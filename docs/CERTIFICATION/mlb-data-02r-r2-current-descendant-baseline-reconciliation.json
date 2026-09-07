@@ -1,0 +1,141 @@
+{
+  "certification": "MLB_DATA_02R_R2_CURRENT_DESCENDANT_BASELINE_RECONCILIATION_CERTIFIED",
+  "asOf": "2026-09-07T13:15:10.872Z",
+  "lastAcceptedBaseline": "861ce9d240daa54749ba88ddd923ea08fdfaeb3b",
+  "acceptedBaseline": "c4be786102c4e88d2b34722e51dc5890d71b564f",
+  "localBeforeSync": "861ce9d240daa54749ba88ddd923ea08fdfaeb3b",
+  "localAfterSync": "c4be786102c4e88d2b34722e51dc5890d71b564f",
+  "originMain": "c4be786102c4e88d2b34722e51dc5890d71b564f",
+  "productionCommit": "c4be786102c4e88d2b34722e51dc5890d71b564f",
+  "relationship": {
+    "state": "COMPATIBLE_DESCENDANT_CANDIDATE",
+    "mergeBase": "861ce9d240daa54749ba88ddd923ea08fdfaeb3b",
+    "aheadBy": 18,
+    "behindBy": 0
+  },
+  "scopeAudit": {
+    "changedFiles": 15,
+    "insertions": 2555,
+    "groups": {
+      "PITCHER_K": [
+        "src/services/mlb-pitcher-strikeout-backtest.service.ts",
+        "src/services/mlb-pitcher-k-shadow.service.ts",
+        "src/app/api/mlb/research/pitcher-strikeouts/backtest/route.ts",
+        "src/app/api/mlb/research/pitcher-strikeouts/shadow/route.ts",
+        "supabase/migrations/20260907124404_mlb_pitcher_k_probability_calibration_v1.sql",
+        "supabase/migrations/20260907124448_mlb_pitcher_k_shadow_registry_v1.sql"
+      ],
+      "OTHER_PLAYER_PROPS": [
+        "src/services/mlb-pitcher-outs-backtest.service.ts",
+        "src/app/api/mlb/research/pitcher-outs/backtest/route.ts",
+        "src/services/mlb-batter-hits-backtest.service.ts",
+        "src/app/api/mlb/research/batter-hits/backtest/route.ts"
+      ],
+      "STATCAST_ANALYTICS": [
+        "supabase/migrations/20260907043059_mlb_pitcher_prop_backtest_dataset_v1.sql",
+        "supabase/migrations/20260907043223_mlb_pitcher_prop_backtest_rolling_features_v1.sql",
+        "supabase/migrations/20260907044513_mlb_pitcher_strikeout_backtest_rows_v1.sql",
+        "supabase/migrations/20260907122901_mlb_pitcher_prop_statcast_labels_v1.sql"
+      ],
+      "MONEYLINE_MODEL": [],
+      "MONEYLINE_FEATURES": [],
+      "VALUE_BOARD": [],
+      "AUTOMATION_CRON": []
+    }
+  },
+  "criticalTouchAudit": "PASS",
+  "acceptedBaselineClassification": "COMPATIBLE_DESCENDANT",
+  "sharedFoundation": {
+    "raw": "pick2_raw_mlb_statcast_pitches",
+    "nativeGames": "pick2_mlb_games",
+    "nativePlayers": "pick2_mlb_players",
+    "parallelRawStore": "NO_PARALLEL_RAW_STORE"
+  },
+  "productionReadback": {
+    "systemVersion": {
+      "httpStatus": 200,
+      "gitCommit": "c4be786102c4e88d2b34722e51dc5890d71b564f",
+      "providerCallsMade": 0
+    },
+    "operationsHealth": {
+      "httpStatus": 200,
+      "status": "HEALTHY",
+      "configuredCrons": [
+        {
+          "owner": "vercel_cron_primary",
+          "path": "/api/cron/operating-day",
+          "schedule": "7-57/10 * * * *",
+          "dryRun": false
+        },
+        {
+          "owner": "github_actions_fallback",
+          "path": "/api/cron/operating-day",
+          "schedule": "7-57/10 * * * *",
+          "dryRun": false,
+          "fallbackLease": "primary_scheduler_recent_success_lease"
+        }
+      ]
+    },
+    "currentBoard": {
+      "httpStatus": 200,
+      "predictionsEvaluated": 44,
+      "candidatesReturned": 30,
+      "duplicateRowsRemoved": 0,
+      "filteredOutSuperseded": 14
+    },
+    "dashboardToday": {
+      "httpStatus": 200,
+      "operatingDate": "2026-09-07",
+      "currentGames": 11,
+      "upcomingGames": 11,
+      "finalGames": 0,
+      "predictionRows": 44,
+      "pricedGroundedRows": 3,
+      "providerCallsMade": 0
+    },
+    "valueBoard": {
+      "httpStatus": 200,
+      "markersPresent": [
+        "MLB Value Board",
+        "Official Pick",
+        "Value Candidate",
+        "Watchlist",
+        "823904"
+      ]
+    },
+    "researchCaveats": [
+      {
+        "route": "/api/mlb/research/pitcher-outs/backtest",
+        "status": 500,
+        "classification": "RESEARCH_ONLY_TIMEOUT_NOT_PICK2_MONEYLINE_BLOCKER",
+        "message": "SportsDataIO quarantined pitcher-start read failed: canceling statement due to statement timeout"
+      }
+    ]
+  },
+  "pitchByPitchAutomationState": "PARTIALLY_AUTOMATED",
+  "automationDomainMatrix": {
+    "PICK2_MONEYLINE_AUTOMATION": "ACTIVE_PROTECTED_OPERATING_DAY_INFRASTRUCTURE",
+    "STATCAST_INGEST_AUTOMATION": "UNKNOWN_PARTIAL",
+    "PITCHER_K_AUTOMATION": "NOT_PRESENT_FOR_BETTING_ACTIVATION",
+    "PLAYER_PROP_AUTOMATION": "CONFIGURED_MANUAL_GUARDED",
+    "DECISION_BOARD_AUTOMATION": "CONFIGURED_MANUAL_GUARDED",
+    "ODDS_AUTOMATION": "ACTIVE_PROTECTED_OPERATING_DAY_INFRASTRUCTURE",
+    "SETTLEMENT_AUTOMATION": "ACTIVE_PROTECTED_OPERATING_DAY_INFRASTRUCTURE",
+    "OTHER": "NBA_SHADOW_CRON_UNRELATED"
+  },
+  "descendantAwarePolicy": "READY",
+  "runBaselineFreeze": "PASS",
+  "midRunDeploymentPolicy": "READY",
+  "executionCheckoutStrategy": "EPHEMERAL_WORKTREE_OR_DETACHED_FROZEN_SHA",
+  "parallelDevelopmentIndependence": "PASS",
+  "movingTargetProblemResolved": "YES_BY_CONTRACT",
+  "manualRefreshReadiness": "YES",
+  "mutationAccounting": {
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "envChanges": 0
+  }
+}

@@ -1,6 +1,22 @@
 # Project Status
 
-Last updated: 2026-09-07 03:00:00Z
+Last updated: 2026-09-07 13:45:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2 Frozen Execution Package Compatibility
+
+- MLB-DATA-02R-R2 is certified as `MLB_DATA_02R_R2_FROZEN_EXECUTION_PACKAGE_COMPATIBILITY_CERTIFIED`. The architecture now separates `EXECUTION_PACKAGE_SHA`, `PRODUCTION_DATABASE_CONTRACT` and `PRODUCTION_WEB_SHA`; production web/UI deployment equality is observability metadata, not a hard gate for a frozen manual refresh.
+- Prepared the real R2 execution package runner in `scripts/mlb-data-02r-r2-frozen-execution-package.mjs` with a required DB contract manifest, stage schema guards, run-freeze V2 fields, provider contract, route-dependency audit, dry-run certification, checkpoint-ready stage order and fail-closed production execution authorization.
+- Current read-only production web SHA is a compatible independent descendant, while the local execution package remains frozen by Git SHA. Live database compatibility passed against required Pick2 moneyline raw/native/features/model/prediction/market/value/Official Pick objects with additive schema tolerance.
+- Champion contract remains `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, feature set `MLB_ML_FEATURE_SET_V1`, feature count 76, preprocessing/artifact digest preserved. Shared ingest path remains `public.pick2_raw_mlb_statcast_pitches`, pitch-by-pitch automation remains `PARTIALLY_AUTOMATED`, and the manual-to-automation path is ready without creating a duplicate raw store.
+- Boundaries held: no provider calls, no odds calls, no production DML/DDL, no Official Pick writes, no env changes, no automation changes, no cron changes and no settlement. `MLB_DATA_02R_R2_MANUAL_DAILY_REFRESH_EXECUTION_READY = YES` for a future separately authorized execution from the certified package.
+
+## 2026-09-07 MLB-DATA-02R-R2 Current Descendant Baseline Reconciliation
+
+- MLB-DATA-02R-R2 is certified as `MLB_DATA_02R_R2_CURRENT_DESCENDANT_BASELINE_RECONCILIATION_CERTIFIED`. The last accepted shared baseline `861ce9d240daa54749ba88ddd923ea08fdfaeb3b` now has current compatible descendant baseline `c4be786102c4e88d2b34722e51dc5890d71b564f`, with merge base equal to the prior baseline, 18 commits ahead and 0 behind.
+- The descendant scope is compatible with Pick2 moneyline and 02R: it adds research-only pitcher strikeout, pitcher outs and batter hits services/APIs, additive pitcher-prop materialized-view/model-registry migrations and a first-inning quarantine note. No moneyline Champion, 76-feature contract, prediction schema, market schema, value schema, Official Pick schema or Value Board files were changed.
+- Production `/api/system/version` aligned to `c4be786102c4e88d2b34722e51dc5890d71b564f` with provider calls 0. `/api/operations/health` was healthy and showed active protected operating-day scheduler infrastructure: Vercel primary and GitHub fallback at `7-57/10 * * * *`. This supersedes older blanket "automation off" assumptions; future 02R manual runs must treat scheduler automation as parallel infrastructure, not delete or disable it.
+- The new descendant-aware execution contract is ready: future 02R runs may accept exact baselines or compatible descendants after critical-touch audit, then freeze `run_id`, `run_date`, `run_as_of`, `execution_baseline_sha`, critical manifest digest and pipeline version. Later unrelated commits must not interrupt the frozen run. Preferred execution uses a detached or ephemeral worktree at the frozen SHA, or a proven matching production package.
+- Shared MLB foundation remains canonical: `pick2_raw_mlb_statcast_pitches`, `pick2_mlb_games`, `pick2_mlb_players` and certified read-only Statcast views/rollups. No parallel raw pitch-by-pitch store was introduced. Current pitch-by-pitch automation is classified `PARTIALLY_AUTOMATED`: raw/current-season foundation and shared analytics exist, but no single certified always-on Statcast ingest cron was found. No provider calls, production DML/DDL, env changes, cron changes, rollback, deletion, migration apply or automation changes were performed.
 
 ## 2026-09-07 MLB-DATA-02R-R1 Daily Refresh Execution Prep
 

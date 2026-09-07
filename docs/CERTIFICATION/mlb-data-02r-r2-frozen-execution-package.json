@@ -1,0 +1,1170 @@
+{
+  "generatedAt": "2026-09-07T14:00:03.527Z",
+  "certificationVerdict": "MLB_DATA_02R_R2_FROZEN_EXECUTION_PACKAGE_COMPATIBILITY_CERTIFIED",
+  "currentSnapshot": {
+    "localHead": "RESOLVED_BY_GIT_AT_RUNTIME",
+    "originMain": "7bc44efba2aaa7a5ea64d57e8bd2e44b47aaa987",
+    "productionWebSha": "7bc44efba2aaa7a5ea64d57e8bd2e44b47aaa987",
+    "productionProviderCallsMade": 0,
+    "timestamp": "2026-09-07T14:00:03.527Z",
+    "MLB_02R_R2_CURRENT_RUNTIME_SNAPSHOT": "PASS"
+  },
+  "executionPackage": {
+    "strategy": "EPHEMERAL_FROZEN_GIT_WORKTREE_OR_DETACHED_SHA",
+    "MLB_02R_R2_EXECUTION_PACKAGE_STRATEGY": "READY",
+    "webDeploymentIndependence": "PASS",
+    "MLB_02R_R2_WEB_DEPLOYMENT_INDEPENDENCE": "PASS",
+    "version": "NEW_EXECUTION_PACKAGE_COMMIT_REQUIRED_AFTER_CERTIFICATION_COMMIT",
+    "MLB_02R_R2_EXECUTION_PACKAGE_VERSION": "READY"
+  },
+  "dbContract": {
+    "manifest": [
+      {
+        "object": "pick2_raw_mlb_statcast_pitches",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "game_pk, at_bat_number, pitch_number",
+        "columns": [
+          "id",
+          "source_version",
+          "game_pk",
+          "game_date",
+          "game_year",
+          "source_home_team",
+          "source_away_team",
+          "source_pitcher_id",
+          "source_batter_id",
+          "mlbam_pitcher_id",
+          "mlbam_batter_id",
+          "at_bat_number",
+          "pitch_number",
+          "raw_payload",
+          "raw_payload_digest"
+        ],
+        "semanticRole": "canonical shared Statcast pitch evidence",
+        "compatibilityRule": "additive columns allowed; required identity/raw digest columns must remain readable and insert-compatible"
+      },
+      {
+        "object": "pick2_mlb_games",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "game_pk",
+        "columns": [
+          "game_pk",
+          "season",
+          "game_date",
+          "scheduled_at",
+          "home_team_id",
+          "away_team_id",
+          "official_status",
+          "doubleheader",
+          "game_number",
+          "source_payload_digest"
+        ],
+        "semanticRole": "native MLB game identity",
+        "compatibilityRule": "primary game_pk semantics preserved"
+      },
+      {
+        "object": "pick2_mlb_players",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "mlbam_person_id",
+        "columns": [
+          "mlbam_person_id",
+          "full_name",
+          "first_name",
+          "last_name",
+          "primary_position",
+          "bat_side",
+          "throw_side",
+          "active",
+          "source_payload_digest"
+        ],
+        "semanticRole": "native MLBAM player identity",
+        "compatibilityRule": "primary MLBAM person identity preserved"
+      },
+      {
+        "object": "pick2_feature_snapshots",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "deterministic_identity",
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "feature_domain",
+          "subject_id",
+          "event_id",
+          "target_game_pk",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "features",
+          "input_digest"
+        ],
+        "semanticRole": "immutable feature payload snapshot",
+        "compatibilityRule": "deterministic identity and digest reuse contract preserved"
+      },
+      {
+        "object": "pick2_mlb_team_daily_features",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "target_game_pk, team_id, feature_version",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "team_id",
+          "target_game_pk",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ],
+        "semanticRole": "team pregame feature rows",
+        "compatibilityRule": "native target-game uniqueness preserved"
+      },
+      {
+        "object": "pick2_mlb_pitcher_daily_features",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "target_game_pk, mlbam_pitcher_id, feature_version",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "player_id",
+          "target_game_pk",
+          "mlbam_pitcher_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ],
+        "semanticRole": "starter pitcher feature rows",
+        "compatibilityRule": "native pitcher key remains insert/reuse compatible"
+      },
+      {
+        "object": "pick2_mlb_bullpen_daily_features",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "target_game_pk, team_id, feature_version",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "team_id",
+          "target_game_pk",
+          "mlbam_pitcher_ids",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ],
+        "semanticRole": "bullpen feature rows",
+        "compatibilityRule": "native target-game uniqueness preserved"
+      },
+      {
+        "object": "pick2_mlb_batter_daily_features",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "target_game_pk, mlbam_batter_id, feature_version",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "player_id",
+          "target_game_pk",
+          "mlbam_batter_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ],
+        "semanticRole": "batter feature rows",
+        "compatibilityRule": "native batter key remains insert/reuse compatible"
+      },
+      {
+        "object": "pick2_mlb_matchup_daily_features",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "target_game_pk, feature_version",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "event_id",
+          "target_game_pk",
+          "home_team_id",
+          "away_team_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ],
+        "semanticRole": "matchup feature rows",
+        "compatibilityRule": "target game key may replace legacy event-only key"
+      },
+      {
+        "object": "pick2_mlb_first_inning_daily_features",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "target_game_pk, feature_version",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "event_id",
+          "target_game_pk",
+          "home_team_id",
+          "away_team_id",
+          "home_starter_mlbam_pitcher_id",
+          "away_starter_mlbam_pitcher_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ],
+        "semanticRole": "first-inning feature rows",
+        "compatibilityRule": "read/write only certified 76-feature moneyline inputs; quarantine unrelated semantics"
+      },
+      {
+        "object": "pick2_model_registry",
+        "readWrite": "READ_ONLY",
+        "key": "sport_key, model_family, target",
+        "columns": [
+          "id",
+          "model_family",
+          "sport_key",
+          "target",
+          "status"
+        ],
+        "semanticRole": "model family registry",
+        "compatibilityRule": "champion moneyline registry remains readable"
+      },
+      {
+        "object": "pick2_model_feature_sets",
+        "readWrite": "READ_ONLY",
+        "key": "sport_key, feature_set_version",
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "feature_set_version",
+          "input_contract"
+        ],
+        "semanticRole": "feature set manifest",
+        "compatibilityRule": "MLB_ML_FEATURE_SET_V1 remains readable"
+      },
+      {
+        "object": "pick2_model_versions",
+        "readWrite": "READ_ONLY",
+        "key": "model_id, model_version",
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "model_id",
+          "feature_set_id",
+          "model_version",
+          "role",
+          "status",
+          "artifact_digest",
+          "metrics"
+        ],
+        "semanticRole": "champion model version",
+        "compatibilityRule": "Champion V1 role/status/artifact digest preserved"
+      },
+      {
+        "object": "pick2_game_predictions",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "deterministic_identity",
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "event_id",
+          "game_pk",
+          "model_version_id",
+          "feature_snapshot_id",
+          "predicted_at",
+          "target",
+          "home_probability",
+          "away_probability",
+          "frozen_input_digest",
+          "model_artifact_digest",
+          "metadata"
+        ],
+        "semanticRole": "immutable moneyline predictions",
+        "compatibilityRule": "insert new deterministic rows only; no overwrite"
+      },
+      {
+        "object": "pick2_mlb_market_event_mappings",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "market_provider, provider_event_id / market_provider, game_pk",
+        "columns": [
+          "id",
+          "game_pk",
+          "market_provider",
+          "provider_event_id",
+          "market_sport_key",
+          "evidence",
+          "mapping_version",
+          "source_payload_digest"
+        ],
+        "semanticRole": "provider event to native game crosswalk",
+        "compatibilityRule": "unambiguous market mapping required before price writes"
+      },
+      {
+        "object": "pick2_mlb_market_price_observations",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "observation_identity",
+        "columns": [
+          "id",
+          "observation_identity",
+          "game_pk",
+          "provider",
+          "provider_event_id",
+          "market_event_mapping_id",
+          "bookmaker_key",
+          "market",
+          "provider_market_key",
+          "side",
+          "american_odds",
+          "provider_last_update",
+          "acquired_at",
+          "source_payload_digest"
+        ],
+        "semanticRole": "immutable market price observations",
+        "compatibilityRule": "insert immutable observations only; no update/delete"
+      },
+      {
+        "object": "pick2_mlb_market_value_evaluations",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "value_identity",
+        "columns": [
+          "id",
+          "value_identity",
+          "prediction_id",
+          "game_pk",
+          "side",
+          "model_version",
+          "model_probability",
+          "provider",
+          "provider_event_id",
+          "bookmaker_key",
+          "market",
+          "provider_market_key",
+          "american_odds",
+          "home_market_observation_id",
+          "away_market_observation_id",
+          "selected_side_market_observation_id",
+          "raw_implied_probability",
+          "no_vig_probability",
+          "edge",
+          "unit_ev",
+          "consensus_probability",
+          "consensus_edge",
+          "book_count",
+          "market_freshness",
+          "temporal_eligibility",
+          "prediction_as_of",
+          "market_acquired_at",
+          "evaluated_at",
+          "source_payload_digest",
+          "evaluation_payload_digest"
+        ],
+        "semanticRole": "native value evaluation rows",
+        "compatibilityRule": "same-book no-vig/value math contract preserved"
+      },
+      {
+        "object": "pick2_mlb_official_picks",
+        "readWrite": "READ_WRITE_GUARDED_BY_STAGE_CAP",
+        "key": "official_pick_identity",
+        "columns": [
+          "id",
+          "official_pick_identity",
+          "prediction_id",
+          "value_evaluation_id",
+          "game_pk",
+          "sport",
+          "market",
+          "side",
+          "bookmaker_key",
+          "american_odds",
+          "model_version",
+          "model_probability",
+          "consensus_probability",
+          "consensus_edge",
+          "unit_ev",
+          "policy_version",
+          "decision_status",
+          "eligibility_flags",
+          "risk_flags",
+          "reason_codes",
+          "blocker_codes",
+          "prediction_as_of",
+          "market_acquired_at",
+          "evaluated_at",
+          "decision_at",
+          "source_payload_digest",
+          "decision_payload_digest"
+        ],
+        "semanticRole": "immutable official pick decisions",
+        "compatibilityRule": "Policy V1 only, one side per game, no overwrite"
+      }
+    ],
+    "digest": "2206cc488b4ff4e098c37b0e12836d247d45600d127b9a052dae4b51ccbe7688",
+    "MLB_02R_R2_EXECUTION_DB_CONTRACT_MANIFEST": "READY",
+    "compatibility": [
+      {
+        "object": "pick2_raw_mlb_statcast_pitches",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "source_version",
+          "game_pk",
+          "game_date",
+          "game_year",
+          "source_home_team",
+          "source_away_team",
+          "source_pitcher_id",
+          "source_batter_id",
+          "mlbam_pitcher_id",
+          "mlbam_batter_id",
+          "at_bat_number",
+          "pitch_number",
+          "raw_payload",
+          "raw_payload_digest"
+        ]
+      },
+      {
+        "object": "pick2_mlb_games",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "game_pk",
+          "season",
+          "game_date",
+          "scheduled_at",
+          "home_team_id",
+          "away_team_id",
+          "official_status",
+          "doubleheader",
+          "game_number",
+          "source_payload_digest"
+        ]
+      },
+      {
+        "object": "pick2_mlb_players",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "mlbam_person_id",
+          "full_name",
+          "first_name",
+          "last_name",
+          "primary_position",
+          "bat_side",
+          "throw_side",
+          "active",
+          "source_payload_digest"
+        ]
+      },
+      {
+        "object": "pick2_feature_snapshots",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "feature_domain",
+          "subject_id",
+          "event_id",
+          "target_game_pk",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "features",
+          "input_digest"
+        ]
+      },
+      {
+        "object": "pick2_mlb_team_daily_features",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "feature_snapshot_id",
+          "team_id",
+          "target_game_pk",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ]
+      },
+      {
+        "object": "pick2_mlb_pitcher_daily_features",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "feature_snapshot_id",
+          "player_id",
+          "target_game_pk",
+          "mlbam_pitcher_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ]
+      },
+      {
+        "object": "pick2_mlb_bullpen_daily_features",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "feature_snapshot_id",
+          "team_id",
+          "target_game_pk",
+          "mlbam_pitcher_ids",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ]
+      },
+      {
+        "object": "pick2_mlb_batter_daily_features",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "feature_snapshot_id",
+          "player_id",
+          "target_game_pk",
+          "mlbam_batter_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ]
+      },
+      {
+        "object": "pick2_mlb_matchup_daily_features",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "feature_snapshot_id",
+          "event_id",
+          "target_game_pk",
+          "home_team_id",
+          "away_team_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ]
+      },
+      {
+        "object": "pick2_mlb_first_inning_daily_features",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "feature_snapshot_id",
+          "event_id",
+          "target_game_pk",
+          "home_team_id",
+          "away_team_id",
+          "home_starter_mlbam_pitcher_id",
+          "away_starter_mlbam_pitcher_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp",
+          "feature_version",
+          "sample_sizes",
+          "source_window"
+        ]
+      },
+      {
+        "object": "pick2_model_registry",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "model_family",
+          "sport_key",
+          "target",
+          "status"
+        ]
+      },
+      {
+        "object": "pick2_model_feature_sets",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "feature_set_version",
+          "input_contract"
+        ]
+      },
+      {
+        "object": "pick2_model_versions",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "deterministic_identity",
+          "model_id",
+          "feature_set_id",
+          "model_version",
+          "role",
+          "status",
+          "artifact_digest",
+          "metrics"
+        ]
+      },
+      {
+        "object": "pick2_game_predictions",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "event_id",
+          "game_pk",
+          "model_version_id",
+          "feature_snapshot_id",
+          "predicted_at",
+          "target",
+          "home_probability",
+          "away_probability",
+          "frozen_input_digest",
+          "model_artifact_digest",
+          "metadata"
+        ]
+      },
+      {
+        "object": "pick2_mlb_market_event_mappings",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "game_pk",
+          "market_provider",
+          "provider_event_id",
+          "market_sport_key",
+          "evidence",
+          "mapping_version",
+          "source_payload_digest"
+        ]
+      },
+      {
+        "object": "pick2_mlb_market_price_observations",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "observation_identity",
+          "game_pk",
+          "provider",
+          "provider_event_id",
+          "market_event_mapping_id",
+          "bookmaker_key",
+          "market",
+          "provider_market_key",
+          "side",
+          "american_odds",
+          "provider_last_update",
+          "acquired_at",
+          "source_payload_digest"
+        ]
+      },
+      {
+        "object": "pick2_mlb_market_value_evaluations",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "value_identity",
+          "prediction_id",
+          "game_pk",
+          "side",
+          "model_version",
+          "model_probability",
+          "provider",
+          "provider_event_id",
+          "bookmaker_key",
+          "market",
+          "provider_market_key",
+          "american_odds",
+          "home_market_observation_id",
+          "away_market_observation_id",
+          "selected_side_market_observation_id",
+          "raw_implied_probability",
+          "no_vig_probability",
+          "edge",
+          "unit_ev",
+          "consensus_probability",
+          "consensus_edge",
+          "book_count",
+          "market_freshness",
+          "temporal_eligibility",
+          "prediction_as_of",
+          "market_acquired_at",
+          "evaluated_at",
+          "source_payload_digest",
+          "evaluation_payload_digest"
+        ]
+      },
+      {
+        "object": "pick2_mlb_official_picks",
+        "state": "ADDITIVE_COMPATIBLE",
+        "columnsChecked": [
+          "id",
+          "official_pick_identity",
+          "prediction_id",
+          "value_evaluation_id",
+          "game_pk",
+          "sport",
+          "market",
+          "side",
+          "bookmaker_key",
+          "american_odds",
+          "model_version",
+          "model_probability",
+          "consensus_probability",
+          "consensus_edge",
+          "unit_ev",
+          "policy_version",
+          "decision_status",
+          "eligibility_flags",
+          "risk_flags",
+          "reason_codes",
+          "blocker_codes",
+          "prediction_as_of",
+          "market_acquired_at",
+          "evaluated_at",
+          "decision_at",
+          "source_payload_digest",
+          "decision_payload_digest"
+        ]
+      }
+    ],
+    "incompatible": [],
+    "MLB_02R_R2_CURRENT_DB_COMPATIBILITY": "PASS",
+    "MLB_02R_R2_ADDITIVE_SCHEMA_TOLERANCE": "PASS"
+  },
+  "modelContract": {
+    "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
+    "featureCount": 76,
+    "orderedFeatureSemantics": "PRESERVED_BY_CONTRACT",
+    "preprocessingArtifact": "PRESERVED_BY_ARTIFACT_DIGEST",
+    "MLB_02R_R2_EXECUTION_MODEL_CONTRACT": "PASS"
+  },
+  "providerContract": {
+    "MLB_OFFICIAL": "schedule/status/starters",
+    "STATCAST": "incremental raw evidence cache-first",
+    "THE_ODDS_API": "baseball_mlb h2h American odds max 1 acquisition",
+    "BALLDONTLIE": "FORBIDDEN",
+    "SPORTSDATAIO": "FORBIDDEN_FOR_R2",
+    "MLB_02R_R2_EXECUTION_PROVIDER_CONTRACT": "READY"
+  },
+  "routeDependencyAudit": {
+    "dependencies": [
+      {
+        "stage": "01_SCHEDULE_SYNC",
+        "classification": "DIRECT_PROVIDER_SERVICE"
+      },
+      {
+        "stage": "02_NATIVE_RECONCILIATION",
+        "classification": "DIRECT_DB_SERVICE"
+      },
+      {
+        "stage": "03_RAW_STATCAST_RECONCILIATION",
+        "classification": "DIRECT_PROVIDER_SERVICE"
+      },
+      {
+        "stage": "04_FEATURE_REFRESH",
+        "classification": "LOCAL_SHARED_SERVICE"
+      },
+      {
+        "stage": "05_STARTER_READINESS",
+        "classification": "LOCAL_SHARED_SERVICE"
+      },
+      {
+        "stage": "06_MONEYLINE_INFERENCE",
+        "classification": "LOCAL_SHARED_SERVICE"
+      },
+      {
+        "stage": "07_PREDICTION_PERSISTENCE",
+        "classification": "DIRECT_DB_SERVICE"
+      },
+      {
+        "stage": "08_MARKET_ACQUISITION",
+        "classification": "DIRECT_PROVIDER_SERVICE"
+      },
+      {
+        "stage": "09_MARKET_PERSISTENCE",
+        "classification": "DIRECT_DB_SERVICE"
+      },
+      {
+        "stage": "10_VALUE_EVALUATION",
+        "classification": "LOCAL_SHARED_SERVICE"
+      },
+      {
+        "stage": "11_OFFICIAL_PICK_POLICY",
+        "classification": "LOCAL_SHARED_SERVICE"
+      },
+      {
+        "stage": "12_OFFICIAL_PICK_PERSISTENCE",
+        "classification": "DIRECT_DB_SERVICE"
+      },
+      {
+        "stage": "13_VALUE_BOARD_READBACK",
+        "classification": "LOCAL_SHARED_SERVICE"
+      }
+    ],
+    "productionWebRouteCoreDependency": false,
+    "replacementPolicy": "core stages use direct DB/provider/local shared services; production web routes are observability/readback only",
+    "MLB_02R_R2_WEB_ROUTE_DEPENDENCY_AUDIT": "COMPLETE"
+  },
+  "runner": {
+    "stateBeforeThisPackage": "RUNNER_MISSING",
+    "stateAfterThisPackage": "RUNNER_PREPARED_DRY_RUN_CERTIFIED_FAIL_CLOSED",
+    "stages": [
+      {
+        "order": 1,
+        "stage": "01_SCHEDULE_SYNC",
+        "responsibility": "MLB Official schedule/status/starter discovery",
+        "dependencyClass": "DIRECT_PROVIDER_SERVICE",
+        "provider": "MLB_OFFICIAL",
+        "providerCap": 1,
+        "mode": "READ_PROVIDER_CLASSIFY",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 2,
+        "stage": "02_NATIVE_RECONCILIATION",
+        "responsibility": "game/player insert-or-reuse classification",
+        "dependencyClass": "DIRECT_DB_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "INSERT_REUSE_BLOCK",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 3,
+        "stage": "03_RAW_STATCAST_RECONCILIATION",
+        "responsibility": "canonical raw pitch identity insert-or-reuse",
+        "dependencyClass": "DIRECT_PROVIDER_SERVICE",
+        "provider": "STATCAST",
+        "providerCap": "0_TO_FROZEN_GAME_SET",
+        "mode": "INSERT_REUSE_BLOCK_BATCH_100",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 4,
+        "stage": "04_FEATURE_REFRESH",
+        "responsibility": "certified Pick2 pregame feature builders",
+        "dependencyClass": "LOCAL_SHARED_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "INSERT_REUSE_BLOCK",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 5,
+        "stage": "05_STARTER_READINESS",
+        "responsibility": "confirmed/probable/unknown/changed guard",
+        "dependencyClass": "LOCAL_SHARED_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "READ_CLASSIFY",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 6,
+        "stage": "06_MONEYLINE_INFERENCE",
+        "responsibility": "Champion V1 76-feature inference",
+        "dependencyClass": "LOCAL_SHARED_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "LOCAL_COMPUTE_ONLY",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 7,
+        "stage": "07_PREDICTION_PERSISTENCE",
+        "responsibility": "immutable prediction rows",
+        "dependencyClass": "DIRECT_DB_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "INSERT_REUSE_BLOCK",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 8,
+        "stage": "08_MARKET_ACQUISITION",
+        "responsibility": "The Odds API baseball_mlb h2h American odds",
+        "dependencyClass": "DIRECT_PROVIDER_SERVICE",
+        "provider": "THE_ODDS_API",
+        "providerCap": 1,
+        "mode": "READ_PROVIDER_CLASSIFY",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 9,
+        "stage": "09_MARKET_PERSISTENCE",
+        "responsibility": "market mappings and observations",
+        "dependencyClass": "DIRECT_DB_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "INSERT_REUSE_BLOCK",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 10,
+        "stage": "10_VALUE_EVALUATION",
+        "responsibility": "no-vig/edge/EV evaluation",
+        "dependencyClass": "LOCAL_SHARED_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "COMPUTE_INSERT_REUSE_BLOCK",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 11,
+        "stage": "11_OFFICIAL_PICK_POLICY",
+        "responsibility": "Policy V1 decision gate",
+        "dependencyClass": "LOCAL_SHARED_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "READ_COMPUTE_ONLY",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 12,
+        "stage": "12_OFFICIAL_PICK_PERSISTENCE",
+        "responsibility": "immutable Official Pick decisions",
+        "dependencyClass": "DIRECT_DB_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "INSERT_REUSE_BLOCK",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      },
+      {
+        "order": 13,
+        "stage": "13_VALUE_BOARD_READBACK",
+        "responsibility": "canonical board read-model readback",
+        "dependencyClass": "LOCAL_SHARED_SERVICE",
+        "provider": null,
+        "providerCap": 0,
+        "mode": "READ_ONLY",
+        "checkpointRequired": true,
+        "schemaGuardRequired": true,
+        "dryRunStatus": "PASS",
+        "plannedProviderCalls": 0,
+        "plannedProductionDml": 0,
+        "blockConflict": 0
+      }
+    ],
+    "settlement": "EXCLUDED",
+    "dryRunProviderCalls": 0,
+    "dryRunProductionDml": 0,
+    "dryRunProductionDdl": 0,
+    "MLB_02R_R2_EXECUTION_RUNNER_STATE": "RUNNER_EXISTS_AND_CERTIFIED",
+    "MLB_02R_R2_EXECUTION_RUNNER_PREP": "READY",
+    "MLB_02R_R2_EXECUTION_RUNNER_DRY_CERTIFICATION": "PASS",
+    "MLB_02R_R2_RUNNER_FAIL_CLOSED": "PASS"
+  },
+  "runFreezeV2": {
+    "run_id": "mlb-02r-r2:2fbe7ebd0e127d0cf98784e7eea8346c",
+    "run_date": "2026-09-07",
+    "run_as_of": "2026-09-07T14:00:03.527Z",
+    "execution_package_sha": "FROZEN_GIT_SHA_SELECTED_AT_EXECUTION_START",
+    "certification_package_head_observed_at_generation": "9d27cfb6d4b54d30fd53bdb0b3162bdd188e25c2",
+    "db_contract_digest": "2206cc488b4ff4e098c37b0e12836d247d45600d127b9a052dae4b51ccbe7688",
+    "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "feature_contract_digest": "6052f734985fc1f6244f1a73529a8d74c0227877d69aac3c41fca902abf637e1",
+    "pipeline_version": "MLB_DATA_02R_R2_FROZEN_EXECUTION_PACKAGE_V2",
+    "production_web_sha_observability": "7bc44efba2aaa7a5ea64d57e8bd2e44b47aaa987",
+    "MLB_02R_R2_RUN_FREEZE_V2": "PASS"
+  },
+  "compatibilityPolicy": {
+    "midRun": "ignore web redeploys; stop at next checkpoint if required DB object fingerprint changes",
+    "stageSchemaGuard": "verify required target object projection before each write stage",
+    "sharedIngestPath": "public.pick2_raw_mlb_statcast_pitches",
+    "pitchByPitchAutomationState": "PARTIALLY_AUTOMATED",
+    "manualToAutomationPath": "READY",
+    "MLB_02R_R2_MIDRUN_COMPATIBILITY_POLICY": "READY",
+    "MLB_02R_R2_STAGE_SCHEMA_GUARD": "READY",
+    "MLB_02R_R2_SHARED_INGEST_PATH": "PASS",
+    "MLB_02R_R2_MANUAL_TO_AUTOMATION_PATH": "READY"
+  },
+  "currentWebDescendant": {
+    "productionWebSha": "7bc44efba2aaa7a5ea64d57e8bd2e44b47aaa987",
+    "classification": "PASS",
+    "note": "production web SHA equality is not required; required DB/model/provider contracts are compatible",
+    "MLB_02R_R2_CURRENT_WEB_DESCENDANT_COMPATIBILITY": "PASS",
+    "MLB_02R_R2_MOVING_WEB_SHA_NO_LONGER_BLOCKS_EXECUTION": "YES"
+  },
+  "manualReadiness": {
+    "MLB_DATA_02R_R2_MANUAL_DAILY_REFRESH_EXECUTION_READY": "YES"
+  },
+  "automation": {
+    "readback": {
+      "success": true,
+      "mode": "operating_day_automation_status_v1",
+      "generatedAt": "2026-09-07T14:00:10.931Z",
+      "timezone": "America/Puerto_Rico",
+      "schedulerEnabled": true,
+      "vercelCronConfigured": true,
+      "vercelCronCadence": "0 12 * * *",
+      "vercelCronOperational": true,
+      "externalSchedulerConfigured": true,
+      "externalSchedulerSecretsVerified": false,
+      "automaticMultiRefreshActive": false,
+      "hostingCronConfiguration": {
+        "currentConfigHasMultipleCronEntries": false,
+        "recommendedConsolidatedPath": "/api/cron/operating-day",
+        "recommendedSchedule": "0 12 * * *",
+        "enabledByThisPatch": true,
+        "note": "Vercel Hobby supports one daily cron here. Multiple daily refreshes are provided by the GitHub Actions external scheduler workflow when repository secrets are configured."
+      },
+      "operatingDayId": "cf0e3271-a522-4d54-be80-4b1d233ef1a4",
+      "localCalendarDate": "2026-09-07",
+      "activeOperatingDate": "2026-09-07",
+      "activeSlateDate": "2026-09-07",
+      "providerQueryDate": "2026-09-07",
+      "nextSlateDate": "2026-09-07",
+      "dateSelectionReason": "current_actionable_slate_status_refresh_preempts_stale_recovery_selection",
+      "statusRecoveryDateSelection": {
+        "activeSlateDate": "2026-09-06",
+        "providerQueryDate": "2026-09-06",
+        "recoveryCandidateDate": "2026-09-06",
+        "dateSelectionReason": "bounded_recovery_slate_precedes_current_or_next_slate",
+        "note": "Recovery is diagnostic here; current operating-day automation uses the actionable slate date for status, odds and downstream work."
+      },
+      "currentOperatingDayStage": "morning_refresh",
+      "currentLifecycleState": "planned",
+      "currentStage": "morning_refresh",
+      "lastCompletedStage": null,
+      "nextDueStage": "morning_refresh",
+      "nextDueAt": "now",
+      "lastAttemptedAt": "2026-09-07T13:57:58.933829+00:00",
+      "lastSuccessfulAt": "2026-09-07T13:57:58.933829+00:00",
+      "lastFailureAt": null,
+      "lastFailureReason": null,
+      "selectedSlateDate": "2026-09-07",
+      "eventsFound": 11,
+      "activeCandidates": 45,
+      "officialPicks": 0,
+      "latestOddsTimestamp": "2026-09-07T13:57:49.428Z",
+      "providerCallsToday": 0,
+      "callReserve": 150,
+      "estimatedCallsRemaining": 850,
+      "lastAttemptedRefresh": "2026-09-07T13:57:58.933829+00:00",
+      "lastSuccessfulRefresh": "2026-09-07T13:57:58.933829+00:00",
+      "nextAction": "status_refresh",
+      "statusRefresh": {
+        "provider": "mlb_stats_api",
+        "providerCheckRequired": true,
+        "providerCheckSatisfied": false,
+        "staleStatusCount": 11,
+        "eventsChecked": 11,
+        "lastProviderCheckAt": null,
+        "nextEligibleStatusRefreshAt": null,
+        "providerCallsMade": 0,
+        "failureReason": null
+      },
+      "lastSuccessfulAction": null,
+      "lastSuccessfulActionAt": null,
+      "nextActionReason": "Status provider evidence is due for the selected unresolved slate.",
+      "consecutiveSameActionCount": 0,
+      "actionStuck": false,
+      "nextScheduledTime": "now",
+      "eventsNearingLock": 0,
+      "partialFailures": 0,
+      "staleEvents": 1,
+      "staleMarkets": 1,
+      "recommendationsLocked": false,
+      "providerCallsMade": 0,
+      "requestId": "26d8231f-47e9-4f54-918f-d4bf1e1908de"
+    },
+    "changes": 0,
+    "cronChanges": 0
+  },
+  "boundaries": {
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "oddsCalls": 0,
+    "officialPickWrites": 0,
+    "envChanges": 0,
+    "automationChanges": 0,
+    "cronChanges": 0
+  }
+}
