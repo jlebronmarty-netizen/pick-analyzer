@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 21:37:00Z
+Last updated: 2026-09-06 22:05:00Z
+
+## 2026-09-06 MLB-DATA-02Q-R4 Value Board Direct-Route Activation
+
+- MLB-DATA-02Q-R4 is certified as `MLB_DATA_02Q_R4_VALUE_BOARD_ACTIVATION_CERTIFIED`. The user manually configured Vercel Production with `PICK2_MLB_VALUE_BOARD_ENABLED=true` and performed the required production redeploy/config refresh; Codex performed read-only activation readback only.
+- Production `/api/system/version` is aligned to `7f3415b069c0950e4c57c72a9446ee62316672c9` with 0 provider calls. The production `/mlb-value-board` route now renders successfully and `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_STATE = ACTIVE_DIRECT_ROUTE_ONLY`.
+- Public navigation remains hidden: no nav link, CTA or dashboard discovery was added. Activation scope is direct route only and `MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP_READY = YES` for a separate future navigation-publication phase.
+- Board parity passed from the activated production route and persisted state: 42 rows, 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- UI readback passed for Official Picks, Value Candidates, Watchlist, Blocked zero-state, filters, sorting, detail view, Why/Risk presentation, Factor Edge, freshness and timestamps. Query layer remains read-only, no secrets/env values were exposed, Official Pick/native value/market/prediction/result/model/raw/feature writes remained 0, production DDL remained 0, automation stayed off and cron changes remained 0. `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = YES`.
 
 ## 2026-09-06 MLB-DATA-02Q-R3 Value Board Activation Prep
 
