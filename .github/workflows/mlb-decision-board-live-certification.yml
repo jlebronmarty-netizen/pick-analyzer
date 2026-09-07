@@ -105,30 +105,21 @@ jobs:
         run: |
           set -euo pipefail
           response_file="$(mktemp)"
-          headers_file="$(mktemp)"
           http_code="$(curl -sS \
             --connect-timeout 10 \
             --max-time 45 \
-            -D "$headers_file" \
             -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
             -o "$response_file" \
             -w '%{http_code}' \
             "${MLB_PREVIEW_URL}/api/mlb/player-props/preflight?maximumEvents=1")"
-
           if [ "$http_code" != '200' ]; then
             echo "PREVIEW_PREFLIGHT_HTTP_${http_code}"
             exit 1
           fi
-
           RESPONSE_FILE="$response_file" node <<'NODE'
           const fs = require('fs')
           const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
-          const expectedMarkets = new Set([
-            'pitcher_outs_recorded',
-            'pitcher_strikeouts',
-            'batter_hits',
-            'batter_total_bases',
-          ])
+          const expectedMarkets = new Set(['pitcher_outs_recorded','pitcher_strikeouts','batter_hits','batter_total_bases'])
           const actualMarkets = new Set(Array.isArray(payload.selectedMarkets) ? payload.selectedMarkets : [])
           const blockers = Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : []
           const assertions = [
@@ -145,14 +136,7 @@ jobs:
             [Array.isArray(payload.bookmakerKeys) && payload.bookmakerKeys.length === 2 && payload.bookmakerKeys.includes('fanduel') && payload.bookmakerKeys.includes('williamhill_us'), 'bookmakers must be FanDuel + Caesars only'],
           ]
           const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
-          console.log(JSON.stringify({
-            status: payload.status,
-            estimatedCredits: payload.estimatedCredits,
-            certifiedMappingsAvailable: payload.certifiedMappingsAvailable,
-            bookmakerKeys: payload.bookmakerKeys,
-            selectedMarkets: payload.selectedMarkets,
-            blockers,
-          }, null, 2))
+          console.log(JSON.stringify({status:payload.status,estimatedCredits:payload.estimatedCredits,certifiedMappingsAvailable:payload.certifiedMappingsAvailable,bookmakerKeys:payload.bookmakerKeys,selectedMarkets:payload.selectedMarkets,blockers}, null, 2))
           if (failures.length) throw new Error(`PREFLIGHT_CERTIFICATION_FAILED: ${failures.join('; ')}`)
           NODE
 
@@ -176,30 +160,15 @@ jobs:
             -o "$response_file" \
             -w '%{http_code}' \
             "${MLB_PREVIEW_URL}/api/mlb/player-props/sync")"
-
           if [ "$http_code" != '200' ]; then
             echo "LIVE_SYNC_HTTP_${http_code}"
-            if [ "$http_code" = '409' ]; then
-              RESPONSE_FILE="$response_file" node <<'NODE'
-              const fs = require('fs')
-              try {
-                const p = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
-                console.log(JSON.stringify({ status: p.status ?? null, blockers: p.blockers ?? [] }, null, 2))
-              } catch {}
-              NODE
-            fi
+            RESPONSE_FILE="$response_file" node -e "const fs=require('fs');try{const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'));console.log(JSON.stringify({status:p.status??null,blockers:p.blockers??[]},null,2))}catch{}"
             exit 1
           fi
-
           RESPONSE_FILE="$response_file" node <<'NODE'
           const fs = require('fs')
           const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
-          const expectedMarkets = new Set([
-            'pitcher_outs_recorded',
-            'pitcher_strikeouts',
-            'batter_hits',
-            'batter_total_bases',
-          ])
+          const expectedMarkets = new Set(['pitcher_outs_recorded','pitcher_strikeouts','batter_hits','batter_total_bases'])
           const actualMarkets = new Set(Array.isArray(payload.selectedMarkets) ? payload.selectedMarkets : [])
           const blockers = Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : []
           const accounted = Number(payload.accountedProjectCredits)
@@ -222,24 +191,8 @@ jobs:
             [Array.isArray(payload.bookmakerKeys) && payload.bookmakerKeys.length === 2 && payload.bookmakerKeys.includes('fanduel') && payload.bookmakerKeys.includes('williamhill_us'), 'bookmakers must remain FanDuel + Caesars only'],
           ]
           const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
-          const summary = {
-            status: payload.status,
-            selectedDate: payload.selectedDate,
-            paidProviderCallsMade: payload.paidProviderCallsMade,
-            providerCreditsConsumed: payload.providerCreditsConsumed,
-            accountedProjectCredits: payload.accountedProjectCredits,
-            creditAccountingStatus: payload.creditAccountingStatus,
-            requestsLast: payload.diagnostics?.requestsLast ?? payload.requestsLast ?? null,
-            accountCreditsRemainingAfter: payload.accountCreditsRemainingAfter,
-            rowsRead: payload.rowsRead,
-            rowsNormalized: payload.rowsNormalized,
-            rowsPersisted: payload.rowsPersisted,
-            selectedMarkets: payload.selectedMarkets,
-            bookmakerKeys: payload.bookmakerKeys,
-            blockers,
-          }
+          const summary = {status:payload.status,selectedDate:payload.selectedDate,paidProviderCallsMade:payload.paidProviderCallsMade,providerCreditsConsumed:payload.providerCreditsConsumed,accountedProjectCredits:payload.accountedProjectCredits,creditAccountingStatus:payload.creditAccountingStatus,accountCreditsRemainingAfter:payload.accountCreditsRemainingAfter,rowsRead:payload.rowsRead,rowsNormalized:payload.rowsNormalized,rowsPersisted:payload.rowsPersisted,selectedMarkets:payload.selectedMarkets,bookmakerKeys:payload.bookmakerKeys,blockers}
           console.log(JSON.stringify(summary, null, 2))
-          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## MLB one-event live sync\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`)
           if (failures.length) throw new Error(`LIVE_SYNC_CERTIFICATION_FAILED: ${failures.join('; ')}`)
           NODE
 
@@ -250,13 +203,7 @@ jobs:
         run: |
           set -euo pipefail
           response_file="$(mktemp)"
-          http_code="$(curl -sS \
-            --connect-timeout 10 \
-            --max-time 45 \
-            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
-            -o "$response_file" \
-            -w '%{http_code}' \
-            "${MLB_PREVIEW_URL}/api/mlb/decision-board")"
+          http_code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" -o "$response_file" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/decision-board")"
           if [ "$http_code" != '200' ]; then
             echo "DECISION_BOARD_READBACK_HTTP_${http_code}"
             exit 1
@@ -272,16 +219,6 @@ jobs:
             [Array.isArray(payload.markets), 'markets must be an array'],
           ]
           const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
-          const summary = {
-            mode: payload.mode,
-            selectedDate: payload.selectedDate,
-            productionActivationEnabled: payload.productionActivationEnabled,
-            betCount: payload.summary?.betCount ?? null,
-            propRowsVisible: Array.isArray(payload.props) ? payload.props.length : null,
-            marketRowsVisible: Array.isArray(payload.markets) ? payload.markets.length : null,
-            blockers: payload.blockers ?? [],
-          }
-          console.log(JSON.stringify(summary, null, 2))
-          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Decision Board readback\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`)
+          console.log(JSON.stringify({mode:payload.mode,selectedDate:payload.selectedDate,productionActivationEnabled:payload.productionActivationEnabled,betCount:payload.summary?.betCount??null,propRowsVisible:Array.isArray(payload.props)?payload.props.length:null,marketRowsVisible:Array.isArray(payload.markets)?payload.markets.length:null,blockers:payload.blockers??[]},null,2))
           if (failures.length) throw new Error(`DECISION_BOARD_READBACK_FAILED: ${failures.join('; ')}`)
           NODE
