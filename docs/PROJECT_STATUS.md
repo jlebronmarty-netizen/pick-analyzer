@@ -1,6 +1,102 @@
 # Project Status
 
-Last updated: 2026-09-06 01:15:00Z
+Last updated: 2026-09-07 03:00:00Z
+
+## 2026-09-07 MLB-DATA-02R-R1 Daily Refresh Execution Prep
+
+- MLB-DATA-02R-R1 is certified as `MLB_DATA_02R_R1_DAILY_REFRESH_EXECUTION_PREP_CERTIFIED`. Repository and origin remained aligned to `ecf3c666aaa5c801feb4b322f87375e012ceb191`, production `/api/system/version` aligned to the same commit, and provider calls remained 0.
+- Prepared one bounded manual daily-refresh execution packet for production-local MLB run date `2026-09-06`, run type `MANUAL_CURRENT_SLATE`, pipeline version `MLB_DATA_02R_R1_MANUAL_DAILY_REFRESH_EXECUTION_PACKET_V1` and run ID `mlb-manual-refresh:8b68883b52312945bafbf279e390c6df`.
+- Read-only current production baseline passed: 2026 native games 2,154, native players 1,794, 2026 raw Statcast identities 622,364, 2026 snapshots 59,031, team/starter/bullpen features 3,902 each, batter features 39,521, matchup/first-inning features 1,951 each, predictions 24, market observations 492, native value evaluations 386 and Official Picks 5. The large raw exact count used the certified 02H artifact fallback after the live Supabase count endpoint returned an empty read error.
+- The execution packet defines future provider purpose/caps for MLB Official, Statcast and The Odds API, cache-first reuse, raw/feature/prediction/market/value/Official Pick classifiers and DML cap formulas, starter status handling, board readback, checkpoint/resume semantics, stage matrix, audit fields and human summary contract.
+- R1 performed no daily refresh execution, no provider calls, no odds refresh, no production DML/DDL, no Official Pick or Value Board data changes, no env changes, no automation and no cron changes. `MLB_DATA_02R_R2_MANUAL_DAILY_REFRESH_EXECUTION_READY = YES`; `MLB_DATA_02R_AUTOMATION_ACTIVATION_READY = NO`.
+
+## 2026-09-07 MLB-DATA-02R Daily Refresh Pipeline Prep
+
+- MLB-DATA-02R is certified as `MLB_DATA_02R_DAILY_REFRESH_PIPELINE_PREP_CERTIFIED`. Repository, origin and production are aligned to `aaec403c71585b3a5144c5c82b0ee3bcbe5d6518`; `/api/system/version` reported 0 provider calls.
+- Prepared the daily refresh pipeline contract for the individual-pick-first MLB product: current slate, native ingest, current pregame features, Champion inference, market acquisition, market persistence, no-vig/value evaluation, Official Pick policy, Official Pick persistence, Value Board readback and future settlement prep.
+- The ordered stage contract is ready from `STAGE_01_SCHEDULE_SYNC` through `STAGE_14_RESULT_SETTLEMENT_PREP`, with deterministic run identity, stage checkpoints, provider-call accounting, fail-closed provider policy, native `game_pk` joins, doubleheader safety, live pregame as-of cutoff, started-game exclusion and restart-safe idempotency.
+- The future runner defaults to `DRY_RUN`; execution flags fail closed with `DAILY_REFRESH_EXECUTION_FORBIDDEN_IN_02R_PREP`. Official Picks remain immutable, the daily policy allows zero picks, one side per game is required, and current-board selection resolves canonical persisted state without client-side recomputation.
+- Prep boundaries held: no provider calls, no production DML/DDL, no env changes, no odds refresh, no new picks generated, no automation and no cron changes. The published Value Board remains active with navigation and parity of 42 rows: 5 Official Picks, 14 Value Candidates, 23 Watchlist and 0 Blocked. `MLB_DATA_02R_R1_DAILY_REFRESH_EXECUTION_PREP_READY = YES`; `MLB_DATA_02R_AUTOMATION_ACTIVATION_READY = NO`.
+
+## 2026-09-06 MLB-DATA-02Q-R6 Value Board Navigation Publication
+
+- MLB-DATA-02Q-R6 is certified as `MLB_DATA_02Q_R6_VALUE_BOARD_NAVIGATION_PUBLICATION_CERTIFIED`. The user manually configured Vercel Production with `PICK2_MLB_VALUE_BOARD_NAVIGATION_ENABLED=true` and completed the required runtime refresh; Codex performed read-only production readback only.
+- Repository, origin and production are aligned to `29d1bd05bd11b293887a5ffe63b3951b56a8310d`, and `/api/system/version` reported 0 provider calls. The existing route gate `PICK2_MLB_VALUE_BOARD_ENABLED=true` remained effectively ON and unchanged.
+- Production navigation is now active: Primary navigation exposes `MLB Value Board` targeting `/mlb-value-board`, ordered after `Today` and before `Performance`, with icon `V`. Desktop rail, mobile five-column bottom navigation, active `aria-current`, focus visibility, tap target sizing and responsive no-overflow checks passed.
+- Board parity remained unchanged: 42 total rows, 5 Official Picks, 14 Value Candidates, 23 Watchlist and 0 Blocked. Top pick parity remained game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- R6 remained read-only: no production DML/DDL, no provider calls, no odds refresh, no Official Pick/native value/market/prediction/model/raw/feature writes, no automation and no cron changes. `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_STATE = ACTIVE_WITH_NAVIGATION`; `MLB_DATA_02Q_VALUE_BOARD_NAVIGATION_STATE = ACTIVE`; `MLB_DATA_02R_DAILY_REFRESH_PIPELINE_PREP_READY = YES`.
+
+## 2026-09-06 MLB-DATA-02Q-R5 Value Board Navigation Publication Prep
+
+- MLB-DATA-02Q-R5 is certified as `MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP_CERTIFIED`. R4 activation certification remains published and production-aligned at `2de22c11059b6a0574da9c4f1050f9d1a3d02c5f`; `/api/system/version` reported 0 provider calls.
+- Prepared the future Value Board navigation exposure behind a separate fail-closed gate: `PICK2_MLB_VALUE_BOARD_ENABLED=true` and `PICK2_MLB_VALUE_BOARD_NAVIGATION_ENABLED=true` are both required before the shared dashboard shell includes `/mlb-value-board`.
+- Recommended navigation placement is Primary navigation immediately after `Today` and before `Performance`, with label `MLB Value Board` and existing text-icon convention `V`. Desktop rail and mobile bottom navigation are wired through the same nav item list, with mobile expanding to five stable columns only when the nav gate is on.
+- Production navigation remains unpublished during R5: no nav link, CTA or dashboard discovery was exposed. The direct route remains independently active as `ACTIVE_DIRECT_ROUTE_ONLY`.
+- Board parity remains unchanged: 42 total rows, 5 Official Picks, 14 Value Candidates, 23 Watchlist and 0 Blocked; top pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`. Production DML/DDL, provider calls, odds refresh, Official Pick changes, env changes, automation and cron changes remained 0/off. `MLB_DATA_02Q_R6_VALUE_BOARD_NAVIGATION_PUBLICATION_EXECUTION_READY = YES`.
+
+## 2026-09-06 MLB-DATA-02Q-R4 Value Board Direct-Route Activation
+
+- MLB-DATA-02Q-R4 is certified as `MLB_DATA_02Q_R4_VALUE_BOARD_ACTIVATION_CERTIFIED`. The user manually configured Vercel Production with `PICK2_MLB_VALUE_BOARD_ENABLED=true` and performed the required production redeploy/config refresh; Codex performed read-only activation readback only.
+- Production `/api/system/version` is aligned to `7f3415b069c0950e4c57c72a9446ee62316672c9` with 0 provider calls. The production `/mlb-value-board` route now renders successfully and `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_STATE = ACTIVE_DIRECT_ROUTE_ONLY`.
+- Public navigation remains hidden: no nav link, CTA or dashboard discovery was added. Activation scope is direct route only and `MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP_READY = YES` for a separate future navigation-publication phase.
+- Board parity passed from the activated production route and persisted state: 42 rows, 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- UI readback passed for Official Picks, Value Candidates, Watchlist, Blocked zero-state, filters, sorting, detail view, Why/Risk presentation, Factor Edge, freshness and timestamps. Query layer remains read-only, no secrets/env values were exposed, Official Pick/native value/market/prediction/result/model/raw/feature writes remained 0, production DDL remained 0, automation stayed off and cron changes remained 0. `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = YES`.
+
+## 2026-09-06 MLB-DATA-02Q-R3 Value Board Activation Prep
+
+- MLB-DATA-02Q-R3 is certified as `MLB_DATA_02Q_R3_VALUE_BOARD_ACTIVATION_PREP_CERTIFIED`. The R2 certification commit `01fc87a257b0b3386ddb09e41ba37029d83c4a05` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- Production gate baseline remains `OFF`: `PICK2_MLB_VALUE_BOARD_ENABLED` was not changed, `/mlb-value-board` remains fail-closed publicly, public navigation remains hidden and public board exposure remains `NO`.
+- Activation contract is ready: a future separately authorized activation would set `PICK2_MLB_VALUE_BOARD_ENABLED=true`; Vercel production requires redeploy/configuration refresh for the runtime to observe an environment change; missing, malformed or any non-`true` value remains OFF.
+- Controlled local-only gate-ON validation passed: `/mlb-value-board` rendered successfully with summary, separated statuses, Official Picks first, filters, sorting, mobile-ready layout, Official Pick fields, Value Candidate/Watchlist semantics, zero-blocked empty state, stale/freshness UI, no secrets and no write surface. Gate-off reversion returned to fail-closed behavior.
+- Board parity remains 42 rows: 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`. Production DML 0, production DDL 0, provider calls 0, production env mutations 0, automation off and cron changes 0. `MLB_DATA_02Q_R4_VALUE_BOARD_ACTIVATION_EXECUTION_READY = YES`; `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
+
+## 2026-09-06 MLB-DATA-02Q-R2 Gated Value Board Deployment Readback
+
+- MLB-DATA-02Q-R2 is certified as `MLB_DATA_02Q_R2_GATED_VALUE_BOARD_DEPLOYMENT_CERTIFIED`. Repository alignment passed with local HEAD and `origin/main` at `7d5e5321e3e60d1d4534874e86b5d78af658b8a2`; production `/api/system/version` aligned to the same commit with 0 provider calls.
+- The deployed package contains the gated `/mlb-value-board` route, `MlbValueBoardClient`, the server-only Value Board service and R1 supporting artifacts. The feature gate `PICK2_MLB_VALUE_BOARD_ENABLED` remains default-off and production gate state is certified `OFF` without changing environment configuration.
+- Production direct-route readback for `/mlb-value-board` is classified `OTHER_FAIL_CLOSED`: the response renders the 404 shell behavior and exposes none of the Value Board markers, top-pick identifiers or board counts. Public navigation remains hidden with no `/mlb-value-board` link or `MLB Value Board` CTA on the production homepage.
+- Read-only preservation passed: Official Picks remain 5, native value evaluations remain 386 and the deterministic board still resolves to 42 rows: 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick parity remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- Boundaries held: Value Board publication `NO`, production DML 0, production DDL 0, provider calls 0, odds refresh 0, Official Pick changes 0, market/value/prediction/result/model/raw/feature writes 0, automation off and cron changes 0. `MLB_DATA_02Q_R3_VALUE_BOARD_ACTIVATION_PREP_READY = YES`; `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
+
+## 2026-09-06 MLB-DATA-02Q-R1 Value Board UI Implementation
+
+- MLB-DATA-02Q-R1 is certified as `MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION_CERTIFIED`. The certified 02Q prep commit `972e29764a87b9df6b59be7739e3da83fbac3453` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- Implemented the real MLB Value Board UI behind default-off feature gate `PICK2_MLB_VALUE_BOARD_ENABLED`. The route `/mlb-value-board` returns `notFound()` while the gate is off, no public navigation or CTA was added, and production Value Board publication remains `NO`.
+- The gated UI uses the certified 02Q contracts in `src/types/pick2-value-board.ts` and the server-only query/composition service in `src/services/pick2-mlb-value-board.service.ts`. It renders the board summary, Official Picks, Value Candidates, Watchlist, Blocked state, mobile-first cards, desktop detail density, filters, sorting, expandable pick detail, Why/Risk/Blocker explanations, Factor Edge context, freshness/timestamps, loading, error and empty states.
+- Current data parity passed from the certified board state: 42 total rows, 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick parity remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- Boundaries held: production DML 0, production DDL 0, provider calls 0, odds refresh 0, Official Pick changes 0, market/value/prediction/result/model/raw/feature writes 0, automation off and cron changes 0. `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
+
+## 2026-09-06 MLB-DATA-02Q Value Board Prep
+
+- MLB-DATA-02Q is certified as `MLB_DATA_02Q_VALUE_BOARD_PREP_CERTIFIED`. The certified 02P-R2 commit `abdff498104180ddfc0b6fa4e9c45b943b080b0f` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- The Value Board prep used only persisted certified sources: 5 Official Picks, 386 native value evaluations, 24 persisted predictions and 492 market observations. Prediction and market source linkage passed with no provider calls, odds refreshes, Official Pick changes, value writes or prediction writes.
+- The current dry board is 42 collapsed game/side rows with status-count parity: 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. The top Official Pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- Prepared non-public Value Board contracts in `src/types/pick2-value-board.ts` and `src/services/pick2-mlb-value-board.service.ts`: statuses, row shape, ranking, Value Score semantics, why/risk/blocker explanations, Factor Edge, detail payloads, filters, sorting, stale/timestamp behavior and mobile-first presentation rules.
+- Value Board publication remains `NO`, feature gate is `READY_DISABLED`, production DML and DDL remained 0, automation stayed off and cron changes remained 0. `MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION_READY = YES`; `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
+
+## 2026-09-06 MLB-DATA-02P-R2 Official Pick Persistence Execution
+
+- MLB-DATA-02P-R2 is certified as `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_CERTIFIED`. The R2C certification commit `b60cea1f5633042dcade4df4df88d24dbd675144` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- The exact frozen 5 Official Pick payloads certified by R1/R2C under `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` were rebuilt without provider calls, odds refreshes or policy changes. Baselines passed: `public.pick2_mlb_official_picks` existed with 0 matching frozen rows, native value evaluations remained 386, Champion remained `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, predictions remained 24 and prediction results remained 0.
+- Prewrite classification was 5 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`; the Official Pick DML cap was 5. Authorized insert-only DML persisted exactly 5 rows into `public.pick2_mlb_official_picks`, with 0 updates, 0 deletes, 0 conflicts and 0 failures.
+- Postwrite readback passed: all 5 frozen identities exist exactly once, payload parity and source linkage passed, book/price and policy evidence matched, immutability/no-overwrite checks passed and second-pass idempotency classified 0 inserts, 5 reuses and 0 conflicts.
+- Boundaries held: no provider calls, no odds refresh, no market/value/prediction/result/model/raw/feature writes outside the 5 Official Pick inserts, no production DDL, no Value Board publication, automation off and cron changes 0. `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = YES`; `MLB_DATA_02P_R3_OFFICIAL_PICK_REFRESH_CONTRACT_PREP_READY = YES`.
+
+## 2026-09-06 MLB-DATA-02P-R2C Manual Official Pick Schema Apply Readback
+
+- MLB-DATA-02P-R2C is certified as `MLB_DATA_02P_R2C_OFFICIAL_PICK_SCHEMA_PRODUCTION_CERTIFIED`. The user manually applied exactly `supabase/migrations/202609050004_pick2_mlb_official_picks_v1.sql` through the approved Supabase Production SQL Editor; Codex did not reapply the migration and performed 0 production DDL.
+- Repository, origin and production are aligned to `4c9442e8a3e894d7bd42681e96126f6d8c56e9e2`, and `/api/system/version` reported 0 provider calls. Read-only REST confirmed `public.pick2_mlb_official_picks` is visible with 0 rows.
+- User-supplied SQL catalog evidence certifies the full column/type/nullability contract, prediction/value/game FKs, primary key, `UNIQUE(official_pick_identity)`, numeric precision, American-odds storage, CHECK contracts, RLS, target indexes and before-update/before-delete immutability triggers for `public.pick2_mlb_official_picks`.
+- The exact frozen 5 Official Pick candidate set was rebuilt from the R1 artifact under `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` without provider calls or odds refresh. Live schema dry fit passed with 5 valid rows, 0 invalid rows, 0 duplicate proposed identities and 0 missing prediction/value/game linkages.
+- Prewrite classification against the live Official Pick table is 5 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`; future Official Pick DML cap is 5 and projected second pass is 0 inserts, 5 reuses and 0 conflicts. Official Pick DML, other production DML, provider calls, odds refresh, Value Board publication, automation and cron changes all remained 0/off. `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_READY = YES`.
+
+## 2026-09-06 MLB-DATA-02P-R2B Official Pick Table Schema Prep
+
+- MLB-DATA-02P-R2B is certified as `MLB_DATA_02P_R2B_OFFICIAL_PICK_TABLE_SCHEMA_PREP_CERTIFIED`. The R2A diagnosis commit `f4cd2e01a769d68a379c602c30dbeb9da7a8a632` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- The accepted root cause is `TABLE_NOT_CREATED` based on the user-supplied production catalog evidence: `information_schema`, `pg_catalog` and wildcard Official Pick catalog searches found no intended native Official Pick object, and repo search found no committed migration creating `public.pick2_mlb_official_picks`.
+- Prepared non-applied additive migration `supabase/migrations/202609050004_pick2_mlb_official_picks_v1.sql`. The table is rooted in `prediction_id`, `value_evaluation_id`, native `game_pk`, `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` and immutable Official Pick decision state, with required FK links to `pick2_game_predictions`, `pick2_mlb_market_value_evaluations` and `pick2_mlb_games`.
+- The migration prepares `UNIQUE(official_pick_identity)`, semantic checks for MLB moneyline Official Picks, JSON array flag/code contracts, RLS, service-role insert/select, authenticated select, targeted indexes and before-update/before-delete immutability guards. It is additive only and contains no Official Pick inserts, no legacy table mutation and no unrelated DML/DDL.
+- Application contract `src/types/pick2-official-picks.ts` defines native Official Pick rows, future `INSERT_ELIGIBLE` / `REUSE_NO_OP` / `BLOCK_CONFLICT` classification and readback parity shape. Frozen 5 dry fit passed with 5 valid rows, 0 invalid, 0 duplicate proposed identities and 0 missing prediction/value/game linkages. R2B performed 0 production DML, 0 production DDL, 0 provider calls, no Value Board publication, no automation and no cron changes. `MLB_DATA_02P_R2C_OFFICIAL_PICK_SCHEMA_MIGRATION_APPLY_READY = YES`; `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_READY = NO` until migration apply/readback.
 
 ## 2026-09-06 MLB-DATA-02P-R2A Official Pick Table Schema Readback
 

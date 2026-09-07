@@ -1,0 +1,121 @@
+{
+  "generatedAt": "2026-09-07T02:08:54.745Z",
+  "project": "MLB_DATA_02Q_R6_MANUAL_ENV_ACTIVATION_READBACK",
+  "certificationVerdict": "MLB_DATA_02Q_R6_VALUE_BOARD_NAVIGATION_PUBLICATION_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "29d1bd05bd11b293887a5ffe63b3951b56a8310d",
+    "originMain": "29d1bd05bd11b293887a5ffe63b3951b56a8310d",
+    "worktreeCleanBeforeReadback": false,
+    "worktreeStatusBeforeReadback": "M docs/MASTER_ROADMAP.md\n M docs/PROJECT_STATUS.md\n?? docs/CERTIFICATION/mlb-data-02q-r6-manual-env-activation-readback.json\n?? docs/CERTIFICATION/mlb-data-02q-r6-value-board-navigation-production-activation-audit.md\n?? scripts/mlb-data-02q-r6-manual-env-activation-readback-validate.mjs\n?? scripts/mlb-data-02q-r6-manual-env-activation-readback.mjs",
+    "MLB_02Q_R6_REPOSITORY_ALIGNMENT": "PASS"
+  },
+  "production": {
+    "baseUrl": "https://pick-analyzer.vercel.app",
+    "commit": "29d1bd05bd11b293887a5ffe63b3951b56a8310d",
+    "providerCallsMade": 0,
+    "MLB_02Q_R6_PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "gates": {
+    "manualNavigationEnvActivationState": "YES_USER_CONFIRMED",
+    "runtimeRefreshState": "YES_USER_CONFIRMED_AND_READBACK_EFFECTIVE",
+    "MLB_02Q_R6_ROUTE_GATE_BASELINE": "ON",
+    "MLB_02Q_R6_NAVIGATION_VISIBLE": "PASS",
+    "MLB_02Q_R6_NAV_ORDER": "PASS",
+    "MLB_02Q_R6_NAV_ICON": "PASS",
+    "MLB_02Q_R6_DESKTOP_NAV_READBACK": "PASS",
+    "MLB_02Q_R6_MOBILE_NAV_READBACK": "PASS",
+    "MLB_02Q_R6_NAV_RESPONSIVE_STATE": "PASS",
+    "MLB_02Q_R6_ACTIVE_ROUTE_STATE": "PASS",
+    "MLB_02Q_R6_NAV_ACCESSIBILITY": "PASS",
+    "MLB_02Q_R6_DUAL_GATE_CONTRACT": "PASS",
+    "MLB_02Q_R6_BOARD_PARITY": "PASS",
+    "MLB_02Q_R6_TOP_PICK_PARITY": "PASS",
+    "MLB_02Q_R6_QUERY_LAYER_READ_ONLY": "PASS",
+    "MLB_02Q_R6_WRITE_SURFACE": "NONE",
+    "MLB_02Q_R6_SECRET_SAFETY": "PASS",
+    "MLB_02Q_R6_ENV_CHANGE_ACCOUNTING": "PASS",
+    "MLB_02Q_R6_NAV_ROLLBACK_READY": "YES"
+  },
+  "navigation": {
+    "label": "MLB Value Board",
+    "target": "/mlb-value-board",
+    "order": [
+      "Today",
+      "MLB Value Board",
+      "Performance",
+      "Model Lab",
+      "Data Health"
+    ],
+    "icon": "V",
+    "desktopBoardItem": {
+      "label": "MLB Value Board",
+      "href": "/mlb-value-board",
+      "ariaCurrent": null,
+      "icon": "V",
+      "width": 239,
+      "height": 56
+    },
+    "mobileBoardItem": {
+      "label": "MLB Value Board",
+      "href": "/mlb-value-board",
+      "ariaCurrent": null,
+      "icon": "V",
+      "width": 71.59375,
+      "height": 64.5
+    },
+    "mobileGridColumns": 5,
+    "desktopActiveAriaCurrent": "page",
+    "mobileActiveAriaCurrent": "page"
+  },
+  "board": {
+    "officialPickCount": 5,
+    "valueCandidateCount": 14,
+    "watchlistCount": 23,
+    "blockedCount": 0,
+    "totalBoardRows": 42,
+    "topPick": {
+      "game_pk": 823904,
+      "side": "AWAY",
+      "book": "betrivers",
+      "consensus_edge": 0.081935617141676,
+      "unit_ev": 0.2409281394125
+    }
+  },
+  "safety": {
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "officialPickWrites": 0,
+    "nativeValueWrites": 0,
+    "marketWrites": 0,
+    "predictionWrites": 0,
+    "modelWrites": 0,
+    "rawFeatureWrites": 0,
+    "oddsRefresh": 0,
+    "automation": "OFF",
+    "cronChanges": 0
+  },
+  "publication": {
+    "MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_STATE": "ACTIVE_WITH_NAVIGATION",
+    "MLB_DATA_02Q_VALUE_BOARD_NAVIGATION_STATE": "ACTIVE",
+    "MLB_DATA_02R_DAILY_REFRESH_PIPELINE_PREP_READY": "YES"
+  },
+  "validators": [
+    "node scripts/mlb-data-02q-r6-manual-env-activation-readback.mjs",
+    "node scripts/mlb-data-02q-r6-manual-env-activation-readback-validate.mjs",
+    "node scripts/mlb-data-02q-r5-value-board-navigation-prep-validate.mjs",
+    "git diff --check",
+    "changed-file ESLint",
+    "targeted secret scan",
+    "npm.cmd run build"
+  ],
+  "changedFiles": [
+    "scripts/mlb-data-02q-r6-manual-env-activation-readback.mjs",
+    "scripts/mlb-data-02q-r6-manual-env-activation-readback-validate.mjs",
+    "docs/CERTIFICATION/mlb-data-02q-r6-manual-env-activation-readback.json",
+    "docs/CERTIFICATION/mlb-data-02q-r6-value-board-navigation-production-activation-audit.md",
+    "docs/PROJECT_STATUS.md",
+    "docs/MASTER_ROADMAP.md"
+  ]
+}
