@@ -1,0 +1,9 @@
+{
+  "authorized": true,
+  "scope": "mlb-statcast-runtime-performance-v1",
+  "rawSourceOfTruth": "pick2_raw_mlb_statcast_pitches",
+  "providerCallsAllowed": false,
+  "officialPickWritesAllowed": false,
+  "productionBettingActivationAllowed": false,
+  "mode": "read-only-performance-repair"
+}
