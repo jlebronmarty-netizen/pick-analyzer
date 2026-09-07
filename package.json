@@ -29,7 +29,8 @@
     "mlb:player-projections": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-player-projections.mjs",
     "mlb:lineup-context": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-lineup-context.mjs",
     "mlb:starter-intelligence": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-starter-intelligence.mjs",
-    "mlb:statcast:validate": "node scripts/mlb-statcast-validate.mjs"
+    "mlb:statcast:validate": "node scripts/mlb-statcast-validate.mjs",
+    "mlb:statcast:runtime:validate": "node scripts/mlb-statcast-runtime-performance-validate.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
