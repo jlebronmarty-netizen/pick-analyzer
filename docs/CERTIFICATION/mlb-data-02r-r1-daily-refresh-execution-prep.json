@@ -1,0 +1,672 @@
+{
+  "generatedAt": "2026-09-07T02:55:26.080Z",
+  "project": "MLB_DATA_02R_R1_DAILY_REFRESH_EXECUTION_PREP",
+  "certificationVerdict": "MLB_DATA_02R_R1_DAILY_REFRESH_EXECUTION_PREP_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "ecf3c666aaa5c801feb4b322f87375e012ceb191",
+    "originMain": "ecf3c666aaa5c801feb4b322f87375e012ceb191",
+    "worktreeCleanAtEntryGate": true,
+    "worktreeStatusAtGeneration": "M docs/MASTER_ROADMAP.md\n M docs/PROJECT_STATUS.md\n?? docs/CERTIFICATION/mlb-data-02r-r1-daily-refresh-execution-prep.json\n?? docs/CERTIFICATION/mlb-data-02r-r1-manual-daily-refresh-execution-prep-audit.md\n?? scripts/mlb-data-02r-r1-daily-refresh-execution-prep-validate.mjs\n?? scripts/mlb-data-02r-r1-daily-refresh-execution-prep.mjs",
+    "MLB_02R_R1_REPOSITORY_ALIGNMENT": "PASS"
+  },
+  "production": {
+    "baseUrl": "https://pick-analyzer.vercel.app",
+    "commit": "ecf3c666aaa5c801feb4b322f87375e012ceb191",
+    "providerCallsMade": 0,
+    "raw": {
+      "app": "Pick Analyzer",
+      "environment": "production",
+      "release": "0.1.0",
+      "gitCommit": "ecf3c666aaa5c801feb4b322f87375e012ceb191",
+      "buildTimestamp": "runtime",
+      "staticPageCount": 235,
+      "apiRouteCount": 245,
+      "providerCallsMade": 0,
+      "requestId": "012c0059-ec50-4ff1-90f7-6ea2c4245711"
+    },
+    "MLB_02R_R1_PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "runIdentity": {
+    "MLB_02R_R1_RUN_IDENTITY": "READY",
+    "identity": {
+      "sport": "MLB",
+      "run_date": "2026-09-06",
+      "pipeline_version": "MLB_DATA_02R_R1_MANUAL_DAILY_REFRESH_EXECUTION_PACKET_V1",
+      "run_type": "MANUAL_CURRENT_SLATE",
+      "as_of_preparation_timestamp": "2026-09-06T22:55:26 America/New_York"
+    },
+    "runId": "mlb-manual-refresh:8b68883b52312945bafbf279e390c6df",
+    "deterministicRunIdSource": "{\"as_of_preparation_timestamp\":\"2026-09-06T22:55:26 America/New_York\",\"pipeline_version\":\"MLB_DATA_02R_R1_MANUAL_DAILY_REFRESH_EXECUTION_PACKET_V1\",\"run_date\":\"2026-09-06\",\"run_type\":\"MANUAL_CURRENT_SLATE\",\"sport\":\"MLB\"}"
+  },
+  "productionBaseline": {
+    "MLB_02R_R1_PRODUCTION_BASELINE": "PASS",
+    "counts": {
+      "nativeGames2026": 2154,
+      "nativePlayers": 1794,
+      "rawStatcast2026Identities": 622364,
+      "rawStatcast2026IdentitiesSource": "CERTIFIED_ARTIFACT_FALLBACK_AFTER_LIVE_COUNT_ERROR:pick2_raw_mlb_statcast_pitches count failed: {\"message\":\"\"}",
+      "snapshots2026": 59031,
+      "teamFeatures2026": 3902,
+      "starterFeatures2026": 3902,
+      "bullpenFeatures2026": 3902,
+      "batterFeatures2026": 39521,
+      "matchupFeatures2026": 1951,
+      "firstInningFeatures2026": 1951,
+      "predictions": 24,
+      "marketObservations": 492,
+      "nativeValueEvaluations": 386,
+      "officialPicks": 5
+    }
+  },
+  "championBaseline": {
+    "MLB_02R_R1_CHAMPION_BASELINE": "PASS",
+    "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1"
+  },
+  "valueBoardBaseline": {
+    "MLB_02R_R1_VALUE_BOARD_BASELINE": "PASS",
+    "route": "/mlb-value-board",
+    "httpStatus": 200,
+    "boardState": "ACTIVE_WITH_NAVIGATION",
+    "readOnly": true
+  },
+  "scheduleDiscoveryContract": {
+    "MLB_02R_R1_SCHEDULE_DISCOVERY_CONTRACT": "READY",
+    "provider": "MLB_OFFICIAL",
+    "futureRequest": "GET /api/v1/schedule?sportId=1&date=2026-09-06&hydrate=probablePitcher,team",
+    "noProviderCallInR1": true
+  },
+  "scheduleOutputContract": {
+    "MLB_02R_R1_SCHEDULE_OUTPUT_CONTRACT": "READY",
+    "fields": [
+      "game_pk",
+      "game_date",
+      "start_time",
+      "home_team",
+      "away_team",
+      "game_status",
+      "doubleheader_game_number",
+      "starter_state_if_supplied"
+    ]
+  },
+  "providerCallPlan": {
+    "MLB_02R_R1_PROVIDER_CALL_PLAN": "READY",
+    "providers": [
+      {
+        "provider": "MLB_OFFICIAL",
+        "purpose": "Discover current MLB schedule, game_pk identity, game status, doubleheader game number, start time, teams and supplied probable starter state.",
+        "maxCalls": 1,
+        "required": true,
+        "futureRequest": "GET /api/v1/schedule?sportId=1&date=2026-09-06&hydrate=probablePitcher,team",
+        "failureBehavior": "STOP_BEFORE_WRITES"
+      },
+      {
+        "provider": "STATCAST",
+        "purpose": "Acquire completed or newly available pitch-level evidence for current slate games only after schedule identity is frozen.",
+        "maxCalls": "0_TO_CURRENT_SLATE_GAMES",
+        "required": true,
+        "futureRequest": "bounded current-slate game/date request only; no season-wide refresh",
+        "failureBehavior": "STOP_RAW_AND_DEPENDENT_FEATURE_STAGES"
+      },
+      {
+        "provider": "THE_ODDS_API",
+        "purpose": "Acquire current baseball_mlb h2h American moneyline prices for pregame-valid games.",
+        "maxCalls": 1,
+        "required": true,
+        "futureRequest": "GET /v4/sports/baseball_mlb/odds?regions=us&markets=h2h&oddsFormat=american",
+        "failureBehavior": "STOP_MARKET_VALUE_PICK_BOARD_REFRESH"
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "purpose": "Not part of the certified Pick2 MLB daily refresh path.",
+        "maxCalls": 0,
+        "required": false,
+        "failureBehavior": "NO_EFFECT"
+      },
+      {
+        "provider": "SPORTSDATAIO",
+        "purpose": "Not part of the certified Pick2 MLB daily refresh path unless a future phase explicitly reauthorizes an edge case.",
+        "maxCalls": 0,
+        "required": false,
+        "failureBehavior": "NO_EFFECT"
+      }
+    ],
+    "providerCallsInR1": 0
+  },
+  "providerCaps": {
+    "MLB_02R_R1_PROVIDER_CAPS": "PASS",
+    "openEndedLoops": 0,
+    "maximumKnownCallsBeforeExecution": "2_PLUS_0_TO_CURRENT_SLATE_GAMES_STATCAST"
+  },
+  "cacheReusePlan": {
+    "MLB_02R_R1_CACHE_REUSE_PLAN": "READY",
+    "MLB_02R_R1_CACHE_FIRST_POLICY": "PASS",
+    "reusableSources": [
+      "persisted schedule/native games",
+      "Statcast daily cache if exact source digest valid",
+      "pick2_mlb_games",
+      "pick2_mlb_players",
+      "pick2_raw_mlb_statcast_pitches",
+      "pick2_feature_snapshots",
+      "daily feature tables",
+      "pick2_game_predictions",
+      "pick2_mlb_market_price_observations",
+      "pick2_mlb_market_value_evaluations",
+      "pick2_mlb_official_picks"
+    ]
+  },
+  "rawPlan": {
+    "MLB_02R_R1_RAW_PREWRITE_CLASSIFIER": "READY",
+    "classifications": [
+      "INSERT_ELIGIBLE",
+      "REUSE_NO_OP",
+      "BLOCK_CONFLICT"
+    ],
+    "MLB_02R_R1_RAW_DML_CAP": "READY",
+    "capFormula": "count(INSERT_ELIGIBLE raw pitch identities for discovered current-slate game_pk values); cap must equal exact missing identity count before execution",
+    "MLB_02R_R1_RAW_BATCH_EXECUTION_PLAN": "READY",
+    "batchSize": 100
+  },
+  "featurePlan": {
+    "MLB_02R_R1_FEATURE_TARGET_PLAN": "READY",
+    "targetRule": "current pregame slate games that pass identity, starter and as-of guards",
+    "MLB_02R_R1_FEATURE_DML_CAPS": "READY",
+    "caps": {
+      "snapshots": "count(INSERT_ELIGIBLE deterministic feature snapshot identities); existing exact digest rows are REUSE_NO_OP only",
+      "team": "2 * current eligible target games not already exact-reused",
+      "starter": "2 * current eligible target games not already exact-reused",
+      "bullpen": "2 * current eligible target games not already exact-reused",
+      "batter": "sum certified projected batter-game rows for current eligible target games not already exact-reused",
+      "matchup": "current eligible target games not already exact-reused",
+      "firstInning": "current eligible target games not already exact-reused"
+    },
+    "MLB_02R_R1_FEATURE_FAIL_CLOSED": "PASS"
+  },
+  "starterReadiness": {
+    "MLB_02R_R1_STARTER_READBACK": "READY",
+    "statuses": [
+      "CONFIRMED",
+      "PROBABLE",
+      "UNKNOWN",
+      "CHANGED"
+    ],
+    "MLB_02R_R1_STARTER_EXECUTION_POLICY": "PASS",
+    "policy": {
+      "CONFIRMED": "continue",
+      "PROBABLE": "continue with explicit risk flag if supported",
+      "UNKNOWN": "no prediction or pick",
+      "CHANGED": "rebuild dependent feature/inference state before inference"
+    }
+  },
+  "inferencePlan": {
+    "MLB_02R_R1_INFERENCE_PLAN": "READY",
+    "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "features": 76,
+    "preprocessing": "certified preprocessing artifact; no daily refit",
+    "MLB_02R_R1_PREDICTION_CLASSIFIER": "READY",
+    "predictionClassifications": [
+      "INSERT_ELIGIBLE",
+      "REUSE_NO_OP",
+      "BLOCK_CONFLICT"
+    ],
+    "MLB_02R_R1_PREDICTION_DML_CAP": "READY",
+    "predictionDmlCap": "count current-slate deterministic prediction identities passing starter/feature guards"
+  },
+  "marketPlan": {
+    "MLB_02R_R1_MARKET_ACQUISITION_PLAN": "READY",
+    "sport": "baseball_mlb",
+    "market": "h2h",
+    "oddsFormat": "american",
+    "MLB_02R_R1_ODDS_PROVIDER_CAP": "READY",
+    "oddsProviderCap": 1,
+    "MLB_02R_R1_MARKET_PREWRITE_CLASSIFIER": "READY",
+    "classifications": [
+      "INSERT_ELIGIBLE",
+      "REUSE_NO_OP",
+      "BLOCK_CONFLICT"
+    ],
+    "MLB_02R_R1_MARKET_DML_CAPS": "READY",
+    "caps": {
+      "mappings": "count complete provider-event-to-game_pk mappings required for fresh odds observations",
+      "observations": "2 * count complete same-book current moneyline pairs, capped by provider response rows"
+    }
+  },
+  "valuePlan": {
+    "MLB_02R_R1_VALUE_EXECUTION_PLAN": "READY",
+    "source": "fresh persisted predictions plus fresh complete same-book market pairs for pregame-valid games",
+    "MLB_02R_R1_VALUE_DML_CAP": "READY",
+    "cap": "2 * count fresh complete same-book prediction-market pairs passing temporal guards"
+  },
+  "officialPickPlan": {
+    "MLB_02R_R1_PICK_POLICY_PARITY": "PASS",
+    "policyVersion": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+    "MLB_02R_R1_OFFICIAL_PICK_REFRESH_PLAN": "READY",
+    "refreshSemantics": "one canonical current Official Pick decision state per game for the board; historical immutable pick rows are not overwritten",
+    "MLB_02R_R1_OFFICIAL_PICK_DML_CAP": "READY",
+    "cap": "<= count current eligible games; zero is valid; one side per game required",
+    "MLB_02R_R1_ONE_SIDE_PER_GAME": "PASS",
+    "zeroPicksAllowed": true
+  },
+  "boardReadbackPlan": {
+    "MLB_02R_R1_BOARD_READBACK_PLAN": "READY",
+    "requirements": [
+      "current board resolves canonical latest state",
+      "stale data clearly identified",
+      "partial failure clearly exposed"
+    ]
+  },
+  "settlement": {
+    "MLB_02R_R1_SETTLEMENT_EXECUTION_STATE": "EXCLUDED",
+    "reason": "current result settlement is not part of the execution-certified R1 manual refresh packet"
+  },
+  "checkpointing": {
+    "MLB_02R_R1_CHECKPOINT_SEQUENCE": "READY",
+    "stages": [
+      {
+        "stage": "STAGE_01_SCHEDULE_DISCOVERY",
+        "checkpoint": "2026-09-06:01:schedule"
+      },
+      {
+        "stage": "STAGE_02_NATIVE_GAME_PLAYER_RECONCILIATION",
+        "checkpoint": "2026-09-06:02:native-identity"
+      },
+      {
+        "stage": "STAGE_03_RAW_STATCAST_RECONCILIATION",
+        "checkpoint": "2026-09-06:03:raw-statcast"
+      },
+      {
+        "stage": "STAGE_04_PREGAME_FEATURE_REFRESH",
+        "checkpoint": "2026-09-06:04:features"
+      },
+      {
+        "stage": "STAGE_05_STARTER_READINESS",
+        "checkpoint": "2026-09-06:05:starters"
+      },
+      {
+        "stage": "STAGE_06_MONEYLINE_INFERENCE",
+        "checkpoint": "2026-09-06:06:inference"
+      },
+      {
+        "stage": "STAGE_07_PREDICTION_PERSISTENCE",
+        "checkpoint": "2026-09-06:07:prediction-persistence"
+      },
+      {
+        "stage": "STAGE_08_MARKET_PRICE_ACQUISITION",
+        "checkpoint": "2026-09-06:08:market-acquisition"
+      },
+      {
+        "stage": "STAGE_09_MARKET_PERSISTENCE",
+        "checkpoint": "2026-09-06:09:market-persistence"
+      },
+      {
+        "stage": "STAGE_10_VALUE_EVALUATION",
+        "checkpoint": "2026-09-06:10:value"
+      },
+      {
+        "stage": "STAGE_11_OFFICIAL_PICK_POLICY",
+        "checkpoint": "2026-09-06:11:pick-policy"
+      },
+      {
+        "stage": "STAGE_12_OFFICIAL_PICK_PERSISTENCE",
+        "checkpoint": "2026-09-06:12:official-picks"
+      },
+      {
+        "stage": "STAGE_13_VALUE_BOARD_READBACK",
+        "checkpoint": "2026-09-06:13:value-board"
+      },
+      {
+        "stage": "STAGE_14_RESULT_SETTLEMENT_PREP",
+        "checkpoint": "2026-09-06:14:settlement-prep"
+      }
+    ],
+    "MLB_02R_R1_RESUME_PLAN": "READY",
+    "resumeRule": "resume from first incomplete or failed stage; reuse all exact successful immutable writes after reclassification"
+  },
+  "executionCommand": {
+    "MLB_02R_R1_EXECUTION_COMMAND": "READY",
+    "command": "node scripts/mlb-data-02r-r1-daily-refresh-execution-prep.mjs --execute-current-slate --run-id mlb-manual-refresh:8b68883b52312945bafbf279e390c6df",
+    "note": "This R1 script intentionally rejects the flag. R2 must provide separate explicit execution authorization and runner wiring.",
+    "MLB_02R_R1_EXECUTION_AUTH_GUARD": "PASS",
+    "failClosedMessage": "DAILY_REFRESH_EXECUTION_FORBIDDEN_IN_02R_R1_PREP"
+  },
+  "executionMatrix": {
+    "MLB_02R_R1_EXECUTION_MATRIX": "READY",
+    "rows": [
+      {
+        "stage": "STAGE_01_SCHEDULE_DISCOVERY",
+        "dependency": "production alignment",
+        "providerRequired": "MLB_OFFICIAL_FUTURE_AUTH_REQUIRED",
+        "providerCap": 1,
+        "readWrite": "READ_PROVIDER_THEN_CLASSIFY_ONLY_IN_R1",
+        "dmlTarget": "pick2_mlb_games candidate set",
+        "dmlCapFormula": "count(INSERT_ELIGIBLE discovered game_pk identities)",
+        "checkpoint": "2026-09-06:01:schedule",
+        "failureBehavior": "STOP_NO_WRITES",
+        "resumeBehavior": "reuse exact schedule response digest if still current"
+      },
+      {
+        "stage": "STAGE_02_NATIVE_GAME_PLAYER_RECONCILIATION",
+        "dependency": "schedule game_pk and player evidence",
+        "providerRequired": "NO_NEW_PROVIDER_IF_SCHEDULE_SUPPLIES_EVIDENCE",
+        "providerCap": 0,
+        "readWrite": "READ_CLASSIFY_FUTURE_UPSERT",
+        "dmlTarget": "pick2_mlb_games, pick2_mlb_players",
+        "dmlCapFormula": "exact INSERT_ELIGIBLE native game/player identities",
+        "checkpoint": "2026-09-06:02:native-identity",
+        "failureBehavior": "BLOCK_CONFLICT_STOPS",
+        "resumeBehavior": "successful rows reclassify as REUSE_NO_OP"
+      },
+      {
+        "stage": "STAGE_03_RAW_STATCAST_RECONCILIATION",
+        "dependency": "frozen game_pk set",
+        "providerRequired": "STATCAST_FUTURE_AUTH_REQUIRED_UNLESS_EXACT_CACHE_VALID",
+        "providerCap": "0_TO_CURRENT_SLATE_GAMES",
+        "readWrite": "READ_PROVIDER_OR_CACHE_THEN_FUTURE_INSERT_ONLY",
+        "dmlTarget": "pick2_raw_mlb_statcast_pitches",
+        "dmlCapFormula": "count(INSERT_ELIGIBLE raw pitch identities for discovered current-slate game_pk values); cap must equal exact missing identity count before execution",
+        "checkpoint": "2026-09-06:03:raw-statcast",
+        "failureBehavior": "BLOCK_CONFLICT_OR_SOURCE_PARITY_CHANGE_STOPS",
+        "resumeBehavior": "resume at first missing batch; exact existing identities are REUSE_NO_OP"
+      },
+      {
+        "stage": "STAGE_04_PREGAME_FEATURE_REFRESH",
+        "dependency": "native identity, raw/source history, pregame as-of",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "READ_STORED_THEN_FUTURE_INSERT_OR_REUSE",
+        "dmlTarget": "pick2_feature_snapshots and certified daily feature tables",
+        "dmlCapFormula": "sum current-slate feature-family INSERT_ELIGIBLE rows",
+        "checkpoint": "2026-09-06:04:features",
+        "failureBehavior": "SNAPSHOT_MISMATCH_OR_LEAKAGE_STOPS",
+        "resumeBehavior": "exact digest snapshots and native-key feature rows are REUSE_NO_OP"
+      },
+      {
+        "stage": "STAGE_05_STARTER_READINESS",
+        "dependency": "schedule/probable starter readback",
+        "providerRequired": "MLB_OFFICIAL_AS_SUPPLIED_BY_STAGE_01",
+        "providerCap": 0,
+        "readWrite": "READ_ONLY",
+        "dmlTarget": "none",
+        "dmlCapFormula": "0",
+        "checkpoint": "2026-09-06:05:starters",
+        "failureBehavior": "UNKNOWN_OR_CHANGED_BLOCKS_AFFECTED_GAME",
+        "resumeBehavior": "re-read status before dependent inference"
+      },
+      {
+        "stage": "STAGE_06_MONEYLINE_INFERENCE",
+        "dependency": "complete features and starter policy",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "LOCAL_COMPUTE_THEN_CLASSIFY",
+        "dmlTarget": "pick2_game_predictions future rows",
+        "dmlCapFormula": "count current-slate deterministic prediction identities passing starter/feature guards",
+        "checkpoint": "2026-09-06:06:inference",
+        "failureBehavior": "NONFINITE_PROBABILITY_OR_FEATURE_MISMATCH_STOPS",
+        "resumeBehavior": "recompute deterministic identity and reuse exact rows"
+      },
+      {
+        "stage": "STAGE_07_PREDICTION_PERSISTENCE",
+        "dependency": "inference output",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "FUTURE_INSERT_OR_REUSE",
+        "dmlTarget": "pick2_game_predictions",
+        "dmlCapFormula": "count current-slate deterministic prediction identities passing starter/feature guards",
+        "checkpoint": "2026-09-06:07:prediction-persistence",
+        "failureBehavior": "BLOCK_CONFLICT_STOPS",
+        "resumeBehavior": "exact prediction identity rows are REUSE_NO_OP"
+      },
+      {
+        "stage": "STAGE_08_MARKET_PRICE_ACQUISITION",
+        "dependency": "pregame-valid game set",
+        "providerRequired": "THE_ODDS_API_FUTURE_AUTH_REQUIRED",
+        "providerCap": 1,
+        "readWrite": "READ_PROVIDER_THEN_CLASSIFY",
+        "dmlTarget": "market observation candidate set",
+        "dmlCapFormula": "2 * count complete same-book current moneyline pairs, capped by provider response rows",
+        "checkpoint": "2026-09-06:08:market-acquisition",
+        "failureBehavior": "PROVIDER_FAILURE_OR_INCOMPLETE_PAIR_BLOCKS_VALUE",
+        "resumeBehavior": "reuse exact market response digest within freshness window"
+      },
+      {
+        "stage": "STAGE_09_MARKET_PERSISTENCE",
+        "dependency": "market acquisition and native mapping",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "FUTURE_INSERT_OR_REUSE",
+        "dmlTarget": "pick2_mlb_market_event_mappings, pick2_mlb_market_price_observations",
+        "dmlCapFormula": "count complete provider-event-to-game_pk mappings required for fresh odds observations; 2 * count complete same-book current moneyline pairs, capped by provider response rows",
+        "checkpoint": "2026-09-06:09:market-persistence",
+        "failureBehavior": "AMBIGUOUS_MAPPING_OR_IDENTITY_CONFLICT_STOPS",
+        "resumeBehavior": "exact immutable market identities are REUSE_NO_OP"
+      },
+      {
+        "stage": "STAGE_10_VALUE_EVALUATION",
+        "dependency": "fresh predictions and complete same-book market pairs",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "COMPUTE_THEN_FUTURE_INSERT_OR_REUSE",
+        "dmlTarget": "pick2_mlb_market_value_evaluations",
+        "dmlCapFormula": "2 * count fresh complete same-book prediction-market pairs passing temporal guards",
+        "checkpoint": "2026-09-06:10:value",
+        "failureBehavior": "MISSING_LINKAGE_OR_NUMERIC_PARITY_FAILURE_STOPS",
+        "resumeBehavior": "exact value identities are REUSE_NO_OP"
+      },
+      {
+        "stage": "STAGE_11_OFFICIAL_PICK_POLICY",
+        "dependency": "fresh native value evaluations",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "READ_COMPUTE_ONLY",
+        "dmlTarget": "none",
+        "dmlCapFormula": "0",
+        "checkpoint": "2026-09-06:11:pick-policy",
+        "failureBehavior": "POLICY_PARITY_FAILURE_STOPS",
+        "resumeBehavior": "recompute from persisted value rows"
+      },
+      {
+        "stage": "STAGE_12_OFFICIAL_PICK_PERSISTENCE",
+        "dependency": "Policy V1 selected rows",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "FUTURE_INSERT_OR_REUSE",
+        "dmlTarget": "pick2_mlb_official_picks",
+        "dmlCapFormula": "<= count current eligible games; zero is valid; one side per game required",
+        "checkpoint": "2026-09-06:12:official-picks",
+        "failureBehavior": "DUPLICATE_SIDE_OR_BLOCK_CONFLICT_STOPS",
+        "resumeBehavior": "one canonical current decision per game; immutable historical rows remain"
+      },
+      {
+        "stage": "STAGE_13_VALUE_BOARD_READBACK",
+        "dependency": "fresh persisted predictions, values, markets and Official Pick decisions",
+        "providerRequired": "NO",
+        "providerCap": 0,
+        "readWrite": "READ_ONLY",
+        "dmlTarget": "none",
+        "dmlCapFormula": "0",
+        "checkpoint": "2026-09-06:13:value-board",
+        "failureBehavior": "PARTIAL_OR_STALE_STATE_EXPOSED_NOT_SILENT",
+        "resumeBehavior": "read canonical latest persisted board state"
+      },
+      {
+        "stage": "STAGE_14_RESULT_SETTLEMENT_PREP",
+        "dependency": "separate settlement certification",
+        "providerRequired": "NO_IN_R1_EXECUTION_PACKET",
+        "providerCap": 0,
+        "readWrite": "EXCLUDED_READINESS_ONLY",
+        "dmlTarget": "none",
+        "dmlCapFormula": "0",
+        "checkpoint": "2026-09-06:14:settlement-prep",
+        "failureBehavior": "EXCLUDED_FROM_R1",
+        "resumeBehavior": "future separate settlement phase"
+      }
+    ]
+  },
+  "observability": {
+    "MLB_02R_R1_EXECUTION_AUDIT": "READY",
+    "fields": [
+      "run_id",
+      "run_date",
+      "as_of",
+      "production_commit",
+      "stage",
+      "checkpoint",
+      "input_digest",
+      "output_digest",
+      "provider",
+      "provider_calls",
+      "rows_planned",
+      "rows_inserted",
+      "rows_reused",
+      "conflicts",
+      "failure_behavior",
+      "resume_behavior"
+    ],
+    "MLB_02R_R1_EXECUTION_SUMMARY": "READY",
+    "summaryFields": [
+      "games discovered",
+      "games prediction-ready",
+      "starter blockers",
+      "raw inserts",
+      "feature inserts/reuses",
+      "predictions",
+      "market observations",
+      "value rows",
+      "Official Picks",
+      "Value Board rows",
+      "provider calls",
+      "DML rows",
+      "blocked stages"
+    ]
+  },
+  "dryCurrentSlatePrep": {
+    "MLB_02R_R1_CURRENT_SLATE_DRY_PREP": "PASS",
+    "mode": "PREP_DRY",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "stageReadinessMatrix": {
+    "MLB_02R_R1_STAGE_READINESS_MATRIX": "READY",
+    "rows": [
+      {
+        "stage": "STAGE_01_SCHEDULE_DISCOVERY",
+        "readiness": "REQUIRES_PROVIDER_CALL"
+      },
+      {
+        "stage": "STAGE_02_NATIVE_GAME_PLAYER_RECONCILIATION",
+        "readiness": "REQUIRES_FUTURE_DML_AUTH"
+      },
+      {
+        "stage": "STAGE_03_RAW_STATCAST_RECONCILIATION",
+        "readiness": "REQUIRES_PROVIDER_CALL"
+      },
+      {
+        "stage": "STAGE_04_PREGAME_FEATURE_REFRESH",
+        "readiness": "REQUIRES_FUTURE_DML_AUTH"
+      },
+      {
+        "stage": "STAGE_05_STARTER_READINESS",
+        "readiness": "READY_FROM_EXISTING_STATE"
+      },
+      {
+        "stage": "STAGE_06_MONEYLINE_INFERENCE",
+        "readiness": "READY_FROM_EXISTING_STATE"
+      },
+      {
+        "stage": "STAGE_07_PREDICTION_PERSISTENCE",
+        "readiness": "REQUIRES_FUTURE_DML_AUTH"
+      },
+      {
+        "stage": "STAGE_08_MARKET_PRICE_ACQUISITION",
+        "readiness": "REQUIRES_PROVIDER_CALL"
+      },
+      {
+        "stage": "STAGE_09_MARKET_PERSISTENCE",
+        "readiness": "REQUIRES_FUTURE_DML_AUTH"
+      },
+      {
+        "stage": "STAGE_10_VALUE_EVALUATION",
+        "readiness": "REQUIRES_FUTURE_DML_AUTH"
+      },
+      {
+        "stage": "STAGE_11_OFFICIAL_PICK_POLICY",
+        "readiness": "READY_FROM_EXISTING_STATE"
+      },
+      {
+        "stage": "STAGE_12_OFFICIAL_PICK_PERSISTENCE",
+        "readiness": "REQUIRES_FUTURE_DML_AUTH"
+      },
+      {
+        "stage": "STAGE_13_VALUE_BOARD_READBACK",
+        "readiness": "READY_FROM_EXISTING_STATE"
+      },
+      {
+        "stage": "STAGE_14_RESULT_SETTLEMENT_PREP",
+        "readiness": "BLOCKED"
+      }
+    ]
+  },
+  "dynamicCaps": {
+    "MLB_02R_R1_DYNAMIC_CAPS": "PASS",
+    "caps": {
+      "raw": "count(INSERT_ELIGIBLE raw pitch identities for discovered current-slate game_pk values); cap must equal exact missing identity count before execution",
+      "nativeGames": "count(INSERT_ELIGIBLE discovered game_pk identities)",
+      "nativePlayers": "count(INSERT_ELIGIBLE discovered MLBAM player identities)",
+      "snapshots": "count(INSERT_ELIGIBLE deterministic feature snapshot identities); existing exact digest rows are REUSE_NO_OP only",
+      "teamFeatures": "2 * current eligible target games not already exact-reused",
+      "starterFeatures": "2 * current eligible target games not already exact-reused",
+      "bullpenFeatures": "2 * current eligible target games not already exact-reused",
+      "batterFeatures": "sum certified projected batter-game rows for current eligible target games not already exact-reused",
+      "matchupFeatures": "current eligible target games not already exact-reused",
+      "firstInningFeatures": "current eligible target games not already exact-reused",
+      "predictions": "count current-slate deterministic prediction identities passing starter/feature guards",
+      "marketMappings": "count complete provider-event-to-game_pk mappings required for fresh odds observations",
+      "marketObservations": "2 * count complete same-book current moneyline pairs, capped by provider response rows",
+      "nativeValueEvaluations": "2 * count fresh complete same-book prediction-market pairs passing temporal guards",
+      "officialPicks": "<= count current eligible games; zero is valid; one side per game required"
+    }
+  },
+  "prepMutationBoundary": {
+    "MLB_02R_R1_PREP_MUTATION_BOUNDARY": "PASS",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "envChanges": 0,
+    "automationChanges": 0,
+    "cronChanges": 0
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2_MANUAL_DAILY_REFRESH_EXECUTION_READY": "YES",
+    "MLB_DATA_02R_AUTOMATION_ACTIVATION_READY": "NO"
+  },
+  "validators": [
+    "node scripts/mlb-data-02r-r1-daily-refresh-execution-prep.mjs",
+    "node scripts/mlb-data-02r-r1-daily-refresh-execution-prep-validate.mjs",
+    "node scripts/mlb-data-02r-daily-refresh-pipeline-prep-validate.mjs",
+    "node scripts/mlb-data-02q-r6-manual-env-activation-readback-validate.mjs",
+    "node scripts/mlb-data-02q-value-board-prep-validate.mjs",
+    "node scripts/mlb-data-02p-r2-official-pick-persistence-execution-validate.mjs",
+    "node scripts/mlb-data-02p-r2c-manual-official-pick-schema-apply-readback-validate.mjs",
+    "node scripts/mlb-data-02o-r3-native-value-persistence-validate.mjs",
+    "node scripts/mlb-data-02n-current-moneyline-value-evaluation-prep-validate.mjs",
+    "node scripts/mlb-data-02m-r3-fresh-market-sample-persistence-validate.mjs",
+    "node scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry-validate.mjs",
+    "node scripts/mlb-data-02i-current-moneyline-dry-inference-prep-validate.mjs",
+    "node scripts/mlb-data-02h-r2-2026-raw-resume-feature-completion-validate.mjs",
+    "node scripts/pick-analyzer-mlb-roadmap-realignment-v1-validate.mjs",
+    "node scripts/mlb-data-01d-r1f-production-manifest-authority-validate.mjs",
+    "git diff --check",
+    "changed-file ESLint",
+    "targeted secret scan",
+    "npm.cmd run build"
+  ],
+  "changedFiles": [
+    "scripts/mlb-data-02r-r1-daily-refresh-execution-prep.mjs",
+    "scripts/mlb-data-02r-r1-daily-refresh-execution-prep-validate.mjs",
+    "docs/CERTIFICATION/mlb-data-02r-r1-daily-refresh-execution-prep.json",
+    "docs/CERTIFICATION/mlb-data-02r-r1-manual-daily-refresh-execution-prep-audit.md",
+    "docs/PROJECT_STATUS.md",
+    "docs/MASTER_ROADMAP.md"
+  ]
+}
