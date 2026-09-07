@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 21:05:00Z
+Last updated: 2026-09-06 21:37:00Z
+
+## 2026-09-06 MLB-DATA-02Q-R3 Value Board Activation Prep
+
+- MLB-DATA-02Q-R3 is certified as `MLB_DATA_02Q_R3_VALUE_BOARD_ACTIVATION_PREP_CERTIFIED`. The R2 certification commit `01fc87a257b0b3386ddb09e41ba37029d83c4a05` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- Production gate baseline remains `OFF`: `PICK2_MLB_VALUE_BOARD_ENABLED` was not changed, `/mlb-value-board` remains fail-closed publicly, public navigation remains hidden and public board exposure remains `NO`.
+- Activation contract is ready: a future separately authorized activation would set `PICK2_MLB_VALUE_BOARD_ENABLED=true`; Vercel production requires redeploy/configuration refresh for the runtime to observe an environment change; missing, malformed or any non-`true` value remains OFF.
+- Controlled local-only gate-ON validation passed: `/mlb-value-board` rendered successfully with summary, separated statuses, Official Picks first, filters, sorting, mobile-ready layout, Official Pick fields, Value Candidate/Watchlist semantics, zero-blocked empty state, stale/freshness UI, no secrets and no write surface. Gate-off reversion returned to fail-closed behavior.
+- Board parity remains 42 rows: 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`. Production DML 0, production DDL 0, provider calls 0, production env mutations 0, automation off and cron changes 0. `MLB_DATA_02Q_R4_VALUE_BOARD_ACTIVATION_EXECUTION_READY = YES`; `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
 
 ## 2026-09-06 MLB-DATA-02Q-R2 Gated Value Board Deployment Readback
 

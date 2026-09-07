@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-09-07T00:49:13.971Z",
+  "project": "MLB_DATA_02Q_R3_VALUE_BOARD_ACTIVATION_PREP",
+  "certificationVerdict": "MLB_DATA_02Q_R3_VALUE_BOARD_ACTIVATION_PREP_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "01fc87a257b0b3386ddb09e41ba37029d83c4a05",
+    "originMain": "01fc87a257b0b3386ddb09e41ba37029d83c4a05",
+    "worktreeStatusAtCertification": "M docs/MASTER_ROADMAP.md\n M docs/PROJECT_STATUS.md\n?? docs/CERTIFICATION/mlb-data-02q-r3-value-board-activation-prep-audit.md\n?? docs/CERTIFICATION/mlb-data-02q-r3-value-board-activation-prep.json\n?? scripts/mlb-data-02q-r3-value-board-activation-prep-validate.mjs\n?? scripts/mlb-data-02q-r3-value-board-activation-prep.mjs",
+    "MLB_02Q_R3_PREPUBLISH_STATE": "PASS",
+    "MLB_02Q_R3_R2_COMMIT_SCOPE_CERTIFIED": "YES"
+  },
+  "publication": {
+    "pushedCommit": "01fc87a257b0b3386ddb09e41ba37029d83c4a05",
+    "state": "PASS"
+  },
+  "production": {
+    "commit": "01fc87a257b0b3386ddb09e41ba37029d83c4a05",
+    "providerCallsMade": 0,
+    "alignment": "PASS"
+  },
+  "baseline": {
+    "productionGate": "OFF",
+    "routeFailClosed": "PASS",
+    "navigationHidden": "PASS",
+    "publicBoardExposure": "NO",
+    "MLB_02Q_R3_PRODUCTION_GATE_BASELINE": "OFF",
+    "MLB_02Q_R3_GATE_OFF_ROUTE_BASELINE": "PASS",
+    "MLB_02Q_R3_GATE_OFF_NAV_BASELINE": "PASS"
+  },
+  "activationContract": {
+    "envName": "PICK2_MLB_VALUE_BOARD_ENABLED",
+    "enabledValue": "true",
+    "productionEnvMutations": 0,
+    "runtimeRefresh": "VERCEL_PRODUCTION_ENV_CHANGE_REQUIRES_REDEPLOY_OR_CONFIGURATION_REFRESH",
+    "failClosedSemantics": "ONLY_EXACT_STRING_TRUE_ENABLES_BOARD",
+    "rollback": "SET_FALSE_OR_REMOVE_ENV_AND_REDEPLOY_OR_REFRESH_RUNTIME",
+    "MLB_02Q_R3_ACTIVATION_ENV_CONTRACT": "READY",
+    "MLB_02Q_R3_RUNTIME_REFRESH_CONTRACT": "READY",
+    "MLB_02Q_R3_GATE_FAIL_CLOSED_SEMANTICS": "PASS",
+    "MLB_02Q_R3_ACTIVATION_ROLLBACK": "READY"
+  },
+  "controlledGateOn": {
+    "enabledInLocalProcessOnly": true,
+    "routeRender": "PASS",
+    "boardParity": "PASS",
+    "topPickParity": "PASS",
+    "uxBaseline": "PASS",
+    "officialPickRenderParity": "PASS",
+    "nonOfficialStatusRender": "PASS",
+    "zeroBlockedRender": "PASS",
+    "staleStateVisible": "PASS",
+    "secretSafety": "PASS",
+    "rawEvidence": {
+      "httpStatus": 200,
+      "titleVisible": true,
+      "summaryVisible": true,
+      "officialFirst": true,
+      "filtersVisible": true,
+      "sortingVisible": true,
+      "boardMarkers": {
+        "topGame": true,
+        "book": true,
+        "away": true,
+        "edge": true,
+        "ev": true
+      },
+      "officialPickRenderParity": true,
+      "nonOfficialStatusRender": true,
+      "zeroBlockedRender": true,
+      "staleStateVisible": true,
+      "secretSafety": true,
+      "writeSurface": true
+    },
+    "MLB_02Q_R3_CONTROLLED_GATE_ON": "PASS",
+    "MLB_02Q_R3_GATE_ON_ROUTE_RENDER": "PASS",
+    "MLB_02Q_R3_GATE_ON_BOARD_PARITY": "PASS",
+    "MLB_02Q_R3_GATE_ON_TOP_PICK_PARITY": "PASS",
+    "MLB_02Q_R3_ACTIVATED_UX_BASELINE": "PASS",
+    "MLB_02Q_R3_OFFICIAL_PICK_RENDER_PARITY": "PASS",
+    "MLB_02Q_R3_NON_OFFICIAL_STATUS_RENDER": "PASS",
+    "MLB_02Q_R3_ZERO_BLOCKED_RENDER": "PASS",
+    "MLB_02Q_R3_STALE_STATE_ON_ACTIVATION": "PASS",
+    "MLB_02Q_R3_GATE_ON_SECRET_SAFETY": "PASS"
+  },
+  "board": {
+    "officialPickCount": 5,
+    "valueCandidateCount": 14,
+    "watchlistCount": 23,
+    "blockedCount": 0,
+    "totalBoardRows": 42,
+    "nativeValueCount": 386,
+    "topPick": {
+      "game_pk": 823904,
+      "game_date": "2026-09-05",
+      "start_time": "2026-09-06T01:10:00+00:00",
+      "home_team": "baseball_mlb:mlb:sportsdataio:team:1",
+      "away_team": "baseball_mlb:mlb:sportsdataio:team:35",
+      "side": "AWAY",
+      "market": "MONEYLINE",
+      "status": "OFFICIAL_PICK",
+      "status_rank": 1,
+      "board_rank": 1,
+      "value_score": 78.095,
+      "best_book": "betrivers",
+      "bookmaker_name": "BetRivers",
+      "american_odds": 185,
+      "model_probability": 0.43541338225,
+      "consensus_probability": 0.353477765108324,
+      "consensus_edge": 0.081935617141676,
+      "unit_ev": 0.2409281394125,
+      "book_count": 11,
+      "market_dispersion": 0.020283964718561,
+      "market_freshness": "FRESH",
+      "starter_status": "PROBABLE",
+      "risk_flags": [
+        "PROBABLE_STARTER",
+        "MODERATE_MARKET_DISPERSION",
+        "EXTREME_PRICE"
+      ],
+      "blocker_codes": [],
+      "why": [
+        "Model probability exceeds market consensus by 8.2 percentage points.",
+        "Best current price is available at betrivers.",
+        "Best-price unit EV is 24.1%.",
+        "11 books support the current market view.",
+        "Starter is probable, so the row carries an explicit risk flag."
+      ],
+      "risk_explanation": [
+        "Starter is probable rather than confirmed.",
+        "Books disagree enough to mark market dispersion as moderate.",
+        "The best price is in a more volatile plus-money range."
+      ],
+      "blocker_explanation": [],
+      "factor_edge": [
+        {
+          "family": "market_consensus",
+          "direction": "supports_pick",
+          "label": "Market consensus"
+        },
+        {
+          "family": "market_dispersion",
+          "direction": "supports_pick",
+          "label": "Market dispersion"
+        },
+        {
+          "family": "starter_certainty",
+          "direction": "adds_risk",
+          "label": "Starter certainty"
+        },
+        {
+          "family": "team_form_strength",
+          "direction": "context_only",
+          "label": "Team form / strength"
+        },
+        {
+          "family": "starter_context",
+          "direction": "context_only",
+          "label": "Starter context"
+        },
+        {
+          "family": "bullpen_context",
+          "direction": "context_only",
+          "label": "Bullpen context"
+        },
+        {
+          "family": "offense_context",
+          "direction": "context_only",
+          "label": "Offense context"
+        },
+        {
+          "family": "matchup_context",
+          "direction": "context_only",
+          "label": "Matchup context"
+        },
+        {
+          "family": "first_inning_context",
+          "direction": "context_only",
+          "label": "First-inning context"
+        }
+      ],
+      "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+      "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+      "value_evaluation_id": "ac27f633-b396-43ac-a0a2-b9baafb51247",
+      "official_pick_identity": "6767ea71f01ebb06183a2ec8cf1db371571074e19882e27fc8438aef0e4f6b21",
+      "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+      "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+      "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+      "decision_at": "2026-09-05T21:55:01.709+00:00"
+    }
+  },
+  "navigationPlan": {
+    "recommendation": "DIRECT_ROUTE_ONLY_FIRST_RELEASE",
+    "navigationEntry": "SEPARATE_AUTHORIZATION_AND_CERTIFICATION_REQUIRED",
+    "MLB_02Q_R3_NAV_ACTIVATION_POLICY": "READY",
+    "MLB_02Q_R3_MINIMAL_ACTIVATION_SCOPE": "READY"
+  },
+  "dataContract": {
+    "providerIndependence": "PASS",
+    "readOnlyPersistedState": "PASS",
+    "noOddsRefresh": true,
+    "noOfficialPickRecompute": true,
+    "MLB_02Q_R3_ACTIVATION_PROVIDER_INDEPENDENCE": "PASS",
+    "MLB_02Q_R3_ACTIVATION_READ_ONLY_DATA_CONTRACT": "PASS"
+  },
+  "security": {
+    "secretSafety": "PASS",
+    "writeSurface": "NONE",
+    "MLB_02Q_R3_GATE_ON_SECRET_SAFETY": "PASS",
+    "MLB_02Q_R3_GATE_ON_WRITE_SURFACE": "NONE"
+  },
+  "rollback": {
+    "reversionTest": {
+      "httpStatus": 200,
+      "failClosed": true,
+      "boardExposure": "NO"
+    },
+    "MLB_02Q_R3_GATE_OFF_REVERSION_TEST": "PASS"
+  },
+  "readbackContract": {
+    "checklist": [
+      "production commit",
+      "gate state",
+      "route HTTP/render state",
+      "board counts",
+      "top pick",
+      "navigation state",
+      "provider calls",
+      "DML/DDL",
+      "secret safety"
+    ],
+    "MLB_02Q_R3_ACTIVATION_READBACK_CONTRACT": "READY"
+  },
+  "boundaries": {
+    "officialPickWrites": 0,
+    "nativeValueWrites": 0,
+    "marketWrites": 0,
+    "predictionWrites": 0,
+    "modelWrites": 0,
+    "rawFeatureWrites": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "productionEnvMutations": 0,
+    "automation": "OFF",
+    "cronChanges": 0,
+    "MLB_02Q_R3_PRODUCTION_DML": 0,
+    "MLB_02Q_R3_PRODUCTION_DDL": 0,
+    "MLB_02Q_R3_PROVIDER_CALLS": 0,
+    "MLB_02Q_R3_PRODUCTION_ENV_MUTATIONS": 0,
+    "MLB_02Q_R3_AUTOMATION_STATE": "OFF"
+  },
+  "readiness": {
+    "MLB_DATA_02Q_R4_VALUE_BOARD_ACTIVATION_EXECUTION_READY": "YES",
+    "MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY": "NO"
+  },
+  "validators": {
+    "dedicated": "scripts/mlb-data-02q-r3-value-board-activation-prep-validate.mjs",
+    "inherited": "SEE_RUN_LOG"
+  },
+  "humanReadableAudit": {
+    "path": "docs/CERTIFICATION/mlb-data-02q-r3-value-board-activation-prep-audit.md",
+    "title": "MLB VALUE BOARD ACTIVATION PREP AUDIT",
+    "productionGateStillOff": true,
+    "noPublicActivationPerformed": true
+  }
+}
