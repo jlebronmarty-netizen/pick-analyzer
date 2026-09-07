@@ -19,6 +19,7 @@ on:
 permissions:
   contents: read
   statuses: read
+  id-token: write
 
 jobs:
   validate:
@@ -91,12 +92,23 @@ jobs:
           }
           NODE
 
+      - name: Mint GitHub OIDC token for protected preview
+        id: vercel_oidc
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
       - name: Verify zero-credit preview preflight
         id: runtime_preflight
         if: github.event_name == 'push'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.vercel_oidc.outputs.token }}
         run: |
           set -euo pipefail
 
@@ -125,6 +137,7 @@ jobs:
           http_code="$(curl -sS -L \
             --connect-timeout 10 \
             --max-time 45 \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
             -o "$response_file" \
             -w '%{http_code}' \
             "${MLB_PREVIEW_URL}/api/mlb/player-props/preflight?maximumEvents=1")"
