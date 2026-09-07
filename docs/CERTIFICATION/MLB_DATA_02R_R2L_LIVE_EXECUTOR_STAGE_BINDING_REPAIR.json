@@ -1,0 +1,166 @@
+{
+  "generatedAt": "2026-09-07T23:43:35.572Z",
+  "project": "MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR",
+  "certificationVerdict": "MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR_CERTIFIED",
+  "priorPackageSha": "8541e8bc3c899b9b01a1b96dfb1a196c8e0e016b",
+  "packageSha": "8541e8bc3c899b9b01a1b96dfb1a196c8e0e016b",
+  "entrypoint": {
+    "path": "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs",
+    "cliArgs": "--execute-current-slate --run-id <run_id>",
+    "envFlag": "MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED=YES",
+    "orchestratorFunction": "runR2BExecutableEntrypoint",
+    "wrapperModule": "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs",
+    "r2hModule": "scripts/mlb-data-02r-r2h-full-dry-integration.mjs",
+    "r2iLiveModule": "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs",
+    "previousPlaceholderSource": "runCurrentSlateStage EXECUTE_CURRENT_SLATE branch",
+    "previousEmptyEligibleGamePkSource": "R2A wrapper-mode run freeze was created before schedule normalization"
+  },
+  "gates": {
+    "MLB_02R_R2L_ENTRYPOINT_CALL_CHAIN": "COMPLETE",
+    "MLB_02R_R2L_PLACEHOLDER_REFERENCE_INVENTORY": "COMPLETE",
+    "MLB_02R_R2L_R2I_LIVE_STAGE_INVENTORY": "PASS",
+    "MLB_02R_R2L_EXECUTABLE_BINDING_REPAIR": "PASS",
+    "MLB_02R_R2L_FROZEN_GAME_SET_HANDOFF": "PASS",
+    "MLB_02R_R2L_AUTH_HANDOFF": "PASS",
+    "MLB_02R_R2L_PROVIDER_HANDOFF": "PASS",
+    "MLB_02R_R2L_REPOSITORY_HANDOFF": "PASS",
+    "MLB_02R_R2L_FULL_LIVE_BRANCH_SIMULATION": "PASS",
+    "MLB_02R_R2L_DRY_REGRESSION": "PASS",
+    "MLB_02R_R2L_ACTIVE_PLACEHOLDER_COUNT": 0,
+    "MLB_02R_R2L_ENTRYPOINT_NEGATIVE_TESTS": "PASS",
+    "MLB_02R_R2L_BUSINESS_LOGIC_PARITY": "PASS",
+    "MLB_02R_R2L_EXECUTION_GUARD_PARITY": "PASS",
+    "MLB_02R_R2L_LIVE_FAIL_CLOSED": "PASS"
+  },
+  "placeholderInventory": [
+    {
+      "file": "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs",
+      "classification": "LEGACY_BACKWARD_COMPATIBILITY",
+      "activeR2BPath": false
+    },
+    {
+      "file": "docs/CERTIFICATION/MLB_DATA_02R_R2E_COMPONENT_INTERFACE_REFACTOR_PLAN_AUDIT.md",
+      "classification": "DOC_ONLY",
+      "activeR2BPath": false
+    },
+    {
+      "file": "docs/CERTIFICATION/MLB_DATA_02R_R2E_COMPONENT_INTERFACE_REFACTOR_PLAN.json",
+      "classification": "DOC_ONLY",
+      "activeR2BPath": false
+    }
+  ],
+  "r2iLiveStageInventory": {
+    "01 schedule": "REAL_PROVIDER_CLIENT",
+    "02 native": "REAL_PRODUCTION_REPOSITORY",
+    "03 raw Statcast": "REAL_PROVIDER_CLIENT_AND_REAL_PRODUCTION_REPOSITORY",
+    "04 features": "REAL_PRODUCTION_REPOSITORY",
+    "05 starters": "PURE_SERVICE",
+    "06 inference": "PURE_SERVICE",
+    "07 predictions": "REAL_PRODUCTION_REPOSITORY",
+    "08 odds": "REAL_PROVIDER_CLIENT",
+    "09 markets": "REAL_PRODUCTION_REPOSITORY",
+    "10 value": "REAL_PRODUCTION_REPOSITORY",
+    "11 policy": "PURE_SERVICE",
+    "12 Official Picks": "REAL_PRODUCTION_REPOSITORY",
+    "13 board": "READ_ONLY_PRODUCTION_REPOSITORY"
+  },
+  "bindingRootCause": "LEGACY_WRAPPER_BRANCH",
+  "liveSimulation": {
+    "mode": "LIVE_EXECUTE",
+    "stages": 13,
+    "eligibleGamePks": [
+      700001
+    ],
+    "activePlaceholderCount": 0,
+    "writeResults": [
+      {
+        "table": "pick2_mlb_games",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_players",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_raw_mlb_statcast_pitches",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_feature_snapshots",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_team_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_pitcher_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_bullpen_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_batter_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_matchup_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_first_inning_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_game_predictions",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_market_event_mappings",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_market_price_observations",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_market_value_evaluations",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_official_picks",
+        "inserted": 0
+      }
+    ],
+    "providerLedger": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 1,
+      "THE_ODDS_API": 1
+    }
+  },
+  "dryRegression": {
+    "stages": 13,
+    "providerCalls": 0,
+    "productionDml": 0
+  },
+  "safety": {
+    "realProviderCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "predictionWrites": 0,
+    "marketWrites": 0,
+    "valueWrites": 0,
+    "officialPickWrites": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlementWrites": 0,
+    "liveRefreshExecuted": false
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY": "YES_AFTER_PUBLICATION_ALIGNMENT_AND_DIRECT_AUTHORIZATION"
+  },
+  "errors": []
+}

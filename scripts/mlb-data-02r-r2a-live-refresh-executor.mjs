@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 import { createClient } from '@supabase/supabase-js'
 import {
   R2D_FAIL_CLOSED_MESSAGE,
@@ -13,7 +14,13 @@ import {
   wrapperNames,
 } from './mlb-data-02r-r2d-current-slate-wrappers.mjs'
 import { runR2HFullDryIntegration } from './mlb-data-02r-r2h-full-dry-integration.mjs'
-import { createTestRepository, runR2ILiveExecution } from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
+import {
+  R2I_AUTH_ERROR,
+  R2I_LIVE_TARGETS,
+  createSupabaseProductionRepository,
+  createTestRepository,
+  runR2ILiveExecution,
+} from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
 
 const BASE_URL = 'https://pick-analyzer.vercel.app'
 const MODEL_VERSION = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
@@ -32,13 +39,14 @@ const execute = args.has('--execute-current-slate') || args.has('--execute')
 const dryRun = args.has('--dry-run') || !execute
 const resumeFrom = valueAfter('--resume-from')
 const suppliedRunId = valueAfter('--run-id')
+const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 
-if (execute && process.env.MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED !== 'YES') {
+if (isDirectExecution && execute && process.env.MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED !== 'YES') {
   console.error(R2D_FAIL_CLOSED_MESSAGE)
   process.exit(1)
 }
 
-if (args.has('--r2h-full-dry-integration')) {
+if (isDirectExecution && args.has('--r2h-full-dry-integration')) {
   runR2HFullDryIntegration({ mode: 'DRY_RUN' })
     .then((artifact) => {
       console.log(JSON.stringify({
@@ -63,7 +71,7 @@ if (args.has('--r2h-full-dry-integration')) {
     })
 }
 
-if (args.has('--r2i-live-branch-simulation')) {
+if (isDirectExecution && args.has('--r2i-live-branch-simulation')) {
   const authorization = {
     authorized: true,
     execution_package_sha: localPackageShaForSimulation(),
@@ -127,6 +135,60 @@ if (args.has('--r2i-live-branch-simulation')) {
       }, null, 2))
       process.exit(1)
     })
+}
+
+function buildLiveAuthorization({ executionPackageSha, runId, dmlCaps: caps = null } = {}) {
+  return {
+    authorized: true,
+    execution_package_sha: executionPackageSha,
+    run_id: runId,
+    providerCaps: {
+      MLB_OFFICIAL: { allowed: true, maxCalls: 1 },
+      STATCAST: { allowed: true, maxCalls: '0_TO_FROZEN_GAME_SET' },
+      THE_ODDS_API: { allowed: true, maxCalls: 1, sport: 'baseball_mlb', market: 'h2h', oddsFormat: 'american' },
+      BALLDONTLIE: { allowed: false, maxCalls: 0 },
+      SPORTSDATAIO: { allowed: false, maxCalls: 0 },
+      OTHER: { allowed: false, maxCalls: 0 },
+    },
+    dmlCaps: caps ?? {
+      nativeGames: null,
+      nativePlayers: null,
+      rawStatcast: null,
+      features: { snapshots: null, team: null, starter: null, bullpen: null, batter: null, matchup: null, firstInning: null },
+      predictions: null,
+      marketMappings: null,
+      marketObservations: null,
+      nativeValues: null,
+      officialPicks: null,
+    },
+    authorizedDmlTargets: Object.values(R2I_LIVE_TARGETS),
+    ddlAllowed: false,
+    settlementAllowed: false,
+    automationAllowed: false,
+  }
+}
+
+export async function runR2BExecutableEntrypoint({
+  mode = 'DRY_RUN',
+  authorization = null,
+  providers = {},
+  repository = createTestRepository(),
+  runId = 'mlb-02r-r2b-executable',
+  executionPackageSha = localPackageShaForSimulation(),
+} = {}) {
+  if (mode === 'LIVE_EXECUTE') {
+    if (!authorization) throw new Error(R2I_AUTH_ERROR)
+    return runR2ILiveExecution({
+      mode: 'LIVE_EXECUTE',
+      authorization,
+      providers,
+      repository,
+      runId,
+      executionPackageSha,
+    })
+  }
+  if (mode === 'DRY_RUN') return runR2HFullDryIntegration({ mode: 'DRY_RUN' })
+  throw new Error(`INVALID_R2B_EXECUTABLE_MODE:${mode}`)
 }
 
 function localPackageShaForSimulation() {
@@ -408,6 +470,103 @@ async function main() {
   if (incompatible.length) throw new Error(`DB_CONTRACT_INCOMPATIBLE:${incompatible.map((entry) => entry.object).join(',')}`)
   if (championReadback.state !== 'PASS') throw new Error('MODEL_CONTRACT_PREFLIGHT_FAILED')
 
+  if (execute) {
+    const schemaFingerprint = Object.fromEntries(dbCompatibility.map((entry) => [entry.object, entry]))
+    const authorization = buildLiveAuthorization({ executionPackageSha, runId })
+    const liveArtifact = await runR2BExecutableEntrypoint({
+      mode: 'LIVE_EXECUTE',
+      authorization,
+      runId,
+      executionPackageSha,
+      repository: createSupabaseProductionRepository({ client: db, schemaFingerprint }),
+      providers: {
+        oddsApiKey: process.env.THE_ODDS_API_KEY ?? process.env.ODDS_API_KEY,
+      },
+    })
+    const activePlaceholderCount = liveArtifact.stages.filter((stage) => String(stage.status).includes('WRAPPER_READY_REQUIRES_STAGE_IMPLEMENTATION')).length
+    const artifact = {
+      generatedAt: now.toISOString(),
+      certificationVerdict: activePlaceholderCount === 0
+        ? 'MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_COMPLETED'
+        : 'MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_BLOCKED_WRAPPER_READY_REQUIRES_STAGE_IMPLEMENTATION',
+      executionMode: 'EXECUTE_CURRENT_SLATE',
+      liveExecutorPath: 'scripts/mlb-data-02r-r2a-live-refresh-executor.mjs',
+      r2lBinding: {
+        state: activePlaceholderCount === 0 ? 'R2I_LIVE_STAGE_EXECUTOR_BOUND' : 'PLACEHOLDER_STILL_ACTIVE',
+        orchestrator: 'runR2BExecutableEntrypoint',
+        downstream: 'runR2ILiveExecution',
+        activePlaceholderCount,
+      },
+      repository: {
+        branch: git(['branch', '--show-current']),
+        localHead,
+        originMain,
+        worktreeStatus: git(['status', '--short']),
+      },
+      runFreeze: liveArtifact.runContext,
+      dbPreflight: {
+        MLB_02R_R2A_DB_PREFLIGHT: 'READY',
+        manifest,
+        digest: dbContractDigest,
+        compatibility: dbCompatibility,
+        incompatible,
+      },
+      modelPreflight: {
+        MLB_02R_R2A_MODEL_PREFLIGHT: 'READY',
+        champion: MODEL_VERSION,
+        featureSet: FEATURE_SET,
+        featureCount: FEATURE_COUNT,
+        modelArtifactDigest: MODEL_ARTIFACT_DIGEST,
+        readback: championReadback,
+      },
+      stages: liveArtifact.stages,
+      writeResults: liveArtifact.writeResults,
+      schemaGuards: liveArtifact.schemaGuards,
+      providerLedger: liveArtifact.providerLedger,
+      safety: liveArtifact.safety,
+      boundaries: {
+        providerCalls: liveArtifact.safety.realProviderCalls,
+        productionDml: liveArtifact.safety.productionDml,
+        productionDdl: liveArtifact.safety.productionDdl,
+        automationChanges: liveArtifact.safety.automationChanges,
+        cronChanges: liveArtifact.safety.cronChanges,
+        settlement: 'EXCLUDED',
+      },
+    }
+    fs.mkdirSync(path.dirname(ARTIFACT_PATH), { recursive: true })
+    fs.writeFileSync(ARTIFACT_PATH, `${JSON.stringify(artifact, null, 2)}\n`)
+    fs.writeFileSync(AUDIT_PATH, `# MLB Live Manual Refresh Executor Audit
+
+Certification: \`${artifact.certificationVerdict}\`
+
+- Executor: \`${artifact.liveExecutorPath}\`
+- Mode: \`EXECUTE_CURRENT_SLATE\`
+- Execution package SHA: \`${executionPackageSha}\`
+- Run ID: \`${runId}\`
+- Orchestrator: \`runR2BExecutableEntrypoint -> runR2ILiveExecution\`
+- Active placeholder count: ${activePlaceholderCount}
+- Real provider calls: ${liveArtifact.safety.realProviderCalls}
+- Production DML: ${liveArtifact.safety.productionDml}
+- Production DDL: ${liveArtifact.safety.productionDdl}
+- Automation changes: ${liveArtifact.safety.automationChanges}
+- Cron changes: ${liveArtifact.safety.cronChanges}
+
+The R2B executable live branch now routes to the R2I live stage orchestrator instead of the R2D placeholder wrapper loop. Provider and DML execution remain bounded by the run-scoped authorization, provider caps, DML caps, schema guards and stage conflict checks.
+`)
+    console.log(JSON.stringify({
+      certificationVerdict: artifact.certificationVerdict,
+      liveExecutorPath: artifact.liveExecutorPath,
+      runId,
+      r2lBinding: artifact.r2lBinding.state,
+      activePlaceholderCount,
+      stages: liveArtifact.stages.length,
+      providerCalls: liveArtifact.safety.realProviderCalls,
+      productionDml: liveArtifact.safety.productionDml,
+      productionDdl: liveArtifact.safety.productionDdl,
+    }, null, 2))
+    return
+  }
+
   const budget = providerBudget()
   assertProviderBudget(budget)
   const matrix = stages(runDate)
@@ -643,7 +802,7 @@ R2D thin-wrapper repair is active for current-slate execution: broad component c
   }, null, 2))
 }
 
-if (!args.has('--r2h-full-dry-integration') && !args.has('--r2i-live-branch-simulation')) {
+if (isDirectExecution && !args.has('--r2h-full-dry-integration') && !args.has('--r2i-live-branch-simulation')) {
   main().catch((error) => {
     console.error(JSON.stringify({
       certificationVerdict: 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_BLOCKED',

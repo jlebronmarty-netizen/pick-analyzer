@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 18:25:00Z
+Last updated: 2026-09-07 19:40:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2L Live Executor Stage Binding Repair
+
+- MLB-DATA-02R-R2L is locally certified as `MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR_CERTIFIED`. It repairs the actual R2B executable `--execute-current-slate` path so authorized live execution routes through `runR2BExecutableEntrypoint -> runR2ILiveExecution` instead of the R2D wrapper-placeholder loop.
+- The accepted root cause was `LEGACY_WRAPPER_BRANCH`: the entrypoint performed DB/model preflight successfully, then iterated scope wrappers whose live-mode status was `WRAPPER_READY_REQUIRES_STAGE_IMPLEMENTATION`, leaving `eligible_game_pks` empty and no real stage work executed.
+- R2L preserves the existing R2I/R2F/R2G business logic and does not add a second pipeline. Full live-branch simulation uses injected MLB Official, Statcast and The Odds API test clients plus an injected repository, proving 13 stages traverse with active placeholder count 0 and frozen eligible game handoff populated from schedule parser output.
+- Boundaries held: real provider calls 0, The Odds API real calls 0, production DML 0, production DDL 0, Official Pick writes 0, automation changes 0, cron changes 0 and settlement excluded. Live refresh was not executed in R2L.
+- After publication and production alignment of this package, `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY = YES_AFTER_PUBLICATION_ALIGNMENT_AND_DIRECT_AUTHORIZATION`.
 
 ## 2026-09-07 MLB-DATA-02R-R2K Starter Live Target Schema Guard Repair
 
