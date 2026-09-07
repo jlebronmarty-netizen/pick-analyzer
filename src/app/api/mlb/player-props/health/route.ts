@@ -9,7 +9,14 @@ export async function GET(request: NextRequest) {
     const date = request.nextUrl.searchParams.get('date')
     const market = request.nextUrl.searchParams.get('market')
     const [comparison, ingestion] = await Promise.all([
-      getMlbPlayerPropHealth({ date, market }),
+      getMlbPlayerPropHealth({ date, market }).catch((error) => ({
+        success: false,
+        mode: 'mlb_player_prop_comparison_health_degraded',
+        generatedAt: new Date().toISOString(),
+        comparisonHealthAvailable: false,
+        comparisonError: errorMessage(error, 'MLB player prop comparison health unavailable'),
+        blockers: ['PLAYER_PROP_COMPARISON_HEALTH_READ_FAILED'],
+      })),
       getMlbPlayerPropRecentIngestionHealth(),
     ])
     return apiOk({ ...comparison, ingestion }, id)
