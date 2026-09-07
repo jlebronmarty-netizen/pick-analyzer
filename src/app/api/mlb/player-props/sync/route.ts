@@ -13,7 +13,7 @@ function syncSecret() {
 function authorized(request: NextRequest) {
   const secret = syncSecret()
   if (!secret) return false
-  return request.headers.get('authorization') === `Bearer ${secret}` || request.nextUrl.searchParams.get('secret') === secret
+  return request.headers.get('authorization') === `Bearer ${secret}`
 }
 
 function provider(value: unknown): MlbPlayerPropIngestionProvider | null {
