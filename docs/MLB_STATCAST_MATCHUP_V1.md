@@ -8,7 +8,7 @@ This layer extends the permanent Statcast foundation with read-only matchup evid
 
 ## Production data surfaces
 
-The following `security_invoker` views are active in Supabase and restricted to `service_role`:
+The following `security_invoker` source views are active in Supabase and restricted to `service_role`:
 
 - `mlb_statcast_pitcher_hand_split_summary`
 - `mlb_statcast_batter_hand_split_summary`
@@ -18,7 +18,9 @@ The following `security_invoker` views are active in Supabase and restricted to 
 - `mlb_statcast_league_pitch_type_summary`
 - `mlb_statcast_pitcher_batter_summary`
 
-2026 validation counts at creation:
+Request-time reads use corresponding service-role-only materialized relations with `_mv` suffix. The source views remain available for validation and research; `pick2_raw_mlb_statcast_pitches` remains the single raw source of truth.
+
+2026 validation counts:
 
 - pitcher hand splits: 1,692
 - batter hand splits: 1,285
@@ -104,6 +106,22 @@ xwOBA suppression compares pitcher-allowed or opponent-produced xwOBA with the s
 
 These are diagnostic deltas, not probabilities, prices, expected value or recommendations.
 
+## Runtime contract
+
+The production migration ledger contains:
+
+- `20260907035256_mlb_statcast_matchup_views_v1`
+- `20260907035833_mlb_statcast_runtime_performance_v1`
+- `20260907040410_mlb_statcast_team_runtime_rollups_v1`
+- `20260907041118_mlb_statcast_matchup_runtime_rollups_v1`
+- `20260907041404_mlb_statcast_matchup_runtime_rollups_v1`
+
+The `04:11:18` migration materializes the seven matchup surfaces. The `04:14:04` follow-up records stable refresh entrypoints and adds `refresh_mlb_statcast_all_analytics()` for post-ingest refresh of general and matchup rollups.
+
+A reproduced PHI-vs-RHP team/pitch-type read that previously required roughly 9.6 seconds is served by an indexed materialized relation in approximately 0.139 ms SQL execution time (`EXPLAIN ANALYZE`, 16 result rows).
+
+No request-time Baseball Savant/provider call is performed.
+
 ## Validation
 
 Run:
@@ -112,7 +130,15 @@ Run:
 npm run mlb:statcast:matchup:validate
 ```
 
-The validator requires all seven views to be populated, 30 MLB teams in team-vs-pitch-type data, both RHP and LHP league baselines and a valid multi-game pitcher-vs-team sample.
+The validator reads the bounded materialized surfaces and requires all seven to be populated, 30 MLB teams in team-vs-pitch-type data, both RHP and LHP league baselines and a valid multi-game pitcher-vs-team sample.
+
+After each successful raw Statcast ingest, the service role can execute:
+
+```text
+refresh_mlb_statcast_all_analytics()
+```
+
+to refresh coverage/team runtime rollups and the matchup materialized surfaces.
 
 ## Activation boundary
 
