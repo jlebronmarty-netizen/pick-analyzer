@@ -1,8 +1,17 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
-import { execFileSync, spawnSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { createClient } from '@supabase/supabase-js'
+import {
+  R2D_FAIL_CLOSED_MESSAGE,
+  R2D_SCOPE_CERTIFICATION,
+  buildPrewriteScopeArtifact,
+  createFrozenSlateContext,
+  runCurrentSlateStage,
+  stageWrapperBindings,
+  wrapperNames,
+} from './mlb-data-02r-r2d-current-slate-wrappers.mjs'
 
 const BASE_URL = 'https://pick-analyzer.vercel.app'
 const MODEL_VERSION = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
@@ -23,7 +32,7 @@ const resumeFrom = valueAfter('--resume-from')
 const suppliedRunId = valueAfter('--run-id')
 
 if (execute && process.env.MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED !== 'YES') {
-  console.error('LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION')
+  console.error(R2D_FAIL_CLOSED_MESSAGE)
   process.exit(1)
 }
 
@@ -191,21 +200,7 @@ function dmlCaps() {
 }
 
 function liveComponentBindings() {
-  return {
-    '01 schedule sync': { adapter: 'internal MLB Official schedule fetcher', liveCallable: true, provider: 'MLB_OFFICIAL' },
-    '02 native reconciliation': { command: ['node', ['scripts/mlb-data-02h-2026-current-foundation.mjs', '--execute-ingest', '--r2-resume']], liveCallable: true },
-    '03 raw Statcast reconciliation': { command: ['node', ['scripts/mlb-data-02h-2026-current-foundation.mjs', '--execute-ingest', '--r2-resume']], liveCallable: true, provider: 'STATCAST' },
-    '04 feature refresh': { command: ['node', ['scripts/mlb-data-02h-2026-current-foundation.mjs', '--execute-features']], liveCallable: true },
-    '05 starter readiness': { adapter: 'executor starter classifier over frozen schedule/native metadata', liveCallable: true },
-    '06 moneyline inference': { command: ['node', ['scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs', '--write-artifact']], liveCallable: true },
-    '07 prediction persistence': { command: ['node', ['scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs', '--execute']], liveCallable: true },
-    '08 market acquisition': { command: ['node', ['scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs', '--write-artifact']], liveCallable: true, provider: 'THE_ODDS_API' },
-    '09 market persistence': { command: ['node', ['scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs', '--execute', '--write-artifact']], liveCallable: true },
-    '10 value evaluation': { command: ['node', ['scripts/mlb-data-02o-r3-native-value-persistence.mjs', '--execute']], liveCallable: true },
-    '11 Official Pick policy': { command: ['node', ['scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs']], liveCallable: true },
-    '12 Official Pick persistence': { command: ['node', ['scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs', '--execute-official-picks']], liveCallable: true },
-    '13 Value Board readback': { adapter: 'read-only /mlb-value-board persisted board readback', liveCallable: true },
-  }
+  return stageWrapperBindings()
 }
 
 function stages(runDate) {
@@ -286,16 +281,8 @@ function assertProviderBudget(budget) {
   }
 }
 
-function runBoundComponent(binding) {
-  if (!execute) return { status: 'DRY_RUN_NOT_INVOKED' }
-  if (process.env.MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION !== 'YES') {
-    return { status: 'LIVE_COMPONENT_INVOCATION_HELD_FOR_EXECUTION_PHASE' }
-  }
-  if (!binding?.command) return { status: 'INTERNAL_ADAPTER_READY_NOT_SPAWNED_BY_DRY_CERTIFICATION' }
-  const [command, commandArgs] = binding.command
-  const result = spawnSync(command, commandArgs, { encoding: 'utf8', stdio: 'pipe' })
-  if (result.status !== 0) throw new Error(`COMPONENT_FAILED:${command} ${commandArgs.join(' ')}:${result.stderr || result.stdout}`)
-  return { status: 'PASS', stdoutDigest: digest(result.stdout), stderrDigest: digest(result.stderr) }
+function runBoundComponent(stage, context) {
+  return runCurrentSlateStage({ context, stage: stage.stage, mode: dryRun ? 'DRY_RUN' : 'EXECUTE_CURRENT_SLATE' })
 }
 
 async function main() {
@@ -323,6 +310,23 @@ async function main() {
   const budget = providerBudget()
   assertProviderBudget(budget)
   const matrix = stages(runDate)
+  const frozenContext = createFrozenSlateContext({
+    run_id: runId,
+    run_date: runDate,
+    run_as_of: now.toISOString(),
+    execution_package_sha: executionPackageSha,
+    eligible_game_pks: [],
+    blocked_game_pks: [],
+    game_start_times: {},
+    starter_states: {},
+    db_contract_digest: dbContractDigest,
+    model_artifact_digest: MODEL_ARTIFACT_DIGEST,
+    feature_contract_digest: digest({ featureSet: FEATURE_SET, featureCount: FEATURE_COUNT, modelVersion: MODEL_VERSION }),
+    provider_budget: budget,
+    per_stage_dml_caps: dmlCaps(),
+    checkpoint_state: matrix.map((stage) => ({ stage: stage.stage, checkpoint: stage.checkpoint, status: 'PENDING' })),
+    live_authorization: execute,
+  })
   const completed = []
   let checkpointPath = null
   let resumeStarted = !resumeFrom
@@ -332,7 +336,7 @@ async function main() {
       continue
     }
     resumeStarted = true
-    const component = runBoundComponent(stage.componentBinding)
+    const component = runBoundComponent(stage, frozenContext)
     const status = dryRun ? 'DRY_RUN_PASS' : component.status
     checkpointPath = writeCheckpoint(runId, stage, status)
     completed.push({ ...stage, status, component })
@@ -344,9 +348,17 @@ async function main() {
     run_date: runDate,
     run_as_of: now.toISOString(),
     execution_package_sha: executionPackageSha,
+    eligible_game_pks: frozenContext.eligible_game_pks,
+    blocked_game_pks: frozenContext.blocked_game_pks,
+    game_start_times: frozenContext.game_start_times,
+    starter_states: frozenContext.starter_states,
     db_contract_digest: dbContractDigest,
     model_artifact_digest: MODEL_ARTIFACT_DIGEST,
     feature_contract_digest: digest({ featureSet: FEATURE_SET, featureCount: FEATURE_COUNT, modelVersion: MODEL_VERSION }),
+    provider_budget: budget,
+    per_stage_dml_caps: dmlCaps(),
+    checkpoint_state: frozenContext.checkpoint_state,
+    frozen_context_digest: frozenContext.frozen_context_digest,
     pipeline_version: PIPELINE_VERSION,
     production_web_sha_start: version.gitCommit,
     MLB_02R_R2A_RUN_FREEZE_IMPLEMENTATION: 'PASS',
@@ -400,7 +412,10 @@ async function main() {
     },
     guards: {
       MLB_02R_R2A_EXECUTION_GUARD: 'PASS',
-      failClosedMessage: 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION',
+      failClosedMessage: R2D_FAIL_CLOSED_MESSAGE,
+      MLB_02R_R2D_BROAD_GLOBAL_HOLD_ISOLATED: 'PASS',
+      broadGlobalHoldVariable: 'MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION',
+      broadGlobalHoldUsedByR2Executor: false,
       MLB_02R_R2A_STARTED_GAME_GUARD: 'PASS',
       scheduleClassifications: ['PREGAME_SAFE', 'STARTED_IN_PROGRESS', 'FINAL', 'POSTPONED', 'SUSPENDED', 'OTHER_BLOCKED'],
       noValidSlateGate: 'PREGAME_SAFE=0 stops before Statcast/Odds/DML',
@@ -422,6 +437,16 @@ async function main() {
       MLB_02R_R2A_PICK_PERSISTENCE_STAGE: 'READY',
       MLB_02R_R2A_BOARD_READBACK_STAGE: 'READY',
       rows: completed,
+    },
+    r2dThinWrappers: {
+      certification: R2D_SCOPE_CERTIFICATION,
+      wrapperModule: 'scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs',
+      wrappersImplemented: wrapperNames,
+      legacyBroadCommandInvocation: 'DISABLED_FOR_R2_CURRENT_SLATE',
+      prewriteScopeArtifact: buildPrewriteScopeArtifact(frozenContext, []),
+      R2D_CURRENT_SLATE_SCOPE_WRAPPERS: 'PASS',
+      R2D_FROZEN_CONTEXT_CONTRACT: 'PASS',
+      R2D_PREWRITE_CONTAINMENT_ARTIFACT_READY: 'PASS',
     },
     checkpointResume: {
       MLB_02R_R2A_CHECKPOINT_RESUME: 'PASS',
@@ -500,6 +525,8 @@ REAL EXECUTOR IMPLEMENTED.
 - Cron changes: 0
 
 The executor defaults to dry-run, records run-freeze/checkpoint/audit state, validates the certified database/model contracts, declares bounded provider/DML caps, and fails closed for live execution unless \`MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED=YES\` is present in a future authorized execution phase.
+
+R2D thin-wrapper repair is active for current-slate execution: broad component command spawning is disabled, \`MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION\` is not read by this executor, and production-capable stages must pass frozen context, game_pk containment, as-of, cap and checkpoint guards before any separately authorized future execution.
 `)
 
   console.log(JSON.stringify({

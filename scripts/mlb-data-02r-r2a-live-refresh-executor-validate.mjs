@@ -21,7 +21,7 @@ const dry = spawnSync(process.execPath, [scriptPath, '--dry-run'], { encoding: '
 check('dry run exits zero', dry.status === 0)
 
 const blocked = spawnSync(process.execPath, [scriptPath, '--execute-current-slate'], { encoding: 'utf8' })
-check('execute without auth fails closed', blocked.status !== 0 && `${blocked.stdout}${blocked.stderr}`.includes('LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION'))
+check('execute without auth fails closed', blocked.status !== 0 && `${blocked.stdout}${blocked.stderr}`.includes('LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION'))
 
 check('artifact created', fs.existsSync(artifactPath))
 check('audit created', fs.existsSync(auditPath))
@@ -35,7 +35,8 @@ check('component inventory complete', artifact.componentInventory?.MLB_02R_R2A_C
 check('component files present', artifact.componentInventory.inventory.every((entry) => entry.filesPresent === true))
 check('reuse contract', artifact.reuseContract?.MLB_02R_R2A_REUSE_CONTRACT === 'PASS')
 check('live executor ready', artifact.liveExecutorPath === scriptPath)
-check('execution guard', artifact.guards?.MLB_02R_R2A_EXECUTION_GUARD === 'PASS' && artifact.guards.failClosedMessage === 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION')
+check('execution guard', artifact.guards?.MLB_02R_R2A_EXECUTION_GUARD === 'PASS' && artifact.guards.failClosedMessage === 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION')
+check('R2D broad hold isolated', artifact.guards?.MLB_02R_R2D_BROAD_GLOBAL_HOLD_ISOLATED === 'PASS' && artifact.guards.broadGlobalHoldUsedByR2Executor === false)
 check('run freeze', artifact.runFreeze?.MLB_02R_R2A_RUN_FREEZE_IMPLEMENTATION === 'PASS' && artifact.runFreeze.execution_package_sha)
 check('db preflight', artifact.dbPreflight?.MLB_02R_R2A_DB_PREFLIGHT === 'READY' && artifact.dbPreflight.incompatible.length === 0)
 check('model preflight', artifact.modelPreflight?.MLB_02R_R2A_MODEL_PREFLIGHT === 'READY' && artifact.modelPreflight.champion === 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1' && artifact.modelPreflight.featureSet === 'MLB_ML_FEATURE_SET_V1' && artifact.modelPreflight.featureCount === 76)
@@ -44,6 +45,7 @@ check('started-game guard', artifact.guards?.MLB_02R_R2A_STARTED_GAME_GUARD === 
 check('frozen game set', artifact.guards?.MLB_02R_R2A_FROZEN_GAME_SET === 'READY')
 check('dynamic caps', artifact.guards?.MLB_02R_R2A_DYNAMIC_CAP_ENGINE === 'PASS' && Object.keys(artifact.guards.dmlCaps).length >= 14)
 check('13 stages ready', artifact.stages?.rows.length === 13 && artifact.stages.rows.every((stage) => stage.dryRunReachable === true))
+check('R2D thin wrappers present', artifact.r2dThinWrappers?.R2D_CURRENT_SLATE_SCOPE_WRAPPERS === 'PASS' && artifact.r2dThinWrappers.wrappersImplemented.length === 8)
 check('native stage', artifact.stages.MLB_02R_R2A_NATIVE_STAGE === 'READY')
 check('raw stage', artifact.stages.MLB_02R_R2A_RAW_STAGE === 'READY')
 check('feature stage', artifact.stages.MLB_02R_R2A_FEATURE_STAGE === 'READY')
@@ -66,7 +68,7 @@ check('dry certification', artifact.dryCertification?.MLB_02R_R2A_LIVE_EXECUTOR_
 check('zero mutation boundary', artifact.boundaries.providerCalls === 0 && artifact.boundaries.productionDml === 0 && artifact.boundaries.productionDdl === 0 && artifact.boundaries.officialPickWrites === 0 && artifact.boundaries.cronChanges === 0)
 check('source supports flags', source.includes('--dry-run') && source.includes('--execute-current-slate') && source.includes('--resume-from') && source.includes('--run-id'))
 check('source does not keep old compatibility blocker', !source.includes('DAILY_REFRESH_EXECUTION_NOT_PERFORMED_IN_COMPATIBILITY_CERTIFICATION'))
-check('source binds certified components', source.includes('liveComponentBindings') && source.includes('mlb-data-02h-2026-current-foundation.mjs') && source.includes('mlb-data-02m-r2-fresh-market-sample-acquisition.mjs'))
+check('source binds thin wrappers', source.includes('liveComponentBindings') && source.includes('mlb-data-02r-r2d-current-slate-wrappers.mjs') && !source.includes('spawnSync') && !source.includes('process.env.MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION'))
 check('audit states live not performed', audit.includes('REAL EXECUTOR IMPLEMENTED') && audit.includes('Provider calls: 0') && audit.includes('Production DML: 0') && audit.includes('Settlement: EXCLUDED'))
 
 const combined = source + JSON.stringify(artifact) + audit + dry.stdout + dry.stderr

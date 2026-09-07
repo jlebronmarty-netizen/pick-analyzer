@@ -3935,3 +3935,11 @@ Status: `MLB_DATA_02R_R2C_SAFE_DESIGN_SPLIT_BINDING_INVENTORY_CERTIFIED`
 Result: R2C completed the read-only binding inventory and design split. The R2A executor was not modified. The design identifies broad R2A component bindings behind `MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION` and requires a separate thin-wrapper implementation before R2B live execution can be retried. Provider calls, production DML/DDL, odds calls, Official Pick writes, env changes, automation changes and cron changes were all 0.
 
 Next: authorize `MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_IMPLEMENTATION` to implement the wrapper interfaces, remove the broad global unlock dependency and validate with real non-synthetic scope tests. Do not retry R2B live refresh until R2D certifies.
+
+## MLB-DATA-02R-R2D Current-Slate Thin Wrapper Implementation
+
+Status: `MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_IMPLEMENTATION_CERTIFIED`
+
+Result: R2D adds frozen current-slate wrapper bindings for the R2 production-capable stages and patches the live-refresh executor so R2 current-slate execution cannot be unlocked through broad legacy command spawning. The old global hold is preserved for unrelated workflows but is not read by the R2 executor. The new wrappers enforce frozen game_pk scope, run_as_of parity, started-game exclusion, per-stage caps, conflict blocking and prewrite containment.
+
+Next: after publication/deployment alignment and direct in-chat R2B authorization, retry the manual current-slate refresh using the R2D wrapper-gated executor. Do not execute providers, DML, odds refresh, Official Pick changes, automation or cron from R2D itself.

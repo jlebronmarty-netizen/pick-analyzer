@@ -2966,3 +2966,9 @@ The prior certified identity state is preserved: 1,292 existing-player candidate
 MLB-DATA-02R-R2C is locally certified as `MLB_DATA_02R_R2C_SAFE_DESIGN_SPLIT_BINDING_INVENTORY_CERTIFIED` for read-only design only. The R2A live executor was audited without modification, provider calls, production DML/DDL, odds calls, Official Pick writes, env changes, automation changes or cron changes.
 
 The audit confirms the current R2A global hold `MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION` can unlock broad component commands and is not necessary for a safe R2B retry. R2B remains blocked until a separate repair implements thin frozen-current-slate wrappers, passes real non-synthetic scope tests and produces a prewrite containment artifact.
+
+## 2026-09-07 MLB-DATA-02R-R2D Current-Slate Thin Wrapper Implementation
+
+MLB-DATA-02R-R2D implements the current-slate thin wrapper layer required by R2C. The R2A executor no longer spawns broad production-capable component commands for R2 current-slate execution and no longer reads `MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION`; live execution remains fail-closed on the R2B-specific authorization boundary.
+
+The wrapper contract freezes `run_id`, `run_date`, `run_as_of`, execution package SHA, eligible and blocked `game_pk` sets, start times, starter states, DB/model/feature digests, provider budgets, per-stage DML caps and checkpoint state. Dedicated validation covers game_pk containment, started-game rejection, cap enforcement, as-of parity, conflict blocking, provider dry-run hold and prewrite containment artifacts. This phase made 0 provider calls, 0 production DML/DDL, 0 odds calls, 0 Official Pick writes, 0 environment changes, 0 automation changes and 0 cron changes. R2B live execution was not performed.

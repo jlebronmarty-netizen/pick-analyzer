@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T14:45:53.082Z",
+  "generatedAt": "2026-09-07T16:33:34.131Z",
   "certificationVerdict": "MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_CERTIFIED",
   "existingRunnerStateBefore": "RUNNER_PREPARED_DRY_RUN_CERTIFIED_FAIL_CLOSED",
   "executionMode": "DRY_RUN",
@@ -7,9 +7,9 @@
   "executionPackageStrategy": "DETACHED_OR_FROZEN_GIT_SHA_EXECUTION_PACKAGE",
   "repository": {
     "branch": "main",
-    "localHead": "f9bd1d94d7727d7d17832e181de9c97f25add9d3",
+    "localHead": "33f72ddc175bee380655e65cc0cdf5f9a4458fee",
     "originMain": "7bc44efba2aaa7a5ea64d57e8bd2e44b47aaa987",
-    "worktreeStatus": "?? .tmp/"
+    "worktreeStatus": "M docs/CERTIFICATION/MLB_DATA_02R_R2A_LIVE_MANUAL_REFRESH_EXECUTOR_AUDIT.md\n M docs/CERTIFICATION/mlb-data-02r-r2a-live-refresh-executor.json\n M docs/MASTER_ROADMAP.md\n M docs/PROJECT_STATUS.md\n M scripts/mlb-data-02r-r2a-live-refresh-executor-validate.mjs\n M scripts/mlb-data-02r-r2a-live-refresh-executor.mjs\n?? .tmp/\n?? docs/CERTIFICATION/MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_AUDIT.md\n?? docs/CERTIFICATION/MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_CERTIFICATION.json\n?? scripts/mlb-data-02r-r2d-current-slate-thin-wrapper-validate.mjs\n?? scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs"
   },
   "componentInventory": {
     "MLB_02R_R2A_COMPONENT_INVENTORY": "COMPLETE",
@@ -149,15 +149,151 @@
     "noDuplicateRawStore": true
   },
   "runFreeze": {
-    "run_id": "mlb-02r-r2a:d3824bea89f49f61156b0a3645e89a18",
+    "run_id": "mlb-02r-r2a:76297b365aaa0bbab72c223b0c154a05",
     "run_date": "2026-09-07",
-    "run_as_of": "2026-09-07T14:45:53.082Z",
-    "execution_package_sha": "RESOLVED_AT_FROZEN_EXECUTION_START",
+    "run_as_of": "2026-09-07T16:33:34.131Z",
+    "execution_package_sha": "33f72ddc175bee380655e65cc0cdf5f9a4458fee",
+    "eligible_game_pks": [],
+    "blocked_game_pks": [],
+    "game_start_times": {},
+    "starter_states": {},
     "db_contract_digest": "2206cc488b4ff4e098c37b0e12836d247d45600d127b9a052dae4b51ccbe7688",
     "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
     "feature_contract_digest": "6052f734985fc1f6244f1a73529a8d74c0227877d69aac3c41fca902abf637e1",
+    "provider_budget": {
+      "MLB_OFFICIAL": {
+        "allowed": true,
+        "maxCalls": 1,
+        "consumed": 0,
+        "stages": [
+          "01 schedule sync"
+        ],
+        "forbiddenInDryRun": true
+      },
+      "STATCAST": {
+        "allowed": true,
+        "maxCalls": "0_TO_FROZEN_GAME_SET",
+        "consumed": 0,
+        "stages": [
+          "03 raw Statcast reconciliation"
+        ],
+        "forbiddenInDryRun": true
+      },
+      "THE_ODDS_API": {
+        "allowed": true,
+        "maxCalls": 1,
+        "consumed": 0,
+        "stages": [
+          "08 market acquisition"
+        ],
+        "sport": "baseball_mlb",
+        "market": "h2h",
+        "oddsFormat": "american",
+        "forbiddenInDryRun": true
+      },
+      "BALLDONTLIE": {
+        "allowed": false,
+        "maxCalls": 0,
+        "consumed": 0
+      },
+      "SPORTSDATAIO": {
+        "allowed": false,
+        "maxCalls": 0,
+        "consumed": 0
+      },
+      "OTHER": {
+        "allowed": false,
+        "maxCalls": 0,
+        "consumed": 0
+      }
+    },
+    "per_stage_dml_caps": {
+      "nativeGames": "exact INSERT_ELIGIBLE current-slate game_pk identities",
+      "nativePlayers": "exact INSERT_ELIGIBLE current-slate MLBAM person identities",
+      "rawStatcast": "exact missing deterministic pitch identities for frozen eligible game_pk set",
+      "featureSnapshots": "exact deterministic feature snapshot INSERT_ELIGIBLE rows; exact digest matches are REUSE_NO_OP",
+      "teamFeatures": "2 * frozen feature-eligible games minus exact reuses",
+      "starterFeatures": "2 * frozen feature-eligible games minus exact reuses",
+      "bullpenFeatures": "2 * frozen feature-eligible games minus exact reuses",
+      "batterFeatures": "sum certified batter-game rows for frozen feature-eligible games minus exact reuses",
+      "matchupFeatures": "1 * frozen feature-eligible games minus exact reuses",
+      "firstInningFeatures": "1 * frozen feature-eligible games minus exact reuses",
+      "predictions": "exact prediction identities that pass starter, feature and probability guards",
+      "marketMappings": "exact matched provider-event/game_pk mappings required by fresh odds evidence",
+      "marketObservations": "exact complete h2h observation rows from one The Odds API response",
+      "nativeValues": "exact fresh prediction + complete same-book pair evaluations",
+      "officialPicks": "<= frozen eligible game count; zero valid; one side per game"
+    },
+    "checkpoint_state": [
+      {
+        "stage": "01 schedule sync",
+        "checkpoint": "2026-09-07:01:01_schedule_sync",
+        "status": "PENDING"
+      },
+      {
+        "stage": "02 native reconciliation",
+        "checkpoint": "2026-09-07:02:02_native_reconciliation",
+        "status": "PENDING"
+      },
+      {
+        "stage": "03 raw Statcast reconciliation",
+        "checkpoint": "2026-09-07:03:03_raw_Statcast_reconciliation",
+        "status": "PENDING"
+      },
+      {
+        "stage": "04 feature refresh",
+        "checkpoint": "2026-09-07:04:04_feature_refresh",
+        "status": "PENDING"
+      },
+      {
+        "stage": "05 starter readiness",
+        "checkpoint": "2026-09-07:05:05_starter_readiness",
+        "status": "PENDING"
+      },
+      {
+        "stage": "06 moneyline inference",
+        "checkpoint": "2026-09-07:06:06_moneyline_inference",
+        "status": "PENDING"
+      },
+      {
+        "stage": "07 prediction persistence",
+        "checkpoint": "2026-09-07:07:07_prediction_persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "08 market acquisition",
+        "checkpoint": "2026-09-07:08:08_market_acquisition",
+        "status": "PENDING"
+      },
+      {
+        "stage": "09 market persistence",
+        "checkpoint": "2026-09-07:09:09_market_persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "10 value evaluation",
+        "checkpoint": "2026-09-07:10:10_value_evaluation",
+        "status": "PENDING"
+      },
+      {
+        "stage": "11 Official Pick policy",
+        "checkpoint": "2026-09-07:11:11_Official_Pick_policy",
+        "status": "PENDING"
+      },
+      {
+        "stage": "12 Official Pick persistence",
+        "checkpoint": "2026-09-07:12:12_Official_Pick_persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "13 Value Board readback",
+        "checkpoint": "2026-09-07:13:13_Value_Board_readback",
+        "status": "PENDING"
+      }
+    ],
+    "frozen_context_digest": "600e21f3b872bd8947649cd49a5708e4e002eaa79a4701e94b1caf66513e9a26",
     "pipeline_version": "MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_V1",
-    "production_web_sha_start": "18434335943d7ee13e07399e42ac6f40f797be07",
+    "production_web_sha_start": "ecf1226a791161cdec93d1edd5c7656f4e75b83f",
     "MLB_02R_R2A_RUN_FREEZE_IMPLEMENTATION": "PASS"
   },
   "dbPreflight": {
@@ -1308,7 +1444,10 @@
   },
   "guards": {
     "MLB_02R_R2A_EXECUTION_GUARD": "PASS",
-    "failClosedMessage": "LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION",
+    "failClosedMessage": "LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION",
+    "MLB_02R_R2D_BROAD_GLOBAL_HOLD_ISOLATED": "PASS",
+    "broadGlobalHoldVariable": "MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION",
+    "broadGlobalHoldUsedByR2Executor": false,
     "MLB_02R_R2A_STARTED_GAME_GUARD": "PASS",
     "scheduleClassifications": [
       "PREGAME_SAFE",
@@ -1369,9 +1508,13 @@
           "OTHER_BLOCKED"
         ],
         "componentBinding": {
-          "adapter": "internal MLB Official schedule fetcher",
+          "wrapper": "r2cCurrentSlateScheduleReadWrapper",
+          "provider": "MLB_OFFICIAL",
+          "writeCapKey": null,
+          "readOnly": true,
           "liveCallable": true,
-          "provider": "MLB_OFFICIAL"
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:01:01_schedule_sync",
         "dmlCap": "0",
@@ -1383,7 +1526,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateScheduleReadWrapper",
+          "providerStatus": "DRY_RUN_PROVIDER_NOT_CALLED",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1399,15 +1548,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02h-2026-current-foundation.mjs",
-              "--execute-ingest",
-              "--r2-resume"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateNativeIdentityWrapper",
+          "provider": null,
+          "writeCapKey": "nativeIdentity",
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:02:02_native_reconciliation",
         "dmlCap": {
@@ -1422,7 +1568,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateNativeIdentityWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1438,16 +1590,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02h-2026-current-foundation.mjs",
-              "--execute-ingest",
-              "--r2-resume"
-            ]
-          ],
+          "wrapper": "r2cCurrentSlateStatcastWrapper",
+          "provider": "STATCAST",
+          "writeCapKey": "rawStatcast",
           "liveCallable": true,
-          "provider": "STATCAST"
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:03:03_raw_Statcast_reconciliation",
         "dmlCap": "exact missing deterministic pitch identities for frozen eligible game_pk set",
@@ -1459,7 +1607,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateStatcastWrapper",
+          "providerStatus": "DRY_RUN_PROVIDER_NOT_CALLED",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1475,14 +1629,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02h-2026-current-foundation.mjs",
-              "--execute-features"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateFeatureWrapper",
+          "provider": null,
+          "writeCapKey": "features",
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:04:04_feature_refresh",
         "dmlCap": {
@@ -1502,7 +1654,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateFeatureWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1519,8 +1677,13 @@
           "CHANGED"
         ],
         "componentBinding": {
-          "adapter": "executor starter classifier over frozen schedule/native metadata",
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateStarterReadinessWrapper",
+          "provider": null,
+          "writeCapKey": null,
+          "readOnly": true,
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:05:05_starter_readiness",
         "dmlCap": "0",
@@ -1532,7 +1695,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateStarterReadinessWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1547,14 +1716,13 @@
           "BLOCKED"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-              "--write-artifact"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateInferenceWrapper",
+          "provider": null,
+          "writeCapKey": null,
+          "readOnly": true,
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:06:06_moneyline_inference",
         "dmlCap": "0",
@@ -1566,7 +1734,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateInferenceWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1582,14 +1756,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs",
-              "--execute"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlatePredictionWrapper",
+          "provider": null,
+          "writeCapKey": "predictions",
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:07:07_prediction_persistence",
         "dmlCap": "exact prediction identities that pass starter, feature and probability guards",
@@ -1601,7 +1773,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlatePredictionWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1618,15 +1796,13 @@
           "DUPLICATE_PROVIDER_EVENT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs",
-              "--write-artifact"
-            ]
-          ],
+          "wrapper": "r2cCurrentSlateMarketAcquisitionWrapper",
+          "provider": "THE_ODDS_API",
+          "writeCapKey": null,
+          "readOnly": true,
           "liveCallable": true,
-          "provider": "THE_ODDS_API"
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:08:08_market_acquisition",
         "dmlCap": "0",
@@ -1638,7 +1814,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateMarketAcquisitionWrapper",
+          "providerStatus": "DRY_RUN_PROVIDER_NOT_CALLED",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1654,15 +1836,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs",
-              "--execute",
-              "--write-artifact"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateMarketPersistenceWrapper",
+          "provider": null,
+          "writeCapKey": "market",
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:09:09_market_persistence",
         "dmlCap": {
@@ -1677,7 +1856,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateMarketPersistenceWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1693,14 +1878,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02o-r3-native-value-persistence.mjs",
-              "--execute"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateValueWrapper",
+          "provider": null,
+          "writeCapKey": "value",
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:10:10_value_evaluation",
         "dmlCap": "exact fresh prediction + complete same-book pair evaluations",
@@ -1712,7 +1895,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateValueWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1729,13 +1918,13 @@
           "BLOCKED"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateOfficialPickWrapper",
+          "provider": null,
+          "writeCapKey": null,
+          "readOnly": true,
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:11:11_Official_Pick_policy",
         "dmlCap": "0",
@@ -1747,7 +1936,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateOfficialPickWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1763,14 +1958,12 @@
           "BLOCK_CONFLICT"
         ],
         "componentBinding": {
-          "command": [
-            "node",
-            [
-              "scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs",
-              "--execute-official-picks"
-            ]
-          ],
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateOfficialPickWrapper",
+          "provider": null,
+          "writeCapKey": "officialPicks",
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:12:12_Official_Pick_persistence",
         "dmlCap": "<= frozen eligible game count; zero valid; one side per game",
@@ -1782,7 +1975,13 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateOfficialPickWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       },
       {
@@ -1799,8 +1998,13 @@
           "BLOCKED"
         ],
         "componentBinding": {
-          "adapter": "read-only /mlb-value-board persisted board readback",
-          "liveCallable": true
+          "wrapper": "r2cCurrentSlateValueBoardReadWrapper",
+          "provider": null,
+          "writeCapKey": null,
+          "readOnly": true,
+          "liveCallable": true,
+          "invocationMethod": "thin_frozen_current_slate_wrapper",
+          "legacyBroadCommand": false
         },
         "checkpoint": "2026-09-07:13:13_Value_Board_readback",
         "dmlCap": "0",
@@ -1812,20 +2016,56 @@
         "reused": 0,
         "conflicts": 0,
         "component": {
-          "status": "DRY_RUN_NOT_INVOKED"
+          "status": "DRY_RUN_SCOPE_WRAPPER_PASS",
+          "wrapper": "r2cCurrentSlateValueBoardReadWrapper",
+          "providerStatus": "NO_PROVIDER_CALL",
+          "legacyBroadCommand": false,
+          "providerCalls": 0,
+          "productionDml": 0,
+          "productionDdl": 0
         }
       }
     ]
   },
+  "r2dThinWrappers": {
+    "certification": "MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_IMPLEMENTATION_CERTIFIED",
+    "wrapperModule": "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs",
+    "wrappersImplemented": [
+      "r2cCurrentSlateNativeIdentityWrapper",
+      "r2cCurrentSlateStatcastWrapper",
+      "r2cCurrentSlateFeatureWrapper",
+      "r2cCurrentSlatePredictionWrapper",
+      "r2cCurrentSlateMarketAcquisitionWrapper",
+      "r2cCurrentSlateMarketPersistenceWrapper",
+      "r2cCurrentSlateValueWrapper",
+      "r2cCurrentSlateOfficialPickWrapper"
+    ],
+    "legacyBroadCommandInvocation": "DISABLED_FOR_R2_CURRENT_SLATE",
+    "prewriteScopeArtifact": {
+      "run_id": "mlb-02r-r2a:76297b365aaa0bbab72c223b0c154a05",
+      "run_as_of": "2026-09-07T16:33:34.131Z",
+      "frozen_context_digest": "600e21f3b872bd8947649cd49a5708e4e002eaa79a4701e94b1caf66513e9a26",
+      "tables": [],
+      "historical_rows_touched": 0,
+      "out_of_scope_game_pks_touched": 0,
+      "conflicts": 0,
+      "provider_calls": 0,
+      "production_dml": 0,
+      "production_ddl": 0
+    },
+    "R2D_CURRENT_SLATE_SCOPE_WRAPPERS": "PASS",
+    "R2D_FROZEN_CONTEXT_CONTRACT": "PASS",
+    "R2D_PREWRITE_CONTAINMENT_ARTIFACT_READY": "PASS"
+  },
   "checkpointResume": {
     "MLB_02R_R2A_CHECKPOINT_RESUME": "PASS",
-    "checkpointPath": ".tmp\\mlb-data-02r-r2a-checkpoints\\mlb-02r-r2a_d3824bea89f49f61156b0a3645e89a18.json",
+    "checkpointPath": ".tmp\\mlb-data-02r-r2a-checkpoints\\mlb-02r-r2a_76297b365aaa0bbab72c223b0c154a05.json",
     "resumeFrom": null,
     "resumeRule": "resume from first incomplete/failed stage and reclassify completed immutable work as REUSE_NO_OP"
   },
   "webIndependence": {
     "MLB_02R_R2A_WEB_SHA_INDEPENDENCE": "PASS",
-    "productionWebShaStart": "18434335943d7ee13e07399e42ac6f40f797be07",
+    "productionWebShaStart": "ecf1226a791161cdec93d1edd5c7656f4e75b83f",
     "rule": "production web SHA is metadata only; required DB/model contracts are the execution gates"
   },
   "idempotency": {

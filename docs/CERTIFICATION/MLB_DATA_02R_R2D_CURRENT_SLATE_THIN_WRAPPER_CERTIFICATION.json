@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-09-07T00:00:00.000Z",
+  "certificationVerdict": "MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_IMPLEMENTATION_CERTIFIED",
+  "phase": "MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_IMPLEMENTATION",
+  "r2cDesignLoaded": "MLB_DATA_02R_R2C_SAFE_DESIGN_SPLIT_BINDING_INVENTORY_CERTIFIED",
+  "wrappersImplemented": [
+    "r2cCurrentSlateNativeIdentityWrapper",
+    "r2cCurrentSlateStatcastWrapper",
+    "r2cCurrentSlateFeatureWrapper",
+    "r2cCurrentSlatePredictionWrapper",
+    "r2cCurrentSlateMarketAcquisitionWrapper",
+    "r2cCurrentSlateMarketPersistenceWrapper",
+    "r2cCurrentSlateValueWrapper",
+    "r2cCurrentSlateOfficialPickWrapper"
+  ],
+  "executorPatch": {
+    "executorPath": "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs",
+    "legacyBroadCommandInvocation": "DISABLED_FOR_R2_CURRENT_SLATE",
+    "broadGlobalHoldVariable": "MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION",
+    "broadGlobalHoldUsedByR2Executor": false,
+    "failClosedMessage": "LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION"
+  },
+  "frozenContextFields": [
+    "blocked_game_pks",
+    "checkpoint_state",
+    "db_contract_digest",
+    "eligible_game_pks",
+    "execution_package_sha",
+    "feature_contract_digest",
+    "frozen_context_digest",
+    "game_start_times",
+    "model_artifact_digest",
+    "per_stage_dml_caps",
+    "provider_budget",
+    "run_as_of",
+    "run_date",
+    "run_id",
+    "starter_states"
+  ],
+  "guards": {
+    "frozenGamePkContainment": "PASS",
+    "startedGameGuard": "PASS",
+    "asOfGuard": "PASS",
+    "capGuard": "PASS",
+    "conflictGuard": "PASS",
+    "providerDryRunGuard": "PASS",
+    "historicalScopeGuard": "PASS"
+  },
+  "prewriteScopeArtifact": {
+    "contract": "READY",
+    "requiredFields": [
+      "table",
+      "frozen_game_pk_scope",
+      "planned_identities",
+      "planned_inserts",
+      "reuses",
+      "conflicts",
+      "cap",
+      "historical_rows_touched",
+      "out_of_scope_game_pks_touched"
+    ],
+    "historical_rows_touched": 0,
+    "out_of_scope_game_pks_touched": 0,
+    "conflicts": 0,
+    "provider_calls": 0,
+    "production_dml": 0,
+    "production_ddl": 0
+  },
+  "zeroMutation": {
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "oddsApiCalls": 0,
+    "officialPickWrites": 0,
+    "environmentChanges": 0,
+    "automationChanges": 0,
+    "cronChanges": 0
+  },
+  "futureExecution": {
+    "R2B_LIVE_REFRESH_EXECUTION_PERFORMED": "NO",
+    "R2B_RETRY_READY_AFTER_DIRECT_AUTHORIZATION": "YES_WITH_FROZEN_CONTEXT_AND_PREWRITE_GUARDS"
+  }
+}
