@@ -1,0 +1,6 @@
+{
+  "authorized": true,
+  "paidCallsAllowed": false,
+  "mutationsAllowed": false,
+  "purpose": "Read the bounded MLB Decision Board Player Props sync ledger after the one-event canary. No provider calls or mutations are authorized."
+}
