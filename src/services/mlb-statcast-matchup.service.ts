@@ -155,8 +155,8 @@ export async function getMlbStatcastMatchup(input: {
   const [pitcherSummaryResult, pitchTypesResult, pitcherSplitsResult, vsTeamResult] = await Promise.all([
     supabaseAdmin.from('mlb_statcast_pitcher_season_summary').select('*').eq('season', input.season).eq('pitcher', input.pitcherId).maybeSingle(),
     supabaseAdmin.from('mlb_statcast_pitcher_pitch_type_summary').select('*').eq('season', input.season).eq('pitcher', input.pitcherId).order('total_pitches', { ascending: false }),
-    supabaseAdmin.from('mlb_statcast_pitcher_hand_split_summary').select('*').eq('season', input.season).eq('pitcher', input.pitcherId),
-    supabaseAdmin.from('mlb_statcast_pitcher_vs_team_summary').select('*').eq('season', input.season).eq('pitcher', input.pitcherId).eq('opponent_team', sourceOpponentTeam).maybeSingle(),
+    supabaseAdmin.from('mlb_statcast_pitcher_hand_split_summary_mv').select('*').eq('season', input.season).eq('pitcher', input.pitcherId),
+    supabaseAdmin.from('mlb_statcast_pitcher_vs_team_summary_mv').select('*').eq('season', input.season).eq('pitcher', input.pitcherId).eq('opponent_team', sourceOpponentTeam).maybeSingle(),
   ])
 
   for (const result of [pitcherSummaryResult, pitchTypesResult, pitcherSplitsResult, vsTeamResult]) {
@@ -175,18 +175,18 @@ export async function getMlbStatcastMatchup(input: {
     ? supabaseAdmin.from('pick2_mlb_players').select('mlbam_person_id, full_name, bat_side').in('mlbam_person_id', batterIds)
     : Promise.resolve({ data: [], error: null })
   const batterHandQuery = batterIds.length
-    ? supabaseAdmin.from('mlb_statcast_batter_hand_split_summary').select('*').eq('season', input.season).eq('pitcher_throws', pitcherThrows).in('batter', batterIds)
+    ? supabaseAdmin.from('mlb_statcast_batter_hand_split_summary_mv').select('*').eq('season', input.season).eq('pitcher_throws', pitcherThrows).in('batter', batterIds)
     : Promise.resolve({ data: [], error: null })
   const batterPitchQuery = batterIds.length
-    ? supabaseAdmin.from('mlb_statcast_batter_pitch_type_summary').select('*').eq('season', input.season).eq('pitcher_throws', pitcherThrows).in('batter', batterIds)
+    ? supabaseAdmin.from('mlb_statcast_batter_pitch_type_summary_mv').select('*').eq('season', input.season).eq('pitcher_throws', pitcherThrows).in('batter', batterIds)
     : Promise.resolve({ data: [], error: null })
   const h2hQuery = batterIds.length
-    ? supabaseAdmin.from('mlb_statcast_pitcher_batter_summary').select('*').eq('season', input.season).eq('pitcher', input.pitcherId).in('batter', batterIds)
+    ? supabaseAdmin.from('mlb_statcast_pitcher_batter_summary_mv').select('*').eq('season', input.season).eq('pitcher', input.pitcherId).in('batter', batterIds)
     : Promise.resolve({ data: [], error: null })
 
   const [teamPitchResult, leaguePitchResult, playersResult, batterHandResult, batterPitchResult, h2hResult] = await Promise.all([
-    supabaseAdmin.from('mlb_statcast_team_vs_pitch_type_summary').select('*').eq('season', input.season).eq('team', sourceOpponentTeam).eq('pitcher_throws', pitcherThrows),
-    supabaseAdmin.from('mlb_statcast_league_pitch_type_summary').select('*').eq('season', input.season).eq('pitcher_throws', pitcherThrows),
+    supabaseAdmin.from('mlb_statcast_team_vs_pitch_type_summary_mv').select('*').eq('season', input.season).eq('team', sourceOpponentTeam).eq('pitcher_throws', pitcherThrows),
+    supabaseAdmin.from('mlb_statcast_league_pitch_type_summary_mv').select('*').eq('season', input.season).eq('pitcher_throws', pitcherThrows),
     playerQuery,
     batterHandQuery,
     batterPitchQuery,
