@@ -1,0 +1,8 @@
+{
+  "authorized": true,
+  "paidProviderCallsAllowed": false,
+  "mutationsAllowed": false,
+  "scope": "protected-preview responsive, accessibility, API safety, health readback, and persisted canary verification",
+  "expectedCanaryEventId": "baseball_mlb:mlb:sportsdataio:event:79431",
+  "expectedPersistedCanaryRows": 14
+}
