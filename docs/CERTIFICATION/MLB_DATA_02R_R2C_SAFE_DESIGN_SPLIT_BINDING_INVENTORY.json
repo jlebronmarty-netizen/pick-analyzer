@@ -1,0 +1,354 @@
+{
+  "certificationVerdict": "MLB_DATA_02R_R2C_SAFE_DESIGN_SPLIT_BINDING_INVENTORY_CERTIFIED",
+  "phase": "MLB_DATA_02R_R2C_SAFE_DESIGN_SPLIT_READ_ONLY_BINDING_INVENTORY",
+  "generatedAt": "2026-09-07T00:00:00.000Z",
+  "priorLivePackageSha": "a36f19e92cc38b50b75c1a6e4a1e01a2409754b9",
+  "executorAudited": {
+    "path": "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs",
+    "modified": false,
+    "MLB_02R_R2C_BINDING_MAP": "COMPLETE"
+  },
+  "bindingMap": [
+    {
+      "stage": "01 schedule sync",
+      "boundComponent": "internal MLB Official schedule fetcher plus 02H foundation source",
+      "filePath": "scripts/mlb-data-02h-2026-current-foundation.mjs, src/services/mlb-official-data-provider.service.ts",
+      "invocationMethod": "internal adapter placeholder in executor",
+      "readWrite": "provider-read only in stage design",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "date/season capable through 02H schedule/current foundation",
+      "dateFilterSupport": "existing provider/service can work by date window, executor binding does not pass frozen date context",
+      "gamePkFilterSupport": "not proven at executor binding",
+      "runIdSupport": false,
+      "asOfSupport": false,
+      "explicitDmlCapSupport": "not applicable",
+      "checkpointSupport": "executor checkpoint only"
+    },
+    {
+      "stage": "02 native reconciliation",
+      "boundComponent": "node scripts/mlb-data-02h-2026-current-foundation.mjs --execute-ingest --r2-resume",
+      "filePath": "scripts/mlb-data-02h-2026-current-foundation.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "writes pick2_mlb_games and pick2_mlb_players when execute-ingest is active",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "broad current-season ingest capable",
+      "dateFilterSupport": "internal season/date windows exist",
+      "gamePkFilterSupport": "no CLI game_pk allowlist support",
+      "runIdSupport": false,
+      "asOfSupport": false,
+      "explicitDmlCapSupport": "script-local caps only, not injected from R2B frozen context",
+      "checkpointSupport": "02H R2 raw checkpoint plus executor checkpoint"
+    },
+    {
+      "stage": "03 raw Statcast reconciliation",
+      "boundComponent": "node scripts/mlb-data-02h-2026-current-foundation.mjs --execute-ingest --r2-resume",
+      "filePath": "scripts/mlb-data-02h-2026-current-foundation.mjs, src/services/mlb-statcast-query.service.ts",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "can write pick2_raw_mlb_statcast_pitches",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "date-partitioned current-season raw ingest; can reconcile more than frozen slate",
+      "dateFilterSupport": "internal date windows and cache files exist",
+      "gamePkFilterSupport": "filters completed game_pks internally, but no executor-supplied frozen allowlist",
+      "runIdSupport": false,
+      "asOfSupport": false,
+      "explicitDmlCapSupport": "r2 raw batch size exists; no frozen-slate cap input",
+      "checkpointSupport": ".tmp/mlb-data-02h-r2-raw-resume-checkpoint.json"
+    },
+    {
+      "stage": "04 feature refresh",
+      "boundComponent": "node scripts/mlb-data-02h-2026-current-foundation.mjs --execute-features",
+      "filePath": "scripts/mlb-data-02h-2026-current-foundation.mjs, scripts/mlb-data-01d-r1i-partial-feature-dml-resume.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "can write snapshots and daily feature tables",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "feature recovery/current-season feature capable",
+      "dateFilterSupport": "as_of_date derived internally from target game date",
+      "gamePkFilterSupport": "feature rows carry target_game_pk, but no CLI frozen allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "feature as-of semantics exist; executor does not inject run_as_of",
+      "explicitDmlCapSupport": "domain caps exist in scripts, not R2B-context caps",
+      "checkpointSupport": "executor checkpoint only"
+    },
+    {
+      "stage": "05 starter readiness",
+      "boundComponent": "executor starter classifier over frozen schedule/native metadata",
+      "filePath": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
+      "invocationMethod": "internal adapter placeholder",
+      "readWrite": "read-only",
+      "productionCapable": false,
+      "historicalFullScopeCapability": "read-only inference inventory capable",
+      "dateFilterSupport": "uses current inventory/as-of in source artifact",
+      "gamePkFilterSupport": "can inspect game_pk rows, no injected allowlist",
+      "runIdSupport": false,
+      "asOfSupport": true,
+      "explicitDmlCapSupport": "not applicable",
+      "checkpointSupport": "executor checkpoint only"
+    },
+    {
+      "stage": "06 moneyline inference",
+      "boundComponent": "node scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs --write-artifact",
+      "filePath": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs, artifacts/mlb/mlb-02c-moneyline-baseline-model.json",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "local artifact write only; prediction DML explicitly forbidden in 02I",
+      "productionCapable": false,
+      "historicalFullScopeCapability": "read-only current inference over discovered inventory",
+      "dateFilterSupport": "uses runtime as_of",
+      "gamePkFilterSupport": "native read uses game_pk set from inventory, no CLI allowlist",
+      "runIdSupport": false,
+      "asOfSupport": true,
+      "explicitDmlCapSupport": "prediction DML forbidden",
+      "checkpointSupport": "executor checkpoint only"
+    },
+    {
+      "stage": "07 prediction persistence",
+      "boundComponent": "node scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs --execute",
+      "filePath": "scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "intended immutable prediction writes, but executor passes wrong execute flag for current script",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "frozen 02I artifact persistence capable",
+      "dateFilterSupport": "hard-coded frozenAsOf",
+      "gamePkFilterSupport": "uses game_pks in frozen 02I artifact, not arbitrary R2B allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "hard-coded",
+      "explicitDmlCapSupport": "artifact row count cap only",
+      "checkpointSupport": "script artifact plus executor checkpoint"
+    },
+    {
+      "stage": "08 market acquisition",
+      "boundComponent": "node scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs --write-artifact",
+      "filePath": "scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "provider call plus local artifact write",
+      "productionCapable": false,
+      "historicalFullScopeCapability": "sport-wide The Odds API response capable",
+      "dateFilterSupport": "provider event commence_time window inferred from response",
+      "gamePkFilterSupport": "crosswalk classification produces game_pk, no executor allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "uses fixed predictionsAsOf",
+      "explicitDmlCapSupport": "provider call cap 1",
+      "checkpointSupport": "executor checkpoint only"
+    },
+    {
+      "stage": "09 market persistence",
+      "boundComponent": "node scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs --execute --write-artifact",
+      "filePath": "scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "writes market mappings and observations",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "fresh sample persistence capable",
+      "dateFilterSupport": "inherits frozen market sample timestamps",
+      "gamePkFilterSupport": "uses sample game_pks, no executor allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "inherits prediction metadata",
+      "explicitDmlCapSupport": "sample row caps only",
+      "checkpointSupport": "script artifact plus executor checkpoint"
+    },
+    {
+      "stage": "10 value evaluation",
+      "boundComponent": "node scripts/mlb-data-02o-r3-native-value-persistence.mjs --execute",
+      "filePath": "scripts/mlb-data-02o-r3-native-value-persistence.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "writes native value evaluations",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "prepared value artifact persistence capable",
+      "dateFilterSupport": "checks pregame-valid timestamps from source rows",
+      "gamePkFilterSupport": "reads by planned row game_pk, no executor allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "source artifact only",
+      "explicitDmlCapSupport": "artifact row cap only",
+      "checkpointSupport": "script artifact plus executor checkpoint"
+    },
+    {
+      "stage": "11 Official Pick policy",
+      "boundComponent": "node scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs",
+      "filePath": "scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "read-only DB plus local artifact",
+      "productionCapable": false,
+      "historicalFullScopeCapability": "reads all value rows then selects Policy V1 candidates",
+      "dateFilterSupport": "uses temporal_eligibility",
+      "gamePkFilterSupport": "policy rows include game_pk, no executor allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "uses source prediction/market timestamps",
+      "explicitDmlCapSupport": "not applicable",
+      "checkpointSupport": "executor checkpoint only"
+    },
+    {
+      "stage": "12 Official Pick persistence",
+      "boundComponent": "node scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs --execute-official-picks",
+      "filePath": "scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs",
+      "invocationMethod": "spawnSync command behind global hold",
+      "readWrite": "writes pick2_mlb_official_picks",
+      "productionCapable": true,
+      "historicalFullScopeCapability": "frozen 5 official pick persistence capable",
+      "dateFilterSupport": "source policy timestamps",
+      "gamePkFilterSupport": "payloads include game_pk, no executor allowlist",
+      "runIdSupport": false,
+      "asOfSupport": "source artifact only",
+      "explicitDmlCapSupport": "5-row frozen cap only",
+      "checkpointSupport": "script artifact plus executor checkpoint"
+    },
+    {
+      "stage": "13 Value Board readback",
+      "boundComponent": "read-only /mlb-value-board persisted board readback",
+      "filePath": "src/services/pick2-mlb-value-board.service.ts, src/app/mlb-value-board/page.tsx",
+      "invocationMethod": "internal adapter placeholder",
+      "readWrite": "read-only",
+      "productionCapable": false,
+      "historicalFullScopeCapability": "read model only",
+      "dateFilterSupport": "board filters through persisted row state",
+      "gamePkFilterSupport": "read model can display game_pk rows, no write risk",
+      "runIdSupport": false,
+      "asOfSupport": "read-only persisted timestamps",
+      "explicitDmlCapSupport": "not applicable",
+      "checkpointSupport": "executor checkpoint only"
+    }
+  ],
+  "componentScopeClassification": {
+    "MLB_02R_R2C_COMPONENT_SCOPE_CLASSIFICATION": "COMPLETE",
+    "CURRENT_SLATE_SAFE_ALREADY": ["01 schedule sync", "13 Value Board readback"],
+    "CURRENT_SLATE_SAFE_WITH_EXISTING_ARGS": [],
+    "NEEDS_THIN_SCOPE_WRAPPER": ["02 native reconciliation", "03 raw Statcast reconciliation", "04 feature refresh", "07 prediction persistence", "08 market acquisition", "09 market persistence", "10 value evaluation", "11 Official Pick policy", "12 Official Pick persistence"],
+    "BROAD_SCOPE_UNSAFE": ["02 native reconciliation", "03 raw Statcast reconciliation", "04 feature refresh"],
+    "READ_ONLY_ONLY": ["05 starter readiness", "06 moneyline inference", "11 Official Pick policy", "13 Value Board readback"],
+    "NOT_SUITABLE_FOR_R2": ["direct broad 02H execute-ingest/execute-features invocation without wrapper"]
+  },
+  "globalHoldAudit": {
+    "MLB_02R_R2C_GLOBAL_HOLD_AUDIT": "COMPLETE",
+    "variable": "MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION",
+    "defined": "not defined by repository; read directly from process.env in scripts/mlb-data-02r-r2a-live-refresh-executor.mjs",
+    "readAt": "runBoundComponent(binding)",
+    "unlocks": "spawnSync invocation for any stage component with command metadata",
+    "affectedCommands": ["02H --execute-ingest --r2-resume", "02H --execute-features", "02I --write-artifact", "02J R3 --execute", "02M R2 --write-artifact", "02M R3 --execute --write-artifact", "02O R3 --execute", "02P R1", "02P R2 --execute-official-picks"],
+    "canUnlockBroadHistoricalExecution": true,
+    "necessaryForR2B": false,
+    "decision": "replace in future patch with per-stage frozen-context authorization; do not set to YES"
+  },
+  "rawBindingDesign": {
+    "MLB_02R_R2C_RAW_BINDING_DESIGN": "READY",
+    "existingComponents": ["scripts/mlb-data-02h-2026-current-foundation.mjs", "src/services/mlb-statcast-query.service.ts"],
+    "exactDateRangeSupport": "internal date-window support exists",
+    "exactGamePkSetSupport": "not exposed as CLI/API allowlist",
+    "exactMissingIdentityListSupport": "not exposed",
+    "cacheOnlySupport": "cache files reused internally; strict cache-only mode not exposed",
+    "currentSeasonOnlySupport": true,
+    "accidentalUnrelatedBackfillRisk": true,
+    "writeTable": "pick2_raw_mlb_statcast_pitches",
+    "identityContract": "statcast:mlb:2026:game_pk:at_bat_number:pitch_number",
+    "batchSize": "500 standard, 100 R2 raw resume",
+    "checkpointBehavior": ".tmp/mlb-data-02h-r2-raw-resume-checkpoint.json"
+  },
+  "featureBindingDesign": {
+    "MLB_02R_R2C_FEATURE_BINDING_DESIGN": "READY",
+    "domains": ["snapshots", "team", "starter", "bullpen", "batter", "matchup", "firstInning"],
+    "targetGameFilterSupport": "target_game_pk exists in generated rows and uniqueness keys",
+    "gamePkSupport": "present in rows, not exposed as executor input",
+    "asOfSupport": "as_of_date and as_of_timestamp are generated from prior-date semantics",
+    "historicalRowsReadOnlyDependencies": true,
+    "writeTargetCanBeRestrictedToFrozenGames": "yes with thin wrapper filtering planned rows before insert"
+  },
+  "predictionBindingDesign": {
+    "MLB_02R_R2C_PREDICTION_BINDING_DESIGN": "READY",
+    "inferenceComponent": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
+    "persistenceComponent": "scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs",
+    "restrictionFeasible": "yes with wrapper asserting rows.game_pk subset, row.as_of equals frozen run_as_of, Champion V1 digest and feature input digest parity"
+  },
+  "marketBindingDesign": {
+    "MLB_02R_R2C_MARKET_BINDING_DESIGN": "READY",
+    "acquisition": "scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs",
+    "crosswalk": "classifyProviderEvents inside 02M R2",
+    "mappingPersistence": "scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs",
+    "observationPersistence": "scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs",
+    "restrictionFeasible": "yes with wrapper filtering provider events/normalized rows to frozen eligible_game_pks before persistence; out-of-scope provider events ignored"
+  },
+  "valueBindingDesign": {
+    "MLB_02R_R2C_VALUE_BINDING_DESIGN": "READY",
+    "component": "scripts/mlb-data-02o-r3-native-value-persistence.mjs",
+    "restrictionFeasible": "yes with wrapper requiring prediction.game_pk and market observation game_pk in frozen eligible_game_pks and matching timestamps"
+  },
+  "pickBindingDesign": {
+    "MLB_02R_R2C_PICK_BINDING_DESIGN": "READY",
+    "policy": "scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs",
+    "persistence": "scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs",
+    "restrictionFeasible": "yes with wrapper filtering Policy V1 candidates to frozen eligible_game_pks, one side per game, decision_at before start"
+  },
+  "frozenContextDesign": {
+    "MLB_02R_R2C_FROZEN_CONTEXT_DESIGN": "READY",
+    "schema": {
+      "run_id": "string",
+      "run_date": "YYYY-MM-DD",
+      "run_as_of": "ISO-8601 timestamp",
+      "execution_package_sha": "git SHA",
+      "eligible_game_pks": "integer[]",
+      "blocked_game_pks": "integer[]",
+      "game_start_times": "record<game_pk, ISO-8601 timestamp>",
+      "starter_states": "record<game_pk, {home:string,away:string}>",
+      "db_contract_digest": "sha256",
+      "model_artifact_digest": "sha256",
+      "feature_contract_digest": "sha256",
+      "provider_budget": "record<provider, cap>",
+      "per_stage_dml_caps": "record<stage, table caps>",
+      "checkpoint_state": "ordered stage checkpoint summary"
+    }
+  },
+  "thinWrapperDesign": {
+    "MLB_02R_R2C_THIN_WRAPPER_DESIGN": "COMPLETE",
+    "wrappers": [
+      "r2cCurrentSlateNativeIdentityWrapper",
+      "r2cCurrentSlateStatcastWrapper",
+      "r2cCurrentSlateFeatureWrapper",
+      "r2cCurrentSlatePredictionWrapper",
+      "r2cCurrentSlateMarketAcquisitionWrapper",
+      "r2cCurrentSlateMarketPersistenceWrapper",
+      "r2cCurrentSlateValueWrapper",
+      "r2cCurrentSlateOfficialPickWrapper"
+    ],
+    "commonContract": {
+      "input": "frozen context plus stage-specific source artifact/evidence",
+      "output": "prewrite classifications, write results when separately authorized, containment proof",
+      "scopeEnforcement": "every planned row must reference eligible_game_pks and frozen run_as_of where applicable",
+      "failureBehavior": "throw BLOCK_CONFLICT, OUT_OF_SCOPE_GAME_PK, CAP_EXCEEDED, AS_OF_MISMATCH or HISTORICAL_SCOPE_ATTEMPT",
+      "noOpBehavior": "REUSE_NO_OP for identical persisted rows only",
+      "explicitlyCannotDo": ["discover wider game scope", "run season backfill", "write out-of-scope rows", "change feature/model/policy semantics"]
+    }
+  },
+  "minimalExecutorPatchPlan": {
+    "MLB_02R_R2C_MINIMAL_EXECUTOR_PATCH_PLAN": "READY",
+    "filesThatWouldChange": ["scripts/mlb-data-02r-r2a-live-refresh-executor.mjs", "new non-production wrapper module(s)", "dedicated validator", "certification artifacts"],
+    "patchSummary": "pass frozen context, call safe wrappers only, remove dependence on broad global unlock, enforce stage guards, preserve certified business logic"
+  },
+  "realTestPlan": {
+    "MLB_02R_R2C_REAL_TEST_PLAN": "READY",
+    "proofs": ["static scope proof", "dry-run with real current code paths and providers disabled", "frozen game_pk containment assertion", "write-plan containment assertion", "broad-component negative test", "cap-overrun negative test", "started-game negative test", "wrong-game_pk negative test", "historical-scope negative test", "explicit authorization negative test"],
+    "syntheticPassShortcuts": false
+  },
+  "prewriteScopeArtifactDesign": {
+    "MLB_02R_R2C_PREWRITE_SCOPE_ARTIFACT_DESIGN": "READY",
+    "requiredFields": ["table", "frozen_game_pk_scope", "planned_identities", "planned_inserts", "reuses", "conflicts", "cap", "historical_rows_touched", "out_of_scope_game_pks_touched"],
+    "successContract": {
+      "historical_rows_touched": 0,
+      "out_of_scope_game_pks_touched": 0
+    }
+  },
+  "stageImplementationDecision": {
+    "MLB_02R_R2C_STAGE_IMPLEMENTATION_DECISION": "COMPLETE",
+    "SAFE_NO_CHANGE": ["13 Value Board readback"],
+    "SAFE_WITH_EXISTING_ARGS": [],
+    "SAFE_WITH_THIN_WRAPPER": ["01 schedule sync", "05 starter readiness", "06 moneyline inference", "08 market acquisition", "11 Official Pick policy"],
+    "REQUIRES_SEPARATE_REPAIR": ["02 native reconciliation", "03 raw Statcast reconciliation", "04 feature refresh", "07 prediction persistence", "09 market persistence", "10 value evaluation", "12 Official Pick persistence"],
+    "BLOCKED": ["R2B live execution until wrappers and real tests are implemented"]
+  },
+  "zeroMutation": {
+    "Provider calls": 0,
+    "Production DML": 0,
+    "Production DDL": 0,
+    "Odds calls": 0,
+    "Official Pick writes": 0,
+    "Cron changes": 0,
+    "Automation changes": 0,
+    "Env changes": 0,
+    "Executor code changes": 0,
+    "Production-capable semantic changes": 0
+  }
+}

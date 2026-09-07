@@ -3928,3 +3928,10 @@ Status: `MLB_DATA_01C_R4C_EXTERNAL_EDGE_ACQUISITION_BLOCKED`
 Result: R4C attempted the authorized bounded identity-only acquisition and stopped without persistence. The one SportsDataIO MLB `Players` master/list call and seven SportsDataIO `GamesByDate` event identity calls all returned HTTP 401, so no certifiable player MLBAM/person field, player crosswalk, event edge or event crosswalk could be produced. The 1,292 existing-player gap, 16 ambiguous-player gap, 161 safe-create set and seven event edge gaps remain unchanged.
 
 Next: recheck SportsDataIO MLB credential/entitlement out of band, then rerun only the bounded R4C provider-auth recheck if authorized. Do not proceed to R4D namespace planning unless a successful identity payload proves there is no exact MLBAM bridge, and do not start R5 or MLB-DATA-01D.
+## MLB-DATA-02R-R2C Safe Current-Slate Binding Design
+
+Status: `MLB_DATA_02R_R2C_SAFE_DESIGN_SPLIT_BINDING_INVENTORY_CERTIFIED`
+
+Result: R2C completed the read-only binding inventory and design split. The R2A executor was not modified. The design identifies broad R2A component bindings behind `MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION` and requires a separate thin-wrapper implementation before R2B live execution can be retried. Provider calls, production DML/DDL, odds calls, Official Pick writes, env changes, automation changes and cron changes were all 0.
+
+Next: authorize `MLB_DATA_02R_R2D_CURRENT_SLATE_THIN_WRAPPER_IMPLEMENTATION` to implement the wrapper interfaces, remove the broad global unlock dependency and validate with real non-synthetic scope tests. Do not retry R2B live refresh until R2D certifies.
