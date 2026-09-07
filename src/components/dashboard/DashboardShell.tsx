@@ -1,52 +1,54 @@
-import type { ReactNode } from 'react'
-import { Activity, FlaskConical, Home, Trophy } from 'lucide-react'
-import DashboardShellClient from '@/components/dashboard/DashboardShellClient'
+import { ReactNode } from 'react'
+import DashboardShellClient, { DashboardNavItem, DashboardTitleByPath } from '@/components/dashboard/DashboardShellClient'
 import {
-  buildPick2MlbValueBoardNavigation,
-  PICK2_MLB_VALUE_BOARD_HREF,
-} from '@/config/pick2-mlb-value-board-navigation'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+  PICK2_MLB_VALUE_BOARD_NAVIGATION_ICON,
+  PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
+  PICK2_MLB_VALUE_BOARD_ROUTE,
+  isPick2MlbValueBoardNavigationEnabled,
+} from '@/config/pick2-value-board-navigation'
 
-const productNavItems = [
-  { href: '/today', label: 'Today', icon: Home },
-  { href: '/mlb', label: 'MLB', icon: Activity },
-  { href: '/performance', label: 'Performance', icon: Trophy },
-  { href: '/model-lab', label: 'Model Lab', icon: FlaskConical },
-  { href: '/data-health', label: 'Data Health', icon: Activity },
+const baseProductNavItems: DashboardNavItem[] = [
+  { href: '/today', label: 'Today', icon: 'T' },
+  { href: '/mlb', label: 'MLB', icon: 'B' },
+  { href: '/performance', label: 'Performance', icon: 'P' },
+  { href: '/model-lab', label: 'Model Lab', icon: 'M' },
+  { href: '/data-health', label: 'Data Health', icon: 'D' },
 ]
 
-const titleByPath: Record<string, string> = {
+const titleByPath: DashboardTitleByPath = {
+  '/': 'Today',
   '/today': 'Today',
   '/mlb': 'MLB Decision Board',
+  [PICK2_MLB_VALUE_BOARD_ROUTE]: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
   '/performance': 'Performance',
   '/model-lab': 'Model Lab',
   '/data-health': 'Data Health',
 }
 
-export default async function DashboardShell({ children }: { children: ReactNode }) {
-  const pick2Navigation = await buildPick2MlbValueBoardNavigation(supabaseAdmin)
-  const dynamicProductNavItems = pick2Navigation.visible
-    ? [
-        ...productNavItems,
-        {
-          href: pick2Navigation.href,
-          label: pick2Navigation.label,
-          icon: Activity,
-        },
-      ]
-    : productNavItems
+function getProductNavItems(): DashboardNavItem[] {
+  if (!isPick2MlbValueBoardNavigationEnabled()) return baseProductNavItems
 
-  const dynamicTitleByPath = pick2Navigation.visible
-    ? {
-        ...titleByPath,
-        [PICK2_MLB_VALUE_BOARD_HREF]: pick2Navigation.label,
-      }
-    : titleByPath
+  return [
+    baseProductNavItems[0],
+    baseProductNavItems[1],
+    {
+      href: PICK2_MLB_VALUE_BOARD_ROUTE,
+      label: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
+      icon: PICK2_MLB_VALUE_BOARD_NAVIGATION_ICON,
+    },
+    ...baseProductNavItems.slice(2),
+  ]
+}
 
+export default function DashboardShell({
+  children,
+}: {
+  children: ReactNode
+}) {
   return (
     <DashboardShellClient
-      productNavItems={dynamicProductNavItems}
-      titleByPath={dynamicTitleByPath}
+      productNavItems={getProductNavItems()}
+      titleByPath={titleByPath}
     >
       {children}
     </DashboardShellClient>
