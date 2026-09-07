@@ -2,9 +2,13 @@
   "authorized": true,
   "paidProviderCallsAllowed": false,
   "mutationsAllowed": false,
-  "targetUrl": "https://pick-analyzer-git-feature-mlb-nrfi-backtest-v1-pick-analyzer.vercel.app/api/mlb/research/nrfi/backtest",
-  "expectedModelVersion": "MLB_NRFI_RESEARCH_V1",
-  "expectedMarket": "NRFI_YRFI",
-  "expectedStatus": "RESEARCH_ONLY_NOT_READY_FOR_SHADOW",
-  "reason": "Zero-cost end-to-end validation of the leakage-safe NRFI/YRFI research endpoint on its protected Vercel preview."
+  "targetUrl": "https://pick-analyzer-git-feature-mlb-game-models-347e7a-pick-analyzer.vercel.app/api/mlb/research/game-models/backtest",
+  "expectedModelVersion": "MLB_GAME_MODELS_RESEARCH_V1",
+  "expectedStatus": "RESEARCH_COMPLETE",
+  "expectedMarkets": {
+    "moneyline": "ANY",
+    "runLine": "ANY",
+    "totals": "ANY"
+  },
+  "reason": "Zero-cost protected-preview discovery audit for the leakage-safe MLB Moneyline, Run Line and Totals research backtest."
 }
