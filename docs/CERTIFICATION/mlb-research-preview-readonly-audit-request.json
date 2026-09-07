@@ -10,5 +10,5 @@
     "runLine": "ANY",
     "totals": "ANY"
   },
-  "reason": "Zero-cost protected-preview discovery audit for the leakage-safe MLB Moneyline, Run Line and Totals research backtest."
+  "reason": "Zero-cost protected-preview rerun after numerical-stability repair of the leakage-safe MLB Moneyline, Run Line and Totals research backtest."
 }
