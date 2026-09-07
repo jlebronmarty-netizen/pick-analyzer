@@ -11,7 +11,12 @@ export async function GET(request: NextRequest) {
   try {
     const eventId = request.nextUrl.searchParams.get('eventId')?.trim()
     if (!eventId || !eventId.startsWith('baseball_mlb:mlb:')) {
-      return apiError({ id, code: 'INVALID_REQUEST', message: 'A canonical MLB eventId is required.' }, 400)
+      return apiError({
+        id,
+        code: 'BAD_REQUEST',
+        message: 'A canonical MLB eventId is required.',
+        status: 400,
+      })
     }
 
     const { data, error } = await supabaseAdmin
