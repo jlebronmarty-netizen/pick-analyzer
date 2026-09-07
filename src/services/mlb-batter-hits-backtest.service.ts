@@ -313,21 +313,21 @@ function empiricalOverProbability(predicted: number, line: number, residuals: nu
   return over / residuals.length
 }
 
-function brierReport(trainScored: Scored[], target: Scored[]) {
-  const residuals = trainScored.map((row) => row.actual - row.predicted)
+function brierReport(calibrationScored: Scored[], target: Scored[]) {
+  const residuals = calibrationScored.map((row) => row.actual - row.predicted)
   return PROP_LINES.map((line) => {
-    const trainRate = mean(trainScored.map((row) => (row.actual > line ? 1 : 0))) ?? 0
-    const baselineBrier = mean(target.map((row) => ((row.actual > line ? 1 : 0) - trainRate) ** 2))
+    const calibrationEventRate = mean(calibrationScored.map((row) => (row.actual > line ? 1 : 0))) ?? 0
+    const baselineBrier = mean(target.map((row) => ((row.actual > line ? 1 : 0) - calibrationEventRate) ** 2))
     const modelBrier = mean(
       target.map((row) => {
-        const p = empiricalOverProbability(row.predicted, line, residuals) ?? trainRate
+        const p = empiricalOverProbability(row.predicted, line, residuals) ?? calibrationEventRate
         return (p - (row.actual > line ? 1 : 0)) ** 2
       }),
     )
     return {
       line,
       n: target.length,
-      trainEventRate: trainRate,
+      calibrationEventRate,
       modelBrier,
       baselineBrier,
       brierSkill:
@@ -374,7 +374,6 @@ export async function runMlbBatterHitsBacktest() {
   const final2025Fit = fitRows([...train, ...validation, ...test], alpha)
   if (!final2025Fit) throw new Error('Unable to fit final 2025 batter hits model')
   const holdoutScored = scoreRows(holdout, final2025Fit, alpha)
-  const full2025Scored = scoreRows([...train, ...validation, ...test], final2025Fit, alpha)
 
   return {
     modelVersion: MODEL_VERSION,
@@ -385,6 +384,7 @@ export async function runMlbBatterHitsBacktest() {
       hyperparameterSelection: '2025 TRAIN -> 2025 VALIDATION only',
       fixedTest: '2025-09-01 through end of 2025 feature coverage',
       externalHoldout: '2026, never used for alpha selection',
+      probabilityCalibration: '2026 probability diagnostics use empirical residuals from the untouched 2025 fixed TEST scored by the pre-test TRAIN-selected model. The final all-2025 fit is used only for 2026 point predictions.',
       sourceRule: SOURCE_RULE,
       sportsbookOddsUsed: false,
       providerCallsAtRuntime: false,
@@ -415,9 +415,14 @@ export async function runMlbBatterHitsBacktest() {
       externalHoldout2026: baselineMetrics(holdout),
     },
     probabilities: {
-      method: 'empirical residual distribution from 2025 training data; no sportsbook odds',
+      method: 'empirical residual distribution with no sportsbook odds',
       fixedTest2025: brierReport(trainScored, testScored),
-      externalHoldout2026: brierReport(full2025Scored, holdoutScored),
+      externalHoldout2026: brierReport(testScored, holdoutScored),
+      externalHoldout2026Calibration: {
+        source: 'untouched 2025 fixed TEST residuals from the pre-test model',
+        target: 'external 2026 holdout',
+        outOfSample: true,
+      },
     },
     holdoutMonthly: monthlyMetrics(holdoutScored),
     safety: {
