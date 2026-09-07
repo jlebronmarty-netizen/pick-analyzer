@@ -28,8 +28,18 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 })
 
 const EXPECTED = {
-  2025: { pitches: 712528, games: 2430, lastGameDate: '2025-09-28' },
-  2026: { pitches: 631404, games: 2139, lastGameDate: '2026-09-05' },
+  2025: {
+    mode: 'exact',
+    pitches: 712528,
+    games: 2430,
+    lastGameDate: '2025-09-28',
+  },
+  2026: {
+    mode: 'minimum',
+    pitches: 631404,
+    games: 2139,
+    lastGameDate: '2026-09-05',
+  },
 }
 
 const { data: coverage, error: coverageError } = await supabase
@@ -45,9 +55,23 @@ for (const [seasonText, expected] of Object.entries(EXPECTED)) {
   const season = Number(seasonText)
   const row = bySeason.get(season)
   assert(row, `Missing Statcast coverage for ${season}`)
-  assert(Number(row.pitches) === expected.pitches, `${season} pitch mismatch: expected ${expected.pitches}, got ${row.pitches}`)
-  assert(Number(row.games) === expected.games, `${season} game mismatch: expected ${expected.games}, got ${row.games}`)
-  assert(row.last_game_date === expected.lastGameDate, `${season} last-date mismatch: expected ${expected.lastGameDate}, got ${row.last_game_date}`)
+
+  const pitches = Number(row.pitches)
+  const games = Number(row.games)
+
+  if (expected.mode === 'exact') {
+    assert(pitches === expected.pitches, `${season} pitch mismatch: expected ${expected.pitches}, got ${row.pitches}`)
+    assert(games === expected.games, `${season} game mismatch: expected ${expected.games}, got ${row.games}`)
+    assert(row.last_game_date === expected.lastGameDate, `${season} last-date mismatch: expected ${expected.lastGameDate}, got ${row.last_game_date}`)
+  } else {
+    assert(pitches >= expected.pitches, `${season} pitch regression: certified minimum ${expected.pitches}, got ${row.pitches}`)
+    assert(games >= expected.games, `${season} game regression: certified minimum ${expected.games}, got ${row.games}`)
+    assert(
+      typeof row.last_game_date === 'string' && row.last_game_date >= expected.lastGameDate,
+      `${season} last-date regression: certified minimum ${expected.lastGameDate}, got ${row.last_game_date}`,
+    )
+  }
+
   assert(Number(row.pitchers) > 0, `${season} has zero pitchers`)
   assert(Number(row.batters) > 0, `${season} has zero batters`)
   assert(Number(row.batting_teams) === 30, `${season} expected 30 batting teams, got ${row.batting_teams}`)
@@ -57,7 +81,7 @@ for (const [seasonText, expected] of Object.entries(EXPECTED)) {
     .select('id', { count: 'exact', head: true })
     .eq('game_year', season)
   if (rawError) throw new Error(`${season} raw count failed: ${rawError.message}`)
-  assert(Number(rawCount) === expected.pitches, `${season} raw/view count mismatch: expected ${expected.pitches}, got ${rawCount}`)
+  assert(Number(rawCount) === pitches, `${season} raw/view count mismatch: coverage ${pitches}, raw ${rawCount}`)
 }
 
 const viewChecks = [
