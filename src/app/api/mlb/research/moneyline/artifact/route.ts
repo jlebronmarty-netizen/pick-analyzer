@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const id = requestId(request)
   try {
     const report = await getMlbMoneylineFrozenArtifact()
-    return apiOk(report, id, {
+    return apiOk({ ...report, market: 'MONEYLINE' }, id, {
       headers: {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },
