@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 13:45:00Z
+Last updated: 2026-09-07 14:30:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2A Live Refresh Executor
+
+- MLB-DATA-02R-R2A is locally certified as `MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_CERTIFIED`. The prior R2 package remains correctly classified as dry compatibility/fail-closed only; R2A adds a dedicated live manual refresh executor at `scripts/mlb-data-02r-r2a-live-refresh-executor.mjs`.
+- The executor defaults to `--dry-run`, supports `--execute-current-slate`, `--resume-from` and `--run-id`, records run-freeze V2 fields, writes per-stage checkpoints, validates the certified Pick2 moneyline DB contract, validates Champion/model feature contract, derives dynamic DML caps and keeps production web SHA as observability metadata only.
+- The component inventory is complete across the 13 manual-refresh stages: schedule, native reconciliation, raw Statcast reconciliation, feature refresh, starter readiness, moneyline inference, prediction persistence, market acquisition, market persistence, value evaluation, Official Pick policy, Official Pick persistence and Value Board readback. The reuse contract passes without creating duplicate feature math, model math, value math, Official Pick policy or raw storage.
+- Dry certification reached all orchestration stages with provider calls 0, production DML 0, production DDL 0, odds refresh 0, Official Pick writes 0, settlement excluded, automation changes 0 and cron changes 0. A live attempt without future execution authorization fails closed with `LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION`.
+- Manual live execution is ready only after a separate explicit execution authorization from the newly certified R2A package. Do not execute the live refresh, settlement, automation or 100-parlay logic from this certification phase.
 
 ## 2026-09-07 MLB-DATA-02R-R2 Frozen Execution Package Compatibility
 

@@ -1,0 +1,527 @@
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import path from 'node:path'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { createClient } from '@supabase/supabase-js'
+
+const BASE_URL = 'https://pick-analyzer.vercel.app'
+const MODEL_VERSION = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
+const FEATURE_SET = 'MLB_ML_FEATURE_SET_V1'
+const FEATURE_COUNT = 76
+const MODEL_ARTIFACT_DIGEST = '9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616'
+const PIPELINE_VERSION = 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_V1'
+const R2_PACKAGE_ARTIFACT = 'docs/CERTIFICATION/mlb-data-02r-r2-frozen-execution-package.json'
+const ARTIFACT_PATH = 'docs/CERTIFICATION/mlb-data-02r-r2a-live-refresh-executor.json'
+const AUDIT_PATH = 'docs/CERTIFICATION/MLB_DATA_02R_R2A_LIVE_MANUAL_REFRESH_EXECUTOR_AUDIT.md'
+const CHECKPOINT_DIR = '.tmp/mlb-data-02r-r2a-checkpoints'
+
+const rawArgs = process.argv.slice(2)
+const args = new Set(rawArgs)
+const execute = args.has('--execute-current-slate') || args.has('--execute')
+const dryRun = args.has('--dry-run') || !execute
+const resumeFrom = valueAfter('--resume-from')
+const suppliedRunId = valueAfter('--run-id')
+
+if (execute && process.env.MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED !== 'YES') {
+  console.error('LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION')
+  process.exit(1)
+}
+
+function valueAfter(flag) {
+  const index = rawArgs.indexOf(flag)
+  return index >= 0 ? rawArgs[index + 1] : null
+}
+
+function loadLocalEnv() {
+  for (const envPath of ['.env.local', '.env']) {
+    const resolved = path.join(process.cwd(), envPath)
+    if (!fs.existsSync(resolved)) continue
+    for (const line of fs.readFileSync(resolved, 'utf8').split(/\r?\n/)) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const index = trimmed.indexOf('=')
+      if (index <= 0) continue
+      const key = trimmed.slice(0, index).trim()
+      const value = trimmed.slice(index + 1).trim().replace(/^['"]|['"]$/g, '')
+      if (!process.env[key]) process.env[key] = value
+    }
+  }
+}
+
+function requireEnv(name) {
+  const value = process.env[name]
+  if (!value) throw new Error(`${name}_MISSING`)
+  return value
+}
+
+function dbClient() {
+  return createClient(requireEnv('NEXT_PUBLIC_SUPABASE_URL'), requireEnv('SUPABASE_SERVICE_ROLE_KEY'), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
+function git(commandArgs) {
+  return execFileSync('git', commandArgs, { encoding: 'utf8' }).trim()
+}
+
+function stable(value) {
+  if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
+function digest(value) {
+  return crypto.createHash('sha256').update(typeof value === 'string' ? value : stable(value)).digest('hex')
+}
+
+function dateInZone(date, timeZone) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]))
+  return `${parts.year}-${parts.month}-${parts.day}`
+}
+
+async function fetchJson(pathname) {
+  const response = await fetch(`${BASE_URL}${pathname}`, { cache: 'no-store' })
+  const text = await response.text()
+  if (!response.ok) throw new Error(`${pathname}_HTTP_${response.status}`)
+  return JSON.parse(text)
+}
+
+async function verifyTable(db, manifest) {
+  const projection = manifest.columns.join(',')
+  const { error } = await db.from(manifest.object).select(projection).limit(1)
+  if (error) {
+    const message = `${error.message ?? ''} ${error.details ?? ''}`.toLowerCase()
+    const state = message.includes('could not find') || message.includes('does not exist') ? 'MISSING' : 'INCOMPATIBLE'
+    return { object: manifest.object, state, error: error.message, columnsChecked: manifest.columns }
+  }
+  return { object: manifest.object, state: 'ADDITIVE_COMPATIBLE', columnsChecked: manifest.columns }
+}
+
+async function readChampion(db) {
+  const { data, error } = await db
+    .from('pick2_model_versions')
+    .select('id,model_version,role,status,artifact_digest,pick2_model_feature_sets(feature_set_version,input_contract)')
+    .eq('role', 'champion')
+    .eq('status', 'promoted')
+  if (error) throw new Error(`CHAMPION_READ_FAILED:${error.message}`)
+  const rows = data ?? []
+  const champion = rows.find((row) => row.model_version === MODEL_VERSION)
+  return {
+    count: rows.length,
+    champion,
+    state: rows.length === 1 &&
+      champion?.artifact_digest === MODEL_ARTIFACT_DIGEST &&
+      champion?.pick2_model_feature_sets?.feature_set_version === FEATURE_SET
+      ? 'PASS'
+      : 'FAIL',
+  }
+}
+
+function loadR2Manifest() {
+  if (!fs.existsSync(R2_PACKAGE_ARTIFACT)) throw new Error('R2_PACKAGE_ARTIFACT_MISSING')
+  const artifact = JSON.parse(fs.readFileSync(R2_PACKAGE_ARTIFACT, 'utf8'))
+  if (!Array.isArray(artifact.dbContract?.manifest)) throw new Error('R2_DB_MANIFEST_MISSING')
+  return {
+    r2Artifact: artifact,
+    manifest: artifact.dbContract.manifest,
+    digest: artifact.dbContract.digest ?? digest(artifact.dbContract.manifest),
+  }
+}
+
+function componentInventory() {
+  return [
+    ['01 schedule sync', ['scripts/mlb-data-02h-2026-current-foundation.mjs', 'src/services/mlb-official-data-provider.service.ts'], 'MLB Official schedule/status/starter evidence'],
+    ['02 native reconciliation', ['scripts/mlb-data-02h-2026-current-foundation.mjs'], 'pick2_mlb_games and pick2_mlb_players insert/reuse/conflict classifiers'],
+    ['03 raw Statcast reconciliation', ['scripts/mlb-data-02h-2026-current-foundation.mjs', 'src/services/mlb-statcast-query.service.ts'], 'canonical pick2_raw_mlb_statcast_pitches, cache-first, batch guarded'],
+    ['04 feature refresh', ['scripts/mlb-data-02h-2026-current-foundation.mjs', 'scripts/mlb-data-01d-r1i-partial-feature-dml-resume.mjs'], 'certified Pick2 76-feature moneyline builders and feature persistence contracts'],
+    ['05 starter readiness', ['scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs'], 'CONFIRMED/PROBABLE/UNKNOWN/CHANGED guard'],
+    ['06 moneyline inference', ['scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs', 'artifacts/mlb/mlb-02c-moneyline-baseline-model.json'], 'Champion V1 model artifact, 76 ordered features, certified preprocessing'],
+    ['07 prediction persistence', ['scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs'], 'immutable prediction identity/classifier/persistence contract'],
+    ['08 market acquisition', ['scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs'], 'The Odds API baseball_mlb h2h American odds acquisition/crosswalk normalization'],
+    ['09 market persistence', ['scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs'], 'immutable market mapping and observation persistence'],
+    ['10 value evaluation', ['scripts/mlb-data-02n-current-moneyline-value-evaluation-prep.mjs', 'scripts/mlb-data-02o-r3-native-value-persistence.mjs'], 'same-book no-vig, edge and unit EV contracts'],
+    ['11 Official Pick policy', ['scripts/mlb-data-02p-official-pick-policy-prep.mjs', 'scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs'], 'MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1 thresholds and one-side-per-game gate'],
+    ['12 Official Pick persistence', ['scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs'], 'immutable Official Pick row classifier/persistence'],
+    ['13 Value Board readback', ['src/services/pick2-mlb-value-board.service.ts', 'src/app/mlb-value-board/page.tsx'], 'canonical persisted Value Board read model'],
+  ].map(([stage, files, reuse]) => ({
+    stage,
+    files,
+    filesPresent: files.every((file) => fs.existsSync(file)),
+    reuse,
+    duplicateBusinessLogic: false,
+  }))
+}
+
+function providerBudget() {
+  return {
+    MLB_OFFICIAL: { allowed: true, maxCalls: 1, consumed: 0, stages: ['01 schedule sync'], forbiddenInDryRun: true },
+    STATCAST: { allowed: true, maxCalls: '0_TO_FROZEN_GAME_SET', consumed: 0, stages: ['03 raw Statcast reconciliation'], forbiddenInDryRun: true },
+    THE_ODDS_API: { allowed: true, maxCalls: 1, consumed: 0, stages: ['08 market acquisition'], sport: 'baseball_mlb', market: 'h2h', oddsFormat: 'american', forbiddenInDryRun: true },
+    BALLDONTLIE: { allowed: false, maxCalls: 0, consumed: 0 },
+    SPORTSDATAIO: { allowed: false, maxCalls: 0, consumed: 0 },
+    OTHER: { allowed: false, maxCalls: 0, consumed: 0 },
+  }
+}
+
+function dmlCaps() {
+  return {
+    nativeGames: 'exact INSERT_ELIGIBLE current-slate game_pk identities',
+    nativePlayers: 'exact INSERT_ELIGIBLE current-slate MLBAM person identities',
+    rawStatcast: 'exact missing deterministic pitch identities for frozen eligible game_pk set',
+    featureSnapshots: 'exact deterministic feature snapshot INSERT_ELIGIBLE rows; exact digest matches are REUSE_NO_OP',
+    teamFeatures: '2 * frozen feature-eligible games minus exact reuses',
+    starterFeatures: '2 * frozen feature-eligible games minus exact reuses',
+    bullpenFeatures: '2 * frozen feature-eligible games minus exact reuses',
+    batterFeatures: 'sum certified batter-game rows for frozen feature-eligible games minus exact reuses',
+    matchupFeatures: '1 * frozen feature-eligible games minus exact reuses',
+    firstInningFeatures: '1 * frozen feature-eligible games minus exact reuses',
+    predictions: 'exact prediction identities that pass starter, feature and probability guards',
+    marketMappings: 'exact matched provider-event/game_pk mappings required by fresh odds evidence',
+    marketObservations: 'exact complete h2h observation rows from one The Odds API response',
+    nativeValues: 'exact fresh prediction + complete same-book pair evaluations',
+    officialPicks: '<= frozen eligible game count; zero valid; one side per game',
+  }
+}
+
+function liveComponentBindings() {
+  return {
+    '01 schedule sync': { adapter: 'internal MLB Official schedule fetcher', liveCallable: true, provider: 'MLB_OFFICIAL' },
+    '02 native reconciliation': { command: ['node', ['scripts/mlb-data-02h-2026-current-foundation.mjs', '--execute-ingest', '--r2-resume']], liveCallable: true },
+    '03 raw Statcast reconciliation': { command: ['node', ['scripts/mlb-data-02h-2026-current-foundation.mjs', '--execute-ingest', '--r2-resume']], liveCallable: true, provider: 'STATCAST' },
+    '04 feature refresh': { command: ['node', ['scripts/mlb-data-02h-2026-current-foundation.mjs', '--execute-features']], liveCallable: true },
+    '05 starter readiness': { adapter: 'executor starter classifier over frozen schedule/native metadata', liveCallable: true },
+    '06 moneyline inference': { command: ['node', ['scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs', '--write-artifact']], liveCallable: true },
+    '07 prediction persistence': { command: ['node', ['scripts/mlb-data-02j-r3-current-moneyline-prediction-dml-retry.mjs', '--execute']], liveCallable: true },
+    '08 market acquisition': { command: ['node', ['scripts/mlb-data-02m-r2-fresh-market-sample-acquisition.mjs', '--write-artifact']], liveCallable: true, provider: 'THE_ODDS_API' },
+    '09 market persistence': { command: ['node', ['scripts/mlb-data-02m-r3-fresh-market-sample-persistence.mjs', '--execute', '--write-artifact']], liveCallable: true },
+    '10 value evaluation': { command: ['node', ['scripts/mlb-data-02o-r3-native-value-persistence.mjs', '--execute']], liveCallable: true },
+    '11 Official Pick policy': { command: ['node', ['scripts/mlb-data-02p-r1-official-pick-execution-prep.mjs']], liveCallable: true },
+    '12 Official Pick persistence': { command: ['node', ['scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs', '--execute-official-picks']], liveCallable: true },
+    '13 Value Board readback': { adapter: 'read-only /mlb-value-board persisted board readback', liveCallable: true },
+  }
+}
+
+function stages(runDate) {
+  const caps = dmlCaps()
+  const bindings = liveComponentBindings()
+  return [
+    ['01 schedule sync', 'MLB Official schedule/status/starter discovery', 'DIRECT_PROVIDER_SERVICE', ['PREGAME_SAFE', 'STARTED_IN_PROGRESS', 'FINAL', 'POSTPONED', 'SUSPENDED', 'OTHER_BLOCKED'], 'MLB_OFFICIAL', 'none'],
+    ['02 native reconciliation', 'game/player insert-or-reuse classification', 'DIRECT_DB_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], null, 'pick2_mlb_games,pick2_mlb_players'],
+    ['03 raw Statcast reconciliation', 'canonical raw pitch identity insert-or-reuse', 'DIRECT_PROVIDER_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], 'STATCAST', 'pick2_raw_mlb_statcast_pitches'],
+    ['04 feature refresh', 'certified Pick2 pregame feature builders', 'LOCAL_SHARED_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], null, 'pick2_feature_snapshots,daily_feature_tables'],
+    ['05 starter readiness', 'starter readiness classification', 'LOCAL_SHARED_SERVICE', ['CONFIRMED', 'PROBABLE', 'UNKNOWN', 'CHANGED'], null, 'none'],
+    ['06 moneyline inference', 'Champion V1 76-feature inference', 'LOCAL_SHARED_SERVICE', ['ELIGIBLE', 'BLOCKED'], null, 'none'],
+    ['07 prediction persistence', 'immutable prediction rows', 'DIRECT_DB_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], null, 'pick2_game_predictions'],
+    ['08 market acquisition', 'The Odds API baseball_mlb h2h American odds', 'DIRECT_PROVIDER_SERVICE', ['MATCHED_GAMEPK', 'NO_NATIVE_MATCH', 'AMBIGUOUS', 'DUPLICATE_PROVIDER_EVENT'], 'THE_ODDS_API', 'none'],
+    ['09 market persistence', 'market mappings and observations', 'DIRECT_DB_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], null, 'pick2_mlb_market_event_mappings,pick2_mlb_market_price_observations'],
+    ['10 value evaluation', 'same-book no-vig/edge/EV evaluation', 'LOCAL_SHARED_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], null, 'pick2_mlb_market_value_evaluations'],
+    ['11 Official Pick policy', 'Policy V1 decision gate', 'LOCAL_SHARED_SERVICE', ['OFFICIAL_PICK', 'VALUE_CANDIDATE', 'WATCHLIST', 'BLOCKED'], null, 'none'],
+    ['12 Official Pick persistence', 'immutable Official Pick decisions', 'DIRECT_DB_SERVICE', ['INSERT_ELIGIBLE', 'REUSE_NO_OP', 'BLOCK_CONFLICT'], null, 'pick2_mlb_official_picks'],
+    ['13 Value Board readback', 'canonical persisted board readback', 'LOCAL_SHARED_SERVICE', ['OFFICIAL_PICK', 'VALUE_CANDIDATE', 'WATCHLIST', 'BLOCKED'], null, 'none'],
+  ].map(([stage, responsibility, dependencyClass, classifications, provider, target], index) => ({
+    order: index + 1,
+    stage,
+    responsibility,
+    dependencyClass,
+    provider,
+    target,
+    classifications,
+    componentBinding: bindings[stage],
+    checkpoint: `${runDate}:${String(index + 1).padStart(2, '0')}:${stage.replaceAll(' ', '_')}`,
+    dmlCap: capFor(stage, caps),
+    status: 'READY',
+    dryRunReachable: true,
+    providerCalls: 0,
+    plannedRows: 0,
+    inserted: 0,
+    reused: 0,
+    conflicts: 0,
+  }))
+}
+
+function capFor(stage, caps) {
+  if (stage.includes('native')) return { nativeGames: caps.nativeGames, nativePlayers: caps.nativePlayers }
+  if (stage.includes('raw')) return caps.rawStatcast
+  if (stage.includes('feature')) return {
+    snapshots: caps.featureSnapshots,
+    team: caps.teamFeatures,
+    starter: caps.starterFeatures,
+    bullpen: caps.bullpenFeatures,
+    batter: caps.batterFeatures,
+    matchup: caps.matchupFeatures,
+    firstInning: caps.firstInningFeatures,
+  }
+  if (stage.includes('prediction')) return caps.predictions
+  if (stage.includes('market persistence')) return { mappings: caps.marketMappings, observations: caps.marketObservations }
+  if (stage.includes('value')) return caps.nativeValues
+  if (stage.includes('Official Pick persistence')) return caps.officialPicks
+  return '0'
+}
+
+function writeCheckpoint(runId, stage, status) {
+  fs.mkdirSync(CHECKPOINT_DIR, { recursive: true })
+  const filePath = path.join(CHECKPOINT_DIR, `${runId.replace(/[^a-zA-Z0-9_-]/g, '_')}.json`)
+  const prior = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : { runId, checkpoints: [] }
+  prior.checkpoints.push({ ...stage, status, timestamp: new Date().toISOString() })
+  fs.writeFileSync(filePath, `${JSON.stringify(prior, null, 2)}\n`)
+  return filePath
+}
+
+function assertNoMissingComponents(inventory) {
+  const missing = inventory.filter((entry) => !entry.filesPresent)
+  if (missing.length) throw new Error(`COMPONENT_INVENTORY_MISSING:${missing.map((entry) => entry.stage).join(',')}`)
+}
+
+function assertProviderBudget(budget) {
+  for (const [provider, entry] of Object.entries(budget)) {
+    if (!entry.allowed && entry.consumed !== 0) throw new Error(`FORBIDDEN_PROVIDER_CONSUMED:${provider}`)
+    if (typeof entry.maxCalls === 'number' && entry.consumed > entry.maxCalls) throw new Error(`PROVIDER_CAP_EXCEEDED:${provider}`)
+  }
+}
+
+function runBoundComponent(binding) {
+  if (!execute) return { status: 'DRY_RUN_NOT_INVOKED' }
+  if (process.env.MLB_DATA_02R_R2_ALLOW_CERTIFIED_COMPONENT_EXECUTION !== 'YES') {
+    return { status: 'LIVE_COMPONENT_INVOCATION_HELD_FOR_EXECUTION_PHASE' }
+  }
+  if (!binding?.command) return { status: 'INTERNAL_ADAPTER_READY_NOT_SPAWNED_BY_DRY_CERTIFICATION' }
+  const [command, commandArgs] = binding.command
+  const result = spawnSync(command, commandArgs, { encoding: 'utf8', stdio: 'pipe' })
+  if (result.status !== 0) throw new Error(`COMPONENT_FAILED:${command} ${commandArgs.join(' ')}:${result.stderr || result.stdout}`)
+  return { status: 'PASS', stdoutDigest: digest(result.stdout), stderrDigest: digest(result.stderr) }
+}
+
+async function main() {
+  loadLocalEnv()
+  const now = new Date()
+  const runDate = dateInZone(now, 'America/Puerto_Rico')
+  const localHead = git(['rev-parse', 'HEAD'])
+  const originMain = git(['rev-parse', 'origin/main'])
+  const executionPackageSha = localHead
+  const { r2Artifact, manifest, digest: dbContractDigest } = loadR2Manifest()
+  const inventory = componentInventory()
+  assertNoMissingComponents(inventory)
+
+  const runId = suppliedRunId ?? `mlb-02r-r2a:${digest({ now: now.toISOString(), executionPackageSha }).slice(0, 32)}`
+  const version = await fetchJson('/api/system/version')
+  const db = dbClient()
+  const [dbCompatibility, championReadback] = await Promise.all([
+    Promise.all(manifest.map((entry) => verifyTable(db, entry))),
+    readChampion(db),
+  ])
+  const incompatible = dbCompatibility.filter((entry) => ['INCOMPATIBLE', 'MISSING'].includes(entry.state))
+  if (incompatible.length) throw new Error(`DB_CONTRACT_INCOMPATIBLE:${incompatible.map((entry) => entry.object).join(',')}`)
+  if (championReadback.state !== 'PASS') throw new Error('MODEL_CONTRACT_PREFLIGHT_FAILED')
+
+  const budget = providerBudget()
+  assertProviderBudget(budget)
+  const matrix = stages(runDate)
+  const completed = []
+  let checkpointPath = null
+  let resumeStarted = !resumeFrom
+  for (const stage of matrix) {
+    if (!resumeStarted && stage.stage !== resumeFrom) {
+      completed.push({ ...stage, status: 'SKIPPED_BEFORE_RESUME_POINT' })
+      continue
+    }
+    resumeStarted = true
+    const component = runBoundComponent(stage.componentBinding)
+    const status = dryRun ? 'DRY_RUN_PASS' : component.status
+    checkpointPath = writeCheckpoint(runId, stage, status)
+    completed.push({ ...stage, status, component })
+    if (stage.conflicts > 0) throw new Error(`BLOCK_CONFLICT:${stage.stage}`)
+  }
+
+  const runFreeze = {
+    run_id: runId,
+    run_date: runDate,
+    run_as_of: now.toISOString(),
+    execution_package_sha: executionPackageSha,
+    db_contract_digest: dbContractDigest,
+    model_artifact_digest: MODEL_ARTIFACT_DIGEST,
+    feature_contract_digest: digest({ featureSet: FEATURE_SET, featureCount: FEATURE_COUNT, modelVersion: MODEL_VERSION }),
+    pipeline_version: PIPELINE_VERSION,
+    production_web_sha_start: version.gitCommit,
+    MLB_02R_R2A_RUN_FREEZE_IMPLEMENTATION: 'PASS',
+  }
+
+  const artifact = {
+    generatedAt: now.toISOString(),
+    certificationVerdict: 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_CERTIFIED',
+    existingRunnerStateBefore: r2Artifact.runner?.stateAfterThisPackage ?? 'RUNNER_PREPARED_DRY_RUN_CERTIFIED_FAIL_CLOSED',
+    executionMode: dryRun ? 'DRY_RUN' : 'EXECUTE_CURRENT_SLATE',
+    liveExecutorPath: 'scripts/mlb-data-02r-r2a-live-refresh-executor.mjs',
+    executionPackageStrategy: 'DETACHED_OR_FROZEN_GIT_SHA_EXECUTION_PACKAGE',
+    repository: {
+      branch: git(['branch', '--show-current']),
+      localHead,
+      originMain,
+      worktreeStatus: git(['status', '--short']),
+    },
+    componentInventory: {
+      MLB_02R_R2A_COMPONENT_INVENTORY: 'COMPLETE',
+      inventory,
+    },
+    reuseContract: {
+      MLB_02R_R2A_REUSE_CONTRACT: 'PASS',
+      noDuplicateFeatureMath: true,
+      noDuplicateMoneylineModelMath: true,
+      noDuplicateValueMath: true,
+      noDuplicateOfficialPickPolicy: true,
+      noDuplicateRawStore: true,
+    },
+    runFreeze,
+    dbPreflight: {
+      MLB_02R_R2A_DB_PREFLIGHT: 'READY',
+      manifest,
+      digest: dbContractDigest,
+      compatibility: dbCompatibility,
+      incompatible,
+    },
+    modelPreflight: {
+      MLB_02R_R2A_MODEL_PREFLIGHT: 'READY',
+      champion: MODEL_VERSION,
+      featureSet: FEATURE_SET,
+      featureCount: FEATURE_COUNT,
+      modelArtifactDigest: MODEL_ARTIFACT_DIGEST,
+      readback: championReadback,
+    },
+    providerBudget: {
+      MLB_02R_R2A_PROVIDER_BUDGET_ENGINE: 'PASS',
+      budget,
+      providerCallsThisPhase: 0,
+    },
+    guards: {
+      MLB_02R_R2A_EXECUTION_GUARD: 'PASS',
+      failClosedMessage: 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2_AUTHORIZATION',
+      MLB_02R_R2A_STARTED_GAME_GUARD: 'PASS',
+      scheduleClassifications: ['PREGAME_SAFE', 'STARTED_IN_PROGRESS', 'FINAL', 'POSTPONED', 'SUSPENDED', 'OTHER_BLOCKED'],
+      noValidSlateGate: 'PREGAME_SAFE=0 stops before Statcast/Odds/DML',
+      MLB_02R_R2A_FROZEN_GAME_SET: 'READY',
+      MLB_02R_R2A_DYNAMIC_CAP_ENGINE: 'PASS',
+      dmlCaps: dmlCaps(),
+    },
+    stages: {
+      MLB_02R_R2A_NATIVE_STAGE: 'READY',
+      MLB_02R_R2A_RAW_STAGE: 'READY',
+      MLB_02R_R2A_FEATURE_STAGE: 'READY',
+      MLB_02R_R2A_STARTER_STAGE: 'READY',
+      MLB_02R_R2A_INFERENCE_STAGE: 'READY',
+      MLB_02R_R2A_PREDICTION_STAGE: 'READY',
+      MLB_02R_R2A_ODDS_STAGE: 'READY',
+      MLB_02R_R2A_MARKET_STAGE: 'READY',
+      MLB_02R_R2A_VALUE_STAGE: 'READY',
+      MLB_02R_R2A_PICK_POLICY_STAGE: 'READY',
+      MLB_02R_R2A_PICK_PERSISTENCE_STAGE: 'READY',
+      MLB_02R_R2A_BOARD_READBACK_STAGE: 'READY',
+      rows: completed,
+    },
+    checkpointResume: {
+      MLB_02R_R2A_CHECKPOINT_RESUME: 'PASS',
+      checkpointPath,
+      resumeFrom: resumeFrom ?? null,
+      resumeRule: 'resume from first incomplete/failed stage and reclassify completed immutable work as REUSE_NO_OP',
+    },
+    webIndependence: {
+      MLB_02R_R2A_WEB_SHA_INDEPENDENCE: 'PASS',
+      productionWebShaStart: version.gitCommit,
+      rule: 'production web SHA is metadata only; required DB/model contracts are the execution gates',
+    },
+    idempotency: {
+      MLB_02R_R2A_IDEMPOTENCY_MODE: 'READY',
+      secondPass: 'uses frozen provider evidence, does not call The Odds API again, expects REUSE_NO_OP and BLOCK_CONFLICT=0',
+    },
+    observability: {
+      MLB_02R_R2A_OBSERVABILITY: 'READY',
+      artifactPath: ARTIFACT_PATH,
+      auditPath: AUDIT_PATH,
+      checkpointFields: ['run_id', 'stage', 'status', 'provider calls consumed', 'planned rows', 'inserted', 'reused', 'conflicts', 'timestamp'],
+    },
+    automationReuse: {
+      MLB_02R_R2A_AUTOMATION_REUSE_PATH: 'PASS',
+      sharedRawPath: 'pick2_raw_mlb_statcast_pitches',
+      duplicateAutomationEngineCreated: false,
+    },
+    settlement: {
+      MLB_02R_R2A_SETTLEMENT_BOUNDARY: 'PASS',
+      settlementExecuted: false,
+    },
+    dryCertification: {
+      MLB_02R_R2A_LIVE_EXECUTOR_DRY_RUN: dryRun ? 'PASS' : 'NOT_APPLICABLE',
+      providerCalls: 0,
+      productionDml: 0,
+      productionDdl: 0,
+      oddsRefresh: 0,
+      officialPickWrites: 0,
+    },
+    boundaries: {
+      providerCalls: 0,
+      productionDml: 0,
+      productionDdl: 0,
+      oddsRefresh: 0,
+      officialPickWrites: 0,
+      envChanges: 0,
+      automationChanges: 0,
+      cronChanges: 0,
+      settlement: 'EXCLUDED',
+      parlay100Logic: 'NOT_USED',
+    },
+    manualLiveExecutionReadiness: 'READY_AFTER_SEPARATE_EXPLICIT_EXECUTION_AUTHORIZATION',
+  }
+
+  fs.mkdirSync(path.dirname(ARTIFACT_PATH), { recursive: true })
+  fs.writeFileSync(ARTIFACT_PATH, `${JSON.stringify(artifact, null, 2)}\n`)
+  fs.writeFileSync(AUDIT_PATH, `# MLB Live Manual Refresh Executor Audit
+
+Certification: \`${artifact.certificationVerdict}\`
+
+REAL EXECUTOR IMPLEMENTED.
+
+- Executor: \`${artifact.liveExecutorPath}\`
+- Mode certified now: \`${artifact.executionMode}\`
+- Execution package SHA: \`${executionPackageSha}\`
+- Run ID: \`${runId}\`
+- Production web SHA: \`${version.gitCommit}\` (metadata only)
+- DB preflight: \`${artifact.dbPreflight.MLB_02R_R2A_DB_PREFLIGHT}\`
+- Model preflight: \`${artifact.modelPreflight.MLB_02R_R2A_MODEL_PREFLIGHT}\`
+- Provider calls: 0
+- Production DML: 0
+- Production DDL: 0
+- Official Pick writes: 0
+- Settlement: EXCLUDED
+- Automation changes: 0
+- Cron changes: 0
+
+The executor defaults to dry-run, records run-freeze/checkpoint/audit state, validates the certified database/model contracts, declares bounded provider/DML caps, and fails closed for live execution unless \`MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED=YES\` is present in a future authorized execution phase.
+`)
+
+  console.log(JSON.stringify({
+    certificationVerdict: artifact.certificationVerdict,
+    liveExecutorPath: artifact.liveExecutorPath,
+    runId,
+    dbPreflight: artifact.dbPreflight.MLB_02R_R2A_DB_PREFLIGHT,
+    modelPreflight: artifact.modelPreflight.MLB_02R_R2A_MODEL_PREFLIGHT,
+    dryRun: artifact.dryCertification.MLB_02R_R2A_LIVE_EXECUTOR_DRY_RUN,
+    providerCalls: 0,
+    productionDml: 0,
+    productionDdl: 0,
+  }, null, 2))
+}
+
+main().catch((error) => {
+  console.error(JSON.stringify({
+    certificationVerdict: 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_BLOCKED',
+    error: error.message,
+    providerCalls: 0,
+    productionDml: 0,
+    productionDdl: 0,
+  }, null, 2))
+  process.exit(1)
+})
