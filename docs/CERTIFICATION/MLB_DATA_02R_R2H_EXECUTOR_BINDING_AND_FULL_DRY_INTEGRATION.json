@@ -1,0 +1,1678 @@
+{
+  "generatedAt": "2026-09-07T22:39:04.186Z",
+  "project": "MLB_DATA_02R_R2H_EXECUTOR_BINDING_AND_FULL_DRY_INTEGRATION",
+  "certificationVerdict": "MLB_DATA_02R_R2H_EXECUTOR_BINDING_AND_FULL_DRY_INTEGRATION_CERTIFIED",
+  "priorPackageSha": "bc49787dbaf2749402c5236739f735422d9983c7",
+  "gates": {
+    "MLB_02R_R2H_INTERFACE_PACKAGE_PARITY": "PASS",
+    "MLB_02R_R2H_EXECUTOR_BINDING_INVENTORY": "COMPLETE",
+    "MLB_02R_R2H_EXECUTOR_BINDINGS": "PASS",
+    "MLB_02R_R2H_LEGACY_BROAD_PATH_ISOLATION": "PASS",
+    "MLB_02R_R2H_FROZEN_CONTEXT_PROPAGATION": "PASS",
+    "MLB_02R_R2H_DRY_PROVIDER_EVIDENCE": "PASS",
+    "MLB_02R_R2H_DRY_DB_INTEGRATION": "PASS",
+    "MLB_02R_R2H_STAGE_01": "PASS",
+    "MLB_02R_R2H_FROZEN_GAME_SET": "PASS",
+    "MLB_02R_R2H_STAGE_02": "PASS",
+    "MLB_02R_R2H_STAGE_03": "PASS",
+    "MLB_02R_R2H_STAGE_04": "PASS",
+    "MLB_02R_R2H_STAGE_05": "PASS",
+    "MLB_02R_R2H_STAGE_06": "PASS",
+    "MLB_02R_R2H_STAGE_07": "PASS",
+    "MLB_02R_R2H_STAGE_08": "PASS",
+    "MLB_02R_R2H_STAGE_09": "PASS",
+    "MLB_02R_R2H_STAGE_10": "PASS",
+    "MLB_02R_R2H_STAGE_11": "PASS",
+    "MLB_02R_R2H_STAGE_12": "PASS",
+    "MLB_02R_R2H_STAGE_13": "PASS",
+    "MLB_02R_R2H_FULL_PREWRITE_PLAN": "PASS",
+    "MLB_02R_R2H_CHECKPOINT_RESUME_INTEGRATION": "PASS",
+    "MLB_02R_R2H_DRY_IDEMPOTENCY": "PASS",
+    "MLB_02R_R2H_INTEGRATED_NEGATIVE_TESTS": "PASS",
+    "MLB_02R_R2H_PLACEHOLDER_ELIMINATION": "PASS",
+    "MLB_02R_R2H_LIVE_FAIL_CLOSED": "PASS",
+    "MLB_02R_R2H_WEB_SHA_INDEPENDENCE": "PASS",
+    "MLB_02R_R2H_AUTOMATION_REUSE": "PASS",
+    "MLB_02R_R2H_FULL_DRY_INTEGRATION": "PASS"
+  },
+  "executor": {
+    "path": "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs",
+    "dryIntegrationFlag": "--r2h-full-dry-integration",
+    "broadLegacyExecution": "ISOLATED",
+    "placeholderStatesRemaining": 0
+  },
+  "runContext": {
+    "run_id": "mlb-02r-r2h-dry",
+    "run_date": "2026-09-07",
+    "run_as_of": "2026-09-07T15:30:00.000Z",
+    "execution_package_sha": "bc49787dbaf2749402c5236739f735422d9983c7",
+    "db_contract_digest": "r2h-dry-db-contract",
+    "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "feature_contract_digest": "6052f734985fc1f6244f1a73529a8d74c0227877d69aac3c41fca902abf637e1",
+    "eligible_game_pks": [
+      700001
+    ],
+    "blocked_game_pks": [
+      700099
+    ],
+    "game_start_times": {
+      "700001": "2026-09-07T23:05:00.000Z"
+    },
+    "starter_states": {
+      "700001": "PROBABLE"
+    },
+    "provider_budget": {
+      "MLB_OFFICIAL": {
+        "allowed": true,
+        "maxCalls": 1,
+        "consumed": 0,
+        "forbiddenInDryRun": true
+      },
+      "STATCAST": {
+        "allowed": true,
+        "maxCalls": "0_TO_FROZEN_GAME_SET",
+        "consumed": 0,
+        "forbiddenInDryRun": true
+      },
+      "THE_ODDS_API": {
+        "allowed": true,
+        "maxCalls": 1,
+        "consumed": 0,
+        "sport": "baseball_mlb",
+        "market": "h2h",
+        "oddsFormat": "american",
+        "forbiddenInDryRun": true
+      },
+      "BALLDONTLIE": {
+        "allowed": false,
+        "maxCalls": 0,
+        "consumed": 0
+      },
+      "SPORTSDATAIO": {
+        "allowed": false,
+        "maxCalls": 0,
+        "consumed": 0
+      },
+      "OTHER": {
+        "allowed": false,
+        "maxCalls": 0,
+        "consumed": 0
+      }
+    },
+    "per_stage_dml_caps": {
+      "nativeGames": 1,
+      "nativePlayers": 2,
+      "rawStatcast": 2,
+      "features": {
+        "snapshots": 1,
+        "team": 2,
+        "starter": 2,
+        "bullpen": 2,
+        "batter": 4,
+        "matchup": 1,
+        "firstInning": 1
+      },
+      "predictions": 1,
+      "marketMappings": 1,
+      "marketObservations": 2,
+      "nativeValues": 2,
+      "officialPicks": 1
+    },
+    "checkpoint_state": [
+      {
+        "stage": "01 schedule sync",
+        "status": "COMPLETE"
+      },
+      {
+        "stage": "02 native reconciliation",
+        "status": "PENDING"
+      },
+      {
+        "stage": "03 raw Statcast reconciliation",
+        "status": "PENDING"
+      },
+      {
+        "stage": "04 feature refresh",
+        "status": "PENDING"
+      },
+      {
+        "stage": "05 starter readiness",
+        "status": "PENDING"
+      },
+      {
+        "stage": "06 moneyline inference",
+        "status": "PENDING"
+      },
+      {
+        "stage": "07 prediction persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "08 odds evidence handoff",
+        "status": "PENDING"
+      },
+      {
+        "stage": "09 market persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "10 value persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "11 Official Pick policy",
+        "status": "PENDING"
+      },
+      {
+        "stage": "12 Official Pick persistence",
+        "status": "PENDING"
+      },
+      {
+        "stage": "13 Value Board readback",
+        "status": "PENDING"
+      }
+    ]
+  },
+  "bindings": {
+    "01 schedule sync": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "02 native reconciliation": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "03 raw Statcast reconciliation": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "04 feature refresh": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "05 starter readiness": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "06 moneyline inference": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "07 prediction persistence": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "08 odds evidence handoff": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "09 market persistence": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "10 value persistence": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "11 Official Pick policy": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "12 Official Pick persistence": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE",
+    "13 Value Board readback": "CERTIFIED_R2F_R2G_CALLABLE_INTERFACE"
+  },
+  "providerEvidence": {
+    "schedule": "MLB_OFFICIAL_SHAPED_INJECTED",
+    "statcast": "STATCAST_SHAPED_INJECTED_CACHE",
+    "odds": "THE_ODDS_API_H2H_SHAPED_INJECTED"
+  },
+  "dryDbIntegration": "INJECTED_DRY_REPOSITORY_INSERT_REUSE_CONFLICT_PATHS",
+  "stageResults": [
+    {
+      "stage": "01 schedule sync",
+      "status": "PASS",
+      "plannedRows": 2,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "runDate": "2026-09-07",
+        "runAsOf": "2026-09-07T15:30:00.000Z",
+        "games": [
+          {
+            "game_pk": 700001,
+            "start_time": "2026-09-07T23:05:00.000Z",
+            "scheduled_at": "2026-09-07T23:05:00.000Z",
+            "game_date": "2026-09-07",
+            "home_team_id": 111,
+            "away_team_id": 110,
+            "home": {
+              "team_id": 111,
+              "mlb_team_id": 111,
+              "abbreviation": "HME"
+            },
+            "away": {
+              "team_id": 110,
+              "mlb_team_id": 110,
+              "abbreviation": "AWY"
+            },
+            "status": "Pre-Game",
+            "doubleheader": "N",
+            "game_number": 1,
+            "doubleheader_identity": "2026-09-07:110:111:1",
+            "starter_evidence": {
+              "homeProbablePitcher": {
+                "id": 660002,
+                "fullName": "Home Starter",
+                "confirmed": true
+              },
+              "awayProbablePitcher": {
+                "id": 660001,
+                "fullName": "Away Starter",
+                "confirmed": false
+              }
+            },
+            "pregame_classification": "PREGAME_SAFE",
+            "source_payload_digest": "acfa10581c43891433514390620d5f4071f0beea68d9e383aa832deb01bb7e04"
+          },
+          {
+            "game_pk": 700099,
+            "start_time": "2026-09-07T14:05:00.000Z",
+            "scheduled_at": "2026-09-07T14:05:00.000Z",
+            "game_date": "2026-09-07",
+            "home_team_id": 113,
+            "away_team_id": 112,
+            "home": {
+              "team_id": 113,
+              "mlb_team_id": 113,
+              "abbreviation": "DON"
+            },
+            "away": {
+              "team_id": 112,
+              "mlb_team_id": 112,
+              "abbreviation": "OLD"
+            },
+            "status": "Final",
+            "doubleheader": null,
+            "game_number": null,
+            "doubleheader_identity": "2026-09-07:112:113:1",
+            "starter_evidence": {
+              "homeProbablePitcher": null,
+              "awayProbablePitcher": null
+            },
+            "pregame_classification": "FINAL",
+            "source_payload_digest": "c2a34d3e15d2ab380fa68b9b4449627d44b8fc05368205ae3ee128bc15d7939e"
+          }
+        ],
+        "providerAccounting": {
+          "provider": "MLB_OFFICIAL",
+          "planned": 0,
+          "consumed": 0,
+          "blocked": 0,
+          "calls": 0
+        }
+      }
+    },
+    {
+      "stage": "02 native reconciliation",
+      "status": "PASS",
+      "plannedRows": 3,
+      "insertEligible": 3,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "gamePlan": {
+          "plannedRows": 1,
+          "insertEligible": 1,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": [
+            {
+              "identity": "700001",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            }
+          ]
+        },
+        "playerPlan": {
+          "plannedRows": 2,
+          "insertEligible": 2,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": [
+            {
+              "identity": "660002",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            },
+            {
+              "identity": "660001",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            }
+          ]
+        },
+        "productionDml": 0
+      }
+    },
+    {
+      "stage": "03 raw Statcast reconciliation",
+      "status": "PASS",
+      "plannedRows": 2,
+      "insertEligible": 2,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "target": "public.pick2_raw_mlb_statcast_pitches",
+        "batchSize": 100,
+        "sourceIdentities": [
+          "statcast:mlb:2026:700001:1:1",
+          "statcast:mlb:2026:700001:1:2"
+        ],
+        "present": 0,
+        "missing": 2,
+        "duplicates": 0,
+        "unexpected": 0,
+        "providerAccounting": {
+          "provider": "STATCAST",
+          "planned": 0,
+          "consumed": 0,
+          "blocked": 0,
+          "calls": 0
+        },
+        "classifications": [
+          {
+            "identity": "statcast:mlb:2026:700001:1:1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE"
+          },
+          {
+            "identity": "statcast:mlb:2026:700001:1:2",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "04 feature refresh",
+      "status": "PASS",
+      "plannedRows": 13,
+      "insertEligible": 13,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "domains": {
+          "snapshots": {
+            "plannedRows": 1,
+            "insertEligible": 1,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "snapshot:700001:moneyline",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          },
+          "team": {
+            "plannedRows": 2,
+            "insertEligible": 2,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "team:700001:111:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              },
+              {
+                "identity": "team:700001:110:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          },
+          "starter": {
+            "plannedRows": 2,
+            "insertEligible": 2,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "starter:700001:660002:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              },
+              {
+                "identity": "starter:700001:660001:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          },
+          "bullpen": {
+            "plannedRows": 2,
+            "insertEligible": 2,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "bullpen:700001:111:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              },
+              {
+                "identity": "bullpen:700001:110:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          },
+          "batter": {
+            "plannedRows": 4,
+            "insertEligible": 4,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "batter:700001:770001:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              },
+              {
+                "identity": "batter:700001:770002:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              },
+              {
+                "identity": "batter:700001:770003:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              },
+              {
+                "identity": "batter:700001:770004:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          },
+          "matchup": {
+            "plannedRows": 1,
+            "insertEligible": 1,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "matchup:700001:game:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          },
+          "firstInning": {
+            "plannedRows": 1,
+            "insertEligible": 1,
+            "reuseNoOp": 0,
+            "blockConflict": 0,
+            "classifications": [
+              {
+                "identity": "firstInning:700001:game:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+                "game_pk": 700001,
+                "classification": "INSERT_ELIGIBLE"
+              }
+            ]
+          }
+        },
+        "targetGamePks": [
+          700001
+        ],
+        "championFeatureSemantics": "MLB_ML_FEATURE_SET_V1_PRESERVED",
+        "historicalReadsAllowed": true,
+        "productionDml": 0
+      }
+    },
+    {
+      "stage": "05 starter readiness",
+      "status": "PASS",
+      "plannedRows": 1,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "rows": [
+          {
+            "game_pk": 700001,
+            "classification": "PROBABLE",
+            "reasons": [
+              "PROBABLE_STARTER"
+            ],
+            "evidence": {
+              "starter": {
+                "homeProbablePitcher": {
+                  "id": 660002,
+                  "fullName": "Home Starter",
+                  "confirmed": true
+                },
+                "awayProbablePitcher": {
+                  "id": 660001,
+                  "fullName": "Away Starter",
+                  "confirmed": false
+                }
+              },
+              "support": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "stage": "06 moneyline inference",
+      "status": "PASS",
+      "plannedRows": 1,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "game_pk": 700001,
+        "home_probability": 0.5411090483515291,
+        "away_probability": 0.45889095164847093,
+        "input_digest": "ef06b339694b1dc1c2eba44d743aba1374e87b3f0e1fd373f5a3135be0fb6be7",
+        "range_audit": "PASS",
+        "validation_state": "PASS"
+      }
+    },
+    {
+      "stage": "07 prediction persistence",
+      "status": "PASS",
+      "plannedRows": 1,
+      "insertEligible": 1,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "target": "public.pick2_game_predictions",
+        "plan": {
+          "plannedRows": 1,
+          "insertEligible": 1,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": [
+            {
+              "identity": "baseball_mlb::prediction::moneyline::700001::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::ef06b339694b1dc1c2eba44d743aba1374e87b3f0e1fd373f5a3135be0fb6be7",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "stage": "08 odds evidence handoff",
+      "status": "PASS",
+      "plannedRows": 3,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "events": [
+          {
+            "id": "odds-event-700001",
+            "sport_key": "baseball_mlb",
+            "commence_time": "2026-09-07T23:05:00.000Z",
+            "home_team": "Home Team",
+            "away_team": "Away Team",
+            "bookmakers": [
+              {
+                "key": "book_a",
+                "title": "Book A",
+                "markets": [
+                  {
+                    "key": "h2h",
+                    "last_update": "2026-09-07T15:01:00.000Z",
+                    "outcomes": [
+                      {
+                        "name": "Home Team",
+                        "price": -120
+                      },
+                      {
+                        "name": "Away Team",
+                        "price": 110
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "odds-event-out-of-scope",
+            "sport_key": "baseball_mlb",
+            "commence_time": "2026-09-07T23:05:00.000Z",
+            "home_team": "Other Home",
+            "away_team": "Other Away",
+            "bookmakers": [
+              {
+                "key": "book_a",
+                "title": "Book A",
+                "markets": [
+                  {
+                    "key": "h2h",
+                    "last_update": "2026-09-07T15:01:00.000Z",
+                    "outcomes": [
+                      {
+                        "name": "Other Home",
+                        "price": -105
+                      },
+                      {
+                        "name": "Other Away",
+                        "price": -105
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "odds-event-unmatched",
+            "sport_key": "baseball_mlb",
+            "commence_time": "2026-09-07T23:05:00.000Z",
+            "home_team": "No Match",
+            "away_team": "Nobody",
+            "bookmakers": []
+          }
+        ],
+        "responseDigest": "543eeeda33289bda5d058a7027a0120d4583667c1292a88379fc657f7c67562d",
+        "acquiredAt": "2026-09-07T15:01:00.000Z",
+        "providerAccounting": {
+          "provider": "THE_ODDS_API",
+          "sport": "baseball_mlb",
+          "market": "h2h",
+          "oddsFormat": "american",
+          "maxLiveRequests": 1,
+          "calls": 0
+        },
+        "eligibleGamePks": [
+          700001
+        ]
+      }
+    },
+    {
+      "stage": "09 market persistence",
+      "status": "PASS",
+      "plannedRows": 3,
+      "insertEligible": 3,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "targetMappings": "public.pick2_mlb_market_event_mappings",
+        "targetObservations": "public.pick2_mlb_market_price_observations",
+        "mappingRows": [
+          {
+            "game_pk": 700001,
+            "provider_event_id": "odds-event-700001",
+            "market_provider": "the-odds-api",
+            "market_sport_key": "baseball_mlb",
+            "identity": "odds-event-700001",
+            "source_payload_digest": "a1053720b0ec9b5db90a33caeb871d0d4016061df227d9870a2d56869e28c993"
+          }
+        ],
+        "observationRows": [
+          {
+            "observation_identity": "32dba48a92b696e6e5bd7829379c66628c0cd40a6e59963d6f904a2fcc24f8c1",
+            "game_pk": 700001,
+            "provider": "the-odds-api",
+            "provider_event_id": "odds-event-700001",
+            "bookmaker_key": "book_a",
+            "market": "MONEYLINE",
+            "provider_market_key": "h2h",
+            "side": "HOME",
+            "american_odds": -120,
+            "provider_last_update": "2026-09-07T15:01:00.000Z",
+            "acquired_at": "2026-09-07T15:01:00.000Z",
+            "source_payload_digest": "90d70337ce8c41b3dbe222aad65b73d5a3efd354bd0611809e4cb858c08c0f9d",
+            "source_response_digest": "543eeeda33289bda5d058a7027a0120d4583667c1292a88379fc657f7c67562d"
+          },
+          {
+            "observation_identity": "5de902246aa2b82eec3b0fdebb59f2dcd1a8546448308382d716c27fb8c30777",
+            "game_pk": 700001,
+            "provider": "the-odds-api",
+            "provider_event_id": "odds-event-700001",
+            "bookmaker_key": "book_a",
+            "market": "MONEYLINE",
+            "provider_market_key": "h2h",
+            "side": "AWAY",
+            "american_odds": 110,
+            "provider_last_update": "2026-09-07T15:01:00.000Z",
+            "acquired_at": "2026-09-07T15:01:00.000Z",
+            "source_payload_digest": "fa4caa03a52b66c108e938ac782b8d72c64b8b1175456d07908059a9921142d0",
+            "source_response_digest": "543eeeda33289bda5d058a7027a0120d4583667c1292a88379fc657f7c67562d"
+          }
+        ],
+        "mappingPlan": {
+          "plannedRows": 1,
+          "insertEligible": 1,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": [
+            {
+              "identity": "odds-event-700001",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            }
+          ]
+        },
+        "observationPlan": {
+          "plannedRows": 2,
+          "insertEligible": 2,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": [
+            {
+              "identity": "32dba48a92b696e6e5bd7829379c66628c0cd40a6e59963d6f904a2fcc24f8c1",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            },
+            {
+              "identity": "5de902246aa2b82eec3b0fdebb59f2dcd1a8546448308382d716c27fb8c30777",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            }
+          ]
+        },
+        "normalization": {
+          "rows": 4,
+          "invalid": 0,
+          "providerEventCount": 3
+        },
+        "crosswalk": [
+          {
+            "provider_event_id": "odds-event-700001",
+            "classification": "MATCHED",
+            "game_pk": 700001
+          },
+          {
+            "provider_event_id": "odds-event-out-of-scope",
+            "classification": "OUT_OF_SCOPE",
+            "game_pk": 700002
+          }
+        ],
+        "pairState": {
+          "completePairs": 1,
+          "partialPairs": 0
+        }
+      }
+    },
+    {
+      "stage": "10 value persistence",
+      "status": "PASS",
+      "plannedRows": 2,
+      "insertEligible": 2,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "target": "public.pick2_mlb_market_value_evaluations",
+        "plan": {
+          "plannedRows": 2,
+          "insertEligible": 2,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": [
+            {
+              "identity": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            },
+            {
+              "identity": "f774a9065bfd3b066db686cf0a751db2ed92f175fe3d10be7bf2663a45781ef0",
+              "game_pk": 700001,
+              "classification": "INSERT_ELIGIBLE"
+            }
+          ]
+        },
+        "analyticalRows": [
+          {
+            "value_identity": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61",
+            "prediction_id": "pred-700001",
+            "game_pk": 700001,
+            "side": "HOME",
+            "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+            "model_probability": 0.5411090483515291,
+            "bookmaker_key": "book_a",
+            "american_odds": -120,
+            "home_market_observation_id": "obs-0",
+            "away_market_observation_id": "obs-1",
+            "selected_side_market_observation_id": "obs-0",
+            "raw_implied_probability": 0.5454545454545454,
+            "no_vig_probability": 0.5338983050847457,
+            "edge": 0.007210743266783393,
+            "unit_ev": -0.00796674468886327,
+            "consensus_probability": 0.5338983050847457,
+            "consensus_edge": 0.007210743266783393,
+            "market_dispersion": 0,
+            "book_count": 1,
+            "market_freshness": "FRESH",
+            "starter_status": "PROBABLE",
+            "temporal_eligibility": "PREGAME_VALID",
+            "source_payload_digest": "e673887ea4bf1f6972748edc7815c3a7b40e23e98219898c05e6a28779a99f53",
+            "evaluation_payload_digest": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61"
+          },
+          {
+            "value_identity": "f774a9065bfd3b066db686cf0a751db2ed92f175fe3d10be7bf2663a45781ef0",
+            "prediction_id": "pred-700001",
+            "game_pk": 700001,
+            "side": "AWAY",
+            "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+            "model_probability": 0.45889095164847093,
+            "bookmaker_key": "book_a",
+            "american_odds": 110,
+            "home_market_observation_id": "obs-0",
+            "away_market_observation_id": "obs-1",
+            "selected_side_market_observation_id": "obs-1",
+            "raw_implied_probability": 0.47619047619047616,
+            "no_vig_probability": 0.4661016949152542,
+            "edge": -0.007210743266783282,
+            "unit_ev": -0.03632900153821095,
+            "consensus_probability": 0.4661016949152542,
+            "consensus_edge": -0.007210743266783282,
+            "market_dispersion": 0,
+            "book_count": 1,
+            "market_freshness": "FRESH",
+            "starter_status": "PROBABLE",
+            "temporal_eligibility": "PREGAME_VALID",
+            "source_payload_digest": "205a1fe1b43abf5110076679cc67fea75dbd4d923b73206d222d36bedc198fc8",
+            "evaluation_payload_digest": "f774a9065bfd3b066db686cf0a751db2ed92f175fe3d10be7bf2663a45781ef0"
+          }
+        ]
+      }
+    },
+    {
+      "stage": "11 Official Pick policy",
+      "status": "PASS",
+      "plannedRows": 2,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "statuses": [
+          "WATCHLIST",
+          "WATCHLIST"
+        ],
+        "rows": [
+          {
+            "value_identity": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61",
+            "status": "WATCHLIST",
+            "reason_codes": [],
+            "risk_flags": [
+              "PROBABLE_STARTER",
+              "WEAK_CONSENSUS_EDGE"
+            ],
+            "blocker_codes": [],
+            "starter_status": "PROBABLE"
+          },
+          {
+            "value_identity": "f774a9065bfd3b066db686cf0a751db2ed92f175fe3d10be7bf2663a45781ef0",
+            "status": "WATCHLIST",
+            "reason_codes": [],
+            "risk_flags": [
+              "PROBABLE_STARTER"
+            ],
+            "blocker_codes": [],
+            "starter_status": "PROBABLE"
+          }
+        ],
+        "allowedStatuses": [
+          "OFFICIAL_PICK_ELIGIBLE",
+          "VALUE_CANDIDATE",
+          "WATCHLIST",
+          "BLOCKED"
+        ]
+      }
+    },
+    {
+      "stage": "12 Official Pick persistence",
+      "status": "PASS",
+      "plannedRows": 0,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "target": "public.pick2_mlb_official_picks",
+        "plan": {
+          "plannedRows": 0,
+          "insertEligible": 0,
+          "reuseNoOp": 0,
+          "blockConflict": 0,
+          "classifications": []
+        },
+        "officialPickRows": []
+      }
+    },
+    {
+      "stage": "13 Value Board readback",
+      "status": "PASS",
+      "plannedRows": 2,
+      "insertEligible": 0,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "summary": {
+        "operatingDate": "2026-09-07",
+        "asOf": "2026-09-07T15:30:00.000Z",
+        "OfficialPicks": 0,
+        "ValueCandidates": 0,
+        "Watchlist": 2,
+        "Blocked": 0,
+        "Total": 2,
+        "TopPick": {
+          "status": "WATCHLIST",
+          "game_pk": 700001,
+          "side": "HOME",
+          "value_identity": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61"
+        },
+        "freshness": "FRESH",
+        "state": "DRY_CANONICAL_FIXTURE"
+      }
+    }
+  ],
+  "frozenGameSet": {
+    "eligibleGamePks": [
+      700001
+    ],
+    "blockedGamePks": [
+      700099
+    ],
+    "outOfScopeRows": 0
+  },
+  "prewritePlan": {
+    "domains": [
+      {
+        "domain": "native games",
+        "cap": 1,
+        "rows": [
+          {
+            "domain": "native games",
+            "identity": "700001",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 1,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "native players",
+        "cap": 2,
+        "rows": [
+          {
+            "domain": "native players",
+            "identity": "660002",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 2,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "native players",
+            "identity": "660001",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 2,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "raw Statcast",
+        "cap": 2,
+        "rows": [
+          {
+            "domain": "raw Statcast",
+            "identity": "statcast:mlb:2026:700001:1:1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 2,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "raw Statcast",
+            "identity": "statcast:mlb:2026:700001:1:2",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 2,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:snapshots",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:snapshots",
+            "identity": "snapshot:700001:moneyline",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:team",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:team",
+            "identity": "team:700001:111:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "features:team",
+            "identity": "team:700001:110:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:starter",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:starter",
+            "identity": "starter:700001:660002:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "features:starter",
+            "identity": "starter:700001:660001:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:bullpen",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:bullpen",
+            "identity": "bullpen:700001:111:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "features:bullpen",
+            "identity": "bullpen:700001:110:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:batter",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:batter",
+            "identity": "batter:700001:770001:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "features:batter",
+            "identity": "batter:700001:770002:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "features:batter",
+            "identity": "batter:700001:770003:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "features:batter",
+            "identity": "batter:700001:770004:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 4,
+        "insertEligible": 4,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:matchup",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:matchup",
+            "identity": "matchup:700001:game:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "features:firstInning",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "features:firstInning",
+            "identity": "firstInning:700001:game:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "07 prediction persistence",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "07 prediction persistence",
+            "identity": "baseball_mlb::prediction::moneyline::700001::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::ef06b339694b1dc1c2eba44d743aba1374e87b3f0e1fd373f5a3135be0fb6be7",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "market mappings",
+        "cap": 1,
+        "rows": [
+          {
+            "domain": "market mappings",
+            "identity": "odds-event-700001",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 1,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "market observations",
+        "cap": 2,
+        "rows": [
+          {
+            "domain": "market observations",
+            "identity": "32dba48a92b696e6e5bd7829379c66628c0cd40a6e59963d6f904a2fcc24f8c1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 2,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "market observations",
+            "identity": "5de902246aa2b82eec3b0fdebb59f2dcd1a8546448308382d716c27fb8c30777",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": 2,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "10 value persistence",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "10 value persistence",
+            "identity": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "10 value persistence",
+            "identity": "f774a9065bfd3b066db686cf0a751db2ed92f175fe3d10be7bf2663a45781ef0",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "12 Official Pick persistence",
+        "cap": null,
+        "rows": [],
+        "plannedRows": 0,
+        "insertEligible": 0,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      }
+    ],
+    "plannedRows": 24,
+    "insertEligible": 24,
+    "reuseNoOp": 0,
+    "blockConflict": 0,
+    "historicalTargetRows": 0,
+    "outOfScopeRows": 0
+  },
+  "commonPersistencePlan": {
+    "domains": [
+      {
+        "domain": "07 prediction persistence",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "07 prediction persistence",
+            "identity": "baseball_mlb::prediction::moneyline::700001::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::ef06b339694b1dc1c2eba44d743aba1374e87b3f0e1fd373f5a3135be0fb6be7",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 1,
+        "insertEligible": 1,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "09 market persistence",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "09 market persistence",
+            "identity": "32dba48a92b696e6e5bd7829379c66628c0cd40a6e59963d6f904a2fcc24f8c1",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "09 market persistence",
+            "identity": "5de902246aa2b82eec3b0fdebb59f2dcd1a8546448308382d716c27fb8c30777",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "10 value persistence",
+        "cap": null,
+        "rows": [
+          {
+            "domain": "10 value persistence",
+            "identity": "26dc30a81908daa724adbe2037d0c9d420a8940e2528335fd6491b94be21ee61",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          },
+          {
+            "domain": "10 value persistence",
+            "identity": "f774a9065bfd3b066db686cf0a751db2ed92f175fe3d10be7bf2663a45781ef0",
+            "game_pk": 700001,
+            "classification": "INSERT_ELIGIBLE",
+            "cap": null,
+            "source_linkage": "PASS",
+            "historical_target": false,
+            "out_of_scope": false
+          }
+        ],
+        "plannedRows": 2,
+        "insertEligible": 2,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      },
+      {
+        "domain": "12 Official Pick persistence",
+        "cap": null,
+        "rows": [],
+        "plannedRows": 0,
+        "insertEligible": 0,
+        "reuseNoOp": 0,
+        "blockConflict": 0,
+        "sourceLinkageFailures": 0,
+        "historicalTargetRows": 0,
+        "outOfScopeRows": 0
+      }
+    ],
+    "plannedRows": 5,
+    "insertEligible": 5,
+    "reuseNoOp": 0,
+    "blockConflict": 0,
+    "outOfScopeRows": 0,
+    "historicalTargetRows": 0
+  },
+  "checkpointResume": {
+    "status": "PASS",
+    "interruptedAfter": "06 moneyline inference",
+    "completedStagesReused": 6,
+    "firstIncompleteStage": "07 prediction persistence",
+    "noDuplicateImmutableWorkPlanned": true
+  },
+  "dryIdempotency": {
+    "status": "PASS",
+    "deterministicStageCount": 13,
+    "providerCalls": 0,
+    "conflicts": 0,
+    "insertEligible": 0,
+    "reuseNoOp": 24
+  },
+  "integratedNegativeTests": {
+    "status": "PASS",
+    "tests": [
+      {
+        "label": "no pregame games",
+        "status": "PASS",
+        "token": "R2_RAW_FULL_SEASON_SCOPE_FORBIDDEN"
+      },
+      {
+        "label": "wrong game_pk",
+        "status": "PASS",
+        "token": "OUT_OF_SCOPE_GAME_PK"
+      },
+      {
+        "label": "started game",
+        "status": "PASS",
+        "token": "VALUE_TEMPORAL_BLOCK"
+      },
+      {
+        "label": "starter changed",
+        "status": "PASS",
+        "token": "OFFICIAL_PICK_POLICY_STATUS_BLOCK"
+      },
+      {
+        "label": "raw historical scope expansion",
+        "status": "PASS",
+        "token": "R2_RAW_DEPENDENCY_WINDOW_TOO_BROAD"
+      },
+      {
+        "label": "feature out-of-scope target",
+        "status": "PASS",
+        "token": "OUT_OF_SCOPE_GAME_PK"
+      },
+      {
+        "label": "prediction conflict",
+        "status": "PASS",
+        "token": "BLOCK_CONFLICT"
+      },
+      {
+        "label": "provider budget exceeded",
+        "status": "PASS",
+        "token": "ODDS_PROVIDER_CALL_FORBIDDEN_IN_DRY_RUN"
+      },
+      {
+        "label": "ambiguous market event",
+        "status": "PASS",
+        "token": "MARKET_AMBIGUOUS_ELIGIBLE_EVENT_BLOCK"
+      },
+      {
+        "label": "post-start market timestamp",
+        "status": "PASS",
+        "token": "VALUE_TEMPORAL_BLOCK"
+      },
+      {
+        "label": "value linkage mismatch",
+        "status": "PASS",
+        "token": "VALUE_PREDICTION_LINKAGE_REQUIRED"
+      },
+      {
+        "label": "Policy hard blocker",
+        "status": "PASS",
+        "token": "OFFICIAL_PICK_POLICY_STATUS_BLOCK"
+      },
+      {
+        "label": "Official Pick after start",
+        "status": "PASS",
+        "token": "OFFICIAL_PICK_DECISION_AFTER_START"
+      },
+      {
+        "label": "DML cap exceeded",
+        "status": "PASS",
+        "token": "CAP_EXCEEDED"
+      },
+      {
+        "label": "missing stage dependency",
+        "status": "PASS",
+        "token": "VALUE_COMPLETE_SAME_BOOK_PAIR_REQUIRED"
+      },
+      {
+        "label": "missing live authorization",
+        "status": "PASS",
+        "token": "LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION"
+      }
+    ],
+    "count": 16
+  },
+  "webShaIndependence": "PASS",
+  "automationReuse": {
+    "state": "PASS",
+    "sharedRawPath": "public.pick2_raw_mlb_statcast_pitches",
+    "scheduledEngineNotEnabled": true
+  },
+  "safety": {
+    "providerCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "predictionWrites": 0,
+    "marketWrites": 0,
+    "valueWrites": 0,
+    "officialPickWrites": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlementWrites": 0,
+    "liveRefreshExecuted": false,
+    "migrationApplied": false,
+    "providerSubstitution": false
+  },
+  "remainingBlockers": [
+    "R2B live retry still requires direct authorization against the newly certified R2H package.",
+    "No automation or cron activation is authorized in R2H."
+  ],
+  "recommendedNextPhase": "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_RETRY_FROM_R2H_CERTIFIED_PACKAGE",
+  "recommendedNextInstruction": "Authorize one bounded R2B current-slate live manual refresh from the R2H package SHA only, with explicit provider and production DML caps.",
+  "errors": []
+}

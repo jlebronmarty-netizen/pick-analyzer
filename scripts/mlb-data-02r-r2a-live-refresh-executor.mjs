@@ -12,6 +12,7 @@ import {
   stageWrapperBindings,
   wrapperNames,
 } from './mlb-data-02r-r2d-current-slate-wrappers.mjs'
+import { runR2HFullDryIntegration } from './mlb-data-02r-r2h-full-dry-integration.mjs'
 
 const BASE_URL = 'https://pick-analyzer.vercel.app'
 const MODEL_VERSION = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
@@ -34,6 +35,31 @@ const suppliedRunId = valueAfter('--run-id')
 if (execute && process.env.MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED !== 'YES') {
   console.error(R2D_FAIL_CLOSED_MESSAGE)
   process.exit(1)
+}
+
+if (args.has('--r2h-full-dry-integration')) {
+  runR2HFullDryIntegration({ mode: 'DRY_RUN' })
+    .then((artifact) => {
+      console.log(JSON.stringify({
+        certificationVerdict: artifact.certificationVerdict,
+        stages: artifact.stages.length,
+        providerCalls: artifact.safety.providerCalls,
+        productionDml: artifact.safety.productionDml,
+        productionDdl: artifact.safety.productionDdl,
+        placeholderStatesRemaining: artifact.placeholderStatesRemaining,
+      }, null, 2))
+      process.exit(0)
+    })
+    .catch((error) => {
+      console.error(JSON.stringify({
+        certificationVerdict: 'MLB_DATA_02R_R2H_EXECUTOR_BINDING_AND_FULL_DRY_INTEGRATION_FAILED',
+        error: error.message,
+        providerCalls: 0,
+        productionDml: 0,
+        productionDdl: 0,
+      }, null, 2))
+      process.exit(1)
+    })
 }
 
 function valueAfter(flag) {
@@ -542,13 +568,15 @@ R2D thin-wrapper repair is active for current-slate execution: broad component c
   }, null, 2))
 }
 
-main().catch((error) => {
-  console.error(JSON.stringify({
-    certificationVerdict: 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_BLOCKED',
-    error: error.message,
-    providerCalls: 0,
-    productionDml: 0,
-    productionDdl: 0,
-  }, null, 2))
-  process.exit(1)
-})
+if (!args.has('--r2h-full-dry-integration')) {
+  main().catch((error) => {
+    console.error(JSON.stringify({
+      certificationVerdict: 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_BLOCKED',
+      error: error.message,
+      providerCalls: 0,
+      productionDml: 0,
+      productionDdl: 0,
+    }, null, 2))
+    process.exit(1)
+  })
+}
