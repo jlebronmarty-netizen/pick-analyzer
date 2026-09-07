@@ -54,6 +54,8 @@ html.pa-light main {
 }
 
 html.pa-light .bg-slate-950,
+html.pa-light .bg-slate-950\/95,
+html.pa-light .bg-slate-950\/90,
 html.pa-light .bg-slate-950\/80,
 html.pa-light .bg-slate-950\/70,
 html.pa-light .bg-slate-950\/60 {
@@ -62,16 +64,42 @@ html.pa-light .bg-slate-950\/60 {
 
 html.pa-light .bg-slate-900,
 html.pa-light .bg-slate-900\/80,
-html.pa-light .bg-slate-900\/70 {
+html.pa-light .bg-slate-900\/70,
+html.pa-light .bg-slate-900\/40 {
   background-color: rgba(241, 245, 249, 0.94);
 }
 
+html.pa-light .bg-sky-950\/10 {
+  background-color: rgba(224, 242, 254, 0.72);
+}
+
+html.pa-light .bg-emerald-500\/15 {
+  background-color: rgba(16, 185, 129, 0.16);
+}
+
+html.pa-light .bg-rose-500\/5 {
+  background-color: rgba(255, 228, 230, 0.72);
+}
+
 html.pa-light .text-white,
-html.pa-light .text-slate-100 {
+html.pa-light .text-slate-100,
+html.pa-light .text-slate-200 {
   color: #0f172a;
 }
 
 html.pa-light .text-slate-300,
 html.pa-light .text-slate-400 {
   color: #334155;
+}
+
+html.pa-light .text-slate-500 {
+  color: #64748b;
+}
+
+html.pa-light .text-slate-600 {
+  color: #475569;
+}
+
+html.pa-light .text-rose-100 {
+  color: #9f1239;
 }
