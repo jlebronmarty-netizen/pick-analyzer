@@ -193,7 +193,7 @@ function nowIso() {
 }
 
 function apiKey() {
-  return process.env.ODDS_API_KEY?.trim() ?? process.env.THE_ODDS_API_KEY?.trim() ?? ''
+  return process.env.THE_ODDS_API_KEY?.trim() ?? ''
 }
 
 function hash(parts: unknown[]) {
@@ -227,7 +227,7 @@ function seasonFrom(value: string | null | undefined) {
 async function fetchProviderEvents(maxCalls: number) {
   const key = apiKey()
   if (!key) {
-    return { events: [] as ProviderEvent[], calls: [], blocker: 'ODDS_API_KEY_NOT_PRESENT' as string | null }
+    return { events: [] as ProviderEvent[], calls: [], blocker: 'THE_ODDS_API_KEY_NOT_PRESENT' as string | null }
   }
   const url = new URL(`${BASE_URL}/sports/${ODDS_API_SPORT_KEY}/events`)
   url.searchParams.set('apiKey', key)
