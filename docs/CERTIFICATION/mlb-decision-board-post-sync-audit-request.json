@@ -2,5 +2,6 @@
   "authorized": true,
   "paidCallsAllowed": false,
   "mutationsAllowed": false,
-  "purpose": "Audit account quota, project ledger, persisted player-prop health, and Decision Board state after the bounded sync attempt without any paid provider call or write."
+  "attempt": 2,
+  "purpose": "Re-audit account quota, project ledger, stored player-prop health, and Decision Board state after the bounded sync attempt. This request authorizes zero paid provider calls and zero mutations."
 }
