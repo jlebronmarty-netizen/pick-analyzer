@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 15:45:00Z
+Last updated: 2026-09-07 16:20:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2G Persistence Interface Refactor Implementation
+
+- MLB-DATA-02R-R2G is locally certified as `MLB_DATA_02R_R2G_PERSISTENCE_INTERFACE_REFACTOR_IMPLEMENTATION_CERTIFIED`. It implements only Wave 3 from the certified R2E plan: bounded callable interfaces for prediction persistence, odds evidence handoff, market normalization/crosswalk/classification/persistence, native value calculation/classification/persistence and Official Pick classification/persistence.
+- Added `scripts/mlb-data-02r-r2g-persistence-interfaces.mjs` plus a small shared prewrite-plan contract in `scripts/mlb-data-02r-r2f-stage-contracts.mjs`. The interfaces use injected repositories and evidence, explicit eligible `game_pk` scope, DML caps, digest-based insert/reuse/conflict classification and fail-closed unauthorized live execution.
+- The dedicated R2G validator exercises real fixture-backed insert/reuse/conflict paths for predictions, market observations, native value rows and Official Picks; validates odds handoff accounting, market event crosswalks, American/no-vig value math, policy handoff, one-side-per-game and started-game guards, cap enforcement, source linkage and common prewrite planning.
+- Boundaries held: provider calls 0, The Odds API calls 0, production DML 0, production DDL 0, prediction/market/value/Official Pick writes 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. Wave 4 executor binding and full dry integration remain blocked for a later phase.
+- Next recommended phase is `MLB_DATA_02R_R2H_EXECUTOR_BINDING_AND_FULL_DRY_INTEGRATION`.
 
 ## 2026-09-07 MLB-DATA-02R-R2F Component Interface Refactor Implementation
 

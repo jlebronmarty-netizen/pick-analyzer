@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 
 export const STAGE_MODES = Object.freeze(['DRY_RUN', 'LIVE_EXECUTE', 'READBACK_ONLY'])
+export const PERSISTENCE_MODES = STAGE_MODES
 export const R2F_LIVE_AUTH_ERROR = 'MLB_02R_R2F_LIVE_EXECUTE_REQUIRES_FUTURE_DIRECT_AUTHORIZATION'
 
 export function stable(value) {
@@ -158,6 +159,31 @@ export function stageResult({
     productionDml,
     productionDdl,
     artifact,
+  }
+}
+
+export function buildPrewritePlan({ domain, rows = [], identityField = 'identity', gamePkField = 'game_pk', cap = null, sourceLinkage = () => true } = {}) {
+  const planned = rows.map((row) => ({
+    domain,
+    identity: row[identityField],
+    game_pk: row[gamePkField],
+    classification: row.classification ?? row.status,
+    cap,
+    source_linkage: sourceLinkage(row) ? 'PASS' : 'FAIL',
+    historical_target: row.historical_target === true,
+    out_of_scope: row.out_of_scope === true,
+  }))
+  return {
+    domain,
+    cap,
+    rows: planned,
+    plannedRows: planned.length,
+    insertEligible: planned.filter((row) => row.classification === 'INSERT_ELIGIBLE').length,
+    reuseNoOp: planned.filter((row) => row.classification === 'REUSE_NO_OP').length,
+    blockConflict: planned.filter((row) => row.classification === 'BLOCK_CONFLICT').length,
+    sourceLinkageFailures: planned.filter((row) => row.source_linkage !== 'PASS').length,
+    historicalTargetRows: planned.filter((row) => row.historical_target).length,
+    outOfScopeRows: planned.filter((row) => row.out_of_scope).length,
   }
 }
 
