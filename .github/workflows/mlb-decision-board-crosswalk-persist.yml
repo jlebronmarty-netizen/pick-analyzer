@@ -1,0 +1,187 @@
+name: MLB Decision Board Crosswalk Persistence
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+    paths:
+      - 'docs/CERTIFICATION/mlb-decision-board-crosswalk-persist-request.json'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+concurrency:
+  group: mlb-decision-board-crosswalk-persistence
+  cancel-in-progress: false
+
+jobs:
+  persist-current-crosswalk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MLB_PREVIEW_URL: https://pick-analyzer-git-feature-mlb-decision-board-v1-pick-analyzer.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate explicit zero-credit mapping request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const path = 'docs/CERTIFICATION/mlb-decision-board-crosswalk-persist-request.json'
+          if (!fs.existsSync(path)) throw new Error('CROSSWALK_PERSIST_REQUEST_FILE_MISSING')
+          const request = JSON.parse(fs.readFileSync(path, 'utf8'))
+          const assertions = [
+            [request.authorized === true, 'authorized must be true'],
+            [request.branch === 'feature/mlb-decision-board-v1', 'branch must match certification branch'],
+            [request.provider === 'the-odds-api', 'provider must be the-odds-api'],
+            [request.maximumProviderCalls === 1, 'maximumProviderCalls must equal 1'],
+            [request.expectedProviderCredits === 0, 'expectedProviderCredits must equal 0'],
+            [request.targetTable === 'provider_entity_mappings', 'targetTable must be provider_entity_mappings'],
+            [request.officialPickWritesAllowed === false, 'Official Pick writes must remain prohibited'],
+            [request.productionActivationAllowed === false, 'production activation must remain prohibited'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          if (failures.length) throw new Error(`CROSSWALK_PERSIST_REQUEST_INVALID: ${failures.join('; ')}`)
+          console.log('PASS: bounded zero-credit crosswalk persistence request validated.')
+          NODE
+
+      - name: Mint GitHub OIDC token for protected preview
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Wait for matching Vercel deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            status_json="$(curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            vercel_state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
+            if [ "$vercel_state" = 'success' ]; then
+              echo 'PASS: matching Vercel deployment is READY.'
+              exit 0
+            fi
+            if [ "$vercel_state" = 'failure' ] || [ "$vercel_state" = 'error' ]; then
+              echo 'VERCEL_DEPLOYMENT_FAILED'
+              exit 1
+            fi
+            if [ "$attempt" = '36' ]; then
+              echo 'VERCEL_DEPLOYMENT_NOT_READY'
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Persist certified current event mappings with zero provider credits
+        shell: bash
+        env:
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            --data '{"live":true,"persist":true,"confirm":"ODDS_API_EVENT_CROSSWALK_PERSIST","maxCalls":1}' \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PREVIEW_URL}/api/providers/the-odds-api/event-crosswalk")"
+
+          if [ "$http_code" != '200' ]; then
+            echo "CROSSWALK_PERSIST_HTTP_${http_code}"
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const blockers = Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : []
+          const requestsLast = payload.quota?.requestsLast == null ? null : Number(payload.quota.requestsLast)
+          const assertions = [
+            [payload.success === true, 'crosswalk persistence must succeed'],
+            [payload.status === 'PERSISTED', 'crosswalk status must be PERSISTED'],
+            [payload.provider === 'the-odds-api', 'provider must be the-odds-api'],
+            [payload.providerCallsMade === 1, 'exactly one provider /events call is allowed'],
+            [requestsLast === 0, 'The Odds API /events call must report x-requests-last=0'],
+            [Number(payload.rowsPersisted) > 0, 'at least one certified mapping must persist'],
+            [Number(payload.remoteMutationsMade) === Number(payload.rowsPersisted), 'only mapping rows may be mutated'],
+            [blockers.length === 0, `crosswalk blockers present: ${blockers.join(', ')}`],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          const summary = {
+            status: payload.status,
+            providerCallsMade: payload.providerCallsMade,
+            requestsLast,
+            rowsPersisted: payload.rowsPersisted,
+            remoteMutationsMade: payload.remoteMutationsMade,
+            persistableMappingCount: Array.isArray(payload.persistableMappings) ? payload.persistableMappings.length : null,
+            blockers,
+          }
+          console.log(JSON.stringify(summary, null, 2))
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## MLB crosswalk persistence\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`)
+          if (failures.length) throw new Error(`CROSSWALK_PERSIST_CERTIFICATION_FAILED: ${failures.join('; ')}`)
+          NODE
+
+      - name: Re-run protected zero-credit Player Props preflight
+        shell: bash
+        env:
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PREVIEW_URL}/api/mlb/player-props/preflight?maximumEvents=1")"
+          if [ "$http_code" != '200' ]; then
+            echo "PREFLIGHT_AFTER_CROSSWALK_HTTP_${http_code}"
+            exit 1
+          fi
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const blockers = Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : []
+          const assertions = [
+            [payload.status === 'DRY_RUN', 'preflight status must be DRY_RUN'],
+            [payload.dryRun === true, 'preflight must remain dry-run'],
+            [payload.providerCallsMade === 0, 'preflight must make zero provider calls'],
+            [payload.providerCreditsConsumed === 0, 'preflight must consume zero credits'],
+            [payload.remoteMutationsMade === 0, 'preflight must make zero mutations'],
+            [payload.estimatedCredits === 4, 'one-event estimate must remain 4 credits'],
+            [Number(payload.certifiedMappingsAvailable) > 0, 'certifiedMappingsAvailable must be > 0'],
+            [blockers.length === 0, `preflight blockers present: ${blockers.join(', ')}`],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          const summary = {
+            status: payload.status,
+            providerCallsMade: payload.providerCallsMade,
+            providerCreditsConsumed: payload.providerCreditsConsumed,
+            remoteMutationsMade: payload.remoteMutationsMade,
+            estimatedCredits: payload.estimatedCredits,
+            certifiedMappingsAvailable: payload.certifiedMappingsAvailable,
+            blockers,
+          }
+          console.log(JSON.stringify(summary, null, 2))
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Player Props preflight after crosswalk persistence\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`)
+          if (failures.length) throw new Error(`PREFLIGHT_AFTER_CROSSWALK_FAILED: ${failures.join('; ')}`)
+          NODE
