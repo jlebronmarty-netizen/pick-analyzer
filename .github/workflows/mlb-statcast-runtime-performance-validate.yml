@@ -1,0 +1,32 @@
+name: MLB Statcast Runtime Performance Validate
+
+on:
+  push:
+    branches:
+      - fix/mlb-statcast-runtime-v1
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260907035833_mlb_statcast_runtime_performance_v1.sql'
+      - 'supabase/migrations/20260907040410_mlb_statcast_team_runtime_rollups_v1.sql'
+      - 'scripts/mlb-statcast-runtime-performance-validate.mjs'
+      - 'package.json'
+      - '.github/workflows/mlb-statcast-runtime-performance-validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Validate read-only Statcast runtime contract
+        run: npm run mlb:statcast:runtime:validate
+      - name: Production TypeScript build
+        run: npm run build
