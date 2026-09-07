@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 22:51:00Z
+Last updated: 2026-09-07 02:22:00Z
+
+## 2026-09-07 MLB-DATA-02R Daily Refresh Pipeline Prep
+
+- MLB-DATA-02R is certified as `MLB_DATA_02R_DAILY_REFRESH_PIPELINE_PREP_CERTIFIED`. Repository, origin and production are aligned to `aaec403c71585b3a5144c5c82b0ee3bcbe5d6518`; `/api/system/version` reported 0 provider calls.
+- Prepared the daily refresh pipeline contract for the individual-pick-first MLB product: current slate, native ingest, current pregame features, Champion inference, market acquisition, market persistence, no-vig/value evaluation, Official Pick policy, Official Pick persistence, Value Board readback and future settlement prep.
+- The ordered stage contract is ready from `STAGE_01_SCHEDULE_SYNC` through `STAGE_14_RESULT_SETTLEMENT_PREP`, with deterministic run identity, stage checkpoints, provider-call accounting, fail-closed provider policy, native `game_pk` joins, doubleheader safety, live pregame as-of cutoff, started-game exclusion and restart-safe idempotency.
+- The future runner defaults to `DRY_RUN`; execution flags fail closed with `DAILY_REFRESH_EXECUTION_FORBIDDEN_IN_02R_PREP`. Official Picks remain immutable, the daily policy allows zero picks, one side per game is required, and current-board selection resolves canonical persisted state without client-side recomputation.
+- Prep boundaries held: no provider calls, no production DML/DDL, no env changes, no odds refresh, no new picks generated, no automation and no cron changes. The published Value Board remains active with navigation and parity of 42 rows: 5 Official Picks, 14 Value Candidates, 23 Watchlist and 0 Blocked. `MLB_DATA_02R_R1_DAILY_REFRESH_EXECUTION_PREP_READY = YES`; `MLB_DATA_02R_AUTOMATION_ACTIVATION_READY = NO`.
 
 ## 2026-09-06 MLB-DATA-02Q-R6 Value Board Navigation Publication
 
