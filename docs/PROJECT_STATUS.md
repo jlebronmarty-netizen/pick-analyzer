@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 17:45:00Z
+Last updated: 2026-09-07 18:25:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2K Starter Live Target Schema Guard Repair
+
+- MLB-DATA-02R-R2K is locally certified as `MLB_DATA_02R_R2K_STARTER_LIVE_TARGET_SCHEMA_GUARD_REPAIR_CERTIFIED`. It repairs the R2I live starter-feature target to reuse the existing certified physical table `public.pick2_mlb_pitcher_daily_features`.
+- Production read-only proof confirmed the physical starter table exists and the incorrect `public.pick2_mlb_starter_daily_features` table is absent. The semantic contract remains unchanged: target game linkage via `target_game_pk`, pitcher identity via `mlbam_pitcher_id`, pregame as-of fields, feature version semantics, and the 76-feature Champion input contract are preserved.
+- The repair changes only the live adapter/schema-guard target. No new starter table was created, no alias table was created, no data migration occurred, and no feature math, model inputs, prediction logic, market logic, Official Pick policy or Value Board logic changed.
+- R2K/R2I/R2H dry validation passed with provider calls 0, The Odds API calls 0, production DML 0, production DDL 0, automation changes 0, cron changes 0 and settlement excluded. The prior legacy-table RLS advisory remains classified `UNRELATED_NON_BLOCKING` for R2K and was not repaired in this phase.
+- After publication and production alignment of this package, `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY = YES` for a separately authorized bounded current-slate live execution.
 
 ## 2026-09-07 MLB-DATA-02R-R2I Live Execution Interface Implementation
 

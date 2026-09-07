@@ -1,0 +1,225 @@
+{
+  "generatedAt": "2026-09-07T23:18:26.781Z",
+  "project": "MLB_DATA_02R_R2K_STARTER_LIVE_TARGET_SCHEMA_GUARD_REPAIR",
+  "certificationVerdict": "MLB_DATA_02R_R2K_STARTER_LIVE_TARGET_SCHEMA_GUARD_REPAIR_CERTIFIED",
+  "priorPackageSha": "8cfd91f626e0e914d2e3abb07dc140b793a39c73",
+  "packageSha": "3ae3d5c2c33ddb938bd3365b67263f985f27bfb0",
+  "originMain": "3ae3d5c2c33ddb938bd3365b67263f985f27bfb0",
+  "productionWebSha": "3ae3d5c2c33ddb938bd3365b67263f985f27bfb0",
+  "gates": {
+    "MLB_02R_R2K_PHYSICAL_STARTER_TABLE": "PASS",
+    "MLB_02R_R2K_STARTER_SEMANTIC_COMPATIBILITY": "PASS",
+    "MLB_02R_R2K_BAD_TARGET_REFERENCE_INVENTORY": "COMPLETE",
+    "MLB_02R_R2K_TARGET_REPAIR": "PASS",
+    "MLB_02R_R2K_STARTER_REPOSITORY_CONTRACT": "PASS",
+    "MLB_02R_R2K_SCHEMA_GUARD": "PASS",
+    "MLB_02R_R2K_MODEL_FEATURE_PARITY": "PASS",
+    "MLB_02R_R2K_DRY_REGRESSION": "PASS",
+    "MLB_02R_R2K_R2J_PREFLIGHT_REGRESSION": "PASS",
+    "MLB_02R_R2K_LEGACY_RLS_ADVISORY": "UNRELATED_NON_BLOCKING"
+  },
+  "physicalStarterTable": {
+    "physicalTable": "pick2_mlb_pitcher_daily_features",
+    "physicalState": "ADDITIVE_COMPATIBLE",
+    "badTableState": "MISSING",
+    "requiredColumns": [
+      "id",
+      "feature_snapshot_id",
+      "player_id",
+      "target_game_pk",
+      "mlbam_pitcher_id",
+      "feature_date",
+      "as_of_date",
+      "as_of_timestamp",
+      "feature_version",
+      "sample_sizes",
+      "source_window"
+    ],
+    "keys": [
+      "target_game_pk",
+      "mlbam_pitcher_id",
+      "feature_version"
+    ],
+    "productionReadbackMethod": "read-only REST projection"
+  },
+  "semanticCompatibility": {
+    "gamePkLinkage": "target_game_pk",
+    "pitcherIdentity": "mlbam_pitcher_id",
+    "legacyPlayerCompatibility": "player_id nullable-compatible",
+    "asOfSemantics": "feature_date/as_of_date/as_of_timestamp",
+    "featureVersionSemantics": "feature_version",
+    "pregameSemantics": "source_window + certified 01D feature pipeline",
+    "championInputs": "76 ordered MLB_ML_FEATURE_SET_V1 inputs preserved",
+    "uniqueness": "target_game_pk + mlbam_pitcher_id + feature_version logical key with existing date-inclusive native index compatibility",
+    "insertReadBehavior": "same starter domain rows, corrected physical table only",
+    "semanticChange": false
+  },
+  "badTargetReferenceInventory": [
+    {
+      "file": "docs/PROJECT_STATUS.md",
+      "line": 8,
+      "classification": "OTHER",
+      "text": "- Production read-only proof confirmed the physical starter table exists and the incorrect `public.pick2_mlb_starter_daily_features` table is absent. The semantic contract remains unchanged: target game linkage via `target_game_pk`, pitcher identity via `mlbam_pitcher_id`, pregame as-of fields, feature version semantics, and the 76-feature Champion input contract are preserved."
+    }
+  ],
+  "liveTargets": {
+    "nativeGames": "pick2_mlb_games",
+    "nativePlayers": "pick2_mlb_players",
+    "rawStatcast": "pick2_raw_mlb_statcast_pitches",
+    "featureSnapshots": "pick2_feature_snapshots",
+    "team": "pick2_mlb_team_daily_features",
+    "starter": "pick2_mlb_pitcher_daily_features",
+    "bullpen": "pick2_mlb_bullpen_daily_features",
+    "batter": "pick2_mlb_batter_daily_features",
+    "matchup": "pick2_mlb_matchup_daily_features",
+    "firstInning": "pick2_mlb_first_inning_daily_features",
+    "predictions": "pick2_game_predictions",
+    "marketMappings": "pick2_mlb_market_event_mappings",
+    "marketObservations": "pick2_mlb_market_price_observations",
+    "values": "pick2_mlb_market_value_evaluations",
+    "officialPicks": "pick2_mlb_official_picks"
+  },
+  "liveDependencyInventory": {
+    "01 schedule": "REAL_PROVIDER_CLIENT",
+    "02 native": "REAL_PRODUCTION_REPOSITORY",
+    "03 raw Statcast": "REAL_PROVIDER_CLIENT_AND_REAL_PRODUCTION_REPOSITORY",
+    "04 features": "REAL_PRODUCTION_REPOSITORY",
+    "05 starters": "PURE_SERVICE",
+    "06 inference": "PURE_SERVICE",
+    "07 predictions": "REAL_PRODUCTION_REPOSITORY",
+    "08 odds": "REAL_PROVIDER_CLIENT",
+    "09 markets": "REAL_PRODUCTION_REPOSITORY",
+    "10 value": "REAL_PRODUCTION_REPOSITORY",
+    "11 policy": "PURE_SERVICE",
+    "12 Official Picks": "REAL_PRODUCTION_REPOSITORY",
+    "13 board": "READ_ONLY_PRODUCTION_REPOSITORY"
+  },
+  "repositoryContract": {
+    "methods": [
+      "readNativeGames",
+      "insertNativeGames",
+      "readNativePlayers",
+      "insertNativePlayers",
+      "readRawRows",
+      "insertRawRows",
+      "readFeatureRows",
+      "insertFeatureRows",
+      "readPredictions",
+      "insertPredictions",
+      "readMarketMappings",
+      "insertMarketMappings",
+      "readMarketObservations",
+      "insertMarketObservations",
+      "readValues",
+      "insertValues",
+      "readOfficialPicks",
+      "insertOfficialPicks",
+      "readValueBoard",
+      "verifySchemaFingerprint"
+    ],
+    "noDelete": true,
+    "noArbitraryUpdate": true,
+    "starterReadsPhysicalTable": true,
+    "futureWritesOnlyInsertEligibleRows": true
+  },
+  "schemaGuard": {
+    "starterTarget": "pick2_mlb_pitcher_daily_features",
+    "state": "ADDITIVE_COMPATIBLE"
+  },
+  "modelFeatureParity": {
+    "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "role": "champion",
+    "status": "promoted",
+    "artifactDigestAvailable": true,
+    "preprocessingDigestAvailable": true,
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
+    "featureCount": 76
+  },
+  "dryRegression": {
+    "stages": 13,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "r2jPreflightRegression": {
+    "dbContract": "PASS",
+    "schemaGuards": "PASS",
+    "modelContract": "PASS",
+    "liveDependencies": "READY",
+    "providerCaps": "PASS",
+    "repositorySafety": "PASS",
+    "dmlCapEngine": "PASS",
+    "checkpointResume": "PASS",
+    "liveAuthGuard": "PASS",
+    "scopeGuards": "PASS",
+    "sharedRawPath": "PASS",
+    "executionPackageIntegrity": "PASS_AFTER_PUBLICATION_FROZEN_WORKTREE"
+  },
+  "providerCaps": {
+    "MLB_OFFICIAL": {
+      "allowed": true,
+      "scope": "bounded current-slate only"
+    },
+    "STATCAST": {
+      "allowed": true,
+      "scope": "bounded dependency scope only"
+    },
+    "THE_ODDS_API": {
+      "allowed": true,
+      "maxCalls": 1,
+      "scope": "baseball_mlb h2h American odds"
+    },
+    "BALLDONTLIE": {
+      "allowed": false,
+      "maxCalls": 0
+    },
+    "SPORTSDATAIO": {
+      "allowed": false,
+      "maxCalls": 0
+    },
+    "OTHER": {
+      "allowed": false,
+      "maxCalls": 0
+    }
+  },
+  "dmlCaps": {
+    "nativeGames": "DERIVED_BEFORE_WRITE",
+    "nativePlayers": "DERIVED_BEFORE_WRITE",
+    "rawStatcast": "DERIVED_BEFORE_WRITE",
+    "features": {
+      "snapshots": "DERIVED_BEFORE_WRITE",
+      "team": "DERIVED_BEFORE_WRITE",
+      "starter": "DERIVED_BEFORE_WRITE",
+      "bullpen": "DERIVED_BEFORE_WRITE",
+      "batter": "DERIVED_BEFORE_WRITE",
+      "matchup": "DERIVED_BEFORE_WRITE",
+      "firstInning": "DERIVED_BEFORE_WRITE"
+    },
+    "predictions": "DERIVED_BEFORE_WRITE",
+    "marketMappings": "DERIVED_BEFORE_WRITE",
+    "marketObservations": "DERIVED_BEFORE_WRITE",
+    "nativeValues": "DERIVED_BEFORE_WRITE",
+    "officialPicks": "DERIVED_BEFORE_WRITE"
+  },
+  "legacyRlsAdvisory": {
+    "classification": "UNRELATED_NON_BLOCKING",
+    "note": "Prior metadata advisory concerns legacy/non-R2K tables and is not repaired in this bounded target repair."
+  },
+  "safety": {
+    "providerCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "predictionWrites": 0,
+    "marketWrites": 0,
+    "valueWrites": 0,
+    "officialPickWrites": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlement": "EXCLUDED"
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY": "YES_AFTER_PUBLICATION_ALIGNMENT"
+  },
+  "errors": []
+}

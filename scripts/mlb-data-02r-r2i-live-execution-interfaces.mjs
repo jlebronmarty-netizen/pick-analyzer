@@ -41,7 +41,7 @@ export const R2I_LIVE_TARGETS = Object.freeze({
   rawStatcast: 'pick2_raw_mlb_statcast_pitches',
   featureSnapshots: 'pick2_feature_snapshots',
   team: 'pick2_mlb_team_daily_features',
-  starter: 'pick2_mlb_starter_daily_features',
+  starter: 'pick2_mlb_pitcher_daily_features',
   bullpen: 'pick2_mlb_bullpen_daily_features',
   batter: 'pick2_mlb_batter_daily_features',
   matchup: 'pick2_mlb_matchup_daily_features',

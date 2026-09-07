@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T23:00:41.796Z",
+  "generatedAt": "2026-09-07T23:17:19.602Z",
   "project": "MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION",
   "certificationVerdict": "MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION_CERTIFIED",
   "priorPackageSha": "8cfd91f626e0e914d2e3abb07dc140b793a39c73",
@@ -75,7 +75,7 @@
       "rawStatcast": "pick2_raw_mlb_statcast_pitches",
       "featureSnapshots": "pick2_feature_snapshots",
       "team": "pick2_mlb_team_daily_features",
-      "starter": "pick2_mlb_starter_daily_features",
+      "starter": "pick2_mlb_pitcher_daily_features",
       "bullpen": "pick2_mlb_bullpen_daily_features",
       "batter": "pick2_mlb_batter_daily_features",
       "matchup": "pick2_mlb_matchup_daily_features",
@@ -115,7 +115,7 @@
         "inserted": 2
       },
       {
-        "table": "pick2_mlb_starter_daily_features",
+        "table": "pick2_mlb_pitcher_daily_features",
         "inserted": 2
       },
       {
@@ -177,7 +177,7 @@
         "state": "ADDITIVE_COMPATIBLE"
       },
       {
-        "target": "pick2_mlb_starter_daily_features",
+        "target": "pick2_mlb_pitcher_daily_features",
         "state": "ADDITIVE_COMPATIBLE"
       },
       {
