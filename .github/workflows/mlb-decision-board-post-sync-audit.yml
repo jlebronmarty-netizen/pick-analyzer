@@ -1,0 +1,107 @@
+name: MLB Decision Board Post Sync Audit
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+    paths:
+      - 'docs/CERTIFICATION/mlb-decision-board-post-sync-audit-request.json'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MLB_PREVIEW_URL: https://pick-analyzer-git-feature-mlb-decision-board-v1-pick-analyzer.vercel.app
+      MLB_PUBLIC_URL: https://pick-analyzer.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate read-only audit request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const r=require('./docs/CERTIFICATION/mlb-decision-board-post-sync-audit-request.json'); if(r.authorized!==true||r.paidCallsAllowed!==false||r.mutationsAllowed!==false) process.exit(1); console.log('PASS: read-only audit request validated')"
+
+      - name: Mint GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Probe canonical account quota at zero cost
+        shell: bash
+        run: |
+          set -euo pipefail
+          f="$(mktemp)"
+          code="$(curl -sS -L --connect-timeout 10 --max-time 45 -X POST -H 'Content-Type: application/json' --data '{"live":true,"persist":false,"confirm":"ODDS_API_CURRENT_ODDS_V1","maxCalls":1,"maxSports":1}' -o "$f" -w '%{http_code}' "${MLB_PUBLIC_URL}/api/providers/the-odds-api/current-odds")"
+          test "$code" = '200'
+          RESPONSE_FILE="$f" node - <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
+          const c=Array.isArray(p.planObserved)?p.planObserved[0]:null
+          const out={requestsRemaining:c?.requestsRemaining??null,requestsUsed:c?.requestsUsed??null,requestsLast:c?.requestsLast??null,providerCallsMade:p.providerCallsMade,productionMutationsMade:p.productionMutationsMade}
+          console.log(JSON.stringify({canonicalQuota:out},null,2))
+          if(c?.requestsLast!==0||p.productionMutationsMade!==0) process.exit(1)
+          NODE
+
+      - name: Read protected project budget and preflight
+        shell: bash
+        env:
+          OIDC: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          f="$(mktemp)"
+          code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${OIDC}" -o "$f" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/player-props/preflight?maximumEvents=1")"
+          test "$code" = '200'
+          RESPONSE_FILE="$f" node - <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
+          const b=p.projectBudget??null
+          const out={status:p.status,dryRun:p.dryRun,providerCallsMade:p.providerCallsMade,providerCreditsConsumed:p.providerCreditsConsumed,remoteMutationsMade:p.remoteMutationsMade,estimatedCredits:p.estimatedCredits,certifiedMappingsAvailable:p.certifiedMappingsAvailable,blockers:p.blockers??[],projectBudget:b}
+          console.log(JSON.stringify({preflightAfterSync:out},null,2))
+          if(p.providerCallsMade!==0||p.providerCreditsConsumed!==0||p.remoteMutationsMade!==0) process.exit(1)
+          NODE
+
+      - name: Read stored player prop health
+        shell: bash
+        env:
+          OIDC: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          f="$(mktemp)"
+          code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${OIDC}" -o "$f" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/player-props/health")"
+          test "$code" = '200'
+          RESPONSE_FILE="$f" node - <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
+          const i=p.ingestion??{}
+          const out={status:i.status??null,rowsRead:i.rowsRead??null,rowsNormalized:i.rowsNormalized??null,supportedRowsByMarket:i.supportedRowsByMarket??null,sportsbooks:i.sportsbooks??null,freshness:i.freshness??null,blockers:i.blockers??null,validation:i.validation??null}
+          console.log(JSON.stringify({playerPropHealth:out},null,2))
+          NODE
+
+      - name: Read Decision Board shadow state
+        shell: bash
+        env:
+          OIDC: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          f="$(mktemp)"
+          code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${OIDC}" -o "$f" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/decision-board")"
+          test "$code" = '200'
+          RESPONSE_FILE="$f" node - <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
+          const props=Array.isArray(p.props)?p.props:[]
+          const propSummary=props.map(x=>({eventId:x.eventId,marketKey:x.marketKey,propGroup:x.propGroup,subject:x.subject,side:x.side,line:x.line,bestBook:x.bestBook,bestOdds:x.bestOdds,quotes:Array.isArray(x.quotes)?x.quotes.map(q=>({book:q.book,odds:q.odds,line:q.line,observedAt:q.observedAt})):[],decision:x.decision,edge:x.edge,noVigProbability:x.noVigProbability,blockers:x.blockers??[]}))
+          const out={mode:p.mode,selectedDate:p.selectedDate,productionActivationEnabled:p.productionActivationEnabled,summary:p.summary,diagnostics:p.diagnostics,blockers:p.blockers??[],propRows:propSummary}
+          console.log(JSON.stringify({decisionBoardAfterSync:out},null,2))
+          if(p.productionActivationEnabled!==false||Number(p.summary?.betCount??-1)!==0) process.exit(1)
+          NODE
