@@ -1,0 +1,7 @@
+{
+  "authorized": true,
+  "paidCallsAllowed": false,
+  "mutationsAllowed": false,
+  "eventId": "baseball_mlb:mlb:sportsdataio:event:79431",
+  "purpose": "Read back only the 14 rows persisted by the one-event Player Props canary. No provider calls or mutations are authorized."
+}
