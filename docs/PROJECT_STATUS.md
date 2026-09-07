@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 15:05:00Z
+Last updated: 2026-09-07 15:45:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2F Component Interface Refactor Implementation
+
+- MLB-DATA-02R-R2F is locally certified as `MLB_DATA_02R_R2F_COMPONENT_INTERFACE_REFACTOR_IMPLEMENTATION_CERTIFIED`. It implements only Wave 1 and Wave 2 from the certified R2E plan: shared stage contracts, schedule, starter readiness, Champion inference, Official Pick policy, Value Board readback, native reconciliation, raw Statcast reconciliation and feature generation/classification interfaces.
+- Added a reusable R2F interface layer under `scripts/mlb-data-02r-r2f-stage-contracts.mjs` and `scripts/mlb-data-02r-r2f-wave12-interfaces.mjs`. Existing broad certification scripts were not rewritten in this phase, preserving CLI compatibility while exposing bounded callable code paths for future R2 executor binding.
+- The dedicated validator exercises real parser/classifier/math paths using injected MLB Official-shaped schedule evidence, the certified Champion model artifact, real Policy V1 thresholds, dry DB repositories and negative tests for unauthorized live mode, out-of-scope game scope, full-season raw scope, feature leakage, cap excess, duplicate identities and digest conflicts.
+- Boundaries held: provider calls 0, The Odds API calls 0, production DML 0, production DDL 0, Official Pick writes 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. Wave 3 persistence interfaces, executor binding and live refresh remain blocked for later phases.
+- Next recommended phase is `MLB_DATA_02R_R2G_PERSISTENCE_INTERFACE_REFACTOR_IMPLEMENTATION`.
 
 ## 2026-09-07 MLB-DATA-02R-R2E Component Interface Refactor Plan
 
