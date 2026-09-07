@@ -142,7 +142,7 @@ function headerNumber(headers: Headers, name: string) {
 }
 
 function oddsApiKey() {
-  return process.env.ODDS_API_KEY?.trim() ?? process.env.THE_ODDS_API_KEY?.trim() ?? ''
+  return process.env.THE_ODDS_API_KEY?.trim() ?? ''
 }
 
 function normalizeName(value: unknown) {
@@ -188,7 +188,7 @@ async function eligibleCertifiedMappings(selectedDate: string, maximumEvents: nu
 
 async function probeAccountCredits() {
   const key = oddsApiKey()
-  if (!key) return { ok: false, remaining: null, used: null, last: null, error: 'ODDS_API_KEY_NOT_PRESENT' }
+  if (!key) return { ok: false, remaining: null, used: null, last: null, error: 'THE_ODDS_API_KEY_NOT_PRESENT' }
   const url = new URL(`${ODDS_API_BASE_URL}/sports/`)
   url.searchParams.set('apiKey', key)
   url.searchParams.set('all', 'true')
@@ -439,7 +439,7 @@ export async function syncMlbDecisionBoardPlayerProps(options: SyncOptions = {})
       certifiedMappingsAvailable: mappings.length,
       projectBudget: projectBudget.status,
       blockers: [
-        keyConfigured ? null : 'ODDS_API_KEY_NOT_LOADED_IN_RUNTIME',
+        keyConfigured ? null : 'THE_ODDS_API_KEY_NOT_LOADED_IN_RUNTIME',
         ...projectBudget.blockers,
         mappings.length ? null : 'NO_CERTIFIED_PREGAME_ODDS_API_EVENT_MAPPING',
       ].filter(Boolean),
@@ -450,7 +450,7 @@ export async function syncMlbDecisionBoardPlayerProps(options: SyncOptions = {})
   const preflightBlockers = [
     provider === ODDS_API_PROVIDER ? null : 'LIVE_PLAYER_PROP_PROVIDER_MUST_BE_THE_ODDS_API',
     confirmed ? null : 'confirm=MLB_PLAYER_PROP_SYNC required for protected live sync',
-    keyConfigured ? null : 'ODDS_API_KEY_NOT_LOADED_IN_RUNTIME',
+    keyConfigured ? null : 'THE_ODDS_API_KEY_NOT_LOADED_IN_RUNTIME',
     projectBudget.allowed ? null : 'PROJECT_CREDIT_BUDGET_BLOCKED',
     ...projectBudget.blockers,
   ].filter(Boolean) as string[]
