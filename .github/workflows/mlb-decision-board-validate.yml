@@ -92,6 +92,69 @@ jobs:
           }
           NODE
 
+      - name: Audit upcoming MLB event crosswalk at zero cost
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS -L \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            --data '{"live":true,"persist":false,"confirm":"ODDS_API_EVENT_CROSSWALK","maxCalls":1}' \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PUBLIC_URL}/api/providers/the-odds-api/event-crosswalk")"
+
+          if [ "$http_code" != "200" ]; then
+            echo "Crosswalk audit returned HTTP ${http_code}."
+            head -c 600 "$response_file" || true
+            echo
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const assertions = [
+            [payload.providerCallsMade === 1, 'crosswalk audit must make exactly one /events call'],
+            [payload.remoteMutationsMade === 0, 'crosswalk audit must make zero remote mutations'],
+            [payload.rowsPersisted === 0, 'crosswalk audit must persist zero rows'],
+            [payload.quota?.requestsLast === 0, '/events must report x-requests-last=0'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          console.log(JSON.stringify({
+            status: payload.status,
+            providerCallsMade: payload.providerCallsMade,
+            requestsLast: payload.quota?.requestsLast ?? null,
+            existingProviderMappings: payload.rootCause?.existingProviderMappings ?? null,
+            providerEventsEvaluated: payload.providerEventsEvaluated ?? null,
+            internalEventsEvaluated: payload.internalEventsEvaluated ?? null,
+            exactMatches: payload.exactMatches ?? null,
+            deterministicMatches: payload.deterministicMatches ?? null,
+            ambiguousMatches: payload.ambiguousMatches ?? null,
+            unmatchedProviderEvents: payload.unmatchedProviderEvents ?? null,
+            persistableMappingCount: Array.isArray(payload.persistableMappings) ? payload.persistableMappings.length : null,
+            persistableMappings: Array.isArray(payload.persistableMappings)
+              ? payload.persistableMappings.slice(0, 20).map((row) => ({
+                  providerEventId: row.providerEventId,
+                  internalEventId: row.internalEventId,
+                  providerCommenceTime: row.providerCommenceTime,
+                  internalStartTime: row.internalStartTime,
+                  matchMethod: row.matchMethod,
+                  matchConfidence: row.matchConfidence,
+                }))
+              : [],
+            blockers: payload.blockers,
+            warnings: payload.warnings,
+          }, null, 2))
+          if (failures.length) {
+            console.error(`Crosswalk audit assertions failed: ${failures.join('; ')}`)
+            process.exit(1)
+          }
+          NODE
+
       - name: Mint GitHub OIDC token for protected preview
         id: vercel_oidc
         if: github.event_name == 'push'
