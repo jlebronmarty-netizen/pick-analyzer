@@ -10,11 +10,13 @@ The permanent MLB Statcast analytics foundation is active on the certified Pick 
 
 - Raw table: `public.pick2_raw_mlb_statcast_pitches`
 - Natural pitch identity: `game_pk + at_bat_number + pitch_number`
-- 2025 coverage: 712,528 pitches / 2,430 games / 30 teams / through 2025-09-28
-- 2026 coverage: 631,404 pitches / 2,139 games / 30 teams / through 2026-09-05
-- Duplicate pitch identity groups: 0
+- 2025 certified final coverage: 712,528 pitches / 2,430 games / 30 teams / through 2025-09-28
+- 2026 certified baseline: at least 631,404 pitches / 2,139 games / 30 teams / through at least 2026-09-05
+- Duplicate pitch identity groups at certification: 0
 
-The final 2026 gap was closed with 4,590 pitches across 16 games on 2026-09-04 and 4,450 pitches across 15 games on 2026-09-05.
+The 2026 numbers are a certification floor, not a frozen ceiling. The daily ingestion pipeline may advance the active-season pitch count, game count and last game date beyond that baseline. Validation must fail on regression below the certified floor, not on healthy monotonic growth.
+
+The final certification gap was closed with 4,590 pitches across 16 games on 2026-09-04 and 4,450 pitches across 15 games on 2026-09-05.
 
 ## Production database
 
@@ -73,7 +75,7 @@ Run:
 npm run mlb:statcast:validate
 ```
 
-The validator fails unless the certified 2025/2026 pitch counts, game counts, last dates, 30-team coverage and analytical views are present.
+The validator requires exact certified final coverage for 2025. For active-season 2026 it requires coverage at or above the certified baseline, a last game date at or beyond the certified baseline date, 30-team coverage, populated analytical views, and exact agreement between the raw-table pitch count and the coverage view. This preserves fail-closed regression detection without treating legitimate daily ingestion growth as a failure.
 
 ## Ingestion note
 
