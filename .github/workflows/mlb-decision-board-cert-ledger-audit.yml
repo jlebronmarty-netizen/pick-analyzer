@@ -1,0 +1,70 @@
+name: MLB Decision Board Certification Ledger Audit
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+    paths:
+      - 'docs/CERTIFICATION/mlb-decision-board-cert-ledger-audit-request.json'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+jobs:
+  audit-ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      MLB_PREVIEW_URL: https://pick-analyzer-git-feature-mlb-decision-board-v1-pick-analyzer.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate read-only request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const r=require('./docs/CERTIFICATION/mlb-decision-board-cert-ledger-audit-request.json');if(r.authorized!==true||r.paidCallsAllowed!==false||r.mutationsAllowed!==false)process.exit(1);console.log('PASS: ledger audit is read-only')"
+
+      - name: Mint GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Wait for matching Vercel deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 48); do
+            status_json="$(curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
+            if [ "$state" = 'success' ]; then exit 0; fi
+            if [ "$state" = 'failure' ] || [ "$state" = 'error' ]; then echo VERCEL_DEPLOYMENT_FAILED; exit 1; fi
+            if [ "$attempt" = '48' ]; then echo VERCEL_DEPLOYMENT_NOT_READY; exit 1; fi
+            sleep 5
+          done
+
+      - name: Read certification ledger
+        shell: bash
+        env:
+          OIDC: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          f="$(mktemp)"
+          code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${OIDC}" -o "$f" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/player-props/certification-ledger")"
+          echo "CERTIFICATION_LEDGER_HTTP_${code}"
+          if [ "$code" != '200' ]; then head -c 1200 "$f" || true; echo; exit 1; fi
+          RESPONSE_FILE="$f" node - <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
+          const entries=Array.isArray(p.entries)?p.entries:[]
+          console.log(JSON.stringify({mode:p.mode,readOnly:p.readOnly,entries},null,2))
+          if(p.readOnly!==true||!entries.length) process.exit(1)
+          NODE
