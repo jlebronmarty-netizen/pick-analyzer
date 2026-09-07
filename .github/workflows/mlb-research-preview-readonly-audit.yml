@@ -1,0 +1,104 @@
+name: MLB Research Preview Read-Only Audit
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+    paths:
+      - 'docs/CERTIFICATION/mlb-research-preview-readonly-audit-request.json'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: mlb-research-preview-readonly-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate zero-cost request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs = require('fs')
+          const request = require('./docs/CERTIFICATION/mlb-research-preview-readonly-audit-request.json')
+          if (request.authorized !== true) throw new Error('AUDIT_NOT_AUTHORIZED')
+          if (request.paidProviderCallsAllowed !== false) throw new Error('PAID_PROVIDER_CALLS_MUST_BE_FALSE')
+          if (request.mutationsAllowed !== false) throw new Error('MUTATIONS_MUST_BE_FALSE')
+          const url = new URL(request.targetUrl)
+          if (url.protocol !== 'https:') throw new Error('TARGET_MUST_USE_HTTPS')
+          if (!url.hostname.endsWith('.vercel.app')) throw new Error('TARGET_MUST_BE_VERCEL_PREVIEW')
+          if (!url.pathname.startsWith('/api/mlb/research/')) throw new Error('TARGET_MUST_BE_MLB_RESEARCH_API')
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `target_url=${request.targetUrl}\n`)
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `expected_model=${request.expectedModelVersion}\n`)
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `expected_market=${request.expectedMarket}\n`)
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `expected_status=${request.expectedStatus}\n`)
+          NODE
+
+      - name: Mint GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Execute protected preview read
+        shell: bash
+        env:
+          TARGET_URL: ${{ steps.request.outputs.target_url }}
+          EXPECTED_MODEL: ${{ steps.request.outputs.expected_model }}
+          EXPECTED_MARKET: ${{ steps.request.outputs.expected_market }}
+          EXPECTED_STATUS: ${{ steps.request.outputs.expected_status }}
+          VERCEL_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o response.json -w '%{http_code}' \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_OIDC_TOKEN}" \
+            -H 'Accept: application/json' \
+            "$TARGET_URL")"
+          echo "HTTP $code"
+          if [ "$code" != '200' ]; then
+            cat response.json
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs = require('fs')
+          const body = JSON.parse(fs.readFileSync('response.json','utf8'))
+          const expectedModel = process.env.EXPECTED_MODEL
+          const expectedMarket = process.env.EXPECTED_MARKET
+          const expectedStatus = process.env.EXPECTED_STATUS
+          if (body.modelVersion !== expectedModel) throw new Error(`MODEL_MISMATCH:${body.modelVersion}`)
+          if (body.market !== expectedMarket) throw new Error(`MARKET_MISMATCH:${body.market}`)
+          if (body.status !== expectedStatus) throw new Error(`STATUS_MISMATCH:${body.status}`)
+          if (body?.safety?.theOddsApiCreditsConsumed !== 0) throw new Error('ODDS_API_CREDITS_NOT_ZERO')
+          if ((body?.safety?.providerCalls ?? 0) !== 0) throw new Error('PROVIDER_CALLS_NOT_ZERO')
+          if ((body?.safety?.officialPickWrites ?? 0) !== 0) throw new Error('OFFICIAL_PICK_WRITES_NOT_ZERO')
+          if (body?.safety?.bettingActivated !== false) throw new Error('BETTING_ACTIVATED')
+          console.log(JSON.stringify({
+            modelVersion: body.modelVersion,
+            market: body.market,
+            status: body.status,
+            splitCounts: body.dataQuality?.splitCounts ?? null,
+            gate: body.gate ?? null,
+            safety: body.safety,
+          }, null, 2))
+          NODE
+
+      - name: Upload response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-research-preview-readonly-${{ github.run_id }}
+          path: response.json
+          if-no-files-found: ignore
+          retention-days: 7
