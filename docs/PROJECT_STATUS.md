@@ -1,6 +1,20 @@
 # Project Status
 
-Last updated: 2026-09-08 11:20:00Z
+Last updated: 2026-09-08 17:00:00Z
+
+## 2026-09-08 MLB-DATA-02R-R2S Team Feature Snapshot ID Payload Binding Repair
+
+- Final formal-certification build: `npm.cmd run build` PASS, exit 0, 400 static pages. Canonical evidence records all validator results, fresh linkage/protected-state checks, guarded network accounting and final source hashes.
+- Formal R2S certification now uses the canonical `MLB_DATA_02R_R2S_TEAM_FEATURE_SNAPSHOT_ID_PAYLOAD_BINDING_REPAIR.json` and its audit; session-recovery evidence remains supplemental. All 16 validators (R2, R2A, R2D, R2F, R2G, R2H, R2I, R2K through R2S) pass with outputs/caches isolated in the OS temporary directory. R2O/R2P fixture rows now carry the required canonical FK and assert 10 reuses with 0 inserts.
+- The actual R2B -> R2I injected live branch exercises the physical Supabase feature repository adapter, inserts or reuses one canonical snapshot, validates all six daily-table FKs, and reaches every downstream stage through Value Board readback. Fresh read-only evidence validates existing linkage in all six domains; before/after counts, protected games and the Official Pick sample digest are unchanged. Provider calls and production DML/DDL are 0; no live refresh, automation/cron change, push or deployment occurs in this certification.
+- Final recovery build: `npm.cmd run build` passed with exit code 0. Evidence and source hashes: `docs/CERTIFICATION/MLB_DATA_02R_R2S_SESSION_RECOVERY.json`; build log: `.tmp/r2s-resume-build.log`.
+- Session recovery preserved the existing R2S implementation, certification evidence, earlier package edits, `.tmp/` and `.worktrees/`. Recovery adds post-binding daily-row classification through the existing shared classifier: physical database identities and payloads (including canonical snapshot FK) now determine reuse/conflict. A repeat simulation reuses all 10 feature rows with feature DML caps of 0; equivalent database timestamp and team-ID representations compare consistently.
+- Recovery validation: `node scripts/mlb-data-02r-r2s-team-feature-snapshot-id-payload-binding-repair-validate.mjs --offline` and the offline R2I regression pass. Existing production linkage evidence is reused from the prior certification timestamp, not a fresh production verification. Publication/alignment and live execution remain outside this recovery scope.
+- MLB-DATA-02R-R2S is locally certified as `MLB_DATA_02R_R2S_TEAM_FEATURE_SNAPSHOT_ID_PAYLOAD_BINDING_REPAIR_CERTIFIED`. It repairs the R2B -> R2I live feature persistence handoff so future daily feature inserts resolve the actual canonical `public.pick2_feature_snapshots.id` from inserted or reused snapshot rows before binding `feature_snapshot_id`.
+- The prior live blocker was `INSERT_FAILED:pick2_mlb_team_daily_features:null value in column "feature_snapshot_id" violates not-null constraint`. R2S keeps `feature_snapshot_id` required, rejects missing or non-UUID snapshot IDs, and does not synthesize UUIDs or create duplicate snapshots to satisfy linkage.
+- The repair applies the same snapshot-linkage handoff to team, starter, bullpen, batter, matchup and first-inning feature domains while preserving feature math, date/as-of semantics, feature identities, snapshot deterministic identity, Champion V1, prediction math, market/value/Official Pick policy and Statcast semantics.
+- R2S validation proves physical schema/FK contract, insert and reuse snapshot ID resolution, team insert shape guard, referential linkage, idempotency, sibling feature-domain linkage matrix, existing production linkage compatibility, protected native games `823902` and `824958`, and injected live-branch continuation beyond the feature stage.
+- Boundaries held: MLB Official calls 0, Statcast calls 0, The Odds API calls 0, production DML 0, production DDL 0, prediction/market/value/Official Pick writes 0, live refresh not executed, automation changes 0, cron changes 0 and settlement 0. `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY = YES` after publication/alignment and separate direct live authorization.
 
 ## 2026-09-08 MLB-DATA-02R-R2R Current Run Date/As-Of Freeze Repair
 

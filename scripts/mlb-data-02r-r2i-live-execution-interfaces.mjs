@@ -3,6 +3,7 @@ import { fetchR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-founda
 import {
   assertGameScope,
   assertIsoTimestamp,
+  classifyInsertReuseConflict,
   makeProviderAccounting,
   makeRunContext,
   normalizeGamePk,
@@ -302,6 +303,46 @@ function featureSnapshotInsertRow(row) {
   }
 }
 
+const DB_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+export function assertDbUuid(value, label = 'db_uuid') {
+  const text = String(value ?? '')
+  if (!DB_UUID_PATTERN.test(text)) throw new Error(`INVALID_${label.toUpperCase()}:${value}`)
+  return text
+}
+
+const DAILY_FEATURE_REQUIRED_COLUMNS = Object.freeze(['feature_snapshot_id', 'target_game_pk', 'feature_date', 'as_of_date', 'as_of_timestamp', 'feature_version'])
+const DAILY_FEATURE_ALLOWED_COLUMNS = Object.freeze({
+  team: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'team_id', 'sample_sizes', 'source_window']),
+  starter: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'player_id', 'mlbam_pitcher_id', 'sample_sizes', 'source_window']),
+  bullpen: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'team_id', 'mlbam_pitcher_ids', 'sample_sizes', 'source_window']),
+  batter: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'player_id', 'mlbam_batter_id', 'sample_sizes', 'source_window']),
+  matchup: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'event_id', 'home_team_id', 'away_team_id', 'sample_sizes', 'source_window']),
+  firstInning: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'event_id', 'home_team_id', 'away_team_id', 'home_starter_mlbam_pitcher_id', 'away_starter_mlbam_pitcher_id', 'expected_lineup_mlbam_batter_ids', 'sample_sizes', 'source_window']),
+})
+
+function assertDailyFeatureInsertShape(domain, row, { eligibleGamePks = null } = {}) {
+  const allowed = DAILY_FEATURE_ALLOWED_COLUMNS[domain]
+  if (!allowed) throw new Error(`FEATURE_DOMAIN_INSERT_SHAPE_MISSING:${domain}`)
+  const keys = Object.keys(row ?? {})
+  const unexpected = keys.filter((key) => !allowed.has(key))
+  if (unexpected.length) throw new Error(`FEATURE_INSERT_UNEXPECTED_KEYS:${domain}:${unexpected.join(',')}`)
+  const missing = DAILY_FEATURE_REQUIRED_COLUMNS.filter((key) => !(key in row) || row[key] === undefined || row[key] === null || row[key] === '')
+  if (missing.length) throw new Error(`FEATURE_INSERT_MISSING_REQUIRED:${domain}:${missing.join(',')}`)
+  assertDbUuid(row.feature_snapshot_id, `${domain}_feature_snapshot_id`)
+  assertIsoDate(row.feature_date, 'FEATURE_DATE')
+  assertIsoDate(row.as_of_date, 'AS_OF_DATE')
+  assertIsoTimestamp(row.as_of_timestamp, 'as_of_timestamp')
+  if (String(row.as_of_timestamp).slice(0, 10) !== row.as_of_date) throw new Error(`FEATURE_INSERT_AS_OF_TIMESTAMP_DATE_MISMATCH:${domain}`)
+  if (eligibleGamePks) assertGameScope([row], eligibleGamePks, (candidate) => candidate.target_game_pk)
+  if (domain === 'team' || domain === 'bullpen') {
+    if (!row.team_id) throw new Error(`FEATURE_INSERT_TEAM_ID_REQUIRED:${domain}`)
+  }
+  if (domain === 'starter' && !row.mlbam_pitcher_id) throw new Error('FEATURE_INSERT_MLBAM_PITCHER_ID_REQUIRED:starter')
+  if (domain === 'batter' && !row.mlbam_batter_id) throw new Error('FEATURE_INSERT_MLBAM_BATTER_ID_REQUIRED:batter')
+  return { domain, keys, target_game_pk: normalizeGamePk(row.target_game_pk) }
+}
+
 export function featureInsertRowsForDomain(domain, rows) {
   if (domain === 'snapshots') return rows.map(featureSnapshotInsertRow)
   return rows.map((row) => {
@@ -311,11 +352,77 @@ export function featureInsertRowsForDomain(domain, rows) {
     void feature_digest
     void features
     void game_pk
-    return {
+    const insertRow = {
       ...physical,
       target_game_pk: normalizeGamePk(row.target_game_pk ?? row.game_pk),
     }
+    assertDailyFeatureInsertShape(domain, insertRow)
+    return insertRow
   })
+}
+
+function canonicalSnapshotIdentity(row) {
+  return String(row.deterministic_identity ?? row.identity ?? '')
+}
+
+export async function resolveCanonicalFeatureSnapshotIds({
+  repository,
+  plannedSnapshotRows = [],
+  insertedSnapshotRows = [],
+} = {}) {
+  const identities = plannedSnapshotRows.map(canonicalSnapshotIdentity).filter(Boolean)
+  if (!identities.length) return new Map()
+  const readbackRows = await repository.readFeatureRows('snapshots', identities, plannedSnapshotRows)
+  const combined = [...readbackRows, ...insertedSnapshotRows].map((row) => comparableFeatureRow('snapshots', row))
+  const byIdentity = new Map(combined.map((row) => [canonicalSnapshotIdentity(row), row]))
+  const snapshotIdByGamePk = new Map()
+  for (const planned of plannedSnapshotRows) {
+    const identity = canonicalSnapshotIdentity(planned)
+    const canonical = byIdentity.get(identity)
+    if (!canonical?.id) throw new Error(`FEATURE_SNAPSHOT_CANONICAL_ID_UNRESOLVED:${identity}`)
+    const snapshotId = assertDbUuid(canonical.id, 'feature_snapshot_id')
+    snapshotIdByGamePk.set(normalizeGamePk(planned.target_game_pk ?? planned.game_pk), snapshotId)
+  }
+  return snapshotIdByGamePk
+}
+
+export function bindFeatureRowsToSnapshotIds(rowsByDomain = {}, snapshotIdByGamePk = new Map()) {
+  const bound = { ...rowsByDomain }
+  for (const domain of ['team', 'starter', 'bullpen', 'batter', 'matchup', 'firstInning']) {
+    bound[domain] = (rowsByDomain[domain] ?? []).map((row) => {
+      const gamePk = normalizeGamePk(row.target_game_pk ?? row.game_pk)
+      const snapshotId = snapshotIdByGamePk.get(gamePk)
+      if (!snapshotId) throw new Error(`FEATURE_SNAPSHOT_ID_MISSING_FOR_GAME:${domain}:${gamePk}`)
+      const next = { ...row, feature_snapshot_id: snapshotId }
+      assertDailyFeatureInsertShape(domain, featureInsertRowsForDomain(domain, [next])[0])
+      return next
+    })
+  }
+  return bound
+}
+
+// Compare the physical payload after canonical FK binding, using the existing classifier.
+// Daily tables do not store the planner's feature_digest or prefixed identity.
+export async function classifyBoundDailyFeatures(repository, rowsByDomain, eligibleGamePks, caps = {}) {
+  const plans = {}
+  const rows = {}
+  for (const domain of Object.keys(DAILY_FEATURE_ALLOWED_COLUMNS)) {
+    const comparable = (row) => {
+      const payload = Object.fromEntries([...DAILY_FEATURE_ALLOWED_COLUMNS[domain]].sort()
+        .filter((key) => row[key] !== undefined).map((key) => [key, row[key]]))
+      if (payload.as_of_timestamp) payload.as_of_timestamp = new Date(payload.as_of_timestamp).toISOString()
+      if (payload.team_id != null) payload.team_id = String(payload.team_id)
+      return { ...row, identity: featureIdentityForDomain(domain, row), feature_digest: sha256(payload) }
+    }
+    rows[domain] = featureInsertRowsForDomain(domain, rowsByDomain[domain] ?? []).map(comparable)
+    const existing = await repository.readFeatureRows(domain, rows[domain].map((row) => row.identity), rows[domain])
+    plans[domain] = classifyInsertReuseConflict({
+      plannedRows: rows[domain], existingRows: existing.map(comparable),
+      identityFields: ['identity'], digestField: 'feature_digest', eligibleGamePks,
+      cap: caps[domain] ?? null, readGamePk: (row) => row.target_game_pk,
+    })
+  }
+  return { plans, rows }
 }
 
 export function liveDependencyInventory() {
@@ -428,13 +535,13 @@ async function selectByIds(client, table, column, ids) {
 }
 
 async function insertExactRows(client, table, rows, cap) {
-  if (!rows.length) return { inserted: 0, table }
+  if (!rows.length) return { inserted: 0, table, rows: [] }
   if (Number.isInteger(cap) && rows.length > cap) throw new Error(`DML_CAP_EXCEEDED:${table}:${rows.length}:${cap}`)
   const { data, error } = await client.from(table).insert(rows).select('*')
   if (error) throw new Error(`INSERT_FAILED:${table}:${error.message}`)
   const inserted = data?.length ?? rows.length
   if (inserted > rows.length || (Number.isInteger(cap) && inserted > cap)) throw new Error(`DML_ACTUAL_CAP_EXCEEDED:${table}:${inserted}:${cap}`)
-  return { inserted, table }
+  return { inserted, table, rows: data ?? rows }
 }
 
 function normalizeNullableInteger(value, label) {
@@ -771,8 +878,14 @@ export function createTestRepository(existing = {}) {
   const insert = (table, rows, cap) => {
     if (!Object.values(R2I_LIVE_TARGETS).includes(table)) throw new Error(`WRONG_TABLE_BLOCKED:${table}`)
     if (Number.isInteger(cap) && rows.length > cap) throw new Error(`DML_CAP_EXCEEDED:${table}:${rows.length}:${cap}`)
-    writes.push({ table, rows })
-    return { table, inserted: rows.length }
+    const storedRows = rows.map((row, index) => {
+      if (table === R2I_LIVE_TARGETS.featureSnapshots && !row.id) {
+        return { ...row, id: `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}` }
+      }
+      return row
+    })
+    writes.push({ table, rows: storedRows })
+    return { table, inserted: storedRows.length, rows: storedRows }
   }
   return {
     writes,
@@ -789,7 +902,14 @@ export function createTestRepository(existing = {}) {
     async insertNativePlayers(rows, cap) { return insert(R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
     async readRawRows(ids) { return read('rawRows', 'id', ids) },
     async insertRawRows(rows, cap) { return insert(R2I_LIVE_TARGETS.rawStatcast, rows, cap) },
-    async readFeatureRows(domain, ids) { return (existing.features?.[domain] ?? []).map((row) => comparableFeatureRow(domain, row)).filter((row) => ids.includes(row.identity)) },
+    async readFeatureRows(domain, ids) {
+      return (existing.features?.[domain] ?? []).map((row, index) => {
+        const withTestId = domain === 'snapshots' && !row.id
+          ? { ...row, id: `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}` }
+          : row
+        return comparableFeatureRow(domain, withTestId)
+      }).filter((row) => ids.includes(row.identity))
+    },
     async insertFeatureRows(domain, rows, cap) { return insert(liveTargetForFeatureDomain(domain), rows, cap) },
     async readPredictions(ids) { return read('predictions', 'deterministic_identity', ids) },
     async insertPredictions(rows, cap) { return insert(R2I_LIVE_TARGETS.predictions, rows, cap) },
@@ -890,14 +1010,39 @@ export async function runR2ILiveExecution({
   const featureRows = plannedFeatureRows(eligibleGames[0], frozenRunAsOf)
   for (const target of [R2I_LIVE_TARGETS.featureSnapshots, R2I_LIVE_TARGETS.team, R2I_LIVE_TARGETS.starter, R2I_LIVE_TARGETS.bullpen, R2I_LIVE_TARGETS.batter, R2I_LIVE_TARGETS.matchup, R2I_LIVE_TARGETS.firstInning]) schemaGuards.push(await repository.verifySchemaFingerprint(target))
   const featureCaps = Object.fromEntries(Object.entries(featureRows).map(([domain, rows]) => [domain, derivedCap(authCaps.features?.[domain], rows.length)]))
-  const features = await planCurrentSlateFeatures({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', targetGamePks: eligibleGamePks, runAsOf: frozenRunAsOf, perDomainCaps: featureCaps, repository, plannedFeatureRows: featureRows, liveAuthorization: live })
+  const features = await planCurrentSlateFeatures({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', targetGamePks: eligibleGamePks, runAsOf: frozenRunAsOf, perDomainCaps: featureCaps, repository, plannedFeatureRows: live ? { snapshots: featureRows.snapshots } : featureRows, liveAuthorization: live })
   stages.push(features)
   if (live) {
-    for (const [domain, plan] of Object.entries(features.artifact.domains)) {
-      const rows = featureRows[domain].map((row) => ({ ...row, identity: row.identity ?? `${domain}:${row.target_game_pk}:${row.subject_id ?? row.team_id ?? row.mlbam_pitcher_id ?? row.mlbam_batter_id ?? 'game'}:${row.feature_version}`, feature_digest: row.feature_digest ?? row.input_digest ?? sha256(row.features ?? row) }))
-      const identityField = domain === 'snapshots' ? 'deterministic_identity' : 'identity'
-      const rowsForInsert = rows.map((row) => domain === 'snapshots' ? { ...row, deterministic_identity: row.deterministic_identity ?? row.identity, input_digest: row.input_digest ?? row.feature_digest } : row)
-      writeResults.push(await insertRowsFromClassifications(plan.classifications, rowsForInsert, identityField, (insertRows, cap) => repository.insertFeatureRows(domain, insertRows, cap), featureCaps[domain]))
+    const snapshotDomainPlan = features.artifact.domains.snapshots
+    const snapshotRows = featureRows.snapshots.map((row) => ({
+      ...row,
+      deterministic_identity: row.deterministic_identity ?? row.identity,
+      identity: row.identity ?? row.deterministic_identity,
+      input_digest: row.input_digest ?? row.feature_digest,
+      feature_digest: row.feature_digest ?? row.input_digest ?? sha256(row.features ?? row),
+    }))
+    const snapshotWrite = await insertRowsFromClassifications(
+      snapshotDomainPlan.classifications,
+      snapshotRows,
+      'deterministic_identity',
+      (insertRows, cap) => repository.insertFeatureRows('snapshots', insertRows, cap),
+      featureCaps.snapshots,
+    )
+    writeResults.push(snapshotWrite)
+    const snapshotIdByGamePk = await resolveCanonicalFeatureSnapshotIds({
+      repository,
+      plannedSnapshotRows: snapshotRows,
+      insertedSnapshotRows: snapshotWrite.rows ?? [],
+    })
+    const boundFeatureRows = bindFeatureRowsToSnapshotIds(featureRows, snapshotIdByGamePk)
+    const daily = await classifyBoundDailyFeatures(repository, boundFeatureRows, eligibleGamePks, featureCaps)
+    Object.assign(features.artifact.domains, daily.plans)
+    for (const key of ['plannedRows', 'insertEligible', 'reuseNoOp', 'blockConflict']) {
+      features[key] = Object.values(features.artifact.domains).reduce((total, plan) => total + plan[key], 0)
+    }
+    for (const [domain, plan] of Object.entries(daily.plans)) {
+      const rows = daily.rows[domain]
+      writeResults.push(await insertRowsFromClassifications(plan.classifications, rows, 'identity', (insertRows, cap) => repository.insertFeatureRows(domain, insertRows, cap), featureCaps[domain]))
     }
   }
 

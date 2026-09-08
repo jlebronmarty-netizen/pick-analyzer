@@ -131,9 +131,12 @@ function featureRows(gamePk = 700001, fields = { feature_date: '2026-09-07', as_
 }
 
 function existingFeatures(rows = featureRows()) {
+  const canonicalSnapshotId = '11111111-1111-4111-8111-111111111111'
   return Object.fromEntries(Object.entries(rows).map(([domain, values]) => [
     domain,
-    values.map((row) => comparableFeatureRow(domain, row)),
+    values.map((row) => comparableFeatureRow(domain, domain === 'snapshots'
+      ? { ...row, id: canonicalSnapshotId }
+      : featureInsertRowsForDomain(domain, [{ ...row, feature_snapshot_id: canonicalSnapshotId }])[0])),
   ]))
 }
 
@@ -345,6 +348,7 @@ async function main() {
   check('live branch simulation reaches downstream handoff', Boolean(starterStage))
   check('previous date error absent', !JSON.stringify(liveSimulation).includes('FEATURE_SNAPSHOT_DATE_FIELDS_REQUIRED'))
   check('live feature stage conflict-free', featureStage?.blockConflict === 0)
+  check('R2S complete existing feature payloads reuse', featureStage?.reuseNoOp === 10 && featureStage?.insertEligible === 0)
 
   const artifact = {
     generatedAt: new Date().toISOString(),

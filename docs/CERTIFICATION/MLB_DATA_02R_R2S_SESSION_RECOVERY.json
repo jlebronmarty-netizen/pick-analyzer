@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-08",
+  "status": "R2S_LOCAL_RECOVERY_COMPLETE",
+  "priorEvidencePreserved": "docs/CERTIFICATION/MLB_DATA_02R_R2S_TEAM_FEATURE_SNAPSHOT_ID_PAYLOAD_BINDING_REPAIR.json",
+  "validationMode": "OFFLINE_STORED_EVIDENCE",
+  "priorProductionEvidenceTimestamp": "2026-09-08T11:51:02.450Z",
+  "freshProductionRead": false,
+  "r2sValidation": { "status": "PASS", "evidence": ".tmp/r2s-resume-validation.json", "errors": [] },
+  "idempotency": {
+    "repeatFeatureRowsReused": 10,
+    "repeatFeatureRowsInserted": 0,
+    "repeatFeatureWriteCaps": 0,
+    "changedSnapshotId": "BLOCK_CONFLICT",
+    "changedStoredPayload": "BLOCK_CONFLICT",
+    "dailyDomains": ["team", "starter", "bullpen", "batter", "matchup", "firstInning"]
+  },
+  "r2iRegression": {
+    "status": "PASS",
+    "evidence": ".tmp/r2s-regression-MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION.json"
+  },
+  "build": { "command": "npm.cmd run build", "exitCode": 0, "log": ".tmp/r2s-resume-build.log" },
+  "sourceSha256": {
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "f65c40b9c4c10594a0a7e294d83aca4bfb41b73d314d98b01ac1d967cf574308",
+    "scripts/mlb-data-02r-r2s-team-feature-snapshot-id-payload-binding-repair-validate.mjs": "053b946b8c7e5a5ba289ef7f6815fea236bae9b410238d63ba41b3ef265e2f6b"
+  },
+  "boundaries": {
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "liveRefresh": "NO",
+    "automationChanges": 0,
+    "cronChanges": 0
+  },
+  "publication": "NOT_PERFORMED"
+}

@@ -253,9 +253,15 @@ function featureRows(gamePk = 700001) {
 }
 
 function existingFeatures(rows = featureRows()) {
+  const canonicalSnapshotId = '11111111-1111-4111-8111-111111111111'
   return Object.fromEntries(Object.entries(rows).map(([domain, values]) => [
     domain,
-    values.map((row) => comparableFeatureRow(domain, row)),
+    values.map((row) => comparableFeatureRow(domain, domain === 'snapshots'
+      ? { ...row, id: canonicalSnapshotId }
+      : featureInsertRowsForDomain(domain, [{ ...row, feature_snapshot_id: canonicalSnapshotId,
+        sample_sizes: row.sample_sizes ?? {},
+        source_window: row.source_window ?? { rule: 'source_game_date < target_game_date', as_of_date: row.as_of_date, mode: 'live_current_slate' },
+      }])[0])),
   ]))
 }
 
@@ -420,6 +426,7 @@ async function main() {
   const featureStage = liveSimulation.stages.find((stage) => stage.stage === '04 feature refresh')
   const starterStage = liveSimulation.stages.find((stage) => stage.stage === '05 starter readiness')
   check('live branch simulation pass', Boolean(featureStage) && Boolean(starterStage))
+  check('R2S complete existing feature payloads reuse', featureStage?.reuseNoOp === 10 && featureStage?.insertEligible === 0)
   check('previous identity error absent', !JSON.stringify(liveSimulation).includes('pick2_feature_snapshots.identity'))
 
   const identityInventory = [

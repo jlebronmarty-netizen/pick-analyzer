@@ -1,0 +1,1495 @@
+{
+  "validationMode": "PRODUCTION_READBACK",
+  "freshProductionRead": true,
+  "generatedAt": "2026-09-08T16:56:52.606Z",
+  "certificationVerdict": "MLB_DATA_02R_R2S_TEAM_FEATURE_SNAPSHOT_ID_PAYLOAD_BINDING_REPAIR_CERTIFIED",
+  "priorPackageSha": "5ccde72b6f97535ef16b82ce0c8fb5ad46e3b132",
+  "gates": {
+    "MLB_02R_R2S_TEAM_FEATURE_PHYSICAL_SCHEMA": "PASS",
+    "MLB_02R_R2S_FEATURE_SNAPSHOT_FK_CONTRACT": "PASS",
+    "MLB_02R_R2S_SNAPSHOT_ID_HANDOFF_FLOW": "COMPLETE",
+    "MLB_02R_R2S_SNAPSHOT_ID_RESOLUTION": "PASS",
+    "MLB_02R_R2S_TEAM_SNAPSHOT_ID_BINDING": "PASS",
+    "MLB_02R_R2S_TEAM_INSERT_SHAPE_GUARD": "PASS",
+    "MLB_02R_R2S_REFERENTIAL_LINKAGE_TEST": "PASS",
+    "MLB_02R_R2S_TEAM_FEATURE_IDEMPOTENCY": "PASS",
+    "MLB_02R_R2S_FEATURE_SNAPSHOT_LINKAGE_MATRIX": "COMPLETE",
+    "MLB_02R_R2S_EXISTING_LINKAGE_COMPATIBILITY": "PASS",
+    "MLB_02R_R2S_LIVE_BRANCH_SIMULATION": "PASS",
+    "MLB_02R_R2S_PROTECTED_STATE": "PASS",
+    "MLB_02R_R2S_BUSINESS_LOGIC_PARITY": "PASS"
+  },
+  "certificationScope": "R2S snapshot FK payload binding only; injected feature repository, no real live refresh",
+  "checks": [
+    {
+      "label": "schema not-null FK",
+      "passed": true
+    },
+    {
+      "label": "complete team schema inventory",
+      "passed": true
+    },
+    {
+      "label": "team native unique index",
+      "passed": true
+    },
+    {
+      "label": "protected readback available",
+      "passed": true
+    },
+    {
+      "label": "protected games preserved",
+      "passed": true
+    },
+    {
+      "label": "unbound team insert blocked",
+      "passed": true
+    },
+    {
+      "label": "synthetic/non UUID blocked",
+      "passed": true
+    },
+    {
+      "label": "reuse snapshot id resolved",
+      "passed": true
+    },
+    {
+      "label": "insert snapshot id resolved",
+      "passed": true
+    },
+    {
+      "label": "team feature_snapshot_id bound",
+      "passed": true
+    },
+    {
+      "label": "team target game bound",
+      "passed": true
+    },
+    {
+      "label": "team no unsupported feature payload",
+      "passed": true
+    },
+    {
+      "label": "team UUID guard",
+      "passed": true
+    },
+    {
+      "label": "all daily domains bind snapshot id",
+      "passed": true
+    },
+    {
+      "label": "team missing FK rejected",
+      "passed": true
+    },
+    {
+      "label": "team invalid FK rejected",
+      "passed": true
+    },
+    {
+      "label": "team existing linkage compatibility",
+      "passed": true
+    },
+    {
+      "label": "starter missing FK rejected",
+      "passed": true
+    },
+    {
+      "label": "starter invalid FK rejected",
+      "passed": true
+    },
+    {
+      "label": "starter existing linkage compatibility",
+      "passed": true
+    },
+    {
+      "label": "bullpen missing FK rejected",
+      "passed": true
+    },
+    {
+      "label": "bullpen invalid FK rejected",
+      "passed": true
+    },
+    {
+      "label": "bullpen existing linkage compatibility",
+      "passed": true
+    },
+    {
+      "label": "batter missing FK rejected",
+      "passed": true
+    },
+    {
+      "label": "batter invalid FK rejected",
+      "passed": true
+    },
+    {
+      "label": "batter existing linkage compatibility",
+      "passed": true
+    },
+    {
+      "label": "matchup missing FK rejected",
+      "passed": true
+    },
+    {
+      "label": "matchup invalid FK rejected",
+      "passed": true
+    },
+    {
+      "label": "matchup existing linkage compatibility",
+      "passed": true
+    },
+    {
+      "label": "firstInning missing FK rejected",
+      "passed": true
+    },
+    {
+      "label": "firstInning invalid FK rejected",
+      "passed": true
+    },
+    {
+      "label": "firstInning existing linkage compatibility",
+      "passed": true
+    },
+    {
+      "label": "same team feature comparable identity",
+      "passed": true
+    },
+    {
+      "label": "same physical team payload reused",
+      "passed": true
+    },
+    {
+      "label": "all daily domains reuse without inserts",
+      "passed": true
+    },
+    {
+      "label": "different snapshot linkage conflicts",
+      "passed": true
+    },
+    {
+      "label": "different physical payload conflicts",
+      "passed": true
+    },
+    {
+      "label": "missing inserted/readback snapshot id blocked",
+      "passed": true
+    },
+    {
+      "label": "out of scope team shape blocked",
+      "passed": true
+    },
+    {
+      "label": "live branch reaches feature stage",
+      "passed": true
+    },
+    {
+      "label": "live branch team write uses snapshot id",
+      "passed": true
+    },
+    {
+      "label": "live branch advanced downstream",
+      "passed": true
+    },
+    {
+      "label": "no null FK failure in simulation",
+      "passed": true
+    },
+    {
+      "label": "nonempty team physical writes",
+      "passed": true
+    },
+    {
+      "label": "team physical repository FK handoff",
+      "passed": true
+    },
+    {
+      "label": "starter physical repository FK handoff",
+      "passed": true
+    },
+    {
+      "label": "bullpen physical repository FK handoff",
+      "passed": true
+    },
+    {
+      "label": "batter physical repository FK handoff",
+      "passed": true
+    },
+    {
+      "label": "matchup physical repository FK handoff",
+      "passed": true
+    },
+    {
+      "label": "firstInning physical repository FK handoff",
+      "passed": true
+    },
+    {
+      "label": "inserted canonical snapshot stored exactly once",
+      "passed": true
+    },
+    {
+      "label": "team inserted snapshot physical FK handoff",
+      "passed": true
+    },
+    {
+      "label": "starter inserted snapshot physical FK handoff",
+      "passed": true
+    },
+    {
+      "label": "bullpen inserted snapshot physical FK handoff",
+      "passed": true
+    },
+    {
+      "label": "batter inserted snapshot physical FK handoff",
+      "passed": true
+    },
+    {
+      "label": "matchup inserted snapshot physical FK handoff",
+      "passed": true
+    },
+    {
+      "label": "firstInning inserted snapshot physical FK handoff",
+      "passed": true
+    },
+    {
+      "label": "both injected branches reach final board handoff",
+      "passed": true
+    },
+    {
+      "label": "live repeat reuses all ten feature rows with zero cap",
+      "passed": true
+    },
+    {
+      "label": "business logic parity source",
+      "passed": true
+    },
+    {
+      "label": "protected production state unchanged",
+      "passed": true
+    }
+  ],
+  "businessLogicParity": [
+    {
+      "name": "plannedFeatureRows",
+      "unchanged": true
+    },
+    {
+      "name": "modelArtifact",
+      "unchanged": true
+    },
+    {
+      "name": "predictionFromInference",
+      "unchanged": true
+    },
+    {
+      "name": "officialPickFromPolicy",
+      "unchanged": true
+    },
+    {
+      "name": "featureDateFieldsForGame",
+      "unchanged": true
+    },
+    {
+      "name": "createCurrentSlateRunFreeze",
+      "unchanged": true
+    },
+    {
+      "name": "createMlbOfficialLiveClient",
+      "unchanged": true
+    },
+    {
+      "name": "createTheOddsApiLiveClient",
+      "unchanged": true
+    },
+    {
+      "name": "createStatcastLiveClient",
+      "unchanged": true
+    }
+  ],
+  "protectedState": {
+    "countsUnchanged": true,
+    "protectedGamesUnchanged": true,
+    "officialSampleUnchanged": true,
+    "countsValid": true
+  },
+  "physicalSchema": {
+    "source": "migration/schema contract plus read-only production sample",
+    "teamFeatureColumns": [
+      "id",
+      "feature_snapshot_id",
+      "target_game_pk",
+      "team_id",
+      "feature_date",
+      "as_of_date",
+      "as_of_timestamp",
+      "feature_version",
+      "sample_sizes",
+      "source_window",
+      "created_at"
+    ],
+    "featureSnapshotId": {
+      "nullable": false,
+      "fk": "public.pick2_feature_snapshots(id)",
+      "requiredForAllRows": true
+    },
+    "uniqueness": "target_game_pk, team_id, feature_date, feature_version",
+    "schemaInventory": {
+      "featureSnapshotIdNotNullFk": true,
+      "nativeTargetColumn": true,
+      "positiveTargetCheck": true,
+      "nativeUniqueIndex": true,
+      "legacyUniqueDropped": true,
+      "rlsPolicy": true
+    }
+  },
+  "snapshotIdHandoffFlow": [
+    "feature snapshot planner emits deterministic_identity",
+    "snapshot persistence classifies INSERT_ELIGIBLE or REUSE_NO_OP",
+    "snapshot write/readback resolves canonical pick2_feature_snapshots.id",
+    "daily feature rows bind feature_snapshot_id from the canonical snapshot id",
+    "team insert shape guard rejects missing or non-UUID feature_snapshot_id"
+  ],
+  "snapshotIdResolution": {
+    "insertEligible": {
+      "deterministic_identity": "snapshot:700001:moneyline",
+      "resolvedId": "22222222-2222-4222-8222-222222222222"
+    },
+    "reuseNoOp": {
+      "deterministic_identity": "snapshot:700001:moneyline",
+      "resolvedId": "11111111-1111-4111-8111-111111111111"
+    },
+    "noSyntheticUuid": true,
+    "fkOptional": false
+  },
+  "teamInsertShape": {
+    "rows": [
+      {
+        "target_game_pk": 700001,
+        "feature_date": "2026-09-08",
+        "as_of_date": "2026-09-07",
+        "as_of_timestamp": "2026-09-07T23:59:59.000Z",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "source_window": {
+          "rule": "source_game_date < target_game_date",
+          "as_of_date": "2026-09-07",
+          "mode": "live_current_slate"
+        },
+        "sample_sizes": {},
+        "team_id": 111,
+        "feature_snapshot_id": "11111111-1111-4111-8111-111111111111"
+      },
+      {
+        "target_game_pk": 700001,
+        "feature_date": "2026-09-08",
+        "as_of_date": "2026-09-07",
+        "as_of_timestamp": "2026-09-07T23:59:59.000Z",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "source_window": {
+          "rule": "source_game_date < target_game_date",
+          "as_of_date": "2026-09-07",
+          "mode": "live_current_slate"
+        },
+        "sample_sizes": {},
+        "team_id": 110,
+        "feature_snapshot_id": "11111111-1111-4111-8111-111111111111"
+      }
+    ],
+    "required": [
+      "feature_snapshot_id",
+      "target_game_pk",
+      "team_id",
+      "feature_date",
+      "as_of_date",
+      "as_of_timestamp",
+      "feature_version"
+    ],
+    "unsupportedKeysRejected": true
+  },
+  "idempotency": {
+    "sameTeamIdentitySameSnapshotPayload": "REUSE_NO_OP",
+    "sameTeamIdentityDifferentSnapshotOrDigest": "BLOCK_CONFLICT",
+    "newTeamIdentity": "INSERT_ELIGIBLE",
+    "testedDailyDomains": [
+      "team",
+      "starter",
+      "bullpen",
+      "batter",
+      "matchup",
+      "firstInning"
+    ],
+    "repeatFeatureStage": {
+      "reuseNoOp": 10,
+      "insertEligible": 0
+    }
+  },
+  "featureSnapshotLinkageMatrix": [
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "domain": "team",
+      "feature_snapshot_id_required": true,
+      "adapter_currently_binds": true,
+      "physicalInsertRows": 2,
+      "status": "PASS",
+      "existingLinkageSamples": 3,
+      "existingLinkageVerified": true,
+      "simulatedRowsInserted": 2,
+      "simulatedCanonicalFkVerified": true,
+      "insertedSnapshotFkVerified": true
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "domain": "starter",
+      "feature_snapshot_id_required": true,
+      "adapter_currently_binds": true,
+      "physicalInsertRows": 2,
+      "status": "PASS",
+      "existingLinkageSamples": 3,
+      "existingLinkageVerified": true,
+      "simulatedRowsInserted": 2,
+      "simulatedCanonicalFkVerified": true,
+      "insertedSnapshotFkVerified": true
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "domain": "bullpen",
+      "feature_snapshot_id_required": true,
+      "adapter_currently_binds": true,
+      "physicalInsertRows": 2,
+      "status": "PASS",
+      "existingLinkageSamples": 3,
+      "existingLinkageVerified": true,
+      "simulatedRowsInserted": 2,
+      "simulatedCanonicalFkVerified": true,
+      "insertedSnapshotFkVerified": true
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "domain": "batter",
+      "feature_snapshot_id_required": true,
+      "adapter_currently_binds": true,
+      "physicalInsertRows": 1,
+      "status": "PASS",
+      "existingLinkageSamples": 3,
+      "existingLinkageVerified": true,
+      "simulatedRowsInserted": 1,
+      "simulatedCanonicalFkVerified": true,
+      "insertedSnapshotFkVerified": true
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "domain": "matchup",
+      "feature_snapshot_id_required": true,
+      "adapter_currently_binds": true,
+      "physicalInsertRows": 1,
+      "status": "PASS",
+      "existingLinkageSamples": 3,
+      "existingLinkageVerified": true,
+      "simulatedRowsInserted": 1,
+      "simulatedCanonicalFkVerified": true,
+      "insertedSnapshotFkVerified": true
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "domain": "firstInning",
+      "feature_snapshot_id_required": true,
+      "adapter_currently_binds": true,
+      "physicalInsertRows": 1,
+      "status": "PASS",
+      "existingLinkageSamples": 3,
+      "existingLinkageVerified": true,
+      "simulatedRowsInserted": 1,
+      "simulatedCanonicalFkVerified": true,
+      "insertedSnapshotFkVerified": true
+    }
+  ],
+  "existingLinkageCompatibility": {
+    "available": true,
+    "evidenceMode": "FRESH_READ_ONLY_PRODUCTION",
+    "evidenceGeneratedAt": "2026-09-08T16:56:46.814Z",
+    "freshProductionRead": true,
+    "domains": {
+      "team": {
+        "table": "pick2_mlb_team_daily_features",
+        "rows": [
+          {
+            "id": "0009056f-38cb-4fdb-8467-b43711c846b2",
+            "feature_snapshot_id": "7b1e0a30-6f17-4d56-83ca-f94ef1879405",
+            "target_game_pk": 822770,
+            "team_id": "baseball_mlb:mlb:sportsdataio:team:13",
+            "feature_date": "2026-08-29",
+            "as_of_date": "2026-08-28",
+            "as_of_timestamp": "2026-08-28T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "team_games",
+              "pitches": 19744,
+              "sample_size": 135,
+              "plate_appearances": 5049,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "team",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-08-28",
+              "sample_size": 135,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:04.792376+00:00"
+          },
+          {
+            "id": "002440de-4747-4a8f-ab4d-18c3b4b80843",
+            "feature_snapshot_id": "62091ecd-209a-49fc-adac-4d88cf9f91b7",
+            "target_game_pk": 776981,
+            "team_id": "baseball_mlb:mlb:sportsdataio:team:28",
+            "feature_date": "2025-07-27",
+            "as_of_date": "2025-07-26",
+            "as_of_timestamp": "2025-07-26T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "team_games",
+              "pitches": 15041,
+              "sample_size": 105,
+              "plate_appearances": 3888,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "team",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-07-26",
+              "sample_size": 105,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-08-31T23:01:09.411947+00:00"
+          },
+          {
+            "id": "0025cc42-631d-4a0c-9017-73e90d5cf725",
+            "feature_snapshot_id": "54f9f6b3-2f95-4a28-b297-c178691f3020",
+            "target_game_pk": 778227,
+            "team_id": "baseball_mlb:mlb:sportsdataio:team:10",
+            "feature_date": "2025-04-21",
+            "as_of_date": "2025-04-20",
+            "as_of_timestamp": "2025-04-20T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "team_games",
+              "pitches": 3076,
+              "sample_size": 21,
+              "plate_appearances": 781,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "team",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-04-20",
+              "sample_size": 21,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-08-31T23:01:05.923921+00:00"
+          }
+        ],
+        "snapshots": [
+          {
+            "id": "54f9f6b3-2f95-4a28-b297-c178691f3020",
+            "target_game_pk": 778227,
+            "feature_date": "2025-04-21",
+            "as_of_date": "2025-04-20",
+            "as_of_timestamp": "2025-04-20T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "8e5ca131141f41da81e843b7492adb2625c451f37b48fd8abe1a3f80944cd504"
+          },
+          {
+            "id": "62091ecd-209a-49fc-adac-4d88cf9f91b7",
+            "target_game_pk": 776981,
+            "feature_date": "2025-07-27",
+            "as_of_date": "2025-07-26",
+            "as_of_timestamp": "2025-07-26T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "7069d2e9bc29cc746a763255b51a40b10148cfcca2e9159ba78773698c6ab6fa"
+          },
+          {
+            "id": "7b1e0a30-6f17-4d56-83ca-f94ef1879405",
+            "target_game_pk": 822770,
+            "feature_date": "2026-08-29",
+            "as_of_date": "2026-08-28",
+            "as_of_timestamp": "2026-08-28T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "0b554ad6f8bfae877d7813576356b367146016709da49903685d03a17dc03cb8"
+          }
+        ],
+        "nullFkRows": [],
+        "errors": []
+      },
+      "starter": {
+        "table": "pick2_mlb_pitcher_daily_features",
+        "rows": [
+          {
+            "id": "00024028-bc88-4fec-8373-639d74fb6f25",
+            "feature_snapshot_id": "70301292-47b3-4f81-a585-9ab1439f1afc",
+            "target_game_pk": 822986,
+            "mlbam_pitcher_id": 592332,
+            "feature_date": "2026-05-05",
+            "as_of_date": "2026-05-04",
+            "as_of_timestamp": "2026-05-04T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "starter_appearances",
+              "pitches": 624,
+              "sample_size": 7,
+              "plate_appearances": 161,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "starter",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-05-04",
+              "sample_size": 7,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:06.23307+00:00"
+          },
+          {
+            "id": "001009b5-3475-414b-8a4e-b2402cb21977",
+            "feature_snapshot_id": "a0ec398e-079b-44fa-aecf-5a01fd41ab21",
+            "target_game_pk": 777426,
+            "mlbam_pitcher_id": 601713,
+            "feature_date": "2025-06-20",
+            "as_of_date": "2025-06-19",
+            "as_of_timestamp": "2025-06-19T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "starter_appearances",
+              "pitches": 1228,
+              "sample_size": 14,
+              "plate_appearances": 319,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "starter",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-06-19",
+              "sample_size": 14,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-08-31T23:01:13.587103+00:00"
+          },
+          {
+            "id": "00176c2a-c33e-4c46-8907-1489a0a57559",
+            "feature_snapshot_id": "8ed75f38-9542-491a-a894-056e1a806e48",
+            "target_game_pk": 776252,
+            "mlbam_pitcher_id": 676917,
+            "feature_date": "2025-09-20",
+            "as_of_date": "2025-09-19",
+            "as_of_timestamp": "2025-09-19T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "starter_appearances",
+              "pitches": 641,
+              "sample_size": 8,
+              "plate_appearances": 177,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "starter",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-09-19",
+              "sample_size": 8,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-08-31T23:01:16.525556+00:00"
+          }
+        ],
+        "snapshots": [
+          {
+            "id": "70301292-47b3-4f81-a585-9ab1439f1afc",
+            "target_game_pk": 822986,
+            "feature_date": "2026-05-05",
+            "as_of_date": "2026-05-04",
+            "as_of_timestamp": "2026-05-04T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "d7393573277b36465cb3a85ce6d235e029f6a0c71f162fdf40f7f3b4af09542d"
+          },
+          {
+            "id": "8ed75f38-9542-491a-a894-056e1a806e48",
+            "target_game_pk": 776252,
+            "feature_date": "2025-09-20",
+            "as_of_date": "2025-09-19",
+            "as_of_timestamp": "2025-09-19T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "79840bb00fbb40ffbd51c4a199c87c35870deb0f6d76c4758a860ffc3a3254a0"
+          },
+          {
+            "id": "a0ec398e-079b-44fa-aecf-5a01fd41ab21",
+            "target_game_pk": 777426,
+            "feature_date": "2025-06-20",
+            "as_of_date": "2025-06-19",
+            "as_of_timestamp": "2025-06-19T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "828224613ef40ff6d181b475c78b7768ce78ee050834a724972a499d602f8c65"
+          }
+        ],
+        "nullFkRows": [],
+        "errors": []
+      },
+      "bullpen": {
+        "table": "pick2_mlb_bullpen_daily_features",
+        "rows": [
+          {
+            "id": "00086daa-d597-4a11-83ee-4e3cb80527eb",
+            "feature_snapshot_id": "07c714c4-a31a-4d54-a0f0-05a3e75f8266",
+            "target_game_pk": 823477,
+            "team_id": "baseball_mlb:mlb:sportsdataio:team:12",
+            "feature_date": "2026-04-15",
+            "as_of_date": "2026-04-14",
+            "as_of_timestamp": "2026-04-14T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "bullpen_games",
+              "pitches": 1121,
+              "sample_size": 17,
+              "plate_appearances": 276,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "bullpen",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-04-14",
+              "sample_size": 17,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:09.907129+00:00"
+          },
+          {
+            "id": "000901c9-b9ab-4651-8267-4be7c8284b25",
+            "feature_snapshot_id": "7e1ddab8-0e3b-4dfc-990b-d9825d92aee0",
+            "target_game_pk": 776798,
+            "team_id": "baseball_mlb:mlb:sportsdataio:team:10",
+            "feature_date": "2025-08-10",
+            "as_of_date": "2025-08-09",
+            "as_of_timestamp": "2025-08-09T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "bullpen_games",
+              "pitches": 6674,
+              "sample_size": 115,
+              "plate_appearances": 1721,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "bullpen",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-08-09",
+              "sample_size": 115,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-04T17:47:37.81539+00:00"
+          },
+          {
+            "id": "000c0ed5-cb91-4e15-875e-ef800d5ee6d9",
+            "feature_snapshot_id": "270bbae4-635b-40d7-a0e1-0caf50c6682d",
+            "target_game_pk": 822961,
+            "team_id": "baseball_mlb:mlb:sportsdataio:team:11",
+            "feature_date": "2026-06-25",
+            "as_of_date": "2026-06-24",
+            "as_of_timestamp": "2026-06-24T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "bullpen_games",
+              "pitches": 5156,
+              "sample_size": 77,
+              "plate_appearances": 1338,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "bullpen",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-06-24",
+              "sample_size": 77,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:11.887267+00:00"
+          }
+        ],
+        "snapshots": [
+          {
+            "id": "07c714c4-a31a-4d54-a0f0-05a3e75f8266",
+            "target_game_pk": 823477,
+            "feature_date": "2026-04-15",
+            "as_of_date": "2026-04-14",
+            "as_of_timestamp": "2026-04-14T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "9412afb4e50ac6e79d77a8362afc9723f29230b3ee8194dbf76f0828d72fe5dd"
+          },
+          {
+            "id": "270bbae4-635b-40d7-a0e1-0caf50c6682d",
+            "target_game_pk": 822961,
+            "feature_date": "2026-06-25",
+            "as_of_date": "2026-06-24",
+            "as_of_timestamp": "2026-06-24T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "1da16551204454db58feffb9c4b6324475ba2a14a214d26ac2d84b6db3c05bbe"
+          },
+          {
+            "id": "7e1ddab8-0e3b-4dfc-990b-d9825d92aee0",
+            "target_game_pk": 776798,
+            "feature_date": "2025-08-10",
+            "as_of_date": "2025-08-09",
+            "as_of_timestamp": "2025-08-09T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "3d35b1b39678dbc8aa0c6e27527bcd486504ccde97ad2393d5c3982e55f99c87"
+          }
+        ],
+        "nullFkRows": [],
+        "errors": []
+      },
+      "batter": {
+        "table": "pick2_mlb_batter_daily_features",
+        "rows": [
+          {
+            "id": "0000b0ff-5018-4ac4-b50d-65dc02ec49b6",
+            "feature_snapshot_id": "94caae9b-e129-44ba-99ce-f6581414733f",
+            "target_game_pk": 823843,
+            "mlbam_batter_id": 664034,
+            "feature_date": "2026-07-24",
+            "as_of_date": "2026-07-23",
+            "as_of_timestamp": "2026-07-23T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "batter_games",
+              "pitches": 1064,
+              "sample_size": 72,
+              "plate_appearances": 263,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "batter",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-07-23",
+              "sample_size": 72,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:36.123082+00:00"
+          },
+          {
+            "id": "0003313b-792b-4bbc-85f0-1ff363f3088d",
+            "feature_snapshot_id": "b278b652-82d8-4596-aa07-c3298ae41293",
+            "target_game_pk": 777232,
+            "mlbam_batter_id": 672820,
+            "feature_date": "2025-07-05",
+            "as_of_date": "2025-07-04",
+            "as_of_timestamp": "2025-07-04T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "batter_games",
+              "pitches": 917,
+              "sample_size": 72,
+              "plate_appearances": 261,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "batter",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-07-04",
+              "sample_size": 72,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-04T17:48:15.917832+00:00"
+          },
+          {
+            "id": "0003ccf9-71e9-4f21-af41-a976aa226393",
+            "feature_snapshot_id": "e4c14056-91cf-4b5c-90d7-79d646a5c5f9",
+            "target_game_pk": 776958,
+            "mlbam_batter_id": 650859,
+            "feature_date": "2025-07-28",
+            "as_of_date": "2025-07-27",
+            "as_of_timestamp": "2025-07-27T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "batter_games",
+              "pitches": 1325,
+              "sample_size": 99,
+              "plate_appearances": 376,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "batter",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-07-27",
+              "sample_size": 99,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-04T17:48:22.169965+00:00"
+          }
+        ],
+        "snapshots": [
+          {
+            "id": "94caae9b-e129-44ba-99ce-f6581414733f",
+            "target_game_pk": 823843,
+            "feature_date": "2026-07-24",
+            "as_of_date": "2026-07-23",
+            "as_of_timestamp": "2026-07-23T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "dd23113254b6e088c4934a63f663fa81de0a730c21ad538db9fa9ec425977aee"
+          },
+          {
+            "id": "b278b652-82d8-4596-aa07-c3298ae41293",
+            "target_game_pk": 777232,
+            "feature_date": "2025-07-05",
+            "as_of_date": "2025-07-04",
+            "as_of_timestamp": "2025-07-04T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "d69fd4dc00d6dfe68b112c3c8949cd2e96cd06e32b08ccff60b83e37473b6709"
+          },
+          {
+            "id": "e4c14056-91cf-4b5c-90d7-79d646a5c5f9",
+            "target_game_pk": 776958,
+            "feature_date": "2025-07-28",
+            "as_of_date": "2025-07-27",
+            "as_of_timestamp": "2025-07-27T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "f6bdfa8e162851eb3dacae169c84e4b8375373f9c856f309bb6a75bac127014f"
+          }
+        ],
+        "nullFkRows": [],
+        "errors": []
+      },
+      "matchup": {
+        "table": "pick2_mlb_matchup_daily_features",
+        "rows": [
+          {
+            "id": "003203e4-ef40-4005-beb8-b1feb109084c",
+            "feature_snapshot_id": "2bc4edc9-77f3-411c-b918-582891581bb4",
+            "target_game_pk": 824206,
+            "feature_date": "2026-04-18",
+            "as_of_date": "2026-04-17",
+            "as_of_timestamp": "2026-04-17T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "matchup_minimum_history",
+              "sample_size": 3,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "matchup",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-04-17",
+              "sample_size": 3,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:45.402437+00:00"
+          },
+          {
+            "id": "0045c441-008d-434e-afed-5124b42fbeaa",
+            "feature_snapshot_id": "6c2bf0a8-c4c2-4dbb-8e12-4d8fb0780b65",
+            "target_game_pk": 824211,
+            "feature_date": "2026-04-01",
+            "as_of_date": "2026-03-31",
+            "as_of_timestamp": "2026-03-31T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "matchup_minimum_history",
+              "sample_size": 1,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "matchup",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-03-31",
+              "sample_size": 1,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:45.402437+00:00"
+          },
+          {
+            "id": "0047420f-fed2-4f55-b870-17bd2dd18627",
+            "feature_snapshot_id": "184c936b-6b97-42ca-a26d-83156c0bfd27",
+            "target_game_pk": 778484,
+            "feature_date": "2025-04-02",
+            "as_of_date": "2025-04-01",
+            "as_of_timestamp": "2025-04-01T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "matchup_minimum_history",
+              "sample_size": 1,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "matchup",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-04-01",
+              "sample_size": 1,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-04T17:48:44.555186+00:00"
+          }
+        ],
+        "snapshots": [
+          {
+            "id": "184c936b-6b97-42ca-a26d-83156c0bfd27",
+            "target_game_pk": 778484,
+            "feature_date": "2025-04-02",
+            "as_of_date": "2025-04-01",
+            "as_of_timestamp": "2025-04-01T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "ad53c4e75e0d8f827a85e43569c21b0daa5f4c6191555805385cc76111cc78ff"
+          },
+          {
+            "id": "2bc4edc9-77f3-411c-b918-582891581bb4",
+            "target_game_pk": 824206,
+            "feature_date": "2026-04-18",
+            "as_of_date": "2026-04-17",
+            "as_of_timestamp": "2026-04-17T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "5ed4013b6e2634ccfe636411f93b4c9fa8e637853189f94871aaac54f8c03c14"
+          },
+          {
+            "id": "6c2bf0a8-c4c2-4dbb-8e12-4d8fb0780b65",
+            "target_game_pk": 824211,
+            "feature_date": "2026-04-01",
+            "as_of_date": "2026-03-31",
+            "as_of_timestamp": "2026-03-31T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "f980b842f041c7e9785f4cdf6647253087221d759261dd8198b034853c4c3436"
+          }
+        ],
+        "nullFkRows": [],
+        "errors": []
+      },
+      "firstInning": {
+        "table": "pick2_mlb_first_inning_daily_features",
+        "rows": [
+          {
+            "id": "000a6939-f5b3-4fab-9d66-39f040bf166d",
+            "feature_snapshot_id": "f2bc8bd8-06b3-4838-ba6d-08395757780e",
+            "target_game_pk": 824403,
+            "feature_date": "2026-08-04",
+            "as_of_date": "2026-08-03",
+            "as_of_timestamp": "2026-08-03T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "first_inning_minimum_history",
+              "sample_size": 23,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "first_inning",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2026-08-03",
+              "sample_size": 23,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-05T01:11:50.206539+00:00"
+          },
+          {
+            "id": "002f4684-8b29-4354-8b03-7784e6e70f3a",
+            "feature_snapshot_id": "c94f14e8-e338-4cad-9966-e85887469267",
+            "target_game_pk": 776286,
+            "feature_date": "2025-09-17",
+            "as_of_date": "2025-09-16",
+            "as_of_timestamp": "2025-09-16T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "first_inning_minimum_history",
+              "sample_size": 8,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "first_inning",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-09-16",
+              "sample_size": 8,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-04T17:48:51.58844+00:00"
+          },
+          {
+            "id": "003350aa-6e36-4a85-8e2d-495af86fc565",
+            "feature_snapshot_id": "9795e287-f085-490a-a461-d4f1240c0247",
+            "target_game_pk": 777539,
+            "feature_date": "2025-06-13",
+            "as_of_date": "2025-06-12",
+            "as_of_timestamp": "2025-06-12T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "sample_sizes": {
+              "kind": "first_inning_minimum_history",
+              "sample_size": 13,
+              "no_sample_values_written_as_zero": false
+            },
+            "source_window": {
+              "kind": "first_inning",
+              "rule": "source_game_date < target_game_date",
+              "as_of_date": "2025-06-12",
+              "sample_size": 13,
+              "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+            },
+            "created_at": "2026-09-04T17:48:49.490153+00:00"
+          }
+        ],
+        "snapshots": [
+          {
+            "id": "9795e287-f085-490a-a461-d4f1240c0247",
+            "target_game_pk": 777539,
+            "feature_date": "2025-06-13",
+            "as_of_date": "2025-06-12",
+            "as_of_timestamp": "2025-06-12T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "50b9f1a6d4f6a1c7bdc00af759e24e1619f85416e275ad969a3eabbd6ef21531"
+          },
+          {
+            "id": "c94f14e8-e338-4cad-9966-e85887469267",
+            "target_game_pk": 776286,
+            "feature_date": "2025-09-17",
+            "as_of_date": "2025-09-16",
+            "as_of_timestamp": "2025-09-16T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "c51a35d3c3f7c21ef52be308ee0d0b11ea483e536b6760c349234d66d39713fa"
+          },
+          {
+            "id": "f2bc8bd8-06b3-4838-ba6d-08395757780e",
+            "target_game_pk": 824403,
+            "feature_date": "2026-08-04",
+            "as_of_date": "2026-08-03",
+            "as_of_timestamp": "2026-08-03T23:59:59+00:00",
+            "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+            "input_digest": "3d69c967c14c081ff75fd58a205188d4f5d6c3adb6ebeb446037eb00f1ef9278"
+          }
+        ],
+        "nullFkRows": [],
+        "errors": []
+      }
+    },
+    "officialSampleDigest": "fe5f466b9de90ee8b9aaf552c1c71267a25ad64dc3a0bb22fda628e45606316f",
+    "counts": {
+      "pick2_feature_snapshots": 126465,
+      "pick2_mlb_team_daily_features": 8400,
+      "pick2_mlb_pitcher_daily_features": 8400,
+      "pick2_mlb_bullpen_daily_features": 8400,
+      "pick2_mlb_batter_daily_features": 84464,
+      "pick2_mlb_matchup_daily_features": 4200,
+      "pick2_mlb_first_inning_daily_features": 4200,
+      "pick2_mlb_games": 4601,
+      "pick2_game_predictions": 24,
+      "pick2_mlb_official_picks": 5
+    },
+    "teamSample": [
+      {
+        "id": "a6defa2b-ed39-471c-bd20-2e8b724dc80a",
+        "feature_snapshot_id": "51de3975-7378-4b88-bd40-707412f4e5c3",
+        "target_game_pk": 778494,
+        "team_id": "baseball_mlb:mlb:sportsdataio:team:24",
+        "feature_date": "2025-04-01",
+        "as_of_date": "2025-03-31",
+        "as_of_timestamp": "2025-03-31T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "sample_sizes": {
+          "kind": "team_games",
+          "pitches": 651,
+          "sample_size": 5,
+          "plate_appearances": 184,
+          "no_sample_values_written_as_zero": false
+        },
+        "source_window": {
+          "kind": "team",
+          "rule": "source_game_date < target_game_date",
+          "as_of_date": "2025-03-31",
+          "sample_size": 5,
+          "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+        },
+        "created_at": "2026-08-31T23:01:05.923921+00:00"
+      },
+      {
+        "id": "575cd0da-5d70-42a3-884a-ea53c9b7985e",
+        "feature_snapshot_id": "d1d3d2df-691a-4f5d-ae51-b741be6a0708",
+        "target_game_pk": 778494,
+        "team_id": "baseball_mlb:mlb:sportsdataio:team:9",
+        "feature_date": "2025-04-01",
+        "as_of_date": "2025-03-31",
+        "as_of_timestamp": "2025-03-31T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "sample_sizes": {
+          "kind": "team_games",
+          "pitches": 1113,
+          "sample_size": 7,
+          "plate_appearances": 291,
+          "no_sample_values_written_as_zero": false
+        },
+        "source_window": {
+          "kind": "team",
+          "rule": "source_game_date < target_game_date",
+          "as_of_date": "2025-03-31",
+          "sample_size": 7,
+          "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+        },
+        "created_at": "2026-08-31T23:01:05.923921+00:00"
+      },
+      {
+        "id": "0d802ace-4db0-4022-9a02-9dc8206fe98c",
+        "feature_snapshot_id": "77d920f9-cc3a-45a0-b1f7-bf10f16df548",
+        "target_game_pk": 778469,
+        "team_id": "baseball_mlb:mlb:sportsdataio:team:13",
+        "feature_date": "2025-04-02",
+        "as_of_date": "2025-04-01",
+        "as_of_timestamp": "2025-04-01T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "sample_sizes": {
+          "kind": "team_games",
+          "pitches": 849,
+          "sample_size": 6,
+          "plate_appearances": 209,
+          "no_sample_values_written_as_zero": false
+        },
+        "source_window": {
+          "kind": "team",
+          "rule": "source_game_date < target_game_date",
+          "as_of_date": "2025-04-01",
+          "sample_size": 6,
+          "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+        },
+        "created_at": "2026-08-31T23:01:05.923921+00:00"
+      }
+    ],
+    "linkedSnapshots": [
+      {
+        "id": "51de3975-7378-4b88-bd40-707412f4e5c3",
+        "deterministic_identity": "01D:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1:team:team:778494:team:baseball_mlb:mlb:sportsdataio:team:24:none:2025-03-31",
+        "target_game_pk": 778494,
+        "feature_date": "2025-04-01",
+        "as_of_date": "2025-03-31",
+        "as_of_timestamp": "2025-03-31T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "input_digest": "2c690324fa1915168e9c0e578dd68a5d48e876193111a3261658165517d11ed8"
+      },
+      {
+        "id": "77d920f9-cc3a-45a0-b1f7-bf10f16df548",
+        "deterministic_identity": "01D:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1:team:team:778469:team:baseball_mlb:mlb:sportsdataio:team:13:none:2025-04-01",
+        "target_game_pk": 778469,
+        "feature_date": "2025-04-02",
+        "as_of_date": "2025-04-01",
+        "as_of_timestamp": "2025-04-01T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "input_digest": "ae803d021948220eaaee321efc93512ae6f28cfb8d87ef265b3ed74ed297b06f"
+      },
+      {
+        "id": "d1d3d2df-691a-4f5d-ae51-b741be6a0708",
+        "deterministic_identity": "01D:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1:team:team:778494:team:baseball_mlb:mlb:sportsdataio:team:9:none:2025-03-31",
+        "target_game_pk": 778494,
+        "feature_date": "2025-04-01",
+        "as_of_date": "2025-03-31",
+        "as_of_timestamp": "2025-03-31T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "input_digest": "b8cebf30a789a237d0df4f1334fe32872eb914866d3bcf5e6cc3b9fa7867b141"
+      }
+    ],
+    "protectedGames": [
+      {
+        "game_pk": 823902,
+        "game_date": "2026-09-07",
+        "scheduled_at": "2026-09-08T01:10:00+00:00",
+        "source": "mlb_official"
+      },
+      {
+        "game_pk": 824958,
+        "game_date": "2026-09-07",
+        "scheduled_at": "2026-09-08T02:05:00+00:00",
+        "source": "mlb_official"
+      }
+    ]
+  },
+  "liveBranchSimulation": {
+    "featureStage": {
+      "plannedRows": 10,
+      "insertEligible": 9,
+      "reuseNoOp": 1,
+      "blockConflict": 0
+    },
+    "teamWrite": {
+      "inserted": 2,
+      "rowsCarrySnapshotId": true
+    },
+    "downstreamHandoff": true,
+    "downstreamStages": [
+      "05 starter readiness",
+      "06 moneyline inference",
+      "07 prediction persistence",
+      "08 odds evidence handoff",
+      "09 market persistence",
+      "10 value persistence",
+      "11 Official Pick policy",
+      "12 Official Pick persistence",
+      "13 Value Board readback"
+    ],
+    "actualEntrypoint": "runR2BExecutableEntrypoint -> runR2ILiveExecution -> createSupabaseProductionRepository (injected client)",
+    "insertedSnapshotBranch": {
+      "canonicalSnapshotId": "22222222-2222-4222-8222-222222222222",
+      "snapshotRows": 1,
+      "finalStage": "13 Value Board readback"
+    },
+    "injectedProviderCounters": {
+      "mlbOfficial": 1,
+      "statcast": 1,
+      "odds": 1
+    }
+  },
+  "boundaries": {
+    "mlbOfficialCalls": 0,
+    "statcastCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "predictionWrites": 0,
+    "marketWrites": 0,
+    "valueWrites": 0,
+    "officialPickWrites": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlement": 0,
+    "liveRefreshExecuted": "NO",
+    "providerCalls": 0
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY": "YES",
+    "conditions": [
+      "publish and align the bounded R2S package",
+      "separate direct live authorization"
+    ]
+  },
+  "errors": [],
+  "finalizedAt": "2026-09-08T17:01:07.437Z",
+  "validators": [
+    {
+      "validator": "mlb-data-02r-r2-frozen-execution-package-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2a-live-refresh-executor-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2d-current-slate-thin-wrapper-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2f-component-interface-refactor-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2g-persistence-interface-refactor-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2h-executor-binding-full-dry-integration-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2i-live-execution-interface-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2k-starter-live-target-schema-guard-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2l-live-executor-stage-binding-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2m-native-game-insert-payload-schema-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2n-statcast-live-fetch-binding-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2o-feature-snapshot-identity-binding-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2p-feature-snapshot-date-field-binding-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2q-empty-eligible-slate-guard-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2r-current-run-date-asof-freeze-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    },
+    {
+      "validator": "mlb-data-02r-r2s-team-feature-snapshot-id-payload-binding-repair-validate.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "error": null
+    }
+  ],
+  "fullStackSafety": {
+    "readOnlyRequests": 130,
+    "forbiddenRequests": 0,
+    "skippedOptionalReads": 1,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "generatedStaticPages": 400
+  },
+  "sourceHashEncoding": "SHA-256 of UTF-8 source normalized to LF",
+  "sourceSha256": {
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "f65c40b9c4c10594a0a7e294d83aca4bfb41b73d314d98b01ac1d967cf574308",
+    "scripts/mlb-data-02r-r2o-feature-snapshot-identity-binding-repair-validate.mjs": "49ed00eb1be75cdcc59c2260ed49bd775b0cdbf2b45be707f33b5c0343aa92ba",
+    "scripts/mlb-data-02r-r2p-feature-snapshot-date-field-binding-repair-validate.mjs": "f434bbabe7109f0f751a10449132015abc1d82d37b8013c1830d083f7a92cd6c",
+    "scripts/mlb-data-02r-r2s-team-feature-snapshot-id-payload-binding-repair-validate.mjs": "dcd6a2774ea86d3885bf684866e4c8c3282347b7aa5c83640f24b11cc23d3e13",
+    "scripts/mlb-data-02r-r2s-certification-guard.mjs": "7f9941356f86bda205504f88e6203d4a493791d960e11225995e69c328c2f337",
+    "scripts/mlb-data-02r-r2s-certification-stack.mjs": "78b4a864378b400109b0c060b20efae7f0d29c86615ec08106cbd819ad211680"
+  },
+  "supplementalEvidence": "docs/CERTIFICATION/MLB_DATA_02R_R2S_SESSION_RECOVERY.json",
+  "commitScope": [
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs",
+    "scripts/mlb-data-02r-r2o-feature-snapshot-identity-binding-repair-validate.mjs",
+    "scripts/mlb-data-02r-r2p-feature-snapshot-date-field-binding-repair-validate.mjs",
+    "scripts/mlb-data-02r-r2s-team-feature-snapshot-id-payload-binding-repair-validate.mjs",
+    "scripts/mlb-data-02r-r2s-certification-guard.mjs",
+    "scripts/mlb-data-02r-r2s-certification-stack.mjs",
+    "docs/PROJECT_STATUS.md",
+    "docs/MASTER_ROADMAP.md",
+    "docs/CERTIFICATION/MLB_DATA_02R_R2S_TEAM_FEATURE_SNAPSHOT_ID_PAYLOAD_BINDING_REPAIR.json",
+    "docs/CERTIFICATION/MLB_DATA_02R_R2S_TEAM_FEATURE_SNAPSHOT_ID_PAYLOAD_BINDING_REPAIR_AUDIT.md",
+    "docs/CERTIFICATION/MLB_DATA_02R_R2S_SESSION_RECOVERY.json"
+  ],
+  "packageIdentity": {
+    "priorPackageSha": "5ccde72b6f97535ef16b82ce0c8fb5ad46e3b132",
+    "newPackageSha": "Resolve the single R2S commit containing this artifact; reported after commit creation to avoid a self-referential hash."
+  },
+  "remainingR2SBlockers": [],
+  "nextPhase": "R2S package publication/alignment review; live execution requires separate direct authorization"
+}
