@@ -1,0 +1,159 @@
+{
+  "generatedAt": "2026-09-08T00:31:11.583Z",
+  "certificationVerdict": "MLB_DATA_02R_R2N_STATCAST_LIVE_FETCH_BINDING_REPAIR_CERTIFIED",
+  "priorPackageSha": "9c6d29083c8a8fb7f75fe83b9e028df5f6f3c88a",
+  "gates": {
+    "MLB_02R_R2N_SHARED_STATCAST_IMPLEMENTATION_INVENTORY": "COMPLETE",
+    "MLB_02R_R2N_CANONICAL_STATCAST_FETCHER": "scripts/mlb-data-02h-2026-current-foundation.mjs::fetchR2NStatcastRowsForGames",
+    "MLB_02R_R2N_FETCH_ROWS_FOR_GAMES_INTERFACE": "PASS",
+    "MLB_02R_R2N_PITCH_IDENTITY_CONTRACT": "PASS",
+    "MLB_02R_R2N_CURRENT_SLATE_SCOPE": "PASS",
+    "MLB_02R_R2N_CACHE_FIRST": "PASS",
+    "MLB_02R_R2N_STATCAST_PROVIDER_CAP": "PASS",
+    "MLB_02R_R2N_RAW_PREWRITE_PLAN": "PASS",
+    "MLB_02R_R2N_NATIVE_GAME_IDEMPOTENCY": "PASS",
+    "MLB_02R_R2N_EXECUTOR_STATCAST_BINDING": "PASS",
+    "MLB_02R_R2N_LIVE_BRANCH_SIMULATION": "PASS",
+    "MLB_02R_R2N_NEGATIVE_TESTS": "PASS",
+    "MLB_02R_R2N_FEATURE_STAGE_HANDOFF": "PASS",
+    "MLB_02R_R2N_AUTOMATION_REUSE": "PASS",
+    "MLB_02R_R2N_BUSINESS_LOGIC_PARITY": "PASS"
+  },
+  "inventory": [
+    {
+      "path": "scripts/mlb-data-02h-2026-current-foundation.mjs",
+      "classification": "CANONICAL_REUSE",
+      "reason": "Baseball Savant CSV transform, deterministic raw identity, canonical raw table, batch/checkpoint contracts"
+    },
+    {
+      "path": "src/services/mlb-statcast-daily-refresh.service.ts",
+      "classification": "READ_ONLY_HELPER",
+      "reason": "Runtime sibling with same Savant/raw-table contract; not imported by MJS executor because of Next server-only boundary"
+    },
+    {
+      "path": "src/services/mlb-statcast-query.service.ts",
+      "classification": "READ_ONLY_HELPER",
+      "reason": "Read-side analytics profiles over canonical raw/rollups"
+    },
+    {
+      "path": "supabase/migrations/20260907*_mlb_statcast_*",
+      "classification": "READ_ONLY_HELPER",
+      "reason": "Analytics/rollup schema, not acquisition fetcher"
+    }
+  ],
+  "rawPrewritePlan": {
+    "target": "public.pick2_raw_mlb_statcast_pitches",
+    "gamePks": [
+      700001
+    ],
+    "sourceRows": 1,
+    "plannedInserts": 1,
+    "reuses": 0,
+    "conflicts": 0,
+    "batchSize": 100,
+    "cap": 1
+  },
+  "nativeGameIdempotency": {
+    "available": true,
+    "rows": [
+      {
+        "game_pk": 823902,
+        "game_date": "2026-09-07",
+        "source": "mlb_official",
+        "metadata": {
+          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
+          "starter_evidence": {
+            "awayProbablePitcher": {
+              "id": 695505,
+              "link": "/api/v1/people/695505",
+              "fullName": "Chase Burns"
+            },
+            "homeProbablePitcher": {
+              "id": 686218,
+              "link": "/api/v1/people/686218",
+              "fullName": "Emmet Sheehan"
+            }
+          },
+          "mlb_official_identity": {
+            "away_mlb_team_id": 113,
+            "home_mlb_team_id": 119,
+            "away_abbreviation": null,
+            "home_abbreviation": null
+          },
+          "source_schedule_fields_dropped": [
+            "home",
+            "away",
+            "starter_evidence",
+            "pregame_classification",
+            "doubleheader_identity",
+            "status",
+            "start_time"
+          ]
+        }
+      },
+      {
+        "game_pk": 824958,
+        "game_date": "2026-09-07",
+        "source": "mlb_official",
+        "metadata": {
+          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
+          "starter_evidence": {
+            "awayProbablePitcher": {
+              "id": 656302,
+              "link": "/api/v1/people/656302",
+              "fullName": "Dylan Cease"
+            },
+            "homeProbablePitcher": {
+              "id": 682052,
+              "link": "/api/v1/people/682052",
+              "fullName": "Jacob Lopez"
+            }
+          },
+          "mlb_official_identity": {
+            "away_mlb_team_id": 141,
+            "home_mlb_team_id": 133,
+            "away_abbreviation": null,
+            "home_abbreviation": null
+          },
+          "source_schedule_fields_dropped": [
+            "home",
+            "away",
+            "starter_evidence",
+            "pregame_classification",
+            "doubleheader_identity",
+            "status",
+            "start_time"
+          ]
+        }
+      }
+    ],
+    "reuseProjected": true
+  },
+  "liveSimulation": {
+    "stages": 13,
+    "rawStage": {
+      "plannedRows": 1,
+      "insertEligible": 1,
+      "reuseNoOp": 0,
+      "blockConflict": 0
+    },
+    "featureStageReached": true,
+    "providerLedger": {},
+    "testDml": 19
+  },
+  "boundaries": {
+    "mlbOfficialCalls": 0,
+    "statcastExternalCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlement": "EXCLUDED",
+    "liveRefreshExecuted": "NO"
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY": "YES"
+  },
+  "errors": []
+}

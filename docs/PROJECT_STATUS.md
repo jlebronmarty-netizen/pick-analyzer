@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 20:20:00Z
+Last updated: 2026-09-07 21:05:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2N Statcast Live Fetch Binding Repair
+
+- MLB-DATA-02R-R2N is locally certified as `MLB_DATA_02R_R2N_STATCAST_LIVE_FETCH_BINDING_REPAIR_CERTIFIED`. It binds the R2I live Statcast stage to the existing shared 02H Baseball Savant / canonical raw-table implementation via `fetchR2NStatcastRowsForGames`.
+- The selected canonical fetcher remains `scripts/mlb-data-02h-2026-current-foundation.mjs`; the R2N wrapper is bounded to frozen `eligibleGamePks`, a maximum 14-day dependency window, cache-first persisted raw evidence, local CSV reuse, deterministic pitch identity, and `public.pick2_raw_mlb_statcast_pitches`.
+- The R2B live blocker `STATCAST_FETCH_ROWS_FOR_GAMES_REQUIRED` is no longer reachable on the certified default live path. R2N live-branch simulation used injected MLB Official, Statcast CSV and odds evidence plus an injected repository, reached raw Statcast planning and handed off to the feature stage.
+- The two native games inserted by the prior live attempt, `823902` and `824958`, were read back from production and are preserved for future `REUSE_NO_OP` classification. No deletion, overwrite or schema change occurred.
+- Boundaries held: MLB Official calls 0, Statcast external calls 0, The Odds API calls 0, production DML 0, production DDL 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY = YES` after publication/alignment and direct execution authorization.
 
 ## 2026-09-07 MLB-DATA-02R-R2M Native Game Insert Payload Schema Repair
 

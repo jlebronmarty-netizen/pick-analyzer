@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createClient } from '@supabase/supabase-js'
 
 const args = new Set(process.argv.slice(2))
@@ -262,10 +263,10 @@ async function fetchJson(url) {
   return response.json()
 }
 
-async function fetchText(url) {
+async function fetchText(url, fetchImpl = fetch) {
   let lastStatus = null
   for (let attempt = 1; attempt <= 4; attempt += 1) {
-    const response = await fetch(url)
+    const response = await fetchImpl(url)
     lastStatus = response.status
     if (response.ok) return response.text()
     if (![429, 500, 502, 503, 504].includes(response.status)) break
@@ -317,6 +318,99 @@ function statcastUrl(from, to) {
     type: 'details',
   })
   return `https://baseballsavant.mlb.com/statcast_search/csv?${params}`
+}
+
+function assertR2NDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value ?? ''))) throw new Error(`R2N_INVALID_DEPENDENCY_DATE:${value}`)
+  return String(value)
+}
+
+async function r2nTeamMapFromDb(db) {
+  const rows = await readAll(db, 'sports_teams', 'id,abbreviation,metadata,provider_ids', (query) => query.eq('sport_key', 'baseball_mlb'))
+  const byAbbrev = new Map()
+  for (const team of rows) {
+    for (const value of [team.abbreviation, team.metadata?.mlb_abbreviation, team.metadata?.abbreviation]) {
+      if (value) byAbbrev.set(String(value).toUpperCase(), team.id)
+    }
+  }
+  if (byAbbrev.has('ARI')) byAbbrev.set('AZ', byAbbrev.get('ARI'))
+  if (byAbbrev.has('CHW')) byAbbrev.set('CWS', byAbbrev.get('CHW'))
+  return byAbbrev
+}
+
+async function readPersistedRawRowsForGamePks(db, gamePks) {
+  const rows = []
+  for (let index = 0; index < gamePks.length; index += 100) {
+    const chunk = gamePks.slice(index, index + 100)
+    const { data, error } = await db
+      .from('pick2_raw_mlb_statcast_pitches')
+      .select(rawColumns)
+      .in('game_pk', chunk)
+      .order('id', { ascending: true })
+    if (error) throw new Error(`R2N_RAW_CACHE_READ_FAILED:${error.message}`)
+    rows.push(...(data ?? []))
+  }
+  return rows
+}
+
+export async function fetchR2NStatcastRowsForGames({
+  eligibleGamePks = [],
+  dependencyDates = [],
+  runAsOf,
+  mode = 'LIVE_EXECUTE',
+  providerBudget = {},
+  cachePolicy = { strategy: 'CANONICAL_PERSISTED_THEN_LOCAL_CSV' },
+  checkpoint = null,
+  fetchImpl = fetch,
+  db = null,
+  teamMap = null,
+  cacheDir = statcastCacheDir,
+  allowFullSeason = false,
+} = {}) {
+  if (!runAsOf || Number.isNaN(Date.parse(runAsOf))) throw new Error(`R2N_INVALID_RUN_AS_OF:${runAsOf}`)
+  const gamePks = [...new Set(eligibleGamePks.map((value) => Number(value)))]
+  if (!gamePks.length) throw new Error('R2N_EMPTY_GAME_PK_SCOPE')
+  if (gamePks.some((value) => !Number.isInteger(value))) throw new Error('R2N_INVALID_GAME_PK_SCOPE')
+  if (allowFullSeason) throw new Error('R2N_FULL_SEASON_REQUEST_FORBIDDEN')
+  const dates = [...new Set((dependencyDates.length ? dependencyDates : [String(runAsOf).slice(0, 10)]).map(assertR2NDate))].sort()
+  if (dates.length > 14) throw new Error(`R2N_DEPENDENCY_WINDOW_TOO_BROAD:${dates.length}`)
+  if (mode !== 'LIVE_EXECUTE' && !cachePolicy?.injectedEvidenceAllowed) throw new Error('R2N_DRY_RUN_REQUIRES_INJECTED_EVIDENCE')
+  const maxCalls = Number(providerBudget?.STATCAST?.maxCalls ?? dates.length)
+  if (Number.isFinite(maxCalls) && dates.length > maxCalls) throw new Error(`R2N_STATCAST_PROVIDER_CAP_EXCEEDED:${dates.length}:${maxCalls}`)
+
+  const client = db ?? dbClient()
+  const persistedRows = await readPersistedRawRowsForGamePks(client, gamePks)
+  const persistedGamePks = new Set(persistedRows.map((row) => Number(row.game_pk)))
+  if (persistedRows.length && gamePks.every((gamePk) => persistedGamePks.has(gamePk))) {
+    checkpoint?.record?.('r2n_statcast_cache_reuse', { rows: persistedRows.length, gamePks })
+    return persistedRows
+  }
+
+  const teams = teamMap ?? await r2nTeamMapFromDb(client)
+  const rows = []
+  let calls = 0
+  let cacheReuses = 0
+  fs.mkdirSync(cacheDir, { recursive: true })
+  for (const date of dates) {
+    const cachePath = path.join(cacheDir, `${date}.csv`)
+    let text = null
+    if (fs.existsSync(cachePath)) {
+      text = fs.readFileSync(cachePath, 'utf8')
+      cacheReuses += 1
+    } else {
+      text = await fetchText(statcastUrl(date, date), fetchImpl)
+      fs.writeFileSync(cachePath, text)
+      calls += 1
+    }
+    const parsed = parseCsv(text).map((row) => transformStatcastRow(row, teams)).filter(Boolean)
+    if (parsed.length >= 25000) throw new Error(`STATCAST_DAILY_CAP_SUSPECT:${date}:${parsed.length}`)
+    rows.push(...parsed)
+  }
+  const scopedRows = rows.filter((row) => gamePks.includes(Number(row.game_pk)))
+  const outOfScope = rows.length - scopedRows.length
+  if (outOfScope < 0) throw new Error('R2N_SCOPE_ACCOUNTING_INVALID')
+  checkpoint?.record?.('r2n_statcast_fetch', { gamePks, dates, calls, cacheReuses, rows: scopedRows.length })
+  return scopedRows
 }
 
 async function countRows(db, table, column = 'id', configure = (query) => query) {
@@ -1138,7 +1232,11 @@ async function main() {
   console.log(JSON.stringify(artifact, null, 2))
 }
 
-main().catch((error) => {
-  console.error(JSON.stringify({ script: 'mlb-data-02h-2026-current-foundation', status: 'FAIL', error: error.message }, null, 2))
-  process.exitCode = 1
-})
+const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+
+if (isDirectExecution) {
+  main().catch((error) => {
+    console.error(JSON.stringify({ script: 'mlb-data-02h-2026-current-foundation', status: 'FAIL', error: error.message }, null, 2))
+    process.exitCode = 1
+  })
+}

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { fetchR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
 import {
   assertGameScope,
   makeProviderAccounting,
@@ -170,12 +171,12 @@ export function createTheOddsApiLiveClient({ fetchImpl = fetch, apiKey, ledger }
   }
 }
 
-export function createStatcastLiveClient({ fetchRowsForGames, ledger } = {}) {
+export function createStatcastLiveClient({ fetchRowsForGames, ledger, fetchImpl = fetch, db = null, cacheDir = undefined } = {}) {
   return {
     async fetchRowsForGames(args) {
       ledger?.consume('STATCAST', args.eligibleGamePks.length)
-      if (!fetchRowsForGames) throw new Error('STATCAST_FETCH_ROWS_FOR_GAMES_REQUIRED')
-      return fetchRowsForGames(args)
+      const fetcher = fetchRowsForGames ?? fetchR2NStatcastRowsForGames
+      return fetcher({ ...args, fetchImpl, db, cacheDir })
     },
   }
 }
@@ -491,7 +492,13 @@ export async function runR2ILiveExecution({
   const providerCaps = authorization?.providerCaps ?? {}
   const ledger = createProviderLedger(providerCaps)
   const mlbClient = providers.mlbOfficial ?? createMlbOfficialLiveClient({ fetchImpl: providers.fetchImpl, ledger })
-  const statcastClient = providers.statcast ?? createStatcastLiveClient({ fetchRowsForGames: providers.fetchStatcastRows, ledger })
+  const statcastClient = providers.statcast ?? createStatcastLiveClient({
+    fetchRowsForGames: providers.fetchStatcastRows,
+    fetchImpl: providers.statcastFetchImpl ?? providers.fetchImpl,
+    db: providers.statcastDb ?? providers.db,
+    cacheDir: providers.statcastCacheDir,
+    ledger,
+  })
   const oddsClient = providers.odds ?? createTheOddsApiLiveClient({ fetchImpl: providers.fetchImpl, apiKey: providers.oddsApiKey, ledger })
   const stages = []
   const writeResults = []
