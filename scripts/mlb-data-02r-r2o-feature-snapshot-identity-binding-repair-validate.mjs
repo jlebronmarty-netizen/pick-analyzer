@@ -222,17 +222,26 @@ function featureRows(gamePk = 700001) {
     target_game_pk: gamePk,
     feature_date: '2026-09-07',
     as_of_date: '2026-09-06',
-    as_of_timestamp: '2026-09-07T15:30:00.000Z',
+    as_of_timestamp: '2026-09-06T23:59:59.000Z',
     feature_version: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
   }
+  const snapshotFeatures = { vector: 'digest-only' }
+  const snapshotDigest = sha256({
+    target_game_pk: gamePk,
+    feature_version: base.feature_version,
+    feature_date: base.feature_date,
+    as_of_date: base.as_of_date,
+    as_of_timestamp: base.as_of_timestamp,
+    features: snapshotFeatures,
+  })
   return {
     snapshots: [{
       ...base,
       deterministic_identity: `snapshot:${gamePk}:moneyline`,
       feature_domain: 'prediction_bundle',
       subject_id: `game:${gamePk}`,
-      features: { vector: 'digest-only' },
-      input_digest: sha256({ vector: 'digest-only' }),
+      features: snapshotFeatures,
+      input_digest: snapshotDigest,
     }],
     team: [{ ...base, team_id: 111 }, { ...base, team_id: 110 }],
     starter: [{ ...base, mlbam_pitcher_id: 660002 }, { ...base, mlbam_pitcher_id: 660001 }],
@@ -275,9 +284,16 @@ function fakeSupabaseClient() {
       target_game_pk: 700001,
       feature_date: '2026-09-07',
       as_of_date: '2026-09-06',
-      as_of_timestamp: '2026-09-07T15:30:00.000Z',
+      as_of_timestamp: '2026-09-06T23:59:59.000Z',
       feature_version: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
-      input_digest: sha256({ vector: 'digest-only' }),
+      input_digest: sha256({
+        target_game_pk: 700001,
+        feature_version: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
+        feature_date: '2026-09-07',
+        as_of_date: '2026-09-06',
+        as_of_timestamp: '2026-09-06T23:59:59.000Z',
+        features: { vector: 'digest-only' },
+      }),
       features: { vector: 'digest-only' },
     }],
     pick2_mlb_team_daily_features: [{ target_game_pk: 700001, team_id: 111, feature_version: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1', feature_date: '2026-09-07' }],

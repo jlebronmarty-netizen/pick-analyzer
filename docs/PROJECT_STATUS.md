@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 00:55:00Z
+Last updated: 2026-09-08 01:28:30Z
+
+## 2026-09-08 MLB-DATA-02R-R2P Feature Snapshot Date Field Binding Repair
+
+- MLB-DATA-02R-R2P is locally certified as `MLB_DATA_02R_R2P_FEATURE_SNAPSHOT_DATE_FIELD_BINDING_REPAIR_CERTIFIED`. It repairs the R2I live feature snapshot insert path so future `public.pick2_feature_snapshots` writes include physical `feature_date`, `as_of_date`, and `as_of_timestamp`.
+- The target `feature_date` is bound to the official MLB game date, with `as_of_date` as the strict prior UTC date and `as_of_timestamp` as `23:59:59.000Z` on that prior date. The validator proves the UTC boundary case where `scheduled_at` falls on `2026-09-08T01:10:00+00:00` while the official target game date remains `2026-09-07`.
+- Snapshot insert mapping remains rooted in `deterministic_identity`; no compatibility column, schema change, feature semantic change, provider call, production DML/DDL, odds refresh, Official Pick write, automation change, cron change or live refresh occurred.
+- R2P validation proves required date-field guards, date-aware snapshot idempotency, incompatible date/payload conflict blocking, full feature-domain date matrix coverage, read-only production sampling, protected native games `823902` and `824958`, and injected live-branch traversal through the feature stage.
+- `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY_AFTER_PUBLICATION_AND_DIRECT_AUTHORIZATION = YES` after this commit is published/aligned and separate direct live execution authorization is provided.
 
 ## 2026-09-08 MLB-DATA-02R-R2O Feature Snapshot Identity Binding Repair
 

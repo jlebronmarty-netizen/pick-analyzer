@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { fetchR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
 import {
   assertGameScope,
+  assertIsoTimestamp,
   makeProviderAccounting,
   makeRunContext,
   normalizeGamePk,
@@ -169,6 +170,37 @@ export function comparableFeatureRow(domain, row) {
   }
 }
 
+function assertIsoDate(value, label) {
+  const text = String(value ?? '')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text) || Number.isNaN(Date.parse(`${text}T00:00:00.000Z`))) {
+    throw new Error(`INVALID_${label}:${value}`)
+  }
+  return text
+}
+
+function priorUtcDate(value) {
+  const date = new Date(`${assertIsoDate(value, 'FEATURE_DATE')}T00:00:00.000Z`)
+  date.setUTCDate(date.getUTCDate() - 1)
+  return date.toISOString().slice(0, 10)
+}
+
+export function featureDateFieldsForGame(game, { runAsOf } = {}) {
+  assertIsoTimestamp(runAsOf, 'run_as_of')
+  const scheduledAt = game?.scheduled_at ?? game?.start_time ?? game?.gameDate
+  const featureDate = assertIsoDate(
+    game?.game_date ?? game?.officialDate ?? String(scheduledAt ?? '').slice(0, 10),
+    'FEATURE_DATE',
+  )
+  const asOfDate = priorUtcDate(featureDate)
+  const asOfTimestamp = `${asOfDate}T23:59:59.000Z`
+  if (Date.parse(asOfTimestamp) > Date.parse(runAsOf)) throw new Error('FEATURE_AS_OF_AFTER_RUN_AS_OF')
+  return {
+    feature_date: featureDate,
+    as_of_date: asOfDate,
+    as_of_timestamp: asOfTimestamp,
+  }
+}
+
 async function readFeatureRowsByDomain(client, domain, ids, plannedRows = []) {
   if (!ids.length) return []
   const binding = featureBindingForDomain(domain)
@@ -195,9 +227,13 @@ function featureSnapshotInsertRow(row) {
   const deterministicIdentity = row.deterministic_identity ?? row.identity
   if (!deterministicIdentity) throw new Error('FEATURE_SNAPSHOT_DETERMINISTIC_IDENTITY_REQUIRED')
   const targetGamePk = normalizeGamePk(row.target_game_pk ?? row.game_pk)
-  const featureDate = row.feature_date ?? row.as_of_date ?? String(row.as_of_timestamp ?? '').slice(0, 10)
-  const asOfDate = row.as_of_date ?? featureDate
-  if (!featureDate || !asOfDate) throw new Error('FEATURE_SNAPSHOT_DATE_FIELDS_REQUIRED')
+  if (!row.feature_date || !row.as_of_date || !row.as_of_timestamp) throw new Error('FEATURE_SNAPSHOT_DATE_FIELDS_REQUIRED')
+  if (!row.feature_version) throw new Error('FEATURE_SNAPSHOT_FEATURE_VERSION_REQUIRED')
+  const featureDate = assertIsoDate(row.feature_date, 'FEATURE_DATE')
+  const asOfDate = assertIsoDate(row.as_of_date, 'AS_OF_DATE')
+  assertIsoTimestamp(row.as_of_timestamp, 'as_of_timestamp')
+  if (String(row.as_of_timestamp).slice(0, 10) !== asOfDate) throw new Error('FEATURE_SNAPSHOT_AS_OF_TIMESTAMP_DATE_MISMATCH')
+  if (Date.parse(row.as_of_timestamp) > Date.parse(`${featureDate}T23:59:59.999Z`)) throw new Error(`FEATURE_SNAPSHOT_AS_OF_AFTER_FEATURE_DATE:${targetGamePk}`)
   const inputDigest = row.input_digest ?? row.feature_digest ?? sha256(row.features ?? row)
   return {
     deterministic_identity: String(deterministicIdentity),
@@ -210,7 +246,7 @@ function featureSnapshotInsertRow(row) {
     target_game_pk: targetGamePk,
     feature_date: featureDate,
     as_of_date: asOfDate,
-    as_of_timestamp: row.as_of_timestamp ?? null,
+    as_of_timestamp: row.as_of_timestamp,
     feature_version: row.feature_version,
     source_window: row.source_window ?? {},
     sample_sizes: row.sample_sizes ?? {},
@@ -521,10 +557,27 @@ function testEvidence() {
   }
 }
 
-function plannedFeatureRows(gamePk) {
-  const base = { target_game_pk: gamePk, feature_version: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1' }
+function plannedFeatureRows(game, runAsOf) {
+  const gamePk = normalizeGamePk(game.game_pk ?? game.gamePk)
+  const dateFields = featureDateFieldsForGame(game, { runAsOf })
+  const base = {
+    target_game_pk: gamePk,
+    ...dateFields,
+    feature_version: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
+    source_window: { rule: 'source_game_date < target_game_date', as_of_date: dateFields.as_of_date, mode: 'live_current_slate' },
+    sample_sizes: {},
+  }
+  const snapshotFeatures = { vector: 'digest-only' }
+  const snapshotDigest = sha256({
+    target_game_pk: gamePk,
+    feature_version: base.feature_version,
+    feature_date: dateFields.feature_date,
+    as_of_date: dateFields.as_of_date,
+    as_of_timestamp: dateFields.as_of_timestamp,
+    features: snapshotFeatures,
+  })
   return {
-    snapshots: [{ ...base, identity: `snapshot:${gamePk}:moneyline`, features: { vector: 'digest-only' } }],
+    snapshots: [{ ...base, identity: `snapshot:${gamePk}:moneyline`, deterministic_identity: `snapshot:${gamePk}:moneyline`, features: snapshotFeatures, input_digest: snapshotDigest }],
     team: [{ ...base, team_id: 111, features: { recent_runs: 4.5 } }, { ...base, team_id: 110, features: { recent_runs: 4.1 } }],
     starter: [{ ...base, mlbam_pitcher_id: 660002, features: { k_rate: 0.25 } }, { ...base, mlbam_pitcher_id: 660001, features: { k_rate: 0.22 } }],
     bullpen: [{ ...base, team_id: 111, features: { fatigue: 0.1 } }, { ...base, team_id: 110, features: { fatigue: 0.2 } }],
@@ -691,14 +744,14 @@ export async function runR2ILiveExecution({
   stages.push(raw)
   if (live) writeResults.push(await insertRowsFromClassifications(raw.artifact.classifications, statcastEvidence.rows.map((row) => ({ ...row, id: `statcast:mlb:${row.game_year}:${row.game_pk}:${row.at_bat_number}:${row.pitch_number}` })), 'id', (rows, cap) => repository.insertRawRows(rows, cap), rawCap))
 
-  const featureRows = plannedFeatureRows(eligibleGamePks[0])
+  const featureRows = plannedFeatureRows(eligibleGames[0], runAsOf)
   for (const target of [R2I_LIVE_TARGETS.featureSnapshots, R2I_LIVE_TARGETS.team, R2I_LIVE_TARGETS.starter, R2I_LIVE_TARGETS.bullpen, R2I_LIVE_TARGETS.batter, R2I_LIVE_TARGETS.matchup, R2I_LIVE_TARGETS.firstInning]) schemaGuards.push(await repository.verifySchemaFingerprint(target))
   const featureCaps = Object.fromEntries(Object.entries(featureRows).map(([domain, rows]) => [domain, derivedCap(authCaps.features?.[domain], rows.length)]))
   const features = await planCurrentSlateFeatures({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', targetGamePks: eligibleGamePks, runAsOf, perDomainCaps: featureCaps, repository, plannedFeatureRows: featureRows, liveAuthorization: live })
   stages.push(features)
   if (live) {
     for (const [domain, plan] of Object.entries(features.artifact.domains)) {
-      const rows = featureRows[domain].map((row) => ({ ...row, identity: row.identity ?? `${domain}:${row.target_game_pk}:${row.subject_id ?? row.team_id ?? row.mlbam_pitcher_id ?? row.mlbam_batter_id ?? 'game'}:${row.feature_version}`, feature_digest: sha256(row.features ?? row) }))
+      const rows = featureRows[domain].map((row) => ({ ...row, identity: row.identity ?? `${domain}:${row.target_game_pk}:${row.subject_id ?? row.team_id ?? row.mlbam_pitcher_id ?? row.mlbam_batter_id ?? 'game'}:${row.feature_version}`, feature_digest: row.feature_digest ?? row.input_digest ?? sha256(row.features ?? row) }))
       const identityField = domain === 'snapshots' ? 'deterministic_identity' : 'identity'
       const rowsForInsert = rows.map((row) => domain === 'snapshots' ? { ...row, deterministic_identity: row.deterministic_identity ?? row.identity, input_digest: row.input_digest ?? row.feature_digest } : row)
       writeResults.push(await insertRowsFromClassifications(plan.classifications, rowsForInsert, identityField, (insertRows, cap) => repository.insertFeatureRows(domain, insertRows, cap), featureCaps[domain]))

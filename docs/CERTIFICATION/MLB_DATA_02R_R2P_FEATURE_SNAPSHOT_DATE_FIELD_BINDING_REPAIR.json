@@ -1,0 +1,205 @@
+{
+  "generatedAt": "2026-09-08T01:29:09.040Z",
+  "certificationVerdict": "MLB_DATA_02R_R2P_FEATURE_SNAPSHOT_DATE_FIELD_BINDING_REPAIR_CERTIFIED",
+  "priorPackageSha": "9250364294962501c9f7ecb58ddd6389bf707aed",
+  "gates": {
+    "MLB_02R_R2P_FEATURE_SNAPSHOT_DATE_FIELD_BINDING_REPAIR": "PASS",
+    "MLB_02R_R2P_OFFICIAL_GAME_DATE_BINDING": "PASS",
+    "MLB_02R_R2P_STRICT_PRIOR_AS_OF_RULE": "PASS",
+    "MLB_02R_R2P_SNAPSHOT_INSERT_PAYLOAD_SHAPE": "PASS",
+    "MLB_02R_R2P_DATE_AWARE_IDEMPOTENCY": "PASS",
+    "MLB_02R_R2P_DATE_AWARE_CONFLICT_GUARD": "PASS",
+    "MLB_02R_R2P_FEATURE_DATE_MATRIX": "PASS",
+    "MLB_02R_R2P_LIVE_BRANCH_SIMULATION": "PASS",
+    "MLB_02R_R2P_PRODUCTION_READONLY_SAMPLE": "PASS",
+    "MLB_02R_R2P_PROTECTED_GAME_PRESERVATION": "PASS"
+  },
+  "dateBindingContract": {
+    "source": "official game_date first; scheduled_at/start_time only as fallback for missing date",
+    "featureDate": "target official game date",
+    "asOfDate": "strict prior UTC date",
+    "asOfTimestamp": "23:59:59.000Z on strict prior date",
+    "utcBoundaryCase": {
+      "game_pk": 823902,
+      "game_date": "2026-09-07",
+      "scheduled_at": "2026-09-08T01:10:00+00:00"
+    },
+    "utcBoundaryResult": {
+      "feature_date": "2026-09-07",
+      "as_of_date": "2026-09-06",
+      "as_of_timestamp": "2026-09-06T23:59:59.000Z"
+    }
+  },
+  "snapshotInsertShape": {
+    "keys": [
+      "deterministic_identity",
+      "pick2_era",
+      "sport_key",
+      "feature_domain",
+      "subject_id",
+      "secondary_subject_id",
+      "event_id",
+      "target_game_pk",
+      "feature_date",
+      "as_of_date",
+      "as_of_timestamp",
+      "feature_version",
+      "source_window",
+      "sample_sizes",
+      "features",
+      "input_digest"
+    ],
+    "unsupportedIdentityKeyPresent": false
+  },
+  "dateAwareIdempotency": {
+    "sameDeterministicIdentitySameDatePayload": "REUSE_NO_OP",
+    "sameDeterministicIdentityDifferentDatePayload": "BLOCK_CONFLICT",
+    "newDeterministicIdentity": "INSERT_ELIGIBLE"
+  },
+  "featureDateMatrix": [
+    {
+      "domain": "snapshots",
+      "plannedRows": 1,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "deterministic_identity"
+    },
+    {
+      "domain": "team",
+      "plannedRows": 2,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "target_game_pk,team_id,feature_version"
+    },
+    {
+      "domain": "starter",
+      "plannedRows": 2,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "target_game_pk,mlbam_pitcher_id,feature_version"
+    },
+    {
+      "domain": "bullpen",
+      "plannedRows": 2,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "target_game_pk,team_id,feature_version"
+    },
+    {
+      "domain": "batter",
+      "plannedRows": 1,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "target_game_pk,mlbam_batter_id,feature_version"
+    },
+    {
+      "domain": "matchup",
+      "plannedRows": 1,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "target_game_pk,feature_version"
+    },
+    {
+      "domain": "firstInning",
+      "plannedRows": 1,
+      "dateFieldsPresent": true,
+      "sourceWindowStrictPriorDate": true,
+      "binding": "target_game_pk,feature_version"
+    }
+  ],
+  "productionReadback": {
+    "available": true,
+    "snapshotCount": 126464,
+    "snapshotSample": [
+      {
+        "deterministic_identity": "01D:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1:batter:batter:776872:mlbam_batter:543592:none:2025-08-03",
+        "target_game_pk": 776872,
+        "feature_date": "2025-08-04",
+        "as_of_date": "2025-08-03",
+        "as_of_timestamp": "2025-08-03T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "input_digest": "cb2d8aa4e58b17f15a6f681787363ef1adbc454d0ff62a30a3f38013d8d5c4b9"
+      },
+      {
+        "deterministic_identity": "01D:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1:batter:batter:776872:mlbam_batter:692585:none:2025-08-03",
+        "target_game_pk": 776872,
+        "feature_date": "2025-08-04",
+        "as_of_date": "2025-08-03",
+        "as_of_timestamp": "2025-08-03T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "input_digest": "b163c1ea5ec9c081c46e6445255d0ffaa6c8f3da6a67a95a284ab67b16fe7922"
+      },
+      {
+        "deterministic_identity": "01D:MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1:batter:batter:776872:mlbam_batter:664770:none:2025-08-03",
+        "target_game_pk": 776872,
+        "feature_date": "2025-08-04",
+        "as_of_date": "2025-08-03",
+        "as_of_timestamp": "2025-08-03T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "input_digest": "2dc2a27f46cdba89b393a48100e39e1676b58855ab5e877685d6ccd199460583"
+      }
+    ],
+    "dailySample": [
+      {
+        "target_game_pk": 778494,
+        "feature_date": "2025-04-01",
+        "as_of_date": "2025-03-31",
+        "as_of_timestamp": "2025-03-31T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+      },
+      {
+        "target_game_pk": 778494,
+        "feature_date": "2025-04-01",
+        "as_of_date": "2025-03-31",
+        "as_of_timestamp": "2025-03-31T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+      },
+      {
+        "target_game_pk": 778469,
+        "feature_date": "2025-04-02",
+        "as_of_date": "2025-04-01",
+        "as_of_timestamp": "2025-04-01T23:59:59+00:00",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1"
+      }
+    ],
+    "protectedGames": [
+      {
+        "game_pk": 823902,
+        "game_date": "2026-09-07",
+        "scheduled_at": "2026-09-08T01:10:00+00:00",
+        "source": "mlb_official"
+      },
+      {
+        "game_pk": 824958,
+        "game_date": "2026-09-07",
+        "scheduled_at": "2026-09-08T02:05:00+00:00",
+        "source": "mlb_official"
+      }
+    ]
+  },
+  "liveBranchSimulation": {
+    "stages": 13,
+    "featureStage": {
+      "plannedRows": 10,
+      "insertEligible": 9,
+      "reuseNoOp": 1,
+      "blockConflict": 0
+    },
+    "downstreamHandoff": true
+  },
+  "boundaries": {
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "officialPickWrites": 0,
+    "oddsRefresh": "NO",
+    "liveRefreshExecuted": "NO",
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlement": "EXCLUDED"
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY_AFTER_PUBLICATION_AND_DIRECT_AUTHORIZATION": "YES"
+  },
+  "errors": []
+}
