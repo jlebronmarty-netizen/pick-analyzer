@@ -95,49 +95,49 @@ export const R2I_FEATURE_IDENTITY_BINDINGS = Object.freeze({
     table: R2I_LIVE_TARGETS.featureSnapshots,
     physicalIdentityColumn: 'deterministic_identity',
     adapterIdentity: 'identity',
-    readColumns: 'id,deterministic_identity,feature_domain,subject_id,target_game_pk,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,features,input_digest,created_at',
+    readColumns: 'id,deterministic_identity,pick2_era,sport_key,feature_domain,subject_id,secondary_subject_id,event_id,feature_date,as_of_date,as_of_timestamp,feature_version,source_window,sample_sizes,features,input_digest,created_at,target_game_pk,mlbam_person_id,mlbam_pitcher_id,mlbam_batter_id,native_identity_metadata',
     nativeKey: ['deterministic_identity'],
   },
   team: {
     table: R2I_LIVE_TARGETS.team,
     physicalIdentityColumn: 'target_game_pk,team_id,feature_version',
     adapterIdentity: 'identity',
-    readColumns: 'id,feature_snapshot_id,target_game_pk,team_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    readColumns: 'id,feature_snapshot_id,team_id,feature_date,as_of_date,as_of_timestamp,feature_version,recent_k_rate,recent_bb_rate,recent_runs_per_game,recent_iso,handedness_splits,lineup_proxy,sample_sizes,source_window,created_at,target_game_pk',
     nativeKey: ['target_game_pk', 'team_id', 'feature_version'],
   },
   starter: {
     table: R2I_LIVE_TARGETS.starter,
     physicalIdentityColumn: 'target_game_pk,mlbam_pitcher_id,feature_version',
     adapterIdentity: 'identity',
-    readColumns: 'id,feature_snapshot_id,target_game_pk,mlbam_pitcher_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    readColumns: 'id,feature_snapshot_id,player_id,feature_date,as_of_date,as_of_timestamp,feature_version,k_rate,bb_rate,k_minus_bb_rate,whiff_rate,csw_rate,strike_rate,swing_rate,avg_release_speed,velocity_l1,velocity_l3,velocity_l5,velocity_delta,previous_pitch_count,days_rest,pitch_mix,pitch_mix_change,handedness_splits,first_inning_performance,sample_sizes,source_window,created_at,target_game_pk,mlbam_pitcher_id',
     nativeKey: ['target_game_pk', 'mlbam_pitcher_id', 'feature_version'],
   },
   bullpen: {
     table: R2I_LIVE_TARGETS.bullpen,
     physicalIdentityColumn: 'target_game_pk,team_id,feature_version',
     adapterIdentity: 'identity',
-    readColumns: 'id,feature_snapshot_id,target_game_pk,team_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    readColumns: 'id,feature_snapshot_id,team_id,feature_date,as_of_date,as_of_timestamp,feature_version,pitches_previous_24h,pitches_previous_72h,high_workload_reliever_count,reliever_workload,bullpen_k_rate,bullpen_bb_rate,bullpen_k_minus_bb_rate,bullpen_whiff_rate,availability_proxies,sample_sizes,source_window,created_at,target_game_pk,mlbam_pitcher_ids',
     nativeKey: ['target_game_pk', 'team_id', 'feature_version'],
   },
   batter: {
     table: R2I_LIVE_TARGETS.batter,
     physicalIdentityColumn: 'target_game_pk,mlbam_batter_id,feature_version',
     adapterIdentity: 'identity',
-    readColumns: 'id,feature_snapshot_id,target_game_pk,mlbam_batter_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    readColumns: 'id,feature_snapshot_id,player_id,feature_date,as_of_date,as_of_timestamp,feature_version,recent_k_rate,recent_bb_rate,recent_scoring_contribution,iso_value,handedness_splits,pitch_type_matchups,sample_sizes,source_window,created_at,target_game_pk,mlbam_batter_id',
     nativeKey: ['target_game_pk', 'mlbam_batter_id', 'feature_version'],
   },
   matchup: {
     table: R2I_LIVE_TARGETS.matchup,
     physicalIdentityColumn: 'target_game_pk,feature_version',
     adapterIdentity: 'identity',
-    readColumns: 'id,feature_snapshot_id,target_game_pk,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    readColumns: 'id,feature_snapshot_id,event_id,home_team_id,away_team_id,feature_date,as_of_date,as_of_timestamp,feature_version,pitcher_batter_mix,handedness_context,park_context,lineup_context,sample_sizes,source_window,created_at,target_game_pk,mlbam_pitcher_id,mlbam_batter_id',
     nativeKey: ['target_game_pk', 'feature_version'],
   },
   firstInning: {
     table: R2I_LIVE_TARGETS.firstInning,
     physicalIdentityColumn: 'target_game_pk,feature_version',
     adapterIdentity: 'identity',
-    readColumns: 'id,feature_snapshot_id,target_game_pk,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    readColumns: 'id,feature_snapshot_id,event_id,home_team_id,away_team_id,feature_date,as_of_date,as_of_timestamp,feature_version,team_first_inning_scoring_rate,starter_first_inning_k_rate,starter_first_inning_bb_rate,starter_first_inning_baserunner_proxy,starter_first_inning_pitch_count,sample_sizes,source_window,created_at,target_game_pk,home_starter_mlbam_pitcher_id,away_starter_mlbam_pitcher_id,expected_lineup_mlbam_batter_ids',
     nativeKey: ['target_game_pk', 'feature_version'],
   },
 })
@@ -293,6 +293,10 @@ function featureSnapshotInsertRow(row) {
     secondary_subject_id: row.secondary_subject_id ?? null,
     event_id: row.event_id ?? null,
     target_game_pk: targetGamePk,
+    mlbam_person_id: row.mlbam_person_id ?? null,
+    mlbam_pitcher_id: row.mlbam_pitcher_id ?? null,
+    mlbam_batter_id: row.mlbam_batter_id ?? null,
+    native_identity_metadata: row.native_identity_metadata ?? {},
     feature_date: featureDate,
     as_of_date: asOfDate,
     as_of_timestamp: row.as_of_timestamp,
@@ -314,12 +318,12 @@ export function assertDbUuid(value, label = 'db_uuid') {
 
 const DAILY_FEATURE_REQUIRED_COLUMNS = Object.freeze(['feature_snapshot_id', 'target_game_pk', 'feature_date', 'as_of_date', 'as_of_timestamp', 'feature_version'])
 const DAILY_FEATURE_ALLOWED_COLUMNS = Object.freeze({
-  team: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'team_id', 'sample_sizes', 'source_window']),
-  starter: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'player_id', 'mlbam_pitcher_id', 'sample_sizes', 'source_window']),
-  bullpen: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'team_id', 'mlbam_pitcher_ids', 'sample_sizes', 'source_window']),
-  batter: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'player_id', 'mlbam_batter_id', 'sample_sizes', 'source_window']),
-  matchup: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'event_id', 'home_team_id', 'away_team_id', 'sample_sizes', 'source_window']),
-  firstInning: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'event_id', 'home_team_id', 'away_team_id', 'home_starter_mlbam_pitcher_id', 'away_starter_mlbam_pitcher_id', 'expected_lineup_mlbam_batter_ids', 'sample_sizes', 'source_window']),
+  team: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'team_id', 'sample_sizes', 'source_window', 'recent_k_rate', 'recent_bb_rate', 'recent_runs_per_game', 'recent_iso', 'handedness_splits', 'lineup_proxy']),
+  starter: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'player_id', 'mlbam_pitcher_id', 'sample_sizes', 'source_window', 'k_rate', 'bb_rate', 'k_minus_bb_rate', 'whiff_rate', 'csw_rate', 'strike_rate', 'swing_rate', 'avg_release_speed', 'velocity_l1', 'velocity_l3', 'velocity_l5', 'velocity_delta', 'previous_pitch_count', 'days_rest', 'pitch_mix', 'pitch_mix_change', 'handedness_splits', 'first_inning_performance']),
+  bullpen: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'team_id', 'mlbam_pitcher_ids', 'sample_sizes', 'source_window', 'pitches_previous_24h', 'pitches_previous_72h', 'high_workload_reliever_count', 'reliever_workload', 'bullpen_k_rate', 'bullpen_bb_rate', 'bullpen_k_minus_bb_rate', 'bullpen_whiff_rate', 'availability_proxies']),
+  batter: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'player_id', 'mlbam_batter_id', 'sample_sizes', 'source_window', 'recent_k_rate', 'recent_bb_rate', 'recent_scoring_contribution', 'iso_value', 'handedness_splits', 'pitch_type_matchups']),
+  matchup: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'event_id', 'home_team_id', 'away_team_id', 'sample_sizes', 'source_window', 'pitcher_batter_mix', 'handedness_context', 'park_context', 'lineup_context', 'mlbam_pitcher_id', 'mlbam_batter_id']),
+  firstInning: new Set([...DAILY_FEATURE_REQUIRED_COLUMNS, 'event_id', 'home_team_id', 'away_team_id', 'home_starter_mlbam_pitcher_id', 'away_starter_mlbam_pitcher_id', 'expected_lineup_mlbam_batter_ids', 'sample_sizes', 'source_window', 'team_first_inning_scoring_rate', 'starter_first_inning_k_rate', 'starter_first_inning_bb_rate', 'starter_first_inning_baserunner_proxy', 'starter_first_inning_pitch_count']),
 })
 
 function assertDailyFeatureInsertShape(domain, row, { eligibleGamePks = null } = {}) {
@@ -374,16 +378,44 @@ export async function resolveCanonicalFeatureSnapshotIds({
   const identities = plannedSnapshotRows.map(canonicalSnapshotIdentity).filter(Boolean)
   if (!identities.length) return new Map()
   const readbackRows = await repository.readFeatureRows('snapshots', identities, plannedSnapshotRows)
-  const combined = [...readbackRows, ...insertedSnapshotRows].map((row) => comparableFeatureRow('snapshots', row))
+  // Prefer independent readback over an insert response when both are present.
+  const combined = [...insertedSnapshotRows, ...readbackRows].map((row) => comparableFeatureRow('snapshots', row))
   const byIdentity = new Map(combined.map((row) => [canonicalSnapshotIdentity(row), row]))
+  const readbackIdentities = new Set(readbackRows.map(canonicalSnapshotIdentity))
+  const resolvedIds = new Set()
   const snapshotIdByGamePk = new Map()
+  const gameCounts = new Map()
+  snapshotIdByGamePk.byPlannedId = new Map()
+  snapshotIdByGamePk.canonicalRows = new Map()
   for (const planned of plannedSnapshotRows) {
     const identity = canonicalSnapshotIdentity(planned)
     const canonical = byIdentity.get(identity)
     if (!canonical?.id) throw new Error(`FEATURE_SNAPSHOT_CANONICAL_ID_UNRESOLVED:${identity}`)
+    if (planned.native_identity_metadata && !readbackIdentities.has(identity)) throw new Error(`FEATURE_SNAPSHOT_INDEPENDENT_READBACK_MISSING:${identity}`)
     const snapshotId = assertDbUuid(canonical.id, 'feature_snapshot_id')
-    snapshotIdByGamePk.set(normalizeGamePk(planned.target_game_pk ?? planned.game_pk), snapshotId)
+    if (resolvedIds.has(snapshotId)) throw new Error('DUPLICATE_CANONICAL_SNAPSHOT_ID')
+    resolvedIds.add(snapshotId)
+    const gamePk = normalizeGamePk(planned.target_game_pk ?? planned.game_pk)
+    if (normalizeGamePk(canonical.target_game_pk ?? canonical.game_pk) !== gamePk || canonical.input_digest !== (planned.input_digest ?? planned.feature_digest)) throw new Error(`FEATURE_SNAPSHOT_READBACK_CONFLICT:${identity}`)
+    if (planned.native_identity_metadata) {
+      const physicalDigest = (row) => {
+        const payload = featureSnapshotInsertRow(row)
+        payload.as_of_timestamp = new Date(payload.as_of_timestamp).toISOString()
+        return sha256(payload)
+      }
+      if (physicalDigest(canonical) !== physicalDigest(planned)) throw new Error(`FEATURE_SNAPSHOT_READBACK_PAYLOAD_CONFLICT:${identity}`)
+    }
+    if (planned.id) {
+      if (snapshotIdByGamePk.byPlannedId.has(planned.id)) throw new Error('DUPLICATE_PLANNED_SNAPSHOT_ID')
+      snapshotIdByGamePk.byPlannedId.set(planned.id, snapshotId)
+      snapshotIdByGamePk.canonicalRows.set(snapshotId, canonical)
+    }
+    gameCounts.set(gamePk, (gameCounts.get(gamePk) ?? 0) + 1)
+    snapshotIdByGamePk.set(gamePk, snapshotId)
   }
+  // Legacy injected tests have one bundle per game. A real multi-entity plan
+  // must resolve by the builder's snapshot reference, never by game alone.
+  for (const [gamePk, count] of gameCounts) if (count !== 1) snapshotIdByGamePk.delete(gamePk)
   return snapshotIdByGamePk
 }
 
@@ -392,8 +424,16 @@ export function bindFeatureRowsToSnapshotIds(rowsByDomain = {}, snapshotIdByGame
   for (const domain of ['team', 'starter', 'bullpen', 'batter', 'matchup', 'firstInning']) {
     bound[domain] = (rowsByDomain[domain] ?? []).map((row) => {
       const gamePk = normalizeGamePk(row.target_game_pk ?? row.game_pk)
-      const snapshotId = snapshotIdByGamePk.get(gamePk)
+      const snapshotId = row.feature_snapshot_id
+        ? snapshotIdByGamePk.byPlannedId?.get(row.feature_snapshot_id)
+        : snapshotIdByGamePk.get(gamePk)
       if (!snapshotId) throw new Error(`FEATURE_SNAPSHOT_ID_MISSING_FOR_GAME:${domain}:${gamePk}`)
+      const snapshot = snapshotIdByGamePk.canonicalRows?.get(snapshotId)
+      if (snapshot) {
+        const subject = domain === 'team' ? `team:${row.team_id}` : domain === 'bullpen' ? `bullpen:${row.team_id}` : domain === 'starter' ? `mlbam_pitcher:${row.mlbam_pitcher_id}` : domain === 'batter' ? `mlbam_batter:${row.mlbam_batter_id}` : `game:${gamePk}`
+        const family = domain === 'firstInning' ? 'first_inning' : domain
+        if (snapshot.target_game_pk !== gamePk || snapshot.subject_id !== subject || snapshot.native_identity_metadata?.family !== family || snapshot.feature_version !== row.feature_version || snapshot.feature_date !== row.feature_date || snapshot.as_of_date !== row.as_of_date) throw new Error(`FEATURE_SNAPSHOT_ENTITY_BINDING_CONFLICT:${domain}:${gamePk}`)
+      }
       const next = { ...row, feature_snapshot_id: snapshotId }
       assertDailyFeatureInsertShape(domain, featureInsertRowsForDomain(domain, [next])[0])
       return next

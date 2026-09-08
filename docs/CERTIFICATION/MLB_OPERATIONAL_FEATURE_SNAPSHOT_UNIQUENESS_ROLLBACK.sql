@@ -1,0 +1,35 @@
+-- Rollback ONLY before multiple revisions exist; execute only when separately authorized.
+-- On any uniqueness conflict this transaction aborts without changing data.
+begin;
+set local lock_timeout = '5s';
+set local statement_timeout = '60s';
+lock table public.pick2_mlb_team_daily_features, public.pick2_mlb_pitcher_daily_features, public.pick2_mlb_bullpen_daily_features, public.pick2_mlb_batter_daily_features, public.pick2_mlb_matchup_daily_features, public.pick2_mlb_first_inning_daily_features in access exclusive mode;
+CREATE UNIQUE INDEX pick2_mlb_batter_daily_features_native_uidx ON public.pick2_mlb_batter_daily_features USING btree (target_game_pk, mlbam_batter_id, feature_date, feature_version) WHERE ((target_game_pk IS NOT NULL) AND (mlbam_batter_id IS NOT NULL));
+CREATE UNIQUE INDEX pick2_mlb_bullpen_daily_features_native_uidx ON public.pick2_mlb_bullpen_daily_features USING btree (target_game_pk, team_id, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL);
+CREATE UNIQUE INDEX pick2_mlb_bullpen_daily_features_target_game_team_version_key ON public.pick2_mlb_bullpen_daily_features USING btree (target_game_pk, team_id, feature_version) WHERE (target_game_pk IS NOT NULL);
+CREATE UNIQUE INDEX pick2_mlb_first_inning_daily_features_native_uidx ON public.pick2_mlb_first_inning_daily_features USING btree (target_game_pk, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL);
+CREATE UNIQUE INDEX pick2_mlb_matchup_daily_features_native_uidx ON public.pick2_mlb_matchup_daily_features USING btree (target_game_pk, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL);
+CREATE UNIQUE INDEX pick2_mlb_pitcher_daily_features_native_uidx ON public.pick2_mlb_pitcher_daily_features USING btree (target_game_pk, mlbam_pitcher_id, feature_date, feature_version) WHERE ((target_game_pk IS NOT NULL) AND (mlbam_pitcher_id IS NOT NULL));
+CREATE UNIQUE INDEX pick2_mlb_team_daily_features_native_uidx ON public.pick2_mlb_team_daily_features USING btree (target_game_pk, team_id, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL);
+alter table public.pick2_mlb_batter_daily_features add constraint pick2_mlb_batter_daily_featur_player_id_feature_date_featur_key UNIQUE (player_id, feature_date, feature_version);
+alter table public.pick2_mlb_first_inning_daily_features add constraint pick2_mlb_first_inning_daily__event_id_feature_date_feature_key UNIQUE (event_id, feature_date, feature_version);
+alter table public.pick2_mlb_matchup_daily_features add constraint pick2_mlb_matchup_daily_featu_event_id_feature_date_feature_key UNIQUE (event_id, feature_date, feature_version);
+alter table public.pick2_mlb_pitcher_daily_features add constraint pick2_mlb_pitcher_daily_featu_player_id_feature_date_featur_key UNIQUE (player_id, feature_date, feature_version);
+drop index public.pick2_mlb_team_daily_features_snapshot_uidx;
+drop index public.pick2_mlb_pitcher_daily_features_snapshot_uidx;
+drop index public.pick2_mlb_bullpen_daily_features_snapshot_uidx;
+drop index public.pick2_mlb_batter_daily_features_snapshot_uidx;
+drop index public.pick2_mlb_matchup_daily_features_snapshot_uidx;
+drop index public.pick2_mlb_first_inning_daily_features_snapshot_uidx;
+drop index public.pick2_mlb_batter_daily_features_legacy_uidx;
+drop index public.pick2_mlb_first_inning_daily_features_legacy_uidx;
+drop index public.pick2_mlb_matchup_daily_features_legacy_uidx;
+drop index public.pick2_mlb_pitcher_daily_features_legacy_uidx;
+drop index public.pick2_mlb_batter_daily_features_native_lookup;
+drop index public.pick2_mlb_bullpen_daily_features_native_lookup;
+drop index public.pick2_mlb_bullpen_daily_features_target_game_team_version_lookup;
+drop index public.pick2_mlb_first_inning_daily_features_native_lookup;
+drop index public.pick2_mlb_matchup_daily_features_native_lookup;
+drop index public.pick2_mlb_pitcher_daily_features_native_lookup;
+drop index public.pick2_mlb_team_daily_features_native_lookup;
+commit;

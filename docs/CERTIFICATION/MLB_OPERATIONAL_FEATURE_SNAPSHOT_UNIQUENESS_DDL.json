@@ -1,0 +1,48 @@
+{
+  "verdict": "MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_DDL_CERTIFIED",
+  "generatedAt": "2026-09-09T00:48:07.774Z",
+  "authorizedSql": "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_PROPOSED.sql",
+  "sqlSha256": "3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46",
+  "exactCertifiedSqlUnchanged": true,
+  "productionMigrationApplications": 1,
+  "productionRowDml": 0,
+  "providerCalls": 0,
+  "readback": {
+    "tables": 6,
+    "rowsBefore": 118064,
+    "rowsAfter": 118064,
+    "allFullRowDigestsUnchanged": true,
+    "orphanReferences": 0,
+    "preservedForeignPrimaryAndCheckConstraints": 40,
+    "indexesBefore": 17,
+    "indexesAfter": 23,
+    "nativeSnapshotUniqueIndexes": 6,
+    "legacyPartialUniqueIndexes": 4,
+    "lookupIndexes": 7,
+    "invalidOrUnreadyIndexes": 0
+  },
+  "rollback": {
+    "file": "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_ROLLBACK.sql",
+    "localRestorationTest": "PASS",
+    "localConflictAbortPreservesData": "PASS",
+    "productionRollbackConflicts": 0,
+    "executedInProduction": false,
+    "limitation": "After distinct revisions exist, reverting singleton uniqueness can fail. Never delete rows to force rollback; retain containment and repair forward."
+  },
+  "boundaries": {
+    "dropTable": false,
+    "dropColumn": false,
+    "truncate": false,
+    "delete": false,
+    "dataRewrite": false,
+    "foreignKeyRemoval": false,
+    "primaryKeyRemoval": false,
+    "championChange": false,
+    "featureDefinitionChange": false,
+    "preprocessingChange": false,
+    "policyChange": false,
+    "featureSemanticChange": false
+  },
+  "liveReady": false,
+  "publication": "Structural/certification results only; raw replay inputs and full operational read evidence are excluded."
+}

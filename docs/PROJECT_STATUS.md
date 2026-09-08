@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T-R2D exact canonical native enrichment executed and verified)
+Last updated: 2026-09-08 (authorized snapshot revision DDL certified; sanitized publication and real integration)
+
+## MLB Autonomous Operational Mission — DDL Certified, R2T In Progress
+
+- Applied the exact explicitly authorized snapshot-uniqueness SQL, SHA256 `3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46`. Fresh schema checks and independent readback verify 118,064 unchanged daily rows, zero orphan references, all foreign/primary/check constraints preserved, and the six native snapshot-unique indexes. No row DML or other DDL occurred.
+- Local real-source persistence preserves all 76 values and Champion inference with zero-insert reuse. The original 51 checks plus two rollback checks pass. Rollback restores exact original constraints before revisions and rejects conflicting revisions atomically without data loss. Production rollback preflight has zero conflicts; no production rollback was executed.
+- The unpublished mission commit is being sanitized under explicit authorization: raw sample removed, private replay inputs external, public schema/audit limited to structural and necessary aggregate certification evidence. Preserve all 19 inherited artifacts and protected directories. No force push.
+- **Operational certification remains incomplete and live remains contained.** Next: finish revision-aware snapshot-pinned reads, all-game real R2B integration and checkpoint/negative tests; certify R3 before live execution, then follow the original mission order. Sports-provider calls and production row DML remain zero. DDL is exactly one authorized migration; automation/cron/settlement remain unchanged.
+- Evidence: `docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_DDL.json`, `MLB_OPERATIONAL_MISSION_STATUS.json`, and `MLB_OPERATIONAL_MISSION_AUDIT.md`. The forward SQL remains byte-identical; rollback SQL and external-input reproduction instructions are recorded.
 
 ## 2026-09-08 MLB-DATA-02R-R2T-R2D Canonical Native Enrichment Execution
 

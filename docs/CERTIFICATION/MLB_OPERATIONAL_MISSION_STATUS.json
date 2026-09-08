@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-09-09T00:49:11.056Z",
+  "verdict": "DDL_CERTIFIED_R2T_REAL_INTEGRATION_IN_PROGRESS",
+  "operationalCertified": false,
+  "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
+  "packageSha": "ENCLOSING_SANITIZED_COMMIT",
+  "ddlCertification": "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_DDL.json",
+  "completed": {
+    "realPersistenceAdapters": {
+      "status": "PASS",
+      "checks": 21,
+      "realSourceReplay": true,
+      "orderedFeatureCount": 76,
+      "persistedVectorParity": true,
+      "championInferenceParity": true,
+      "secondPassZeroInserts": true,
+      "liveContainment": true
+    },
+    "disposablePostgres": {
+      "status": "PASS",
+      "checks": 32,
+      "exactSchemaReproduction": true,
+      "rowPreservation": true,
+      "allSixDomainUniqueness": true,
+      "foreignKeyPreservation": true,
+      "rollbackValidated": true
+    },
+    "build": {
+      "status": "PASS_AFTER_SANITIZATION",
+      "staticPages": 400
+    }
+  },
+  "providerAccounting": {
+    "MLBOfficial": 0,
+    "sharedStatcast": 0,
+    "OddsAPI": 0,
+    "BALLDONTLIE": 0,
+    "SportsDataIO": 0,
+    "otherSportsProviders": 0,
+    "missionOddsConsumed": 0,
+    "missionOddsRemaining": 20,
+    "perRunCaps": {
+      "MLBOfficial": 50,
+      "sharedStatcast": 100,
+      "OddsAPI": 5
+    },
+    "runs": [],
+    "nonProviderActivity": "Read-only Supabase metadata/evidence, Git publication, production version GET, OS-temp-only pinned PostgreSQL test-engine package download."
+  },
+  "productionDml": {
+    "insert": 0,
+    "update": 0,
+    "delete": 0,
+    "total": 0
+  },
+  "productionDdl": {
+    "migrationApplications": 1,
+    "scope": "Exact authorized six-domain uniqueness proposal; no other DDL."
+  },
+  "liveRefreshExecutions": 0,
+  "automationChanges": 0,
+  "cronChanges": 0,
+  "settlementWrites": 0,
+  "contracts": {
+    "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
+    "featureCount": 76,
+    "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+    "modelChanged": false,
+    "featureSemanticsChanged": false,
+    "rawTarget": "public.pick2_raw_mlb_statcast_pitches"
+  },
+  "protectedState": {
+    "count": 19,
+    "hashes": {
+      "docs/CERTIFICATION/MLB_DATA_02R_R2A_LIVE_MANUAL_REFRESH_EXECUTOR_AUDIT.md": "aac2814e26d90a5b5734cf82929df1d84c73544d90ab386eb7beb2cf79c4aee8",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2F_COMPONENT_INTERFACE_REFACTOR_IMPLEMENTATION.json": "21a53b65f735e78524c1573fe3bf7595907512e6f97e12a8dc17c6d00f483627",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2G_PERSISTENCE_INTERFACE_REFACTOR_IMPLEMENTATION.json": "8c7b5aa3b838004ce475b300a22673e882ec1e826bf9291727bd064ce5f76ea8",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2H_EXECUTOR_BINDING_AND_FULL_DRY_INTEGRATION.json": "350b6f4524c0ac96d9b6943fba7fadc694ba5836998c53ec8bc1e56c8f7c3dc8",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION.json": "09b5e5dacc4c5f0af5d2ead846a1907991650760f2eedee948b22ea2df503c6c",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2K_STARTER_LIVE_TARGET_SCHEMA_GUARD_REPAIR.json": "266338e5ea0f2f104a2ac9006c181822be48515dd58d99494c9adf06cc997852",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR.json": "e32a7d6a6315c532c43f44e4acc31a00788a950334a8c6cba3c65180acfe83e6",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR_AUDIT.md": "813306807d3233419d9aac817bfcd526ed3d9510b7c88fb1a65b6f9e277a67d4",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR.json": "87f3f74a1dc0038e2b37bc43b4b21da3fe1308edf9445a57d3eb309768538a20",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR_AUDIT.md": "1eec06da545d3db69ac21756dbdde8615fb9a2095e172089f3036d714e2b656a",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2N_STATCAST_LIVE_FETCH_BINDING_REPAIR.json": "e9169e3caf44b7dd922dbee830a22be94d8fba91de4062a40fa5481a07a06714",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2O_FEATURE_SNAPSHOT_IDENTITY_BINDING_REPAIR.json": "75eb42526039dbc2d2f7b1778972b337ef4f54394c1c7df7b36471c4e589bb6c",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2P_FEATURE_SNAPSHOT_DATE_FIELD_BINDING_REPAIR.json": "abc30ed6fb8632804d3bffe7baa185260966924783e35a4c8802834b7cf81792",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2Q_EMPTY_ELIGIBLE_SLATE_GUARD_REPAIR.json": "06f845b3580f6593691c17d728087d40fa540d0399c74eb6573377d7b86c43f5",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2R_CURRENT_RUN_DATE_ASOF_FREEZE_REPAIR.json": "5b9bc5ddd59186b3d592a478fe7d28c528f1aabc7334011328f442c1a54a4b04",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2R_CURRENT_RUN_DATE_ASOF_FREEZE_REPAIR_AUDIT.md": "c8bf6f4a869979f4e79189b61bb171963171120689690d881d6406bf8ce7c889",
+      "docs/CERTIFICATION/MLB_DATA_02R_R2_FROZEN_EXECUTION_PACKAGE.md": "c895bd690c01df6893da925fd692cb4dab5937e238c842143f28ee73eb2f0925",
+      "docs/CERTIFICATION/mlb-data-02r-r2-frozen-execution-package.json": "b9e3b80d92850939fa05d7bd724b2bd610d52051e020cafd3083104cdf28992b",
+      "docs/CERTIFICATION/mlb-data-02r-r2a-live-refresh-executor.json": "b3139e34993e82dedbb4affb124750afc2a1ab2c4b7d2a0353363038b4ba908b"
+    },
+    "unchanged": true
+  },
+  "protectedDirectoriesTouched": false,
+  "r2tR3Certified": false,
+  "r2bLiveReady": false,
+  "syntheticPathState": "Legacy fixture code remains below the tested unconditional R2T live containment. Elimination/full real call-graph replacement is NOT yet certified.",
+  "publication": {
+    "rawProductionSamplesIncluded": false,
+    "privateReplayInputs": "Supplied only by external R1_READ_CACHE and BATTER_READ_CACHE; never committed.",
+    "amendUnpublishedCommit": true,
+    "forcePush": false
+  },
+  "remaining": [
+    "Snapshot-pinned revision-aware identity/classification/read consumers; same-day changed-input snapshot identities and full real R2B call graph.",
+    "All-game targets, checkpoints/resume and full negative/regression stack.",
+    "R3 live reenablement before any production live execution.",
+    "Nonempty live run and repeatability.",
+    "Shared-engine automation and daily refresh automation.",
+    "Settlement/performance and Today UI; final operational certification."
+  ],
+  "rollbackAndRecoveryRunbook": "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_AUDIT.md"
+}
