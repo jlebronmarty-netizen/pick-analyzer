@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 02:04:43Z
+Last updated: 2026-09-08 11:20:00Z
+
+## 2026-09-08 MLB-DATA-02R-R2R Current Run Date/As-Of Freeze Repair
+
+- MLB-DATA-02R-R2R is locally certified as `MLB_DATA_02R_R2R_CURRENT_RUN_DATE_ASOF_FREEZE_REPAIR_CERTIFIED`. It repairs the R2B -> R2I live current-slate run freeze so fresh manual execution derives `run_date` from the actual execution-time `America/Puerto_Rico` calendar date and freezes `run_as_of` once from actual run start.
+- Root cause was `HARDCODED_TEST_FIXTURE_LEAK`: `runR2ILiveExecution` previously hardcoded `run_date = 2026-09-07` and `run_as_of = 2026-09-07T15:30:00.000Z`, causing a 2026-09-08 manual run to inspect the prior operating-day slate.
+- The repair preserves explicit replay/test fixture dates, adds run-ID date suffix consistency failure, and records terminal checkpoint identity with execution package SHA, run ID, run date and frozen as-of. Prior-day terminal checkpoints cannot define a new current-slate run.
+- R2R validation proves injected current-clock simulation for `2026-09-08T07:15:00-04:00`, Puerto Rico midnight boundaries, fixture replay preservation, empty-slate regression, non-empty live-branch continuation, checkpoint isolation and protected native game preservation for `823902` and `824958`.
+- Boundaries held: MLB Official calls 0, Statcast calls 0, The Odds API calls 0, production DML 0, production DDL 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY_AFTER_PUBLICATION_AND_DIRECT_AUTHORIZATION = YES`.
 
 ## 2026-09-08 MLB-DATA-02R-R2Q Empty Eligible Slate Guard Repair
 

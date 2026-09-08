@@ -1,0 +1,243 @@
+{
+  "generatedAt": "2026-09-08T11:32:10.436Z",
+  "certificationVerdict": "MLB_DATA_02R_R2R_CURRENT_RUN_DATE_ASOF_FREEZE_REPAIR_CERTIFIED",
+  "priorPackageSha": "635e72a2eefc2c26e62c67176958dba43aa215fa",
+  "gates": {
+    "MLB_02R_R2R_RUN_DATE_SOURCE_INVENTORY": "COMPLETE",
+    "MLB_02R_R2R_ROOT_CAUSE": "HARDCODED_TEST_FIXTURE_LEAK",
+    "MLB_02R_R2R_OPERATING_DATE_CONTRACT": "PASS",
+    "MLB_02R_R2R_RUN_ASOF_CONTRACT": "PASS",
+    "MLB_02R_R2R_RUN_ID_DATE_CONSISTENCY": "PASS",
+    "MLB_02R_R2R_CHECKPOINT_ISOLATION": "PASS",
+    "MLB_02R_R2R_TEST_FIXTURE_ISOLATION": "PASS",
+    "MLB_02R_R2R_RUN_FREEZE_REPAIR": "PASS",
+    "MLB_02R_R2R_CURRENT_DATE_SIMULATION": "PASS",
+    "MLB_02R_R2R_TIMEZONE_BOUNDARY_TESTS": "PASS",
+    "MLB_02R_R2R_REPLAY_MODE_PRESERVATION": "PASS",
+    "MLB_02R_R2R_EMPTY_SLATE_REGRESSION": "PASS",
+    "MLB_02R_R2R_LIVE_BRANCH_SIMULATION": "PASS",
+    "MLB_02R_R2R_PROTECTED_STATE": "PASS"
+  },
+  "runDateSourceInventory": {
+    "cliArgs": [
+      "--run-id",
+      "--resume-from; no run_date/as_of override in current executable"
+    ],
+    "environmentVariables": [
+      "MLB_DATA_02R_R2_LIVE_EXECUTION_AUTHORIZED only; no date env accepted"
+    ],
+    "r2aExecutorDefaults": "fresh Date() once in main; runDate via America/Puerto_Rico; runAsOf via same instant",
+    "r2iLiveDefaults": "LIVE_EXECUTE without explicit replay date/as-of freezes actual execution clock",
+    "r2hR2iFixtures": "fixed dates remain only for explicit replay/test inputs",
+    "checkpoints": "terminal checkpoints carry execution_package_sha, run_id, run_date and run_as_of",
+    "runIdParsing": "YYYYMMDD suffix must match frozen run_date when present",
+    "operatingDayHelper": "America/Puerto_Rico"
+  },
+  "rootCause": "HARDCODED_TEST_FIXTURE_LEAK",
+  "priorEvidence": {
+    "sourceAvailable": true,
+    "hardcodedRunAsOf": true,
+    "hardcodedRunDate": true
+  },
+  "operatingDateContract": {
+    "timezone": "America/Puerto_Rico",
+    "manualCurrentSlate": "CURRENT-SLATE RUN DATE IS EXECUTION-TIME PUERTO RICO DATE",
+    "runAsOf": "RUN_AS_OF IS FROZEN FROM ACTUAL RUN START",
+    "explicitReplayOverrideAllowed": true
+  },
+  "currentDateSimulation": {
+    "run_id": "mlb-data-02r-r2b-live-r2r-20260908",
+    "run_date": "2026-09-08",
+    "run_as_of": "2026-09-08T11:15:00.000Z",
+    "execution_package_sha": "R2R_LOCAL_CERTIFICATION_PACKAGE",
+    "db_contract_digest": "r2i-live-db-contract",
+    "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "feature_contract_digest": "6052f734985fc1f6244f1a73529a8d74c0227877d69aac3c41fca902abf637e1"
+  },
+  "timezoneBoundaryTests": {
+    "local2359": "2026-09-08",
+    "local0001": "2026-09-09",
+    "utcDateDiffers": "2026-09-07"
+  },
+  "replayModePreservation": {
+    "run_id": "mlb-02r-r2r-fixture-replay-20260907",
+    "run_date": "2026-09-07",
+    "run_as_of": "2026-09-07T15:30:00.000Z",
+    "execution_package_sha": "R2R_LOCAL_CERTIFICATION_PACKAGE",
+    "db_contract_digest": "r2i-live-db-contract",
+    "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "feature_contract_digest": "6052f734985fc1f6244f1a73529a8d74c0227877d69aac3c41fca902abf637e1"
+  },
+  "emptySlateRegression": {
+    "terminalStatus": "NO_VALID_PREGAME_SLATE",
+    "providerCounters": {
+      "mlbOfficial": 1,
+      "statcast": 0,
+      "odds": 0
+    },
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "liveBranchSimulation": {
+    "runContext": {
+      "run_id": "mlb-data-02r-r2b-live-r2r-20260908",
+      "run_date": "2026-09-08",
+      "run_as_of": "2026-09-08T11:15:00.000Z",
+      "execution_package_sha": "R2R_LOCAL_CERTIFICATION_PACKAGE",
+      "db_contract_digest": "r2i-live-db-contract",
+      "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+      "feature_contract_digest": "6052f734985fc1f6244f1a73529a8d74c0227877d69aac3c41fca902abf637e1",
+      "eligible_game_pks": [
+        700001
+      ],
+      "blocked_game_pks": [],
+      "provider_budget": {
+        "MLB_OFFICIAL": {
+          "allowed": true,
+          "maxCalls": 1
+        },
+        "STATCAST": {
+          "allowed": true,
+          "maxCalls": 1
+        },
+        "THE_ODDS_API": {
+          "allowed": true,
+          "maxCalls": 1
+        },
+        "BALLDONTLIE": {
+          "allowed": false,
+          "maxCalls": 0
+        },
+        "SPORTSDATAIO": {
+          "allowed": false,
+          "maxCalls": 0
+        },
+        "OTHER": {
+          "allowed": false,
+          "maxCalls": 0
+        }
+      },
+      "per_stage_dml_caps": {
+        "nativeGames": 1,
+        "nativePlayers": 2,
+        "rawStatcast": 1,
+        "features": {
+          "snapshots": 1,
+          "team": 2,
+          "starter": 2,
+          "bullpen": 2,
+          "batter": 1,
+          "matchup": 1,
+          "firstInning": 1
+        },
+        "predictions": 1,
+        "marketMappings": 1,
+        "marketObservations": 2,
+        "nativeValues": 2,
+        "officialPicks": 1
+      }
+    },
+    "stages": [
+      "01 schedule sync",
+      "02 native reconciliation",
+      "03 raw Statcast reconciliation",
+      "04 feature refresh",
+      "05 starter readiness",
+      "06 moneyline inference",
+      "07 prediction persistence",
+      "08 odds evidence handoff",
+      "09 market persistence",
+      "10 value persistence",
+      "11 Official Pick policy",
+      "12 Official Pick persistence",
+      "13 Value Board readback"
+    ],
+    "providerCounters": {
+      "mlbOfficial": 1,
+      "statcast": 1,
+      "odds": 1
+    },
+    "writeResults": [
+      {
+        "table": "pick2_mlb_games",
+        "inserted": 0
+      },
+      {
+        "table": "pick2_mlb_players",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_raw_mlb_statcast_pitches",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_feature_snapshots",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_team_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_pitcher_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_bullpen_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_batter_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_matchup_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_first_inning_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_game_predictions",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_market_event_mappings",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_market_price_observations",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_market_value_evaluations",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_official_picks",
+        "inserted": 0
+      }
+    ]
+  },
+  "protectedState": {
+    "gamePks": [
+      823902,
+      824958
+    ],
+    "mutationPerformed": false,
+    "preservationBasis": "repo-only repair touches run-freeze/checkpoint code only"
+  },
+  "boundaries": {
+    "mlbOfficialCalls": 0,
+    "statcastCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "liveRefreshExecuted": "NO",
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlement": 0
+  },
+  "errors": []
+}

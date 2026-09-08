@@ -38,6 +38,7 @@ export const R2I_CERTIFICATION = 'MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPL
 export const R2I_AUTH_ERROR = 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION'
 export const R2I_PRIOR_PACKAGE_SHA = '8cfd91f626e0e914d2e3abb07dc140b793a39c73'
 export const R2Q_EMPTY_SLATE_TERMINAL_STATUS = 'NO_VALID_PREGAME_SLATE'
+export const R2R_OPERATING_TIME_ZONE = 'America/Puerto_Rico'
 
 const MODEL_ARTIFACT_DIGEST = '9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616'
 const FEATURE_CONTRACT_DIGEST = sha256({ featureSet: R2F_FEATURE_SET, featureCount: R2F_FEATURE_COUNT, modelVersion: R2F_MODEL_VERSION })
@@ -143,6 +144,50 @@ function featureBindingForDomain(domain) {
   const binding = R2I_FEATURE_IDENTITY_BINDINGS[domain]
   if (!binding) throw new Error(`FEATURE_DOMAIN_BINDING_MISSING:${domain}`)
   return binding
+}
+
+export function dateInOperatingZone(date, timeZone = R2R_OPERATING_TIME_ZONE) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]))
+  return `${parts.year}-${parts.month}-${parts.day}`
+}
+
+export function runIdDateSuffix(runId) {
+  const match = String(runId ?? '').match(/(?:^|[-_:])(\d{8})$/)
+  if (!match) return null
+  return `${match[1].slice(0, 4)}-${match[1].slice(4, 6)}-${match[1].slice(6, 8)}`
+}
+
+export function createCurrentSlateRunFreeze({
+  runId = 'mlb-02r-r2i-test-live',
+  executionPackageSha = R2I_PRIOR_PACKAGE_SHA,
+  mode = 'DRY_RUN',
+  clock = null,
+  runDate = null,
+  runAsOf = null,
+  timeZone = R2R_OPERATING_TIME_ZONE,
+} = {}) {
+  const liveCurrentSlate = mode === 'LIVE_EXECUTE' && !runDate && !runAsOf
+  const fixtureClock = new Date('2026-09-07T15:30:00.000Z')
+  const baseDate = clock ? new Date(clock) : liveCurrentSlate ? new Date() : fixtureClock
+  if (Number.isNaN(baseDate.getTime())) throw new Error(`INVALID_RUN_FREEZE_CLOCK:${clock}`)
+  const frozenRunAsOf = assertIsoTimestamp(runAsOf ?? baseDate.toISOString(), 'run_as_of')
+  const frozenRunDate = String(runDate ?? dateInOperatingZone(new Date(frozenRunAsOf), timeZone))
+  const suffixDate = runIdDateSuffix(runId)
+  if (suffixDate && suffixDate !== frozenRunDate) throw new Error(`RUN_ID_DATE_CONTEXT_MISMATCH:${suffixDate}:${frozenRunDate}`)
+  return makeRunContext({
+    run_id: runId,
+    run_date: frozenRunDate,
+    run_as_of: frozenRunAsOf,
+    execution_package_sha: executionPackageSha,
+    db_contract_digest: 'r2i-live-db-contract',
+    model_artifact_digest: MODEL_ARTIFACT_DIGEST,
+    feature_contract_digest: FEATURE_CONTRACT_DIGEST,
+  })
 }
 
 function featureSubjectForKey(row, field) {
@@ -776,17 +821,12 @@ export async function runR2ILiveExecution({
   repository = createTestRepository(),
   runId = 'mlb-02r-r2i-test-live',
   executionPackageSha = R2I_PRIOR_PACKAGE_SHA,
+  runDate = null,
+  runAsOf = null,
+  clock = null,
 } = {}) {
-  const runAsOf = '2026-09-07T15:30:00.000Z'
-  const runContext = makeRunContext({
-    run_id: runId,
-    run_date: '2026-09-07',
-    run_as_of: runAsOf,
-    execution_package_sha: executionPackageSha,
-    db_contract_digest: 'r2i-live-db-contract',
-    model_artifact_digest: MODEL_ARTIFACT_DIGEST,
-    feature_contract_digest: FEATURE_CONTRACT_DIGEST,
-  })
+  const runContext = createCurrentSlateRunFreeze({ runId, executionPackageSha, mode, runDate, runAsOf, clock })
+  const frozenRunAsOf = runContext.run_as_of
   if (mode === 'LIVE_EXECUTE') requireRunScopedLiveAuthorization(authorization, runContext)
   if (!['DRY_RUN', 'LIVE_EXECUTE', 'READBACK_ONLY'].includes(mode)) throw new Error(`INVALID_R2I_MODE:${mode}`)
   const live = mode === 'LIVE_EXECUTE'
@@ -807,9 +847,9 @@ export async function runR2ILiveExecution({
   const writeResults = []
   const schemaGuards = []
 
-  const scheduleEvidence = live ? await mlbClient.getSchedule({ runDate: runContext.run_date, runAsOf }) : evidence.schedule
-  const scheduleBase = await getCurrentSlate({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runDate: runContext.run_date, runAsOf, providerClient: mlbClient, providerBudget: providerCaps, injectedEvidence: scheduleEvidence, liveAuthorization: live })
-  const schedule = applyStartedGameGuard(scheduleBase, runAsOf)
+  const scheduleEvidence = live ? await mlbClient.getSchedule({ runDate: runContext.run_date, runAsOf: frozenRunAsOf }) : evidence.schedule
+  const scheduleBase = await getCurrentSlate({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runDate: runContext.run_date, runAsOf: frozenRunAsOf, providerClient: mlbClient, providerBudget: providerCaps, injectedEvidence: scheduleEvidence, liveAuthorization: live })
+  const schedule = applyStartedGameGuard(scheduleBase, frozenRunAsOf)
   stages.push(schedule)
   const eligibleGames = schedule.artifact.games.filter((game) => game.pregame_classification === 'PREGAME_SAFE')
   const eligibleGamePks = assertEligibleGamePkFreeze(eligibleGames.map((game) => game.game_pk))
@@ -840,17 +880,17 @@ export async function runR2ILiveExecution({
     writeResults.push(await repository.insertNativePlayers(playerRows, nativeCaps.players))
   }
 
-  const statcastEvidence = live ? { rows: await statcastClient.fetchRowsForGames({ eligibleGamePks, dependencyDates: [runContext.run_date], runAsOf }) } : { rows: evidence.statcastRows }
+  const statcastEvidence = live ? { rows: await statcastClient.fetchRowsForGames({ eligibleGamePks, dependencyDates: [runContext.run_date], runAsOf: frozenRunAsOf }) } : { rows: evidence.statcastRows }
   const rawCap = derivedCap(authCaps.rawStatcast, statcastEvidence.rows.length)
   schemaGuards.push(await repository.verifySchemaFingerprint(R2I_LIVE_TARGETS.rawStatcast))
-  const raw = await reconcileCurrentSlateStatcast({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', eligibleGamePks, dependencyDates: [runContext.run_date], runAsOf, providerBudget: providerCaps, rawCap, providerClient: statcastClient, injectedEvidence: statcastEvidence, repository, liveAuthorization: live })
+  const raw = await reconcileCurrentSlateStatcast({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', eligibleGamePks, dependencyDates: [runContext.run_date], runAsOf: frozenRunAsOf, providerBudget: providerCaps, rawCap, providerClient: statcastClient, injectedEvidence: statcastEvidence, repository, liveAuthorization: live })
   stages.push(raw)
   if (live) writeResults.push(await insertRowsFromClassifications(raw.artifact.classifications, statcastEvidence.rows.map((row) => ({ ...row, id: `statcast:mlb:${row.game_year}:${row.game_pk}:${row.at_bat_number}:${row.pitch_number}` })), 'id', (rows, cap) => repository.insertRawRows(rows, cap), rawCap))
 
-  const featureRows = plannedFeatureRows(eligibleGames[0], runAsOf)
+  const featureRows = plannedFeatureRows(eligibleGames[0], frozenRunAsOf)
   for (const target of [R2I_LIVE_TARGETS.featureSnapshots, R2I_LIVE_TARGETS.team, R2I_LIVE_TARGETS.starter, R2I_LIVE_TARGETS.bullpen, R2I_LIVE_TARGETS.batter, R2I_LIVE_TARGETS.matchup, R2I_LIVE_TARGETS.firstInning]) schemaGuards.push(await repository.verifySchemaFingerprint(target))
   const featureCaps = Object.fromEntries(Object.entries(featureRows).map(([domain, rows]) => [domain, derivedCap(authCaps.features?.[domain], rows.length)]))
-  const features = await planCurrentSlateFeatures({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', targetGamePks: eligibleGamePks, runAsOf, perDomainCaps: featureCaps, repository, plannedFeatureRows: featureRows, liveAuthorization: live })
+  const features = await planCurrentSlateFeatures({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', targetGamePks: eligibleGamePks, runAsOf: frozenRunAsOf, perDomainCaps: featureCaps, repository, plannedFeatureRows: featureRows, liveAuthorization: live })
   stages.push(features)
   if (live) {
     for (const [domain, plan] of Object.entries(features.artifact.domains)) {
@@ -861,25 +901,25 @@ export async function runR2ILiveExecution({
     }
   }
 
-  const starters = classifyStarterReadiness({ games: eligibleGames, runAsOf })
+  const starters = classifyStarterReadiness({ games: eligibleGames, runAsOf: frozenRunAsOf })
   stages.push(starters)
-  const inference = inferMoneyline({ gamePk: eligibleGamePks[0], featureVector: Array(R2F_FEATURE_COUNT).fill(0.1), modelArtifact: modelArtifact(), runAsOf })
+  const inference = inferMoneyline({ gamePk: eligibleGamePks[0], featureVector: Array(R2F_FEATURE_COUNT).fill(0.1), modelArtifact: modelArtifact(), runAsOf: frozenRunAsOf })
   stages.push(inference)
-  const prediction = predictionFromInference(inference, eligibleGames[0], runAsOf)
+  const prediction = predictionFromInference(inference, eligibleGames[0], frozenRunAsOf)
   const predictionCap = derivedCap(authCaps.predictions, 1)
   schemaGuards.push(await repository.verifySchemaFingerprint(R2I_LIVE_TARGETS.predictions))
-  const predictions = await persistPredictions({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runContext, eligibleGamePks, runAsOf, predictionCandidates: [prediction], dmlCap: predictionCap, repository, liveAuthorization: live })
+  const predictions = await persistPredictions({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runContext, eligibleGamePks, runAsOf: frozenRunAsOf, predictionCandidates: [prediction], dmlCap: predictionCap, repository, liveAuthorization: live })
   stages.push(predictions)
   if (live) writeResults.push(await insertRowsFromClassifications(predictions.artifact.plan.classifications, [prediction], 'deterministic_identity', (rows, cap) => repository.insertPredictions(rows, cap), predictionCap))
 
   const oddsPayload = live ? await oddsClient.getMoneylineOdds() : evidence.odds
   const oddsDigest = sha256(oddsPayload)
-  const odds = acceptOddsEvidence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', providerResponse: oddsPayload, responseDigest: oddsDigest, acquiredAt: '2026-09-07T15:01:00.000Z', providerAccounting: makeProviderAccounting('THE_ODDS_API', live ? 1 : 0, live ? ledger.read('THE_ODDS_API') : 0), eligibleGamePks, liveAuthorization: live })
+  const odds = acceptOddsEvidence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', providerResponse: oddsPayload, responseDigest: oddsDigest, acquiredAt: frozenRunAsOf, providerAccounting: makeProviderAccounting('THE_ODDS_API', live ? 1 : 0, live ? ledger.read('THE_ODDS_API') : 0), eligibleGamePks, liveAuthorization: live })
   stages.push(odds)
 
-  const normalized = normalizeMarketEvidence({ providerResponse: oddsPayload, responseDigest: oddsDigest, acquiredAt: '2026-09-07T15:01:00.000Z' })
+  const normalized = normalizeMarketEvidence({ providerResponse: oddsPayload, responseDigest: oddsDigest, acquiredAt: frozenRunAsOf })
   const nativeGamesForCrosswalk = eligibleGames.map((game) => ({ game_pk: game.game_pk, home_team_name: game.teams?.home?.team?.name ?? 'Home Team', away_team_name: game.teams?.away?.team?.name ?? 'Away Team', scheduled_at: game.scheduled_at }))
-  const crosswalk = crosswalkMarketEvents({ normalizedRows: normalized.rows, nativeGames: nativeGamesForCrosswalk, eligibleGamePks, runAsOf })
+  const crosswalk = crosswalkMarketEvents({ normalizedRows: normalized.rows, nativeGames: nativeGamesForCrosswalk, eligibleGamePks, runAsOf: frozenRunAsOf })
   const crosswalkByEvent = new Map(crosswalk.map((row) => [row.provider_event_id, row]))
   const matchedRows = normalized.rows.map((row) => ({ ...row, game_pk: crosswalkByEvent.get(row.provider_event_id)?.game_pk ?? null })).filter((row) => row.game_pk != null)
   const marketMappingCap = derivedCap(authCaps.marketMappings, new Set(matchedRows.map((row) => row.provider_event_id)).size)
@@ -894,29 +934,29 @@ export async function runR2ILiveExecution({
     writeResults.push(await insertRowsFromClassifications(markets.artifact.observationPlan.classifications, markets.artifact.observationRows, 'observation_identity', (rows, cap) => repository.insertMarketObservations(rows, cap), marketObservationCap))
   }
 
-  const valueRows = calculateNativeValue({ prediction, observations: markets.artifact.observationRows.map((row, index) => ({ ...row, id: `obs-${index}` })), runAsOf })
+  const valueRows = calculateNativeValue({ prediction, observations: markets.artifact.observationRows.map((row, index) => ({ ...row, id: `obs-${index}` })), runAsOf: frozenRunAsOf })
   const valueCap = derivedCap(authCaps.nativeValues, valueRows.length)
   schemaGuards.push(await repository.verifySchemaFingerprint(R2I_LIVE_TARGETS.values))
-  const values = await classifyValuePersistence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', valueRows, eligibleGamePks, runAsOf, dmlCap: valueCap, repository, liveAuthorization: live })
+  const values = await classifyValuePersistence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', valueRows, eligibleGamePks, runAsOf: frozenRunAsOf, dmlCap: valueCap, repository, liveAuthorization: live })
   values.artifact.analyticalRows = valueRows
   stages.push(values)
   if (live) writeResults.push(await insertRowsFromClassifications(values.artifact.plan.classifications, valueRows, 'value_identity', (rows, cap) => repository.insertValues(rows, cap), valueCap))
 
   const policy = { version: R2F_POLICY_VERSION, thresholds: { consensusEdge: 0.02, unitEv: 0.05, minimumBookCount: 1, freshness: 'FRESH', dispersionMaximum: 0.03 }, modelRange: { min: 0.304475, max: 0.671837 } }
-  const policyResults = valueRows.map((row) => evaluateOfficialPickPolicy({ candidate: row, policy, runAsOf }))
+  const policyResults = valueRows.map((row) => evaluateOfficialPickPolicy({ candidate: row, policy, runAsOf: frozenRunAsOf }))
   const policyStage = { ...policyResults[0], plannedRows: policyResults.length, artifact: { statuses: policyResults.map((row) => row.artifact.status), rows: policyResults.map((row, index) => ({ value_identity: valueRows[index].value_identity, ...row.artifact })) } }
   stages.push(policyStage)
 
   const eligiblePolicyIndex = policyResults.findIndex((row) => row.artifact.status === 'OFFICIAL_PICK_ELIGIBLE')
-  const pickRows = eligiblePolicyIndex >= 0 ? [officialPickFromPolicy(valueRows[eligiblePolicyIndex], policyResults[eligiblePolicyIndex], runAsOf)] : []
+  const pickRows = eligiblePolicyIndex >= 0 ? [officialPickFromPolicy(valueRows[eligiblePolicyIndex], policyResults[eligiblePolicyIndex], frozenRunAsOf)] : []
   const officialPickCap = derivedCap(authCaps.officialPicks, pickRows.length)
   schemaGuards.push(await repository.verifySchemaFingerprint(R2I_LIVE_TARGETS.officialPicks))
-  const picks = await classifyOfficialPickPersistence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', officialPickRows: pickRows, eligibleGamePks, runAsOf, dmlCap: officialPickCap, repository, liveAuthorization: live })
+  const picks = await classifyOfficialPickPersistence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', officialPickRows: pickRows, eligibleGamePks, runAsOf: frozenRunAsOf, dmlCap: officialPickCap, repository, liveAuthorization: live })
   stages.push(picks)
   if (live) writeResults.push(await insertRowsFromClassifications(picks.artifact.plan.classifications, pickRows, 'official_pick_identity', (rows, cap) => repository.insertOfficialPicks(rows, cap), officialPickCap))
 
   const boardSource = live ? await repository.readValueBoard() : { rows: pickRows.map((row) => ({ status: 'OFFICIAL_PICK', ...row })), state: 'DRY_RUN', freshness: 'FRESH' }
-  const board = readValueBoardAdapter({ board: boardSource, operatingDate: runContext.run_date, asOf: runAsOf })
+  const board = readValueBoardAdapter({ board: boardSource, operatingDate: runContext.run_date, asOf: frozenRunAsOf })
   stages.push(board)
 
   return {

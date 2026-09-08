@@ -259,6 +259,8 @@ async function main() {
     repository: createTestRepository({ nativeGames: [{ game_pk: 700001, home_team_id: null, away_team_id: null, game_date: '2026-09-07' }] }),
     executionPackageSha: validatorPackageSha,
     runId: 'mlb-02r-r2n-live-branch-sim',
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   })
   const rawStage = liveSimulation.stages.find((stage) => stage.stage === '03 raw Statcast reconciliation')
   const featureStage = liveSimulation.stages.find((stage) => stage.stage === '04 feature refresh')
@@ -283,6 +285,8 @@ async function main() {
     repository: createTestRepository(),
     executionPackageSha: validatorPackageSha,
     runId: 'mlb-02r-r2n-live-branch-sim',
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   }), 'OUT_OF_SCOPE_GAME_PK')
   await mustThrow('batch cap exceeded', () => runR2ILiveExecution({
     mode: 'LIVE_EXECUTE',
@@ -291,6 +295,8 @@ async function main() {
     repository: createTestRepository(),
     executionPackageSha: validatorPackageSha,
     runId: 'mlb-02r-r2n-live-branch-sim',
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   }), 'CAP_EXCEEDED')
   await mustThrow('missing live authorization', () => runR2BExecutableEntrypoint({ mode: 'LIVE_EXECUTE', authorization: null }), 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION')
   await mustThrow('unexpected raw target table', () => runR2BExecutableEntrypoint({
@@ -300,6 +306,8 @@ async function main() {
     repository: { ...createTestRepository(), insertRawRows: async () => { throw new Error('WRONG_TABLE_BLOCKED:pick2_raw_mlb_statcast_shadow') } },
     executionPackageSha: validatorPackageSha,
     runId: 'mlb-02r-r2n-live-branch-sim',
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   }), 'WRONG_TABLE_BLOCKED')
 
   const nativeGameReadback = await productionNativeGameReadback()

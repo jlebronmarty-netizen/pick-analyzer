@@ -206,6 +206,8 @@ async function main() {
     repository: createTestRepository(),
     runId: 'mlb-02r-r2q-empty-live-sim',
     executionPackageSha: validatorPackageSha,
+    runDate: '2026-09-07',
+    runAsOf,
   })
   const emptyStageNames = emptyRun.stages.map((stage) => stage.stage)
   check('empty terminal status', emptyRun.terminalStatus === R2Q_EMPTY_SLATE_TERMINAL_STATUS)
@@ -231,6 +233,8 @@ async function main() {
     repository: createTestRepository(),
     runId: 'mlb-02r-r2q-stale-live-sim',
     executionPackageSha: validatorPackageSha,
+    runDate: '2026-09-07',
+    runAsOf,
   })
   check('stale/started only clean terminal', staleRun.terminalStatus === R2Q_EMPTY_SLATE_TERMINAL_STATUS && staleProviders.counters.statcast === 0 && staleProviders.counters.odds === 0)
 
@@ -242,6 +246,8 @@ async function main() {
     repository: createTestRepository({ nativeGames: [{ game_pk: 700001, home_team_id: null, away_team_id: null, game_date: '2026-09-07' }] }),
     runId: 'mlb-02r-r2q-nonempty-live-sim',
     executionPackageSha: validatorPackageSha,
+    runDate: '2026-09-07',
+    runAsOf,
   })
   const nonEmptyStageNames = nonEmptyRun.stages.map((stage) => stage.stage)
   check('non-empty does not terminal', nonEmptyRun.terminalStatus !== R2Q_EMPTY_SLATE_TERMINAL_STATUS)

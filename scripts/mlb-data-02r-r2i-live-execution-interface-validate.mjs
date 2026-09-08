@@ -19,6 +19,8 @@ import { persistPredictions } from './mlb-data-02r-r2g-persistence-interfaces.mj
 
 const outputPath = 'docs/CERTIFICATION/MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION.json'
 const auditPath = 'docs/CERTIFICATION/MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION_AUDIT.md'
+const fixtureRunDate = '2026-09-07'
+const fixtureRunAsOf = '2026-09-07T15:30:00.000Z'
 const errors = []
 
 function check(label, condition, detail = null) {
@@ -167,7 +169,7 @@ async function main() {
   const dryRegression = await runR2HFullDryIntegration()
   const { ledger, providers } = testProviders()
   const repository = createTestRepository()
-  const liveSimulation = await runR2ILiveExecution({ mode: 'LIVE_EXECUTE', authorization: auth(), providers, repository })
+  const liveSimulation = await runR2ILiveExecution({ mode: 'LIVE_EXECUTE', authorization: auth(), providers, repository, runDate: fixtureRunDate, runAsOf: fixtureRunAsOf })
   const productionRepository = createSupabaseProductionRepository({ client: fakeSupabaseClient() })
 
   check('dependency inventory', Object.keys(liveDependencyInventory()).length === 13)
@@ -204,7 +206,7 @@ async function main() {
   await mustThrow('delete absent', async () => productionRepository.deleteRows(), 'productionRepository.deleteRows is not a function')
   await mustThrow('update absent', async () => productionRepository.updateRows(), 'productionRepository.updateRows is not a function')
   await mustThrow('out of scope game', () => persistPredictions({ mode: 'LIVE_EXECUTE', liveAuthorization: true, eligibleGamePks: [700001], runAsOf: '2026-09-07T15:30:00.000Z', predictionCandidates: [{ deterministic_identity: 'wrong-game', game_pk: 700999, model_version: 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1', feature_set: 'MLB_ML_FEATURE_SET_V1', frozen_input_digest: 'input', model_artifact_digest: 'artifact', home_probability: 0.5, away_probability: 0.5, prediction_as_of: '2026-09-07T15:30:00.000Z' }], dmlCap: 1, repository: createTestRepository() }), 'OUT_OF_SCOPE_GAME_PK')
-  await mustThrow('cap exceed', () => runR2ILiveExecution({ mode: 'LIVE_EXECUTE', authorization: auth({ dmlCaps: { ...auth().dmlCaps, rawStatcast: 0 } }), providers: testProviders().providers, repository: createTestRepository() }), 'CAP_EXCEEDED')
+  await mustThrow('cap exceed', () => runR2ILiveExecution({ mode: 'LIVE_EXECUTE', authorization: auth({ dmlCaps: { ...auth().dmlCaps, rawStatcast: 0 } }), providers: testProviders().providers, repository: createTestRepository(), runDate: fixtureRunDate, runAsOf: fixtureRunAsOf }), 'CAP_EXCEEDED')
   const noOddsLedger = createProviderLedger({ ...auth().providerCaps, THE_ODDS_API: { allowed: false, maxCalls: 0 } })
   await mustThrow('unauthorized provider', () => createTheOddsApiLiveClient({ fetchImpl: fakeFetch(), apiKey: 'test-only', ledger: noOddsLedger }).getMoneylineOdds(), 'PROVIDER_NOT_ALLOWED:THE_ODDS_API')
   await createTheOddsApiLiveClient({ fetchImpl: fakeFetch(), apiKey: 'test-only', ledger: createProviderLedger(auth().providerCaps) }).getMoneylineOdds()
@@ -213,7 +215,7 @@ async function main() {
   await oddsClient.getMoneylineOdds()
   await mustThrow('second odds call', () => oddsClient.getMoneylineOdds(), 'PROVIDER_CAP_EXCEEDED:THE_ODDS_API')
   await mustThrow('wrong table', () => createTestRepository().insertFeatureRows('unknown', [{}], 1), 'WRONG_TABLE_BLOCKED')
-  await mustThrow('schema guard missing', () => runR2ILiveExecution({ mode: 'LIVE_EXECUTE', authorization: auth(), providers: testProviders().providers, repository: createTestRepository({ schemaState: 'MISSING' }) }), 'SCHEMA_GUARD_BLOCK')
+  await mustThrow('schema guard missing', () => runR2ILiveExecution({ mode: 'LIVE_EXECUTE', authorization: auth(), providers: testProviders().providers, repository: createTestRepository({ schemaState: 'MISSING' }), runDate: fixtureRunDate, runAsOf: fixtureRunAsOf }), 'SCHEMA_GUARD_BLOCK')
 
   const gates = {
     MLB_02R_R2I_LIVE_DEPENDENCY_INVENTORY: 'COMPLETE',

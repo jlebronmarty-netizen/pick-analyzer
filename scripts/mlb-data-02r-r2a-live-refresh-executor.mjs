@@ -105,6 +105,8 @@ if (isDirectExecution && args.has('--r2i-live-branch-simulation')) {
     mode: 'LIVE_EXECUTE',
     authorization,
     executionPackageSha: authorization.execution_package_sha,
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
     repository: createTestRepository(),
     providers: {
       mlbOfficial: { async getSchedule() { return { dates: [{ date: '2026-09-07', games: [{ gamePk: 700001, gameDate: '2026-09-07T23:05:00.000Z', officialDate: '2026-09-07', season: 2026, status: { abstractGameState: 'Preview', detailedState: 'Pre-Game', statusCode: 'P' }, teams: { away: { team: { id: 110, abbreviation: 'AWY', name: 'Away Team' }, probablePitcher: { id: 660001, fullName: 'Away Starter', confirmed: false } }, home: { team: { id: 111, abbreviation: 'HME', name: 'Home Team' }, probablePitcher: { id: 660002, fullName: 'Home Starter', confirmed: true } } } }] }] } } },
@@ -176,6 +178,9 @@ export async function runR2BExecutableEntrypoint({
   repository = createTestRepository(),
   runId = 'mlb-02r-r2b-executable',
   executionPackageSha = localPackageShaForSimulation(),
+  runDate = null,
+  runAsOf = null,
+  clock = null,
 } = {}) {
   if (mode === 'LIVE_EXECUTE') {
     if (!authorization) throw new Error(R2I_AUTH_ERROR)
@@ -186,6 +191,9 @@ export async function runR2BExecutableEntrypoint({
       repository,
       runId,
       executionPackageSha,
+      runDate,
+      runAsOf,
+      clock,
     })
   }
   if (mode === 'DRY_RUN') return runR2HFullDryIntegration({ mode: 'DRY_RUN' })
@@ -453,6 +461,7 @@ async function main() {
   loadLocalEnv()
   const now = new Date()
   const runDate = dateInZone(now, 'America/Puerto_Rico')
+  const runAsOf = now.toISOString()
   const localHead = git(['rev-parse', 'HEAD'])
   const originMain = git(['rev-parse', 'origin/main'])
   const executionPackageSha = localHead
@@ -479,6 +488,8 @@ async function main() {
       authorization,
       runId,
       executionPackageSha,
+      runDate,
+      runAsOf,
       repository: createSupabaseProductionRepository({ client: db, schemaFingerprint }),
       providers: {
         oddsApiKey: process.env.THE_ODDS_API_KEY ?? process.env.ODDS_API_KEY,
@@ -489,6 +500,9 @@ async function main() {
       ? writeCheckpoint(runId, {
         stage: 'terminal empty pregame slate',
         checkpoint: `${liveArtifact.runContext.run_date}:terminal:${R2Q_EMPTY_SLATE_TERMINAL_STATUS}`,
+        execution_package_sha: executionPackageSha,
+        run_date: liveArtifact.runContext.run_date,
+        run_as_of: liveArtifact.runContext.run_as_of,
         terminal_reason: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
         plannedRows: 0,
         inserted: 0,
@@ -599,7 +613,7 @@ The R2B executable live branch now routes to the R2I live stage orchestrator ins
   const frozenContext = createFrozenSlateContext({
     run_id: runId,
     run_date: runDate,
-    run_as_of: now.toISOString(),
+    run_as_of: runAsOf,
     execution_package_sha: executionPackageSha,
     eligible_game_pks: [],
     blocked_game_pks: [],
@@ -632,7 +646,7 @@ The R2B executable live branch now routes to the R2I live stage orchestrator ins
   const runFreeze = {
     run_id: runId,
     run_date: runDate,
-    run_as_of: now.toISOString(),
+    run_as_of: runAsOf,
     execution_package_sha: executionPackageSha,
     eligible_game_pks: frozenContext.eligible_game_pks,
     blocked_game_pks: frozenContext.blocked_game_pks,

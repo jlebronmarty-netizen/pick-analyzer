@@ -336,6 +336,8 @@ async function main() {
     }),
     executionPackageSha: validatorPackageSha,
     runId: 'mlb-02r-r2p-live-branch-sim',
+    runDate: '2026-09-07',
+    runAsOf,
   })
   const featureStage = liveSimulation.stages.find((stage) => stage.stage === '04 feature refresh')
   const starterStage = liveSimulation.stages.find((stage) => stage.stage === '05 starter readiness')

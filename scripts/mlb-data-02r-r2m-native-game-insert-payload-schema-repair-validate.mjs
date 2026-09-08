@@ -309,6 +309,8 @@ async function main() {
     repository,
     runId: 'mlb-02r-r2m-live-repository-simulation',
     executionPackageSha: priorPackageSha,
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   })
   const nativeWrite = repository.writes.find((write) => write.table === R2I_LIVE_TARGETS.nativeGames)
   const nativeWriteRow = nativeWrite?.rows?.[0]
@@ -339,6 +341,8 @@ async function main() {
     repository: createTestRepository({ nativeGames: [{ game_pk: 700001, home_team_id: 'different', away_team_id: 'different', game_date: '2026-09-08' }] }),
     runId: 'mlb-02r-r2m-live-repository-simulation',
     executionPackageSha: priorPackageSha,
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   }), 'BLOCK_CONFLICT')
 
   check('mapper exported', source.includes('export function mapScheduleGameToNativeInsertRow'))

@@ -414,6 +414,8 @@ async function main() {
     }),
     executionPackageSha: validatorPackageSha,
     runId: 'mlb-02r-r2o-live-branch-sim',
+    runDate: '2026-09-07',
+    runAsOf: '2026-09-07T15:30:00.000Z',
   })
   const featureStage = liveSimulation.stages.find((stage) => stage.stage === '04 feature refresh')
   const starterStage = liveSimulation.stages.find((stage) => stage.stage === '05 starter readiness')
