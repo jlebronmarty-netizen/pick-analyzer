@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 01:28:30Z
+Last updated: 2026-09-08 02:04:43Z
+
+## 2026-09-08 MLB-DATA-02R-R2Q Empty Eligible Slate Guard Repair
+
+- MLB-DATA-02R-R2Q is locally certified as `MLB_DATA_02R_R2Q_EMPTY_ELIGIBLE_SLATE_GUARD_REPAIR_CERTIFIED`. It repairs the R2B -> R2I live executor so an empty frozen eligible current-slate set terminates cleanly as `NO_VALID_PREGAME_SLATE` immediately after schedule normalization, status/start guard, and eligible `game_pk` freeze.
+- The guard short-circuits before native/raw/features/prediction/market/value/Official Pick/board work that requires eligible games. It prevents Statcast and The Odds API calls when `eligible_game_pks = []`, while preserving R2N's direct `R2N_EMPTY_GAME_PK_SCOPE` fail-closed guard.
+- The terminal artifact includes `run_id`, `run_date`, `run_as_of`, schedule counts, started/final/blocked counts, `eligible_game_pks = []`, provider accounting, production DML/DDL accounting, and `terminal_reason = NO_VALID_PREGAME_SLATE`. The CLI execution branch can write a terminal checkpoint so retry/resume does not resume at Statcast for the same terminal run.
+- R2Q validation proves empty-slate live-branch simulation, stale/started-only terminal handling, non-empty slate regression through Statcast/features/inference/prediction/odds/market/value/policy/pick/board, protected native games `823902` and `824958`, and business-logic parity.
+- Boundaries held: real MLB Official calls 0, Statcast calls 0, The Odds API calls 0, production DML 0, production DDL 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY_AFTER_PUBLICATION_AND_DIRECT_AUTHORIZATION = YES`.
 
 ## 2026-09-08 MLB-DATA-02R-R2P Feature Snapshot Date Field Binding Repair
 

@@ -1,0 +1,168 @@
+{
+  "generatedAt": "2026-09-08T02:05:36.265Z",
+  "certificationVerdict": "MLB_DATA_02R_R2Q_EMPTY_ELIGIBLE_SLATE_GUARD_REPAIR_CERTIFIED",
+  "priorPackageSha": "9808e0a8701e703e78db035e552d2efcc799aa72",
+  "gates": {
+    "MLB_02R_R2Q_EMPTY_SLATE_DECISION_POINT": "PASS",
+    "MLB_02R_R2Q_TERMINAL_STATUS_CONTRACT": "PASS",
+    "MLB_02R_R2Q_EMPTY_SLATE_SUMMARY": "PASS",
+    "MLB_02R_R2Q_PROVIDER_SHORT_CIRCUIT": "PASS",
+    "MLB_02R_R2Q_DML_SHORT_CIRCUIT": "PASS",
+    "MLB_02R_R2Q_TERMINAL_CHECKPOINT": "PASS",
+    "MLB_02R_R2Q_R2N_GUARD_PRESERVATION": "PASS",
+    "MLB_02R_R2Q_EMPTY_SLATE_LIVE_SIMULATION": "PASS",
+    "MLB_02R_R2Q_NONEMPTY_SLATE_REGRESSION": "PASS",
+    "MLB_02R_R2Q_EMPTY_SCOPE_NEGATIVE_TESTS": "PASS",
+    "MLB_02R_R2Q_PROTECTED_STATE": "PASS",
+    "MLB_02R_R2Q_BUSINESS_LOGIC_PARITY": "PASS"
+  },
+  "decisionPoint": "runR2ILiveExecution immediately after schedule normalization/status classification and eligible_game_pks freeze, before native/raw/features downstream stages",
+  "terminalContract": {
+    "terminalStatus": "NO_VALID_PREGAME_SLATE",
+    "emptyEligibleSlateIsCleanTerminalOutcome": true,
+    "technicalPipelineFailure": false,
+    "providerFailure": false,
+    "schemaFailure": false,
+    "modelFailure": false
+  },
+  "emptySlateSummary": {
+    "run_id": "mlb-02r-r2q-empty-live-sim",
+    "run_date": "2026-09-07",
+    "run_as_of": "2026-09-07T15:30:00.000Z",
+    "schedule_games": 2,
+    "pregame_safe_count": 0,
+    "started_count": 1,
+    "final_count": 1,
+    "blocked_count": 2,
+    "eligible_game_pks": [],
+    "blocked_game_pks": [
+      700010,
+      700011
+    ],
+    "provider_accounting": {},
+    "production_dml_accounting": {
+      "total": 0,
+      "write_results": []
+    },
+    "production_ddl_accounting": {
+      "total": 0
+    },
+    "terminal_reason": "NO_VALID_PREGAME_SLATE"
+  },
+  "providerShortCircuit": {
+    "mlbOfficialInjectedCalls": 1,
+    "statcastCalls": 0,
+    "theOddsApiCalls": 0
+  },
+  "dmlShortCircuit": {
+    "writeResults": [],
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "terminalCheckpoint": {
+    "state": "TERMINAL",
+    "terminalStatus": "NO_VALID_PREGAME_SLATE",
+    "resumeRule": "do not resume downstream Statcast for this terminal empty-slate run; create a new run for a later run_date/run_as_of",
+    "frozenEvidenceReusable": false,
+    "oddsRequestRepeatedOnResume": false
+  },
+  "r2nGuardPreservation": {
+    "directEmptyScopeStillThrows": "R2N_EMPTY_GAME_PK_SCOPE",
+    "orchestratorDoesNotCallR2NWhenEligibleScopeEmpty": true
+  },
+  "emptySlateLiveSimulation": {
+    "stages": [
+      "01 schedule sync",
+      "terminal empty pregame slate"
+    ],
+    "terminal": {
+      "status": "NO_VALID_PREGAME_SLATE",
+      "operationalOutcome": "SUCCESSFUL_FAIL_CLOSED_NO_VALID_PREGAME_SLATE",
+      "pipelineFailure": false,
+      "providerFailure": false,
+      "schemaFailure": false,
+      "modelFailure": false,
+      "summary": {
+        "run_id": "mlb-02r-r2q-empty-live-sim",
+        "run_date": "2026-09-07",
+        "run_as_of": "2026-09-07T15:30:00.000Z",
+        "schedule_games": 2,
+        "pregame_safe_count": 0,
+        "started_count": 1,
+        "final_count": 1,
+        "blocked_count": 2,
+        "eligible_game_pks": [],
+        "blocked_game_pks": [
+          700010,
+          700011
+        ],
+        "provider_accounting": {},
+        "production_dml_accounting": {
+          "total": 0,
+          "write_results": []
+        },
+        "production_ddl_accounting": {
+          "total": 0
+        },
+        "terminal_reason": "NO_VALID_PREGAME_SLATE"
+      }
+    },
+    "providerCounters": {
+      "mlbOfficial": 1,
+      "statcast": 0,
+      "odds": 0
+    }
+  },
+  "nonEmptyRegression": {
+    "stages": [
+      "01 schedule sync",
+      "02 native reconciliation",
+      "03 raw Statcast reconciliation",
+      "04 feature refresh",
+      "05 starter readiness",
+      "06 moneyline inference",
+      "07 prediction persistence",
+      "08 odds evidence handoff",
+      "09 market persistence",
+      "10 value persistence",
+      "11 Official Pick policy",
+      "12 Official Pick persistence",
+      "13 Value Board readback"
+    ],
+    "providerCounters": {
+      "mlbOfficial": 1,
+      "statcast": 1,
+      "odds": 1
+    },
+    "terminalStatus": null
+  },
+  "protectedState": {
+    "available": true,
+    "protectedGames": [
+      {
+        "game_pk": 823902,
+        "game_date": "2026-09-07",
+        "scheduled_at": "2026-09-08T01:10:00+00:00",
+        "source": "mlb_official"
+      },
+      {
+        "game_pk": 824958,
+        "game_date": "2026-09-07",
+        "scheduled_at": "2026-09-08T02:05:00+00:00",
+        "source": "mlb_official"
+      }
+    ]
+  },
+  "boundaries": {
+    "mlbOfficialCalls": 0,
+    "statcastCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "liveRefreshExecuted": "NO",
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlement": 0
+  },
+  "errors": []
+}

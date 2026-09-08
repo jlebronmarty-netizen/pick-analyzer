@@ -7,6 +7,7 @@ import {
   makeRunContext,
   normalizeGamePk,
   sha256,
+  stageResult,
 } from './mlb-data-02r-r2f-stage-contracts.mjs'
 import {
   R2F_FEATURE_COUNT,
@@ -36,6 +37,7 @@ import {
 export const R2I_CERTIFICATION = 'MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION_CERTIFIED'
 export const R2I_AUTH_ERROR = 'LIVE_REFRESH_EXECUTION_REQUIRES_EXPLICIT_R2B_AUTHORIZATION'
 export const R2I_PRIOR_PACKAGE_SHA = '8cfd91f626e0e914d2e3abb07dc140b793a39c73'
+export const R2Q_EMPTY_SLATE_TERMINAL_STATUS = 'NO_VALID_PREGAME_SLATE'
 
 const MODEL_ARTIFACT_DIGEST = '9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616'
 const FEATURE_CONTRACT_DIGEST = sha256({ featureSet: R2F_FEATURE_SET, featureCount: R2F_FEATURE_COUNT, modelVersion: R2F_MODEL_VERSION })
@@ -307,6 +309,11 @@ export function requireRunScopedLiveAuthorization(auth, context) {
     dmlCaps: auth.dmlCaps ?? {},
     authorizedDmlTargets: auth.authorizedDmlTargets ?? [],
   }
+}
+
+export function assertEligibleGamePkFreeze(value) {
+  if (value === undefined || value === null || !Array.isArray(value)) throw new Error('ELIGIBLE_GAME_PK_FREEZE_REQUIRED')
+  return value.map((gamePk) => normalizeGamePk(gamePk))
 }
 
 export function createProviderLedger(caps = {}) {
@@ -587,6 +594,98 @@ function plannedFeatureRows(game, runAsOf) {
   }
 }
 
+function terminalEmptySlateArtifact({ mode, runContext, schedule, eligibleGamePks, blockedGames, providerCaps, authCaps, ledger, stages, writeResults, schemaGuards }) {
+  const frozenEligibleGamePks = assertEligibleGamePkFreeze(eligibleGamePks)
+  if (frozenEligibleGamePks.length !== 0) throw new Error('EMPTY_SLATE_TERMINAL_REQUIRES_EMPTY_FREEZE')
+  const games = schedule.artifact.games ?? []
+  const pregameSafeCount = games.filter((game) => game.pregame_classification === 'PREGAME_SAFE').length
+  const startedCount = games.filter((game) => game.pregame_classification === 'STARTED_IN_PROGRESS').length
+  const finalCount = games.filter((game) => game.pregame_classification === 'FINAL').length
+  const blockedCount = games.length - pregameSafeCount
+  const summary = {
+    run_id: runContext.run_id,
+    run_date: runContext.run_date,
+    run_as_of: runContext.run_as_of,
+    schedule_games: games.length,
+    pregame_safe_count: pregameSafeCount,
+    started_count: startedCount,
+    final_count: finalCount,
+    blocked_count: blockedCount,
+    eligible_game_pks: frozenEligibleGamePks,
+    blocked_game_pks: blockedGames,
+    provider_accounting: ledger.snapshot(),
+    production_dml_accounting: { total: 0, write_results: writeResults },
+    production_ddl_accounting: { total: 0 },
+    terminal_reason: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
+  }
+  const terminalStage = stageResult({
+    stage: 'terminal empty pregame slate',
+    mode,
+    status: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
+    artifact: summary,
+  })
+  return {
+    certificationVerdict: R2I_CERTIFICATION,
+    terminalStatus: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
+    terminal: {
+      status: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
+      operationalOutcome: 'SUCCESSFUL_FAIL_CLOSED_NO_VALID_PREGAME_SLATE',
+      pipelineFailure: false,
+      providerFailure: false,
+      schemaFailure: false,
+      modelFailure: false,
+      summary,
+    },
+    mode,
+    runContext: { ...runContext, eligible_game_pks: frozenEligibleGamePks, blocked_game_pks: blockedGames, provider_budget: providerCaps, per_stage_dml_caps: authCaps },
+    liveBranchTraversed: mode === 'LIVE_EXECUTE',
+    dependencyInventory: liveDependencyInventory(),
+    schemaGuards,
+    stages: [...stages, terminalStage],
+    writeResults,
+    checkpointResume: {
+      state: 'TERMINAL',
+      terminalStatus: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
+      resumeRule: 'do not resume downstream Statcast for this terminal empty-slate run; create a new run for a later run_date/run_as_of',
+      frozenEvidenceReusable: false,
+      oddsRequestRepeatedOnResume: false,
+    },
+    providerLedger: ledger.snapshot(),
+    safety: {
+      realProviderCalls: 0,
+      productionDml: 0,
+      productionDdl: 0,
+      automationChanges: 0,
+      cronChanges: 0,
+      settlementWrites: 0,
+      testProviderCalls: ledger.total(),
+      testDml: 0,
+    },
+  }
+}
+
+function applyStartedGameGuard(schedule, runAsOf) {
+  const guardedGames = (schedule.artifact.games ?? []).map((game) => {
+    const startTime = game.start_time ?? game.scheduled_at
+    if (game.pregame_classification === 'PREGAME_SAFE' && startTime && Date.parse(startTime) <= Date.parse(runAsOf)) {
+      return { ...game, pregame_classification: 'STARTED_IN_PROGRESS', started_game_guard: 'START_TIME_AT_OR_BEFORE_RUN_AS_OF' }
+    }
+    return game
+  })
+  return {
+    ...schedule,
+    artifact: {
+      ...schedule.artifact,
+      games: guardedGames,
+      startedGameGuard: {
+        status: 'PASS',
+        rule: 'PREGAME_SAFE requires scheduled_at/start_time > run_as_of',
+        runAsOf,
+      },
+    },
+  }
+}
+
 function predictionFromInference(inference, game, runAsOf) {
   return {
     id: `pred-${game.game_pk}`,
@@ -709,11 +808,15 @@ export async function runR2ILiveExecution({
   const schemaGuards = []
 
   const scheduleEvidence = live ? await mlbClient.getSchedule({ runDate: runContext.run_date, runAsOf }) : evidence.schedule
-  const schedule = await getCurrentSlate({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runDate: runContext.run_date, runAsOf, providerClient: mlbClient, providerBudget: providerCaps, injectedEvidence: scheduleEvidence, liveAuthorization: live })
+  const scheduleBase = await getCurrentSlate({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runDate: runContext.run_date, runAsOf, providerClient: mlbClient, providerBudget: providerCaps, injectedEvidence: scheduleEvidence, liveAuthorization: live })
+  const schedule = applyStartedGameGuard(scheduleBase, runAsOf)
   stages.push(schedule)
   const eligibleGames = schedule.artifact.games.filter((game) => game.pregame_classification === 'PREGAME_SAFE')
-  const eligibleGamePks = eligibleGames.map((game) => game.game_pk)
+  const eligibleGamePks = assertEligibleGamePkFreeze(eligibleGames.map((game) => game.game_pk))
   const blockedGames = schedule.artifact.games.filter((game) => game.pregame_classification !== 'PREGAME_SAFE').map((game) => game.game_pk)
+  if (eligibleGamePks.length === 0) {
+    return terminalEmptySlateArtifact({ mode, runContext, schedule, eligibleGamePks, blockedGames, providerCaps, authCaps, ledger, stages, writeResults, schemaGuards })
+  }
   const uniqueStarterIds = new Set()
   for (const game of eligibleGames) {
     for (const pitcher of [game.starter_evidence?.homeProbablePitcher, game.starter_evidence?.awayProbablePitcher]) {

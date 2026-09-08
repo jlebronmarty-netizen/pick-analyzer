@@ -17,6 +17,7 @@ import { runR2HFullDryIntegration } from './mlb-data-02r-r2h-full-dry-integratio
 import {
   R2I_AUTH_ERROR,
   R2I_LIVE_TARGETS,
+  R2Q_EMPTY_SLATE_TERMINAL_STATUS,
   createSupabaseProductionRepository,
   createTestRepository,
   runR2ILiveExecution,
@@ -483,10 +484,25 @@ async function main() {
         oddsApiKey: process.env.THE_ODDS_API_KEY ?? process.env.ODDS_API_KEY,
       },
     })
+    const emptySlateTerminal = liveArtifact.terminalStatus === R2Q_EMPTY_SLATE_TERMINAL_STATUS
+    const terminalCheckpointPath = emptySlateTerminal
+      ? writeCheckpoint(runId, {
+        stage: 'terminal empty pregame slate',
+        checkpoint: `${liveArtifact.runContext.run_date}:terminal:${R2Q_EMPTY_SLATE_TERMINAL_STATUS}`,
+        terminal_reason: R2Q_EMPTY_SLATE_TERMINAL_STATUS,
+        plannedRows: 0,
+        inserted: 0,
+        reused: 0,
+        conflicts: 0,
+        eligible_game_pks: [],
+      }, R2Q_EMPTY_SLATE_TERMINAL_STATUS)
+      : null
     const activePlaceholderCount = liveArtifact.stages.filter((stage) => String(stage.status).includes('WRAPPER_READY_REQUIRES_STAGE_IMPLEMENTATION')).length
     const artifact = {
       generatedAt: now.toISOString(),
-      certificationVerdict: activePlaceholderCount === 0
+      certificationVerdict: emptySlateTerminal
+        ? 'MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_NO_VALID_PREGAME_SLATE'
+        : activePlaceholderCount === 0
         ? 'MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_COMPLETED'
         : 'MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_BLOCKED_WRAPPER_READY_REQUIRES_STAGE_IMPLEMENTATION',
       executionMode: 'EXECUTE_CURRENT_SLATE',
@@ -521,6 +537,12 @@ async function main() {
       },
       stages: liveArtifact.stages,
       writeResults: liveArtifact.writeResults,
+      terminal: liveArtifact.terminal ?? null,
+      terminalCheckpoint: {
+        state: emptySlateTerminal ? 'WRITTEN' : 'NOT_APPLICABLE',
+        checkpointPath: terminalCheckpointPath,
+        terminalStatus: emptySlateTerminal ? R2Q_EMPTY_SLATE_TERMINAL_STATUS : null,
+      },
       schemaGuards: liveArtifact.schemaGuards,
       providerLedger: liveArtifact.providerLedger,
       safety: liveArtifact.safety,
@@ -545,6 +567,8 @@ Certification: \`${artifact.certificationVerdict}\`
 - Run ID: \`${runId}\`
 - Orchestrator: \`runR2BExecutableEntrypoint -> runR2ILiveExecution\`
 - Active placeholder count: ${activePlaceholderCount}
+- Terminal status: ${liveArtifact.terminalStatus ?? 'NONE'}
+- Terminal checkpoint: ${terminalCheckpointPath ?? 'NOT_APPLICABLE'}
 - Real provider calls: ${liveArtifact.safety.realProviderCalls}
 - Production DML: ${liveArtifact.safety.productionDml}
 - Production DDL: ${liveArtifact.safety.productionDdl}
@@ -559,6 +583,8 @@ The R2B executable live branch now routes to the R2I live stage orchestrator ins
       runId,
       r2lBinding: artifact.r2lBinding.state,
       activePlaceholderCount,
+      terminalStatus: liveArtifact.terminalStatus ?? null,
+      terminalCheckpoint: terminalCheckpointPath,
       stages: liveArtifact.stages.length,
       providerCalls: liveArtifact.safety.realProviderCalls,
       productionDml: liveArtifact.safety.productionDml,
