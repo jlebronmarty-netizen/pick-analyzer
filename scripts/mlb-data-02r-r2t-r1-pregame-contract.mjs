@@ -154,8 +154,10 @@ export function buildPregameFeatureRows({ target, starters, rawRows, dependencyG
       ensure(row[field] === null || Number.isFinite(row[field]), 'RAW_NONFINITE_VALUE')
     }
   }
-  // Preserve the certified 02H id ordering; do not change historical math here.
-  const sorted = [...rawRows].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  // Match the stored 02I input's database text ordering (verified by R2T-R2).
+  // JS code-point comparison puts :10: before :1: and changes which pitcher
+  // the unchanged builder first encounters. This is source ordering, not math.
+  const sorted = [...rawRows].sort((a, b) => a.id.localeCompare(b.id, 'en-US', { numeric: false }))
   const scan = scanRawRows(sorted)
   ensure(!scan.duplicatePitchIdentities && !scan.pitcherNull && !scan.batterNull, 'RAW_DUPLICATE_OR_MISSING_ID')
   ensure(scan.games.length === allowed.size, 'DEPENDENCY_GAME_MISSING')

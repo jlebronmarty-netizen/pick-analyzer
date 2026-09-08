@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T-R1 pregame evidence certification)
+Last updated: 2026-09-08 (R2T-R2 stored parity PASS; Gate 4 BLOCKED)
+
+## 2026-09-08 MLB-DATA-02R-R2T-R2 Stored Parity and Native Binding
+
+- **R2T-R2 is BLOCKED at the user-mandated Gate 4 stop. R2B Live Execution Ready = NO.** Existing September 8 native rows lack game type and explicit official-date/pregame-state metadata. All 15 need separately scoped same-game evidence recovery/data repair; one game also has unknown starters. No production repair was performed.
+- Stored-output parity now passes for game `824552`: reconstructed home probability `0.5815856653133696` matches stored `0.581585665313` within `1e-12`; the full stored input digest matches exactly. R1's source-order binding was corrected to database-compatible text ordering. This supersedes the earlier R1 reconstructed probability, without changing feature formulas or Champion parameters.
+- Existing canonical aliases and nested starter metadata support nonmutating projections. The schedule mapper now preserves supplied game type/date/state/starter evidence for future inputs. Missing same-game evidence is not fabricated, and existing production rows are not modified.
+- Real persistence, persisted-vector readback, all-game real execution, downstream traversal, checkpoint/resume and idempotency remain NOT RUN after Gate 4. Live containment remains enabled; the legacy fixture path remains unfinished below the guard.
+- Dedicated investigation: 20 passing checks with overall BLOCKED status. R1's 41 checks and nine feature/model validators pass; older live-enabled tests remain containment-incompatible. Build passes with 400 static pages. Canonical R2T-R2 JSON/audit records exact evidence, remaining gates and validation. Providers, production DML/DDL, training, Champion changes, automation/cron, settlement and live refresh remain zero. One bounded local commit; no push; inherited artifacts and protected directories preserved.
 
 ## 2026-09-08 MLB-DATA-02R-R2T-R1 Pregame Evidence Provenance and Target Binding
 

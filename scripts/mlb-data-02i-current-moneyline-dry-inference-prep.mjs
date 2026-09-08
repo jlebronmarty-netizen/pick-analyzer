@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { createClient } from '@supabase/supabase-js'
 
 const writeArtifact = process.argv.includes('--write-artifact')
@@ -34,7 +35,6 @@ function loadLocalEnv() {
   }
 }
 
-loadLocalEnv()
 
 function requireEnv(name) {
   const value = process.env[name]
@@ -259,7 +259,7 @@ function rates(stats) {
   return { kRate: safeRate(stats.strikeouts, stats.plateAppearances), bbRate: safeRate(stats.walks, stats.plateAppearances), kMinusBbRate: stats.plateAppearances ? Number(((stats.strikeouts - stats.walks) / stats.plateAppearances).toFixed(6)) : null, whiffRate: safeRate(stats.whiffs, stats.swings), cswRate: safeRate(stats.whiffs + stats.calledStrikes, stats.pitches), strikeRate: safeRate(stats.strikes, stats.pitches), swingRate: safeRate(stats.swings, stats.pitches), avgReleaseSpeed: average(stats.releaseSpeedSum, stats.releaseSpeedCount), avgEstimatedWoba: average(stats.estimatedWobaSum, stats.estimatedWobaCount), runsPerGame: safeRate(stats.runs, stats.games) }
 }
 
-function buildHistory(rawRows) {
+export function buildHistory(rawRows) {
   const gameMap = new Map()
   for (const row of rawRows) addGame(gameMap, row)
   const history = { teamBatting: new Map(), pitcher: new Map(), batter: new Map(), bullpen: new Map() }
@@ -273,7 +273,7 @@ function probablePitcherId(value) {
   return Number(value.id ?? value.personId ?? value.mlbam_person_id ?? 0) || null
 }
 
-function buildCurrentVector(game, history) {
+export function buildCurrentVector(game, history) {
   const homeTeamStats = history.teamBatting.get(game.homeTeamId) ?? makeStats()
   const awayTeamStats = history.teamBatting.get(game.awayTeamId) ?? makeStats()
   const homeStarterStats = history.pitcher.get(game.homeStarter) ?? makeStats()
@@ -347,7 +347,7 @@ function dot(weights, features) {
   return sum
 }
 
-function infer(modelArtifact, vector) {
+export function infer(modelArtifact, vector) {
   const transformed = transformVector(vector, modelArtifact.preprocessing)
   const homeProbability = sigmoid(dot(modelArtifact.weights, transformed))
   return { homeProbability, awayProbability: 1 - homeProbability }
@@ -381,7 +381,7 @@ function extrapolationState(homeProbability) {
   return distance <= 0.03 ? 'MILD_EXTRAPOLATION' : 'MATERIAL_EXTRAPOLATION_REVIEW'
 }
 
-function inputPayload(row) {
+export function inputPayload(row) {
   return {
     game_pk: row.game_pk,
     market,
@@ -459,6 +459,7 @@ function auditMarkdown(artifact) {
 }
 
 async function main() {
+  loadLocalEnv()
   if (executePredictions) throw new Error('PREDICTION_DML_EXECUTION_FORBIDDEN_IN_02I_PREP')
   ensure(fs.existsSync(modelArtifactPath), 'MODEL_ARTIFACT_MISSING')
   ensure(fs.existsSync(foundationArtifactPath), '02H_R2_ARTIFACT_MISSING')
@@ -817,7 +818,7 @@ async function main() {
   console.log(JSON.stringify(artifact, null, 2))
 }
 
-main().catch((error) => {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch((error) => {
   console.error(JSON.stringify({ script: 'mlb-data-02i-current-moneyline-dry-inference-prep', status: 'FAIL', error: error.message, stack: error.stack }, null, 2))
   process.exitCode = 1
 })
