@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T-R2 stored parity PASS; Gate 4 BLOCKED)
+Last updated: 2026-09-08 (R2T-R2A recovery plan certified; data remains unrepaired)
+
+## 2026-09-08 MLB-DATA-02R-R2T-R2A Native Evidence Recovery Plan
+
+- **The read-only recovery audit/plan is certified; production data is not repaired. R2T-R2 Gate 4 remains blocked and LIVE_EXECUTE remains contained.** The exact inventory covers 18 fields across the fixed 15 games: 270 cells, 105 actual gaps and 165 valid values.
+- Existing evidence supports 30 team-alias enrichments through exact same-game official IDs and the existing cached entity/canonical crosswalk system, plus 28 same-game probable-starter metadata enrichments. No other game's state is copied. The remaining 47 fields require authoritative evidence: 15 game types, 15 explicit official dates, 15 abstract states and two unknown starters for game 823092.
+- The exact preview proposes 58 known-value patches grouped into at most 15 bounded native-row updates. It excludes unresolved new values and authorizes no DML. No repair was applied. Future provider observations cannot be backdated into an earlier pregame run.
+- Twenty bounded source queries and allowed cached/certified sources were inspected; the lone digest-only feature snapshot is not schedule authority. Dedicated validation passes 28 checks, including live containment and preservation of the parity/model/runtime files. Build passes with 400 static pages. Providers, production DML/DDL, live refresh, training, Champion changes, automation/cron and settlement remain zero.
+- Canonical R2T-R2A JSON/audit records all 270 cells and every proposed patch. Next: separately authorize bounded same-game evidence recovery, then review exact production repair independently. Once Gate 4 passes, resume R2T-R2 at Gate 5 without rerunning unchanged stored parity. One bounded local commit; no push; all 19 inherited artifacts and protected directories preserved.
 
 ## 2026-09-08 MLB-DATA-02R-R2T-R2 Stored Parity and Native Binding
 
