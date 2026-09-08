@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T blocked certification)
+Last updated: 2026-09-08 (R2T-R1 pregame evidence certification)
+
+## 2026-09-08 MLB-DATA-02R-R2T-R1 Pregame Evidence Provenance and Target Binding
+
+- R2T-R1 certifies the pregame evidence contract while preserving the R2T live containment. **R2B Live Execution Ready remains NO.** Stored-output parity, real persistence and full live-path completion remain later phases.
+- The certified 02H future-schedule branch explicitly supports `future_schedule_no_lineup`. None of the 76 moneyline V1 inputs directly consumes lineup or individual batter identity; the batter domain is explicitly empty, not fabricated. This resolves the earlier R2T provenance blocker for moneyline V1 without changing model or feature formulas.
+- The current stored native rows lack required canonical target fields and block. Historical fallback reconstructs game `824552` (official date September 6; scheduled September 6 at 22:20Z) at the archived September 5 01:51:21.667Z pregame as-of. Stored native schedule/starter evidence was observed September 4 at 23:04:12.540272Z; all 80,667 dependency pitches from 270 games existed by September 5 at 00:54:52.174099Z. Source performance ends September 3, strictly before the Puerto Rico run date September 4.
+- Real target/entity resolution, starter provenance, missing-lineup policy, all seven domain plans, 76-value lineage and pure Champion inference pass. The dedicated validator passes 41 checks. A stored prediction for the same target/as-of has been identified for the next parity phase; parity is not yet claimed.
+- Exact future payload columns were verified through read-only queries for all seven tables. All-game candidate caps derive from resolved targets; future write caps must derive from INSERT_ELIGIBLE classifications after per-entity snapshot resolution. No persistence was executed.
+- Canonical evidence: `docs/CERTIFICATION/MLB_DATA_02R_R2T_R1_PREGAME_EVIDENCE_PROVENANCE_AND_TARGET_BINDING.json` and its audit. Older live-enabled validators remain explicitly containment-incompatible; R2T's broader completion checks remain incomplete. Provider calls, production DML/DDL, training, Champion changes, automation/cron changes and settlement are all 0. No push; inherited artifact drift and protected directories remain untouched.
 
 ## 2026-09-08 MLB-DATA-02R-R2T Real Feature and Champion Binding — BLOCKED
 

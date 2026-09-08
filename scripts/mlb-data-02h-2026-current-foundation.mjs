@@ -803,7 +803,7 @@ function updateGame(row, game) {
   game.rows.push(row)
 }
 
-function scanRawRows(rows) {
+export function scanRawRows(rows) {
   const games = new Map()
   const identities = new Set()
   const duplicateIdentities = new Set()
@@ -841,7 +841,7 @@ function mergeStats(totalMap, gameMap, gameDate) {
   }
 }
 
-function updateStatsFromGame(history, game) {
+export function updateStatsFromGame(history, game) {
   const teamGameStats = new Map(), pitcherGameStats = new Map(), batterGameStats = new Map(), bullpenGameStats = new Map()
   for (const row of game.rows) {
     const pitcherId = Number(row.mlbam_pitcher_id), batterId = Number(row.mlbam_batter_id)
@@ -894,7 +894,7 @@ function snapshot({ domain, subjectId, secondarySubjectId = null, game, asOfDate
   return payload
 }
 
-function addDailyRows(output, game, asOfDate, history, current, persistBatter = true) {
+export function addDailyRows(output, game, asOfDate, history, current, persistBatter = true) {
   const homeTeamStats = history.teamBatting.get(game.homeTeamId) ?? makeStats()
   const awayTeamStats = history.teamBatting.get(game.awayTeamId) ?? makeStats()
   const homeStarterStats = history.pitcher.get(game.homeStarter) ?? makeStats()
