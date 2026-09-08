@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import {
+  assertGameScope,
   makeProviderAccounting,
   makeRunContext,
+  normalizeGamePk,
   sha256,
 } from './mlb-data-02r-r2f-stage-contracts.mjs'
 import {
@@ -52,6 +54,29 @@ export const R2I_LIVE_TARGETS = Object.freeze({
   values: 'pick2_mlb_market_value_evaluations',
   officialPicks: 'pick2_mlb_official_picks',
 })
+
+export const NATIVE_GAME_WRITABLE_COLUMNS = Object.freeze([
+  'game_pk',
+  'season',
+  'game_date',
+  'scheduled_at',
+  'home_team_id',
+  'away_team_id',
+  'game_type',
+  'official_status',
+  'doubleheader',
+  'game_number',
+  'source',
+  'source_payload_digest',
+  'legacy_sport_event_id',
+  'metadata',
+])
+
+export const NATIVE_GAME_REQUIRED_INSERT_COLUMNS = Object.freeze([
+  'game_pk',
+  'source',
+  'metadata',
+])
 
 function liveTargetForFeatureDomain(domain) {
   if (domain === 'snapshots') return R2I_LIVE_TARGETS.featureSnapshots
@@ -172,6 +197,84 @@ async function insertExactRows(client, table, rows, cap) {
   return { inserted, table }
 }
 
+function normalizeNullableInteger(value, label) {
+  if (value === undefined || value === null || value === '') return null
+  const parsed = Number(value)
+  if (!Number.isInteger(parsed)) throw new Error(`INVALID_${label.toUpperCase()}:${value}`)
+  return parsed
+}
+
+function normalizeNullableText(value, label) {
+  if (value === undefined || value === null || value === '') return null
+  if (typeof value !== 'string') throw new Error(`INVALID_${label.toUpperCase()}_TYPE`)
+  const trimmed = value.trim()
+  return trimmed ? trimmed : null
+}
+
+function normalizeNativeTeamId(value, label) {
+  if (value === undefined || value === null || value === '') return null
+  if (typeof value === 'number' && Number.isInteger(value)) return null
+  if (typeof value !== 'string') throw new Error(`INVALID_${label.toUpperCase()}_TYPE`)
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  if (/^\d+$/.test(trimmed)) return null
+  return trimmed
+}
+
+export function assertNativeGameInsertShape(row, { eligibleGamePks = null, cap = null, rowCount = null } = {}) {
+  const allowed = new Set(NATIVE_GAME_WRITABLE_COLUMNS)
+  const keys = Object.keys(row ?? {})
+  const unexpected = keys.filter((key) => !allowed.has(key))
+  if (unexpected.length) throw new Error(`NATIVE_GAME_INSERT_UNEXPECTED_KEYS:${unexpected.join(',')}`)
+  const missing = NATIVE_GAME_REQUIRED_INSERT_COLUMNS.filter((key) => !(key in row) || row[key] === undefined || row[key] === null)
+  if (missing.length) throw new Error(`NATIVE_GAME_INSERT_MISSING_REQUIRED:${missing.join(',')}`)
+  const gamePk = normalizeGamePk(row.game_pk)
+  if (eligibleGamePks) assertGameScope([row], eligibleGamePks)
+  if (Number.isInteger(cap) && Number.isInteger(rowCount) && rowCount > cap) throw new Error(`DML_CAP_EXCEEDED:${R2I_LIVE_TARGETS.nativeGames}:${rowCount}:${cap}`)
+  for (const field of ['home_team_id', 'away_team_id']) {
+    if (row[field] !== null && row[field] !== undefined && typeof row[field] !== 'string') throw new Error(`NATIVE_GAME_INSERT_INVALID_TEAM_ID:${field}`)
+  }
+  return { game_pk: gamePk, keys }
+}
+
+export function mapScheduleGameToNativeInsertRow(game, { phase = 'MLB_DATA_02R_R2M' } = {}) {
+  const scheduledAt = game.scheduled_at ?? game.start_time ?? game.gameDate ?? null
+  const officialStatus = game.official_status ?? game.status?.detailedState ?? game.status?.abstractGameState ?? game.status ?? null
+  const homeMlbTeamId = normalizeNullableInteger(game.home?.mlb_team_id ?? game.metadata?.homeMlbTeamId ?? game.teams?.home?.team?.id, 'home_mlb_team_id')
+  const awayMlbTeamId = normalizeNullableInteger(game.away?.mlb_team_id ?? game.metadata?.awayMlbTeamId ?? game.teams?.away?.team?.id, 'away_mlb_team_id')
+  const homeTeamId = normalizeNativeTeamId(game.home_team_id ?? game.home?.team_id, 'home_team_id')
+  const awayTeamId = normalizeNativeTeamId(game.away_team_id ?? game.away?.team_id, 'away_team_id')
+  const row = {
+    game_pk: normalizeGamePk(game.game_pk ?? game.gamePk),
+    season: normalizeNullableInteger(game.season ?? String(game.game_date ?? game.officialDate ?? scheduledAt ?? '').slice(0, 4), 'season'),
+    game_date: game.game_date ?? game.officialDate ?? String(scheduledAt ?? '').slice(0, 10) ?? null,
+    scheduled_at: scheduledAt,
+    home_team_id: homeTeamId,
+    away_team_id: awayTeamId,
+    game_type: normalizeNullableText(game.game_type ?? game.gameType, 'game_type'),
+    official_status: normalizeNullableText(officialStatus, 'official_status'),
+    doubleheader: normalizeNullableText(game.doubleheader ?? game.doubleHeader, 'doubleheader'),
+    game_number: normalizeNullableInteger(game.game_number ?? game.gameNumber, 'game_number'),
+    source: normalizeNullableText(game.source, 'source') ?? 'mlb_official',
+    source_payload_digest: normalizeNullableText(game.source_payload_digest, 'source_payload_digest') ?? sha256(game),
+    legacy_sport_event_id: normalizeNullableText(game.legacy_sport_event_id, 'legacy_sport_event_id'),
+    metadata: {
+      ...(game.metadata && typeof game.metadata === 'object' && !Array.isArray(game.metadata) ? game.metadata : {}),
+      phase,
+      source_schedule_fields_dropped: ['home', 'away', 'starter_evidence', 'pregame_classification', 'doubleheader_identity', 'status', 'start_time'],
+      mlb_official_identity: {
+        home_mlb_team_id: homeMlbTeamId,
+        away_mlb_team_id: awayMlbTeamId,
+        home_abbreviation: game.home?.abbreviation ?? game.teams?.home?.team?.abbreviation ?? null,
+        away_abbreviation: game.away?.abbreviation ?? game.teams?.away?.team?.abbreviation ?? null,
+      },
+      starter_evidence: game.starter_evidence ?? null,
+    },
+  }
+  assertNativeGameInsertShape(row)
+  return row
+}
+
 export function createSupabaseProductionRepository({ client, schemaFingerprint = {} } = {}) {
   if (!client) throw new Error('SUPABASE_CLIENT_REQUIRED')
   return {
@@ -188,7 +291,10 @@ export function createSupabaseProductionRepository({ client, schemaFingerprint =
       return { target, ...expectation }
     },
     async readNativeGames(ids) { return selectByIds(client, R2I_LIVE_TARGETS.nativeGames, 'game_pk', ids) },
-    async insertNativeGames(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.nativeGames, rows, cap) },
+    async insertNativeGames(rows, cap) {
+      for (const row of rows) assertNativeGameInsertShape(row, { cap, rowCount: rows.length })
+      return insertExactRows(client, R2I_LIVE_TARGETS.nativeGames, rows, cap)
+    },
     async readNativePlayers(ids) { return selectByIds(client, R2I_LIVE_TARGETS.nativePlayers, 'mlbam_person_id', ids) },
     async insertNativePlayers(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
     async readRawRows(ids) { return selectByIds(client, R2I_LIVE_TARGETS.rawStatcast, 'id', ids) },
@@ -326,7 +432,10 @@ export function createTestRepository(existing = {}) {
       return { target, state: 'ADDITIVE_COMPATIBLE' }
     },
     async readNativeGames(ids) { return read('nativeGames', 'game_pk', ids) },
-    async insertNativeGames(rows, cap) { return insert(R2I_LIVE_TARGETS.nativeGames, rows, cap) },
+    async insertNativeGames(rows, cap) {
+      for (const row of rows) assertNativeGameInsertShape(row, { cap, rowCount: rows.length })
+      return insert(R2I_LIVE_TARGETS.nativeGames, rows, cap)
+    },
     async readNativePlayers(ids) { return read('nativePlayers', 'mlbam_person_id', ids) },
     async insertNativePlayers(rows, cap) { return insert(R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
     async readRawRows(ids) { return read('rawRows', 'id', ids) },
@@ -410,7 +519,8 @@ export async function runR2ILiveExecution({
   const native = await reconcileNativeIdentity({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', runContext, scheduleEvidence: eligibleGames, eligibleGamePks, dmlCaps: nativeCaps, repository, liveAuthorization: live })
   stages.push(native)
   if (live) {
-    const gameRows = native.artifact.gamePlan.classifications.filter((row) => row.classification === 'INSERT_ELIGIBLE').map((row) => eligibleGames.find((game) => game.game_pk === row.game_pk)).filter(Boolean)
+    const gameRowsByPk = new Map(eligibleGames.map((game) => [Number(game.game_pk), mapScheduleGameToNativeInsertRow(game, { phase: 'MLB_DATA_02R_R2I_LIVE_EXECUTION' })]))
+    const gameRows = native.artifact.gamePlan.classifications.filter((row) => row.classification === 'INSERT_ELIGIBLE').map((row) => gameRowsByPk.get(Number(row.game_pk))).filter(Boolean)
     const playerRows = native.artifact.playerPlan.classifications.filter((row) => row.classification === 'INSERT_ELIGIBLE').map((row) => ({ game_pk: row.game_pk, mlbam_person_id: Number(row.identity) }))
     writeResults.push(await repository.insertNativeGames(gameRows, nativeCaps.games))
     writeResults.push(await repository.insertNativePlayers(playerRows, nativeCaps.players))

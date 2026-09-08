@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 19:40:00Z
+Last updated: 2026-09-07 20:20:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2M Native Game Insert Payload Schema Repair
+
+- MLB-DATA-02R-R2M is locally certified as `MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR_CERTIFIED`. It repairs only the native-game insert payload boundary so the live R2B path writes the physical `public.pick2_mlb_games` column contract instead of passing normalized schedule objects with `home` / `away` fields.
+- Added a narrow `mapScheduleGameToNativeInsertRow` mapper and `assertNativeGameInsertShape` guard in the R2I live interface. The mapper outputs only `game_pk`, schedule/status fields, nullable canonical `home_team_id` / `away_team_id`, source digest, legacy event link, and JSON `metadata`; MLB Official team IDs and starter evidence remain metadata only when no canonical `sports_teams(id)` value is present.
+- The R2M validator performs read-only production schema/readback checks, inventories current normalized payload keys, verifies the source-to-target crosswalk, runs a real-shaped dry native mapping test, and simulates the repaired live repository path with injected providers/repository only.
+- Negative tests prove extra `away`, extra `home`, nested schedule objects, missing `game_pk`, invalid team identity type, out-of-scope `game_pk`, cap overrun, and conflicting existing game identity all fail closed before or during the certified planning boundary.
+- Boundaries held: provider calls 0, The Odds API calls 0, production DML 0, production DDL 0, prediction/market/value/Official Pick writes 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY = YES` after publication/alignment and direct execution authorization.
 
 ## 2026-09-07 MLB-DATA-02R-R2L Live Executor Stage Binding Repair
 

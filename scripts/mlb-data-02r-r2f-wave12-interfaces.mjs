@@ -280,6 +280,26 @@ export function readValueBoardAdapter({ board, operatingDate = null, asOf = null
   })
 }
 
+function compareNullableText(left, right) {
+  if (left === undefined || left === null || right === undefined || right === null) return true
+  return String(left) === String(right)
+}
+
+function assertNativeGameCompatibility(plannedRows, existingRows) {
+  const plannedByPk = new Map(plannedRows.map((row) => [Number(row.game_pk), row]))
+  const conflicts = []
+  for (const existing of existingRows) {
+    const planned = plannedByPk.get(Number(existing.game_pk))
+    if (!planned) continue
+    for (const field of ['game_date', 'home_team_id', 'away_team_id']) {
+      if (!compareNullableText(planned[field], existing[field])) {
+        conflicts.push({ game_pk: Number(existing.game_pk), field })
+      }
+    }
+  }
+  if (conflicts.length) throw new Error(`BLOCK_CONFLICT:${conflicts.length}:NATIVE_GAME_IDENTITY_MISMATCH`)
+}
+
 export async function reconcileNativeIdentity({
   mode = 'DRY_RUN',
   runContext = makeRunContext(),
@@ -317,6 +337,7 @@ export async function reconcileNativeIdentity({
   const playerRows = [...playersById.values()]
   const existingGames = await repository.readNativeGames(games.map((game) => game.game_pk))
   const existingPlayers = await repository.readNativePlayers(playerRows.map((row) => row.mlbam_person_id))
+  assertNativeGameCompatibility(games, existingGames)
   const gamePlan = classifyInsertReuseConflict({ plannedRows: games, existingRows: existingGames, identityFields: ['game_pk'], digestField: null, eligibleGamePks: eligible, cap: dmlCaps.games ?? null })
   const playerPlan = classifyInsertReuseConflict({ plannedRows: playerRows, existingRows: existingPlayers, identityFields: ['mlbam_person_id'], digestField: null, eligibleGamePks: eligible, cap: dmlCaps.players ?? null })
   return stageResult({

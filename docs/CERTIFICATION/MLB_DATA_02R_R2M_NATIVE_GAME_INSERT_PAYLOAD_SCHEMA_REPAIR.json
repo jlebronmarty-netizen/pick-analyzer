@@ -1,0 +1,550 @@
+{
+  "generatedAt": "2026-09-08T00:05:30.202Z",
+  "project": "MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR",
+  "certificationVerdict": "MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR_CERTIFIED",
+  "priorPackageSha": "40b5e218095d265b3f8c258acf1b6642849001ec",
+  "packageSha": "40b5e218095d265b3f8c258acf1b6642849001ec",
+  "physicalSchema": {
+    "table": "public.pick2_mlb_games",
+    "columns": [
+      {
+        "name": "game_pk",
+        "type": "bigint",
+        "nullable": false,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "season",
+        "type": "integer",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "game_date",
+        "type": "date",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "scheduled_at",
+        "type": "timestamptz",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "home_team_id",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null,
+        "fk": "public.sports_teams(id)"
+      },
+      {
+        "name": "away_team_id",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null,
+        "fk": "public.sports_teams(id)"
+      },
+      {
+        "name": "game_type",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "official_status",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "doubleheader",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "game_number",
+        "type": "integer",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "source",
+        "type": "text",
+        "nullable": false,
+        "writable": true,
+        "default": "mlb_official"
+      },
+      {
+        "name": "source_payload_digest",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null
+      },
+      {
+        "name": "legacy_sport_event_id",
+        "type": "text",
+        "nullable": true,
+        "writable": true,
+        "default": null,
+        "fk": "public.sport_events(id)"
+      },
+      {
+        "name": "metadata",
+        "type": "jsonb",
+        "nullable": false,
+        "writable": true,
+        "default": "{}"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamptz",
+        "nullable": false,
+        "writable": false,
+        "default": "timezone('utc', now())"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamptz",
+        "nullable": false,
+        "writable": false,
+        "default": "timezone('utc', now())"
+      }
+    ],
+    "primaryKey": [
+      "game_pk"
+    ],
+    "foreignKeys": {
+      "home_team_id": "public.sports_teams(id)",
+      "away_team_id": "public.sports_teams(id)",
+      "legacy_sport_event_id": "public.sport_events(id)"
+    },
+    "uniqueConstraints": [
+      "PRIMARY KEY (game_pk)"
+    ],
+    "indexes": [
+      "pick2_mlb_games_pkey",
+      "pick2_mlb_games_season_game_date_idx",
+      "pick2_mlb_games_legacy_sport_event_idx"
+    ],
+    "checks": [
+      "game_pk > 0",
+      "game_number is null or game_number > 0"
+    ]
+  },
+  "productionReadback": {
+    "available": true,
+    "columnsVerifiedBySelect": [
+      "game_pk",
+      "season",
+      "game_date",
+      "scheduled_at",
+      "home_team_id",
+      "away_team_id",
+      "game_type",
+      "official_status",
+      "doubleheader",
+      "game_number",
+      "source",
+      "source_payload_digest",
+      "legacy_sport_event_id",
+      "metadata"
+    ],
+    "representativeRows": [
+      {
+        "game_pk": 776135,
+        "season": 2025,
+        "game_date": null,
+        "scheduled_at": null,
+        "home_team_id": null,
+        "away_team_id": null,
+        "game_type": null,
+        "official_status": null,
+        "doubleheader": null,
+        "game_number": null,
+        "source": "statcast_native_identity_backfill",
+        "hasMetadata": true
+      },
+      {
+        "game_pk": 776136,
+        "season": 2025,
+        "game_date": null,
+        "scheduled_at": null,
+        "home_team_id": null,
+        "away_team_id": null,
+        "game_type": null,
+        "official_status": null,
+        "doubleheader": null,
+        "game_number": null,
+        "source": "statcast_native_identity_backfill",
+        "hasMetadata": true
+      },
+      {
+        "game_pk": 776137,
+        "season": 2025,
+        "game_date": null,
+        "scheduled_at": null,
+        "home_team_id": null,
+        "away_team_id": null,
+        "game_type": null,
+        "official_status": null,
+        "doubleheader": null,
+        "game_number": null,
+        "source": "statcast_native_identity_backfill",
+        "hasMetadata": true
+      }
+    ]
+  },
+  "currentPayloadInventory": {
+    "currentNormalizedPayload": [
+      {
+        "property": "away",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      },
+      {
+        "property": "away_team_id",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "doubleheader",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "doubleheader_identity",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      },
+      {
+        "property": "game_date",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "game_number",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "game_pk",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "home",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      },
+      {
+        "property": "home_team_id",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "pregame_classification",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      },
+      {
+        "property": "scheduled_at",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "source_payload_digest",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "start_time",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      },
+      {
+        "property": "starter_evidence",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      },
+      {
+        "property": "status",
+        "classification": "DERIVED_SCHEDULE_ONLY"
+      }
+    ],
+    "mappedInsertPayload": [
+      {
+        "property": "away_team_id",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "doubleheader",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "game_date",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "game_number",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "game_pk",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "game_type",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "home_team_id",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "legacy_sport_event_id",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "metadata",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "official_status",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "scheduled_at",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "season",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "source",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      },
+      {
+        "property": "source_payload_digest",
+        "classification": "PHYSICAL_TABLE_COLUMN"
+      }
+    ],
+    "missingRequiredColumns": []
+  },
+  "nativeGameColumnCrosswalk": [
+    {
+      "targetColumn": "game_pk",
+      "sourceField": "game.game_pk/game.gamePk",
+      "conversion": "integer normalization",
+      "identitySemantics": "required identity"
+    },
+    {
+      "targetColumn": "season",
+      "sourceField": "game.season or year from game_date/scheduled_at",
+      "conversion": "nullable integer",
+      "identitySemantics": "season partition metadata"
+    },
+    {
+      "targetColumn": "game_date",
+      "sourceField": "game.game_date/game.officialDate/date portion of scheduled_at",
+      "conversion": "nullable ISO date string",
+      "identitySemantics": "official MLB date"
+    },
+    {
+      "targetColumn": "scheduled_at",
+      "sourceField": "game.scheduled_at/game.start_time/game.gameDate",
+      "conversion": "nullable timestamptz string",
+      "identitySemantics": "pregame temporal guard"
+    },
+    {
+      "targetColumn": "home_team_id",
+      "sourceField": "canonical text sports_teams id when present",
+      "conversion": "nullable text FK; numeric MLB IDs remain metadata only",
+      "identitySemantics": "home canonical team identity"
+    },
+    {
+      "targetColumn": "away_team_id",
+      "sourceField": "canonical text sports_teams id when present",
+      "conversion": "nullable text FK; numeric MLB IDs remain metadata only",
+      "identitySemantics": "away canonical team identity"
+    },
+    {
+      "targetColumn": "game_type",
+      "sourceField": "game.game_type/game.gameType",
+      "conversion": "nullable text",
+      "identitySemantics": "MLB game type"
+    },
+    {
+      "targetColumn": "official_status",
+      "sourceField": "game.official_status/status detailed or abstract state",
+      "conversion": "nullable text",
+      "identitySemantics": "MLB status"
+    },
+    {
+      "targetColumn": "doubleheader",
+      "sourceField": "game.doubleheader/game.doubleHeader",
+      "conversion": "nullable text",
+      "identitySemantics": "doubleheader marker"
+    },
+    {
+      "targetColumn": "game_number",
+      "sourceField": "game.game_number/game.gameNumber",
+      "conversion": "nullable positive integer",
+      "identitySemantics": "doubleheader game number"
+    },
+    {
+      "targetColumn": "source",
+      "sourceField": "game.source or default",
+      "conversion": "non-null text default mlb_official",
+      "identitySemantics": "source authority"
+    },
+    {
+      "targetColumn": "source_payload_digest",
+      "sourceField": "existing digest or sha256(source game)",
+      "conversion": "nullable text",
+      "identitySemantics": "source immutability proof"
+    },
+    {
+      "targetColumn": "legacy_sport_event_id",
+      "sourceField": "game.legacy_sport_event_id",
+      "conversion": "nullable text FK",
+      "identitySemantics": "legacy compatibility only"
+    },
+    {
+      "targetColumn": "metadata",
+      "sourceField": "safe source schedule metadata",
+      "conversion": "non-null jsonb",
+      "identitySemantics": "non-relational MLB Official details"
+    }
+  ],
+  "teamIdentityMapping": {
+    "home": "home_team_id stores nullable canonical public.sports_teams(id) text; MLB Official team id is metadata.mlb_official_identity.home_mlb_team_id",
+    "away": "away_team_id stores nullable canonical public.sports_teams(id) text; MLB Official team id is metadata.mlb_official_identity.away_mlb_team_id",
+    "scheduleObjectsPersistedAsColumns": false
+  },
+  "dryNativeMappingTest": {
+    "shape": {
+      "game_pk": 700001,
+      "keys": [
+        "game_pk",
+        "season",
+        "game_date",
+        "scheduled_at",
+        "home_team_id",
+        "away_team_id",
+        "game_type",
+        "official_status",
+        "doubleheader",
+        "game_number",
+        "source",
+        "source_payload_digest",
+        "legacy_sport_event_id",
+        "metadata"
+      ]
+    },
+    "mappedRow": {
+      "game_pk": 700001,
+      "season": 2026,
+      "game_date": "2026-09-07",
+      "scheduled_at": "2026-09-07T23:05:00.000Z",
+      "home_team_id": null,
+      "away_team_id": null,
+      "game_type": null,
+      "official_status": "Pre-Game",
+      "doubleheader": "N",
+      "game_number": 1,
+      "source": "mlb_official",
+      "source_payload_digest": "0085b8041f8c85c36ca4d8a3fbf0b9d2a7cb7f67452b8b0ec64a3f4ec6f32397",
+      "legacy_sport_event_id": null,
+      "metadata": {
+        "phase": "MLB_DATA_02R_R2M",
+        "source_schedule_fields_dropped": [
+          "home",
+          "away",
+          "starter_evidence",
+          "pregame_classification",
+          "doubleheader_identity",
+          "status",
+          "start_time"
+        ],
+        "mlb_official_identity": {
+          "home_mlb_team_id": 111,
+          "away_mlb_team_id": 110,
+          "home_abbreviation": "HME",
+          "away_abbreviation": "AWY"
+        },
+        "starter_evidence": {
+          "homeProbablePitcher": {
+            "id": 660002,
+            "fullName": "Home Starter",
+            "confirmed": true
+          },
+          "awayProbablePitcher": {
+            "id": 660001,
+            "fullName": "Away Starter",
+            "confirmed": false
+          }
+        }
+      }
+    },
+    "unexpectedColumns": 0,
+    "missingRequiredColumns": 0
+  },
+  "liveRepositorySimulation": {
+    "stages": 13,
+    "activePlaceholderCount": 0,
+    "nativeWriteKeys": [
+      "away_team_id",
+      "doubleheader",
+      "game_date",
+      "game_number",
+      "game_pk",
+      "game_type",
+      "home_team_id",
+      "legacy_sport_event_id",
+      "metadata",
+      "official_status",
+      "scheduled_at",
+      "season",
+      "source",
+      "source_payload_digest"
+    ],
+    "providerLedger": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 1,
+      "THE_ODDS_API": 1
+    }
+  },
+  "gates": {
+    "MLB_02R_R2M_NATIVE_GAME_PHYSICAL_SCHEMA": "PASS",
+    "MLB_02R_R2M_CURRENT_PAYLOAD_INVENTORY": "COMPLETE",
+    "MLB_02R_R2M_NATIVE_GAME_COLUMN_CROSSWALK": "READY",
+    "MLB_02R_R2M_TEAM_IDENTITY_MAPPING": "PASS",
+    "MLB_02R_R2M_NATIVE_GAME_PAYLOAD_MAPPER": "PASS",
+    "MLB_02R_R2M_INSERT_SHAPE_GUARD": "PASS",
+    "MLB_02R_R2M_NATIVE_PLAYER_SEPARATION": "PASS",
+    "MLB_02R_R2M_DRY_NATIVE_MAPPING_TEST": "PASS",
+    "MLB_02R_R2M_LIVE_REPOSITORY_SIMULATION": "PASS",
+    "MLB_02R_R2M_NATIVE_PAYLOAD_NEGATIVE_TESTS": "PASS",
+    "MLB_02R_R2M_EXISTING_ROW_COMPATIBILITY": "PASS",
+    "MLB_02R_R2M_BUSINESS_LOGIC_PARITY": "PASS",
+    "MLB_02R_R2M_PIPELINE_REGRESSION": "PASS"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "predictionWrites": 0,
+    "marketWrites": 0,
+    "valueWrites": 0,
+    "officialPickWrites": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlementWrites": 0,
+    "liveRefreshExecuted": false
+  },
+  "readiness": {
+    "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY": "YES"
+  },
+  "errors": []
+}
