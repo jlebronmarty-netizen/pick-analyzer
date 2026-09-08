@@ -29,9 +29,13 @@ async function fetchSchedule(label, startDate, endDate) {
 
 const historicalGamePks = new Set([822853,823095,823337,823907,824069,824144,824388,824632,824796])
 
-const historicalSeason = await fetchSchedule('historicalSeason', '2026-01-01', '2026-09-03')
-const historicalHorizon = await fetchSchedule('historicalHorizon', '2026-09-03', '2026-09-06')
-const currentHorizon = await fetchSchedule('currentHorizon', '2026-09-06', '2026-09-09')
+// Exact MLB_DATA_02H contract from the certified 2026-09-04 run.
+const historicalSeason = await fetchSchedule('historicalSeason', '2026-01-01', '2026-09-04')
+const historicalHorizon = await fetchSchedule('historicalHorizon', '2026-09-04', '2026-09-06')
+
+// Exact equivalent contract for the 2026-09-07 Puerto Rico operating date.
+const currentSeason = await fetchSchedule('currentSeason', '2026-01-01', '2026-09-07')
+const currentHorizon = await fetchSchedule('currentHorizon', '2026-09-07', '2026-09-09')
 
 const output = {
   mode: 'MLB_DATA_02H_DIGEST_PROOF_READ_ONLY',
@@ -42,7 +46,11 @@ const output = {
     url: source.url,
     games: source.games.filter((game) => historicalGamePks.has(game.gamePk)),
   })),
-  sep7: currentHorizon.games.filter((game) => game.officialDate === '2026-09-07'),
+  sep7: [currentSeason, currentHorizon].map((source) => ({
+    label: source.label,
+    url: source.url,
+    games: source.games.filter((game) => game.officialDate === '2026-09-07'),
+  })),
 }
 
 console.log(`MLB_DATA_02H_DIGEST_PROOF=${JSON.stringify(output)}`)
