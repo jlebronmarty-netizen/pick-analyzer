@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T-R2C native repair reviewed; data remains unrepaired)
+Last updated: 2026-09-08 (R2T-R2D exact canonical native enrichment executed and verified)
+
+## 2026-09-08 MLB-DATA-02R-R2T-R2D Canonical Native Enrichment Execution
+
+- The explicitly authorized R2C packet from `9fb94364d843c4b5bf5c81bd9f2a36b2c5205b0f` was executed in one atomic, fail-closed transaction. **15 native rows / 90 logical field assignments** were applied, equivalent to 75 physical column assignments after metadata coalescing. Actual database write time: `2026-09-08T20:07:31.485422+00:00`.
+- The write covers only 30 canonical team IDs, 15 game types, 15 official-date metadata values, 15 exact versioned provenance records and 15 actual-write timestamps. Full-row old-value predicates were rechecked under locks before any UPDATE. Table shape, trigger/rule absence, row counts, per-row results and caps were enforced. No INSERT, DELETE, DDL or other-table write occurred.
+- Independent readback matches all 15 exact expected rows. All 52 excluded paths remain unchanged, including the two UNKNOWN starters for game 823092 and all excluded starter/status promotions. Original source digests, created_at, nested starter evidence and unrelated metadata are preserved. Actual persisted rows project to 15 REUSE_NO_OP classifications and **zero second-pass updates**; no second production write ran.
+- Thirteen offline guard checks, database dry preflight and production readback pass; build exits 0 with 400 pages and ESLint has zero warnings. A local Windows text-transport encoding issue was detected and corrected against the unmodified direct database response before certification. Canonical execution evidence and audit are in `docs/CERTIFICATION/MLB_DATA_02R_R2T_R2D_CANONICAL_NATIVE_ENRICHMENT_EXECUTION.json` and `_AUDIT.md`.
+- Provider calls, model/feature-semantic changes, prediction/market/value/Official Pick writes, settlement, automation/cron and live refresh remain zero. **Gate 5 was not resumed; live remains disabled.** These canonical enrichments do not establish missing current-state bindings or historical pregame proof. Next: separately instruct the already-bound real case 824552's injected persistence integration. One bounded certification commit after readback; no push; inherited 19 artifacts and protected directories preserved.
 
 ## 2026-09-08 MLB-DATA-02R-R2T-R2C Native Repair Review and Unknown Starter Policy
 
