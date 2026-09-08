@@ -452,10 +452,10 @@ export async function planCurrentSlateFeatures({
       ...row,
       target_game_pk: normalizeGamePk(row.target_game_pk ?? row.game_pk),
       identity: row.identity ?? row.deterministic_identity ?? `${domain}:${row.target_game_pk ?? row.game_pk}:${row.subject_id ?? row.team_id ?? row.mlbam_pitcher_id ?? row.mlbam_batter_id ?? 'game'}:${row.feature_version ?? 'v1'}`,
-      feature_digest: row.feature_digest ?? sha256(row.features ?? row),
+      feature_digest: row.feature_digest ?? row.input_digest ?? sha256(row.features ?? row),
     }))
     assertGameScope(rows, eligible, (row) => row.target_game_pk)
-    const existing = await repository.readFeatureRows(domain, rows.map((row) => row.identity))
+    const existing = await repository.readFeatureRows(domain, rows.map((row) => row.identity), rows)
     plans[domain] = classifyInsertReuseConflict({
       plannedRows: rows,
       existingRows: existing,

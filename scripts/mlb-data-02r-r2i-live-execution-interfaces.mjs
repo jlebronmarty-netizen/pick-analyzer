@@ -84,6 +84,157 @@ function liveTargetForFeatureDomain(domain) {
   return R2I_LIVE_TARGETS[domain]
 }
 
+export const R2I_FEATURE_IDENTITY_BINDINGS = Object.freeze({
+  snapshots: {
+    table: R2I_LIVE_TARGETS.featureSnapshots,
+    physicalIdentityColumn: 'deterministic_identity',
+    adapterIdentity: 'identity',
+    readColumns: 'id,deterministic_identity,feature_domain,subject_id,target_game_pk,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,features,input_digest,created_at',
+    nativeKey: ['deterministic_identity'],
+  },
+  team: {
+    table: R2I_LIVE_TARGETS.team,
+    physicalIdentityColumn: 'target_game_pk,team_id,feature_version',
+    adapterIdentity: 'identity',
+    readColumns: 'id,feature_snapshot_id,target_game_pk,team_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    nativeKey: ['target_game_pk', 'team_id', 'feature_version'],
+  },
+  starter: {
+    table: R2I_LIVE_TARGETS.starter,
+    physicalIdentityColumn: 'target_game_pk,mlbam_pitcher_id,feature_version',
+    adapterIdentity: 'identity',
+    readColumns: 'id,feature_snapshot_id,target_game_pk,mlbam_pitcher_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    nativeKey: ['target_game_pk', 'mlbam_pitcher_id', 'feature_version'],
+  },
+  bullpen: {
+    table: R2I_LIVE_TARGETS.bullpen,
+    physicalIdentityColumn: 'target_game_pk,team_id,feature_version',
+    adapterIdentity: 'identity',
+    readColumns: 'id,feature_snapshot_id,target_game_pk,team_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    nativeKey: ['target_game_pk', 'team_id', 'feature_version'],
+  },
+  batter: {
+    table: R2I_LIVE_TARGETS.batter,
+    physicalIdentityColumn: 'target_game_pk,mlbam_batter_id,feature_version',
+    adapterIdentity: 'identity',
+    readColumns: 'id,feature_snapshot_id,target_game_pk,mlbam_batter_id,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    nativeKey: ['target_game_pk', 'mlbam_batter_id', 'feature_version'],
+  },
+  matchup: {
+    table: R2I_LIVE_TARGETS.matchup,
+    physicalIdentityColumn: 'target_game_pk,feature_version',
+    adapterIdentity: 'identity',
+    readColumns: 'id,feature_snapshot_id,target_game_pk,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    nativeKey: ['target_game_pk', 'feature_version'],
+  },
+  firstInning: {
+    table: R2I_LIVE_TARGETS.firstInning,
+    physicalIdentityColumn: 'target_game_pk,feature_version',
+    adapterIdentity: 'identity',
+    readColumns: 'id,feature_snapshot_id,target_game_pk,feature_date,as_of_date,as_of_timestamp,feature_version,sample_sizes,source_window,created_at',
+    nativeKey: ['target_game_pk', 'feature_version'],
+  },
+})
+
+function featureBindingForDomain(domain) {
+  const binding = R2I_FEATURE_IDENTITY_BINDINGS[domain]
+  if (!binding) throw new Error(`FEATURE_DOMAIN_BINDING_MISSING:${domain}`)
+  return binding
+}
+
+function featureSubjectForKey(row, field) {
+  if (field === 'mlbam_pitcher_id') return row.mlbam_pitcher_id ?? row.subject_id
+  if (field === 'mlbam_batter_id') return row.mlbam_batter_id ?? row.subject_id
+  return row[field]
+}
+
+export function featureIdentityForDomain(domain, row) {
+  const binding = featureBindingForDomain(domain)
+  if (domain === 'snapshots') return String(row.deterministic_identity ?? row.identity)
+  return binding.nativeKey.map((field) => {
+    const value = field === 'target_game_pk' ? normalizeGamePk(row.target_game_pk ?? row.game_pk) : featureSubjectForKey(row, field)
+    if (value === undefined || value === null || value === '') throw new Error(`FEATURE_IDENTITY_INCOMPLETE:${domain}:${field}`)
+    return String(value)
+  }).join(':')
+}
+
+export function comparableFeatureRow(domain, row) {
+  const identity = featureIdentityForDomain(domain, row)
+  const digest = row.feature_digest ?? row.input_digest ?? null
+  return {
+    ...row,
+    target_game_pk: normalizeGamePk(row.target_game_pk ?? row.game_pk),
+    identity,
+    feature_digest: digest,
+  }
+}
+
+async function readFeatureRowsByDomain(client, domain, ids, plannedRows = []) {
+  if (!ids.length) return []
+  const binding = featureBindingForDomain(domain)
+  if (domain === 'snapshots') {
+    const { data, error } = await client
+      .from(binding.table)
+      .select(binding.readColumns)
+      .in(binding.physicalIdentityColumn, ids)
+    if (error) throw new Error(`READ_FAILED:${binding.table}:${error.message}`)
+    return (data ?? []).map((row) => comparableFeatureRow(domain, row))
+  }
+  const gamePks = [...new Set(plannedRows.map((row) => normalizeGamePk(row.target_game_pk ?? row.game_pk)))]
+  if (!gamePks.length) return []
+  const { data, error } = await client
+    .from(binding.table)
+    .select(binding.readColumns)
+    .in('target_game_pk', gamePks)
+  if (error) throw new Error(`READ_FAILED:${binding.table}:${error.message}`)
+  const requested = new Set(ids.map(String))
+  return (data ?? []).map((row) => comparableFeatureRow(domain, row)).filter((row) => requested.has(String(row.identity)))
+}
+
+function featureSnapshotInsertRow(row) {
+  const deterministicIdentity = row.deterministic_identity ?? row.identity
+  if (!deterministicIdentity) throw new Error('FEATURE_SNAPSHOT_DETERMINISTIC_IDENTITY_REQUIRED')
+  const targetGamePk = normalizeGamePk(row.target_game_pk ?? row.game_pk)
+  const featureDate = row.feature_date ?? row.as_of_date ?? String(row.as_of_timestamp ?? '').slice(0, 10)
+  const asOfDate = row.as_of_date ?? featureDate
+  if (!featureDate || !asOfDate) throw new Error('FEATURE_SNAPSHOT_DATE_FIELDS_REQUIRED')
+  const inputDigest = row.input_digest ?? row.feature_digest ?? sha256(row.features ?? row)
+  return {
+    deterministic_identity: String(deterministicIdentity),
+    pick2_era: row.pick2_era ?? 'PICK_2_ERA_V1',
+    sport_key: row.sport_key ?? 'baseball_mlb',
+    feature_domain: row.feature_domain ?? 'prediction_bundle',
+    subject_id: row.subject_id ?? `game:${targetGamePk}`,
+    secondary_subject_id: row.secondary_subject_id ?? null,
+    event_id: row.event_id ?? null,
+    target_game_pk: targetGamePk,
+    feature_date: featureDate,
+    as_of_date: asOfDate,
+    as_of_timestamp: row.as_of_timestamp ?? null,
+    feature_version: row.feature_version,
+    source_window: row.source_window ?? {},
+    sample_sizes: row.sample_sizes ?? {},
+    features: row.features ?? {},
+    input_digest: inputDigest,
+  }
+}
+
+export function featureInsertRowsForDomain(domain, rows) {
+  if (domain === 'snapshots') return rows.map(featureSnapshotInsertRow)
+  return rows.map((row) => {
+    const { identity, deterministic_identity, feature_digest, features, game_pk, ...physical } = row
+    void identity
+    void deterministic_identity
+    void feature_digest
+    void features
+    void game_pk
+    return {
+      ...physical,
+      target_game_pk: normalizeGamePk(row.target_game_pk ?? row.game_pk),
+    }
+  })
+}
+
 export function liveDependencyInventory() {
   return {
     '01 schedule': 'REAL_PROVIDER_CLIENT',
@@ -300,8 +451,8 @@ export function createSupabaseProductionRepository({ client, schemaFingerprint =
     async insertNativePlayers(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
     async readRawRows(ids) { return selectByIds(client, R2I_LIVE_TARGETS.rawStatcast, 'id', ids) },
     async insertRawRows(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.rawStatcast, rows, cap) },
-    async readFeatureRows(domain, ids) { return selectByIds(client, liveTargetForFeatureDomain(domain), 'identity', ids) },
-    async insertFeatureRows(domain, rows, cap) { return insertExactRows(client, liveTargetForFeatureDomain(domain), rows, cap) },
+    async readFeatureRows(domain, ids, plannedRows = []) { return readFeatureRowsByDomain(client, domain, ids, plannedRows) },
+    async insertFeatureRows(domain, rows, cap) { return insertExactRows(client, liveTargetForFeatureDomain(domain), featureInsertRowsForDomain(domain, rows), cap) },
     async readPredictions(ids) { return selectByIds(client, R2I_LIVE_TARGETS.predictions, 'deterministic_identity', ids) },
     async insertPredictions(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.predictions, rows, cap) },
     async readMarketMappings(ids) { return selectByIds(client, R2I_LIVE_TARGETS.marketMappings, 'provider_event_id', ids) },
@@ -441,7 +592,7 @@ export function createTestRepository(existing = {}) {
     async insertNativePlayers(rows, cap) { return insert(R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
     async readRawRows(ids) { return read('rawRows', 'id', ids) },
     async insertRawRows(rows, cap) { return insert(R2I_LIVE_TARGETS.rawStatcast, rows, cap) },
-    async readFeatureRows(domain, ids) { return (existing.features?.[domain] ?? []).filter((row) => ids.includes(row.identity)) },
+    async readFeatureRows(domain, ids) { return (existing.features?.[domain] ?? []).map((row) => comparableFeatureRow(domain, row)).filter((row) => ids.includes(row.identity)) },
     async insertFeatureRows(domain, rows, cap) { return insert(liveTargetForFeatureDomain(domain), rows, cap) },
     async readPredictions(ids) { return read('predictions', 'deterministic_identity', ids) },
     async insertPredictions(rows, cap) { return insert(R2I_LIVE_TARGETS.predictions, rows, cap) },
@@ -548,7 +699,9 @@ export async function runR2ILiveExecution({
   if (live) {
     for (const [domain, plan] of Object.entries(features.artifact.domains)) {
       const rows = featureRows[domain].map((row) => ({ ...row, identity: row.identity ?? `${domain}:${row.target_game_pk}:${row.subject_id ?? row.team_id ?? row.mlbam_pitcher_id ?? row.mlbam_batter_id ?? 'game'}:${row.feature_version}`, feature_digest: sha256(row.features ?? row) }))
-      writeResults.push(await insertRowsFromClassifications(plan.classifications, rows, 'identity', (insertRows, cap) => repository.insertFeatureRows(domain, insertRows, cap), featureCaps[domain]))
+      const identityField = domain === 'snapshots' ? 'deterministic_identity' : 'identity'
+      const rowsForInsert = rows.map((row) => domain === 'snapshots' ? { ...row, deterministic_identity: row.deterministic_identity ?? row.identity, input_digest: row.input_digest ?? row.feature_digest } : row)
+      writeResults.push(await insertRowsFromClassifications(plan.classifications, rowsForInsert, identityField, (insertRows, cap) => repository.insertFeatureRows(domain, insertRows, cap), featureCaps[domain]))
     }
   }
 

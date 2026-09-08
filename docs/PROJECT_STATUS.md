@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 21:05:00Z
+Last updated: 2026-09-08 00:55:00Z
+
+## 2026-09-08 MLB-DATA-02R-R2O Feature Snapshot Identity Binding Repair
+
+- MLB-DATA-02R-R2O is locally certified as `MLB_DATA_02R_R2O_FEATURE_SNAPSHOT_IDENTITY_BINDING_REPAIR_CERTIFIED`. It repairs the R2I live feature repository binding so `public.pick2_feature_snapshots` uses the physical immutable identity column `deterministic_identity`, not a nonexistent `identity` column.
+- The repair does not alter schema, add columns, create compatibility views, or change feature math. The in-memory generic feature identity concept remains intentional, while the Supabase adapter maps snapshots to `deterministic_identity` and daily feature domains to their native target-game keys.
+- R2O read-only production inventory confirmed `deterministic_identity`, target-game linkage, feature version, as-of fields, payload fields, `input_digest`, and protected native games `823902` and `824958`. The feature identity matrix has no unresolved binding blocker.
+- R2O validation proves same deterministic identity plus same payload classifies `REUSE_NO_OP`, changed immutable payload classifies `BLOCK_CONFLICT`, and new deterministic identity classifies `INSERT_ELIGIBLE`. Injected live-branch simulation reaches downstream handoff without the prior `pick2_feature_snapshots.identity` failure.
+- Boundaries held: MLB Official calls 0, Statcast calls 0, The Odds API calls 0, production DML 0, production DDL 0, prediction/market/value/Official Pick writes 0, live refresh not executed, automation changes 0, cron changes 0 and settlement excluded. `MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_READY = YES` after publication/alignment and direct execution authorization.
 
 ## 2026-09-07 MLB-DATA-02R-R2N Statcast Live Fetch Binding Repair
 
