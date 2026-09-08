@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T-R2B bounded evidence recovered; data remains unrepaired)
+Last updated: 2026-09-08 (R2T-R2C native repair reviewed; data remains unrepaired)
+
+## 2026-09-08 MLB-DATA-02R-R2T-R2C Native Repair Review and Unknown Starter Policy
+
+- The read-only review preserves both UNKNOWN starter fields for game `823092`. Twenty-two exact-game/internal sources (including all seven game-scoped shared Statcast relations) and seven matching local certification artifacts provide no recoverable starter assignment. Five SELECT-only statements, including catalog discovery, were used; provider calls and production DML/DDL are zero.
+- UNKNOWN is allowed for canonical native enrichment, but blocks reconstruction or live/persistence work that actually targets game 823092. It is **not required for the existing selected R2T-R2 case `824552`**, whose own native/ starter binding passes at the archived as-of. The former all-current-row stop must not be treated as a dependency of that separate test. Gate 5 was not resumed and full live execution remains disabled.
+- The final conditional authorization packet narrows 140 prior proposals to **15 rows / 90 field assignments**: 30 canonical team IDs, 15 game types, 15 official-date metadata fields, 15 versioned provenance records and 15 actual-write timestamps. Fifty mutable status/starter promotions are excluded from unqualified future state authority; both unresolved starters were never proposed. Total excluded candidates: 52. Dated mutable observations remain archived inside provenance. No production repair occurred.
+- All 15 rows are reviewed with exact old/new values and digests. The safe packet has zero unsafe historical rewrites or conflicts, preserves original evidence, and requires separate DML authorization plus atomic fresh-row comparison. Pure simulation applies 90 assignments on the first pass and zero updates on the second; concurrency, partial application and provenance changes block. Twenty-seven dedicated checks pass. Canonical JSON/audit: `MLB_DATA_02R_R2T_R2C_NATIVE_REPAIR_REVIEW_AND_UNKNOWN_STARTER_RESOLUTION` in `docs/CERTIFICATION`.
+- Next: separately review/authorize the 15-row/90-field canonical-only repair, or separately instruct continuation of the already-bound 824552 injected persistence case. The repair is not a prerequisite for that unrelated test, and neither path authorizes live execution, another provider call or historical backdating. One bounded local commit; no push; 19 inherited artifacts and protected directories preserved.
+- Verification: canonical packet replay, source hashes, scoped secret scan and whitespace checks pass. ESLint has zero warnings; `npm.cmd run build` exits 0 with 400 static pages. These results certify the review and safe subset, not production mutation or live readiness.
 
 ## 2026-09-08 MLB-DATA-02R-R2T-R2B Bounded MLB Official Evidence Recovery
 
