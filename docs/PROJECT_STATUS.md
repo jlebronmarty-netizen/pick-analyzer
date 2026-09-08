@@ -1,6 +1,16 @@
 # Project Status
 
-Last updated: 2026-09-08 (R2T-R2A recovery plan certified; data remains unrepaired)
+Last updated: 2026-09-08 (R2T-R2B bounded evidence recovered; data remains unrepaired)
+
+## 2026-09-08 MLB-DATA-02R-R2T-R2B Bounded MLB Official Evidence Recovery
+
+- Exactly one MLB Official request returned the frozen 15 game IDs, with no missing or unrelated games. Actual response observation: `2026-09-08T19:16:32.018Z`. No retries or other providers. The response resolves 45 of 47 provider-dependent fields: 15 explicit official dates, 15 actual game types and 15 abstract states. Both starters for game `823092` remain UNKNOWN.
+- All 105 original gaps are reconciled: 103 supported enrichment values, two unresolved, zero conflicts. A/B/C/D/E/F changes from `0/28/30/47/0/0` to `0/28/75/2/0/0`; C now includes 45 newly captured same-game cache values, whose provenance starts at this acquisition. None of the 103 recovered values is certified for the original affected-run historical as-of.
+- The exact **review-only** cap is 15 row updates and 140 field assignments: 103 gap repairs, seven timestamped detailed-status progressions, 15 provenance metadata records and 15 actual future-write timestamp assignments. Unknown starters and historical replay are excluded. All metadata paths are coalesced per row; old row digests must match and all actual future pregame conditions must be revalidated before separately authorized DML.
+- R2T-R2 resume readiness remains **NO**. Production native rows are unrepaired and game 823092 lacks both starters. The existing R1 resolver passes 14 projected target/starter bindings and blocks that game. This in-memory observation-time test is not production repair, historical proof or permission to resume Gate 5. Actual LIVE_EXECUTE remains contained before providers or writes; stored parity, Champion and 76-feature behavior are preserved.
+- Canonical evidence and audit: `docs/CERTIFICATION/MLB_DATA_02R_R2T_R2B_BOUNDED_MLB_OFFICIAL_EVIDENCE_RECOVERY.json` and `_AUDIT.md`. The artifact includes the exact response bytes, pre-call 47-field baseline, 105-field reconciliation and every proposed patch. Production DML/DDL, predictions, features, Official Picks, automation, cron and settlement remain unchanged. One bounded local commit; no push; 19 inherited generated artifacts and protected directories preserved.
+- Next: review the exact conditional repair preview and unresolved-starter handling under separate authorization. Do not reacquire under the consumed one-call authorization, backdate evidence, resume persistence, or enable live refresh.
+- Validation: 31 dedicated offline checks, canonical evidence replay and the scoped secret scan pass. ESLint reports zero warnings; `npm.cmd run build` exits 0 with 400 static pages. The audit certifies bounded recovery and stop behavior, not repaired production data or live readiness.
 
 ## 2026-09-08 MLB-DATA-02R-R2T-R2A Native Evidence Recovery Plan
 
