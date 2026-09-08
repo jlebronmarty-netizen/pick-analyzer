@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-08 17:00:00Z
+Last updated: 2026-09-08 (R2T blocked certification)
+
+## 2026-09-08 MLB-DATA-02R-R2T Real Feature and Champion Binding — BLOCKED
+
+- **R2B Live Execution Ready = NO.** This supersedes the readiness claims below. R2S proved fixture-based persistence linkage, not production feature/model readiness. R2T is not certified and no live refresh was executed.
+- Added a read-only real Champion loader, registry/order/preprocessing checks, the existing certified 02F vector assembler, per-feature lineage and six-domain snapshot verification. Three real historical games produce 76 features and match the existing historical inference algorithm exactly. Historical algorithm parity does not establish parity with stored certified prediction outputs or prove pregame evidence availability.
+- The actual R2B -> R2I live entrypoint now stops before fixture repository construction, provider calls or writes. This is a containment guard, not a completed replacement live pipeline. Legacy fixture paths remain below that guard; their live-mode regression tests now fail explicitly.
+- Blocking evidence: certified 01D target context uses batters observed in the target game; historical native rows lack scheduled time and team identity, and feature rows were created after their target games. A certified pregame target/lineup contract and bounded current dependency builder must be established without silently changing V1 semantics. Real entity snapshots also require a persistence integration beyond the single-snapshot-per-game fixture handoff.
+- Full real-model dry integration, successful live-branch simulation and the complete regression stack remain unpassed. The canonical R2T JSON and audit record partial passes and blockers; they do not replace or rewrite prior R2S evidence.
+- Provider calls, production DML/DDL, prediction/market/value/pick writes, model training, Champion changes, automation/cron changes and settlement are all 0. The 19 inherited generated-artifact edits and protected directories remain untouched. No push or deployment is part of R2T.
 
 ## 2026-09-08 MLB-DATA-02R-R2S Team Feature Snapshot ID Payload Binding Repair
 

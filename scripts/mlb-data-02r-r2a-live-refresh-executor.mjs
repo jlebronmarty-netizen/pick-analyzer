@@ -175,7 +175,7 @@ export async function runR2BExecutableEntrypoint({
   mode = 'DRY_RUN',
   authorization = null,
   providers = {},
-  repository = createTestRepository(),
+  repository = null,
   runId = 'mlb-02r-r2b-executable',
   executionPackageSha = localPackageShaForSimulation(),
   runDate = null,

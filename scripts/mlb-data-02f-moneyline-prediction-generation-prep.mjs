@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { createClient } from '@supabase/supabase-js'
 
 const writeArtifact = process.argv.includes('--write-artifact')
@@ -44,8 +45,6 @@ function loadLocalEnv() {
     if (!process.env[key]) process.env[key] = value
   }
 }
-
-loadLocalEnv()
 
 function requireEnv(name) {
   const value = process.env[name]
@@ -155,7 +154,7 @@ function splitRows(rows) {
   }
 }
 
-function buildVector(game, maps) {
+export function buildVector(game, maps) {
   const homeTeam = maps.team.get(rowKey(game.gamePk, game.homeTeamId))
   const awayTeam = maps.team.get(rowKey(game.gamePk, game.awayTeamId))
   const first = maps.first.get(Number(game.gamePk))
@@ -206,7 +205,7 @@ function dot(weights, features) {
   return sum
 }
 
-function infer(modelArtifact, rows) {
+export function infer(modelArtifact, rows) {
   return rows.map((row) => {
     const z = transformVector(row.x, modelArtifact.preprocessing)
     const homeProbability = sigmoid(dot(modelArtifact.weights, z))
@@ -348,6 +347,7 @@ async function readChampion(db) {
 }
 
 async function main() {
+  loadLocalEnv()
   if (executePredictions) throw new Error('PREDICTION_EXECUTION_FORBIDDEN_IN_02F_PREP')
   ensure(fs.existsSync(modelArtifactPath), 'MODEL_ARTIFACT_MISSING')
   ensure(fs.existsSync(trainingArtifactPath), 'TRAINING_CERTIFICATION_MISSING')
@@ -719,7 +719,7 @@ async function main() {
   console.log(JSON.stringify(artifact, null, 2))
 }
 
-main().catch((error) => {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch((error) => {
   console.error(JSON.stringify({ script: 'mlb-data-02f-moneyline-prediction-generation-prep', status: 'FAIL', error: error.message }, null, 2))
   process.exitCode = 1
 })

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { assertR2TLiveReadiness } from './mlb-data-02r-r2t-real-feature-champion.mjs'
 import { fetchR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
 import {
   assertGameScope,
@@ -938,7 +939,7 @@ export async function runR2ILiveExecution({
   mode = 'DRY_RUN',
   authorization = null,
   providers = {},
-  repository = createTestRepository(),
+  repository = null,
   runId = 'mlb-02r-r2i-test-live',
   executionPackageSha = R2I_PRIOR_PACKAGE_SHA,
   runDate = null,
@@ -947,8 +948,13 @@ export async function runR2ILiveExecution({
 } = {}) {
   const runContext = createCurrentSlateRunFreeze({ runId, executionPackageSha, mode, runDate, runAsOf, clock })
   const frozenRunAsOf = runContext.run_as_of
-  if (mode === 'LIVE_EXECUTE') requireRunScopedLiveAuthorization(authorization, runContext)
+  if (mode === 'LIVE_EXECUTE') {
+    requireRunScopedLiveAuthorization(authorization, runContext)
+    assertR2TLiveReadiness()
+  }
   if (!['DRY_RUN', 'LIVE_EXECUTE', 'READBACK_ONLY'].includes(mode)) throw new Error(`INVALID_R2I_MODE:${mode}`)
+  // Fixture repositories are constructed only after the live safety boundary.
+  if (!repository) repository = createTestRepository()
   const live = mode === 'LIVE_EXECUTE'
   const authCaps = authorization?.dmlCaps ?? {}
   const evidence = testEvidence()
