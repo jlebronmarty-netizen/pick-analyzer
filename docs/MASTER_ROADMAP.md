@@ -1,5 +1,7 @@
 # Master Roadmap
 
+R6 update (2026-09-09): durable-state inventory is complete; Gate 2 is **DDL_REQUIRED**. The exact additive, service-only runtime-state migration is proposed and passes 32 disposable PostgreSQL checks, but remains unapplied. Existing shared job/checkpoint tables do not provide the required private state security boundary without DDL. Vercel Cron and the existing R2 engine remain selected; automation stays disabled. No R6 production DML/DDL or sports providers. See `docs/CERTIFICATION/MLB_DATA_02R_R6_SCHEMA_REQUIREMENT_AUDIT.md`.
+
 ## Current MLB mission: repeatability certified
 
 Two genuine September 9 production refreshes from `633768729b212746d03a5bf4d2ae542d1d84f945` passed independent readback, exact 76-vector/Champion parity, immutable-history preservation and zero-cap replay. First: 14 eligible games, 14 predictions, 306 observations/values and eight Official Picks. Second: 13 eligible games, 13 predictions, 286 observations/values and seven Official Picks. The second reused 130 snapshots, 104 daily rows and 13 market mappings; new schedule evidence and missing starter evidence were blocked independently.

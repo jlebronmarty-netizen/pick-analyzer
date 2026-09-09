@@ -1,5 +1,7 @@
 # Project Status
 
+R6 update (2026-09-09): durable-state inventory is complete; Gate 2 is **DDL_REQUIRED**. The exact additive, service-only runtime-state migration is proposed and passes 32 disposable PostgreSQL checks, but remains unapplied. Existing shared job/checkpoint tables do not provide the required private state security boundary without DDL. Vercel Cron and the existing R2 engine remain selected; automation stays disabled. No R6 production DML/DDL or sports providers. See `docs/CERTIFICATION/MLB_DATA_02R_R6_SCHEMA_REQUIREMENT_AUDIT.md`.
+
 Last updated: 2026-09-09 (MLB_DATA_02R_REPEATABILITY_CERTIFIED)
 
 ## Current MLB mission state

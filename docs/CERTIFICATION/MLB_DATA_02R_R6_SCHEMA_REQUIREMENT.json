@@ -1,0 +1,76 @@
+{
+  "certificationVerdict": "MLB_DATA_02R_R6_BLOCKED_DDL_REQUIRED",
+  "generatedAt": "2026-09-09T21:06:48.332Z",
+  "startingSha": "661377ed7f08838033c71bb426be4b6c03892238",
+  "packageSha": "ENCLOSING_BOUNDED_PROPOSAL_COMMIT",
+  "durableStateInventory": "COMPLETE",
+  "schemaRequirement": "DDL_REQUIRED",
+  "migration": {
+    "path": "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql",
+    "normalizedSha256": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
+    "appliedToProduction": false,
+    "productionTargetAbsent": true,
+    "existingTablesModified": 0,
+    "seedDml": 0
+  },
+  "reason": "No suitable existing private server-only operational state table. The two JSONB job/checkpoint candidates have RLS disabled, authenticated SELECT and client TRUNCATE grants; securing shared tables also requires DDL. Add one dedicated protected table instead of altering shared consumers.",
+  "proposedLimits": {
+    "checkpointJsonTextBytes": 65536,
+    "dmlJsonTextBytes": 16384,
+    "leaseMinutes": 15,
+    "mlbPerRun": 50,
+    "statcastPerRun": 100,
+    "oddsPerRun": 1,
+    "missionOdds": 20
+  },
+  "validation": {
+    "scope": "PROPOSED_SCHEMA_ONLY",
+    "disposablePostgresChecks": 32,
+    "status": "PASS",
+    "runtimeGatesCertified": false,
+    "build": {
+      "status": "PASS",
+      "exitCode": 0,
+      "staticPages": 400
+    }
+  },
+  "gates": {
+    "1": "COMPLETE",
+    "2": "DDL_REQUIRED",
+    "3": "PENDING_GATE_2_AUTHORIZATION",
+    "4": "PENDING_GATE_2_AUTHORIZATION",
+    "5": "PENDING_GATE_2_AUTHORIZATION",
+    "6": "PENDING_GATE_2_AUTHORIZATION",
+    "7": "PENDING_GATE_2_AUTHORIZATION",
+    "8": "PENDING_GATE_2_AUTHORIZATION",
+    "9": "PENDING_GATE_2_AUTHORIZATION",
+    "10": "PENDING_GATE_2_AUTHORIZATION",
+    "11": "PENDING_GATE_2_AUTHORIZATION",
+    "12": "PENDING_GATE_2_AUTHORIZATION",
+    "13": "PENDING_GATE_2_AUTHORIZATION",
+    "14": "PENDING_GATE_2_AUTHORIZATION",
+    "15": "PENDING_GATE_2_AUTHORIZATION",
+    "16": "PENDING_GATE_2_AUTHORIZATION",
+    "17": "PENDING_GATE_2_AUTHORIZATION",
+    "18": "PENDING_GATE_2_AUTHORIZATION",
+    "19": "PENDING_GATE_2_AUTHORIZATION",
+    "20": "PENDING_GATE_2_AUTHORIZATION",
+    "21": "PENDING_GATE_2_AUTHORIZATION"
+  },
+  "accounting": {
+    "sportsProviders": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "missionOddsConsumed": 2,
+    "missionOddsCap": 20,
+    "liveExecutions": 0,
+    "cronChanges": 0
+  },
+  "engine": "EXISTING_CERTIFIED_R2_UNCHANGED",
+  "scheduler": "VERCEL_CRON",
+  "executorHost": "VERCEL_PRODUCTION_FUNCTION",
+  "automationActivation": "DISABLED",
+  "finalOperationalCertification": false,
+  "remaining": "Separate exact DDL authorization, followed by implementation/certification of Gates 3?21",
+  "audit": "docs/CERTIFICATION/MLB_DATA_02R_R6_SCHEMA_REQUIREMENT_AUDIT.md"
+}
