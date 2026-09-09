@@ -200,7 +200,7 @@
     "fencedWrites": 8,
     "providerAwait": 6,
     "automationProductGroups": 17,
-    "hostHttp": 7,
+    "hostHttp": 8,
     "unattendedPreflight": 27,
     "r3GuardGroups": 5,
     "otherGuardGroups": 3,
@@ -271,16 +271,32 @@
       "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
       "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92"
     },
-    "bundleManifestDigest": "dec7c663fd8f1a733e705014b178e0e66b41420ace57d6a5ed1fb13b198055a2"
+    "bundleManifestDigest": "dec7c663fd8f1a733e705014b178e0e66b41420ace57d6a5ed1fb13b198055a2",
+    "resolvedBy": "Explicit user authorization for exact eight-file candidate",
+    "currentStatus": "RESOLVED"
   },
   "syntheticProductionPaths": 0,
   "startedGameLeakage": 0,
   "productionConflicts": 0,
   "finalOperationalCertification": "NOT_ISSUED",
   "remainingLimitations": [
-    "Approval of exact reviewed fenced Edge endpoint deployment",
-    "Real Vercel host dry invocation and production resource readback",
+    "Publish empty POST stream adapter repair and verify real Vercel host",
     "Automation activation and actual scheduled readback",
     "Final operational certification"
-  ]
+  ],
+  "verdict": "MLB_DATA_02R_R6_EDGE_DEPLOYED_HOST_VERIFICATION_PENDING",
+  "edgeDeployment": {
+    "version": 5,
+    "candidateSha": "4fda1cb8ad411000c32363c8158ffae489f27454",
+    "verifyJwt": false,
+    "exactEightFileMatch": true,
+    "missingBearer": 401,
+    "wrongBearer": 401,
+    "publicBearer": 401,
+    "serviceBearer": 200,
+    "protocol": "MLB_R6_FENCED_RUNTIME_V1",
+    "providerCalls": 0,
+    "businessDml": 0,
+    "additionalDdl": 0
+  }
 }

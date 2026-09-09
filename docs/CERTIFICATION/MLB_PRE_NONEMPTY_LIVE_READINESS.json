@@ -332,7 +332,7 @@
     "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
     "scripts/mlb-pre-nonempty-readiness-validate.mjs": "d74bb43af7abe5c06c3486669d09ad3b5bc998f169aaf4fb4fa65f6b576ad0cf",
     "src/app/api/admin/mlb-operational-preflight/route.ts": "7162661a36e47f2467c0d754537371997315447a63594726c9f01a159f3d65f9",
-    "src/app/api/cron/mlb-operational/route.ts": "abef3bec30d871a4f06e5ad58941773c412aa72304874b49d3b7c78be8048f5f",
+    "src/app/api/cron/mlb-operational/route.ts": "400417ec0c681ee3847bc00bac263a548ef30de0855aad1994f1c28eac6b1b0e",
     "src/app/api/mlb/operations/health/route.ts": "ffef2df6914d48dbfca090771ff54f1dbbcb6eea1d70a4f44eb92e361621e523",
     "src/app/api/mlb/operations/route.ts": "4259aca43582e249c7e3e1ebd868a09465c41d920d7a6cfa2ab69d3fd5d720f5",
     "src/app/api/mlb/performance/route.ts": "bbb38e8cc200396b0417f09cf2863d9c6439f0d8d4f1ca9fa8e6952f3fb76f5c",

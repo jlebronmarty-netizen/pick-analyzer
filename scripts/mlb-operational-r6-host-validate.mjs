@@ -29,6 +29,15 @@ await check('Cron GET invokes the sole coordinator with deployed package only',a
 await check('Authenticated dry POST selects provider-free host probe',async()=>{
   const response=await post(request('POST'));assert.equal((await response.json()).status,'HOST_DRY_PASS');assert.equal(calls[1].hostDry,true)
 })
+await check('Production empty POST stream invokes dry host; nonempty stream rejects',async()=>{
+  const make=bytes=>new Request('https://production.invalid/api/cron/mlb-operational',{method:'POST',headers:{authorization:'Bearer ISOLATED_CRON_TEST'},body:new ReadableStream({start(controller){if(bytes)controller.enqueue(new Uint8Array([1]));controller.close()}}),duplex:'half'})
+  const before=calls.length
+  assert.equal((await post(make(false))).status,200)
+  assert.equal(calls.length,before+1)
+  assert.equal(calls.at(-1).hostDry,true)
+  assert.equal((await post(make(true))).status,400)
+  assert.equal(calls.length,before+1)
+})
 await check('Unexpected errors cannot expose credentials or raw evidence',async()=>{
   context.executeProductionTick=async()=>{throw Error('ISOLATED_PRIVATE_VALUE')}
   const response=await get(request());assert.equal(response.status,503);assert.equal((await response.json()).reason,'MLB_OPERATIONAL_EXECUTION_BLOCKED')

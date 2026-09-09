@@ -9,7 +9,19 @@ const reply=(body:unknown,status=200)=>Response.json(body,{status,headers:{'Cach
 async function invoke(request:Request,hostDry:boolean) {
   const secret=process.env.CRON_SECRET,supplied=Buffer.from(request.headers.get('authorization')??''),expected=Buffer.from(`Bearer ${secret??''}`)
   if(!secret || supplied.length!==expected.length || !timingSafeEqual(supplied,expected))return reply({status:'UNAUTHORIZED'},401)
-  if(new URL(request.url).search || request.body!==null)return reply({status:'INVALID_REQUEST'},400)
+  if(new URL(request.url).search)return reply({status:'INVALID_REQUEST'},400)
+  // Production may supply an empty stream for a bodyless POST.
+  if(request.body!==null) {
+    const reader=request.body.getReader()
+    try {
+      for(;;) {
+        const chunk=await reader.read()
+        if(chunk.done)break
+        if(chunk.value.byteLength) {await reader.cancel();return reply({status:'INVALID_REQUEST'},400)}
+      }
+    } catch {return reply({status:'INVALID_REQUEST'},400)}
+    finally {reader.releaseLock()}
+  }
   try {return reply(await executeProductionTick({packageSha:process.env.VERCEL_GIT_COMMIT_SHA,hostDry}))}
   catch(error) {
     const code=error instanceof Error?error.message:''
