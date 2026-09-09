@@ -1,5 +1,8 @@
 # Master Roadmap
 
+The repaired live path saved its 14-game, 846 MB private checkpoint successfully, then stopped before writes on a 30,723-character snapshot read URL (HTTP 400). Byte-bounded identity reads now resolve the actual 140-identity slate in 11 successful read-only requests. Six batching checks, 66 SQL checks, 16 behavior groups, eight guards, lint and the 400-page build pass. A new certified-package live retry is pending; automation remains disabled. Mission totals so far: five MLB calls, one Statcast call, zero Odds calls, 15 native inserts and 4,160 dependency pitch inserts; no new DDL.
+
+
 September 9 live continuation: 15 canonical games and 4,160 September 8 dependency pitches were acquired with bounded readback. A later run failed before downstream writes on Node string length while serializing slate evidence. Streaming canonical hashing and private context-sharded checkpoints preserve the digest and freeze contracts; 66 SQL checks, 16 behavior groups, 8 guards, oversized evidence tests and build pass. The certified repair awaits its live retry; repeatability and activation remain pending. No model, 76-feature, preprocessing, policy or DDL change. Raw evidence remains private.
 
 

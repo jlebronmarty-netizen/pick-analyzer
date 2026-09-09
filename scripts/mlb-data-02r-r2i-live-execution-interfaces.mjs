@@ -265,12 +265,8 @@ async function readFeatureRowsByDomain(client, domain, ids, plannedRows = []) {
   if (!ids.length) return []
   const binding = featureBindingForDomain(domain)
   if (domain === 'snapshots') {
-    const { data, error } = await client
-      .from(binding.table)
-      .select(binding.readColumns)
-      .in(binding.physicalIdentityColumn, ids)
-    if (error) throw new Error(`READ_FAILED:${binding.table}:${error.message}`)
-    return (data ?? []).map((row) => comparableFeatureRow(domain, row))
+    const data = await selectByIds(client, binding.table, binding.physicalIdentityColumn, ids, binding.readColumns)
+    return data.map((row) => comparableFeatureRow(domain, row))
   }
   const gamePks = [...new Set(plannedRows.map((row) => normalizeGamePk(row.target_game_pk ?? row.game_pk)))]
   if (!gamePks.length) return []
@@ -638,13 +634,25 @@ export function createStatcastLiveClient({ fetchRowsForGames, ledger, fetchImpl 
   }
 }
 
-async function selectByIds(client, table, column, ids) {
+export function partitionReadIdentities(ids) {
+  const batches = []
+  let batch = [], bytes = 0
+  for (const id of [...new Set(ids)]) {
+    const size = encodeURIComponent(String(id)).length + 6
+    if (size > 3000) throw new Error('READ_IDENTITY_TOO_LONG')
+    if (batch.length && (bytes + size > 3000 || batch.length === 150)) { batches.push(batch); batch = []; bytes = 0 }
+    batch.push(id); bytes += size
+  }
+  if (batch.length) batches.push(batch)
+  return batches
+}
+
+async function selectByIds(client, table, column, ids, columns = '*') {
   if (!ids.length) return []
   const unique = [...new Set(ids)]
   const rows = []
-  for (let start = 0; start < unique.length; start += 150) {
-    const batch = unique.slice(start, start + 150)
-    const { data, error } = await client.from(table).select('*').in(column, batch).limit(batch.length + 1)
+  for (const batch of partitionReadIdentities(unique)) {
+    const { data, error } = await client.from(table).select(columns).in(column, batch).limit(batch.length + 1)
     if (error || !Array.isArray(data)) throw new Error(`READ_FAILED:${table}:${error?.code ?? 'MISSING_DATA'}`)
     if (data.length > batch.length || data.some(r => !batch.map(String).includes(String(r[column])))) throw new Error(`READ_IDENTITY_SCOPE:${table}`)
     rows.push(...data)

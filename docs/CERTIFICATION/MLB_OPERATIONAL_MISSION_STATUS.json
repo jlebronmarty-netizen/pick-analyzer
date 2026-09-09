@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-09T12:58:42.673Z",
-  "verdict": "MLB_OPERATIONAL_LARGE_CHECKPOINT_REPAIR_CERTIFIED",
+  "generatedAt": "2026-09-09T13:16:33.049Z",
+  "verdict": "MLB_OPERATIONAL_IDENTITY_READ_BATCH_REPAIR_CERTIFIED",
   "operationalCertified": false,
   "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
   "packageSha": "ENCLOSING_SANITIZED_COMMIT",
@@ -64,11 +64,17 @@
     "largeCheckpointRepair": {
       "certificate": "MLB_OPERATIONAL_LARGE_CHECKPOINT_REPAIR.json",
       "status": "PASS",
+      "liveRetryPending": false,
+      "liveCheckpointBytes": 845933926
+    },
+    "identityReadRepair": {
+      "certificate": "MLB_OPERATIONAL_IDENTITY_READ_BATCH_REPAIR.json",
+      "status": "PASS",
       "liveRetryPending": true
     }
   },
   "providerAccounting": {
-    "MLBOfficial": 4,
+    "MLBOfficial": 5,
     "sharedStatcast": 1,
     "OddsAPI": 0,
     "BALLDONTLIE": 0,
@@ -149,6 +155,19 @@
           "MLB_OFFICIAL": 1
         },
         "productionDml": 0
+      },
+      {
+        "runId": "mlb-operational-ddab2a6c-028b-45d4-aff2-d851e7f69e5d",
+        "runDate": "2026-09-09",
+        "runAsOf": "2026-09-09T13:02:05.426Z",
+        "packageSha": "0176ec2f162f00563237ac10180069d0ec449570",
+        "status": "BLOCKED_SNAPSHOT_READ_URL_LENGTH",
+        "eligibleGames": 14,
+        "blockedGames": 1,
+        "providerCalls": {
+          "MLB_OFFICIAL": 1
+        },
+        "productionDml": 0
       }
     ],
     "nonProviderActivity": "Read-only Supabase metadata/evidence, Git publication, production version GET, OS-temp-only pinned PostgreSQL test-engine package download."
@@ -163,7 +182,7 @@
     "migrationApplications": 1,
     "scope": "Exact authorized six-domain uniqueness proposal; no other DDL."
   },
-  "liveRefreshExecutions": 4,
+  "liveRefreshExecutions": 5,
   "automationChanges": 0,
   "cronChanges": 0,
   "settlementWrites": 0,
