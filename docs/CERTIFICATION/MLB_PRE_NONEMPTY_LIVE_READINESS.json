@@ -26,11 +26,11 @@
     "checkpointRecovery": "PASS",
     "overlapPrevention": "PASS",
     "providerBudgets": "EXISTING_LEDGER;ONE_ODDS_REQUEST_PER_DAILY_INVOCATION;MISSION_MAX_20",
-    "schemaPreflight": "Fresh connector SELECT required before each invocation; executable acceptance tool validated",
+    "schemaPreflight": "Unattended Supabase Edge fixed read-only query; shared checker and server client; original freshness guard preserved",
     "activationPrerequisites": [
       "GENUINE_NONEMPTY_LIVE_SUCCESS",
       "REAL_PRODUCTION_REPEATABILITY",
-      "ONE_PERSISTENT_COORDINATOR_WITH_READONLY_SCHEMA_CONNECTOR"
+      "ONE_VERIFIED_PERSISTENT_COORDINATOR_WITH_UNATTENDED_PREFLIGHT"
     ]
   },
   "settlement": {
@@ -317,7 +317,7 @@
     "scripts/mlb-data-02h-2026-current-foundation.mjs": "f1bdc445065e658f535ca2879fc3ce32a4b92f65090a53a406bdecf99550af15",
     "scripts/mlb-data-02r-r2t-r3-validate.mjs": "7ad6543d0a6efb7b7cacb34ff912418b970bd3aa6991198bf558be429635cacf",
     "scripts/mlb-operational-automation.mjs": "658b0cb2b2df73668947c01df0f7d9165332d913d013cb4dd2620e94fe9e4920",
-    "scripts/mlb-operational-tick.mjs": "45988c0285c8298295eab599bbd2fee8b46459c953051f6524faa05bdd24ae41",
+    "scripts/mlb-operational-tick.mjs": "95c69c6449d0d1221f060f3fd4ccac4038d923ab147b84e70b411bcf384d7b1e",
     "scripts/mlb-operational-preflight.mjs": "c8e76badafcbfd13d1ac549799e3b8984e2faecd377542f331358e7c491e4005",
     "scripts/mlb-operational-schema-preflight.sql": "6e796b5416eebea92dfc937ed757d05cc03bd753dad4da8b50769b66a035c30a",
     "scripts/mlb-operational-readonly-network-guard.mjs": "b4c535d64cce41aa85ee40be0fbdd351fd47d873262c549711d8c265d3aad383",
@@ -346,7 +346,13 @@
     "src/services/pick2-mlb-performance-read.service.ts": "537131cd7484a68959ff1ca94509e422ffe0e13a5982a14f9b374438ad4d923d",
     "src/services/pick2-mlb-health.service.ts": "5aefc5f4d726323d0390e7038c8c9ffed93844e9615167fb9de8a50f83205068",
     "src/services/pick2-operational-telemetry.ts": "696decb4a3ccfe6570f87d41fd621ed89bee7d413f887bd96eae7ec8980df22d",
-    "src/types/pick2-value-board.ts": "2da78bf1bb81ff0cc589a35780900d65f91a6f0d6089b350f6482d6247f56ec8"
+    "src/types/pick2-value-board.ts": "2da78bf1bb81ff0cc589a35780900d65f91a6f0d6089b350f6482d6247f56ec8",
+    "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
+    "src/services/pick2-mlb-unattended-preflight.ts": "74e8676f4d7475a9b402bcabb9f844bfc0061a464aee0531431a590f840b11f3",
+    "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
+    "supabase/functions/mlb-operational-preflight/index.ts": "bde60830dfa75e0778da8db2047ab8d3cfeda323eb426656f1b0d5c09b39bc03",
+    "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
+    "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154"
   },
   "nonemptyUiRevision": {
     "certificate": "MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json",
@@ -354,5 +360,11 @@
     "checks": 12,
     "providerCalls": 0,
     "productionDml": 0
+  },
+  "r4Preflight": {
+    "status": "PASS",
+    "certification": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_CERTIFICATION.json",
+    "activation": "DISABLED",
+    "blocker": "PERSISTENT_EXECUTOR_HOST_NOT_VERIFIED"
   }
 }

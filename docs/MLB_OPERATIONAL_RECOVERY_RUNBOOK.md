@@ -1,12 +1,12 @@
 # MLB operational recovery
 
-The coordinator is **disabled** until a genuine nonempty pregame refresh and a subsequent real refresh certify repeatability. Dry fixtures never satisfy these gates. The prepared runner is single-host; do not deploy independent coordinators on multiple ephemeral hosts.
+Real nonempty production refresh and repeatability are certified. The coordinator remains **disabled** pending a verified persistent executor host. Unattended schema preflight is now production-verified; do not deploy the filesystem-based runner on independent ephemeral hosts.
 
 ## Before each invocation
 
 1. Inspect HEAD, origin/main, ancestry and the worktree. Preserve unrelated changes and never touch `.tmp/` or `.worktrees/`. Freeze the chosen validated commit; do not fetch, integrate or switch packages during a run.
-2. Use the authorized Supabase connector to execute `scripts/mlb-operational-schema-preflight.sql` on project `ynuocvexviorgdjrfthw`. This is SELECT-only. Save the returned `evidence` object outside the public repository.
-3. Pipe that exact fresh JSON to `node scripts/mlb-operational-preflight.mjs --accept-read-only-catalog`. The tool checks the physical contracts and refuses evidence older than 15 minutes. Never replace its timestamp, fabricate catalog evidence, or bypass the check. The coordinator needs this read-only connector step before each scheduled invocation; the service-role REST credential alone cannot inspect indexes.
+2. Run `node --env-file=.env.local --loader ./scripts/local-ts-loader.mjs scripts/mlb-operational-unattended-preflight.mjs --read-only-preflight`. It uses the service-authenticated Edge endpoint, checks the original contracts and freshness, and writes the accepted private preflight. The tick invokes this automatically before execution.
+3. The prior SELECT query and `mlb-operational-preflight.mjs --accept-read-only-catalog` remain manual recovery tools. Never alter timestamps or bypass drift checks. Database clock lead up to 15 seconds is handled only by waiting for actual time.
 4. Verify the existing private mission ledger, run journal and checkpoint directory survive between invocations. Do not initialize a missing ledger after recorded usage. Restore the exact trusted private evidence backup before retrying.
 
 ## Next genuine pregame slate
@@ -17,7 +17,7 @@ After the first nonempty run, independently verify persisted native/raw/features
 
 ## Prepared automation schedule (not installed)
 
-Use one coordinator with a persistent private OS-temp run directory and the connector preflight step above. The command is `node --env-file=.env.local --loader ./scripts/local-ts-loader.mjs scripts/mlb-operational-tick.mjs --execute-tick --mode=<mode> --package-sha=<frozen validated HEAD>`.
+Use one coordinator with a persistent private OS-temp run directory and the unattended preflight step above. The command is `node --env-file=.env.local --loader ./scripts/local-ts-loader.mjs scripts/mlb-operational-tick.mjs --execute-tick --mode=<mode> --package-sha=<frozen validated HEAD>`.
 
 | Mode | Proposed Puerto Rico cadence | Binding |
 |---|---|---|
@@ -26,12 +26,12 @@ Use one coordinator with a persistent private OS-temp run directory and the conn
 | STARTER_CHANGE | Replace the pending pregame tick when a starter change is observed | New R2 freeze; original snapshots preserved |
 | ODDS_FRESHNESS | Replace the pending pregame tick when market freshness expires | Same R2 path; at most one Odds request |
 | INCREMENTAL | Every 15 minutes while stored/Official scope has live games | Existing shared Statcast reconciliation |
-| POSTGAME | Hourly after games finish | Shared Statcast then authoritative final settlement |
+| POSTGAME | Hourly after games finish | Shared Statcast reconciliation; automatic settlement disabled |
 | OVERNIGHT | 04:00 | Previous operating-day final-game reconciliation |
 
 Starter/odds triggers replace a daily tick rather than launching parallel prediction runs. The durable mission-wide Odds limit remains 20; stop before exhausting it and do not silently reset it for a new day. Live/pitch scheduling does not confer pregame eligibility. No historical/full-season scan is permitted.
 
-Activation requires the exact nonempty and repeatability evidence in `MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json`, source-hash verification, dry certification, one coordinator host, existing credentials and the read-only schema-preflight channel. Enabling a scheduler without that connector channel is prohibited. No cron, environment or scheduler configuration was changed during preparation.
+Activation requires the exact nonempty and repeatability evidence in `MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json`, source-hash verification, dry certification, one coordinator host, existing credentials and the read-only schema-preflight channel. Enabling a scheduler without that verified unattended channel is prohibited. No cron, environment or scheduler configuration was changed during preparation.
 
 ## Failures and recovery
 
@@ -56,4 +56,8 @@ Data Health labels its last published certification accounting explicitly. It mu
 
 ## September 9 production certification
 
-The first nonempty and subsequent real refresh are certified in `docs/CERTIFICATION/MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json`. Both freeze package `633768729b212746d03a5bf4d2ae542d1d84f945`. All pending snapshot writes were independently recovered and no unresolved journal entries remain. Automation stays disabled until its persistent host has an unattended read-only schema-preflight connection; the interactive session connector is not an installed scheduler connection. Do not weaken preflight or mark the service active without scheduled execution and readback. Resume at that connection/activation gate, preserving mission Odds consumption of 2/20 and all private ledgers.
+The first nonempty and subsequent real refresh are certified in `docs/CERTIFICATION/MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json`. Both freeze package `633768729b212746d03a5bf4d2ae542d1d84f945`. All pending snapshot writes were independently recovered and no unresolved journal entries remain. R4 now verifies the unattended schema channel; automation stays disabled until the persistent executor host is verified. Do not weaken preflight or mark the service active without scheduled execution and readback. Resume at the persistent-host/activation gate, preserving mission Odds consumption of 2/20 and all private ledgers.
+
+## R4 persistent-host activation gate
+
+The fixed-query unattended endpoint is verified; no new database credential is needed in Vercel. Full scheduled execution still requires one verified persistent Node/Git/private-checkpoint host. `runtimeHost.verified` must remain false until host identity, durable state, credential access, restart recovery and overlap checks pass. Do not infer this from a successful read-only Vercel preflight. Keep `settlementAutomation` DISABLED. See the R4 audit for exact proposed UTC triggers and the current blocker.

@@ -1,0 +1,3740 @@
+{
+  "expected": [
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "deterministic_identity",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "pick2_era",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "sport_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "feature_domain",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "subject_id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "secondary_subject_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "features",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "input_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "mlbam_person_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "mlbam_batter_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_feature_snapshots",
+      "column": "native_identity_metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "player_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "recent_k_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "recent_bb_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "recent_scoring_contribution",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "iso_value",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "handedness_splits",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "pitch_type_matchups",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_batter_daily_features",
+      "column": "mlbam_batter_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "team_id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "pitches_previous_24h",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "pitches_previous_72h",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "high_workload_reliever_count",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "reliever_workload",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "bullpen_k_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "bullpen_bb_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "bullpen_k_minus_bb_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "bullpen_whiff_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "availability_proxies",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_bullpen_daily_features",
+      "column": "mlbam_pitcher_ids",
+      "type": "ARRAY",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "home_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "away_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "team_first_inning_scoring_rate",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "starter_first_inning_k_rate",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "starter_first_inning_bb_rate",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "starter_first_inning_baserunner_proxy",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "starter_first_inning_pitch_count",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "home_starter_mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "away_starter_mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_first_inning_daily_features",
+      "column": "expected_lineup_mlbam_batter_ids",
+      "type": "ARRAY",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "home_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "away_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "pitcher_batter_mix",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "handedness_context",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "park_context",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "lineup_context",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_matchup_daily_features",
+      "column": "mlbam_batter_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "player_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "k_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "bb_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "k_minus_bb_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "whiff_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "csw_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "strike_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "swing_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "avg_release_speed",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "velocity_l1",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "velocity_l3",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "velocity_l5",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "velocity_delta",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "previous_pitch_count",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "days_rest",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "pitch_mix",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "pitch_mix_change",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "handedness_splits",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "first_inning_performance",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_pitcher_daily_features",
+      "column": "mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "team_id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "feature_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "as_of_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "as_of_timestamp",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "feature_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "recent_k_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "recent_bb_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "recent_runs_per_game",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "recent_iso",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "handedness_splits",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "lineup_proxy",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "sample_sizes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "source_window",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_team_daily_features",
+      "column": "target_game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "deterministic_identity",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "pick2_era",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "sport_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "model_version_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "feature_snapshot_id",
+      "type": "uuid",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "predicted_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "target",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "home_probability",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "away_probability",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "expected_home_score",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "expected_away_score",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "expected_total",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "expected_margin",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "frozen_input_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "model_artifact_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_game_predictions",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "market_provider",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "provider_event_id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "market_sport_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "matched_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "evidence",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "mapping_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "source_payload_digest",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "legacy_sport_event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_event_mappings",
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "observation_identity",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "provider",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "provider_event_id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "market_event_mapping_id",
+      "type": "uuid",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "region",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "bookmaker_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "bookmaker_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "market",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "provider_market_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "side",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "outcome_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "american_odds",
+      "type": "integer",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "provider_last_update",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "acquired_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "commence_time",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "source_payload_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "source_response_digest",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "source_provenance",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_price_observations",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "value_identity",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "prediction_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "side",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "model_version_id",
+      "type": "uuid",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "model_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "model_probability",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "provider",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "provider_event_id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "bookmaker_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "bookmaker_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "market",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "provider_market_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "american_odds",
+      "type": "integer",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "home_market_observation_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "away_market_observation_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "selected_side_market_observation_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "raw_implied_probability",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "no_vig_probability",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "edge",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "unit_ev",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "consensus_probability",
+      "type": "numeric",
+      "nullable": "YES",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "consensus_edge",
+      "type": "numeric",
+      "nullable": "YES",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "market_dispersion",
+      "type": "numeric",
+      "nullable": "YES",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "book_count",
+      "type": "integer",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "market_freshness",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "starter_status",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "temporal_eligibility",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "eligibility_flags",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "risk_flags",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "evaluation_method_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "prediction_as_of",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "provider_last_update",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "market_acquired_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "evaluated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "source_payload_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "evaluation_payload_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_market_value_evaluations",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "official_pick_identity",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "prediction_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "value_evaluation_id",
+      "type": "uuid",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "sport",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "market",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "side",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "bookmaker_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "bookmaker_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "american_odds",
+      "type": "integer",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "model_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "model_probability",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "consensus_probability",
+      "type": "numeric",
+      "nullable": "YES",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "consensus_edge",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "unit_ev",
+      "type": "numeric",
+      "nullable": "NO",
+      "physical": "numeric(18,15)"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "policy_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "decision_status",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "eligibility_flags",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "risk_flags",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "reason_codes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "blocker_codes",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "prediction_as_of",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "market_acquired_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "evaluated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "decision_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "source_payload_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "decision_payload_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_official_picks",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "season",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "game_date",
+      "type": "date",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "scheduled_at",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "home_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "away_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "game_type",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "official_status",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "doubleheader",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "game_number",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "source",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "source_payload_digest",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "legacy_sport_event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_games",
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "mlbam_person_id",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "full_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "first_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "last_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "primary_position",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "bat_side",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "throw_side",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "active",
+      "type": "boolean",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "first_seen_date",
+      "type": "date",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "last_seen_date",
+      "type": "date",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "source",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "source_payload_digest",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "legacy_sport_player_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_mlb_players",
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "sport_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "league_key",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "name",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "abbreviation",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "sports_teams",
+      "column": "city",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "sports_teams",
+      "column": "conference",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "sports_teams",
+      "column": "division",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "sports_teams",
+      "column": "logo_url",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "sports_teams",
+      "column": "active",
+      "type": "boolean",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "provider_ids",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "sports_teams",
+      "column": "updated_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "id",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "pick2_era",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source_version",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "game_date",
+      "type": "date",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "game_year",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "game_type",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source_home_team",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source_away_team",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "canonical_home_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "canonical_away_team_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "event_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "event_mapping_state",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source_batter_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "canonical_pitcher_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "canonical_batter_id",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "player_mapping_state",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "source_player_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "pitch_type",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "pitch_name",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "type",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "release_speed",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "effective_speed",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "release_spin_rate",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "spin_axis",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "release_extension",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "release_pos_x",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "release_pos_y",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "release_pos_z",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "arm_angle",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "p_throws",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "stand",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "balls",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "strikes",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "outs_when_up",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "home_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "away_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "bat_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "fld_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "post_home_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "post_away_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "post_bat_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "post_fld_score",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "events",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "description",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "inning",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "inning_topbot",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "pfx_x",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "pfx_z",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "plate_x",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "plate_z",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "zone",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "vx0",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "vy0",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "vz0",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "ax",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "ay",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "az",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "api_break_z_with_gravity",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "api_break_x_arm",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "api_break_x_batter_in",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "launch_speed",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "launch_angle",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "estimated_ba_using_speedangle",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "estimated_woba_using_speedangle",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "estimated_slg_using_speedangle",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "launch_speed_angle",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "hit_distance_sc",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "bb_type",
+      "type": "text",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "hit_location",
+      "type": "integer",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "hc_x",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "hc_y",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "bat_speed",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "swing_length",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "attack_angle",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "attack_direction",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "swing_path_tilt",
+      "type": "numeric",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "at_bat_number",
+      "type": "integer",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "pitch_number",
+      "type": "integer",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "raw_payload",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "raw_payload_digest",
+      "type": "text",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "mapping_metadata",
+      "type": "jsonb",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "mapped_at",
+      "type": "timestamp with time zone",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "ingested_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES"
+    },
+    {
+      "table": "pick2_raw_mlb_statcast_pitches",
+      "column": "mlbam_batter_id",
+      "type": "bigint",
+      "nullable": "YES"
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "conname": "pick2_mlb_batter_daily_features_check",
+      "contype": "c",
+      "definition": "CHECK ((as_of_date <= feature_date))"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "conname": "pick2_mlb_batter_daily_features_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "conname": "pick2_mlb_batter_daily_features_mlbam_batter_id_positive",
+      "contype": "c",
+      "definition": "CHECK (((mlbam_batter_id IS NULL) OR (mlbam_batter_id > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "conname": "pick2_mlb_batter_daily_features_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "conname": "pick2_mlb_batter_daily_features_player_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (player_id) REFERENCES sport_players(id)"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "conname": "pick2_mlb_batter_daily_features_target_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((target_game_pk IS NULL) OR (target_game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "conname": "pick2_mlb_bullpen_daily_features_check",
+      "contype": "c",
+      "definition": "CHECK ((as_of_date <= feature_date))"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "conname": "pick2_mlb_bullpen_daily_features_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "conname": "pick2_mlb_bullpen_daily_features_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "conname": "pick2_mlb_bullpen_daily_features_target_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((target_game_pk IS NULL) OR (target_game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "conname": "pick2_mlb_bullpen_daily_features_team_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (team_id) REFERENCES sports_teams(id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_away_starter_mlbam_positi",
+      "contype": "c",
+      "definition": "CHECK (((away_starter_mlbam_pitcher_id IS NULL) OR (away_starter_mlbam_pitcher_id > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_away_team_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (away_team_id) REFERENCES sports_teams(id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_check",
+      "contype": "c",
+      "definition": "CHECK ((as_of_date <= feature_date))"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_event_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (event_id) REFERENCES sport_events(id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_home_starter_mlbam_positi",
+      "contype": "c",
+      "definition": "CHECK (((home_starter_mlbam_pitcher_id IS NULL) OR (home_starter_mlbam_pitcher_id > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_home_team_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (home_team_id) REFERENCES sports_teams(id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "conname": "pick2_mlb_first_inning_daily_features_target_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((target_game_pk IS NULL) OR (target_game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_away_team_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (away_team_id) REFERENCES sports_teams(id)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_check",
+      "contype": "c",
+      "definition": "CHECK ((as_of_date <= feature_date))"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_event_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (event_id) REFERENCES sport_events(id)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_home_team_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (home_team_id) REFERENCES sports_teams(id)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_mlbam_batter_id_positive",
+      "contype": "c",
+      "definition": "CHECK (((mlbam_batter_id IS NULL) OR (mlbam_batter_id > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_mlbam_pitcher_id_positive",
+      "contype": "c",
+      "definition": "CHECK (((mlbam_pitcher_id IS NULL) OR (mlbam_pitcher_id > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "conname": "pick2_mlb_matchup_daily_features_target_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((target_game_pk IS NULL) OR (target_game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "conname": "pick2_mlb_pitcher_daily_features_check",
+      "contype": "c",
+      "definition": "CHECK ((as_of_date <= feature_date))"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "conname": "pick2_mlb_pitcher_daily_features_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "conname": "pick2_mlb_pitcher_daily_features_mlbam_pitcher_id_positive",
+      "contype": "c",
+      "definition": "CHECK (((mlbam_pitcher_id IS NULL) OR (mlbam_pitcher_id > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "conname": "pick2_mlb_pitcher_daily_features_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "conname": "pick2_mlb_pitcher_daily_features_player_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (player_id) REFERENCES sport_players(id)"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "conname": "pick2_mlb_pitcher_daily_features_target_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((target_game_pk IS NULL) OR (target_game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "conname": "pick2_mlb_team_daily_features_check",
+      "contype": "c",
+      "definition": "CHECK ((as_of_date <= feature_date))"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "conname": "pick2_mlb_team_daily_features_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "conname": "pick2_mlb_team_daily_features_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "conname": "pick2_mlb_team_daily_features_target_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((target_game_pk IS NULL) OR (target_game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "conname": "pick2_mlb_team_daily_features_team_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (team_id) REFERENCES sports_teams(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_away_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((away_probability IS NULL) OR ((away_probability >= (0)::numeric) AND (away_probability <= (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_event_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (event_id) REFERENCES sport_events(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((game_pk IS NULL) OR (game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_home_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((home_probability IS NULL) OR ((home_probability >= (0)::numeric) AND (home_probability <= (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_model_version_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (model_version_id) REFERENCES pick2_model_versions(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_pick2_era_check",
+      "contype": "c",
+      "definition": "CHECK ((pick2_era = 'PICK_2_ERA_V1'::text))"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_legacy_sport_event_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (legacy_sport_event_id) REFERENCES sport_events(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_market_provider_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM market_provider)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_provider_event_id_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM provider_event_id)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observation_market_event_mapping_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (market_event_mapping_id) REFERENCES pick2_mlb_market_event_mappings(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_american_odds_check",
+      "contype": "c",
+      "definition": "CHECK ((american_odds <> 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_bookmaker_key_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM bookmaker_key)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_market_check",
+      "contype": "c",
+      "definition": "CHECK ((market = 'MONEYLINE'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_observation_identity_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM observation_identity)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_provider_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM provider)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_provider_event_id_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM provider_event_id)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_provider_market_key_check",
+      "contype": "c",
+      "definition": "CHECK ((provider_market_key = 'h2h'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_side_check",
+      "contype": "c",
+      "definition": "CHECK ((side = ANY (ARRAY['HOME'::text, 'AWAY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_source_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM source_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evalua_selected_side_market_observa_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (selected_side_market_observation_id) REFERENCES pick2_mlb_market_price_observations(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_away_market_observation_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (away_market_observation_id) REFERENCES pick2_mlb_market_price_observations(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_evaluation_method_version_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM evaluation_method_version)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_evaluation_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM evaluation_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_home_market_observation_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (home_market_observation_id) REFERENCES pick2_mlb_market_price_observations(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluation_raw_implied_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((raw_implied_probability > (0)::numeric) AND (raw_implied_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_american_odds_check",
+      "contype": "c",
+      "definition": "CHECK ((american_odds <> 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_book_count_check",
+      "contype": "c",
+      "definition": "CHECK ((book_count >= 1))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_check",
+      "contype": "c",
+      "definition": "CHECK ((home_market_observation_id <> away_market_observation_id))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_check1",
+      "contype": "c",
+      "definition": "CHECK ((((side = 'HOME'::text) AND (selected_side_market_observation_id = home_market_observation_id)) OR ((side = 'AWAY'::text) AND (selected_side_market_observation_id = away_market_observation_id))))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_consensus_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((consensus_probability IS NULL) OR ((consensus_probability > (0)::numeric) AND (consensus_probability < (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_eligibility_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(eligibility_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_market_check",
+      "contype": "c",
+      "definition": "CHECK ((market = 'MONEYLINE'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_market_freshness_check",
+      "contype": "c",
+      "definition": "CHECK ((market_freshness = ANY (ARRAY['FRESH'::text, 'AGING'::text, 'STALE'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_model_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((model_probability > (0)::numeric) AND (model_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_model_version_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (model_version_id) REFERENCES pick2_model_versions(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_no_vig_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((no_vig_probability > (0)::numeric) AND (no_vig_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_prediction_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (prediction_id) REFERENCES pick2_game_predictions(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_provider_market_key_check",
+      "contype": "c",
+      "definition": "CHECK ((provider_market_key = 'h2h'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_risk_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(risk_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_side_check",
+      "contype": "c",
+      "definition": "CHECK ((side = ANY (ARRAY['HOME'::text, 'AWAY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_source_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM source_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_temporal_eligibility_check",
+      "contype": "c",
+      "definition": "CHECK ((temporal_eligibility = ANY (ARRAY['PREGAME_VALID'::text, 'PREGAME_VALID_AT_MARKET_ACQUISITION'::text, 'STARTED_GAME_BLOCKED'::text, 'STALE_MARKET_BLOCKED'::text, 'AGING_ANALYTICAL_ONLY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_value_identity_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM value_identity)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_american_odds_check",
+      "contype": "c",
+      "definition": "CHECK ((american_odds <> 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_blocker_codes_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(blocker_codes) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_bookmaker_key_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM bookmaker_key)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_consensus_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((consensus_probability IS NULL) OR ((consensus_probability > (0)::numeric) AND (consensus_probability < (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_decision_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM decision_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_decision_status_check",
+      "contype": "c",
+      "definition": "CHECK ((decision_status = 'OFFICIAL_PICK'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_eligibility_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(eligibility_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_market_check",
+      "contype": "c",
+      "definition": "CHECK ((market = 'MONEYLINE'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_model_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((model_probability > (0)::numeric) AND (model_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_model_version_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM model_version)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_official_pick_identity_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM official_pick_identity)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_policy_version_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM policy_version)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_prediction_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (prediction_id) REFERENCES pick2_game_predictions(id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_reason_codes_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(reason_codes) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_risk_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(risk_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_side_check",
+      "contype": "c",
+      "definition": "CHECK ((side = ANY (ARRAY['HOME'::text, 'AWAY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_source_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM source_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_sport_check",
+      "contype": "c",
+      "definition": "CHECK ((sport = 'MLB'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_value_evaluation_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (value_evaluation_id) REFERENCES pick2_mlb_market_value_evaluations(id)"
+    }
+  ],
+  "indexes": [
+    {
+      "table_name": "pick2_feature_snapshots",
+      "index_name": "pick2_feature_snapshots_deterministic_identity_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_feature_snapshots_deterministic_identity_key ON public.pick2_feature_snapshots USING btree (deterministic_identity)"
+    },
+    {
+      "table_name": "pick2_feature_snapshots",
+      "index_name": "pick2_feature_snapshots_event_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_feature_snapshots_event_idx ON public.pick2_feature_snapshots USING btree (event_id, feature_version)"
+    },
+    {
+      "table_name": "pick2_feature_snapshots",
+      "index_name": "pick2_feature_snapshots_native_game_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_feature_snapshots_native_game_idx ON public.pick2_feature_snapshots USING btree (sport_key, feature_domain, target_game_pk, feature_date DESC) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_feature_snapshots",
+      "index_name": "pick2_feature_snapshots_native_person_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_feature_snapshots_native_person_idx ON public.pick2_feature_snapshots USING btree (sport_key, feature_domain, mlbam_person_id, feature_date DESC) WHERE (mlbam_person_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_feature_snapshots",
+      "index_name": "pick2_feature_snapshots_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_feature_snapshots_pkey ON public.pick2_feature_snapshots USING btree (id)"
+    },
+    {
+      "table_name": "pick2_feature_snapshots",
+      "index_name": "pick2_feature_snapshots_subject_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_feature_snapshots_subject_idx ON public.pick2_feature_snapshots USING btree (sport_key, feature_domain, subject_id, feature_date DESC)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "index_name": "pick2_game_predictions_deterministic_identity_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_game_predictions_deterministic_identity_key ON public.pick2_game_predictions USING btree (deterministic_identity)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "index_name": "pick2_game_predictions_event_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_game_predictions_event_idx ON public.pick2_game_predictions USING btree (sport_key, event_id, predicted_at DESC)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "index_name": "pick2_game_predictions_game_pk_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_game_predictions_game_pk_idx ON public.pick2_game_predictions USING btree (sport_key, game_pk, predicted_at DESC) WHERE (game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "index_name": "pick2_game_predictions_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_game_predictions_pkey ON public.pick2_game_predictions USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "index_name": "pick2_mlb_batter_daily_features_legacy_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_batter_daily_features_legacy_uidx ON public.pick2_mlb_batter_daily_features USING btree (player_id, feature_date, feature_version) WHERE (target_game_pk IS NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "index_name": "pick2_mlb_batter_daily_features_native_lookup",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_batter_daily_features_native_lookup ON public.pick2_mlb_batter_daily_features USING btree (target_game_pk, mlbam_batter_id, feature_date, feature_version) WHERE ((target_game_pk IS NOT NULL) AND (mlbam_batter_id IS NOT NULL))"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "index_name": "pick2_mlb_batter_daily_features_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_batter_daily_features_pkey ON public.pick2_mlb_batter_daily_features USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_batter_daily_features",
+      "index_name": "pick2_mlb_batter_daily_features_snapshot_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_batter_daily_features_snapshot_uidx ON public.pick2_mlb_batter_daily_features USING btree (feature_snapshot_id) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "index_name": "pick2_mlb_bullpen_daily_features_native_lookup",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_bullpen_daily_features_native_lookup ON public.pick2_mlb_bullpen_daily_features USING btree (target_game_pk, team_id, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "index_name": "pick2_mlb_bullpen_daily_features_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_bullpen_daily_features_pkey ON public.pick2_mlb_bullpen_daily_features USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "index_name": "pick2_mlb_bullpen_daily_features_snapshot_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_bullpen_daily_features_snapshot_uidx ON public.pick2_mlb_bullpen_daily_features USING btree (feature_snapshot_id) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_bullpen_daily_features",
+      "index_name": "pick2_mlb_bullpen_daily_features_target_game_team_version_looku",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_bullpen_daily_features_target_game_team_version_looku ON public.pick2_mlb_bullpen_daily_features USING btree (target_game_pk, team_id, feature_version) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "index_name": "pick2_mlb_first_inning_daily_features_legacy_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_first_inning_daily_features_legacy_uidx ON public.pick2_mlb_first_inning_daily_features USING btree (event_id, feature_date, feature_version) WHERE (target_game_pk IS NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "index_name": "pick2_mlb_first_inning_daily_features_native_lookup",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_first_inning_daily_features_native_lookup ON public.pick2_mlb_first_inning_daily_features USING btree (target_game_pk, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "index_name": "pick2_mlb_first_inning_daily_features_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_first_inning_daily_features_pkey ON public.pick2_mlb_first_inning_daily_features USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_first_inning_daily_features",
+      "index_name": "pick2_mlb_first_inning_daily_features_snapshot_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_first_inning_daily_features_snapshot_uidx ON public.pick2_mlb_first_inning_daily_features USING btree (feature_snapshot_id) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_games",
+      "index_name": "pick2_mlb_games_legacy_sport_event_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_games_legacy_sport_event_idx ON public.pick2_mlb_games USING btree (legacy_sport_event_id) WHERE (legacy_sport_event_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_games",
+      "index_name": "pick2_mlb_games_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_games_pkey ON public.pick2_mlb_games USING btree (game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_games",
+      "index_name": "pick2_mlb_games_season_game_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_games_season_game_date_idx ON public.pick2_mlb_games USING btree (season, game_date)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "index_name": "pick2_mlb_market_event_mappin_market_provider_provider_even_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_event_mappin_market_provider_provider_even_key ON public.pick2_mlb_market_event_mappings USING btree (market_provider, provider_event_id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "index_name": "pick2_mlb_market_event_mappings_game_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_event_mappings_game_idx ON public.pick2_mlb_market_event_mappings USING btree (game_pk, market_provider)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "index_name": "pick2_mlb_market_event_mappings_market_provider_game_pk_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_event_mappings_market_provider_game_pk_key ON public.pick2_mlb_market_event_mappings USING btree (market_provider, game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "index_name": "pick2_mlb_market_event_mappings_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_event_mappings_pkey ON public.pick2_mlb_market_event_mappings USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "index_name": "pick2_mlb_market_price_observations_book_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_price_observations_book_idx ON public.pick2_mlb_market_price_observations USING btree (provider, bookmaker_key, market, acquired_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "index_name": "pick2_mlb_market_price_observations_event_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_price_observations_event_idx ON public.pick2_mlb_market_price_observations USING btree (provider, provider_event_id, market, acquired_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "index_name": "pick2_mlb_market_price_observations_game_latest_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_price_observations_game_latest_idx ON public.pick2_mlb_market_price_observations USING btree (game_pk, market, acquired_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "index_name": "pick2_mlb_market_price_observations_observation_identity_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_price_observations_observation_identity_key ON public.pick2_mlb_market_price_observations USING btree (observation_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "index_name": "pick2_mlb_market_price_observations_pair_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_price_observations_pair_idx ON public.pick2_mlb_market_price_observations USING btree (game_pk, provider, bookmaker_key, market, provider_market_key, COALESCE(provider_last_update, acquired_at))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "index_name": "pick2_mlb_market_price_observations_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_price_observations_pkey ON public.pick2_mlb_market_price_observations USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_book_side_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_value_evaluations_book_side_idx ON public.pick2_mlb_market_value_evaluations USING btree (provider, bookmaker_key, side, evaluated_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_edge_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_value_evaluations_edge_idx ON public.pick2_mlb_market_value_evaluations USING btree (edge DESC, unit_ev DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_eligibility_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_value_evaluations_eligibility_idx ON public.pick2_mlb_market_value_evaluations USING btree (temporal_eligibility, market_freshness, evaluated_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_game_latest_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_value_evaluations_game_latest_idx ON public.pick2_mlb_market_value_evaluations USING btree (game_pk, market, evaluated_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_value_evaluations_pkey ON public.pick2_mlb_market_value_evaluations USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_prediction_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_market_value_evaluations_prediction_idx ON public.pick2_mlb_market_value_evaluations USING btree (prediction_id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "index_name": "pick2_mlb_market_value_evaluations_value_identity_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_market_value_evaluations_value_identity_key ON public.pick2_mlb_market_value_evaluations USING btree (value_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "index_name": "pick2_mlb_matchup_daily_features_legacy_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_matchup_daily_features_legacy_uidx ON public.pick2_mlb_matchup_daily_features USING btree (event_id, feature_date, feature_version) WHERE (target_game_pk IS NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "index_name": "pick2_mlb_matchup_daily_features_native_lookup",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_matchup_daily_features_native_lookup ON public.pick2_mlb_matchup_daily_features USING btree (target_game_pk, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "index_name": "pick2_mlb_matchup_daily_features_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_matchup_daily_features_pkey ON public.pick2_mlb_matchup_daily_features USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_matchup_daily_features",
+      "index_name": "pick2_mlb_matchup_daily_features_snapshot_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_matchup_daily_features_snapshot_uidx ON public.pick2_mlb_matchup_daily_features USING btree (feature_snapshot_id) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_book_side_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_official_picks_book_side_idx ON public.pick2_mlb_official_picks USING btree (bookmaker_key, side, decision_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_game_decision_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_official_picks_game_decision_idx ON public.pick2_mlb_official_picks USING btree (game_pk, decision_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_official_pick_identity_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_official_picks_official_pick_identity_key ON public.pick2_mlb_official_picks USING btree (official_pick_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_official_picks_pkey ON public.pick2_mlb_official_picks USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_policy_status_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_official_picks_policy_status_idx ON public.pick2_mlb_official_picks USING btree (policy_version, decision_status, decision_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_prediction_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_official_picks_prediction_idx ON public.pick2_mlb_official_picks USING btree (prediction_id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "index_name": "pick2_mlb_official_picks_value_evaluation_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_official_picks_value_evaluation_idx ON public.pick2_mlb_official_picks USING btree (value_evaluation_id)"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "index_name": "pick2_mlb_pitcher_daily_features_legacy_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_pitcher_daily_features_legacy_uidx ON public.pick2_mlb_pitcher_daily_features USING btree (player_id, feature_date, feature_version) WHERE (target_game_pk IS NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "index_name": "pick2_mlb_pitcher_daily_features_native_lookup",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_pitcher_daily_features_native_lookup ON public.pick2_mlb_pitcher_daily_features USING btree (target_game_pk, mlbam_pitcher_id, feature_date, feature_version) WHERE ((target_game_pk IS NOT NULL) AND (mlbam_pitcher_id IS NOT NULL))"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "index_name": "pick2_mlb_pitcher_daily_features_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_pitcher_daily_features_pkey ON public.pick2_mlb_pitcher_daily_features USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_pitcher_daily_features",
+      "index_name": "pick2_mlb_pitcher_daily_features_snapshot_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_pitcher_daily_features_snapshot_uidx ON public.pick2_mlb_pitcher_daily_features USING btree (feature_snapshot_id) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_players",
+      "index_name": "pick2_mlb_players_legacy_sport_player_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_players_legacy_sport_player_idx ON public.pick2_mlb_players USING btree (legacy_sport_player_id) WHERE (legacy_sport_player_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_players",
+      "index_name": "pick2_mlb_players_name_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_players_name_idx ON public.pick2_mlb_players USING btree (last_name, first_name) WHERE (last_name IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_players",
+      "index_name": "pick2_mlb_players_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_players_pkey ON public.pick2_mlb_players USING btree (mlbam_person_id)"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "index_name": "pick2_mlb_team_daily_features_native_lookup",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_mlb_team_daily_features_native_lookup ON public.pick2_mlb_team_daily_features USING btree (target_game_pk, team_id, feature_date, feature_version) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "index_name": "pick2_mlb_team_daily_features_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_team_daily_features_pkey ON public.pick2_mlb_team_daily_features USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_team_daily_features",
+      "index_name": "pick2_mlb_team_daily_features_snapshot_uidx",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_mlb_team_daily_features_snapshot_uidx ON public.pick2_mlb_team_daily_features USING btree (feature_snapshot_id) WHERE (target_game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitche_game_pk_at_bat_number_pitch_n_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_raw_mlb_statcast_pitche_game_pk_at_bat_number_pitch_n_key ON public.pick2_raw_mlb_statcast_pitches USING btree (game_pk, at_bat_number, pitch_number)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_batter_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_batter_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (source_batter_id, game_date)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_event_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_event_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (event_id, game_date)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_game_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_game_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_pk, at_bat_number, pitch_number)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_mapping_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_mapping_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (event_mapping_state, player_mapping_state, game_date)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_mlbam_batter_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_mlbam_batter_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (mlbam_batter_id, game_date) WHERE (mlbam_batter_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_mlbam_pitcher_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_mlbam_pitcher_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (mlbam_pitcher_id, game_date) WHERE (mlbam_pitcher_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_pitcher_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_pitcher_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (source_pitcher_id, game_date)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX pick2_raw_mlb_statcast_pitches_pkey ON public.pick2_raw_mlb_statcast_pitches USING btree (id)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_batter_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_batter_date_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, mlbam_batter_id, game_date DESC, game_pk) WHERE (mlbam_batter_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_batter_effective_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_batter_effective_date_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, COALESCE(mlbam_batter_id, source_batter_id), game_date DESC, game_pk) WHERE (COALESCE(mlbam_batter_id, source_batter_id) IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_batting_team_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_batting_team_date_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, (\nCASE\n    WHEN (inning_topbot = 'Top'::text) THEN source_away_team\n    WHEN (inning_topbot = 'Bot'::text) THEN source_home_team\n    ELSE NULL::text\nEND), game_date DESC, game_pk)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_fielding_team_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_fielding_team_date_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, (\nCASE\n    WHEN (inning_topbot = 'Top'::text) THEN source_home_team\n    WHEN (inning_topbot = 'Bot'::text) THEN source_away_team\n    ELSE NULL::text\nEND), game_date DESC, game_pk)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_pitch_type_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_pitch_type_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, mlbam_pitcher_id, pitch_type, game_date DESC) WHERE ((mlbam_pitcher_id IS NOT NULL) AND (pitch_type IS NOT NULL))"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_pitcher_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_pitcher_date_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, mlbam_pitcher_id, game_date DESC, game_pk) WHERE (mlbam_pitcher_id IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_pitcher_effective_date_id",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_pitcher_effective_date_id ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, COALESCE(mlbam_pitcher_id, source_pitcher_id), game_date DESC, game_pk) WHERE (COALESCE(mlbam_pitcher_id, source_pitcher_id) IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_pitcher_effective_pitch_t",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_pitcher_effective_pitch_t ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, COALESCE(mlbam_pitcher_id, source_pitcher_id), pitch_type, game_date DESC) WHERE ((COALESCE(mlbam_pitcher_id, source_pitcher_id) IS NOT NULL) AND (pitch_type IS NOT NULL))"
+    },
+    {
+      "table_name": "pick2_raw_mlb_statcast_pitches",
+      "index_name": "pick2_raw_mlb_statcast_pitches_season_teams_date_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX pick2_raw_mlb_statcast_pitches_season_teams_date_idx ON public.pick2_raw_mlb_statcast_pitches USING btree (game_year, source_home_team, source_away_team, game_date DESC)"
+    },
+    {
+      "table_name": "sports_teams",
+      "index_name": "sports_teams_pkey",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX sports_teams_pkey ON public.sports_teams USING btree (id)"
+    },
+    {
+      "table_name": "sports_teams",
+      "index_name": "sports_teams_provider_idx",
+      "indisunique": false,
+      "indisvalid": true,
+      "definition": "CREATE INDEX sports_teams_provider_idx ON public.sports_teams USING gin (provider_ids)"
+    },
+    {
+      "table_name": "sports_teams",
+      "index_name": "sports_teams_sport_key_league_key_name_key",
+      "indisunique": true,
+      "indisvalid": true,
+      "definition": "CREATE UNIQUE INDEX sports_teams_sport_key_league_key_name_key ON public.sports_teams USING btree (sport_key, league_key, name)"
+    }
+  ]
+}

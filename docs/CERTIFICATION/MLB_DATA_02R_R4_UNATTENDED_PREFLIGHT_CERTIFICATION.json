@@ -1,0 +1,302 @@
+{
+  "certificationVerdict": "MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_VERIFIED_ACTIVATION_BLOCKED",
+  "startingSha": "3f13a5ceca78854824480ccdff91d48c267a93ec",
+  "finalSha": "ENCLOSING_BOUNDED_COMMIT",
+  "operationalCertified": false,
+  "generatedAt": "2026-09-09T15:45:13.664Z",
+  "gates": [
+    {
+      "gate": 1,
+      "name": "MLB_02R_R4_AUTOMATION_INVENTORY",
+      "status": "COMPLETE"
+    },
+    {
+      "gate": 2,
+      "name": "MLB_02R_R4_UNATTENDED_CONNECTION_INVENTORY",
+      "status": "LOCAL_AND_EDGE_COMPLETE_VERCEL_READBACK_PENDING"
+    },
+    {
+      "gate": 3,
+      "name": "MLB_02R_R4_LEAST_PRIVILEGE_RUNTIME_ACCESS",
+      "status": "PASS_FIXED_QUERY_CONFINEMENT"
+    },
+    {
+      "gate": 4,
+      "name": "MLB_02R_R4_SECRET_SAFETY",
+      "status": "PASS"
+    },
+    {
+      "gate": 5,
+      "name": "MLB_02R_R4_UNATTENDED_SCHEMA_PREFLIGHT",
+      "status": "PASS"
+    },
+    {
+      "gate": 6,
+      "name": "MLB_02R_R4_PREFLIGHT_FAIL_CLOSED",
+      "status": "PASS_SCHEMA_AND_VERSION_CHECKS"
+    },
+    {
+      "gate": 7,
+      "name": "MLB_02R_R4_AUTOMATION_RUNTIME_BINDING",
+      "status": "PREPARED_PERSISTENT_HOST_BLOCKED"
+    },
+    {
+      "gate": 8,
+      "name": "MLB_02R_R4_AUTOMATION_CONCURRENCY",
+      "status": "PASS_SINGLE_HOST_TESTS_NOT_DISTRIBUTED"
+    },
+    {
+      "gate": 9,
+      "name": "MLB_02R_R4_PROVIDER_BUDGET_AUTOMATION",
+      "status": "PASS"
+    },
+    {
+      "gate": 10,
+      "name": "MLB_02R_R4_AUTOMATION_SCHEDULE",
+      "status": "DOCUMENTED_NOT_INSTALLED"
+    },
+    {
+      "gate": 11,
+      "name": "MLB_02R_R4_UNATTENDED_DRY_CERTIFICATION",
+      "status": "PREFLIGHT_PASS_FULL_SCHEDULER_PENDING"
+    },
+    {
+      "gate": 12,
+      "name": "MLB_02R_R4_AUTOMATION_ACTIVATION",
+      "status": "BLOCKED"
+    },
+    {
+      "gate": 13,
+      "name": "MLB_02R_R4_SCHEDULED_PRODUCTION_READBACK",
+      "status": "NOT_RUN"
+    },
+    {
+      "gate": 14,
+      "name": "MLB_02R_R4_PITCH_AUTOMATION_READBACK",
+      "status": "DRY_PASS_SCHEDULED_PENDING"
+    },
+    {
+      "gate": 15,
+      "name": "MLB_02R_R4_DAILY_REFRESH_AUTOMATION_READBACK",
+      "status": "DRY_PASS_SCHEDULED_PENDING"
+    },
+    {
+      "gate": 16,
+      "name": "MLB_02R_R4_AUTOMATION_ROLLBACK",
+      "status": "READY"
+    },
+    {
+      "gate": 17,
+      "name": "MLB_02R_R4_UI_AUTOMATION_READBACK",
+      "status": "PENDING_ACTIVATION"
+    },
+    {
+      "gate": 18,
+      "name": "MLB_02R_R4_SETTLEMENT_BOUNDARY",
+      "status": "PASS_DISABLED"
+    },
+    {
+      "gate": 19,
+      "name": "MLB_02R_R4_FINAL_OPERATIONAL_CERTIFICATION",
+      "status": "NOT_ISSUED"
+    }
+  ],
+  "blocker": {
+    "code": "PERSISTENT_EXECUTOR_HOST_NOT_VERIFIED",
+    "hardStop": true,
+    "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
+    "requiredResolution": "Identify the existing persistent production runner or explicitly designate the current machine, then certify runtime/checkpoint access and activate the same prepared coordinator.",
+    "authorizationNeeded": false
+  },
+  "preflight": {
+    "status": "PASS",
+    "checkedAt": "2026-09-09T15:40:22.483001+00:00",
+    "columnsCompared": 406,
+    "preservedConstraintsCompared": 116,
+    "requiredIndexesCompared": 84,
+    "existingNotValidatedChecks": 19,
+    "historicalCheckViolations": 0,
+    "invalidIndexes": 0,
+    "orphanSnapshotReferences": 0,
+    "nativeSnapshotUniqueIndexes": 6,
+    "schemaCompatible": true,
+    "failures": [],
+    "ddlDigest": "3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46",
+    "projectRef": "ynuocvexviorgdjrfthw",
+    "connection": {
+      "databaseUrl": "PRESENT",
+      "serverOnly": true,
+      "transaction": "READ_ONLY"
+    },
+    "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "featureCount": 76,
+    "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1"
+  },
+  "validation": {
+    "status": "PASS",
+    "checks": [
+      {
+        "name": "Certified structural catalog passes",
+        "status": "PASS"
+      },
+      {
+        "name": "missing table",
+        "status": "PASS"
+      },
+      {
+        "name": "missing column",
+        "status": "PASS"
+      },
+      {
+        "name": "missing index",
+        "status": "PASS"
+      },
+      {
+        "name": "invalid index",
+        "status": "PASS"
+      },
+      {
+        "name": "snapshot orphan",
+        "status": "PASS"
+      },
+      {
+        "name": "foreign key drift",
+        "status": "PASS"
+      },
+      {
+        "name": "All certified schema manifests match generated contract",
+        "status": "PASS"
+      },
+      {
+        "name": "Fixed SQL is exact canonical SELECT; no caller SQL",
+        "status": "PASS"
+      },
+      {
+        "name": "Anonymous/wrong role blocked before DB access",
+        "status": "PASS"
+      },
+      {
+        "name": "Request SQL/POST forbidden before DB access",
+        "status": "PASS"
+      },
+      {
+        "name": "Missing DB connection fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "Authenticated fixed query uses read-only transaction",
+        "status": "PASS"
+      },
+      {
+        "name": "Driver error redacted and fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "Shared server client accepts fresh complete preflight",
+        "status": "PASS"
+      },
+      {
+        "name": "Champion drift fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "76-feature drift fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "Feature version drift fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "Policy drift fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "Runtime credential failure blocks",
+        "status": "PASS"
+      },
+      {
+        "name": "HTTP failure blocks",
+        "status": "PASS"
+      },
+      {
+        "name": "Expired preflight blocks",
+        "status": "PASS"
+      },
+      {
+        "name": "Clock lead beyond bounded wait blocks",
+        "status": "PASS"
+      },
+      {
+        "name": "Server caller rejects orphan contract",
+        "status": "PASS"
+      },
+      {
+        "name": "Unverified persistent host blocks before runtime work",
+        "status": "PASS"
+      },
+      {
+        "name": "Ephemeral Vercel host blocks before runtime work",
+        "status": "PASS"
+      }
+    ],
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "secretSafety": {
+    "status": "PASS",
+    "trackedFiles": 3057,
+    "clientBundleFiles": 614,
+    "secretValueMatches": [],
+    "protectedFiles": 19,
+    "protectedDrift": 0
+  },
+  "regressions": {
+    "automationBehaviorGroups": 16,
+    "r3Guards": 5,
+    "operationalGuards": 3,
+    "status": "PASS"
+  },
+  "providerCallsThisPhase": {
+    "MLB_OFFICIAL": 0,
+    "STATCAST": 0,
+    "THE_ODDS_API": 0,
+    "BALLDONTLIE": 0,
+    "SPORTSDATAIO": 0,
+    "OTHER": 0
+  },
+  "missionOdds": {
+    "consumed": 2,
+    "cap": 20,
+    "remaining": 18
+  },
+  "productionDml": 0,
+  "productionDdl": 0,
+  "syntheticProductionPaths": 0,
+  "startedGameLeakage": 0,
+  "conflicts": 0,
+  "automationState": "DISABLED",
+  "settlementAutomation": "DISABLED",
+  "sourceHashes": {
+    "scripts/mlb-operational-tick.mjs": "95c69c6449d0d1221f060f3fd4ccac4038d923ab147b84e70b411bcf384d7b1e",
+    "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
+    "src/services/pick2-mlb-unattended-preflight.ts": "74e8676f4d7475a9b402bcabb9f844bfc0061a464aee0531431a590f840b11f3",
+    "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
+    "supabase/functions/mlb-operational-preflight/index.ts": "bde60830dfa75e0778da8db2047ab8d3cfeda323eb426656f1b0d5c09b39bc03",
+    "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
+    "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154",
+    "scripts/mlb-operational-schema-preflight-review.mjs": "39198b35a636e21225f47e452987ce6cbb92e1471ee8bd4dadd4ee37715bb935",
+    "tsconfig.json": "32b78a77b590d611e85442da45aa0909c35d2c910a2a5b1aaa3f1d7e94a5fc95",
+    "scripts/mlb-operational-r4-validate.mjs": "086101d60828bca69afb3b29169567bcb056dbe3ae371a780bc69217f70764ec",
+    "src/app/api/admin/mlb-operational-preflight/route.ts": "2fe24783e0e2a85d472faf6f1fca7b1b0c899328a70f5bbab94fccf0e2c3cea7"
+  },
+  "audit": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_AUDIT.md",
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "staticPages": 400
+  },
+  "productionVercelReadback": "REQUIRED_AFTER_PUBLICATION",
+  "lint": "PASS"
+}

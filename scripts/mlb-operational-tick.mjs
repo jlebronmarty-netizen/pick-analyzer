@@ -16,11 +16,14 @@ import { operatingDate } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import { planMlbSettlement, digestSettlementEvidence } from '../src/services/pick2-mlb-settlement.ts'
 import { persistMlbSettlementPlan } from '../src/services/pick2-mlb-settlement-persistence.service.ts'
 import { persistOperationalTelemetry } from '../src/services/pick2-operational-telemetry.ts'
+import { runMlbOperationalSchemaPreflight } from './mlb-operational-unattended-preflight.mjs'
 const ensure = (ok, reason) => { if (!ok) throw new Error(`TICK_BLOCK:${reason}`) }
 const read = async query => { const { data, error } = await query; ensure(!error && Array.isArray(data), 'DATABASE_READ'); return data }
 
 export async function executeProductionTick({ mode, packageSha }) {
-  assertAutomationActivation(JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json', 'utf8')))
+  const activation = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json', 'utf8'))
+  assertAutomationActivation(activation)
+  ensure(activation.runtimeHost?.verified === true && !process.env.VERCEL, 'PERSISTENT_HOST_REQUIRED')
   requireCanonicalR3Readiness()
   const readiness = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json', 'utf8'))
   ensure(readiness.automation?.status === 'DRY_CERTIFIED' && Object.keys(readiness.sourceHashes ?? {}).includes('scripts/mlb-operational-tick.mjs'), 'AUTOMATION_SOURCE_CERTIFICATION')
@@ -28,6 +31,7 @@ export async function executeProductionTick({ mode, packageSha }) {
   ensure(AUTOMATION_MODES.includes(mode) && /^[a-f0-9]{40}$/.test(packageSha), 'ARGUMENTS')
   ensure(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim() === packageSha, 'PACKAGE')
   ensure(!process.env.R2S_VALIDATION_DIR, 'CERTIFICATION_ENVIRONMENT')
+  await runMlbOperationalSchemaPreflight()
   const root = path.join(os.tmpdir(), 'pick-analyzer-mlb-operational-coordinator')
   const liveRoot = path.join(os.tmpdir(), 'pick-analyzer-mlb-operational-live')
   const at = new Date().toISOString(), date = operatingDate(at)
@@ -76,7 +80,7 @@ export async function executeProductionTick({ mode, packageSha }) {
       const pitches = await reconcileAutomatedPitches({ ...args, job: { ...job, ...scope }, store, repository, client })
       args.checkpoint('PITCH_READBACK', { ...pitches, writes: journal.summary() })
       const settlements = []
-      if (['POSTGAME', 'OVERNIGHT'].includes(job.mode)) {
+      if (activation.settlementAutomation === 'ENABLED' && ['POSTGAME', 'OVERNIGHT'].includes(job.mode)) {
         const certification = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json', 'utf8'))
         ensure(certification.settlement?.status === 'CERTIFIED', 'SETTLEMENT_CERTIFICATION_REQUIRED')
         for (const gamePk of scope.gamePks) {

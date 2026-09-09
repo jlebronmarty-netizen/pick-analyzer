@@ -14,12 +14,21 @@
     "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
     "conflicts": 0
   },
-  "reason": "The prepared persistent coordinator requires fresh read-only catalog verification before every invocation. This session connector works, but no unattended connector host or direct database/management credential is available to the scheduler. Existing GitHub fallback invokes another observer and does not supply the certified R2 persistent coordinator or schema preflight.",
+  "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
   "blocker": {
-    "code": "UNATTENDED_SCHEMA_PREFLIGHT_CHANNEL_UNAVAILABLE",
+    "code": "PERSISTENT_EXECUTOR_HOST_NOT_VERIFIED",
     "hardStop": true,
-    "reason": "The prepared persistent coordinator requires fresh read-only catalog verification before every invocation. This session connector works, but no unattended connector host or direct database/management credential is available to the scheduler. Existing GitHub fallback invokes another observer and does not supply the certified R2 persistent coordinator or schema preflight.",
-    "requiredResolution": "Identify/provision the persistent single coordinator and its unattended read-only schema channel using secure credential configuration; never paste credentials in chat.",
+    "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
+    "requiredResolution": "Identify the existing persistent production runner or explicitly designate the current machine, then certify runtime/checkpoint access and activate the same prepared coordinator.",
     "authorizationNeeded": false
+  },
+  "runtimeHost": {
+    "verified": false
+  },
+  "settlementAutomation": "DISABLED",
+  "unattendedPreflight": {
+    "status": "PASS",
+    "endpoint": "mlb-operational-preflight",
+    "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
   }
 }
