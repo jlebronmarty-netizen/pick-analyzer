@@ -1,5 +1,8 @@
 # Project Status
 
+September 9 live continuation: 15 canonical games and 4,160 September 8 dependency pitches were acquired with bounded readback. A later run failed before downstream writes on Node string length while serializing slate evidence. Streaming canonical hashing and private context-sharded checkpoints preserve the digest and freeze contracts; 66 SQL checks, 16 behavior groups, 8 guards, oversized evidence tests and build pass. The certified repair awaits its live retry; repeatability and activation remain pending. No model, 76-feature, preprocessing, policy or DDL change. Raw evidence remains private.
+
+
 Last updated: 2026-09-09 (PRE_NONEMPTY_LIVE_READINESS)
 
 ## Current MLB mission state — pre-nonempty readiness

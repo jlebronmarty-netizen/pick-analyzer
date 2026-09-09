@@ -11,7 +11,30 @@ export function stable(value) {
 }
 
 export function sha256(value) {
-  return crypto.createHash('sha256').update(typeof value === 'string' ? value : stable(value)).digest('hex')
+  const hash = crypto.createHash('sha256')
+  if (typeof value === 'string') return hash.update(value).digest('hex')
+  // Preserve the exact stable() byte contract without constructing one string
+  // for an entire slate's repeated dependency history.
+  const append = (item, arrayElement = false) => {
+    if (Array.isArray(item)) {
+      hash.update('[')
+      for (let i = 0; i < item.length; i += 1) { if (i) hash.update(','); append(item[i], true) }
+      hash.update(']')
+    } else if (item && typeof item === 'object') {
+      hash.update('{')
+      Object.keys(item).sort().forEach((key, index) => {
+        if (index) hash.update(',')
+        hash.update(JSON.stringify(key) + ':'); append(item[key])
+      })
+      hash.update('}')
+    } else {
+      const encoded = JSON.stringify(item)
+      hash.update(encoded === undefined ? (arrayElement ? '' : 'undefined') : encoded)
+    }
+  }
+  if (value === undefined || typeof value === 'function' || typeof value === 'symbol') throw new TypeError('Cannot hash undefined')
+  append(value)
+  return hash.digest('hex')
 }
 
 export function assertStageMode(mode) {

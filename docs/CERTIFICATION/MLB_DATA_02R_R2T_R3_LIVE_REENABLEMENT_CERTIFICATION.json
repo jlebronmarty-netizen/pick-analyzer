@@ -250,7 +250,7 @@
     "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
     "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be46aede40ca583ecfafc9f8675f50cc0a44782d663b2b5f6a60cb8aaf608fc7",
     "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs": "7ca9358eced88174739fe88b09acb6e789e256bf23dd3b6f3795038b41945f74",
-    "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "0206894fad888dab52a6e9b24cf5c3e49a44e03c1f89df8fdbe43378f351e769",
+    "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
     "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs": "ba5a7b74fa1b8c044835c14415b99655fc1bf213f1693871c47ad0bd8d14da81",
     "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs": "1d6b0af10645ad3de4c87f9dc293a5ef8adf67f8f52f0cac6f8eea4e06c2e138",
     "scripts/mlb-data-02r-r2h-full-dry-integration.mjs": "a876c44443fb79ee75d36181a62d1be0c0d103e7bbdc351e205fc2c6056d1cac",
@@ -258,7 +258,7 @@
     "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "d243642d67bd65e3f3d1744e651192cbf12f1899b382ebbb8e629faebb58b294",
     "scripts/mlb-data-02r-r2t-market-binding.mjs": "2d3a14c53f8fca19c32fba73303c22f2f96de4694588e891075670efbe49a067",
     "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
-    "scripts/mlb-data-02r-r2t-private-run-store.mjs": "bd3323062af220b4f83ee55811d025cf97ce21d4b768a5facb16aa4eb4cf2f6e",
+    "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
     "scripts/mlb-data-02r-r2t-production-bindings.mjs": "2dc87eead0e6bc5488f12ea91580330bf181e45b92c4829f979e1bf6ccafa768",
     "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "94665469a88d8601dbdd2410d07ad25067ce6419801a6038b7ee4827f30e512d",
     "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "bd726afa116235412a794f44028093b1c23993674a14852cf78b25ff8959a0de",
@@ -381,5 +381,11 @@
     "disposableRegressionChecks": 66,
     "priorFrozenPackage": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
     "productionExecutionThisRevision": false
+  },
+  "largeCheckpointRevision": {
+    "certificate": "MLB_OPERATIONAL_LARGE_CHECKPOINT_REPAIR.json",
+    "checks": 66,
+    "digestParity": "PASS",
+    "shardedCheckpointReadback": "PASS"
   }
 }

@@ -1,0 +1,73 @@
+{
+  "certificationVerdict": "MLB_OPERATIONAL_LARGE_CHECKPOINT_REPAIR_CERTIFIED",
+  "generatedAt": "2026-09-09T12:58:42.673Z",
+  "basePackageSha": "0f16a4a815375b7f4ecbdd074a985aba1601e655",
+  "packageSha": "ENCLOSING_BOUNDED_COMMIT",
+  "failedRunId": "mlb-operational-8121561b-fbf4-41af-9cac-bb7543aa235a",
+  "failure": "Invalid string length before downstream persistence",
+  "repair": [
+    "Streaming SHA256 preserves exact legacy canonical bytes",
+    "Private atomic checkpoint manifest with independently verified context shards"
+  ],
+  "validators": {
+    "largeEvidence": [
+      "Exact legacy canonical digest parity including nullable and sparse values",
+      "576 MiB evidence exceeds legacy string limit and hashes successfully without contract drift",
+      "Fourteen-game checkpoint shards reconstruct exact evidence and original digest",
+      "Atomic manifest replacement preserves checkpoint across downstream saves",
+      "Changed shard fails closed before evidence use",
+      "Legacy empty checkpoints remain readable"
+    ],
+    "disposableSql": 66,
+    "behavioralGroups": 16,
+    "r3Guards": 5,
+    "operationalGuards": 3,
+    "build": {
+      "exitCode": 0,
+      "pages": 400
+    },
+    "eslint": {
+      "errors": 0,
+      "warnings": 1
+    }
+  },
+  "productionEffectsOfRepair": 0,
+  "sourceHashes": {
+    "artifacts/mlb/mlb-02c-moneyline-baseline-model.json": "30c6e6fd7d3c57e0771c27d6459a7db1853b50a74b6889f0af42f5c0b9706087",
+    "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json": "c81c8f55feb0bef6fbb10e9adb01c4e9e7c2153966e7b8cd05c229ed1105442b",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_DOWNSTREAM_SCHEMA_REVIEW.json": "0a327ebffd62d1aa56491744ad6e636325c7fb30d8df5a414abd20b06eb6bb25",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SCHEMA_REVIEW.json": "9c416227eac19b271cc9d8afc647883d0a13a15c6b2995677c93759349096704",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_NATIVE_SCHEMA_REVIEW.json": "057cc38461b2e5ce2d6fb954c6eda5316c970e4fbfa3ad8dc92c3fef58b6733a",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_RAW_SCHEMA_REVIEW.json": "2388dba409154f57083175319b4e6cd1c953e2fb44484b75655abc58fb5a286e",
+    "docs/CERTIFICATION/mlb-data-02p-official-pick-policy-prep.json": "12a5e90af38bee9b394f78938aef8ffb1d4c386b8d915a2ca5787cb6dea3470a",
+    "package-lock.json": "921fc3e1888157cd4acc3b208c8516649fa65b6124d8ebc759fa25bef25d035d",
+    "package.json": "de9d954c4c94443c6c35425d9d26f93b9ab4e2c4427a1be219d2990d1bfd2edd",
+    "scripts/mlb-data-02f-moneyline-prediction-generation-prep.mjs": "082ca798c70de4d60c7cc32465b39717fd6e4ebbcd4e025a5dee5dc7aa3773cd",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "f1bdc445065e658f535ca2879fc3ce32a4b92f65090a53a406bdecf99550af15",
+    "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
+    "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be46aede40ca583ecfafc9f8675f50cc0a44782d663b2b5f6a60cb8aaf608fc7",
+    "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs": "7ca9358eced88174739fe88b09acb6e789e256bf23dd3b6f3795038b41945f74",
+    "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
+    "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs": "ba5a7b74fa1b8c044835c14415b99655fc1bf213f1693871c47ad0bd8d14da81",
+    "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs": "1d6b0af10645ad3de4c87f9dc293a5ef8adf67f8f52f0cac6f8eea4e06c2e138",
+    "scripts/mlb-data-02r-r2h-full-dry-integration.mjs": "a876c44443fb79ee75d36181a62d1be0c0d103e7bbdc351e205fc2c6056d1cac",
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "3da155d19c7d4a56f3ce77d47fb44a563bd6276b3e77eb7889b65cb2c7b57964",
+    "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "d243642d67bd65e3f3d1744e651192cbf12f1899b382ebbb8e629faebb58b294",
+    "scripts/mlb-data-02r-r2t-market-binding.mjs": "2d3a14c53f8fca19c32fba73303c22f2f96de4694588e891075670efbe49a067",
+    "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
+    "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
+    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "2dc87eead0e6bc5488f12ea91580330bf181e45b92c4829f979e1bf6ccafa768",
+    "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "94665469a88d8601dbdd2410d07ad25067ce6419801a6038b7ee4827f30e512d",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "bd726afa116235412a794f44028093b1c23993674a14852cf78b25ff8959a0de",
+    "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
+    "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "40ff74968c54ab07d99d1e5145eeeb71a9b8c8b275d9d2f902508e89f8030ef2",
+    "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
+    "scripts/mlb-data-02r-r2t-real-feature-champion.mjs": "f9c614afadebc90209e028306eefacb46ab6de4930cbcbb03fdd847a0de3b077",
+    "scripts/mlb-data-02r-r2t-write-journal.mjs": "53b06f154987e2d76efcf9e96279241cc7e0b9bf1bb8f7a2687344ce08340f0b",
+    "scripts/mlb-operational-manual-refresh.mjs": "d451763c2bae56617adc0b55368b4fb0bf958383607184238002e468b30e4b17"
+  },
+  "modelFeaturePolicyChanged": false,
+  "repeatabilityCertified": false,
+  "automationActivation": "DISABLED",
+  "liveRetryPending": true
+}

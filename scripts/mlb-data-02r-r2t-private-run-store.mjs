@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
+import { sha256 } from './mlb-data-02r-r2f-stage-contracts.mjs'
 
 // Operational evidence stays outside the public repository. Exclusive run locks
 // prevent concurrent consumers from racing a provider budget or checkpoint.
@@ -16,11 +17,37 @@ export function createPrivateRunStore(root) {
     if (!/^[a-zA-Z0-9_-]+$/.test(key)) throw new Error('PRIVATE_RUN_KEY_INVALID')
     return path.join(resolved, `${key}.json`)
   }
-  const load = key => fs.existsSync(file(key)) ? JSON.parse(fs.readFileSync(file(key), 'utf8')) : null
+  const load = key => {
+    if (!fs.existsSync(file(key))) return null
+    const value = JSON.parse(fs.readFileSync(file(key), 'utf8'))
+    if (value?.privateContextShards) {
+      if (value.privateContextShards.version !== 1 || !Array.isArray(value.privateContextShards.parts) || value.privateContextShards.parts.length > 50 || !value.evidence || Object.hasOwn(value.evidence, 'contexts')) throw new Error('PRIVATE_CONTEXT_MANIFEST_INVALID')
+      value.evidence.contexts = value.privateContextShards.parts.map(part => {
+        if (!part.key.startsWith(`${key}-context-`)) throw new Error('PRIVATE_CONTEXT_KEY_INVALID')
+        const context = JSON.parse(fs.readFileSync(file(part.key), 'utf8'))
+        if (sha256(context) !== part.digest) throw new Error('PRIVATE_CONTEXT_DIGEST_DRIFT')
+        return context
+      })
+      delete value.privateContextShards
+    }
+    return value
+  }
   const save = (key, value) => {
     const destination = file(key)
     const pending = path.join(resolved, `${key}-${randomUUID()}.pending`)
-    fs.writeFileSync(pending, JSON.stringify(value), { flag: 'wx' })
+    let payload = value
+    if (Array.isArray(value?.evidence?.contexts) && value.evidence.contexts.length) {
+      if (value.evidence.contexts.length > 50) throw new Error('PRIVATE_CONTEXT_CAP')
+      const generation = randomUUID()
+      const parts = value.evidence.contexts.map((context, index) => {
+        const partKey = `${key}-context-${generation}-${index}`
+        fs.writeFileSync(file(partKey), JSON.stringify(context), { flag: 'wx' })
+        return { key: partKey, digest: sha256(context) }
+      })
+      const { contexts: _contexts, ...evidence } = value.evidence
+      payload = { ...value, evidence, privateContextShards: { version: 1, parts } }
+    }
+    fs.writeFileSync(pending, JSON.stringify(payload), { flag: 'wx' })
     fs.renameSync(pending, destination)
   }
   let lock = null
