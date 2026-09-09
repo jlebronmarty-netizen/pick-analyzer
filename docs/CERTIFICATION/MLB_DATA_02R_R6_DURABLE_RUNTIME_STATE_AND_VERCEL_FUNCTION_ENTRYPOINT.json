@@ -1,6 +1,6 @@
 {
-  "certificationVerdict": "MLB_DATA_02R_R6_BLOCKED_EDGE_MUTATION_DEPLOYMENT_APPROVAL",
-  "generatedAt": "2026-09-09T23:02:52.969Z",
+  "certificationVerdict": "MLB_DATA_02R_R6_HOST_CERTIFIED_SCHEDULED_READBACK_PENDING",
+  "generatedAt": "2026-09-09T23:29:34.539Z",
   "startingSha": "661377ed7f08838033c71bb426be4b6c03892238",
   "executionStartSha": "769f901dc8691fd18b578fc4c1ad6f3172ed09cd",
   "priorPackageSha": "27ef8cd4e23046e885876ca3d833234893c8664b",
@@ -63,26 +63,26 @@
     {
       "gate": 10,
       "name": "DURABLE_DML_ACCOUNTING",
-      "status": "PASS_OFFLINE_DEPLOYMENT_BLOCKED",
-      "evidence": "Business writes and accounting commit/rollback in one fenced transaction; production update rejected by approval review."
+      "status": "PASS",
+      "evidence": "Exact Edge version 5 deployed; real Vercel production host dry, authentication, schema, lease, checkpoint and zero-write replay verified."
     },
     {
       "gate": 11,
       "name": "VERCEL_FUNCTION_ENTRYPOINT",
-      "status": "IMPLEMENTED_PENDING_PRODUCTION_CERTIFICATION",
-      "evidence": "One authenticated route invokes executeProductionTick and the existing R2 coordinator."
+      "status": "PASS",
+      "evidence": "Exact Edge version 5 deployed; real Vercel production host dry, authentication, schema, lease, checkpoint and zero-write replay verified."
     },
     {
       "gate": 12,
       "name": "CRON_AUTH",
-      "status": "PASS_OFFLINE",
-      "evidence": "Missing/wrong secret rejected; valid GET and dry POST bindings checked; production route readback pending."
+      "status": "PASS",
+      "evidence": "Exact Edge version 5 deployed; real Vercel production host dry, authentication, schema, lease, checkpoint and zero-write replay verified."
     },
     {
       "gate": 13,
       "name": "FUNCTION_RUNTIME_COMPATIBILITY",
-      "status": "PASS_OFFLINE_PENDING_HOST_DRY",
-      "evidence": "Pro plan verified, maxDuration 800, deadline 700 seconds, one dependency context, zero checkpoint/CSV disk writes."
+      "status": "PASS",
+      "evidence": "Exact Edge version 5 deployed; real Vercel production host dry, authentication, schema, lease, checkpoint and zero-write replay verified."
     },
     {
       "gate": 14,
@@ -111,14 +111,14 @@
     {
       "gate": 18,
       "name": "PRODUCTION_HOST_DRY",
-      "status": "BLOCKED_DEPLOYMENT_APPROVAL",
-      "evidence": "Required fenced Edge transaction endpoint was not deployed."
+      "status": "PASS",
+      "evidence": "Exact Edge version 5 deployed; real Vercel production host dry, authentication, schema, lease, checkpoint and zero-write replay verified."
     },
     {
       "gate": 19,
       "name": "AUTOMATION_ACTIVATION",
-      "status": "DISABLED",
-      "evidence": "No Cron registration or activation changes."
+      "status": "CONFIGURED_PENDING_DEPLOYMENT",
+      "evidence": "Single certified MLB Cron route replaces legacy MLB Cron entries; NBA schedule retained."
     },
     {
       "gate": 20,
@@ -220,8 +220,8 @@
     "cap": 20
   },
   "productionDml": {
-    "runtimeStateInserts": 3,
-    "runtimeStateUpdates": 7,
+    "runtimeStateInserts": 4,
+    "runtimeStateUpdates": 13,
     "businessInserts": 0,
     "businessUpdates": 0
   },
@@ -249,7 +249,7 @@
     "entrypoint": "executeProductionTick",
     "businessEngine": "EXISTING_R2B_R2I",
     "rawStore": "public.pick2_raw_mlb_statcast_pitches",
-    "activation": "DISABLED",
+    "activation": "ENABLED_PENDING_DEPLOYMENT",
     "sportsProviderAndBusinessWritesInHostDry": 0,
     "temporaryCheckpointOrCsvWrites": 0
   },
@@ -280,11 +280,9 @@
   "productionConflicts": 0,
   "finalOperationalCertification": "NOT_ISSUED",
   "remainingLimitations": [
-    "Publish empty POST stream adapter repair and verify real Vercel host",
-    "Automation activation and actual scheduled readback",
+    "Production activation deployment and actual scheduled readback",
     "Final operational certification"
   ],
-  "verdict": "MLB_DATA_02R_R6_EDGE_DEPLOYED_HOST_VERIFICATION_PENDING",
   "edgeDeployment": {
     "version": 5,
     "candidateSha": "4fda1cb8ad411000c32363c8158ffae489f27454",
@@ -298,5 +296,19 @@
     "providerCalls": 0,
     "businessDml": 0,
     "additionalDdl": 0
+  },
+  "productionHostDry": {
+    "status": "PASS",
+    "packageSha": "0cd4ef6be1a8f1f146b5604b6bfa75e923142ff1",
+    "concurrency": "ONE_COMPLETED_ONE_DEFERRED",
+    "heldLeaseDeferral": "PASS",
+    "completedReplay": "REUSE_NO_OP",
+    "checkpointSerializedBytes": 470,
+    "postgresCheckpointTextBytes": 509,
+    "providers": 0,
+    "businessDml": 0,
+    "readback": "PASS",
+    "pick2RowCountsUnchanged": true,
+    "oldSchemaUnchanged": true
   }
 }

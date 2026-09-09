@@ -1,5 +1,5 @@
 {
-  "activation": "DISABLED",
+  "activation": "ENABLED",
   "hostCount": 1,
   "dryCertification": "PASS",
   "firstNonemptyRun": {
@@ -14,24 +14,23 @@
     "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
     "conflicts": 0
   },
-  "reason": "R6 exact migration and durable lease production readback pass. Durable R2 recovery and Vercel host code pass offline validation. Automatic approval review rejected deployment of the fenced business-write Edge endpoint; explicit endpoint deployment approval is required before host dry invocation and activation.",
-  "blocker": {
-    "code": "R6_EDGE_MUTATION_DEPLOYMENT_APPROVAL_REQUIRED",
-    "hardStop": true,
-    "reason": "R6 exact migration and durable lease production readback pass. Durable R2 recovery and Vercel host code pass offline validation. Automatic approval review rejected deployment of the fenced business-write Edge endpoint; explicit endpoint deployment approval is required before host dry invocation and activation.",
-    "requiredResolution": "Authorize deploying the reviewed service-only mlb-runtime-state fenced business-write handler; no additional DDL. Then verify real Vercel host, activate existing Cron path and observe scheduled readback.",
-    "authorizationNeeded": true
-  },
+  "reason": "Production Function dry invocation, actual-host concurrency, durable checkpoint readback, zero-write replay and fresh unattended schema preflight pass.",
+  "blocker": null,
   "runtimeHost": {
     "type": "VERCEL_PRODUCTION_FUNCTION",
     "scheduler": "VERCEL_CRON",
     "path": "/api/cron/mlb-operational",
-    "verified": false
+    "verified": true,
+    "verifiedPackageSha": "0cd4ef6be1a8f1f146b5604b6bfa75e923142ff1",
+    "schedule": "*/15 * * * *",
+    "hostDry": "HOST_DRY_PASS",
+    "concurrency": "ONE_COMPLETED_ONE_DEFERRED"
   },
   "settlementAutomation": "DISABLED",
   "unattendedPreflight": {
     "status": "VERCEL_EDGE_PASS",
     "endpoint": "mlb-operational-preflight",
     "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
-  }
+  },
+  "scheduledProductionReadback": "PENDING"
 }

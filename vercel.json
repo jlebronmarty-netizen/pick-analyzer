@@ -1,16 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron/operating-day",
-      "schedule": "7-57/10 * * * *"
+      "path": "/api/cron/mlb-operational",
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/cron/nba-current-era-shadow",
       "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "20 12 * * *"
     }
   ]
 }

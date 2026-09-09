@@ -1,5 +1,15 @@
 # MLB operational recovery
 
+## Current R6 production contract
+
+The exact eight-file Edge candidate is deployed as version 5 with custom service-only bearer authentication. The production Function passes actual-host dry invocation, lease deferral, concurrent exclusion, durable checkpoint and completed-run reuse. The former endpoint-approval blocker below is resolved. The authoritative state is `public.pick2_mlb_runtime_state`; historical filesystem recovery instructions below apply only to the retained manual-run evidence.
+
+The activated configuration uses one MLB schedule: `/api/cron/mlb-operational` at `*/15 * * * *` UTC. It replaces the legacy operating-day and MLB Statcast cron entries and preserves the NBA cron. GET runs the existing coordinator; authenticated empty POST is a provider-free host probe. Deployment is the activation boundary; observe a real scheduled run before final certification.
+
+Before recovery, read the current RUN, LEASE and MISSION records securely. Never reset counters or clear a pending run. An active lease must defer other hosts. Release/expiry permits the same frozen package and as-of to resume; package/date mismatch is a hard stop. Lost provider acquisition without canonical evidence remains blocked and consumed. Data Health exposes sanitized current durable accounting; mission Odds began this activation at 2/20.
+
+To contain a failure, disable the MLB cron and activation flag in a bounded normal deployment; do not alter the NBA schedule. Preserve the in-flight durable record, all canonical rows and receipts. Read back pending operations before retrying. Do not delete runtime rows, reset budgets, run extra DDL or silently change a frozen package. Settlement automation remains disabled.
+
 Real nonempty production refresh and repeatability are certified. The coordinator remains **disabled** pending a verified persistent executor host. Unattended schema preflight is now production-verified; do not deploy the filesystem-based runner on independent ephemeral hosts.
 
 ## Before each invocation
