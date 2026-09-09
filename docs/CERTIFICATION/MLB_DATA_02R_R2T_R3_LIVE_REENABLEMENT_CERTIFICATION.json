@@ -266,7 +266,7 @@
     "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "40ff74968c54ab07d99d1e5145eeeb71a9b8c8b275d9d2f902508e89f8030ef2",
     "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
     "scripts/mlb-data-02r-r2t-real-feature-champion.mjs": "f9c614afadebc90209e028306eefacb46ab6de4930cbcbb03fdd847a0de3b077",
-    "scripts/mlb-data-02r-r2t-write-journal.mjs": "53b06f154987e2d76efcf9e96279241cc7e0b9bf1bb8f7a2687344ce08340f0b",
+    "scripts/mlb-data-02r-r2t-write-journal.mjs": "7f5ab9a2a5ad83e9f305b38df4e3f7299907ee1022ecd6887c4dd1411e5faefa",
     "scripts/mlb-operational-manual-refresh.mjs": "d451763c2bae56617adc0b55368b4fb0bf958383607184238002e468b30e4b17"
   },
   "manualEntrypoint": "scripts/mlb-operational-manual-refresh.mjs",
@@ -391,6 +391,11 @@
   "identityReadRevision": {
     "certificate": "MLB_OPERATIONAL_IDENTITY_READ_BATCH_REPAIR.json",
     "actualReadback": "PASS",
+    "disposableChecks": 66
+  },
+  "journalReadbackRevision": {
+    "certificate": "MLB_OPERATIONAL_JOURNAL_READBACK_REPAIR.json",
+    "actualRecovery": "PASS",
     "disposableChecks": 66
   }
 }

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-09T13:16:33.049Z",
-  "verdict": "MLB_OPERATIONAL_IDENTITY_READ_BATCH_REPAIR_CERTIFIED",
+  "generatedAt": "2026-09-09T13:32:39.628Z",
+  "verdict": "MLB_OPERATIONAL_JOURNAL_READBACK_REPAIR_CERTIFIED",
   "operationalCertified": false,
   "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
   "packageSha": "ENCLOSING_SANITIZED_COMMIT",
@@ -71,10 +71,15 @@
       "certificate": "MLB_OPERATIONAL_IDENTITY_READ_BATCH_REPAIR.json",
       "status": "PASS",
       "liveRetryPending": true
+    },
+    "journalReadbackRepair": {
+      "certificate": "MLB_OPERATIONAL_JOURNAL_READBACK_REPAIR.json",
+      "status": "PASS",
+      "liveRetryPending": true
     }
   },
   "providerAccounting": {
-    "MLBOfficial": 5,
+    "MLBOfficial": 6,
     "sharedStatcast": 1,
     "OddsAPI": 0,
     "BALLDONTLIE": 0,
@@ -168,21 +173,35 @@
           "MLB_OFFICIAL": 1
         },
         "productionDml": 0
+      },
+      {
+        "runId": "mlb-operational-776731d2-4058-43cd-b731-4f8dcce49fae",
+        "runDate": "2026-09-09",
+        "runAsOf": "2026-09-09T13:19:42.866Z",
+        "packageSha": "fdf495eb476ab2618f53a82d2313c0453567b261",
+        "status": "BLOCKED_JOURNAL_READBACK_RECOVERED",
+        "eligibleGames": 14,
+        "blockedGames": 1,
+        "providerCalls": {
+          "MLB_OFFICIAL": 1
+        },
+        "productionDml": 140,
+        "independentSnapshotReadback": "140_APPLIED_ZERO_CONFLICTS"
       }
     ],
     "nonProviderActivity": "Read-only Supabase metadata/evidence, Git publication, production version GET, OS-temp-only pinned PostgreSQL test-engine package download."
   },
   "productionDml": {
-    "insert": 4175,
+    "insert": 4315,
     "update": 0,
     "delete": 0,
-    "total": 4175
+    "total": 4315
   },
   "productionDdl": {
     "migrationApplications": 1,
     "scope": "Exact authorized six-domain uniqueness proposal; no other DDL."
   },
-  "liveRefreshExecutions": 5,
+  "liveRefreshExecutions": 6,
   "automationChanges": 0,
   "cronChanges": 0,
   "settlementWrites": 0,

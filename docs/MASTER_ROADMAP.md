@@ -1,5 +1,8 @@
 # Master Roadmap
 
+The 140-snapshot production insert was independently verified across all 2,800 planned fields after the old journal readback URL failed. The repaired byte-bounded journal recovered APPLIED without repeating DML. Nine batching/recovery checks, 66 SQL checks, 16 behavior groups, eight guards, lint and the 400-page build pass. Mission cumulative: six MLB calls, one Statcast call, zero Odds calls; 4,315 inserts (15 native, 4,160 raw, 140 snapshots). Prediction/value/pick stages, successful nonempty refresh, repeatability and activation remain pending. No extra DDL or model/policy changes.
+
+
 The repaired live path saved its 14-game, 846 MB private checkpoint successfully, then stopped before writes on a 30,723-character snapshot read URL (HTTP 400). Byte-bounded identity reads now resolve the actual 140-identity slate in 11 successful read-only requests. Six batching checks, 66 SQL checks, 16 behavior groups, eight guards, lint and the 400-page build pass. A new certified-package live retry is pending; automation remains disabled. Mission totals so far: five MLB calls, one Statcast call, zero Odds calls, 15 native inserts and 4,160 dependency pitch inserts; no new DDL.
 
 

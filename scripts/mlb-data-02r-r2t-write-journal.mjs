@@ -1,4 +1,5 @@
 import { sha256 } from './mlb-data-02r-r2f-stage-contracts.mjs'
+import { partitionReadIdentities } from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
 
 const identityColumns = Object.freeze({
   pick2_mlb_games: 'game_pk', pick2_mlb_players: 'mlbam_person_id', pick2_raw_mlb_statcast_pitches: 'id',
@@ -33,8 +34,14 @@ export function createWriteJournal({ client, store, runContext }) {
   async function inspect(entry) {
     const column = identityColumns[entry.table]
     const ids = entry.rows.map(r => r[column])
-    const { data, error } = await client.from(entry.table).select('*').in(column, ids).limit(ids.length + 1)
-    ensure(!error && Array.isArray(data) && data.length <= ids.length, 'READBACK_FAILED')
+    const data = []
+    for (const batch of partitionReadIdentities(ids)) {
+      const result = await client.from(entry.table).select('*').in(column, batch).limit(batch.length + 1)
+      ensure(!result.error && Array.isArray(result.data) && result.data.length <= batch.length, 'READBACK_FAILED')
+      ensure(result.data.every(row => batch.some(id => String(id) === String(row[column]))), 'READBACK_SCOPE')
+      data.push(...result.data)
+    }
+    ensure(new Set(data.map(row => String(row[column]))).size === data.length, 'READBACK_DUPLICATE')
     if (data.length === entry.rows.length && entry.rows.every(p => data.some(r => String(r[column]) === String(p[column]) && matches(r, p, entry.operation === 'UPDATE')))) return 'APPLIED'
     if (entry.operation === 'INSERT' && data.length === 0) return 'NOT_APPLIED'
     if (entry.operation === 'UPDATE' && data.length === 1 && matches(data[0], entry.expectedOld)) return 'NOT_APPLIED'
