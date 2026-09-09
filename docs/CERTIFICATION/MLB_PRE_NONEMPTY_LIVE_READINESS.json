@@ -336,7 +336,7 @@
     "src/app/api/mlb/performance/route.ts": "bbb38e8cc200396b0417f09cf2863d9c6439f0d8d4f1ca9fa8e6952f3fb76f5c",
     "src/components/pick2/MlbToday.tsx": "00a6e704557d1771f80c68d916debf1b8b5174dd56edd21ec654cc5b9cb41154",
     "src/components/pick2/CanonicalDashboardBoundary.tsx": "547379819564ac87b38b58d643c0419cace11891d0a0671c3e977455b65da409",
-    "src/components/pick2/MlbValueBoardClient.tsx": "bf25c1912a4882aa235d6b22830767457f030c475ba1be9404223d0cca2beb4e",
+    "src/components/pick2/MlbValueBoardClient.tsx": "150d61a6c979036c1bd8015d522a298bb96fa4bb49a90035fd257f722a5a87cc",
     "src/components/dashboard/DashboardShellClient.tsx": "de8385945419569fdba9257a2df95f249ee8177dfa89c2b450b60b17a4335b03",
     "src/services/pick2-mlb-value-board.service.ts": "7e2c807d6915c897354cb63aceafd05a8766a35a5030b8c07647c6d2bb86bc9b",
     "src/services/pick2-operational-projection.ts": "172dd368a79c688b613173fa9f10cdef278de562fdb0c7eb3db2c763863c6a6c",
@@ -347,5 +347,12 @@
     "src/services/pick2-mlb-health.service.ts": "5aefc5f4d726323d0390e7038c8c9ffed93844e9615167fb9de8a50f83205068",
     "src/services/pick2-operational-telemetry.ts": "696decb4a3ccfe6570f87d41fd621ed89bee7d413f887bd96eae7ec8980df22d",
     "src/types/pick2-value-board.ts": "2da78bf1bb81ff0cc589a35780900d65f91a6f0d6089b350f6482d6247f56ec8"
+  },
+  "nonemptyUiRevision": {
+    "certificate": "MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json",
+    "reason": "Explicit Puerto Rico timezone prevents server/browser hydration drift with real populated rows",
+    "checks": 12,
+    "providerCalls": 0,
+    "productionDml": 0
   }
 }

@@ -2,7 +2,24 @@
   "activation": "DISABLED",
   "hostCount": 1,
   "dryCertification": "PASS",
-  "firstNonemptyRun": null,
-  "repeatability": null,
-  "reason": "Activation requires a successful nonempty current-slate run and subsequent real repeatability certification. No cron or scheduler has been enabled."
+  "firstNonemptyRun": {
+    "status": "CANONICAL_STAGES_READBACK_COMPLETE",
+    "runId": "mlb-operational-04035c55-b6b8-47f6-9882-4553fc43df85",
+    "eligibleGames": 14,
+    "packageSha": "633768729b212746d03a5bf4d2ae542d1d84f945"
+  },
+  "repeatability": {
+    "verdict": "MLB_DATA_02R_REPEATABILITY_CERTIFIED",
+    "firstRunId": "mlb-operational-04035c55-b6b8-47f6-9882-4553fc43df85",
+    "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
+    "conflicts": 0
+  },
+  "reason": "The prepared persistent coordinator requires fresh read-only catalog verification before every invocation. This session connector works, but no unattended connector host or direct database/management credential is available to the scheduler. Existing GitHub fallback invokes another observer and does not supply the certified R2 persistent coordinator or schema preflight.",
+  "blocker": {
+    "code": "UNATTENDED_SCHEMA_PREFLIGHT_CHANNEL_UNAVAILABLE",
+    "hardStop": true,
+    "reason": "The prepared persistent coordinator requires fresh read-only catalog verification before every invocation. This session connector works, but no unattended connector host or direct database/management credential is available to the scheduler. Existing GitHub fallback invokes another observer and does not supply the certified R2 persistent coordinator or schema preflight.",
+    "requiredResolution": "Identify/provision the persistent single coordinator and its unattended read-only schema channel using secure credential configuration; never paste credentials in chat.",
+    "authorizationNeeded": false
+  }
 }

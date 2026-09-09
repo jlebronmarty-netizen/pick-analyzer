@@ -77,6 +77,7 @@ function american(value: number) {
 function shortTime(value: string | null) {
   if (!value) return 'TBD'
   return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Puerto_Rico',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

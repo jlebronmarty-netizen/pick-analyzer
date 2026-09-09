@@ -1,23 +1,18 @@
 # Project Status
 
-The 140-snapshot production insert was independently verified across all 2,800 planned fields after the old journal readback URL failed. The repaired byte-bounded journal recovered APPLIED without repeating DML. Nine batching/recovery checks, 66 SQL checks, 16 behavior groups, eight guards, lint and the 400-page build pass. Mission cumulative: six MLB calls, one Statcast call, zero Odds calls; 4,315 inserts (15 native, 4,160 raw, 140 snapshots). Prediction/value/pick stages, successful nonempty refresh, repeatability and activation remain pending. No extra DDL or model/policy changes.
+Last updated: 2026-09-09 (MLB_DATA_02R_REPEATABILITY_CERTIFIED)
 
+## Current MLB mission state
 
-The repaired live path saved its 14-game, 846 MB private checkpoint successfully, then stopped before writes on a 30,723-character snapshot read URL (HTTP 400). Byte-bounded identity reads now resolve the actual 140-identity slate in 11 successful read-only requests. Six batching checks, 66 SQL checks, 16 behavior groups, eight guards, lint and the 400-page build pass. A new certified-package live retry is pending; automation remains disabled. Mission totals so far: five MLB calls, one Statcast call, zero Odds calls, 15 native inserts and 4,160 dependency pitch inserts; no new DDL.
+Two genuine September 9 production refreshes from `633768729b212746d03a5bf4d2ae542d1d84f945` passed independent readback, exact 76-vector/Champion parity, immutable-history preservation and zero-cap replay. First: 14 eligible games, 14 predictions, 306 observations/values and eight Official Picks. Second: 13 eligible games, 13 predictions, 286 observations/values and seven Official Picks. The second reused 130 snapshots, 104 daily rows and 13 market mappings; new schedule evidence and missing starter evidence were blocked independently.
 
+Mission accounting: MLB Official 14, Statcast 1, Odds 2/20; 5,667 inserts, one bounded update, zero pending writes/conflicts/leakage. No additional DDL. Original 24 predictions and five Official Picks remain unchanged.
 
-September 9 live continuation: 15 canonical games and 4,160 September 8 dependency pitches were acquired with bounded readback. A later run failed before downstream writes on Node string length while serializing slate evidence. Streaming canonical hashing and private context-sharded checkpoints preserve the digest and freeze contracts; 66 SQL checks, 16 behavior groups, 8 guards, oversized evidence tests and build pass. The certified repair awaits its live retry; repeatability and activation remain pending. No model, 76-feature, preprocessing, policy or DDL change. Raw evidence remains private.
+Automation is implemented and dry-certified, with real repeatability now certified, but remains disabled. The hard stop is an unavailable unattended read-only schema-preflight connection on a verified persistent single coordinator. Required next gates: configure that connection, fresh preflight, activation, production automation readback, then final operational certification. No new permission is required for already-authorized activation once the connection is available.
 
+Validation: 66 SQL integration checks, 16 behavior groups, eight guard groups, nine identity/recovery checks, 27 real-vector checks, exact first-run readback after the second run, lint and 400-page build. Populated Today/Value Board/Data Health pass 12 mobile/desktop/API checks; explicit Puerto Rico formatting fixes hydration drift. No fixture fallback, provider calls or production mutations in browser verification. Batter output remains empty under the certified current-game contract; no batter input is manufactured. Settlement is implemented/certified, with no production settlement or supported ROI/CLV sample yet.
 
-Last updated: 2026-09-09 (PRE_NONEMPTY_LIVE_READINESS)
-
-## Current MLB mission state — pre-nonempty readiness
-
-The one authorized live run from `47ee366f25390c5c9e805903bcd8e4cb168fdadc` returned `NO_VALID_PREGAME_SLATE` with 15 non-pregame games, one MLB Official request and zero production writes. Under the subsequent authorization, automation implementation/dry certification, settlement/performance, Today/Value Board/Data Health and recovery tooling are complete without another live refresh. The canonical report is `docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json`; its audit and `docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md` define coverage and activation prerequisites.
-
-Validation: 16 behavioral groups, 66 existing disposable PostgreSQL integration checks, five R3 guard groups, three operational groups, 12 mobile/desktop/API checks, passing lint and a 400-page build. Final browser validation observes zero forbidden requests; canonical pages no longer mount the legacy dashboard provider that initializes model weights. All 19 inherited artifacts and protected directories remain untouched. This work session made no providers, production DML/DDL, cron changes, environment changes or automation activation.
-
-Only the genuinely live gates remain: a successful nonempty pregame production refresh, subsequent real repeatability, dependent automation activation, and final operational certification. The prepared single coordinator retains the fresh schema-connector preflight and existing provider/DML budgets; no empty/postgame substitute may satisfy these gates.
+Canonical evidence: `docs/CERTIFICATION/MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json` and its audit. The recovery runbook records the exact activation blocker. All 19 inherited artifacts, `.tmp/` and `.worktrees/` remain untouched.
 
 ## Historical prerequisite state — DDL, R2T-R2 and R3
 
