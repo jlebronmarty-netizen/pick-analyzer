@@ -13,7 +13,7 @@
     {
       "gate": 2,
       "name": "MLB_02R_R4_UNATTENDED_CONNECTION_INVENTORY",
-      "status": "LOCAL_AND_EDGE_COMPLETE_VERCEL_READBACK_PENDING"
+      "status": "COMPLETE"
     },
     {
       "gate": 3,
@@ -281,7 +281,7 @@
   "sourceHashes": {
     "scripts/mlb-operational-tick.mjs": "95c69c6449d0d1221f060f3fd4ccac4038d923ab147b84e70b411bcf384d7b1e",
     "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
-    "src/services/pick2-mlb-unattended-preflight.ts": "74e8676f4d7475a9b402bcabb9f844bfc0061a464aee0531431a590f840b11f3",
+    "src/services/pick2-mlb-unattended-preflight.ts": "ccfe7dcf812f41c8fb9f7602d7fa7a45bec67eef942198fc1b6257a6f39f1cef",
     "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
     "supabase/functions/mlb-operational-preflight/index.ts": "bde60830dfa75e0778da8db2047ab8d3cfeda323eb426656f1b0d5c09b39bc03",
     "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
@@ -289,7 +289,7 @@
     "scripts/mlb-operational-schema-preflight-review.mjs": "39198b35a636e21225f47e452987ce6cbb92e1471ee8bd4dadd4ee37715bb935",
     "tsconfig.json": "32b78a77b590d611e85442da45aa0909c35d2c910a2a5b1aaa3f1d7e94a5fc95",
     "scripts/mlb-operational-r4-validate.mjs": "086101d60828bca69afb3b29169567bcb056dbe3ae371a780bc69217f70764ec",
-    "src/app/api/admin/mlb-operational-preflight/route.ts": "2fe24783e0e2a85d472faf6f1fca7b1b0c899328a70f5bbab94fccf0e2c3cea7"
+    "src/app/api/admin/mlb-operational-preflight/route.ts": "7162661a36e47f2467c0d754537371997315447a63594726c9f01a159f3d65f9"
   },
   "audit": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_AUDIT.md",
   "build": {
@@ -297,6 +297,75 @@
     "exitCode": 0,
     "staticPages": 400
   },
-  "productionVercelReadback": "REQUIRED_AFTER_PUBLICATION",
-  "lint": "PASS"
+  "productionVercelReadback": {
+    "status": "BLOCKED_UNDER_DIAGNOSIS",
+    "packageSha": "8b4ff2b379495075a4d6d116be988033ff19de6b",
+    "anonymousHttp": 401,
+    "authenticatedHttp": 503,
+    "queryRejectedHttp": 400,
+    "postHttp": 405
+  },
+  "lint": "PASS",
+  "connectionInventory": [
+    {
+      "name": "SUPABASE_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_URL",
+      "present": true,
+      "serverOnly": false,
+      "scope": "production"
+    },
+    {
+      "name": "SUPABASE_ANON_KEY",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "present": false,
+      "serverOnly": false,
+      "scope": "production"
+    },
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY",
+      "present": true,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "SUPABASE_DB_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "DATABASE_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "DIRECT_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "SUPABASE_ACCESS_TOKEN",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production"
+    },
+    {
+      "name": "CRON_SECRET",
+      "present": true,
+      "serverOnly": true,
+      "scope": "production"
+    }
+  ]
 }

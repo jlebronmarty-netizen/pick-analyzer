@@ -19,7 +19,9 @@ export async function GET(request: Request) {
     const preflight = await runMlbOperationalSchemaPreflight()
     return reply({ status: 'PASS', packageSha: process.env.VERCEL_GIT_COMMIT_SHA ?? null, connectionInventory, preflight,
       automationActivation: activation.activation, runtimeBinding: activation.runtimeHost.verified ? 'PERSISTENT_HOST_VERIFIED' : 'PERSISTENT_EXECUTOR_HOST_REQUIRED', providerCalls: 0, productionDml: 0, productionDdl: 0 })
-  } catch {
-    return reply({ status: 'BLOCKED', reason: 'UNATTENDED_PREFLIGHT_FAILED', connectionInventory, providerCalls: 0, productionDml: 0, productionDdl: 0 }, 503)
+  } catch (error) {
+    const codes = new Set(['PREFLIGHT_VERSION_CONTRACT', 'PREFLIGHT_CREDENTIALS', 'PREFLIGHT_CONNECTION', 'PREFLIGHT_HTTP', 'PREFLIGHT_CLOCK', 'PREFLIGHT_SCHEMA_CONTRACT'])
+    const reason = error instanceof Error && (codes.has(error.message) || /^PREFLIGHT_HTTP_[1-5][0-9]{2}$/.test(error.message)) ? error.message : 'UNATTENDED_PREFLIGHT_FAILED'
+    return reply({ status: 'BLOCKED', reason, connectionInventory, providerCalls: 0, productionDml: 0, productionDdl: 0 }, 503)
   }
 }

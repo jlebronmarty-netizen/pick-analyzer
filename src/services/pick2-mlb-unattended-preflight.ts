@@ -6,13 +6,13 @@ export async function runMlbOperationalSchemaPreflight() {
     || certificate.champion !== 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
     || certificate.featureSet !== 'MLB_ML_FEATURE_SET_V1' || certificate.featureCount !== 76
     || certificate.policy !== 'MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1') throw Error('PREFLIGHT_VERSION_CONTRACT')
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, '')
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
   if (url !== 'https://ynuocvexviorgdjrfthw.supabase.co' || !key) throw Error('PREFLIGHT_CREDENTIALS')
   const response = await fetch(`${url}/functions/v1/mlb-operational-preflight`, {
     headers: { authorization: `Bearer ${key}`, apikey: key }, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(35000),
   }).catch(() => { throw Error('PREFLIGHT_CONNECTION') })
-  if (!response.ok) throw Error('PREFLIGHT_HTTP')
+  if (!response.ok) throw Error(`PREFLIGHT_HTTP_${response.status}`)
   const result = await response.json()
   const lead = Date.parse(result.checkedAt) - Date.now()
   if (!Number.isFinite(lead) || lead > 15000) throw Error('PREFLIGHT_CLOCK')

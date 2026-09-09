@@ -348,11 +348,12 @@
     "src/services/pick2-operational-telemetry.ts": "696decb4a3ccfe6570f87d41fd621ed89bee7d413f887bd96eae7ec8980df22d",
     "src/types/pick2-value-board.ts": "2da78bf1bb81ff0cc589a35780900d65f91a6f0d6089b350f6482d6247f56ec8",
     "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
-    "src/services/pick2-mlb-unattended-preflight.ts": "74e8676f4d7475a9b402bcabb9f844bfc0061a464aee0531431a590f840b11f3",
+    "src/services/pick2-mlb-unattended-preflight.ts": "ccfe7dcf812f41c8fb9f7602d7fa7a45bec67eef942198fc1b6257a6f39f1cef",
     "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
     "supabase/functions/mlb-operational-preflight/index.ts": "bde60830dfa75e0778da8db2047ab8d3cfeda323eb426656f1b0d5c09b39bc03",
     "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
-    "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154"
+    "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154",
+    "src/app/api/admin/mlb-operational-preflight/route.ts": "7162661a36e47f2467c0d754537371997315447a63594726c9f01a159f3d65f9"
   },
   "nonemptyUiRevision": {
     "certificate": "MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json",
