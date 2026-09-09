@@ -1,0 +1,286 @@
+{
+  "certificationVerdict": "MLB_DATA_02R_R6_BLOCKED_EDGE_MUTATION_DEPLOYMENT_APPROVAL",
+  "generatedAt": "2026-09-09T23:02:52.969Z",
+  "startingSha": "661377ed7f08838033c71bb426be4b6c03892238",
+  "executionStartSha": "769f901dc8691fd18b578fc4c1ad6f3172ed09cd",
+  "priorPackageSha": "27ef8cd4e23046e885876ca3d833234893c8664b",
+  "finalSha": "ENCLOSING_BOUNDED_COMMIT",
+  "gates": [
+    {
+      "gate": 1,
+      "name": "DURABLE_STATE_INVENTORY",
+      "status": "COMPLETE",
+      "evidence": "Existing-table inventory retained in R6 schema-requirement certificate."
+    },
+    {
+      "gate": 2,
+      "name": "SCHEMA_REQUIREMENT",
+      "status": "APPLIED_AND_VERIFIED",
+      "evidence": "Only the exact SHA-authorized migration; independent production catalog and immediate 82-table count readback."
+    },
+    {
+      "gate": 3,
+      "name": "DISTRIBUTED_LOCK",
+      "status": "PASS",
+      "evidence": "Production state-only Edge lease with holder, expiry, renewal and fencing."
+    },
+    {
+      "gate": 4,
+      "name": "CROSS_INSTANCE_LOCK",
+      "status": "PASS",
+      "evidence": "Two concurrent production requests: one acquired, one deferred; release/reacquire and stale-owner rejection verified."
+    },
+    {
+      "gate": 5,
+      "name": "COMPACT_CHECKPOINT",
+      "status": "PASS_OFFLINE",
+      "evidence": "Only frozen scope, hashes, canonical snapshot/market references, counts and stage metadata."
+    },
+    {
+      "gate": 6,
+      "name": "CHECKPOINT_SIZE",
+      "status": "PASS_OFFLINE",
+      "evidence": "Full 14-game archived-run checkpoint projection: 21254 bytes; application budget 48000 bytes."
+    },
+    {
+      "gate": 7,
+      "name": "CROSS_INSTANCE_RESUME",
+      "status": "PASS_DISPOSABLE_SQL",
+      "evidence": "Separate runtime client/authority resumes R2 after persisted features without raw rebuild."
+    },
+    {
+      "gate": 8,
+      "name": "DURABLE_PROVIDER_ACCOUNTING",
+      "status": "PASS",
+      "evidence": "Production mission baseline remains 2/20; atomic per-run reservation code verified offline."
+    },
+    {
+      "gate": 9,
+      "name": "PROVIDER_CAP_RACE",
+      "status": "PASS_SIMULATED_SQL",
+      "evidence": "Concurrent reservation race and mission-cap race pass without real provider calls."
+    },
+    {
+      "gate": 10,
+      "name": "DURABLE_DML_ACCOUNTING",
+      "status": "PASS_OFFLINE_DEPLOYMENT_BLOCKED",
+      "evidence": "Business writes and accounting commit/rollback in one fenced transaction; production update rejected by approval review."
+    },
+    {
+      "gate": 11,
+      "name": "VERCEL_FUNCTION_ENTRYPOINT",
+      "status": "IMPLEMENTED_PENDING_PRODUCTION_CERTIFICATION",
+      "evidence": "One authenticated route invokes executeProductionTick and the existing R2 coordinator."
+    },
+    {
+      "gate": 12,
+      "name": "CRON_AUTH",
+      "status": "PASS_OFFLINE",
+      "evidence": "Missing/wrong secret rejected; valid GET and dry POST bindings checked; production route readback pending."
+    },
+    {
+      "gate": 13,
+      "name": "FUNCTION_RUNTIME_COMPATIBILITY",
+      "status": "PASS_OFFLINE_PENDING_HOST_DRY",
+      "evidence": "Pro plan verified, maxDuration 800, deadline 700 seconds, one dependency context, zero checkpoint/CSV disk writes."
+    },
+    {
+      "gate": 14,
+      "name": "RAW_MEMORY_BOUND",
+      "status": "PASS_OFFLINE",
+      "evidence": "Shared Statcast engine streams at most 100 rows per batch and limits CSV response to 32 MiB."
+    },
+    {
+      "gate": 15,
+      "name": "INTERRUPTION_RECOVERY",
+      "status": "PASS_DISPOSABLE_SQL",
+      "evidence": "Forced interruption before prediction persistence; second runtime reads durable references and completes downstream."
+    },
+    {
+      "gate": 16,
+      "name": "IDEMPOTENCY",
+      "status": "PASS_DISPOSABLE_SQL",
+      "evidence": "Second full R2 replay inserts zero duplicate rows and consumes no extra provider reservations; completed identity reuses terminal run."
+    },
+    {
+      "gate": 17,
+      "name": "EXISTING_REGRESSION",
+      "status": "PASS_OFFLINE",
+      "evidence": "71 SQL checks, 17 automation/product groups, 27 preflight checks, existing R3 guards, lint and successful 400-page build."
+    },
+    {
+      "gate": 18,
+      "name": "PRODUCTION_HOST_DRY",
+      "status": "BLOCKED_DEPLOYMENT_APPROVAL",
+      "evidence": "Required fenced Edge transaction endpoint was not deployed."
+    },
+    {
+      "gate": 19,
+      "name": "AUTOMATION_ACTIVATION",
+      "status": "DISABLED",
+      "evidence": "No Cron registration or activation changes."
+    },
+    {
+      "gate": 20,
+      "name": "SCHEDULED_READBACK",
+      "status": "PENDING",
+      "evidence": "Requires approved endpoint deployment, successful host dry and activation."
+    },
+    {
+      "gate": 21,
+      "name": "FINAL_OPERATIONAL_CERTIFICATION",
+      "status": "NOT_ISSUED",
+      "evidence": "Do not certify before every required production gate passes."
+    }
+  ],
+  "schema": {
+    "migration": "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql",
+    "normalizedSha256": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
+    "productionApplications": 1,
+    "additionalDdl": 0,
+    "table": "public.pick2_mlb_runtime_state",
+    "columns": 20,
+    "constraints": 17,
+    "indexes": 1,
+    "policies": 0,
+    "rls": true,
+    "grants": [
+      "service_role SELECT",
+      "service_role INSERT",
+      "service_role UPDATE"
+    ],
+    "existingSchemaUnchanged": true,
+    "existing82TableCountsUnchangedAtImmediateMigrationReadback": true,
+    "closingPick2TableCountsUnchanged": true,
+    "concurrentUnrelatedNonPick2TableCountChanges": 7
+  },
+  "compactCheckpoint": {
+    "status": "PASS",
+    "scope": "READ_ONLY_REAL_FEATURE_PARITY_NOT_LIVE_PERSISTENCE",
+    "checkpointStage": "COMPLETE_WITH_CANONICAL_FEATURE_AND_MARKET_REFERENCES",
+    "games": 14,
+    "allSixDomainParity": "PASS",
+    "vectorAndChampionParity": "PASS",
+    "evidenceDriftRejected": true,
+    "sourceBytes": 845933926,
+    "checkpointBytes": 21254,
+    "maximumDependencyContexts": 1,
+    "maximumDependencyRows": 97318,
+    "peakRssBytes": 687419392,
+    "elapsedSeconds": 117,
+    "temporaryEvidenceWrites": 0,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "productionEntrypointIntegrated": "LOCAL_ONLY_PENDING_DEPLOYMENT"
+  },
+  "crossInstanceR2Resume": {
+    "status": "PASS",
+    "checkpointBytes": 4041,
+    "games": 2,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "productionLease": {
+    "concurrentRequests": 2,
+    "acquired": 1,
+    "deferred": 1,
+    "fencedRecovery": true,
+    "checkpointRecovered": true,
+    "frozenAsOfPreserved": true,
+    "terminalState": "COMPLETE",
+    "secondInvocation": "REUSE_NO_OP",
+    "leaseReleased": true,
+    "probePackageSha": "27ef8cd4e23046e885876ca3d833234893c8664b"
+  },
+  "validators": {
+    "sql": 71,
+    "stateOperations": 21,
+    "fencedWrites": 8,
+    "providerAwait": 6,
+    "automationProductGroups": 17,
+    "hostHttp": 7,
+    "unattendedPreflight": 27,
+    "r3GuardGroups": 5,
+    "otherGuardGroups": 3,
+    "build": "PASS_400_PAGES",
+    "lint": "PASS"
+  },
+  "providerCallsThisPhase": {
+    "MLB_OFFICIAL": 0,
+    "STATCAST": 0,
+    "THE_ODDS_API": 0,
+    "BALLDONTLIE": 0,
+    "SPORTSDATAIO": 0,
+    "OTHER": 0
+  },
+  "cumulativeOddsCalls": {
+    "consumed": 2,
+    "cap": 20
+  },
+  "productionDml": {
+    "runtimeStateInserts": 3,
+    "runtimeStateUpdates": 7,
+    "businessInserts": 0,
+    "businessUpdates": 0
+  },
+  "productionDdl": {
+    "authorizedMigration": 1,
+    "other": 0
+  },
+  "protectedState": {
+    "inheritedGeneratedArtifacts": 19,
+    "byteHashesUnchanged": true,
+    "tmpDirectoryUntouched": true,
+    "worktreesDirectoryUntouched": true,
+    "Champion": "UNCHANGED",
+    "features76": "UNCHANGED",
+    "preprocessing": "UNCHANGED",
+    "PolicyV1": "UNCHANGED",
+    "originalPredictionsAndPicks": "UNCHANGED",
+    "settlement": "DISABLED"
+  },
+  "runtime": {
+    "scheduler": "VERCEL_CRON",
+    "executor": "VERCEL_PRODUCTION_FUNCTION",
+    "route": "/api/cron/mlb-operational",
+    "authentication": "EXISTING_CRON_SECRET_BEARER",
+    "entrypoint": "executeProductionTick",
+    "businessEngine": "EXISTING_R2B_R2I",
+    "rawStore": "public.pick2_raw_mlb_statcast_pitches",
+    "activation": "DISABLED",
+    "sportsProviderAndBusinessWritesInHostDry": 0,
+    "temporaryCheckpointOrCsvWrites": 0
+  },
+  "approvalBlocker": {
+    "action": "Deploy updated mlb-runtime-state Supabase Edge Function",
+    "automaticReview": "REJECTED",
+    "reason": "Persistent custom bearer-authenticated production mutation endpoint with verify_jwt=false requires explicit endpoint deployment authorization.",
+    "bypassed": false,
+    "verifyJwt": false,
+    "customAuth": "Constant-time comparison with existing server-only Supabase service credential; anonymous and incorrect credentials rejected.",
+    "writeContract": "Fixed allowlist, schema preflight, exact identity and payload, DB-held lease/fence, dynamic per-stage caps, transactional accounting, immutable conflict rejection and readback. No caller SQL or DDL.",
+    "sourceHashes": {
+      "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
+      "scripts/mlb-data-02r-r2t-write-contract.mjs": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82",
+      "supabase/functions/_shared/mlb-fenced-write.mjs": "78ccbffc7d9ba849f51c8171131c22360b53dcf7350213307ec9f0aed64b7b72",
+      "supabase/functions/_shared/mlb-runtime-schema.mjs": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951",
+      "supabase/functions/_shared/mlb-runtime-state.mjs": "5e4d9bcf61d60a6ea4570d3116c3df212eafdcc7a02d9c68c932e40654bfe418",
+      "supabase/functions/mlb-runtime-state/index.ts": "2c721c56da6393163fc75651ef32f776636c76755d371cdd49f41adcecc8ebbd",
+      "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
+      "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92"
+    },
+    "bundleManifestDigest": "dec7c663fd8f1a733e705014b178e0e66b41420ace57d6a5ed1fb13b198055a2"
+  },
+  "syntheticProductionPaths": 0,
+  "startedGameLeakage": 0,
+  "productionConflicts": 0,
+  "finalOperationalCertification": "NOT_ISSUED",
+  "remainingLimitations": [
+    "Approval of exact reviewed fenced Edge endpoint deployment",
+    "Real Vercel host dry invocation and production resource readback",
+    "Automation activation and actual scheduled readback",
+    "Final operational certification"
+  ]
+}

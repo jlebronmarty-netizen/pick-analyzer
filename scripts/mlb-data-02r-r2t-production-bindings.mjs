@@ -10,6 +10,7 @@ import { assertR2TLiveReadiness, createCertifiedFeatureReadRepository, verifyCha
 import { createPregameReadRepository } from './mlb-data-02r-r2t-r1-read-repository.mjs'
 import { resolveStoredOfficialTeamAliases, bindStoredNativeContext } from './mlb-data-02r-r2t-r2-native-binding.mjs'
 import { resolvePregameTarget, resolveStarterContext, buildPregameFeatureRows, operatingDate } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
+import { prepareCompactFeatureContext, buildCompactFeaturePlan, restorePinnedFeaturePlan } from './mlb-operational-r6-compact-features.mjs'
 
 const ensure = (condition, reason) => { if (!condition) throw new Error(`R2T_PRODUCTION_BLOCK:${reason}`) }
 const read = async (query, label) => { const { data, error } = await query; ensure(!error && Array.isArray(data), `READ:${label}:${error?.code ?? 'UNKNOWN'}`); return data }
@@ -21,34 +22,35 @@ const businessNative = row => ({
   awayStarter: row.metadata?.awayProbablePitcher?.id ?? row.metadata?.starter_evidence?.awayProbablePitcher?.id ?? null,
 })
 
-export function createCanonicalProductionBindings({ client, repository, store, runContext, authorization, oddsApiKey }) {
+export function createCanonicalProductionBindings({ client, repository, store, runContext, authorization, oddsApiKey, compactContexts = false }) {
   assertR2TLiveReadiness()
   ensure(repository.executionEnvironment === 'PRODUCTION_SUPABASE', 'REPOSITORY')
   const fetchImpl = (url, options = {}) => {
     const parsed = new URL(url)
     ensure(parsed.protocol === 'https:' && ['statsapi.mlb.com', 'baseballsavant.mlb.com', 'api.the-odds-api.com'].includes(parsed.hostname) && !parsed.username && !parsed.password, 'PROVIDER_HOST')
     ensure(!options.method || options.method === 'GET', 'PROVIDER_METHOD')
-    return fetch(url, { ...options, redirect: 'error' })
+    return fetch(url, { ...options, signal: options.signal ?? AbortSignal.timeout(60000), redirect: 'error' })
   }
-  return { ...createBindings({ client, repository, store, runContext, authorization, oddsApiKey, fetchImpl, now: () => new Date() }), executionEnvironment: 'PRODUCTION' }
+  return createBindings({ client, repository, store, runContext, authorization, oddsApiKey, fetchImpl, compactContexts, now: () => new Date() }).then(bindings => ({ ...bindings, executionEnvironment: 'PRODUCTION' }))
 }
 
 export function createCanonicalCertificationBindings(input) {
   ensure(process.env.R2S_VALIDATION_DIR && input.client?.executionEnvironment === 'DISPOSABLE_PGLITE' && input.repository?.executionEnvironment === 'DISPOSABLE_PGLITE', 'ISOLATED_POSTGRES_REQUIRED')
-  return { ...createBindings(input), executionEnvironment: 'DISPOSABLE_PGLITE' }
+  return createBindings(input).then(bindings => ({ ...bindings, executionEnvironment: 'DISPOSABLE_PGLITE' }))
 }
 
-function createBindings({ client, repository, store, runContext, authorization, oddsApiKey, fetchImpl, now }) {
+async function createBindings({ client, repository, store, runContext, authorization, oddsApiKey, fetchImpl, now, compactContexts = false }) {
   ensure(store.locked && typeof now === 'function' && repository.writeJournal, 'EXCLUSIVE_RUN_LOCK_AND_JOURNAL_REQUIRED')
   ensure(authorization?.authorized && authorization.execution_package_sha === runContext.execution_package_sha, 'AUTHORIZATION')
   const runKey = `accounting-${runContext.run_id}`
-  const prior = store.load(runKey) ?? { frozen: sha256(runContext), providers: {}, dml: [] }
+  const prior = await store.load(runKey) ?? { frozen: sha256(runContext), providers: {}, dml: [] }
+  let mission = await store.load('mission-provider-budget') ?? { oddsCalls: 0 }
   ensure(prior.frozen === sha256(runContext), 'ACCOUNTING_FREEZE')
   const caps = authorization.providerCaps
   const limits = { MLB_OFFICIAL: 50, STATCAST: 100, THE_ODDS_API: 5 }
   for (const [provider, cap] of Object.entries(caps)) ensure(Number.isInteger(cap.maxCalls) && cap.maxCalls >= 0 && cap.maxCalls <= (limits[provider] ?? 0), 'PROVIDER_AUTH_CAP')
-  const ledger = createProviderLedger(caps, { initial: prior.providers, onConsume: event => {
-    const mission = store.load('mission-provider-budget') ?? { oddsCalls: 0 }
+  const ledger = store.providerLedger ?? createProviderLedger(caps, { initial: prior.providers, onConsume: event => {
+    mission = store.load('mission-provider-budget') ?? { oddsCalls: 0 }
     if (event.provider === 'THE_ODDS_API') { ensure(mission.oddsCalls + event.count <= 20, 'MISSION_ODDS_CAP'); mission.oddsCalls += event.count }
     store.save('mission-provider-budget', mission)
     prior.providers[event.provider] = event.consumed
@@ -56,22 +58,23 @@ function createBindings({ client, repository, store, runContext, authorization, 
   } })
   const mlb = createMlbOfficialLiveClient({ fetchImpl, ledger })
   const odds = createTheOddsApiLiveClient({ fetchImpl, ledger, apiKey: oddsApiKey })
-  const statcast = createStatcastLiveClient({ fetchImpl, ledger, db: client, cacheDir: path.join(store.root, 'statcast-cache') })
+  const statcast = createStatcastLiveClient({ fetchImpl, ledger, db: client, cacheDir: store.referenceOnly?null:path.join(store.root, 'statcast-cache') })
   const pregame = createPregameReadRepository(client)
   const registryRepository = createCertifiedFeatureReadRepository(client)
-  const recordDml = record => { prior.dml.push(record); store.save(runKey, prior) }
+  const recordDml = async record => { prior.dml.push(record); await store.save(runKey, prior) }
   const confirmedMutations = table => repository.writeJournal.summary().filter(r => r.table === table).reduce((sum, r) => sum + (r.actualRows ?? 0), 0)
   const allowed = new Set(authorization.authorizedDmlTargets)
   const requireTarget = table => ensure(allowed.has(table), `UNAUTHORIZED_WRITE_TARGET:${table}`)
   let aliasCache = null
+  const preparedPlans = compactContexts ? new Map() : null
   async function acquireSchedule() {
     ensure(operatingDate(now().toISOString()) === runContext.run_date, 'CURRENT_OPERATING_DATE')
     const key = `schedule-${runContext.run_id}`
-    const saved = store.load(key)
+    const saved = await store.load(key)
     if (saved) { ensure(saved.digest === sha256(saved.payload), 'SCHEDULE_CACHE_DIGEST'); return saved }
     const payload = await mlb.getSchedule({ runDate: runContext.run_date })
     const evidence = { payload, acquiredAt: now().toISOString(), digest: sha256(payload) }
-    store.save(key, evidence)
+    await store.save(key, evidence)
     return evidence
   }
   async function canonicalAliases() {
@@ -95,7 +98,7 @@ function createBindings({ client, repository, store, runContext, authorization, 
     for (const side of ['home', 'away']) ensure(!previous?.[`${side}_team_id`] || previous[`${side}_team_id`] === planned[`${side}_team_id`], 'NATIVE_TEAM_IDENTITY_CONFLICT')
     ensure(!previous || !/Final|Game Over|Completed/i.test(previous.official_status ?? ''), 'NATIVE_FINAL_STATE_CONFLICT')
     if (previous && sha256(businessNative(bindStoredNativeContext(previous, aliases))) === sha256(businessNative(planned))) {
-      recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 0, updated: 0, reused: 1, conflicts: 0 })
+      await recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 0, updated: 0, reused: 1, conflicts: 0 })
       return previous
     }
     requireTarget('pick2_mlb_games')
@@ -107,7 +110,7 @@ function createBindings({ client, repository, store, runContext, authorization, 
       ensure(plan.insertEligible === 1 && plan.blockConflict === 0, 'NATIVE_INSERT_PLAN')
       const result = await repository.insertNativeGames([planned], 1)
       ensure(result.inserted === 1, 'NATIVE_INSERT_COUNT')
-      recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 1, updated: 0, reused: 0, conflicts: 0 })
+      await recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 1, updated: 0, reused: 0, conflicts: 0 })
     } else {
       ensure(previous.source_payload_digest && previous.updated_at, 'NATIVE_OLD_PROVENANCE')
       const patch = { ...planned, legacy_sport_event_id: previous.legacy_sport_event_id ?? planned.legacy_sport_event_id, metadata: { ...previous.metadata, ...planned.metadata }, updated_at: now().toISOString() }
@@ -117,7 +120,7 @@ function createBindings({ client, repository, store, runContext, authorization, 
         return query.select('game_pk')
       })
       ensure(!error && data?.length === 1, 'NATIVE_EXPECTED_OLD_CONFLICT')
-      recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 0, updated: 1, reused: 0, conflicts: 0 })
+      await recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 0, updated: 1, reused: 0, conflicts: 0 })
     }
     const rows = await repository.readNativeGames([planned.game_pk])
     ensure(rows.length === 1 && sha256(businessNative(rows[0])) === sha256(businessNative(planned)) && rows[0].source_payload_digest === planned.source_payload_digest, 'NATIVE_READBACK')
@@ -154,12 +157,12 @@ function createBindings({ client, repository, store, runContext, authorization, 
     for (const row of rows) ensure(readback.some(r => r.mlbam_person_id === row.mlbam_person_id && r.source_payload_digest === row.source_payload_digest && r.full_name === row.full_name), 'PLAYER_INSERT_DIGEST_READBACK')
     const repeated = classify(readback.map(r => ({ mlbam_person_id: r.mlbam_person_id, game_pk: target.gamePk })), 0)
     ensure(repeated.insertEligible === 0 && repeated.reuseNoOp === ids.length, 'PLAYER_IDEMPOTENCY')
-    recordDml({ table: 'pick2_mlb_players', game_pk: target.gamePk, candidates: plan.plannedRows, planned: plan.insertEligible, cap, inserted: rows.length, updated: 0, reused: plan.reuseNoOp, conflicts: plan.blockConflict })
+    await recordDml({ table: 'pick2_mlb_players', game_pk: target.gamePk, candidates: plan.plannedRows, planned: plan.insertEligible, cap, inserted: rows.length, updated: 0, reused: plan.reuseNoOp, conflicts: plan.blockConflict })
   }
   return {
     checkpoint: store,
     registryRepository,
-    providerAccounting: () => ({ ...ledger.snapshot(), missionOddsConsumed: store.load('mission-provider-budget')?.oddsCalls ?? 0 }),
+    providerAccounting: () => ({ ...ledger.snapshot(), missionOddsConsumed: ledger.missionOddsConsumed?.() ?? mission.oddsCalls }),
     dmlAccounting: () => ({ writes: repository.writeJournal.summary(), sourcePlans: prior.dml }),
     async readContexts() {
       await repository.writeJournal.recover()
@@ -171,7 +174,19 @@ function createBindings({ client, repository, store, runContext, authorization, 
       const eligible = slate.artifact.games.filter(g => g.pregame_classification === 'PREGAME_SAFE' && g.metadata.abstractGameState === 'Preview' && ['Scheduled', 'Pre-Game', 'Warmup'].includes(g.status) && g.game_type === 'R' && Date.parse(g.scheduled_at) > now().getTime())
       const blockedGames = slate.artifact.games.filter(g => !eligible.includes(g)).map(g => ({ gamePk: g.game_pk, reason: 'NOT_PREGAME' }))
       const scope = eligible.map(g => g.game_pk)
+      await store.freezeScope?.(scope)
       const existing = await repository.readNativeGames(scope)
+      if(store.freezeDependencyScope) {
+        const missing=new Set()
+        for(const native of existing) {
+          let target,starters
+          try {target=resolvePregameTarget({native:bindStoredNativeContext(native,aliases),runAsOf:runContext.run_as_of,eligibleGamePks:scope});starters=resolveStarterContext(target)}
+          catch {continue} // The main reconciliation loop classifies the reason.
+          const inventory=await pregame.readDependencies(target,starters,{inventoryMissing:true,inventoryOnly:true})
+          inventory.missingGamePks.forEach(id=>missing.add(id))
+        }
+        await store.freezeDependencyScope([...missing].sort((a,b)=>a-b))
+      }
       const contexts = [], nativeGames = []
       for (const game of eligible) {
         const native = await reconcileGame(game, existing.find(r => r.game_pk === game.game_pk), aliases)
@@ -190,10 +205,14 @@ function createBindings({ client, repository, store, runContext, authorization, 
         await reconcileStarters(target, starters)
         const dependencies = await pregame.readDependencies(target, starters, { inventoryMissing: true })
         if (dependencies.missingGamePks.length) {
+          await store.freezeDependencyScope?.(dependencies.missingGamePks)
           requireTarget('pick2_raw_mlb_statcast_pitches')
-          const rows = await statcast.fetchRowsForGames({ eligibleGamePks: dependencies.missingGamePks, dependencyDates: [...new Set(dependencies.missingGameDates.map(g => g.gameDate))], runAsOf: runContext.run_as_of, providerBudget: caps })
+          const seenRawIds=new Set()
+          for await (const rows of statcast.streamRowsForGames({ eligibleGamePks: dependencies.missingGamePks, dependencyDates: [...new Set(dependencies.missingGameDates.map(g => g.gameDate))], runAsOf: runContext.run_as_of, providerBudget: caps })) {
           ensure(rows.every(r => dependencies.missingGamePks.includes(r.game_pk) && r.game_date < target.performanceCutoff && r.game_year === Number(target.gameDate.slice(0, 4)) && dependencies.missingGameDates.some(d => d.gamePk === r.game_pk && d.gameDate === r.game_date)), 'RAW_SCOPE_ESCAPE')
-          ensure(rows.length <= dependencies.missingGamePks.length * 1000 && new Set(rows.map(r => r.id)).size === rows.length, 'RAW_CAP_OR_DUPLICATE')
+          ensure(rows.length<=100 && rows.every(r=>!seenRawIds.has(r.id)) && new Set(rows.map(r=>r.id)).size===rows.length,'RAW_CAP_OR_DUPLICATE')
+          rows.forEach(r=>seenRawIds.add(r.id))
+          ensure(seenRawIds.size<=dependencies.missingGamePks.length*1000,'RAW_CAP_OR_DUPLICATE')
           const priorRows = await repository.readRawRows(rows.map(r => r.id))
           ensure(priorRows.every(r => rows.some(p => p.id === r.id && p.raw_payload_digest === r.raw_payload_digest)), 'RAW_IMMUTABLE_CONFLICT')
           const rawInserted = confirmedMutations('pick2_raw_mlb_statcast_pitches')
@@ -208,18 +227,25 @@ function createBindings({ client, repository, store, runContext, authorization, 
             await repository.insertRawRows(batch, batch.length)
             const readback = await repository.readRawRows(batch.map(r => r.id))
             ensure(readback.length === batch.length && readback.every(r => batch.some(p => p.id === r.id && p.raw_payload_digest === r.raw_payload_digest)), 'RAW_READBACK')
-            recordDml({ table: 'pick2_raw_mlb_statcast_pitches', planned: batch.length, cap: batch.length, inserted: batch.length, updated: 0, reused: 0, conflicts: 0 })
+            await recordDml({ table: 'pick2_raw_mlb_statcast_pitches', planned: batch.length, cap: batch.length, inserted: batch.length, updated: 0, reused: 0, conflicts: 0 })
           }
           const readback = await repository.readRawRows(rows.map(r => r.id))
           const repeated = classifyInsertReuseConflict({ plannedRows: rows, existingRows: readback, identityFields: ['id'], digestField: 'raw_payload_digest', eligibleGamePks: dependencies.missingGamePks, cap: 0 })
           ensure(repeated.reuseNoOp === rows.length && repeated.insertEligible === 0, 'RAW_IDEMPOTENCY')
+          }
           blockedGames.push({ gamePk: game.game_pk, reason: 'NEW_RAW_EVIDENCE_AFTER_RUN_FREEZE' }); continue
         }
         if (dependencies.rows.some(r => Date.parse(r.ingested_at) > Date.parse(runContext.run_as_of) || Date.parse(r.created_at) > Date.parse(runContext.run_as_of))) {
           blockedGames.push({ gamePk: game.game_pk, reason: 'NEW_RAW_EVIDENCE_AFTER_RUN_FREEZE' }); continue
         }
-        buildPregameFeatureRows({ target, starters, rawRows: dependencies.rows, dependencyGamePks: dependencies.dependencyGamePks })
-        contexts.push({ target, starters, dependencies })
+        if (compactContexts) {
+          const prepared=prepareCompactFeatureContext({context:{target,starters,dependencies},runDate:runContext.run_date,runAsOf:runContext.run_as_of})
+          contexts.push(prepared.context);preparedPlans.set(target.gamePk,prepared.generated)
+        }
+        else {
+          buildPregameFeatureRows({ target, starters, rawRows: dependencies.rows, dependencyGamePks: dependencies.dependencyGamePks })
+          contexts.push({ target, starters, dependencies })
+        }
         const rawGame = scheduleEvidence.payload.dates.flatMap(d => d.games).find(g => g.gamePk === game.game_pk)
         nativeGames.push({ game_pk: game.game_pk, scheduled_at: target.scheduledAt, home_team_name: rawGame.teams.home.team.name, away_team_name: rawGame.teams.away.team.name })
       }
@@ -227,12 +253,30 @@ function createBindings({ client, repository, store, runContext, authorization, 
     },
     async getOddsEvidence() {
       const key = `odds-${runContext.run_id}`
-      const saved = store.load(key)
+      const saved = await store.load(key)
       if (saved) { ensure(saved.responseDigest === sha256(saved.payload), 'ODDS_CACHE_DIGEST'); return saved }
       const payload = await odds.getMoneylineOdds()
       const evidence = { payload, acquiredAt: now().toISOString(), responseDigest: sha256(payload) }
-      store.save(key, evidence)
+      await store.save(key, evidence)
       return evidence
+    },
+    ...(compactContexts ? { buildFeaturePlan: args => buildCompactFeaturePlan({ ...args, preparedPlans, readDependencies: (target,starters) => pregame.readDependencies(target,starters) }) } : {}),
+    ...(compactContexts ? {restoreFeaturePlan:args=>restorePinnedFeaturePlan({...args,repository})}:{}),
+    async restoreContexts({references,scope}) {
+      ensure(compactContexts,'COMPACT_CONTEXTS_REQUIRED')
+      const aliases=await canonicalAliases(),rows=await repository.readNativeGames(scope),contexts=[]
+      for(const reference of references.filter(r=>r.kind==='pregame_target')) {
+        const native=rows.find(r=>String(r.game_pk)===reference.identity)
+        ensure(native,'CANONICAL_CONTEXT_MISSING')
+        const target=resolvePregameTarget({native:bindStoredNativeContext(native,aliases),runAsOf:runContext.run_as_of,eligibleGamePks:scope})
+        const starters=resolveStarterContext(target)
+        ensure(sha256({target,starters})===reference.digest && reference.asOf===target.runAsOf,'CANONICAL_CONTEXT_DRIFT')
+        const raw=references.find(r=>r.kind==='raw_dependencies' && r.identity===reference.identity),dependency=references.find(r=>r.kind==='dependency_scope' && r.identity===reference.identity)
+        ensure(raw && dependency && dependency.asOf===target.runAsOf,'CANONICAL_DEPENDENCY_REFERENCE')
+        ensure(dependency.count>0 && dependency.count<=500 && raw.count>0 && raw.count<=dependency.count*1000 && Date.parse(raw.asOf)<=Date.parse(target.runAsOf),'CANONICAL_DEPENDENCY_PROVENANCE')
+        contexts.push({target,starters,dependencies:{scopeDigest:dependency.digest,dependencyCount:dependency.count,actualRows:raw.count,dependencyDigest:raw.digest,latestAvailableAt:raw.asOf}})
+      }
+      return contexts
     },
     async assertCurrentStarters({ contexts, at, domain }) {
       const rows = await repository.readNativeGames(contexts.map(c => c.target.gamePk))

@@ -1,0 +1,33 @@
+# R6 durable runtime and Vercel Function audit
+
+**Verdict: `MLB_DATA_02R_R6_BLOCKED_EDGE_MUTATION_DEPLOYMENT_APPROVAL`.** The exact authorized schema migration is applied and verified. The remaining production blocker is approval review of the fenced transaction endpoint deployment. Automation is disabled; final operational certification is not issued.
+
+## Schema and production preservation
+
+Migration `supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql` still has normalized SHA-256 `b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036`. It was applied exactly once. Independent immediate readback preserved all 82 existing public table counts and their schema digest. The new service-only table matches 20 columns, 17 constraints, one index, zero policies, RLS, and only service-role SELECT/INSERT/UPDATE grants. No further DDL occurred.
+
+A later independent readback still matches the old schema and all pre-existing Pick2 table counts. Seven unrelated non-Pick2 tables changed during concurrent production activity. Those changes are not attributed to this phase; the immediate migration preservation check and the later concurrent activity are distinct observations.
+
+The production state-only Edge probe made three runtime-state inserts and seven bounded runtime-state updates. Two concurrent lease requests yielded one acquisition and one deferral. Fenced release/reacquire, wrong-owner rejection, durable checkpoint recovery, unchanged run freeze, completion and terminal reuse passed. The lease is released. No production business rows were inserted or updated by R6. Every sports-provider count for R6 is zero, and the durable mission Odds ledger remains **2/20**.
+
+## Runtime implementation and offline evidence
+
+The existing R2B → R2I business path remains the sole feature, Champion, market, value and pick engine. Runtime adapters use shared SQL leases, compact references and atomic provider reservations. The proposed fenced write handler holds the lease lock while classifying and committing business rows and their compact DML accounting in the same transaction. Lost-response retries read canonical rows; immutable conflicts, old-value drift, unexpected targets/shapes and stale owners roll back.
+
+R2 feature recovery pins canonical snapshot UUIDs and verifies physical-row and vector digests. A separate runtime resumes after persisted features without rebuilding raw history, completes the downstream path, and then replays with zero duplicate inserts or extra provider reservations. Its complete two-game checkpoint is **4,041 bytes**. The representative archived 14-game full-run projection, including canonical feature and market references, is **21,254 bytes**, compared with 845,933,926 bytes of prior sharded raw context. The application checkpoint budget is 48,000 bytes; PostgreSQL also enforces its certified physical limit.
+
+The shared Statcast engine now streams batches of at most 100 rows. It checks exact canonical cache counts, rejects truncated reads, bounds each CSV response to 32 MiB, and supports canonical-only cache operation without Function-local CSV or checkpoint files. The 14-game parity replay retained at most one dependency context, with 97,318 rows at peak; observed process RSS was 687,419,392 bytes. This is offline representative resource evidence, not a production Function benchmark. Vercel confirms the project is Pro; the prepared route declares 800 seconds with an earlier 700-second yield deadline.
+
+Validation: 71 PostgreSQL integration checks; 21 state-operation checks; eight fenced-write checks; six awaited-provider-reservation checks; 17 automation/product groups; seven HTTP/host checks; 27 unattended-preflight checks; five R3 guards and three existing operational guard groups. Champion, all 76 feature definitions, preprocessing and Policy V1 remain unchanged. Current-game batter output remains legitimately empty; separate historical batter evidence exercises its physical FK contract. Build verification is recorded in the companion JSON.
+
+The single route `/api/cron/mlb-operational` uses the existing `CRON_SECRET`, rejects caller-selected inputs and invokes `executeProductionTick`. GET is reserved for live Cron execution after activation; authenticated POST is the provider-free host probe. Data Health reads a bounded, sanitized projection of shared runtime accounting. Lease holders, reservation receipts, raw evidence and checkpoint references are never returned to the public surface.
+
+## Deployment hard stop and next action
+
+Automatic approval review rejected deployment of the updated `mlb-runtime-state` Supabase Edge Function because it adds a persistent production mutation endpoint with custom bearer authentication and `verify_jwt=false`. The reviewer requires explicit authorization for that endpoint. The rejection was not bypassed. The existing deployed state-only version remains in place; the new fenced business-write operation has not been deployed or exercised in production.
+
+The exact eight-file deployment candidate is recorded by source hashes in the companion JSON. Its sorted normalized source-hash manifest digest is `dec7c663fd8f1a733e705014b178e0e66b41420ace57d6a5ed1fb13b198055a2`. The handler authenticates the existing server-only service credential in constant time; `verify_jwt=false` does not make its operations anonymous. No new credential, environment change or additional migration is proposed.
+
+After explicit endpoint deployment approval, verify the source manifest, deploy that candidate, repeat independent schema/access/accounting readback, and perform the real Vercel host dry invocation. Only then may the existing standing mission continue through activation and scheduled production readback. No Cron configuration changed in this phase. Settlement remains disabled. Vercel Cron and the Vercel Production Function remain the sole intended scheduler and executor host.
+
+All 19 inherited generated-artifact byte hashes are preserved. `.tmp/` and `.worktrees/` are untouched. This audit publishes structural contracts, digests and aggregate validation only; private production row samples remain outside the repository.

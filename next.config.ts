@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import fs from 'node:fs';
+
+const mlbCertificates=['docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION.json','docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json'];
+const mlbRuntimeFiles=[...new Set([...mlbCertificates,...mlbCertificates.flatMap(file=>Object.keys(JSON.parse(fs.readFileSync(file,'utf8')).sourceHashes??{})),'docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json'])].map(file=>`./${file}`);
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
@@ -12,6 +16,7 @@ const nextConfig: NextConfig = {
     memoryBasedWorkersCount: true,
   },
   outputFileTracingIncludes: {
+    '/api/cron/mlb-operational': mlbRuntimeFiles,
     '/': ['./docs/CERTIFICATION/mlb-data-02p-official-pick-policy-prep.json'],
     '/today': ['./docs/CERTIFICATION/mlb-data-02p-official-pick-policy-prep.json'],
     '/mlb-value-board': ['./docs/CERTIFICATION/mlb-data-02p-official-pick-policy-prep.json'],

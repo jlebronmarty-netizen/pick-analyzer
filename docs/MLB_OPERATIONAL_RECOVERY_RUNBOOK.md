@@ -15,9 +15,13 @@ Run `node --env-file=.env.local scripts/mlb-operational-manual-refresh.mjs --exe
 
 After the first nonempty run, independently verify persisted native/raw/features, all six snapshot FKs, the 76-vector, Champion probabilities, markets, values, decisions, board, provider ledger and write journal. A subsequent genuinely valid refresh must prove immutable reuse, no duplicates, correct new evidence revisions and zero conflicts before `MLB_DATA_02R_REPEATABILITY_CERTIFIED` is issued.
 
-## Prepared automation schedule (not installed)
+## Prepared Vercel automation schedule (disabled)
 
-Use one coordinator with a persistent private OS-temp run directory and the unattended preflight step above. The command is `node --env-file=.env.local --loader ./scripts/local-ts-loader.mjs scripts/mlb-operational-tick.mjs --execute-tick --mode=<mode> --package-sha=<frozen validated HEAD>`.
+The persistent scheduler is Vercel Cron and the executor is the production Function at `/api/cron/mlb-operational`. Shared Supabase runtime state owns the lease, frozen run, checkpoints, provider reservations and business-write accounting. Function-local memory and files are not authoritative. The prepared GET handler invokes the existing `executeProductionTick`; authenticated POST is reserved for a provider-free host probe. Both use the existing server-only `CRON_SECRET`. No request parameters select dates, games, packages or budgets.
+
+R6 deployment is blocked by automatic approval review of the exact fenced business-write Edge handler. The state-only Edge version is deployed, but the new atomic business-write operation is not. Do not activate Cron or substitute unfenced direct writes. The exact reviewed source manifest and required endpoint approval are in `docs/CERTIFICATION/MLB_DATA_02R_R6_DURABLE_RUNTIME_STATE_AND_VERCEL_FUNCTION_ENTRYPOINT.json`. No additional DDL is authorized or required.
+
+On interruption, inspect the service-only RUN and LEASE records. An unexpired lease defers other invocations. After release/expiry, the same compatible package resumes the existing run identity and frozen as-of. Persisted feature UUIDs and market evidence digests must verify before replay. Never reset the mission Odds counter, change a frozen scope, force-release an active lease, or retry an ambiguously consumed provider request as though it never occurred. A stale-date, incompatible-package, provenance, conflict or ambiguous-acquisition error remains a hard stop requiring investigation. Terminal scheduled identities return `REUSE_NO_OP`.
 
 | Mode | Proposed Puerto Rico cadence | Binding |
 |---|---|---|

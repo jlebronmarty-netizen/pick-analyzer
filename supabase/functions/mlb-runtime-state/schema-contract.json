@@ -1,0 +1,230 @@
+{
+  "rls": true,
+  "grants": [
+    {
+      "role": "service_role",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "privilege": "SELECT"
+    },
+    {
+      "role": "service_role",
+      "privilege": "UPDATE"
+    }
+  ],
+  "columns": [
+    {
+      "name": "scope_key",
+      "type": "text",
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "state_kind",
+      "type": "text",
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "revision",
+      "type": "bigint",
+      "default": "0",
+      "notNull": true
+    },
+    {
+      "name": "fence",
+      "type": "bigint",
+      "default": "0",
+      "notNull": true
+    },
+    {
+      "name": "lease_holder",
+      "type": "uuid",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "lease_acquired_at",
+      "type": "timestamp with time zone",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "lease_expires_at",
+      "type": "timestamp with time zone",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "run_id",
+      "type": "text",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "package_sha",
+      "type": "text",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "run_date",
+      "type": "date",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "run_as_of",
+      "type": "timestamp with time zone",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "default": "'PENDING'::text",
+      "notNull": true
+    },
+    {
+      "name": "checkpoint",
+      "type": "jsonb",
+      "default": "'{}'::jsonb",
+      "notNull": true
+    },
+    {
+      "name": "dml_accounting",
+      "type": "jsonb",
+      "default": "'{}'::jsonb",
+      "notNull": true
+    },
+    {
+      "name": "mlb_official_calls",
+      "type": "integer",
+      "default": "0",
+      "notNull": true
+    },
+    {
+      "name": "statcast_calls",
+      "type": "integer",
+      "default": "0",
+      "notNull": true
+    },
+    {
+      "name": "odds_calls",
+      "type": "integer",
+      "default": "0",
+      "notNull": true
+    },
+    {
+      "name": "mission_odds_calls",
+      "type": "integer",
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "notNull": true
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "default": "now()",
+      "notNull": true
+    }
+  ],
+  "indexes": [
+    "CREATE UNIQUE INDEX pick2_mlb_runtime_state_pkey ON public.pick2_mlb_runtime_state USING btree (scope_key)"
+  ],
+  "policies": 0,
+  "constraints": [
+    {
+      "name": "pick2_mlb_runtime_counter_scope",
+      "type": "c",
+      "definition": "CHECK (((state_kind = 'RUN'::text) OR ((mlb_official_calls = 0) AND (statcast_calls = 0) AND (odds_calls = 0))))"
+    },
+    {
+      "name": "pick2_mlb_runtime_lease_contract",
+      "type": "c",
+      "definition": "CHECK ((((lease_holder IS NULL) AND (lease_acquired_at IS NULL) AND (lease_expires_at IS NULL)) OR ((state_kind = 'LEASE'::text) AND (lease_holder IS NOT NULL) AND (lease_acquired_at IS NOT NULL) AND (lease_expires_at IS NOT NULL) AND (lease_expires_at > lease_acquired_at) AND (lease_expires_at <= (lease_acquired_at + '00:15:00'::interval)))))"
+    },
+    {
+      "name": "pick2_mlb_runtime_scope_contract",
+      "type": "c",
+      "definition": "CHECK ((((state_kind = 'MISSION'::text) AND (scope_key = 'MLB_OPERATIONAL_MISSION'::text) AND (mission_odds_calls IS NOT NULL) AND (run_id IS NULL)) OR ((state_kind = 'LEASE'::text) AND (scope_key = 'MLB_OPERATIONAL_GLOBAL'::text) AND (mission_odds_calls IS NULL)) OR ((state_kind = 'RUN'::text) AND (run_id IS NOT NULL) AND (scope_key = ('RUN:'::text || run_id)) AND (package_sha IS NOT NULL) AND (run_date IS NOT NULL) AND (run_as_of IS NOT NULL) AND (mission_odds_calls IS NULL))))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_checkpoint_check",
+      "type": "c",
+      "definition": "CHECK (((jsonb_typeof(checkpoint) = 'object'::text) AND (octet_length((checkpoint)::text) <= 65536)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_dml_accounting_check",
+      "type": "c",
+      "definition": "CHECK (((jsonb_typeof(dml_accounting) = 'object'::text) AND (octet_length((dml_accounting)::text) <= 16384)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_fence_check",
+      "type": "c",
+      "definition": "CHECK ((fence >= 0))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_mission_odds_calls_check",
+      "type": "c",
+      "definition": "CHECK (((mission_odds_calls >= 2) AND (mission_odds_calls <= 20)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_mlb_official_calls_check",
+      "type": "c",
+      "definition": "CHECK (((mlb_official_calls >= 0) AND (mlb_official_calls <= 50)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_odds_calls_check",
+      "type": "c",
+      "definition": "CHECK (((odds_calls >= 0) AND (odds_calls <= 1)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_package_sha_check",
+      "type": "c",
+      "definition": "CHECK (((package_sha IS NULL) OR (package_sha ~ '^[a-f0-9]{40}$'::text)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (scope_key)"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_revision_check",
+      "type": "c",
+      "definition": "CHECK ((revision >= 0))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_run_id_check",
+      "type": "c",
+      "definition": "CHECK (((run_id IS NULL) OR (run_id ~ '^[A-Za-z0-9_-]{1,100}$'::text)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_scope_key_check",
+      "type": "c",
+      "definition": "CHECK (((length(scope_key) >= 1) AND (length(scope_key) <= 160)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_statcast_calls_check",
+      "type": "c",
+      "definition": "CHECK (((statcast_calls >= 0) AND (statcast_calls <= 100)))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_state_kind_check",
+      "type": "c",
+      "definition": "CHECK ((state_kind = ANY (ARRAY['MISSION'::text, 'LEASE'::text, 'RUN'::text])))"
+    },
+    {
+      "name": "pick2_mlb_runtime_state_status_check",
+      "type": "c",
+      "definition": "CHECK ((status = ANY (ARRAY['PENDING'::text, 'RUNNING'::text, 'COMPLETE'::text, 'BLOCKED'::text, 'FAILED'::text])))"
+    }
+  ]
+}

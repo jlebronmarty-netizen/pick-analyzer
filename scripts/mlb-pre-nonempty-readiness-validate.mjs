@@ -45,7 +45,7 @@ await check('cross-mode overlap blocked by exclusive coordinator lock', async ()
 await check('checkpoint package change blocks before stage execution', async () => { await assert.rejects(runAutomationJob({ root: jobRoot, job: { ...job, packageSha: 'b'.repeat(40) }, certification: true, execute: () => { throw Error('must not run') } }), /PACKAGE_DRIFT/) })
 
 const raw = new Map()
-const client = { from(table) { assert.equal(table, 'pick2_raw_mlb_statcast_pitches'); const q = { select() { return q }, in() { return q }, order() { return q }, range() { return q }, then(resolve, reject) { return Promise.resolve({ data: [...raw.values()], error: null }).then(resolve, reject) } }; return q } }
+const client = { from(table) { assert.equal(table, 'pick2_raw_mlb_statcast_pitches'); const q = { select() { return q }, eq() { return q }, limit() { return q }, in() { return q }, order() { return q }, range() { return q }, then(resolve, reject) { return Promise.resolve({ data: [...raw.values()], count:raw.size,error: null }).then(resolve, reject) } }; return q } }
 const repository = { writeJournal: {}, readRawRows: async ids => ids.map(id => raw.get(id)).filter(Boolean), insertRawRows: async rows => { rows.forEach(r => { assert.ok(!raw.has(r.id)); raw.set(r.id, r) }); return { inserted: rows.length } } }
 const csv = n => 'game_pk,game_date,game_year,game_type,home_team,away_team,pitcher,batter,at_bat_number,pitch_number\n' + Array.from({ length: n }, (_, i) => `900000001,2026-09-09,2026,R,HME,AWY,660001,770001,1,${i + 1}`).join('\n')
 let requests = 0
@@ -66,6 +66,13 @@ await check('shared engine incremental ingest expands partial canonical game; ch
 await check('pregame target evidence never ingested as dependency', async () => {
   const store = createPrivateRunStore(path.join(root, `raw-block-${Date.now()}`)); store.acquire()
   try { await assert.rejects(reconcileAutomatedPitches({ job: { ...job, gamePks: [1], targetGamePks: [1], dates: ['2026-09-09'] }, state: {}, store, repository }), /PREGAME_TARGET_LEAKAGE/) } finally { store.release() }
+})
+await check('durable pitch adapter streams at most 100 rows and checkpoints only verified references',async()=>{
+  let reservations=0,maximumBatch=0,completed=null
+  const ledger={consume:async()=>{assert.equal(reservations,0);reservations++},snapshot:()=>({STATCAST:reservations})}
+  const durableRepository={...repository,insertRawRows:async rows=>{maximumBatch=Math.max(maximumBatch,rows.length);return repository.insertRawRows(rows)}}
+  const result=await reconcileAutomatedPitches({job:{...job,mode:'INCREMENTAL',gamePks:[900000001],targetGamePks:[],dates:[job.date]},state:{checkpoints:[]},store:{locked:true,referenceOnly:true,providerLedger:ledger},repository:durableRepository,client,teamMap:new Map([['HME','home'],['AWY','away']]),checkpoint:async(stage,data)=>{assert.equal(stage,'RAW_READBACK');assert.deepEqual(Object.keys(data).sort(),['count','digest']);completed=data},fetchImpl:async()=>({ok:true,text:async()=>csv(250)})})
+  assert.equal(maximumBatch,100);assert.equal(result.rows,250);assert.equal(result.inserted,247);assert.equal(completed.count,250);assert.equal(reservations,1)
 })
 
 const payload = { gamePk: 900000001, gameData: { status: { detailedState: 'Final' } }, liveData: { linescore: { teams: { home: { runs: 5 }, away: { runs: 3 } } } } }

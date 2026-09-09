@@ -17,10 +17,12 @@ import { planMlbSettlement, digestSettlementEvidence } from '../src/services/pic
 import { persistMlbSettlementPlan } from '../src/services/pick2-mlb-settlement-persistence.service.ts'
 import { persistOperationalTelemetry } from '../src/services/pick2-operational-telemetry.ts'
 import { runMlbOperationalSchemaPreflight } from './mlb-operational-unattended-preflight.mjs'
+import {executeVercelProductionTick} from './mlb-operational-r6-vercel-runtime.mjs'
 const ensure = (ok, reason) => { if (!ok) throw new Error(`TICK_BLOCK:${reason}`) }
 const read = async query => { const { data, error } = await query; ensure(!error && Array.isArray(data), 'DATABASE_READ'); return data }
 
-export async function executeProductionTick({ mode, packageSha }) {
+export async function executeProductionTick({ mode=null, packageSha, hostDry=false }) {
+  if(process.env.VERCEL==='1')return executeVercelProductionTick({packageSha,hostDry})
   const activation = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json', 'utf8'))
   assertAutomationActivation(activation)
   ensure(activation.runtimeHost?.verified === true && !process.env.VERCEL, 'PERSISTENT_HOST_REQUIRED')

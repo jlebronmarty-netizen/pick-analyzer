@@ -141,6 +141,11 @@ export function expandAllGameTargets(contexts) {
     writeCapRule: 'future per-domain insert cap equals INSERT_ELIGIBLE count after canonical snapshot resolution; REUSE_NO_OP consumes zero; any BLOCK_CONFLICT stops' }
 }
 
+export function pregameGameDefinition(target,starters) {
+  return { gamePk: target.gamePk, gameDate: target.gameDate, homeTeamId: target.homeTeamId, awayTeamId: target.awayTeamId,
+    homeStarter: starters.home.mlbam_pitcher_id, awayStarter: starters.away.mlbam_pitcher_id, homeBatters: [], awayBatters: [] }
+}
+
 export function buildPregameFeatureRows({ target, starters, rawRows, dependencyGamePks }) {
   ensure(rawRows?.length && dependencyGamePks?.length, 'RAW_HISTORY_MISSING')
   const allowed = new Set(dependencyGamePks)
@@ -167,8 +172,7 @@ export function buildPregameFeatureRows({ target, starters, rawRows, dependencyG
   }
   const history = { teamBatting: new Map(), pitcher: new Map(), batter: new Map(), bullpen: new Map() }
   for (const game of scan.games.sort((a, b) => a.gameDate.localeCompare(b.gameDate) || a.gamePk - b.gamePk)) updateStatsFromGame(history, game)
-  const game = { gamePk: target.gamePk, gameDate: target.gameDate, homeTeamId: target.homeTeamId, awayTeamId: target.awayTeamId,
-    homeStarter: starters.home.mlbam_pitcher_id, awayStarter: starters.away.mlbam_pitcher_id, homeBatters: [], awayBatters: [] }
+  const game = pregameGameDefinition(target,starters)
   const rows = { snapshots: [], team: [], starter: [], bullpen: [], batter: [], matchup: [], firstInning: [], offense: 0 }
   ensure(addDailyRows(rows, game, target.asOfDate, history, { sampleSizes: [] }, false), 'REQUIRED_HISTORY_MISSING')
   const dependencyDigest = sha256(sorted.map((row) => [row.id, row.raw_payload_digest, row.ingested_at, row.created_at]))

@@ -340,20 +340,27 @@ async function r2nTeamMapFromDb(db) {
 
 async function readPersistedRawRowsForGamePks(db, gamePks) {
   const rows = []
-  for (let index = 0; index < gamePks.length; index += 100) {
-    const chunk = gamePks.slice(index, index + 100)
-    const { data, error } = await db
-      .from('pick2_raw_mlb_statcast_pitches')
-      .select(rawColumns)
-      .in('game_pk', chunk)
-      .order('id', { ascending: true })
-    if (error) throw new Error(`R2N_RAW_CACHE_READ_FAILED:${error.message}`)
-    rows.push(...(data ?? []))
+  for (let index = 0; index < gamePks.length; index += 8) {
+    const results=await Promise.allSettled(gamePks.slice(index,index+8).map(gamePk=>db.from('pick2_raw_mlb_statcast_pitches').select(rawColumns,{count:'exact'}).eq('game_pk',gamePk).order('id',{ascending:true}).limit(1001)))
+    for(const result of results) {
+      if(result.status==='rejected')throw new Error('R2N_RAW_CACHE_READ_FAILED')
+      const {data,error,count}=result.value
+      if(error || !Array.isArray(data) || !Number.isInteger(count) || count>1000 || data.length!==count)throw new Error('R2N_RAW_CACHE_TRUNCATED_OR_OVER_CAP')
+      rows.push(...data)
+    }
   }
   return rows
 }
 
-export async function fetchR2NStatcastRowsForGames({
+export async function fetchR2NStatcastRowsForGames(options = {}) {
+  const rows=[]
+  for await (const batch of streamR2NStatcastRowsForGames(options)) rows.push(...batch)
+  return rows
+}
+
+// The existing adapter can consume bounded batches directly. The compatibility
+// wrapper above retains its array contract for existing callers.
+export async function* streamR2NStatcastRowsForGames({
   eligibleGamePks = [],
   dependencyDates = [],
   runAsOf,
@@ -370,6 +377,7 @@ export async function fetchR2NStatcastRowsForGames({
   if (!runAsOf || Number.isNaN(Date.parse(runAsOf))) throw new Error(`R2N_INVALID_RUN_AS_OF:${runAsOf}`)
   const gamePks = [...new Set(eligibleGamePks.map((value) => Number(value)))]
   if (!gamePks.length) throw new Error('R2N_EMPTY_GAME_PK_SCOPE')
+  if (gamePks.length > 500) throw new Error('R2N_GAME_SCOPE_CAP')
   if (gamePks.some((value) => !Number.isInteger(value))) throw new Error('R2N_INVALID_GAME_PK_SCOPE')
   if (allowFullSeason) throw new Error('R2N_FULL_SEASON_REQUEST_FORBIDDEN')
   const dates = [...new Set((dependencyDates.length ? dependencyDates : [String(runAsOf).slice(0, 10)]).map(assertR2NDate))].sort()
@@ -379,7 +387,7 @@ export async function fetchR2NStatcastRowsForGames({
   if (Number.isFinite(maxCalls) && dates.length > maxCalls) throw new Error(`R2N_STATCAST_PROVIDER_CAP_EXCEEDED:${dates.length}:${maxCalls}`)
 
   const client = db ?? dbClient()
-  const persistedRows = await readPersistedRawRowsForGamePks(client, gamePks)
+  let persistedRows = await readPersistedRawRowsForGamePks(client, gamePks)
   const persistedGamePks = new Set(persistedRows.map((row) => Number(row.game_pk)))
   // Reconciliation cannot treat a partial game's first pitch as complete.
   // Automation supplies a bounded slot-specific CSV cache for this mode.
@@ -387,34 +395,47 @@ export async function fetchR2NStatcastRowsForGames({
   if (reconcileScope && !['INCREMENTAL', 'POSTGAME', 'OVERNIGHT'].includes(cachePolicy?.reconciliationMode)) throw new Error('R2N_INVALID_RECONCILIATION_MODE')
   if (!reconcileScope && persistedRows.length && gamePks.every((gamePk) => persistedGamePks.has(gamePk))) {
     checkpoint?.record?.('r2n_statcast_cache_reuse', { rows: persistedRows.length, gamePks })
-    return persistedRows
+    for(let start=0;start<persistedRows.length;start+=100)yield persistedRows.slice(start,start+100)
+    return
   }
-
+  persistedRows = []
   const teams = teamMap ?? await r2nTeamMapFromDb(client)
-  const rows = []
+  let scopedCount = 0
   let calls = 0
   let cacheReuses = 0
-  fs.mkdirSync(cacheDir, { recursive: true })
+  if(cacheDir!==null)fs.mkdirSync(cacheDir, { recursive: true })
   for (const date of dates) {
-    const cachePath = path.join(cacheDir, `${date}.csv`)
+    const cachePath = cacheDir===null?null:path.join(cacheDir, `${date}.csv`)
     let text = null
-    if (fs.existsSync(cachePath)) {
+    if (cachePath && fs.existsSync(cachePath)) {
+      if(fs.statSync(cachePath).size>32*1024*1024)throw new Error('R2N_CSV_BYTE_CAP')
       text = fs.readFileSync(cachePath, 'utf8')
       cacheReuses += 1
     } else {
-      text = await fetchText(statcastUrl(date, date), fetchImpl)
-      fs.writeFileSync(cachePath, text)
+      const response=await fetchImpl(statcastUrl(date,date))
+      if(!response.ok)throw new Error(`R2N_STATCAST_HTTP_${response.status ?? 'UNKNOWN'}`)
+      if(response.body?.getReader) {
+        const reader=response.body.getReader(),decoder=new TextDecoder();let bytes=0;text=''
+        for(;;) {
+          const chunk=await reader.read();if(chunk.done)break
+          bytes+=chunk.value.byteLength
+          if(bytes>32*1024*1024){await reader.cancel();throw new Error('R2N_CSV_BYTE_CAP')}
+          text+=decoder.decode(chunk.value,{stream:true})
+        }
+        text+=decoder.decode()
+      } else text=await response.text()
+      if(Buffer.byteLength(text)>32*1024*1024)throw new Error('R2N_CSV_BYTE_CAP')
+      if(cachePath)fs.writeFileSync(cachePath, text)
       calls += 1
     }
     const parsed = parseCsv(text).map((row) => transformStatcastRow(row, teams)).filter(Boolean)
     if (parsed.length >= 25000) throw new Error(`STATCAST_DAILY_CAP_SUSPECT:${date}:${parsed.length}`)
-    rows.push(...parsed)
+    const scopedRows=parsed.filter(row=>gamePks.includes(Number(row.game_pk)))
+    scopedCount+=scopedRows.length
+    if(scopedCount>gamePks.length*1000)throw new Error('R2N_SCOPED_ROW_CAP')
+    for(let start=0;start<scopedRows.length;start+=100)yield scopedRows.slice(start,start+100)
   }
-  const scopedRows = rows.filter((row) => gamePks.includes(Number(row.game_pk)))
-  const outOfScope = rows.length - scopedRows.length
-  if (outOfScope < 0) throw new Error('R2N_SCOPE_ACCOUNTING_INVALID')
-  checkpoint?.record?.('r2n_statcast_fetch', { gamePks, dates, calls, cacheReuses, rows: scopedRows.length })
-  return scopedRows
+  checkpoint?.record?.('r2n_statcast_fetch', { gamePks, dates, calls, cacheReuses, rows: scopedCount })
 }
 
 async function countRows(db, table, column = 'id', configure = (query) => query) {

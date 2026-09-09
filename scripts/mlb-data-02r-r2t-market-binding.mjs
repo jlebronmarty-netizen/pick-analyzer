@@ -6,6 +6,24 @@ import { evaluateCertifiedPolicy, loadCertifiedPolicy } from './mlb-data-02r-r2t
 const ensure = (condition, reason) => { if (!condition) throw new Error(`R2T_MARKET_BLOCK:${reason}`) }
 const timestamp = value => typeof value === 'string' && Number.isFinite(Date.parse(value))
 const withoutServerFields = row => Object.fromEntries(Object.entries(row).filter(([key]) => !['id', 'created_at', 'updated_at'].includes(key)))
+const orderedDigest=(rows,key)=>sha256([...rows].sort((a,b)=>String(a[key]).localeCompare(String(b[key]))))
+
+export function canonicalMarketReference({markets,evidence,evaluatedAt}) {
+  return {acquiredAt:evidence.acquiredAt,evaluatedAt,responseDigest:evidence.responseDigest,oddsDigest:sha256(evidence),
+    mappingsDigest:orderedDigest(markets.mappings.rows,'provider_event_id'),observationsDigest:orderedDigest(markets.observations.rows,'observation_identity'),
+    mappingCount:markets.mappings.rows.length,observationCount:markets.observations.rows.length,crosswalk:markets.crosswalk}
+}
+
+export async function restoreCanonicalMarkets({reference,repository,eligibleGamePks,beforeWrite}) {
+  const matched=new Set(reference.crosswalk.filter(r=>r.classification==='MATCHED').map(r=>r.provider_event_id))
+  const mappings=(await repository.readMarketMappingsByGames(eligibleGamePks)).filter(r=>matched.has(r.provider_event_id))
+  const observations=await repository.readMarketObservationsByEvidence({eligibleGamePks,responseDigest:reference.responseDigest,acquiredAt:reference.acquiredAt})
+  ensure(mappings.length===reference.mappingCount && observations.length===reference.observationCount,'MARKET_REFERENCE_COUNT')
+  ensure(orderedDigest(mappings,'provider_event_id')===reference.mappingsDigest && orderedDigest(observations,'observation_identity')===reference.observationsDigest,'MARKET_REFERENCE_DRIFT')
+  const mappingResult=await persistDownstreamRows({domain:'marketMappings',rows:mappings.map(withoutServerFields),repository,eligibleGamePks,cap:0,beforeWrite})
+  const observationResult=await persistDownstreamRows({domain:'marketObservations',rows:observations.map(withoutServerFields),repository,eligibleGamePks,cap:0,beforeWrite})
+  return {mappings:mappingResult,observations:observationResult,crosswalk:reference.crosswalk}
+}
 
 export async function persistCanonicalMarkets({ evidence, nativeGames, eligibleGamePks, repository, limits = {}, beforeWrite }) {
   ensure(timestamp(evidence?.acquiredAt) && evidence.responseDigest === sha256(evidence.payload), 'EVIDENCE_DIGEST_OR_TIME')

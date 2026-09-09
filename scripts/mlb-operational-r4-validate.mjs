@@ -88,12 +88,16 @@ await test('Clock lead beyond bounded wait blocks', async () => assert.rejects(s
 await test('Server caller rejects orphan contract', async () => assert.rejects(serviceTest({ result: { ...good, orphanSnapshotReferences: 1 } })))
 const tickSource = fs.readFileSync('scripts/mlb-operational-tick.mjs', 'utf8')
 const tickCode = tickSource.slice(0, tickSource.indexOf('if (process.argv[1]')).replace(/^import .*\n/gm, '').replace('export async function', 'async function')
-for (const vercel of [false, true]) await test(vercel ? 'Ephemeral Vercel host blocks before runtime work' : 'Unverified persistent host blocks before runtime work', async () => {
+for (const vercel of [false, true]) await test(vercel ? 'Unverified Vercel deployment blocks before runtime work' : 'Unverified persistent host blocks before runtime work', async () => {
   const activation = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json', 'utf8'))
   activation.activation = 'ENABLED'; activation.runtimeHost = { verified: vercel }
-  const context = vm.createContext({ fs: { readFileSync: () => JSON.stringify(activation) }, assertAutomationActivation, process: { env: vercel ? { VERCEL: '1' } : {} } })
+  const environment={env:vercel?{VERCEL:'1'}:{}}
+  const hostContext=vm.createContext({process:environment})
+  const hostSource=fs.readFileSync('scripts/mlb-operational-r6-vercel-runtime.mjs','utf8').replace(/^import .*\n/gm,'').replaceAll('export function','function').replaceAll('export async function','async function')
+  vm.runInContext(hostSource,hostContext)
+  const context = vm.createContext({ fs: { readFileSync: () => JSON.stringify(activation) }, assertAutomationActivation, process: environment,executeVercelProductionTick:vm.runInContext('executeVercelProductionTick',hostContext) })
   vm.runInContext(tickCode, context)
-  await assert.rejects(vm.runInContext('executeProductionTick({mode:"PREGAME",packageSha:"a".repeat(40)})', context), /PERSISTENT_HOST_REQUIRED/)
+  await assert.rejects(vm.runInContext('executeProductionTick({mode:"PREGAME",packageSha:"a".repeat(40)})', context), vercel?/FROZEN_DEPLOYMENT/:/PERSISTENT_HOST_REQUIRED/)
 })
 const report = { status: 'PASS', checks, providerCalls: 0, productionDml: 0, productionDdl: 0 }
 const output = path.join(os.tmpdir(), 'pick-analyzer-operational-mission/r4-validation.json')

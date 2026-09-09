@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { pathToFileURL } from 'node:url'
 import { createHash } from 'node:crypto'
 import { createRuntimeStateAuthority, validateCheckpoint, validateDml, serializedBytes } from '../supabase/functions/_shared/mlb-runtime-state.mjs'
+import {assertRuntimeSchema} from '../supabase/functions/_shared/mlb-runtime-schema.mjs'
 const { PGlite } = await import(pathToFileURL(process.env.R6_PGLITE_MODULE).href)
 const db = new PGlite()
 const checks = []
@@ -19,6 +20,14 @@ try {
   const sql = fs.readFileSync('supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql','utf8').replace(/\r\n/g,'\n')
   assert.equal(sha(sql),'b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036')
   await db.exec(sql)
+  await check('Exact runtime catalog and service-only access preflight',async()=>{
+    const read=async(sql,params=[]) => (await db.query(sql,params)).rows
+    await assertRuntimeSchema(read)
+    await db.exec('GRANT SELECT ON pick2_mlb_runtime_state TO anon')
+    await assert.rejects(assertRuntimeSchema(read),/RUNTIME_SCHEMA_DRIFT/)
+    await db.exec('REVOKE SELECT ON pick2_mlb_runtime_state FROM anon')
+    await assertRuntimeSchema(read)
+  })
   await check('Missing durable state fails closed', () => assert.rejects(a(request), /NOT_INITIALIZED/))
   await check('Initialization retains mission usage two', async () => assert.equal((await a({op:'initialize'})).missionOddsCalls,2))
   await check('First authority acquires lease', async () => {

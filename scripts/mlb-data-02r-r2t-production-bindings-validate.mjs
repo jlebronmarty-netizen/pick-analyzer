@@ -12,6 +12,8 @@ import { createWriteJournal } from './mlb-data-02r-r2t-write-journal.mjs'
 import { runR2BExecutableEntrypoint } from './mlb-data-02r-r2a-live-refresh-executor.mjs'
 import { operatingDate } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import { sha256 } from './mlb-data-02r-r2f-stage-contracts.mjs'
+import {pinnedFeatureReferences} from './mlb-operational-r6-compact-features.mjs'
+import {validateDurableR2Resume} from './mlb-operational-r6-r2-resume-validate.mjs'
 
 export async function validateProductionBindingsLocally({ db, root, contexts, oddsPayload, registry, check }) {
   const client = createPgliteClient(db)
@@ -63,10 +65,12 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   const writeJournal = createWriteJournal({ client, store, runContext })
   const repository = { ...createSupabaseProductionRepository({ client, writeJournal }), executionEnvironment: 'DISPOSABLE_PGLITE' }
   assert.throws(() => createCanonicalProductionBindings({ client, repository, store, runContext, authorization }), /R2T_LIVE_BLOCKED|R2T_PRODUCTION_BLOCK:REPOSITORY/)
-  const canonical = createCanonicalCertificationBindings({ client, repository, store, runContext, authorization, oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl, now: () => new Date(runAsOf) })
+  const canonical = await createCanonicalCertificationBindings({ client, repository, store, runContext, authorization, compactContexts: true, oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl, now: () => new Date(runAsOf) })
   console.log(JSON.stringify({ stage: 'ISOLATED_PRODUCTION_BINDINGS', operation: 'read canonical contexts', realProviderCalls: 0 }))
   const evidence = await canonical.readContexts()
   assert.equal(evidence.contexts.length, contexts.length)
+  assert.ok(evidence.contexts.every(c => !Object.hasOwn(c.dependencies,'rows') && /^[a-f0-9]{64}$/.test(c.dependencies.dependencyDigest)))
+  check('compact production contexts retain canonical digest references without raw rows', true)
   check('production source adapter reconstructs every real archived game from local SQL readback', true)
   assert.equal(canonical.providerAccounting().MLB_OFFICIAL, 1)
   assert.equal(canonical.providerAccounting().STATCAST ?? 0, 0)
@@ -75,6 +79,12 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
     executionPackageSha: runContext.execution_package_sha, runDate: runContext.run_date, runAsOf, clock: runAsOf })
   assert.equal(result.status, 'CANONICAL_STAGES_READBACK_COMPLETE')
   assert.equal(result.predictions.rows.length, contexts.length)
+  const generated=await canonical.buildFeaturePlan({contexts:evidence.contexts,runDate:runContext.run_date,runAsOf})
+  const pins=pinnedFeatureReferences({generated,persistedRows:result.features.rows})
+  const recovered=await canonical.restoreFeaturePlan({contexts:evidence.contexts,references:pins})
+  assert.deepEqual(recovered.games.map(g=>g.vector.values),generated.games.map(g=>g.vector.values))
+  assert.equal(recovered.memory.maximumDependencyRows,0)
+  check('canonical snapshot-pinned recovery preserves all vectors without raw reads',true)
   assert.equal(calls.filter(host => host === 'api.the-odds-api.com').length, 1)
   assert.equal(result.markets.crosswalk.filter(row => row.classification === 'MATCHED').length, contexts.length, JSON.stringify({ crosswalk: result.markets.crosswalk, nativeGames: evidence.nativeGames, marketGames: oddsPayload.map(event => ({ home: event.home_team, away: event.away_team, time: event.commence_time })) }))
   assert.ok(calls.filter(host => host === 'statsapi.mlb.com').length >= 3, JSON.stringify({ calls, predictionInserts: result.predictions.inserted, valueInserts: result.values.inserted, pickInserts: result.picks.inserted }))
@@ -83,6 +93,8 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
     executionPackageSha: runContext.execution_package_sha, runDate: runContext.run_date, runAsOf, clock: runAsOf })
   assert.equal(calls.length, countBeforeRetry)
   check('actual production adapter R2B/R2I SQL pipeline completes and retries without provider reacquisition', true)
+  const durableResult=await validateDurableR2Resume({db,client,root,runContext,authorization,fetchImpl,check})
+  fs.writeFileSync(path.join(root,'r6-r2-resume-validation.json'),JSON.stringify(durableResult,null,2))
   const savedStatus = payload.dates[0].games[0].status.abstractGameState
   payload.dates[0].games[0].status.abstractGameState = 'Live'
   await assert.rejects(() => canonical.assertCurrentStarters({ contexts: evidence.contexts, at: runAsOf, domain: 'predictions' }), /CURRENT_STARTED_GAME_VETO/)
@@ -143,7 +155,7 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   const probeStore = { ...store, load: key => probeDocuments.get(key) ?? null, save: (key, value) => { probeDocuments.set(key, value) } }
   const probeJournal = createWriteJournal({ client, store: probeStore, runContext: probeContext })
   const probeRepository = { ...createSupabaseProductionRepository({ client, writeJournal: probeJournal }), executionEnvironment: 'DISPOSABLE_PGLITE' }
-  const probe = createCanonicalCertificationBindings({ client, repository: probeRepository, store: probeStore, runContext: probeContext, authorization,
+  const probe = await createCanonicalCertificationBindings({ client, repository: probeRepository, store: probeStore, runContext: probeContext, authorization,
     oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl: async () => ({ ok: true, json: async () => probePayload }), now: () => new Date(Date.parse(runAsOf) + 1000) })
   const updated = await probe.readContexts()
   assert.equal(updated.contexts.length, 0)
@@ -174,7 +186,7 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   const concurrentStore = { ...store, load: key => concurrentDocuments.get(key) ?? null, save: (key, value) => concurrentDocuments.set(key, value) }
   const concurrentJournal = createWriteJournal({ client: concurrentClient, store: concurrentStore, runContext: concurrentContext })
   const concurrentRepository = { ...createSupabaseProductionRepository({ client: concurrentClient, writeJournal: concurrentJournal }), executionEnvironment: 'DISPOSABLE_PGLITE' }
-  const concurrentCanonical = createCanonicalCertificationBindings({ client: concurrentClient, repository: concurrentRepository, store: concurrentStore,
+  const concurrentCanonical = await createCanonicalCertificationBindings({ client: concurrentClient, repository: concurrentRepository, store: concurrentStore,
     runContext: concurrentContext, authorization, oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl: async () => ({ ok: true, json: async () => concurrentPayload }), now: () => new Date(Date.parse(runAsOf) + 1000) })
   await assert.rejects(() => concurrentCanonical.readContexts(), /PARTIAL_OR_CONFLICTING_STATE/)
   const afterConcurrent = (await client.from('pick2_mlb_games').select('*').eq('game_pk', concurrentPk)).data[0]
@@ -188,7 +200,7 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   const emptyJournal = createWriteJournal({ client, store: emptyStore, runContext: emptyContext })
   const emptyRepository = { ...createSupabaseProductionRepository({ client, writeJournal: emptyJournal }), executionEnvironment: 'DISPOSABLE_PGLITE' }
   let emptyCalls = 0
-  const emptyCanonical = createCanonicalCertificationBindings({ client, repository: emptyRepository, store: emptyStore, runContext: emptyContext, authorization,
+  const emptyCanonical = await createCanonicalCertificationBindings({ client, repository: emptyRepository, store: emptyStore, runContext: emptyContext, authorization,
     oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl: async () => { emptyCalls++; return { ok: true, json: async () => ({ dates: [] }) } }, now: () => new Date(runAsOf) })
   const emptyResult = await runR2BExecutableEntrypoint({ mode: 'CERTIFICATION_SIMULATION', providers: { canonical: emptyCanonical }, repository: emptyRepository, authorization,
     runId: emptyContext.run_id, executionPackageSha: emptyContext.execution_package_sha, runDate: emptyContext.run_date, runAsOf, clock: runAsOf })

@@ -43,9 +43,10 @@ export async function runAutomationJob({ root, job, execute, certification = fal
 
 // The existing launcher owns the actual run freeze and all R2 stages. Persist
 // its run identity even after failure, allowing the next tick to resume it.
-export async function executeDailyJob({ job, state, checkpoint, liveRoot, manual = runManualRefresh }) {
+export async function executeDailyJob({ job, state, checkpoint, liveRoot, manual = runManualRefresh, durableRuntime = null }) {
   ensure(manual === runManualRefresh || process.env.R2S_VALIDATION_DIR, 'INJECTED_DAILY_EXECUTOR_FORBIDDEN')
   ensure(['INITIALIZE', 'PREGAME', 'STARTER_CHANGE', 'ODDS_FRESHNESS'].includes(job.mode), 'DAILY_MODE')
+  if(durableRuntime)return manual({packageSha:job.packageSha,durableRuntime,cacheRoot:'CANONICAL_ONLY'})
   const names = () => fs.readdirSync(liveRoot).filter(n => n.startsWith('run-'))
   let intent = state.checkpoints.find(c => c.stage === 'R2_INTENT')?.data
   if (!intent) { intent = { existingRuns: names() }; checkpoint('R2_INTENT', intent) }
@@ -64,8 +65,27 @@ export async function reconcileAutomatedPitches({ job, state, checkpoint, store,
   ensure(job.dates.every(d => /^2026-\d{2}-\d{2}$/.test(d) && d <= job.date), 'DATE_SCOPE')
   ensure(job.mode !== 'PREGAME' || job.gamePks.every(pk => !job.targetGamePks.includes(pk)), 'PREGAME_TARGET_LEAKAGE')
   ensure(!fetchImpl || process.env.R2S_VALIDATION_DIR, 'INJECTED_TRANSPORT_FORBIDDEN')
-  const ledger = createProviderLedger({ MLB_OFFICIAL: { allowed: true, maxCalls: 50 }, STATCAST: { allowed: true, maxCalls: Math.min(100, job.dates.length) } }, { initial: state.providerAccounting, onConsume: e => { state.providerAccounting[e.provider] = e.consumed; checkpoint('PROVIDER', { ...state.providerAccounting }) } })
-  const statcast = createStatcastLiveClient({ ledger, db: client, cacheDir: path.join(store.root, `csv-${automationIdentity(job)}`), ...(fetchImpl ? { fetchImpl } : {}) })
+  const ledger = store.providerLedger??createProviderLedger({ MLB_OFFICIAL: { allowed: true, maxCalls: 50 }, STATCAST: { allowed: true, maxCalls: Math.min(100, job.dates.length) } }, { initial: state.providerAccounting, onConsume: e => { state.providerAccounting[e.provider] = e.consumed; checkpoint('PROVIDER', { ...state.providerAccounting }) } })
+  const statcast = createStatcastLiveClient({ ledger, db: client, cacheDir: store.referenceOnly?null:path.join(store.root, `csv-${automationIdentity(job)}`), ...(fetchImpl ? { fetchImpl } : {}) })
+  if(store.referenceOnly) {
+    const seen=new Set();let inserted=0,reused=0
+    const digest=createHash('sha256')
+    for await(const rows of statcast.streamRowsForGames({eligibleGamePks:job.gamePks,dependencyDates:job.dates,runAsOf:job.at,teamMap,providerBudget:{STATCAST:{maxCalls:job.dates.length}},cachePolicy:job.mode==='PREGAME'?{strategy:'CANONICAL_PERSISTED_THEN_LOCAL_CSV'}:{strategy:'RECONCILE_FROZEN_SCOPE',reconciliationMode:job.mode}})) {
+      ensure(rows.length<=100 && rows.every(r=>job.gamePks.includes(r.game_pk) && job.dates.includes(r.game_date) && !seen.has(r.id)) && new Set(rows.map(r=>r.id)).size===rows.length,'RAW_CAP_SCOPE')
+      for(const row of rows){seen.add(row.id);digest.update(hash([row.id,row.raw_payload_digest]))}
+      ensure(seen.size<=job.gamePks.length*1000,'RAW_CAP_SCOPE')
+      const plan=classifyInsertReuseConflict({plannedRows:rows,existingRows:await repository.readRawRows(rows.map(r=>r.id)),identityFields:['id'],digestField:'raw_payload_digest',eligibleGamePks:job.gamePks,cap:rows.length})
+      ensure(plan.blockConflict===0,'BLOCK_CONFLICT')
+      const ids=new Set(plan.classifications.filter(c=>c.classification==='INSERT_ELIGIBLE').map(c=>c.identity))
+      const inserts=rows.filter(r=>ids.has(r.id))
+      if(inserts.length)await repository.insertRawRows(inserts,inserts.length)
+      const repeat=classifyInsertReuseConflict({plannedRows:rows,existingRows:await repository.readRawRows(rows.map(r=>r.id)),identityFields:['id'],digestField:'raw_payload_digest',eligibleGamePks:job.gamePks,cap:0})
+      ensure(repeat.reuseNoOp===rows.length && repeat.blockConflict===0,'RAW_READBACK_IDEMPOTENCY')
+      inserted+=inserts.length;reused+=rows.length-inserts.length
+    }
+    await checkpoint('RAW_READBACK',{count:seen.size,digest:digest.digest('hex')})
+    return {rows:seen.size,cap:job.gamePks.length*1000,inserted,reused,conflicts:0,providers:ledger.snapshot(),idempotency:'PASS',target:'public.pick2_raw_mlb_statcast_pitches'}
+  }
   let rows = state.checkpoints.find(c => c.stage === 'RAW_PLAN')?.data?.rows
   if (!rows) {
     rows = await statcast.fetchRowsForGames({ eligibleGamePks: job.gamePks, dependencyDates: job.dates, runAsOf: job.at, teamMap, providerBudget: { STATCAST: { maxCalls: job.dates.length } }, cachePolicy: job.mode === 'PREGAME' ? { strategy: 'CANONICAL_PERSISTED_THEN_LOCAL_CSV' } : { strategy: 'RECONCILE_FROZEN_SCOPE', reconciliationMode: job.mode } })

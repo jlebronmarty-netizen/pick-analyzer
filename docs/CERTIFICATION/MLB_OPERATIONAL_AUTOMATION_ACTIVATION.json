@@ -14,15 +14,18 @@
     "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
     "conflicts": 0
   },
-  "reason": "Vercel Production credential reconciliation and actual Vercel-to-Edge read-only schema preflight pass. No existing persistent certified R2 executor host is identified: repository self-hosted runner inventory is empty and no matching local scheduler/service is registered. Host identity, durable private state, restart/overlap verification and scheduled execution remain required.",
+  "reason": "R6 exact migration and durable lease production readback pass. Durable R2 recovery and Vercel host code pass offline validation. Automatic approval review rejected deployment of the fenced business-write Edge endpoint; explicit endpoint deployment approval is required before host dry invocation and activation.",
   "blocker": {
-    "code": "R5_PERSISTENT_EXECUTOR_HOST_UNAVAILABLE",
+    "code": "R6_EDGE_MUTATION_DEPLOYMENT_APPROVAL_REQUIRED",
     "hardStop": true,
-    "reason": "Vercel Production credential reconciliation and actual Vercel-to-Edge read-only schema preflight pass. No existing persistent certified R2 executor host is identified: repository self-hosted runner inventory is empty and no matching local scheduler/service is registered. Host identity, durable private state, restart/overlap verification and scheduled execution remain required.",
-    "requiredResolution": "Identify and connect the existing always-on Node/Git host; preserve private checkpoints and mission Odds ledger at 2/20. Verify host preflight and locks before activation.",
-    "authorizationNeeded": false
+    "reason": "R6 exact migration and durable lease production readback pass. Durable R2 recovery and Vercel host code pass offline validation. Automatic approval review rejected deployment of the fenced business-write Edge endpoint; explicit endpoint deployment approval is required before host dry invocation and activation.",
+    "requiredResolution": "Authorize deploying the reviewed service-only mlb-runtime-state fenced business-write handler; no additional DDL. Then verify real Vercel host, activate existing Cron path and observe scheduled readback.",
+    "authorizationNeeded": true
   },
   "runtimeHost": {
+    "type": "VERCEL_PRODUCTION_FUNCTION",
+    "scheduler": "VERCEL_CRON",
+    "path": "/api/cron/mlb-operational",
     "verified": false
   },
   "settlementAutomation": "DISABLED",

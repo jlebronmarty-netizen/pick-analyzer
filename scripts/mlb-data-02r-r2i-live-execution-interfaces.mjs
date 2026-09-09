@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import { assertR2TLiveReadiness } from './mlb-data-02r-r2t-real-feature-champion.mjs'
 import { buildAllPregameFeatureRows } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
+import {pinnedFeatureReferences} from './mlb-operational-r6-compact-features.mjs'
 import { buildPersistedPredictions, persistDownstreamRows, assertDownstreamPayload, DOWNSTREAM_BINDINGS, downstreamSchemaColumns } from './mlb-data-02r-r2t-downstream-persistence.mjs'
-import { persistCanonicalMarkets, buildCanonicalValues, buildCanonicalOfficialPicks } from './mlb-data-02r-r2t-market-binding.mjs'
+import { persistCanonicalMarkets, buildCanonicalValues, buildCanonicalOfficialPicks, canonicalMarketReference, restoreCanonicalMarkets } from './mlb-data-02r-r2t-market-binding.mjs'
 import { assertCanonicalRawInsert } from './mlb-data-02r-r2t-raw-binding.mjs'
-import { fetchR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
+import { fetchR2NStatcastRowsForGames, streamR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
 import {
   assertGameScope,
   assertIsoTimestamp,
@@ -598,7 +599,7 @@ export function createProviderLedger(caps = {}, { initial = {}, onConsume = null
 export function createMlbOfficialLiveClient({ fetchImpl = fetch, baseUrl = 'https://statsapi.mlb.com/api/v1', ledger } = {}) {
   return {
     async getSchedule({ runDate }) {
-      ledger?.consume('MLB_OFFICIAL', 1)
+      await ledger?.consume('MLB_OFFICIAL', 1)
       const response = await fetchImpl(`${baseUrl}/schedule?sportId=1&date=${encodeURIComponent(runDate)}&hydrate=probablePitcher`)
       if (!response?.ok) throw new Error(`MLB_OFFICIAL_SCHEDULE_HTTP_${response?.status ?? 'UNKNOWN'}`)
       return response.json()
@@ -610,7 +611,7 @@ export function createTheOddsApiLiveClient({ fetchImpl = fetch, apiKey, ledger }
   return {
     async getMoneylineOdds() {
       if (!apiKey) throw new Error('THE_ODDS_API_KEY_REQUIRED')
-      ledger?.consume('THE_ODDS_API', 1)
+      await ledger?.consume('THE_ODDS_API', 1)
       const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${encodeURIComponent(apiKey)}`
       const response = await fetchImpl(url)
       if (!response?.ok) throw new Error(`THE_ODDS_API_HTTP_${response?.status ?? 'UNKNOWN'}`)
@@ -620,13 +621,21 @@ export function createTheOddsApiLiveClient({ fetchImpl = fetch, apiKey, ledger }
   }
 }
 
-export function createStatcastLiveClient({ fetchRowsForGames, ledger, fetchImpl = fetch, db = null, cacheDir = undefined } = {}) {
+export function createStatcastLiveClient({ fetchRowsForGames, ledger, fetchImpl = (url,options)=>fetch(url,{...options,redirect:'error',signal:AbortSignal.timeout(60000)}), db = null, cacheDir = undefined } = {}) {
   return {
+    async *streamRowsForGames(args) {
+      if (!ledger || cacheDir===undefined) throw new Error('STATCAST_LEDGER_AND_EXPLICIT_CACHE_REQUIRED')
+      const countedFetch=async(...request)=>{await ledger.consume('STATCAST',1);return fetchImpl(...request)}
+      if(fetchRowsForGames) {
+        const rows=await fetchRowsForGames({...args,fetchImpl:countedFetch,db,cacheDir})
+        for(let start=0;start<rows.length;start+=100)yield rows.slice(start,start+100)
+      } else yield* streamR2NStatcastRowsForGames({...args,fetchImpl:countedFetch,db,cacheDir})
+    },
     async fetchRowsForGames(args) {
-      if (!ledger || !cacheDir) throw new Error('STATCAST_LEDGER_AND_EXPLICIT_CACHE_REQUIRED')
+      if (!ledger || cacheDir===undefined) throw new Error('STATCAST_LEDGER_AND_EXPLICIT_CACHE_REQUIRED')
       const fetcher = fetchRowsForGames ?? fetchR2NStatcastRowsForGames
       const countedFetch = async (...request) => {
-        ledger.consume('STATCAST', 1)
+        await ledger.consume('STATCAST', 1)
         return fetchImpl(...request)
       }
       return fetcher({ ...args, fetchImpl: countedFetch, db, cacheDir })
@@ -790,6 +799,11 @@ export function createSupabaseProductionRepository({ client, schemaFingerprint =
     async insertRawRows(rows, cap) { return write(R2I_LIVE_TARGETS.rawStatcast, rows, cap) },
     async readFeatureRows(domain, ids, plannedRows = []) { return readFeatureRowsByDomain(client, domain, ids, plannedRows) },
     async insertFeatureRows(domain, rows, cap) { return write(liveTargetForFeatureDomain(domain), featureInsertRowsForDomain(domain, rows), cap) },
+    async readPinnedFeatureRows(snapshotIds) {
+      const rows={snapshots:await selectByIds(client,R2I_LIVE_TARGETS.featureSnapshots,'id',snapshotIds)}
+      for(const domain of ['team','starter','bullpen','batter','matchup','firstInning'])rows[domain]=await selectByIds(client,R2I_LIVE_TARGETS[domain],'feature_snapshot_id',snapshotIds)
+      return rows
+    },
     async readPredictions(ids) { return selectByIds(client, R2I_LIVE_TARGETS.predictions, 'deterministic_identity', ids) },
     async insertPredictions(rows, cap) { return write(R2I_LIVE_TARGETS.predictions, rows, cap) },
     async readMarketMappings(ids) { return selectByIds(client, R2I_LIVE_TARGETS.marketMappings, 'provider_event_id', ids) },
@@ -800,6 +814,11 @@ export function createSupabaseProductionRepository({ client, schemaFingerprint =
       return data
     },
     async insertMarketMappings(rows, cap) { return write(R2I_LIVE_TARGETS.marketMappings, rows, cap) },
+    async readMarketObservationsByEvidence({eligibleGamePks,responseDigest,acquiredAt}) {
+      const {data,error}=await client.from(R2I_LIVE_TARGETS.marketObservations).select('*').in('game_pk',eligibleGamePks).eq('source_response_digest',responseDigest).eq('acquired_at',acquiredAt).limit(5001)
+      if(error || !Array.isArray(data) || data.length>5000)throw Error('MARKET_REFERENCE_READ_FAILED')
+      return data
+    },
     async readMarketObservations(ids) { return selectByIds(client, R2I_LIVE_TARGETS.marketObservations, 'observation_identity', ids) },
     async insertMarketObservations(rows, cap) { return write(R2I_LIVE_TARGETS.marketObservations, rows, cap) },
     async readValues(ids) { return selectByIds(client, R2I_LIVE_TARGETS.values, 'value_identity', ids) },
@@ -1142,15 +1161,33 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
   }
   const limits = authorization?.dmlCaps ?? {}
   for (const target of [...Object.values(R2I_FEATURE_IDENTITY_BINDINGS).map(b => b.table), ...Object.values(DOWNSTREAM_BINDINGS).map(b => b.table)]) await repository.verifySchemaFingerprint(target)
-  const generated = buildAllPregameFeatureRows({ contexts, runDate: runContext.run_date, runAsOf: runContext.run_as_of })
+  const featureInput = { contexts, runDate: runContext.run_date, runAsOf: runContext.run_as_of }
+  const pinned=checkpoint.featureReferences && canonical.restoreFeaturePlan
+  const generated = pinned ? await canonical.restoreFeaturePlan({contexts,references:checkpoint.featureReferences}) : canonical.buildFeaturePlan ? await canonical.buildFeaturePlan(featureInput) : buildAllPregameFeatureRows(featureInput)
   const guardedRepository = Object.create(repository)
   guardedRepository.insertFeatureRows = async (domain, rows, cap) => {
     if (rows.length) await assertPregame({ domain, rows })
     return repository.insertFeatureRows(domain, rows, cap)
   }
-  const features = await persistCanonicalFeaturePlan({ repository: guardedRepository, rowsByDomain: revisionFeatureRows(generated.rows), eligibleGamePks: scope, limits: limits.features ?? {} })
+  const features = await persistCanonicalFeaturePlan({ repository: guardedRepository, rowsByDomain: pinned ? generated.rows : revisionFeatureRows(generated.rows), eligibleGamePks: scope, limits: pinned ? Object.fromEntries(Object.keys(R2I_FEATURE_IDENTITY_BINDINGS).map(domain=>[domain,0])) : limits.features ?? {} })
   const plannedPredictions = await buildPersistedPredictions({ games: generated.games, persistedFeatures: features.rows, registryRepository: canonical.registryRepository, runAsOf: runContext.run_as_of })
+  if(canonical.checkpoint.referenceOnly && !checkpoint.featureReferences) {
+    checkpoint.featureReferences=pinnedFeatureReferences({generated,persistedRows:features.rows})
+    await canonical.checkpoint.save(runContext.run_id,checkpoint)
+  }
   const predictions = await persistDownstreamRows({ domain: 'predictions', rows: plannedPredictions, repository, eligibleGamePks: scope, cap: limits.predictions ?? plannedPredictions.length, beforeWrite: assertPregame })
+  let markets
+  if(canonical.checkpoint.referenceOnly) {
+    if(checkpoint.marketReference)markets=await restoreCanonicalMarkets({reference:checkpoint.marketReference,repository,eligibleGamePks:scope,beforeWrite:assertPregame})
+    else {
+      const evidence=await canonical.getOddsEvidence({runContext,eligibleGamePks:scope})
+      checkpoint.evaluatedAt=now()
+      markets=await persistCanonicalMarkets({evidence,nativeGames,eligibleGamePks:scope,repository,limits,beforeWrite:assertPregame})
+      checkpoint.marketReference=canonicalMarketReference({markets,evidence,evaluatedAt:checkpoint.evaluatedAt})
+      checkpoint.oddsDigest=checkpoint.marketReference.oddsDigest
+      await canonical.checkpoint.save(runContext.run_id,checkpoint)
+    }
+  } else {
   if (!checkpoint.odds) {
     checkpoint.odds = await canonical.getOddsEvidence({ runContext, eligibleGamePks: scope })
     checkpoint.oddsDigest = sha256(checkpoint.odds)
@@ -1158,7 +1195,8 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
     await canonical.checkpoint.save(runContext.run_id, checkpoint)
   }
   if (sha256(checkpoint.odds) !== checkpoint.oddsDigest) throw new Error('R2T_CHECKPOINT_ODDS_DRIFT')
-  const markets = await persistCanonicalMarkets({ evidence: checkpoint.odds, nativeGames, eligibleGamePks: scope, repository, limits, beforeWrite: assertPregame })
+  markets = await persistCanonicalMarkets({ evidence: checkpoint.odds, nativeGames, eligibleGamePks: scope, repository, limits, beforeWrite: assertPregame })
+  }
   const valueRows = buildCanonicalValues({ predictions: predictions.rows, observations: markets.observations.rows, evaluatedAt: checkpoint.evaluatedAt })
   const values = await persistDownstreamRows({ domain: 'values', rows: valueRows, repository, eligibleGamePks: scope, cap: limits.nativeValues ?? valueRows.length, beforeWrite: assertPregame })
   const decision = buildCanonicalOfficialPicks({ values: values.rows, decisionAt: checkpoint.evaluatedAt, scheduledByGame: new Map(contexts.map(c => [c.target.gamePk, c.target.scheduledAt])) })

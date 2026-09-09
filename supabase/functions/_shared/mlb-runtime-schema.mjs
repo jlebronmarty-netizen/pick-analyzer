@@ -1,0 +1,10 @@
+import expected from '../mlb-runtime-state/schema-contract.json' with {type:'json'}
+import {sha256} from '../../../scripts/mlb-data-02r-r2f-stage-contracts.mjs'
+const query = "SELECT jsonb_build_object('columns',(SELECT jsonb_agg(jsonb_build_object('name',a.attname,'type',format_type(a.atttypid,a.atttypmod),'notNull',a.attnotnull,'default',pg_get_expr(d.adbin,d.adrelid)) ORDER BY a.attnum) FROM pg_attribute a LEFT JOIN pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum WHERE a.attrelid='public.pick2_mlb_runtime_state'::regclass AND a.attnum>0 AND NOT a.attisdropped),'constraints',(SELECT jsonb_agg(jsonb_build_object('name',conname,'type',contype,'definition',pg_get_constraintdef(oid)) ORDER BY conname) FROM pg_constraint WHERE conrelid='public.pick2_mlb_runtime_state'::regclass),'indexes',(SELECT jsonb_agg(indexdef ORDER BY indexname) FROM pg_indexes WHERE schemaname='public' AND tablename='pick2_mlb_runtime_state'),'policies',(SELECT count(*) FROM pg_policies WHERE schemaname='public' AND tablename='pick2_mlb_runtime_state'),'rls',(SELECT relrowsecurity FROM pg_class WHERE oid='public.pick2_mlb_runtime_state'::regclass),'grants',(SELECT jsonb_agg(jsonb_build_object('role',COALESCE(r.rolname,'PUBLIC'),'privilege',a.privilege_type) ORDER BY COALESCE(r.rolname,'PUBLIC'),a.privilege_type) FROM pg_class c CROSS JOIN LATERAL aclexplode(c.relacl) a LEFT JOIN pg_roles r ON r.oid=a.grantee WHERE c.oid='public.pick2_mlb_runtime_state'::regclass AND a.grantee<>c.relowner)) AS contract;"
+
+export async function assertRuntimeSchema(read) {
+  const rows=await read(query)
+  if(rows.length!==1 || sha256(rows[0].contract)!==sha256(expected))throw Error('R6_STATE:RUNTIME_SCHEMA_DRIFT')
+  const permissions=await read("SELECT (SELECT rolbypassrls FROM pg_roles WHERE rolname='service_role') AS bypass, (SELECT count(*)::int FROM pg_attribute WHERE attrelid='public.pick2_mlb_runtime_state'::regclass AND attnum>0 AND NOT attisdropped AND attacl IS NOT NULL) AS column_grants")
+  if(permissions[0]?.bypass!==true || permissions[0]?.column_grants!==0)throw Error('R6_STATE:RUNTIME_ACCESS_DRIFT')
+}

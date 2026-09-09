@@ -15,6 +15,8 @@ import { createSupabaseProductionRepository, createCurrentSlateRunFreeze, R2I_LI
 import { runR2BExecutableEntrypoint } from './mlb-data-02r-r2a-live-refresh-executor.mjs'
 import { operatingDate } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import { collectRuntimeSourcePaths, R3_CERTIFICATE } from './mlb-data-02r-r2t-r3-readiness.mjs'
+import {createDurableRunStore} from './mlb-operational-r6-run-store.mjs'
+import {createDurableWriteJournal} from './mlb-operational-r6-write-journal.mjs'
 
 const ensure = (condition, reason) => { if (!condition) throw new Error(`MLB_MANUAL_BLOCK:${reason}`) }
 const git = args => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
@@ -45,8 +47,9 @@ export function verifyInitialMissionLedger(published) {
     && accounting.missionOddsRemaining === 20 && Array.isArray(accounting.runs) && accounting.runs.length === 0, 'PRIVATE_MISSION_LEDGER_RECOVERY_REQUIRED')
 }
 
-export async function runManualRefresh({ packageSha, resumeRunId = null } = {}) {
+export async function runManualRefresh({ packageSha, resumeRunId = null, durableRuntime = null, cacheRoot = null } = {}) {
   assertR2TLiveReadiness()
+  if(durableRuntime) return runDurableManualRefresh({packageSha,runtime:durableRuntime,cacheRoot})
   ensure(/^[a-f0-9]{40}$/.test(packageSha ?? '') && git(['rev-parse', 'HEAD']) === packageSha, 'FROZEN_PACKAGE')
   const frozenFiles = [...collectRuntimeSourcePaths(), R3_CERTIFICATE]
   git(['ls-files', '--error-unmatch', '--', ...frozenFiles])
@@ -83,7 +86,7 @@ export async function runManualRefresh({ packageSha, resumeRunId = null } = {}) 
     journal = createWriteJournal({ client, store, runContext })
     const repository = createSupabaseProductionRepository({ client, writeJournal: journal })
     const authorization = manualRunAuthorization(runContext)
-    canonical = createCanonicalProductionBindings({ client, repository, store, runContext, authorization, oddsApiKey: process.env.THE_ODDS_API_KEY ?? process.env.ODDS_API_KEY })
+    canonical = await createCanonicalProductionBindings({ client, repository, store, runContext, authorization, oddsApiKey: process.env.THE_ODDS_API_KEY ?? process.env.ODDS_API_KEY })
     const result = await runR2BExecutableEntrypoint({ mode: 'LIVE_EXECUTE', executionPackageSha: packageSha, runId: runContext.run_id,
       runDate: runContext.run_date, runAsOf: runContext.run_as_of, authorization, repository, providers: { canonical } })
     ensure(git(['rev-parse', 'HEAD']) === packageSha, 'PACKAGE_CHANGED_DURING_RUN')
@@ -98,6 +101,25 @@ export async function runManualRefresh({ packageSha, resumeRunId = null } = {}) 
     if (runContext) store.save(`failure-${runContext.run_id}`, { at: new Date().toISOString(), error: safeError, providers: canonical?.providerAccounting() ?? {}, writes: journal?.summary() ?? [] })
     throw new Error(safeError)
   } finally { store.release() }
+}
+
+// Same R2 coordinator and bindings; only runtime ownership differs on Vercel.
+// The database has already frozen the actual start and owns all counters/writes.
+async function runDurableManualRefresh({packageSha,runtime,cacheRoot}) {
+  ensure(process.env.VERCEL==='1' && process.env.VERCEL_ENV==='production' && process.env.VERCEL_GIT_COMMIT_SHA===packageSha,'VERCEL_FROZEN_PACKAGE')
+  ensure(!process.env.R2S_VALIDATION_DIR && runtime.locked && runtime.run.package_sha===packageSha,'DURABLE_RUNTIME_REQUIRED')
+  const row=runtime.run,runDate=String(row.run_date).slice(0,10),runAsOf=new Date(row.run_as_of).toISOString()
+  ensure(runDate===operatingDate(new Date().toISOString()) && typeof cacheRoot==='string','CURRENT_DURABLE_RUN')
+  const runContext=createCurrentSlateRunFreeze({mode:'LIVE_EXECUTE',runId:row.run_id,executionPackageSha:packageSha,runDate,runAsOf})
+  const client=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}})
+  const store=createDurableRunStore({runtime,runContext,root:cacheRoot}),journal=createDurableWriteJournal(runtime)
+  const repository=createSupabaseProductionRepository({client,writeJournal:journal}),authorization=manualRunAuthorization(runContext)
+  const canonical=await createCanonicalProductionBindings({client,repository,store,runContext,authorization,compactContexts:true,oddsApiKey:process.env.THE_ODDS_API_KEY??process.env.ODDS_API_KEY})
+  store.setCanonical(canonical)
+  const result=await runR2BExecutableEntrypoint({mode:'LIVE_EXECUTE',executionPackageSha:packageSha,runId:runContext.run_id,runDate,runAsOf,authorization,repository,providers:{canonical}})
+  return {status:result.status,runId:runContext.run_id,runDate,runAsOf,packageSha,eligibleGames:result.eligibleGamePks?.length??0,blockedGames:result.blockedGames?.length??0,
+    predictions:result.predictions?.rows.length??0,observations:result.markets?.observations.rows.length??0,values:result.values?.rows.length??0,officialPicks:result.picks?.rows.length??0,
+    providers:canonical.providerAccounting(),dml:journal.summary(),productionDdl:0,syntheticProductionPaths:0}
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

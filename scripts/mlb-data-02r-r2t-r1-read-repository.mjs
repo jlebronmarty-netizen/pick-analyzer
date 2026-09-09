@@ -24,7 +24,7 @@ export function createPregameReadRepository(db) {
       const rows = await read(db.from('pick2_game_predictions').select('*').order('predicted_at', { ascending: false }).limit(100), 'prediction_candidates')
       return rows.data
     },
-    async readDependencies(target, starters, { inventoryMissing = false } = {}) {
+    async readDependencies(target, starters, { inventoryMissing = false, inventoryOnly = false } = {}) {
       const seasonStart = `${target.gameDate.slice(0, 4)}-01-01`
       const teamIds = [target.homeTeamId, target.awayTeamId]
       const pitcherIds = [starters.home.mlbam_pitcher_id, starters.away.mlbam_pitcher_id]
@@ -55,19 +55,19 @@ export function createPregameReadRepository(db) {
       for (let start = 0; start < ids.length; start += 8) {
         const scope = ids.slice(start, start + 8)
         const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW)
-          .select(columns, { count: 'exact' }).eq('game_pk', gamePk).limit(1000), 'scoped_raw_history')))
+          .select(inventoryOnly ? 'id' : columns, { count: 'exact', ...(inventoryOnly ? {head:true} : {}) }).eq('game_pk', gamePk).limit(1000), 'scoped_raw_history')))
         // Inspect every settled result, including errors, before continuing.
         const errors = results.filter((result) => result.status === 'rejected')
         requireRead(errors.length === 0, `RAW_GAME_READ:${errors.map((result) => result.reason.message).join('|')}`)
         for (const [index, result] of results.entries()) {
           const page = result.value
-          if (inventoryMissing && page.count === 0 && page.data.length === 0) {
+          if (inventoryMissing && page.count === 0 && (inventoryOnly || page.data.length === 0)) {
             missingGamePks.push(scope[index])
             continue
           }
           requireRead(Number.isInteger(page.count) && page.count > 0 && page.count <= 1000, 'RAW_READ_CAP_OR_MISSING_GAME')
-          requireRead(page.data.length === page.count, 'RAW_READ_TRUNCATED')
-          rows.push(...page.data)
+          requireRead(inventoryOnly || page.data.length === page.count, 'RAW_READ_TRUNCATED')
+          if(!inventoryOnly)rows.push(...page.data)
           counts.push({ gamePks: [scope[index]], count: page.count })
         }
       }
