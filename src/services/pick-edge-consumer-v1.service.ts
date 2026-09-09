@@ -2,27 +2,26 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoard, type CurrentBoardCandidate, type CurrentBoardResponse } from '@/services/current-board.service'
-import type {
-  ConsumerBookQuote,
-  ConsumerEnvelope,
-  ConsumerFreshness,
-  ConsumerGame,
-  ConsumerGameStatus,
-  ConsumerHealth,
-  ConsumerMainLine,
-  ConsumerMarketFamily,
-  ConsumerMeta,
-  ConsumerOpportunity,
-  ConsumerRecommendationMetadata,
-  ConsumerSort,
-  ConsumerStarter,
-  ConsumerTeamRef,
+import {
+  PICK_EDGE_CONSUMER_CONTRACT_VERSION,
+  type ConsumerBookQuote,
+  type ConsumerEnvelope,
+  type ConsumerFreshness,
+  type ConsumerGame,
+  type ConsumerGameStatus,
+  type ConsumerHealth,
+  type ConsumerMainLine,
+  type ConsumerMarketFamily,
+  type ConsumerMeta,
+  type ConsumerOpportunity,
+  type ConsumerRecommendationMetadata,
+  type ConsumerSort,
+  type ConsumerStarter,
+  type ConsumerTeamRef,
 } from '@/types/pick-edge-consumer-v1'
-import { PICK_EDGE_CONSUMER_CONTRACT_VERSION } from '@/types/pick-edge-consumer-v1'
 
 const TIMEZONE = 'America/Puerto_Rico' as const
-const SUPPORTED_GAME_MARKETS = new Set(['moneyline', 'spread', 'total'])
-const WATCH_POLICY_STATUSES = new Set(['WATCH', 'QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'])
+const WATCH_STATUSES = new Set(['WATCH', 'QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'])
 
 const MLB_TEAMS: Record<number, { name: string; abbreviation: string }> = {
   108: { name: 'Los Angeles Angels', abbreviation: 'LAA' },
@@ -77,7 +76,6 @@ type SportEventRow = {
 type OddsRow = {
   id: string
   event_id: string
-  provider: string | null
   sportsbook: string | null
   market: string | null
   outcome: string | null
@@ -85,7 +83,6 @@ type OddsRow = {
   line: number | null
   snapshot_time: string | null
   provider_timestamp: string | null
-  metadata: Record<string, unknown> | null
 }
 
 type OfficialPickRow = {
@@ -109,22 +106,37 @@ type OfficialPickRow = {
   decision_at: string | null
 }
 
-type CanonicalGameContext = {
+type GameContext = {
+  gamePk: number
   row: CanonicalGameRow
   event: SportEventRow
-  gamePk: number
   away: ConsumerTeamRef
   home: ConsumerTeamRef
   awayStarter: ConsumerStarter | null
   homeStarter: ConsumerStarter | null
 }
 
-type ConsumerSnapshot = {
-  board: CurrentBoardResponse
+type Snapshot = {
   meta: ConsumerMeta
   games: ConsumerGame[]
   opportunities: ConsumerOpportunity[]
   health: ConsumerHealth
+}
+
+function asNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(String).filter(Boolean) : []
 }
 
 function localToday() {
@@ -149,33 +161,18 @@ function normalizeAbbreviation(value: string | null | undefined) {
   return upper
 }
 
-function toIsoMinute(value: string | null | undefined) {
+function isoMinute(value: string | null | undefined) {
   if (!value) return ''
   const ms = Date.parse(value)
   if (!Number.isFinite(ms)) return ''
   return new Date(Math.floor(ms / 60_000) * 60_000).toISOString()
 }
 
-function canonicalKey(start: string | null, away: string | null, home: string | null) {
-  return `${toIsoMinute(start)}|${normalizeAbbreviation(away)}|${normalizeAbbreviation(home)}`
+function gameKey(start: string | null, away: string | null, home: string | null) {
+  return `${isoMinute(start)}|${normalizeAbbreviation(away)}|${normalizeAbbreviation(home)}`
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
-}
-
-function asNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') return null
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-function stringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return []
-  return value.map((item) => String(item)).filter(Boolean)
-}
-
-function officialMlbTeamId(metadata: Record<string, unknown>, side: 'away' | 'home') {
+function teamId(metadata: Record<string, unknown>, side: 'away' | 'home') {
   const direct = asNumber(metadata[`${side}MlbTeamId`])
   if (direct !== null) return Math.round(direct)
   const identity = asRecord(metadata.mlb_official_identity)
@@ -183,9 +180,9 @@ function officialMlbTeamId(metadata: Record<string, unknown>, side: 'away' | 'ho
   return nested === null ? null : Math.round(nested)
 }
 
-function teamRef(mlbTeamId: number | null, fallbackAbbreviation: string | null): ConsumerTeamRef {
+function teamRef(mlbTeamId: number | null, fallback: string | null): ConsumerTeamRef {
   const known = mlbTeamId === null ? null : MLB_TEAMS[mlbTeamId]
-  const abbreviation = known?.abbreviation ?? normalizeAbbreviation(fallbackAbbreviation) || null
+  const abbreviation = known?.abbreviation ?? (normalizeAbbreviation(fallback) || null)
   return {
     id: mlbTeamId === null ? null : `mlb:${mlbTeamId}`,
     mlbTeamId,
@@ -195,7 +192,7 @@ function teamRef(mlbTeamId: number | null, fallbackAbbreviation: string | null):
   }
 }
 
-function starterFromMetadata(metadata: Record<string, unknown>, side: 'away' | 'home', observedAt: string | null): ConsumerStarter | null {
+function starter(metadata: Record<string, unknown>, side: 'away' | 'home', observedAt: string | null): ConsumerStarter | null {
   const pitcher = asRecord(metadata[`${side}ProbablePitcher`])
   const id = asNumber(pitcher.id)
   const name = typeof pitcher.fullName === 'string' ? pitcher.fullName.trim() : ''
@@ -213,9 +210,9 @@ function starterFromMetadata(metadata: Record<string, unknown>, side: 'away' | '
   }
 }
 
-function mapGameStatus(value: string | null | undefined): ConsumerGameStatus {
+function gameStatus(value: string | null | undefined): ConsumerGameStatus {
   const normalized = String(value ?? '').toLowerCase()
-  if (normalized.includes('final') || normalized.includes('completed')) return 'FINAL'
+  if (normalized.includes('final') || normalized.includes('complete')) return 'FINAL'
   if (normalized.includes('live') || normalized.includes('progress')) return 'LIVE'
   if (normalized.includes('postpon')) return 'POSTPONED'
   if (normalized.includes('cancel')) return 'CANCELLED'
@@ -224,26 +221,26 @@ function mapGameStatus(value: string | null | undefined): ConsumerGameStatus {
   return 'UNKNOWN'
 }
 
-function mapFreshness(board: CurrentBoardResponse): ConsumerFreshness {
+function freshness(board: CurrentBoardResponse): ConsumerFreshness {
   if (board.dataFreshness.status === 'fresh') return 'FRESH'
   if (board.dataFreshness.status === 'partial') return 'AGING'
   if (board.dataFreshness.status === 'stale') return 'STALE'
   return 'UNKNOWN'
 }
 
-function mapFamily(market: string | null | undefined): ConsumerMarketFamily {
-  const normalized = String(market ?? '').toLowerCase()
-  if (normalized === 'moneyline') return 'MONEYLINE'
-  if (normalized === 'spread' || normalized === 'run_line') return 'RUN_LINE'
-  if (normalized === 'total') return 'TOTAL'
-  return normalized.toUpperCase() || 'UNKNOWN'
+function family(market: string | null | undefined): ConsumerMarketFamily {
+  const value = String(market ?? '').toLowerCase()
+  if (value === 'moneyline') return 'MONEYLINE'
+  if (value === 'spread' || value === 'run_line') return 'RUN_LINE'
+  if (value === 'total') return 'TOTAL'
+  return value.toUpperCase() || 'UNKNOWN'
 }
 
-function marketForFamily(family: ConsumerMarketFamily) {
-  if (family === 'MONEYLINE') return 'moneyline'
-  if (family === 'RUN_LINE') return 'spread'
-  if (family === 'TOTAL') return 'total'
-  return String(family).toLowerCase()
+function familyMarket(value: ConsumerMarketFamily) {
+  if (value === 'MONEYLINE') return 'moneyline'
+  if (value === 'RUN_LINE') return 'spread'
+  if (value === 'TOTAL') return 'total'
+  return String(value).toLowerCase()
 }
 
 function confidenceTier(value: number | null): 'HIGH' | 'MEDIUM' | 'LOW' | 'UNRATED' {
@@ -253,32 +250,36 @@ function confidenceTier(value: number | null): 'HIGH' | 'MEDIUM' | 'LOW' | 'UNRA
   return 'LOW'
 }
 
-function fairAmericanOdds(probabilityPercent: number | null) {
-  if (probabilityPercent === null || probabilityPercent <= 0 || probabilityPercent >= 100) return null
-  const p = probabilityPercent / 100
-  return Math.round(p >= 0.5 ? -100 * p / (1 - p) : 100 * (1 - p) / p)
-}
-
-function impliedFromAmerican(odds: number | null) {
+function impliedProbability(odds: number | null) {
   if (odds === null || odds === 0) return null
   return odds < 0 ? (-odds / (-odds + 100)) * 100 : (100 / (odds + 100)) * 100
 }
 
-function selectionSide(candidate: CurrentBoardCandidate, game: CanonicalGameContext): 'HOME' | 'AWAY' | 'OVER' | 'UNDER' | null {
+function fairOdds(probabilityPercent: number | null) {
+  if (probabilityPercent === null || probabilityPercent <= 0 || probabilityPercent >= 100) return null
+  const p = probabilityPercent / 100
+  return Math.round(p >= 0.5 ? (-100 * p) / (1 - p) : (100 * (1 - p)) / p)
+}
+
+function candidateSide(candidate: CurrentBoardCandidate, game: GameContext): 'HOME' | 'AWAY' | 'OVER' | 'UNDER' | null {
   const selection = String(candidate.canonicalOutcome?.selection ?? candidate.selection ?? '').toUpperCase()
   const home = game.home.abbreviation ?? ''
   const away = game.away.abbreviation ?? ''
-  if (selection === home || selection.includes(`${home} `)) return 'HOME'
-  if (selection === away || selection.includes(`${away} `)) return 'AWAY'
+  if (home && (selection === home || selection.includes(`${home} `))) return 'HOME'
+  if (away && (selection === away || selection.includes(`${away} `))) return 'AWAY'
   if (selection.includes('OVER')) return 'OVER'
   if (selection.includes('UNDER')) return 'UNDER'
   return null
 }
 
-function recommendationMetadata(candidate: CurrentBoardCandidate, official: OfficialPickRow | null): ConsumerRecommendationMetadata {
+function officialKey(gamePk: number, market: string, side: string) {
+  return `${gamePk}|${market.toUpperCase()}|${side.toUpperCase()}`
+}
+
+function recommendation(candidate: CurrentBoardCandidate, official: OfficialPickRow | null): ConsumerRecommendationMetadata {
   const status = official
     ? 'RECOMMENDED'
-    : WATCH_POLICY_STATUSES.has(candidate.recommendationPolicyStatus)
+    : WATCH_STATUSES.has(candidate.recommendationPolicyStatus)
       ? 'WATCH'
       : 'NO_PLAY'
   return {
@@ -293,264 +294,231 @@ function recommendationMetadata(candidate: CurrentBoardCandidate, official: Offi
   }
 }
 
-function quoteFromOdds(row: OddsRow, freshness: ConsumerFreshness, isBestPrice = false): ConsumerBookQuote {
+function quote(row: OddsRow, status: ConsumerFreshness, best = false): ConsumerBookQuote {
+  const price = asNumber(row.price)
   return {
     quoteId: row.id,
     bookKey: String(row.sportsbook ?? 'unknown').toLowerCase(),
     bookName: row.sportsbook ?? 'Unknown book',
     line: asNumber(row.line),
-    americanOdds: asNumber(row.price),
-    impliedProbability: impliedFromAmerican(asNumber(row.price)),
+    americanOdds: price,
+    impliedProbability: impliedProbability(price),
     noVigProbability: null,
     acquiredAt: row.snapshot_time,
     providerLastUpdate: row.provider_timestamp,
-    freshness,
-    isBestPrice,
+    freshness: status,
+    isBestPrice: best,
   }
 }
 
-function canonicalFallbackQuote(candidate: CurrentBoardCandidate, freshness: ConsumerFreshness): ConsumerBookQuote | null {
-  const price = candidate.canonicalPrice?.americanOdds ?? candidate.americanOdds
-  if (price === null || price === undefined) return null
+function fallbackQuote(candidate: CurrentBoardCandidate, status: ConsumerFreshness): ConsumerBookQuote | null {
+  const price = asNumber(candidate.canonicalPrice?.americanOdds ?? candidate.americanOdds)
+  if (price === null) return null
   return {
     quoteId: candidate.canonicalPrice?.oddsSnapshotId ?? candidate.oddsSnapshotId,
     bookKey: String(candidate.canonicalPrice?.sportsbook ?? candidate.sportsbook ?? 'unknown').toLowerCase(),
     bookName: candidate.canonicalPrice?.sportsbook ?? candidate.sportsbook ?? 'Unknown book',
-    line: candidate.canonicalOutcome?.line ?? candidate.line,
-    americanOdds: asNumber(price),
+    line: asNumber(candidate.canonicalOutcome?.line ?? candidate.line),
+    americanOdds: price,
     impliedProbability: asNumber(candidate.canonicalPrice?.impliedProbability ?? candidate.impliedProbability),
     noVigProbability: null,
     acquiredAt: candidate.canonicalPrice?.timestamp ?? candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp,
     providerLastUpdate: candidate.providerSourceUpdatedAt,
-    freshness,
+    freshness: status,
     isBestPrice: true,
   }
 }
 
-function candidateQuotes(
-  candidate: CurrentBoardCandidate,
-  game: CanonicalGameContext,
-  oddsRows: OddsRow[],
-  freshness: ConsumerFreshness
-) {
-  const family = mapFamily(candidate.market)
-  const expectedMarket = marketForFamily(family)
-  const side = selectionSide(candidate, game)
-  if (!side || !SUPPORTED_GAME_MARKETS.has(expectedMarket)) {
-    const fallback = canonicalFallbackQuote(candidate, freshness)
+function exactQuotes(candidate: CurrentBoardCandidate, game: GameContext, odds: OddsRow[], status: ConsumerFreshness) {
+  const marketFamily = family(candidate.market)
+  const market = familyMarket(marketFamily)
+  const side = candidateSide(candidate, game)
+  if (!side || !['moneyline', 'spread', 'total'].includes(market)) {
+    const fallback = fallbackQuote(candidate, status)
     return fallback ? [fallback] : []
   }
-
-  const desiredOutcome = side.toLowerCase()
-  const desiredLine = candidate.canonicalOutcome?.line ?? candidate.line
+  const wantedLine = asNumber(candidate.canonicalOutcome?.line ?? candidate.line)
   const perBook = new Map<string, OddsRow>()
-  for (const row of oddsRows) {
+  for (const row of odds) {
     if (row.event_id !== game.event.id) continue
-    if (String(row.market ?? '').toLowerCase() !== expectedMarket) continue
-    if (String(row.outcome ?? '').toLowerCase() !== desiredOutcome) continue
-    if ((family === 'RUN_LINE' || family === 'TOTAL') && desiredLine !== null && desiredLine !== undefined) {
-      if (asNumber(row.line) !== asNumber(desiredLine)) continue
-    }
+    if (String(row.market ?? '').toLowerCase() !== market) continue
+    if (String(row.outcome ?? '').toUpperCase() !== side) continue
+    if ((market === 'spread' || market === 'total') && wantedLine !== null && asNumber(row.line) !== wantedLine) continue
     const book = String(row.sportsbook ?? 'unknown').toLowerCase()
     if (!perBook.has(book)) perBook.set(book, row)
   }
-
-  const selected = [...perBook.values()].sort((a, b) => (asNumber(b.price) ?? -Infinity) - (asNumber(a.price) ?? -Infinity))
-  if (!selected.length) {
-    const fallback = canonicalFallbackQuote(candidate, freshness)
+  const rows = [...perBook.values()].sort((a, b) => (asNumber(b.price) ?? -Infinity) - (asNumber(a.price) ?? -Infinity))
+  if (!rows.length) {
+    const fallback = fallbackQuote(candidate, status)
     return fallback ? [fallback] : []
   }
-  return selected.map((row, index) => quoteFromOdds(row, freshness, index === 0))
+  return rows.map((row, index) => quote(row, status, index === 0))
 }
 
-function officialKey(gamePk: number, market: string, side: string) {
-  return `${gamePk}|${market.toUpperCase()}|${side.toUpperCase()}`
+function officialQuote(row: OfficialPickRow, line: number | null, status: ConsumerFreshness): ConsumerBookQuote {
+  const odds = asNumber(row.american_odds)
+  return {
+    quoteId: row.official_pick_identity,
+    bookKey: String(row.bookmaker_key ?? row.bookmaker_name ?? 'unknown').toLowerCase(),
+    bookName: row.bookmaker_name ?? row.bookmaker_key ?? 'Unknown book',
+    line,
+    americanOdds: odds,
+    impliedProbability: impliedProbability(odds),
+    noVigProbability: asNumber(row.consensus_probability) === null ? null : asNumber(row.consensus_probability)! * 100,
+    acquiredAt: row.market_acquired_at,
+    providerLastUpdate: row.market_acquired_at,
+    freshness: status,
+    isBestPrice: true,
+  }
 }
 
-function opportunityFromCandidate(
+function opportunity(
   candidate: CurrentBoardCandidate,
-  game: CanonicalGameContext,
-  oddsRows: OddsRow[],
-  officialByKey: Map<string, OfficialPickRow>,
-  freshness: ConsumerFreshness
+  game: GameContext,
+  odds: OddsRow[],
+  officials: Map<string, OfficialPickRow>,
+  status: ConsumerFreshness
 ): ConsumerOpportunity {
-  const family = mapFamily(candidate.market)
-  const side = selectionSide(candidate, game)
-  const official = side ? officialByKey.get(officialKey(game.gamePk, family, side)) ?? null : null
-  const quotes = candidateQuotes(candidate, game, oddsRows, freshness)
-  const bestQuote = official
-    ? {
-        quoteId: official.official_pick_identity,
-        bookKey: String(official.bookmaker_key ?? official.bookmaker_name ?? 'unknown').toLowerCase(),
-        bookName: official.bookmaker_name ?? official.bookmaker_key ?? 'Unknown book',
-        line: candidate.canonicalOutcome?.line ?? candidate.line,
-        americanOdds: asNumber(official.american_odds),
-        impliedProbability: impliedFromAmerican(asNumber(official.american_odds)),
-        noVigProbability: official.consensus_probability === null ? null : asNumber(official.consensus_probability)! * 100,
-        acquiredAt: official.market_acquired_at,
-        providerLastUpdate: official.market_acquired_at,
-        freshness,
-        isBestPrice: true,
-      } satisfies ConsumerBookQuote
-    : quotes[0] ?? canonicalFallbackQuote(candidate, freshness)
-
-  const selection = String(candidate.canonicalOutcome?.selection ?? candidate.selection)
-  const teamSide = side === 'HOME' ? game.home : side === 'AWAY' ? game.away : null
+  const marketFamily = family(candidate.market)
+  const side = candidateSide(candidate, game)
+  const official = side ? officials.get(officialKey(game.gamePk, marketFamily, side)) ?? null : null
+  const quotes = exactQuotes(candidate, game, odds, status)
+  const line = asNumber(candidate.canonicalOutcome?.line ?? candidate.line)
+  const bestQuote = official ? officialQuote(official, line, status) : (quotes[0] ?? fallbackQuote(candidate, status))
+  const selectedTeam = side === 'HOME' ? game.home : side === 'AWAY' ? game.away : null
+  const modelProbability = asNumber(candidate.canonicalOutcome?.probability ?? candidate.modelProbability)
   return {
     opportunityId: candidate.predictionId,
     sport: 'MLB',
     gamePk: game.gamePk,
-    family,
+    family: marketFamily,
     market: candidate.marketLabel || String(candidate.market),
-    subjectType: teamSide ? 'TEAM' : 'GAME',
-    subjectId: teamSide?.id ?? null,
-    subjectName: teamSide?.name ?? candidate.matchup,
-    selection,
-    line: asNumber(candidate.canonicalOutcome?.line ?? candidate.line),
+    subjectType: selectedTeam ? 'TEAM' : 'GAME',
+    subjectId: selectedTeam?.id ?? null,
+    subjectName: selectedTeam?.name ?? candidate.matchup,
+    selection: String(candidate.canonicalOutcome?.selection ?? candidate.selection),
+    line,
     projection: {
       value: null,
       unit: null,
       modelVersion: candidate.modelVersion ?? null,
       generatedAt: candidate.predictionGeneratedAt ?? null,
     },
-    modelProbability: asNumber(candidate.canonicalOutcome?.probability ?? candidate.modelProbability),
-    impliedProbability: asNumber(bestQuote?.impliedProbability ?? candidate.impliedProbability),
-    noVigProbability: official?.consensus_probability === null || official?.consensus_probability === undefined
-      ? null
-      : asNumber(official.consensus_probability)! * 100,
-    fairAmericanOdds: fairAmericanOdds(asNumber(candidate.canonicalOutcome?.probability ?? candidate.modelProbability)),
-    edge: official?.consensus_edge === null || official?.consensus_edge === undefined
-      ? asNumber(candidate.canonicalEv?.actionableEdge ?? candidate.edgePercentagePoints ?? candidate.edge)
-      : asNumber(official.consensus_edge)! * 100,
-    expectedValue: official?.unit_ev === null || official?.unit_ev === undefined
-      ? asNumber(candidate.canonicalEv?.actionableExpectedValue ?? candidate.expectedValuePercent ?? candidate.expectedValue)
-      : asNumber(official.unit_ev)! * 100,
-    consensusProbability: official?.consensus_probability === null || official?.consensus_probability === undefined
-      ? null
-      : asNumber(official.consensus_probability)! * 100,
-    consensusEdge: official?.consensus_edge === null || official?.consensus_edge === undefined
-      ? null
-      : asNumber(official.consensus_edge)! * 100,
+    modelProbability,
+    impliedProbability: bestQuote?.impliedProbability ?? asNumber(candidate.impliedProbability),
+    noVigProbability: official && asNumber(official.consensus_probability) !== null ? asNumber(official.consensus_probability)! * 100 : null,
+    fairAmericanOdds: fairOdds(modelProbability),
+    edge: official && asNumber(official.consensus_edge) !== null
+      ? asNumber(official.consensus_edge)! * 100
+      : asNumber(candidate.canonicalEv?.actionableEdge ?? candidate.edgePercentagePoints ?? candidate.edge),
+    expectedValue: official && asNumber(official.unit_ev) !== null
+      ? asNumber(official.unit_ev)! * 100
+      : asNumber(candidate.canonicalEv?.actionableExpectedValue ?? candidate.expectedValuePercent ?? candidate.expectedValue),
+    consensusProbability: official && asNumber(official.consensus_probability) !== null ? asNumber(official.consensus_probability)! * 100 : null,
+    consensusEdge: official && asNumber(official.consensus_edge) !== null ? asNumber(official.consensus_edge)! * 100 : null,
     marketDispersion: null,
     bestQuote,
     quotes,
-    recommendation: recommendationMetadata(candidate, official),
-    freshness: candidate.stale ? 'STALE' : freshness,
+    recommendation: recommendation(candidate, official),
+    freshness: candidate.stale ? 'STALE' : status,
     dataAsOf: candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp ?? candidate.predictionGeneratedAt ?? null,
     dataQualityScore: asNumber(candidate.featureQuality),
     sourceLineageAvailable: Boolean(candidate.snapshotId || candidate.oddsSnapshotId),
   }
 }
 
-function syntheticOfficialOpportunity(
-  official: OfficialPickRow,
-  game: CanonicalGameContext,
-  freshness: ConsumerFreshness
-): ConsumerOpportunity | null {
-  if (official.market.toUpperCase() !== 'MONEYLINE') return null
-  const team = official.side.toUpperCase() === 'HOME' ? game.home : official.side.toUpperCase() === 'AWAY' ? game.away : null
-  if (!team) return null
-  const modelProbability = asNumber(official.model_probability)
-  const modelPct = modelProbability === null ? null : modelProbability * 100
-  const consensus = asNumber(official.consensus_probability)
-  const edge = asNumber(official.consensus_edge)
-  const ev = asNumber(official.unit_ev)
-  const odds = asNumber(official.american_odds)
-  const quote: ConsumerBookQuote = {
-    quoteId: official.official_pick_identity,
-    bookKey: String(official.bookmaker_key ?? official.bookmaker_name ?? 'unknown').toLowerCase(),
-    bookName: official.bookmaker_name ?? official.bookmaker_key ?? 'Unknown book',
-    line: null,
-    americanOdds: odds,
-    impliedProbability: impliedFromAmerican(odds),
-    noVigProbability: consensus === null ? null : consensus * 100,
-    acquiredAt: official.market_acquired_at,
-    providerLastUpdate: official.market_acquired_at,
-    freshness,
-    isBestPrice: true,
-  }
+function syntheticOfficial(row: OfficialPickRow, game: GameContext, status: ConsumerFreshness): ConsumerOpportunity | null {
+  if (row.market.toUpperCase() !== 'MONEYLINE') return null
+  const selectedTeam = row.side.toUpperCase() === 'HOME' ? game.home : row.side.toUpperCase() === 'AWAY' ? game.away : null
+  if (!selectedTeam) return null
+  const probability = asNumber(row.model_probability)
+  const modelProbability = probability === null ? null : probability * 100
+  const consensus = asNumber(row.consensus_probability)
+  const edge = asNumber(row.consensus_edge)
+  const ev = asNumber(row.unit_ev)
+  const bestQuote = officialQuote(row, null, status)
   return {
-    opportunityId: `official:${official.official_pick_identity}`,
+    opportunityId: `official:${row.official_pick_identity}`,
     sport: 'MLB',
     gamePk: game.gamePk,
     family: 'MONEYLINE',
     market: 'Moneyline',
     subjectType: 'TEAM',
-    subjectId: team.id,
-    subjectName: team.name,
-    selection: team.abbreviation ?? team.name,
+    subjectId: selectedTeam.id,
+    subjectName: selectedTeam.name,
+    selection: selectedTeam.abbreviation ?? selectedTeam.name,
     line: null,
-    projection: { value: null, unit: null, modelVersion: official.model_version, generatedAt: official.prediction_as_of },
-    modelProbability: modelPct,
-    impliedProbability: quote.impliedProbability,
+    projection: { value: null, unit: null, modelVersion: row.model_version, generatedAt: row.prediction_as_of },
+    modelProbability,
+    impliedProbability: bestQuote.impliedProbability,
     noVigProbability: consensus === null ? null : consensus * 100,
-    fairAmericanOdds: fairAmericanOdds(modelPct),
+    fairAmericanOdds: fairOdds(modelProbability),
     edge: edge === null ? null : edge * 100,
     expectedValue: ev === null ? null : ev * 100,
     consensusProbability: consensus === null ? null : consensus * 100,
     consensusEdge: edge === null ? null : edge * 100,
     marketDispersion: null,
-    bestQuote: quote,
-    quotes: [quote],
+    bestQuote,
+    quotes: [bestQuote],
     recommendation: {
       status: 'RECOMMENDED',
       label: 'Official Pick',
-      confidenceTier: confidenceTier(modelPct),
-      confidenceScore: modelPct,
-      reasonCodes: stringArray(official.reason_codes),
-      riskFlags: stringArray(official.risk_flags),
+      confidenceTier: confidenceTier(modelProbability),
+      confidenceScore: modelProbability,
+      reasonCodes: stringArray(row.reason_codes),
+      riskFlags: stringArray(row.risk_flags),
       explanation: 'Certified Pick Analyzer Policy V1 official recommendation.',
       productAction: 'ANALYSIS_ONLY',
     },
-    freshness,
-    dataAsOf: official.decision_at ?? official.market_acquired_at,
+    freshness: status,
+    dataAsOf: row.decision_at ?? row.market_acquired_at,
     dataQualityScore: null,
     sourceLineageAvailable: true,
   }
 }
 
-function latestDisplayQuote(rows: OddsRow[], eventId: string, market: string, outcome: string, freshness: ConsumerFreshness) {
-  const candidates = rows.filter((row) =>
+function latestQuote(odds: OddsRow[], eventId: string, market: string, outcome: string, status: ConsumerFreshness) {
+  const rows = odds.filter((row) =>
     row.event_id === eventId &&
     String(row.market ?? '').toLowerCase() === market &&
     String(row.outcome ?? '').toLowerCase() === outcome
   )
-  const fanduel = candidates.find((row) => String(row.sportsbook ?? '').toLowerCase() === 'fanduel')
-  return (fanduel ?? candidates[0]) ? quoteFromOdds(fanduel ?? candidates[0], freshness) : null
+  const selected = rows.find((row) => String(row.sportsbook ?? '').toLowerCase() === 'fanduel') ?? rows[0]
+  return selected ? quote(selected, status) : null
 }
 
-function buildMainLines(rows: OddsRow[], eventId: string, freshness: ConsumerFreshness): ConsumerMainLine[] {
+function mainLines(odds: OddsRow[], eventId: string, status: ConsumerFreshness): ConsumerMainLine[] {
   return [
     {
       family: 'MONEYLINE',
-      away: latestDisplayQuote(rows, eventId, 'moneyline', 'away', freshness),
-      home: latestDisplayQuote(rows, eventId, 'moneyline', 'home', freshness),
+      away: latestQuote(odds, eventId, 'moneyline', 'away', status),
+      home: latestQuote(odds, eventId, 'moneyline', 'home', status),
     },
     {
       family: 'RUN_LINE',
-      away: latestDisplayQuote(rows, eventId, 'spread', 'away', freshness),
-      home: latestDisplayQuote(rows, eventId, 'spread', 'home', freshness),
+      away: latestQuote(odds, eventId, 'spread', 'away', status),
+      home: latestQuote(odds, eventId, 'spread', 'home', status),
     },
     {
       family: 'TOTAL',
       away: null,
       home: null,
-      over: latestDisplayQuote(rows, eventId, 'total', 'over', freshness),
-      under: latestDisplayQuote(rows, eventId, 'total', 'under', freshness),
+      over: latestQuote(odds, eventId, 'total', 'over', status),
+      under: latestQuote(odds, eventId, 'total', 'under', status),
     },
   ]
 }
 
-function sortOpportunities(items: ConsumerOpportunity[], sort: ConsumerSort = 'probability', gameTime = new Map<number, number>()) {
+function sortOpportunities(items: ConsumerOpportunity[], sort: ConsumerSort, gameTimes: Map<number, number>) {
   return [...items].sort((a, b) => {
-    if (sort === 'edge') return (b.edge ?? -Infinity) - (a.edge ?? -Infinity) || (b.modelProbability ?? -Infinity) - (a.modelProbability ?? -Infinity)
-    if (sort === 'ev') return (b.expectedValue ?? -Infinity) - (a.expectedValue ?? -Infinity) || (b.modelProbability ?? -Infinity) - (a.modelProbability ?? -Infinity)
-    if (sort === 'game_time') return (gameTime.get(a.gamePk) ?? Infinity) - (gameTime.get(b.gamePk) ?? Infinity)
-    return (b.modelProbability ?? -Infinity) - (a.modelProbability ?? -Infinity) || (b.edge ?? -Infinity) - (a.edge ?? -Infinity)
+    if (sort === 'edge') return (b.edge ?? -Infinity) - (a.edge ?? -Infinity)
+    if (sort === 'ev') return (b.expectedValue ?? -Infinity) - (a.expectedValue ?? -Infinity)
+    if (sort === 'game_time') return (gameTimes.get(a.gamePk) ?? Infinity) - (gameTimes.get(b.gamePk) ?? Infinity)
+    return (b.modelProbability ?? -Infinity) - (a.modelProbability ?? -Infinity)
   })
 }
 
-async function canonicalContexts(board: CurrentBoardResponse, date: string) {
+async function buildContexts(board: CurrentBoardResponse, date: string) {
   const gameResult = await supabaseAdmin
     .from('pick2_mlb_games')
     .select('game_pk, game_date, scheduled_at, official_status, metadata, updated_at')
@@ -560,54 +528,57 @@ async function canonicalContexts(board: CurrentBoardResponse, date: string) {
   const canonicalRows = (gameResult.data ?? []) as CanonicalGameRow[]
 
   const eventIds = board.games.map((game) => game.eventId).filter(Boolean)
-  const eventResult = eventIds.length
-    ? await supabaseAdmin.from('sport_events').select('id, home_team, away_team, start_time, status').in('id', eventIds)
-    : { data: [], error: null }
-  if (eventResult.error) throw new Error(`consumer sport events read failed: ${eventResult.error.message}`)
-  const events = (eventResult.data ?? []) as SportEventRow[]
+  let events: SportEventRow[] = []
+  if (eventIds.length) {
+    const eventResult = await supabaseAdmin
+      .from('sport_events')
+      .select('id, home_team, away_team, start_time, status')
+      .in('id', eventIds)
+    if (eventResult.error) throw new Error(`consumer sport events read failed: ${eventResult.error.message}`)
+    events = (eventResult.data ?? []) as SportEventRow[]
+  }
 
   const canonicalByKey = new Map<string, CanonicalGameRow>()
   for (const row of canonicalRows) {
     const metadata = asRecord(row.metadata)
-    const awayId = officialMlbTeamId(metadata, 'away')
-    const homeId = officialMlbTeamId(metadata, 'home')
-    const away = awayId === null ? null : MLB_TEAMS[awayId]?.abbreviation ?? null
-    const home = homeId === null ? null : MLB_TEAMS[homeId]?.abbreviation ?? null
-    canonicalByKey.set(canonicalKey(row.scheduled_at, away, home), row)
+    const awayId = teamId(metadata, 'away')
+    const homeId = teamId(metadata, 'home')
+    canonicalByKey.set(
+      gameKey(row.scheduled_at, awayId === null ? null : MLB_TEAMS[awayId]?.abbreviation ?? null, homeId === null ? null : MLB_TEAMS[homeId]?.abbreviation ?? null),
+      row
+    )
   }
 
-  const byEventId = new Map<string, CanonicalGameContext>()
-  const byGamePk = new Map<number, CanonicalGameContext>()
+  const byEventId = new Map<string, GameContext>()
+  const byGamePk = new Map<number, GameContext>()
   const warnings: string[] = []
   for (const event of events) {
-    const canonical = canonicalByKey.get(canonicalKey(event.start_time, event.away_team, event.home_team))
-    if (!canonical) {
+    const row = canonicalByKey.get(gameKey(event.start_time, event.away_team, event.home_team))
+    if (!row) {
       warnings.push(`UNMAPPED_CANONICAL_GAME:${event.id}`)
       continue
     }
-    const metadata = asRecord(canonical.metadata)
-    const awayMlbId = officialMlbTeamId(metadata, 'away')
-    const homeMlbId = officialMlbTeamId(metadata, 'home')
-    const context: CanonicalGameContext = {
-      row: canonical,
+    const metadata = asRecord(row.metadata)
+    const game: GameContext = {
+      gamePk: Number(row.game_pk),
+      row,
       event,
-      gamePk: Number(canonical.game_pk),
-      away: teamRef(awayMlbId, event.away_team),
-      home: teamRef(homeMlbId, event.home_team),
-      awayStarter: starterFromMetadata(metadata, 'away', canonical.updated_at),
-      homeStarter: starterFromMetadata(metadata, 'home', canonical.updated_at),
+      away: teamRef(teamId(metadata, 'away'), event.away_team),
+      home: teamRef(teamId(metadata, 'home'), event.home_team),
+      awayStarter: starter(metadata, 'away', row.updated_at),
+      homeStarter: starter(metadata, 'home', row.updated_at),
     }
-    byEventId.set(event.id, context)
-    byGamePk.set(context.gamePk, context)
+    byEventId.set(event.id, game)
+    byGamePk.set(game.gamePk, game)
   }
-  return { byEventId, byGamePk, warnings, canonicalRows }
+  return { canonicalRows, byEventId, byGamePk, warnings }
 }
 
 async function readOdds(eventIds: string[]) {
   if (!eventIds.length) return [] as OddsRow[]
   const result = await supabaseAdmin
     .from('sports_odds_snapshots')
-    .select('id, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, provider_timestamp, metadata')
+    .select('id, event_id, sportsbook, market, outcome, price, line, snapshot_time, provider_timestamp')
     .in('event_id', eventIds)
     .in('market', ['moneyline', 'spread', 'total'])
     .order('snapshot_time', { ascending: false })
@@ -625,16 +596,15 @@ async function readOfficialPicks(gamePks: number[]) {
     .eq('decision_status', 'OFFICIAL_PICK')
     .order('decision_at', { ascending: false })
   if (result.error) throw new Error(`consumer official picks read failed: ${result.error.message}`)
-  const rows = (result.data ?? []) as OfficialPickRow[]
-  const deduped = new Map<string, OfficialPickRow>()
-  for (const row of rows) {
+  const latest = new Map<string, OfficialPickRow>()
+  for (const row of (result.data ?? []) as OfficialPickRow[]) {
     const key = officialKey(Number(row.game_pk), row.market, row.side)
-    if (!deduped.has(key)) deduped.set(key, row)
+    if (!latest.has(key)) latest.set(key, row)
   }
-  return [...deduped.values()]
+  return [...latest.values()]
 }
 
-export async function buildPickEdgeConsumerSnapshot(dateInput?: string | null): Promise<ConsumerSnapshot> {
+export async function buildPickEdgeConsumerSnapshot(dateInput?: string | null): Promise<Snapshot> {
   const date = validateConsumerDate(dateInput)
   const board = await getCurrentBoard({
     sportKey: 'baseball_mlb',
@@ -644,132 +614,120 @@ export async function buildPickEdgeConsumerSnapshot(dateInput?: string | null): 
     includeMlbContext: true,
     slateDate: date,
   })
-  const freshness = mapFreshness(board)
-  const contexts = await canonicalContexts(board, date)
-  const eventIds = [...contexts.byEventId.keys()]
-  const gamePks = [...contexts.byGamePk.keys()]
-  const [oddsRows, officialRows] = await Promise.all([readOdds(eventIds), readOfficialPicks(gamePks)])
-  const officialByKey = new Map<string, OfficialPickRow>()
-  for (const row of officialRows) officialByKey.set(officialKey(Number(row.game_pk), row.market, row.side), row)
+  const status = freshness(board)
+  const contexts = await buildContexts(board, date)
+  const [odds, officialRows] = await Promise.all([
+    readOdds([...contexts.byEventId.keys()]),
+    readOfficialPicks([...contexts.byGamePk.keys()]),
+  ])
+  const officials = new Map<string, OfficialPickRow>()
+  for (const row of officialRows) officials.set(officialKey(Number(row.game_pk), row.market, row.side), row)
 
   const opportunities: ConsumerOpportunity[] = []
   for (const candidate of board.candidates) {
-    const context = contexts.byEventId.get(candidate.eventId)
-    if (!context) continue
-    opportunities.push(opportunityFromCandidate(candidate, context, oddsRows, officialByKey, freshness))
+    const game = contexts.byEventId.get(candidate.eventId)
+    if (game) opportunities.push(opportunity(candidate, game, odds, officials, status))
   }
 
-  for (const official of officialRows) {
-    const context = contexts.byGamePk.get(Number(official.game_pk))
-    if (!context) continue
-    const side = official.side.toUpperCase()
+  for (const row of officialRows) {
+    const game = contexts.byGamePk.get(Number(row.game_pk))
+    if (!game) continue
+    const side = row.side.toUpperCase()
+    const abbreviation = side === 'HOME' ? game.home.abbreviation : side === 'AWAY' ? game.away.abbreviation : null
     const alreadyPresent = opportunities.some((item) =>
-      item.gamePk === context.gamePk &&
-      item.family === mapFamily(official.market) &&
+      item.gamePk === game.gamePk &&
+      item.family === family(row.market) &&
       item.recommendation.status === 'RECOMMENDED' &&
-      (side === 'HOME' ? item.selection.includes(context.home.abbreviation ?? '') : side === 'AWAY' ? item.selection.includes(context.away.abbreviation ?? '') : true)
+      Boolean(abbreviation && item.selection.toUpperCase().includes(abbreviation))
     )
     if (!alreadyPresent) {
-      const synthetic = syntheticOfficialOpportunity(official, context, freshness)
-      if (synthetic) opportunities.push(synthetic)
+      const item = syntheticOfficial(row, game, status)
+      if (item) opportunities.push(item)
     }
   }
 
-  const opportunitiesByGame = new Map<number, ConsumerOpportunity[]>()
+  const byGame = new Map<number, ConsumerOpportunity[]>()
   for (const item of opportunities) {
-    const list = opportunitiesByGame.get(item.gamePk) ?? []
-    list.push(item)
-    opportunitiesByGame.set(item.gamePk, list)
+    const items = byGame.get(item.gamePk) ?? []
+    items.push(item)
+    byGame.set(item.gamePk, items)
   }
 
   const games: ConsumerGame[] = []
-  for (const context of contexts.byGamePk.values()) {
-    const candidates = sortOpportunities(opportunitiesByGame.get(context.gamePk) ?? [])
+  for (const game of contexts.byGamePk.values()) {
+    const ranked = sortOpportunities(byGame.get(game.gamePk) ?? [], 'probability', new Map())
     const bestByFamily = new Map<string, ConsumerOpportunity>()
-    for (const candidate of candidates) if (!bestByFamily.has(candidate.family)) bestByFamily.set(candidate.family, candidate)
-    const bestByMarket = [...bestByFamily.values()]
-    const smartPlay = candidates.find((item) =>
-      item.recommendation.status === 'RECOMMENDED' && ['MONEYLINE', 'RUN_LINE', 'TOTAL'].includes(item.family)
-    ) ?? null
+    for (const item of ranked) if (!bestByFamily.has(item.family)) bestByFamily.set(item.family, item)
     const moneyline = bestByFamily.get('MONEYLINE')
     let awayWinProbability: number | null = null
     let homeWinProbability: number | null = null
     if (moneyline?.modelProbability !== null && moneyline?.modelProbability !== undefined) {
-      const selection = moneyline.selection.toUpperCase()
-      if (context.home.abbreviation && selection.includes(context.home.abbreviation)) {
+      const selected = moneyline.selection.toUpperCase()
+      if (game.home.abbreviation && selected.includes(game.home.abbreviation)) {
         homeWinProbability = moneyline.modelProbability
         awayWinProbability = 100 - moneyline.modelProbability
-      } else if (context.away.abbreviation && selection.includes(context.away.abbreviation)) {
+      } else if (game.away.abbreviation && selected.includes(game.away.abbreviation)) {
         awayWinProbability = moneyline.modelProbability
         homeWinProbability = 100 - moneyline.modelProbability
       }
     }
-    const metadata = asRecord(context.row.metadata)
+    const metadata = asRecord(game.row.metadata)
     games.push({
       sport: 'MLB',
-      gamePk: context.gamePk,
-      officialDate: context.row.game_date,
-      startTime: context.row.scheduled_at,
-      status: mapGameStatus(context.row.official_status ?? String(metadata.abstractGameState ?? context.event.status ?? '')),
+      gamePk: game.gamePk,
+      officialDate: game.row.game_date,
+      startTime: game.row.scheduled_at,
+      status: gameStatus(game.row.official_status ?? String(metadata.abstractGameState ?? game.event.status ?? '')),
       venue: null,
-      away: context.away,
-      home: context.home,
-      awayStarter: context.awayStarter,
-      homeStarter: context.homeStarter,
+      away: game.away,
+      home: game.home,
+      awayStarter: game.awayStarter,
+      homeStarter: game.homeStarter,
       projectedAwayRuns: null,
       projectedHomeRuns: null,
       awayWinProbability,
       homeWinProbability,
-      mainLines: buildMainLines(oddsRows, context.event.id, freshness),
-      smartPlay,
-      bestByMarket,
+      mainLines: mainLines(odds, game.event.id, status),
+      smartPlay: ranked.find((item) => item.recommendation.status === 'RECOMMENDED' && ['MONEYLINE', 'RUN_LINE', 'TOTAL'].includes(item.family)) ?? null,
+      bestByMarket: [...bestByFamily.values()],
       dataAsOf: board.latestVisibleMarketSnapshotTimestamp ?? board.latestOddsTimestamp,
-      freshness,
+      freshness: status,
     })
   }
   games.sort((a, b) => Date.parse(a.startTime ?? '') - Date.parse(b.startTime ?? ''))
 
-  const warnings = [
-    ...contexts.warnings,
-    ...board.boardHealth.warnings,
-    ...(board.dataFreshness.status === 'empty' ? ['CURRENT_BOARD_EMPTY'] : []),
-  ]
+  const warnings = [...new Set([...contexts.warnings, ...board.boardHealth.warnings])]
   const meta: ConsumerMeta = {
     contractVersion: PICK_EDGE_CONSUMER_CONTRACT_VERSION,
     generatedAt: new Date().toISOString(),
     dataAsOf: board.latestVisibleMarketSnapshotTimestamp ?? board.latestOddsTimestamp,
     timezone: TIMEZONE,
     source: 'pick-analyzer',
-    stale: freshness === 'STALE' || freshness === 'UNKNOWN',
-    warnings: [...new Set(warnings)],
+    stale: status === 'STALE' || status === 'UNKNOWN',
+    warnings,
   }
-
-  const projectionsAsOf = opportunities
-    .map((item) => item.projection.generatedAt)
-    .filter((value): value is string => Boolean(value))
-    .sort()
-    .at(-1) ?? null
   const gamesAsOf = contexts.canonicalRows
     .map((row) => row.updated_at)
     .filter((value): value is string => Boolean(value))
     .sort()
     .at(-1) ?? null
-  const staleComponents = [
-    ...(freshness === 'STALE' || freshness === 'UNKNOWN' ? ['odds'] : []),
-    ...(board.boardHealth.status === 'EMPTY' ? ['predictions'] : []),
-  ]
+  const projectionsAsOf = opportunities
+    .map((item) => item.projection.generatedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort()
+    .at(-1) ?? null
   const health: ConsumerHealth = {
     gamesAsOf,
-    oddsAsOf: board.latestVisibleMarketSnapshotTimestamp ?? board.latestOddsTimestamp,
+    oddsAsOf: meta.dataAsOf,
     projectionsAsOf,
     lineupsAsOf: null,
     statcastThrough: null,
     modelReadiness: board.boardHealth.status,
-    freshness,
-    staleComponents,
-    warnings: meta.warnings,
+    freshness: status,
+    staleComponents: status === 'STALE' || status === 'UNKNOWN' ? ['odds'] : [],
+    warnings,
   }
-  return { board, meta, games, opportunities, health }
+  return { meta, games, opportunities, health }
 }
 
 export async function getPickEdgeGames(date?: string | null): Promise<ConsumerEnvelope<ConsumerGame[]>> {
@@ -784,7 +742,7 @@ export async function getPickEdgeGame(gamePk: number, date?: string | null): Pro
 
 export async function getPickEdgeOpportunities({
   date,
-  family,
+  family: familyFilter,
   gamePk,
   sort = 'probability',
   limit = 100,
@@ -798,7 +756,7 @@ export async function getPickEdgeOpportunities({
   const snapshot = await buildPickEdgeConsumerSnapshot(date)
   const gameTimes = new Map(snapshot.games.map((game) => [game.gamePk, Date.parse(game.startTime ?? '')]))
   let items = snapshot.opportunities
-  if (family) items = items.filter((item) => item.family === family.toUpperCase())
+  if (familyFilter) items = items.filter((item) => item.family === familyFilter.toUpperCase())
   if (gamePk !== null && gamePk !== undefined) items = items.filter((item) => item.gamePk === gamePk)
   items = sortOpportunities(items, sort, gameTimes).slice(0, Math.max(1, Math.min(limit, 200)))
   return { meta: snapshot.meta, data: items }
