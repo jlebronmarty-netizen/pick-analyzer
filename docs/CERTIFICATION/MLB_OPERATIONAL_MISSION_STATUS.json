@@ -300,7 +300,6 @@
     "preNonemptyPackage": "ENCLOSING_BOUNDED_COMMIT"
   },
   "remaining": [
-    "VERCEL_SERVER_CREDENTIAL_ALIGNMENT",
     "VERIFIED_PERSISTENT_EXECUTOR_HOST",
     "AUTOMATION_UNATTENDED_DRY_CERTIFICATION",
     "AUTOMATION_ACTIVATION",
@@ -309,20 +308,19 @@
   ],
   "rollbackAndRecoveryRunbook": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "MLB_DATA_02R_R4_BLOCKED",
-  "nextPhase": "SECURE_VERCEL_CREDENTIAL_ALIGNMENT_AND_PERSISTENT_EXECUTOR_HOST",
+  "currentPhase": "MLB_DATA_02R_R5_BLOCKED",
+  "nextPhase": "VERIFIED_PERSISTENT_EXECUTOR_HOST",
   "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
   "automationImplementation": "DRY_CERTIFIED; ACTIVATION_DISABLED",
   "publishedR3Sha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
   "automationBlocker": {
-    "code": "R4_RUNTIME_ACCESS_AND_HOST_UNVERIFIED",
+    "code": "R5_PERSISTENT_EXECUTOR_HOST_UNAVAILABLE",
     "hardStop": true,
-    "reason": "The fixed-query Edge preflight passes using the local server credential. Production Vercel presents a configured server credential rejected with HTTP 401 by exact legacy/modern server-key authentication. No authenticated Vercel secret-management channel or verified persistent R2 executor host is available in this session.",
-    "requiredResolution": "Securely align the Vercel production server credential through an authenticated management connection, and identify/verify the persistent R2 coordinator host. Do not paste credentials in chat.",
+    "reason": "Vercel Production credential reconciliation and actual Vercel-to-Edge read-only schema preflight pass. No existing persistent certified R2 executor host is identified: repository self-hosted runner inventory is empty and no matching local scheduler/service is registered. Host identity, durable private state, restart/overlap verification and scheduled execution remain required.",
+    "requiredResolution": "Identify and connect the existing always-on Node/Git host; preserve private checkpoints and mission Odds ledger at 2/20. Verify host preflight and locks before activation.",
     "authorizationNeeded": false
   },
   "pendingGates": [
-    "VERCEL_SERVER_CREDENTIAL_ALIGNMENT",
     "VERIFIED_PERSISTENT_EXECUTOR_HOST",
     "AUTOMATION_UNATTENDED_DRY_CERTIFICATION",
     "AUTOMATION_ACTIVATION",
@@ -333,6 +331,14 @@
   "r4": {
     "schemaPreflight": "EDGE_PASS_VERCEL_AUTH_BLOCKED",
     "certification": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_CERTIFICATION.json",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "schedulerActivation": false
+  },
+  "r5": {
+    "certification": "docs/CERTIFICATION/MLB_DATA_02R_R5_VERCEL_UNATTENDED_AUTH_AND_EXECUTOR_HOST_RECONCILIATION.json",
+    "schemaPreflight": "VERCEL_EDGE_PASS",
     "providerCalls": 0,
     "productionDml": 0,
     "productionDdl": 0,

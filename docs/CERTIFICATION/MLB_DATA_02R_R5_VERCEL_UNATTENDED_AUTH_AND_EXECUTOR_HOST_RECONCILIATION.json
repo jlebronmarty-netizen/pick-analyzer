@@ -1,0 +1,320 @@
+{
+  "certificationVerdict": "MLB_DATA_02R_R5_BLOCKED",
+  "generatedAt": "2026-09-09T20:48:00.153Z",
+  "startingSha": "56d3ce5f923e67f97d22bfb0dd092f71d77617c8",
+  "finalPackage": "ENCLOSING_BOUNDED_CERTIFICATION_COMMIT",
+  "operationalCertified": false,
+  "gates": {
+    "vercelEnvInventory": "COMPLETE",
+    "edgeAuthContract": "PASS",
+    "rootCause": "WRONG_ENV_VAR_VALUE",
+    "credentialAlignment": "PASS",
+    "runtimeRefresh": "PASS",
+    "vercelEdgePreflight": "PASS",
+    "persistentExecutorHost": "BLOCKED",
+    "hostPreflight": "NOT_RUN",
+    "hostConcurrency": "NOT_RUN",
+    "automationActivationReady": "NO"
+  },
+  "environmentInventory": [
+    {
+      "name": "SUPABASE_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_URL",
+      "present": true,
+      "serverOnly": false,
+      "scope": "production",
+      "currentDeploymentIncludes": true,
+      "credentialClass": "EXPECTED_PROJECT_URL"
+    },
+    {
+      "name": "SUPABASE_ANON_KEY",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "present": false,
+      "serverOnly": false,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "SUPABASE_SERVICE_ROLE_KEY",
+      "present": true,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": true,
+      "credentialClass": "AUTHENTICATED_SERVER_KEY"
+    },
+    {
+      "name": "SUPABASE_DB_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "DATABASE_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "DIRECT_URL",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "SUPABASE_ACCESS_TOKEN",
+      "present": false,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": false,
+      "credentialClass": "NOT_PRESENT"
+    },
+    {
+      "name": "CRON_SECRET",
+      "present": true,
+      "serverOnly": true,
+      "scope": "production",
+      "currentDeploymentIncludes": true,
+      "credentialClass": "AUTHENTICATED_ROUTE_SECRET"
+    }
+  ],
+  "managementInventory": {
+    "authenticated": true,
+    "projectId": "prj_hmkAkzUTe3b7M7yedvshGl5L9rP7",
+    "teamId": "team_5NEeiCoWmTBO4kAkgKZwoQmN",
+    "serverCredentialBefore": {
+      "variable": "SUPABASE_SERVICE_ROLE_KEY",
+      "scope": [
+        "development",
+        "preview",
+        "production"
+      ],
+      "class": "LEGACY_SERVICE_ROLE_SHAPED_UNVERIFIED",
+      "projectClaimMatches": true,
+      "matchesKnownGood": false,
+      "trimmedMatchesKnownGood": false,
+      "outerWhitespace": false,
+      "independentEdgeHttp": 401
+    },
+    "serverCredentialAfter": {
+      "variable": "SUPABASE_SERVICE_ROLE_KEY",
+      "scope": [
+        "production"
+      ],
+      "storage": "encrypted",
+      "matchesKnownGood": true
+    },
+    "previewDevelopmentPreserved": true
+  },
+  "authContract": {
+    "header": "Authorization",
+    "scheme": "Bearer",
+    "accepted": "Exact match against Edge SUPABASE_SERVICE_ROLE_KEY or values of SUPABASE_SECRET_KEYS",
+    "apikeyAlsoSent": true,
+    "dedicatedSecret": false,
+    "jwtIssuerAudienceValidation": false,
+    "decodeIsNotAuthentication": true,
+    "dbAccess": "FIXED_QUERY_READ_ONLY_TRANSACTION"
+  },
+  "rootCause": {
+    "classification": "WRONG_ENV_VAR_VALUE",
+    "proof": [
+      "Management-retrieved value differed from accepted local key even after trim",
+      "Management-retrieved value independently returned Edge HTTP 401",
+      "Corrected Production-only value passed secure equality readback",
+      "Same application SHA redeployed; actual Vercel-to-Edge returned HTTP 200/PASS"
+    ],
+    "underlyingOriginOfIncorrectValue": "NOT_DETERMINED"
+  },
+  "runtimeRefresh": {
+    "deploymentId": "dpl_C1BvejDnZA1qyruRmjPzB4XNvvSC",
+    "state": "READY",
+    "sha": "56d3ce5f923e67f97d22bfb0dd092f71d77617c8",
+    "localWorktreeUploaded": false
+  },
+  "vercelEdgePreflight": {
+    "http": 200,
+    "readAt": "2026-09-09T20:44:45.741Z",
+    "status": "PASS",
+    "packageSha": "56d3ce5f923e67f97d22bfb0dd092f71d77617c8",
+    "connectionInventory": [
+      {
+        "name": "SUPABASE_URL",
+        "present": false,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "NEXT_PUBLIC_SUPABASE_URL",
+        "present": true,
+        "serverOnly": false,
+        "scope": "production"
+      },
+      {
+        "name": "SUPABASE_ANON_KEY",
+        "present": false,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "present": false,
+        "serverOnly": false,
+        "scope": "production"
+      },
+      {
+        "name": "SUPABASE_SERVICE_ROLE_KEY",
+        "present": true,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "SUPABASE_DB_URL",
+        "present": false,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "DATABASE_URL",
+        "present": false,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "DIRECT_URL",
+        "present": false,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "SUPABASE_ACCESS_TOKEN",
+        "present": false,
+        "serverOnly": true,
+        "scope": "production"
+      },
+      {
+        "name": "CRON_SECRET",
+        "present": true,
+        "serverOnly": true,
+        "scope": "production"
+      }
+    ],
+    "preflight": {
+      "status": "PASS",
+      "checkedAt": "2026-09-09T20:44:54.006472+00:00",
+      "columnsCompared": 406,
+      "preservedConstraintsCompared": 116,
+      "requiredIndexesCompared": 84,
+      "existingNotValidatedChecks": 19,
+      "historicalCheckViolations": 0,
+      "invalidIndexes": 0,
+      "orphanSnapshotReferences": 0,
+      "nativeSnapshotUniqueIndexes": 6,
+      "schemaCompatible": true,
+      "failures": [],
+      "ddlDigest": "3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46",
+      "projectRef": "ynuocvexviorgdjrfthw",
+      "connection": {
+        "databaseUrl": "PRESENT",
+        "serverOnly": true,
+        "transaction": "READ_ONLY"
+      },
+      "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+      "featureSet": "MLB_ML_FEATURE_SET_V1",
+      "featureCount": 76,
+      "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1"
+    },
+    "automationActivation": "DISABLED",
+    "runtimeBinding": "PERSISTENT_EXECUTOR_HOST_REQUIRED",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "persistentHost": {
+    "status": "UNVERIFIED",
+    "githubRepositoryRunnerInventory": {
+      "http": 200,
+      "totalCount": 0
+    },
+    "localMatchingScheduledTasks": 0,
+    "localMatchingServices": 0,
+    "existingWorkflowRuntime": "ubuntu-latest; legacy HTTP fallback/observer, not certified R2 coordinator",
+    "existingVercelCrons": "Preserved legacy routes; no certified persistent R2 coordinator",
+    "reason": "Certified executor requires one persistent private filesystem, Git checkout, checkpoints, exclusive locks and mission provider ledger; no existing host with that contract was identified.",
+    "secondExecutorCreated": false
+  },
+  "automation": {
+    "activation": "DISABLED",
+    "scheduledReadback": "NOT_RUN",
+    "pitch": "DRY_CERTIFIED_NOT_ACTIVATED",
+    "daily": "DRY_CERTIFIED_NOT_ACTIVATED",
+    "settlement": "DISABLED"
+  },
+  "validators": {
+    "preflightRegression": {
+      "status": "PASS",
+      "checks": 27
+    },
+    "dryBehavior": {
+      "status": "PASS",
+      "checks": 16,
+      "initialAttempt": "Missing external PGlite dependency; reused existing validated dependency via OS-temp junction and rerun passed"
+    },
+    "productionUi": {
+      "status": "PASS",
+      "checks": 12
+    },
+    "build": {
+      "status": "PASS",
+      "exitCode": 0,
+      "staticPages": 400
+    },
+    "certifiedAutomationSourceFiles": 41,
+    "sourceDrift": 0
+  },
+  "accounting": {
+    "sportsProviderCalls": 0,
+    "missionOddsCalls": 2,
+    "missionOddsCap": 20,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "liveRefreshExecutions": 0,
+    "schedulerChanges": 0
+  },
+  "secrets": {
+    "valuesInArtifacts": false,
+    "valuesInChat": false,
+    "credentialsTransferred": "Authenticated management; memory/stdin only; no secret-bearing command arguments or files"
+  },
+  "protectedState": {
+    "inheritedTrackedChanges": 19,
+    "hashMismatches": [],
+    "protectedDirectoriesTouched": false
+  },
+  "remaining": [
+    "Identify existing persistent host and connect securely",
+    "Host preflight, durable state/budget readback, overlap and stale-lock recovery",
+    "Fresh activation gate, scheduled production readback, pitch/daily verification",
+    "Final operational certification"
+  ]
+}

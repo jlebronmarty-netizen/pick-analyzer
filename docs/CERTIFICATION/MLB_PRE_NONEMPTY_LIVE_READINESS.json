@@ -367,5 +367,14 @@
     "certification": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_CERTIFICATION.json",
     "activation": "DISABLED",
     "blocker": "R4_RUNTIME_ACCESS_AND_HOST_UNVERIFIED"
+  },
+  "r5Preflight": {
+    "certification": "docs/CERTIFICATION/MLB_DATA_02R_R5_VERCEL_UNATTENDED_AUTH_AND_EXECUTOR_HOST_RECONCILIATION.json",
+    "schemaPreflight": "VERCEL_EDGE_PASS",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "schedulerActivation": false,
+    "blocker": "R5_PERSISTENT_EXECUTOR_HOST_UNAVAILABLE"
   }
 }
