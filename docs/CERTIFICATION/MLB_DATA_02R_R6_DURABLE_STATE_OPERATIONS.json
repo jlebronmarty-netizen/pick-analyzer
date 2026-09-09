@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "scope": "DURABLE_STATE_OPERATIONS_ONLY",
+  "checks": [
+    {
+      "name": "Missing durable state fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Initialization retains mission usage two",
+      "status": "PASS"
+    },
+    {
+      "name": "First authority acquires lease",
+      "status": "PASS"
+    },
+    {
+      "name": "Independent authority defers same and different run",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong holder cannot write or reserve",
+      "status": "PASS"
+    },
+    {
+      "name": "Metadata rejects raw payloads and model output",
+      "status": "PASS"
+    },
+    {
+      "name": "Scope and compact evidence checkpoint persists",
+      "status": "PASS"
+    },
+    {
+      "name": "Stale checkpoint revision rejects",
+      "status": "PASS"
+    },
+    {
+      "name": "Lease renewal retains fence",
+      "status": "PASS"
+    },
+    {
+      "name": "Two simultaneous Odds reservations permit exactly one",
+      "status": "PASS"
+    },
+    {
+      "name": "Consumed reservation cannot issue a second request",
+      "status": "PASS"
+    },
+    {
+      "name": "Excluded providers cannot reserve",
+      "status": "PASS"
+    },
+    {
+      "name": "Repeated initialization never resets consumed mission budget",
+      "status": "PASS"
+    },
+    {
+      "name": "Release then independent authority resumes frozen state",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired lease rejects owner and allows fenced recovery",
+      "status": "PASS"
+    },
+    {
+      "name": "Scope and completed stages cannot regress",
+      "status": "PASS"
+    },
+    {
+      "name": "DML conflicts, excessive caps, unexpected payload rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Completion requires readback",
+      "status": "PASS"
+    },
+    {
+      "name": "Mission cap race is atomic across separate run reservations",
+      "status": "PASS"
+    },
+    {
+      "name": "Large compact checkpoint fails before database write",
+      "status": "PASS"
+    }
+  ],
+  "productionDml": 0,
+  "productionDdl": 0,
+  "providerCalls": 0,
+  "realCrossProcessDatabaseRace": "PENDING_EXTERNAL_POSTGRES_TEST",
+  "r2BusinessResume": "PENDING",
+  "activation": "DISABLED",
+  "verdict": "R6_DURABLE_STATE_OPERATIONS_OFFLINE_VALIDATED",
+  "build": "PASS_400_PAGES",
+  "productionEdgeAuthentication": {
+    "function": "mlb-runtime-state",
+    "version": 1,
+    "missingCredential": 401,
+    "invalidCredential": 401,
+    "serviceCredential": 200,
+    "readOnlyEmptyState": true
+  },
+  "fullR6Certified": false
+}

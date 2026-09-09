@@ -1,0 +1,62 @@
+{
+  "verdict": "MLB_DATA_02R_R6_EXACT_RUNTIME_SCHEMA_APPLIED_AND_VERIFIED",
+  "phase": "R6_GATE_2_EXECUTION",
+  "priorPackageSha": "769f901dc8691fd18b578fc4c1ad6f3172ed09cd",
+  "migration": "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql",
+  "normalizedSha256": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
+  "authorization": "Exact user-authorized migration only",
+  "beforeCheckedAt": "2026-09-09 21:14:37.043348+00",
+  "afterCheckedAt": "2026-09-09 21:16:15.077584+00",
+  "readback": {
+    "existingTablesChecked": 82,
+    "existingSchemaDigestBefore": "68b688f477953d206991e90ddeeebfe4",
+    "existingSchemaDigestAfter": "68b688f477953d206991e90ddeeebfe4",
+    "existingTableCountsUnchanged": true,
+    "targetExists": true,
+    "columns": 20,
+    "constraints": 17,
+    "indexes": 1,
+    "policies": 0,
+    "rls": true,
+    "grants": [
+      {
+        "role": "service_role",
+        "privilege": "INSERT"
+      },
+      {
+        "role": "service_role",
+        "privilege": "SELECT"
+      },
+      {
+        "role": "service_role",
+        "privilege": "UPDATE"
+      }
+    ],
+    "initialRows": 0,
+    "exactDisposableCatalogParity": "PASS",
+    "orphanReferences": 0,
+    "invalidIndexes": 0,
+    "unattendedVercelEdgePreflight": "PASS",
+    "featureCount": 76
+  },
+  "accounting": {
+    "productionDdlMigrations": 1,
+    "productionDml": 0,
+    "providerCalls": 0,
+    "missionOddsCalls": 2,
+    "missionOddsCap": 20
+  },
+  "protectedState": {
+    "existingRows": "UNCHANGED",
+    "existingTables": "UNCHANGED",
+    "champion": "UNCHANGED",
+    "featureSemantics": "UNCHANGED",
+    "preprocessing": "UNCHANGED",
+    "policyV1": "UNCHANGED",
+    "inheritedChanges": 19
+  },
+  "runtimeGates": "PENDING",
+  "automationActivation": "DISABLED",
+  "operationalCertified": false,
+  "publication": "Structural certification only; no production sample payloads"
+}
