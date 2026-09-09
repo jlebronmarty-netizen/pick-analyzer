@@ -8,10 +8,12 @@ import { buildPregameFeatureRows, assemblePregameVector, buildAllPregameFeatureR
 import { inferChampion } from './mlb-data-02r-r2t-real-feature-champion.mjs'
 import { validateLocalDownstream } from './mlb-data-02r-r2t-downstream-validate.mjs'
 import { buildPersistedPredictions } from './mlb-data-02r-r2t-downstream-persistence.mjs'
+import { collectRuntimeSourcePaths, normalizedFileDigest } from './mlb-data-02r-r2t-r3-readiness.mjs'
 import { featureInsertRowsForDomain, comparableFeatureRow, resolveCanonicalFeatureSnapshotIds, bindFeatureRowsToSnapshotIds, classifyBoundDailyFeatures, R2I_LIVE_TARGETS, revisionFeatureRows, persistCanonicalFeaturePlan } from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
 
 const root = process.env.R2S_VALIDATION_DIR
 if (!root || !process.env.R1_READ_CACHE) throw new Error('ISOLATED_VALIDATION_REQUIRED')
+const testedSourceHashes = Object.fromEntries(collectRuntimeSourcePaths().map(file => [file, normalizedFileDigest(file)]))
 const { PGlite } = await import(pathToFileURL(path.join(root, 'validation-tools/node_modules/@electric-sql/pglite/dist/index.js')))
 // This database is ephemeral WASM PostgreSQL in this process. No connection
 // URL or Supabase client exists here; every SQL insert below is local-only.
@@ -176,10 +178,11 @@ await db.exec('rollback')
 for (const domain of domains) assert.deepEqual(await selectAll(tableFor(domain)), revisedRows[domain])
 check('rollback with revision conflicts aborts and preserves every row', true)
 const report = { generatedAt: new Date().toISOString(), status: 'DISPOSABLE_SCHEMA_AND_ROLLBACK_VALIDATED',
-  engine: '@electric-sql/pglite@0.3.14', checks, migrationDigest: sha256(migration),
+  engine: '@electric-sql/pglite@0.3.14', checks, migrationDigest: sha256(migration), testedSourceHashes,
   realCase: target.gamePk, rowsBefore: Object.fromEntries(domains.map((d) => [d, before[d].length])),
-  limitation: 'Disposable PostgreSQL validates typed real-case persistence and structural revision probes; production migration and full live path are NOT certified. Separate real historical batter sample is schema evidence only.',
+  limitation: 'Disposable PostgreSQL real-model integration with structural market/revision probes; no production live execution. Production DDL has its separate authorization/certificate. Separate historical batter input is schema evidence only.',
   providerCalls: 0, productionDml: 0, productionDdl: 0, liveExecutionEnabled: false }
+for (const [file, hash] of Object.entries(testedSourceHashes)) assert.equal(normalizedFileDigest(file), hash, 'source changed during validation')
 fs.writeFileSync(path.join(root, 'schema-validation.json'), JSON.stringify(report, null, 2))
 console.log(JSON.stringify(report))
 await db.close()

@@ -11,6 +11,7 @@ export function createPgliteClient(db) {
     value(value) { this.params.push(value); return `$${this.params.length}` }
     select(fields = '*', options = {}) { this.fields = fields === '*' ? '*' : fields.split(',').map(identifier).join(','); this.count = options.count; return this }
     eq(field, value) { this.filters.push(`${identifier(field)} = ${this.value(value)}`); return this }
+    is(field, value) { if (value !== null) throw new Error('LOCAL_IS_OPERATOR'); this.filters.push(`${identifier(field)} is null`); return this }
     in(field, values) { this.filters.push(values.length ? `${identifier(field)} in (${values.map(v => this.value(v)).join(',')})` : 'false'); return this }
     not(field, operator, value) { if (operator !== 'is' || value !== null) throw new Error('LOCAL_NOT_OPERATOR'); this.filters.push(`${identifier(field)} is not null`); return this }
     gte(field, value) { this.filters.push(`${identifier(field)} >= ${this.value(value)}`); return this }

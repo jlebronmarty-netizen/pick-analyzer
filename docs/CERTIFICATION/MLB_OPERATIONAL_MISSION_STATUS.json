@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-09T02:27:23.036Z",
-  "verdict": "DDL_AND_R2T_R2_CERTIFIED_R3_PENDING",
+  "generatedAt": "2026-09-09T03:00:27.141Z",
+  "verdict": "DDL_R2T_R2_AND_R3_CERTIFIED_LIVE_RUN_PENDING",
   "operationalCertified": false,
   "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
   "packageSha": "ENCLOSING_SANITIZED_COMMIT",
@@ -43,6 +43,15 @@
       "r1Checks": 41,
       "featureModelValidators": 9,
       "operationalGuards": 3
+    },
+    "r3": {
+      "certificate": "MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION.json",
+      "gates": 12,
+      "disposableChecks": 66,
+      "manualGuardGroups": 5,
+      "frozenRuntimeFiles": 32,
+      "actualCanonicalGuardReadback": "PASS",
+      "unboundLiveAndWrongPackageCalls": "BLOCKED_BEFORE_SIDE_EFFECTS"
     }
   },
   "providerAccounting": {
@@ -111,25 +120,26 @@
     "unchanged": true
   },
   "protectedDirectoriesTouched": false,
-  "r2tR3Certified": false,
-  "r2bLiveReady": false,
-  "syntheticPathState": "Actual canonical core validated against disposable PostgreSQL. Legacy dry graph explicitly rejects live mode; production live remains unconditionally blocked until R3.",
+  "r2tR3Certified": true,
+  "r2bLiveReady": true,
+  "syntheticPathState": "Canonical real graph certified; legacy synthetic dry graph rejects live execution. Exact 32-file R3 manifest, package, private journals and fresh schema preflight are mandatory.",
   "publication": {
     "rawProductionSamplesIncluded": false,
     "privateReplayInputs": "External R1_READ_CACHE, BATTER_READ_CACHE, R2T_MULTI_READ_CACHE and private registry evidence; never committed.",
     "sanitizedPrerequisitePublished": true,
-    "integrationCommitPending": true,
-    "forcePush": false
+    "integrationCommitPending": false,
+    "forcePush": false,
+    "r3CommitPending": true
   },
   "remaining": [
-    "Publish the bounded sanitized R2T-R2 certification commit; quality scans passed.",
-    "R3 live reenablement before any production live execution.",
-    "Nonempty live run and repeatability.",
-    "Shared-engine automation and daily refresh automation.",
-    "Settlement/performance and Today UI; final operational certification."
+    "Publish bounded sanitized R3 package and execute one current-slate manual invocation with maximum one Odds request.",
+    "Successful nonempty live refresh and subsequent repeatability.",
+    "Shared-engine and daily-refresh automation only after repeatability.",
+    "Settlement/performance, Today UI and final operational certification."
   ],
   "rollbackAndRecoveryRunbook": "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_AUDIT.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "R2T-R2 certified; bounded sanitized commit/publication",
-  "nextPhase": "MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION"
+  "currentPhase": "R3 certified; bounded sanitized publication and first current-slate manual invocation",
+  "nextPhase": "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION",
+  "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de"
 }

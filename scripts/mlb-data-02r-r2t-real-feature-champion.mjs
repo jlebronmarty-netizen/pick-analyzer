@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import { buildVector } from './mlb-data-02f-moneyline-prediction-generation-prep.mjs'
 import { inferMoneyline } from './mlb-data-02r-r2f-wave12-interfaces.mjs'
 import { sha256 } from './mlb-data-02r-r2f-stage-contracts.mjs'
+import { requireCanonicalR3Readiness } from './mlb-data-02r-r2t-r3-readiness.mjs'
 
 export const MODEL_VERSION = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
 export const FEATURE_SET = 'MLB_ML_FEATURE_SET_V1'
@@ -204,8 +205,9 @@ export function inferChampion({ vector, model = loadChampionModel() }) {
 }
 
 // No authorization flag can turn historical provenance into pregame evidence.
-// Deliberate hard stop until the missing current-target contract is certified.
+// No live path is enabled without the canonical R3 certificate and exact
+// transitive implementation/model/schema source hashes.
 export function assertR2TLiveReadiness() {
   loadChampionModel()
-  throw new Error('R2T_LIVE_BLOCKED:CURRENT_TARGET_FEATURE_PROVENANCE_AND_SIX_DOMAIN_PERSISTENCE_NOT_CERTIFIED')
+  return requireCanonicalR3Readiness()
 }

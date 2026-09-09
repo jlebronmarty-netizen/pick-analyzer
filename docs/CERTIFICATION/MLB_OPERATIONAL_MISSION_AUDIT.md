@@ -1,6 +1,6 @@
 # MLB autonomous operational mission: authorized DDL and sanitized repair
 
-The exact feature-snapshot uniqueness DDL is applied and certified, and sanitized prerequisite commit `eedecaec58abe8d2b9b8c804a8e1d490cad9f423` is published. R2T-R2 is certified: all 23 integration gates have explicit passing evidence and the bounded publication scan passes. The operational mission and R2T-R3 remain incomplete; live containment stays active.
+The exact feature-snapshot uniqueness DDL is applied and certified, and sanitized prerequisite commit `eedecaec58abe8d2b9b8c804a8e1d490cad9f423` is published. R2T-R2 is certified and published as `3dea44d8892cb71e75ef07a53d05d7eea029e5de`. R3 now passes 12 gates, 66 disposable PostgreSQL checks, five launcher guard groups and the exact 32-file runtime freeze. Canonical readiness and fail-closed invalid-package/binding checks pass. The operational mission remains incomplete; no actual live invocation has run yet.
 
 ## Implementation and validation
 
@@ -43,4 +43,4 @@ The [rollback SQL](MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_ROLLBACK.sql) is 
 
 Production read-only rollback preflight currently finds zero conflicts across the eleven restored uniqueness definitions. No production rollback was executed. Recheck this immediately before any separately authorized rollback; never delete immutable rows to make rollback succeed.
 
-Publish the bounded sanitized integration certificate, then certify R3 before any live run. The real canonical graph now has independent snapshot binding, all-game inference/persistence and checkpoint/readback proof. The legacy dry graph rejects live execution explicitly. Neither DDL success nor the local integration certificate alone enables live readiness. Continue the standing live/repeatability/automation/settlement/Today order with the original budgets and guards.
+Publish the bounded sanitized R3 package, then execute one current-slate manual invocation through the existing R2B/R2I path. The actual launcher requires a fresh read-only schema preflight, the exact package, actual run-start freeze and private exclusive journals. Its stricter one-request Odds limit is cached across retry. Preserve mission accounting and continue the live/repeatability/automation/settlement/Today order; automation remains blocked until repeatability.

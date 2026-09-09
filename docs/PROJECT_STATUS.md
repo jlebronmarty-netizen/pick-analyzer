@@ -1,13 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-09 (real R2T-R2 integration gates verified; R3 remains required)
+Last updated: 2026-09-09 (R2T-R2 and R3 certified; first bounded live invocation pending)
 
-## MLB Autonomous Operational Mission — DDL Certified, R2T-R2 Integration Verified
+## MLB Autonomous Operational Mission — DDL, R2T-R2 and R3 Certified
 
 - Applied the exact explicitly authorized snapshot-uniqueness SQL, SHA256 `3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46`. Fresh schema checks and independent readback verify 118,064 unchanged daily rows, zero orphan references, all foreign/primary/check constraints preserved, and the six native snapshot-unique indexes. No row DML or other DDL occurred.
 - R2T-R2 now has explicit passing evidence for all 23 gates: 64 disposable PostgreSQL checks, 41 R1 checks, nine feature/model regressions and three operational guard checks. Actual R2B/R2I integration uses real multi-game features, persisted 76-value readback and unchanged Champion inference, structural odds fixtures, canonical downstream readback and zero-write retries. The production prediction plan matches the retained stored-input digest. Build passes with 400 pages.
 - Sanitized DDL/repair commit `eedecaec58abe8d2b9b8c804a8e1d490cad9f423` is published. The subsequent integration package removes raw samples from its updated canonical certificate and keeps private replay inputs external. All 19 inherited artifacts and protected directories are preserved. Legacy live validators remain explicitly classified containment failures, not reported as passes.
-- **Operational certification remains incomplete and live remains contained.** Finish the bounded integration publication review, then certify R3 before live execution and follow the original live/repeatability/automation/settlement/Today sequence. Sports-provider calls and production row DML remain zero for this mission. DDL is exactly one authorized migration; automation/cron/settlement remain unchanged.
+- R2T-R2 is published as `3dea44d8892cb71e75ef07a53d05d7eea029e5de`. R3 passes 12 gates, 66 SQL integration checks, five launcher guard groups and a 32-file runtime freeze. Canonical readiness readback passes; unbound live calls and wrong packages stop before side effects. The manual launcher requires fresh schema preflight and a private exclusive journal; this invocation permits at most one Odds request, cached for retry.
+- **Operational certification remains incomplete.** Publish the bounded sanitized R3 package, then execute the first current-slate manual invocation and follow the original live/repeatability/automation/settlement/Today sequence. Sports-provider calls and production row DML remain zero for this mission so far. DDL is exactly one authorized migration; automation/cron/settlement remain unchanged.
 - Evidence: `docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_DDL.json`, `MLB_OPERATIONAL_MISSION_STATUS.json`, and `MLB_OPERATIONAL_MISSION_AUDIT.md`. The forward SQL remains byte-identical; rollback SQL and external-input reproduction instructions are recorded.
 
 The phase notes below are historical; current readiness is stated above.

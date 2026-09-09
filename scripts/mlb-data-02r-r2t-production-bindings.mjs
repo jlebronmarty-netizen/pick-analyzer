@@ -21,9 +21,15 @@ const businessNative = row => ({
   awayStarter: row.metadata?.awayProbablePitcher?.id ?? row.metadata?.starter_evidence?.awayProbablePitcher?.id ?? null,
 })
 
-export function createCanonicalProductionBindings({ client, repository, store, runContext, authorization, oddsApiKey, fetchImpl = fetch }) {
+export function createCanonicalProductionBindings({ client, repository, store, runContext, authorization, oddsApiKey }) {
   assertR2TLiveReadiness()
   ensure(repository.executionEnvironment === 'PRODUCTION_SUPABASE', 'REPOSITORY')
+  const fetchImpl = (url, options = {}) => {
+    const parsed = new URL(url)
+    ensure(parsed.protocol === 'https:' && ['statsapi.mlb.com', 'baseballsavant.mlb.com', 'api.the-odds-api.com'].includes(parsed.hostname) && !parsed.username && !parsed.password, 'PROVIDER_HOST')
+    ensure(!options.method || options.method === 'GET', 'PROVIDER_METHOD')
+    return fetch(url, { ...options, redirect: 'error' })
+  }
   return { ...createBindings({ client, repository, store, runContext, authorization, oddsApiKey, fetchImpl, now: () => new Date() }), executionEnvironment: 'PRODUCTION' }
 }
 
@@ -105,7 +111,11 @@ function createBindings({ client, repository, store, runContext, authorization, 
     } else {
       ensure(previous.source_payload_digest && previous.updated_at, 'NATIVE_OLD_PROVENANCE')
       const patch = { ...planned, legacy_sport_event_id: previous.legacy_sport_event_id ?? planned.legacy_sport_event_id, metadata: { ...previous.metadata, ...planned.metadata }, updated_at: now().toISOString() }
-      const { data, error } = await repository.writeJournal.perform({ table: 'pick2_mlb_games', operation: 'UPDATE', rows: [patch], cap: 1, expectedOld: previous }, () => client.from('pick2_mlb_games').update(patch).eq('game_pk', previous.game_pk).eq('source_payload_digest', previous.source_payload_digest).eq('updated_at', previous.updated_at).select('game_pk'))
+      const { data, error } = await repository.writeJournal.perform({ table: 'pick2_mlb_games', operation: 'UPDATE', rows: [patch], cap: 1, expectedOld: previous }, () => {
+        let query = client.from('pick2_mlb_games').update(patch)
+        for (const [column, value] of Object.entries(previous)) query = value === null ? query.is(column, null) : query.eq(column, typeof value === 'object' ? JSON.stringify(value) : value)
+        return query.select('game_pk')
+      })
       ensure(!error && data?.length === 1, 'NATIVE_EXPECTED_OLD_CONFLICT')
       recordDml({ table: 'pick2_mlb_games', planned: 1, cap: 1, inserted: 0, updated: 1, reused: 0, conflicts: 0 })
     }

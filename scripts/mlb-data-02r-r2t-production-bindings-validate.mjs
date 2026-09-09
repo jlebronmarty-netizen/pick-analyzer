@@ -62,7 +62,7 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   }
   const writeJournal = createWriteJournal({ client, store, runContext })
   const repository = { ...createSupabaseProductionRepository({ client, writeJournal }), executionEnvironment: 'DISPOSABLE_PGLITE' }
-  assert.throws(() => createCanonicalProductionBindings({ client, repository, store, runContext, authorization }), /R2T_LIVE_BLOCKED/)
+  assert.throws(() => createCanonicalProductionBindings({ client, repository, store, runContext, authorization }), /R2T_LIVE_BLOCKED|R2T_PRODUCTION_BLOCK:REPOSITORY/)
   const canonical = createCanonicalCertificationBindings({ client, repository, store, runContext, authorization, oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl, now: () => new Date(runAsOf) })
   console.log(JSON.stringify({ stage: 'ISOLATED_PRODUCTION_BINDINGS', operation: 'read canonical contexts', realProviderCalls: 0 }))
   const evidence = await canonical.readContexts()
@@ -83,6 +83,15 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
     executionPackageSha: runContext.execution_package_sha, runDate: runContext.run_date, runAsOf, clock: runAsOf })
   assert.equal(calls.length, countBeforeRetry)
   check('actual production adapter R2B/R2I SQL pipeline completes and retries without provider reacquisition', true)
+  const savedStatus = payload.dates[0].games[0].status.abstractGameState
+  payload.dates[0].games[0].status.abstractGameState = 'Live'
+  await assert.rejects(() => canonical.assertCurrentStarters({ contexts: evidence.contexts, at: runAsOf, domain: 'predictions' }), /CURRENT_STARTED_GAME_VETO/)
+  payload.dates[0].games[0].status.abstractGameState = savedStatus
+  const savedStarter = payload.dates[0].games[0].teams.home.probablePitcher
+  payload.dates[0].games[0].teams.home.probablePitcher = { ...savedStarter, id: 900000009 }
+  await assert.rejects(() => canonical.assertCurrentStarters({ contexts: evidence.contexts, at: runAsOf, domain: 'values' }), /CURRENT_STARTER_CHANGE_VETO/)
+  payload.dates[0].games[0].teams.home.probablePitcher = savedStarter
+  check('fresh Official evidence vetoes started games and changed starters without replacing frozen inputs', true)
   // Cold-fetch structural fixture through the existing shared R2N engine, with
   // no HTTP transport. It is never supplied to the real-model archived cases.
   const rawSchema = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_RAW_SCHEMA_REVIEW.json', 'utf8'))
@@ -143,6 +152,36 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   await probe.readContexts()
   assert.equal(probeJournal.summary().filter(e => e.operation === 'UPDATE').length, 1)
   check('native enrichment UPDATE uses old predicates, reads back and never backdates new evidence', true)
+  const concurrentPayload = structuredClone(payload)
+  concurrentPayload.dates[0].games = [concurrentPayload.dates[0].games[1]]
+  concurrentPayload.dates[0].games[0].status.detailedState = 'Warmup'
+  const concurrentPk = concurrentPayload.dates[0].games[0].gamePk
+  const beforeConcurrent = (await client.from('pick2_mlb_games').select('*').eq('game_pk', concurrentPk)).data[0]
+  let intercepted = false
+  const concurrentClient = { ...client, from(table) {
+    const query = client.from(table), execute = query.execute.bind(query)
+    query.execute = async () => {
+      if (!intercepted && table === 'pick2_mlb_games' && query.mutation === 'update') {
+        intercepted = true
+        await db.query("update pick2_mlb_games set metadata = metadata || '{\"concurrent_local_probe\":true}'::jsonb where game_pk=$1", [concurrentPk])
+      }
+      return execute()
+    }
+    return query
+  } }
+  const concurrentContext = { ...runContext, run_id: 'r3-concurrent-native-probe' }
+  const concurrentDocuments = new Map()
+  const concurrentStore = { ...store, load: key => concurrentDocuments.get(key) ?? null, save: (key, value) => concurrentDocuments.set(key, value) }
+  const concurrentJournal = createWriteJournal({ client: concurrentClient, store: concurrentStore, runContext: concurrentContext })
+  const concurrentRepository = { ...createSupabaseProductionRepository({ client: concurrentClient, writeJournal: concurrentJournal }), executionEnvironment: 'DISPOSABLE_PGLITE' }
+  const concurrentCanonical = createCanonicalCertificationBindings({ client: concurrentClient, repository: concurrentRepository, store: concurrentStore,
+    runContext: concurrentContext, authorization, oddsApiKey: 'ISOLATED_TEST_VALUE', fetchImpl: async () => ({ ok: true, json: async () => concurrentPayload }), now: () => new Date(Date.parse(runAsOf) + 1000) })
+  await assert.rejects(() => concurrentCanonical.readContexts(), /PARTIAL_OR_CONFLICTING_STATE/)
+  const afterConcurrent = (await client.from('pick2_mlb_games').select('*').eq('game_pk', concurrentPk)).data[0]
+  assert.equal(afterConcurrent.official_status, beforeConcurrent.official_status)
+  assert.equal(afterConcurrent.updated_at, beforeConcurrent.updated_at)
+  assert.equal(afterConcurrent.metadata.concurrent_local_probe, true)
+  check('concurrent native metadata change without timestamp advance prevents the planned UPDATE', true)
   const emptyContext = { ...runContext, run_id: 'r2t-empty-slate-probe' }
   const emptyDocuments = new Map()
   const emptyStore = { ...store, load: key => emptyDocuments.get(key) ?? null, save: (key, value) => { emptyDocuments.set(key, value) } }
