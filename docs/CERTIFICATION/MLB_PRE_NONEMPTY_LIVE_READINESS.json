@@ -328,7 +328,7 @@
     "scripts/mlb-operational-readonly-network-guard.mjs": "b4c535d64cce41aa85ee40be0fbdd351fd47d873262c549711d8c265d3aad383",
     "scripts/mlb-operational-schema-preflight.sql": "6e796b5416eebea92dfc937ed757d05cc03bd753dad4da8b50769b66a035c30a",
     "scripts/mlb-operational-tick.mjs": "f083a7ed4122af4adbf7c42682bd18d91d3bd3991a28951d2a53edadd24f091a",
-    "scripts/mlb-operational-ui-validate.mjs": "913eb693ca09f39071a0daeb2c30b2376c08cab80cc0d040e08a0e69247cfe0e",
+    "scripts/mlb-operational-ui-validate.mjs": "1a81d861c995ae9d37a4a00177d119e8d28f68feef0cf6bfd2b5c4722eea1c16",
     "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
     "scripts/mlb-pre-nonempty-readiness-validate.mjs": "d74bb43af7abe5c06c3486669d09ad3b5bc998f169aaf4fb4fa65f6b576ad0cf",
     "src/app/api/admin/mlb-operational-preflight/route.ts": "7162661a36e47f2467c0d754537371997315447a63594726c9f01a159f3d65f9",

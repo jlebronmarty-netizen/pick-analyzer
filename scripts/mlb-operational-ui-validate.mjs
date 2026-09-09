@@ -3,6 +3,7 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 import { chromium } from '@playwright/test'
 const root = process.env.R2S_VALIDATION_DIR, base = process.env.MLB_UI_VALIDATION_URL ?? 'http://127.0.0.1:3129'
+const activation = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json', 'utf8'))
 assert.ok(root && path.isAbsolute(root))
 const browser = await chromium.launch({ headless: true })
 const checks = [], failures = []
@@ -43,7 +44,12 @@ try {
     assert.equal(health.champion, 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'); assert.equal(health.featureCount, 76)
     assert.equal(health.storedGames, data.games.length)
     assert.equal(health.valueCount, data.board.rows.length)
-    assert.equal(health.automation.activation, 'DISABLED')
+    assert.ok(['ENABLED', 'DISABLED'].includes(activation.activation))
+    assert.equal(health.automation.activation, activation.activation)
+    if (activation.activation === 'ENABLED') {
+      assert.equal(activation.runtimeHost.verified, true)
+      assert.equal(activation.repeatability.verdict, 'MLB_DATA_02R_REPEATABILITY_CERTIFIED')
+    }
     const performance = await context.request.get(base + '/api/mlb/performance')
     assert.equal(performance.status(), 200)
     const report = await performance.json()

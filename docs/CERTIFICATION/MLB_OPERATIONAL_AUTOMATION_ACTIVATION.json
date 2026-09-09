@@ -32,5 +32,6 @@
     "endpoint": "mlb-operational-preflight",
     "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
   },
-  "scheduledProductionReadback": "PENDING"
+  "scheduledProductionReadback": "PASS",
+  "scheduledEvidence": "MLB_R6_SCHEDULED_PRODUCTION_READBACK.json"
 }

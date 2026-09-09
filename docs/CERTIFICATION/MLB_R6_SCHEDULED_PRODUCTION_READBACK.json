@@ -1,0 +1,118 @@
+{
+  "packageSha": "5de5899ccaa1366ead8d2f8f19bd742c216990df",
+  "deploymentId": "dpl_B6tQTjdVTDAhCt7oSBGUmjnkPJHw",
+  "cron": {
+    "method": "GET",
+    "http": 200,
+    "at": "2026-09-09T23:45:42Z",
+    "schedule": "*/15 * * * *"
+  },
+  "runs": [
+    {
+      "runId": "automation-ec5d115b39bae9fec208a239ef7d6e33db727e44256b0b2b757cb43ab6b12478",
+      "mode": "PREGAME",
+      "status": "COMPLETE",
+      "result": {
+        "picks": 0,
+        "reused": 0,
+        "status": "NO_VALID_PREGAME_SLATE",
+        "values": 0,
+        "inserted": 0,
+        "readback": "PASS",
+        "conflicts": 0,
+        "predictions": 0
+      },
+      "runAsOf": "2026-09-09 23:45:45.721+00",
+      "updatedAt": "2026-09-09 23:46:16.344+00",
+      "scopedGames": 1,
+      "blockedReasons": {
+        "NOT_PREGAME": 14,
+        "NEW_CANONICAL_EVIDENCE_AFTER_RUN_FREEZE": 1
+      },
+      "checkpointPostgresBytes": 1546,
+      "dml": [
+        {
+          "cap": 1,
+          "stage": "PERSISTENCE",
+          "digest": "087dd6bb6c86962d5e3e6234786778aef9dc54180ffd64238851399115914600",
+          "reused": 0,
+          "target": "pick2_mlb_games",
+          "planned": 1,
+          "updated": 1,
+          "inserted": 0,
+          "readback": "PASS",
+          "conflicts": 0
+        }
+      ],
+      "providers": {
+        "MLB_OFFICIAL": 1,
+        "STATCAST": 0,
+        "THE_ODDS_API": 0
+      }
+    },
+    {
+      "runId": "automation-f7c939ae31f33f3566d514600d0a39c09ae9a2334a28671553e91fc641da2d01",
+      "mode": "INCREMENTAL",
+      "status": "COMPLETE",
+      "result": {
+        "picks": 0,
+        "reused": 0,
+        "status": "COMPLETE",
+        "values": 0,
+        "inserted": 0,
+        "readback": "PASS",
+        "conflicts": 0,
+        "predictions": 0
+      },
+      "runAsOf": "2026-09-09 23:46:17.442+00",
+      "updatedAt": "2026-09-09 23:46:21.337+00",
+      "scopedGames": 8,
+      "blockedReasons": {},
+      "checkpointPostgresBytes": 855,
+      "dml": [],
+      "providers": {
+        "MLB_OFFICIAL": 1,
+        "STATCAST": 1,
+        "THE_ODDS_API": 0
+      }
+    }
+  ],
+  "providerCalls": {
+    "MLB_OFFICIAL": 2,
+    "STATCAST": 1,
+    "THE_ODDS_API": 0,
+    "BALLDONTLIE": 0,
+    "SPORTSDATAIO": 0,
+    "OTHER": 0
+  },
+  "missionOdds": 2,
+  "businessDml": {
+    "inserted": 0,
+    "updated": 1,
+    "deleted": 0
+  },
+  "runtimeStateThisFollowup": {
+    "inserted": 3,
+    "updated": 22
+  },
+  "runtimeStateR6Total": {
+    "inserted": 6,
+    "updated": 29
+  },
+  "leaseReleased": true,
+  "terminalPass": true,
+  "integrity": {
+    "schemaUnchanged": true,
+    "pick2CountsUnchanged": true,
+    "unrelatedCountDrift": [],
+    "businessInsertCount": 0,
+    "businessUpdateCount": 1
+  },
+  "ui": {
+    "checks": 12,
+    "status": "PASS",
+    "canonicalParity": true,
+    "dataHealthFresh": true,
+    "performance": "NO_SETTLED_SAMPLE"
+  }
+}

@@ -1,5 +1,7 @@
 # Master Roadmap
 
+Current gate: R6 production endpoint, host authentication/concurrency, activation and actual scheduled readback are verified. The single MLB Cron is enabled; daily and incremental modes completed on the actual production Function. Preserve the successful nonempty/repeatability evidence and all existing guards. Final mission certification remains withheld by automatic approval review over production-settlement evidence; do not silently relabel disposable settlement tests as production settlement or bypass the preserved disabled settlement boundary.
+
 R6 Gates 1–18: production host dry/concurrency/checkpoint/reuse now pass alongside retained offline regression evidence. Publish the single MLB durable Cron activation, observe a genuine scheduled invocation, verify canonical surfaces and accounting, then certify Gate 21 only if all required readbacks pass. NBA scheduling and settlement boundaries remain unchanged.
 
 R6 deployment follow-up: The exact authorized Edge candidate is deployed as version 5 with service-only authentication verified. A bounded Vercel empty-POST-stream repair is validated offline; production host readback precedes activation and scheduled verification. The original endpoint-deployment authorization blocker is resolved. No additional DDL is needed.

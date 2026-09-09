@@ -1,5 +1,7 @@
 # MLB operational recovery
 
+Current scheduled readback is verified in `MLB_R6_SCHEDULED_PRODUCTION_READBACK.json`: actual production GET 200, two completed modes, released lease, bounded native update and Odds 2/20. Automation is enabled. Final operational certification is withheld following automatic approval review over the disabled production-settlement boundary; that review did not identify an execution/authentication failure. Preserve settlement disabled pending resolution of the final certification requirement. Do not reset runtime counters or rerun completed jobs to manufacture evidence.
+
 ## Current R6 production contract
 
 The exact eight-file Edge candidate is deployed as version 5 with custom service-only bearer authentication. The production Function passes actual-host dry invocation, lease deferral, concurrent exclusion, durable checkpoint and completed-run reuse. The former endpoint-approval blocker below is resolved. The authoritative state is `public.pick2_mlb_runtime_state`; historical filesystem recovery instructions below apply only to the retained manual-run evidence.
@@ -10,7 +12,9 @@ Before recovery, read the current RUN, LEASE and MISSION records securely. Never
 
 To contain a failure, disable the MLB cron and activation flag in a bounded normal deployment; do not alter the NBA schedule. Preserve the in-flight durable record, all canonical rows and receipts. Read back pending operations before retrying. Do not delete runtime rows, reset budgets, run extra DDL or silently change a frozen package. Settlement automation remains disabled.
 
-Real nonempty production refresh and repeatability are certified. The coordinator remains **disabled** pending a verified persistent executor host. Unattended schema preflight is now production-verified; do not deploy the filesystem-based runner on independent ephemeral hosts.
+## Historical pre-activation guidance
+
+Real nonempty production refresh and repeatability were certified before host activation. The remaining historical sections describe the earlier disabled coordinator and manual runner. Current production uses the durable Vercel contract above.
 
 ## Before each invocation
 

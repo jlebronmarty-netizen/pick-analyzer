@@ -300,32 +300,18 @@
     "preNonemptyPackage": "ENCLOSING_BOUNDED_COMMIT"
   },
   "remaining": [
-    "VERIFIED_PERSISTENT_EXECUTOR_HOST",
-    "AUTOMATION_UNATTENDED_DRY_CERTIFICATION",
-    "AUTOMATION_ACTIVATION",
-    "AUTOMATION_PRODUCTION_READBACK",
-    "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED"
+    "FINAL_OPERATIONAL_CERTIFICATION_REVIEW"
   ],
   "rollbackAndRecoveryRunbook": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "MLB_DATA_02R_R5_BLOCKED",
-  "nextPhase": "VERIFIED_PERSISTENT_EXECUTOR_HOST",
+  "currentPhase": "R6_SCHEDULED_PRODUCTION_READBACK_VERIFIED",
+  "nextPhase": "RESOLVE_FINAL_PRODUCTION_SETTLEMENT_CERTIFICATION_REQUIREMENT",
   "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
-  "automationImplementation": "DRY_CERTIFIED; ACTIVATION_DISABLED",
+  "automationImplementation": "ENABLED_SINGLE_VERCEL_CRON_SCHEDULED_READBACK_PASS",
   "publishedR3Sha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
-  "automationBlocker": {
-    "code": "R5_PERSISTENT_EXECUTOR_HOST_UNAVAILABLE",
-    "hardStop": true,
-    "reason": "Vercel Production credential reconciliation and actual Vercel-to-Edge read-only schema preflight pass. No existing persistent certified R2 executor host is identified: repository self-hosted runner inventory is empty and no matching local scheduler/service is registered. Host identity, durable private state, restart/overlap verification and scheduled execution remain required.",
-    "requiredResolution": "Identify and connect the existing always-on Node/Git host; preserve private checkpoints and mission Odds ledger at 2/20. Verify host preflight and locks before activation.",
-    "authorizationNeeded": false
-  },
+  "automationBlocker": null,
   "pendingGates": [
-    "VERIFIED_PERSISTENT_EXECUTOR_HOST",
-    "AUTOMATION_UNATTENDED_DRY_CERTIFICATION",
-    "AUTOMATION_ACTIVATION",
-    "AUTOMATION_PRODUCTION_READBACK",
-    "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED"
+    "FINAL_OPERATIONAL_CERTIFICATION_REVIEW"
   ],
   "certifiedExecutionSha": "633768729b212746d03a5bf4d2ae542d1d84f945",
   "r4": {
@@ -343,5 +329,16 @@
     "productionDml": 0,
     "productionDdl": 0,
     "schedulerActivation": false
+  },
+  "r6": {
+    "certificate": "docs/CERTIFICATION/MLB_DATA_02R_R6_DURABLE_RUNTIME_STATE_AND_VERCEL_FUNCTION_ENTRYPOINT.json",
+    "scheduledEvidence": "docs/CERTIFICATION/MLB_R6_SCHEDULED_PRODUCTION_READBACK.json",
+    "executionPackageSha": "5de5899ccaa1366ead8d2f8f19bd742c216990df",
+    "hostDry": "PASS",
+    "actualHostConcurrency": "PASS",
+    "activation": "ENABLED",
+    "scheduledReadback": "PASS",
+    "finalCertification": "NOT_ISSUED",
+    "reviewBlocker": "Final certification rejected because production settlement remains disabled and no settled sample exists."
   }
 }
