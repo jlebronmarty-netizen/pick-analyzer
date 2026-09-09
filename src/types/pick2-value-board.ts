@@ -88,8 +88,8 @@ export interface Pick2MlbValueBoardContract {
   rows: Pick2MlbValueBoardRow[]
   filters: Pick2MlbValueBoardFilters
   default_sort: Pick2MlbValueBoardSortOption
-  publication_state: 'PREPARED_NOT_PUBLIC'
-  feature_gate: 'READY_DISABLED'
+  publication_state: 'PREPARED_NOT_PUBLIC' | 'CANONICAL_READ_ONLY'
+  feature_gate: 'READY_DISABLED' | 'ENABLED'
   model_limitation_note: string
   profitability_claim_state: 'NO_HISTORICAL_PROFITABILITY_CLAIM'
 }

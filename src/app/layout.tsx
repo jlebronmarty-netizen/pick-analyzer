@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
-import { DashboardProvider } from '@/context/DashboardContext'
+import CanonicalDashboardBoundary from '@/components/pick2/CanonicalDashboardBoundary'
 import { PersonalizationProvider } from '@/context/PersonalizationContext'
 
 export const metadata: Metadata = {
@@ -27,9 +27,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PersonalizationProvider>
-          <DashboardProvider>
+          <CanonicalDashboardBoundary>
             {children}
-          </DashboardProvider>
+          </CanonicalDashboardBoundary>
         </PersonalizationProvider>
       </body>
     </html>

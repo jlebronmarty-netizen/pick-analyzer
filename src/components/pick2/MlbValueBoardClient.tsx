@@ -112,7 +112,7 @@ function sortRows(rows: Pick2MlbValueBoardRow[], sortKey: Pick2MlbValueBoardSort
 function EmptyState({ status }: { status: Pick2MlbValueBoardStatus }) {
   return (
     <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm text-slate-400">
-      No {statusLabels[status].toLowerCase()} in this prepared board state.
+      No {statusLabels[status].toLowerCase()} in the current stored evidence.
     </div>
   )
 }
@@ -221,7 +221,7 @@ export default function MlbValueBoardClient({ board }: { board: Pick2MlbValueBoa
   }, { OFFICIAL_PICK: 0, VALUE_CANDIDATE: 0, WATCHLIST: 0, BLOCKED: 0 }), [board.rows, board.statuses])
 
   return (
-    <main className="space-y-5">
+    <section aria-label="MLB Value Board" className="space-y-5">
       <section className="rounded-lg border border-slate-800 bg-slate-950/90 p-5 md:p-6">
         <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-300">MLB</p>
         <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -305,7 +305,7 @@ export default function MlbValueBoardClient({ board }: { board: Pick2MlbValueBoa
       <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-4 text-sm leading-6 text-slate-400">
         <p>Official Pick means the row passed Policy V1. It is not a guaranteed outcome, and this board makes no historical profitability, ROI, or CLV claim.</p>
       </section>
-    </main>
+    </section>
   )
 }
 

@@ -38,7 +38,8 @@ for (const changes of [{ checkedAt: '2026-09-09T02:00:00Z' }, { checkedAt: '2026
 }
 check('preflight rejects stale/future/wrong-project evidence, orphan/invalid indexes and schema drift')
 const mission = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_STATUS.json', 'utf8'))
-verifyInitialMissionLedger(mission)
+if (mission.providerAccounting.runs.length === 0 && Object.entries(mission.providerAccounting).filter(([key]) => ['MLBOfficial', 'sharedStatcast', 'OddsAPI', 'BALLDONTLIE', 'SportsDataIO', 'otherSportsProviders', 'missionOddsConsumed'].includes(key)).every(([, value]) => value === 0)) verifyInitialMissionLedger(mission)
+else assert.throws(() => verifyInitialMissionLedger(mission), /LEDGER_RECOVERY/, 'real nonzero mission accounting must prevent ledger reset')
 for (const consumed of [1, 2, -1]) assert.throws(() => verifyInitialMissionLedger({ ...mission, providerAccounting: { ...mission.providerAccounting, missionOddsConsumed: consumed } }), /LEDGER_RECOVERY/)
 assert.throws(() => verifyInitialMissionLedger({ ...mission, providerAccounting: { ...mission.providerAccounting, runs: ['previous'] } }), /LEDGER_RECOVERY/)
 check('missing private ledger cannot reset previously consumed mission budget')

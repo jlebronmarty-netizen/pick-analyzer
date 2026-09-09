@@ -1,7 +1,7 @@
-import Pick2Surface from '@/components/pick2/Pick2Surface'
+import MlbToday from '@/components/pick2/MlbToday'
 
 export const dynamic = 'force-dynamic'
 
 export default function TodayPage() {
-  return <Pick2Surface area="today" />
+  return <MlbToday />
 }

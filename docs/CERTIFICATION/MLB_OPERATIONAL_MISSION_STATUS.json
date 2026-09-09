@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-09T03:00:27.141Z",
-  "verdict": "DDL_R2T_R2_AND_R3_CERTIFIED_LIVE_RUN_PENDING",
+  "generatedAt": "2026-09-09T04:14:05.417Z",
+  "verdict": "PRE_NONEMPTY_LIVE_READINESS",
   "operationalCertified": false,
   "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
   "packageSha": "ENCLOSING_SANITIZED_COMMIT",
@@ -52,10 +52,18 @@
       "frozenRuntimeFiles": 32,
       "actualCanonicalGuardReadback": "PASS",
       "unboundLiveAndWrongPackageCalls": "BLOCKED_BEFORE_SIDE_EFFECTS"
+    },
+    "preNonemptyReadiness": {
+      "certificate": "MLB_PRE_NONEMPTY_LIVE_READINESS.json",
+      "behavioralGroups": 16,
+      "desktopMobileAndApiChecks": 12,
+      "disposableR2Checks": 66,
+      "build": "PASS",
+      "productionSideEffectsThisWorkSession": 0
     }
   },
   "providerAccounting": {
-    "MLBOfficial": 0,
+    "MLBOfficial": 1,
     "sharedStatcast": 0,
     "OddsAPI": 0,
     "BALLDONTLIE": 0,
@@ -68,7 +76,29 @@
       "sharedStatcast": 100,
       "OddsAPI": 5
     },
-    "runs": [],
+    "runs": [
+      {
+        "runId": "mlb-operational-42a2f70a-92bc-4af3-8374-eaaf377539c8",
+        "runDate": "2026-09-08",
+        "runAsOf": "2026-09-09T03:17:52.356Z",
+        "packageSha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
+        "status": "NO_VALID_PREGAME_SLATE",
+        "eligibleGames": 0,
+        "blockedGames": 15,
+        "blockedReasons": {
+          "NOT_PREGAME": 15
+        },
+        "providerCalls": {
+          "MLB_OFFICIAL": 1,
+          "STATCAST": 0,
+          "THE_ODDS_API": 0,
+          "BALLDONTLIE": 0,
+          "SPORTSDATAIO": 0,
+          "OTHER": 0
+        },
+        "productionDml": 0
+      }
+    ],
     "nonProviderActivity": "Read-only Supabase metadata/evidence, Git publication, production version GET, OS-temp-only pinned PostgreSQL test-engine package download."
   },
   "productionDml": {
@@ -81,7 +111,7 @@
     "migrationApplications": 1,
     "scope": "Exact authorized six-domain uniqueness proposal; no other DDL."
   },
-  "liveRefreshExecutions": 0,
+  "liveRefreshExecutions": 1,
   "automationChanges": 0,
   "cronChanges": 0,
   "settlementWrites": 0,
@@ -129,17 +159,20 @@
     "sanitizedPrerequisitePublished": true,
     "integrationCommitPending": false,
     "forcePush": false,
-    "r3CommitPending": true
+    "r3CommitPending": false,
+    "preNonemptyPackage": "ENCLOSING_BOUNDED_COMMIT"
   },
   "remaining": [
-    "Publish bounded sanitized R3 package and execute one current-slate manual invocation with maximum one Odds request.",
-    "Successful nonempty live refresh and subsequent repeatability.",
-    "Shared-engine and daily-refresh automation only after repeatability.",
-    "Settlement/performance, Today UI and final operational certification."
+    "FIRST_SUCCESSFUL_NONEMPTY_CURRENT_SLATE_PRODUCTION_REFRESH",
+    "SUBSEQUENT_REAL_REFRESH_PRODUCTION_REPEATABILITY",
+    "AUTOMATION_ACTIVATION_AFTER_REPEATABILITY",
+    "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED"
   ],
-  "rollbackAndRecoveryRunbook": "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_AUDIT.md",
+  "rollbackAndRecoveryRunbook": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "R3 certified; bounded sanitized publication and first current-slate manual invocation",
-  "nextPhase": "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION",
-  "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de"
+  "currentPhase": "PRE_NONEMPTY_LIVE_READINESS",
+  "nextPhase": "FIRST_GENUINE_NONEMPTY_PREGAME_REFRESH_THEN_REAL_REPEATABILITY",
+  "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
+  "automationImplementation": "DRY_CERTIFIED; ACTIVATION_DISABLED",
+  "publishedR3Sha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc"
 }

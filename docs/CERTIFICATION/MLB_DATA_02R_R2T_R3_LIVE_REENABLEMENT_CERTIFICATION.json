@@ -246,7 +246,7 @@
     "package-lock.json": "921fc3e1888157cd4acc3b208c8516649fa65b6124d8ebc759fa25bef25d035d",
     "package.json": "de9d954c4c94443c6c35425d9d26f93b9ab4e2c4427a1be219d2990d1bfd2edd",
     "scripts/mlb-data-02f-moneyline-prediction-generation-prep.mjs": "082ca798c70de4d60c7cc32465b39717fd6e4ebbcd4e025a5dee5dc7aa3773cd",
-    "scripts/mlb-data-02h-2026-current-foundation.mjs": "65e7c0a5eb438b97ad37d36521d49e5e20374afb2f15967aea4bd2fb794cb55f",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "f1bdc445065e658f535ca2879fc3ce32a4b92f65090a53a406bdecf99550af15",
     "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
     "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be46aede40ca583ecfafc9f8675f50cc0a44782d663b2b5f6a60cb8aaf608fc7",
     "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs": "7ca9358eced88174739fe88b09acb6e789e256bf23dd3b6f3795038b41945f74",
@@ -373,5 +373,13 @@
     "Raw replay inputs, sample vectors, prices and production row payloads are not included in this certificate.",
     "Nonempty live execution, repeatability, automation, settlement/performance and Today remain incomplete mission gates."
   ],
-  "rollback": "Stop invocation or remove/revoke R3 certificate to fail closed; preserve immutable rows. Resume only the same frozen package/run after independent readback; schema rollback needs separate authorization."
+  "rollback": "Stop invocation or remove/revoke R3 certificate to fail closed; preserve immutable rows. Resume only the same frozen package/run after independent readback; schema rollback needs separate authorization.",
+  "reconciliationRevision": {
+    "validatedAt": "2026-09-09T03:37:17.202Z",
+    "defaultPregameBehavior": "UNCHANGED",
+    "sharedEngineChange": "Explicit bounded INCREMENTAL/POSTGAME/OVERNIGHT cache reconciliation; partial persisted coverage no longer treated as complete in those modes",
+    "disposableRegressionChecks": 66,
+    "priorFrozenPackage": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
+    "productionExecutionThisRevision": false
+  }
 }

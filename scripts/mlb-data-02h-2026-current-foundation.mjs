@@ -381,7 +381,11 @@ export async function fetchR2NStatcastRowsForGames({
   const client = db ?? dbClient()
   const persistedRows = await readPersistedRawRowsForGamePks(client, gamePks)
   const persistedGamePks = new Set(persistedRows.map((row) => Number(row.game_pk)))
-  if (persistedRows.length && gamePks.every((gamePk) => persistedGamePks.has(gamePk))) {
+  // Reconciliation cannot treat a partial game's first pitch as complete.
+  // Automation supplies a bounded slot-specific CSV cache for this mode.
+  const reconcileScope = cachePolicy?.strategy === 'RECONCILE_FROZEN_SCOPE'
+  if (reconcileScope && !['INCREMENTAL', 'POSTGAME', 'OVERNIGHT'].includes(cachePolicy?.reconciliationMode)) throw new Error('R2N_INVALID_RECONCILIATION_MODE')
+  if (!reconcileScope && persistedRows.length && gamePks.every((gamePk) => persistedGamePks.has(gamePk))) {
     checkpoint?.record?.('r2n_statcast_cache_reuse', { rows: persistedRows.length, gamePks })
     return persistedRows
   }

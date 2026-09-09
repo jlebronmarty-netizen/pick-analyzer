@@ -1,8 +1,16 @@
 # Project Status
 
-Last updated: 2026-09-09 (R2T-R2 and R3 certified; first bounded live invocation pending)
+Last updated: 2026-09-09 (PRE_NONEMPTY_LIVE_READINESS)
 
-## MLB Autonomous Operational Mission — DDL, R2T-R2 and R3 Certified
+## Current MLB mission state — pre-nonempty readiness
+
+The one authorized live run from `47ee366f25390c5c9e805903bcd8e4cb168fdadc` returned `NO_VALID_PREGAME_SLATE` with 15 non-pregame games, one MLB Official request and zero production writes. Under the subsequent authorization, automation implementation/dry certification, settlement/performance, Today/Value Board/Data Health and recovery tooling are complete without another live refresh. The canonical report is `docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json`; its audit and `docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md` define coverage and activation prerequisites.
+
+Validation: 16 behavioral groups, 66 existing disposable PostgreSQL integration checks, five R3 guard groups, three operational groups, 12 mobile/desktop/API checks, passing lint and a 400-page build. Final browser validation observes zero forbidden requests; canonical pages no longer mount the legacy dashboard provider that initializes model weights. All 19 inherited artifacts and protected directories remain untouched. This work session made no providers, production DML/DDL, cron changes, environment changes or automation activation.
+
+Only the genuinely live gates remain: a successful nonempty pregame production refresh, subsequent real repeatability, dependent automation activation, and final operational certification. The prepared single coordinator retains the fresh schema-connector preflight and existing provider/DML budgets; no empty/postgame substitute may satisfy these gates.
+
+## Historical prerequisite state — DDL, R2T-R2 and R3
 
 - Applied the exact explicitly authorized snapshot-uniqueness SQL, SHA256 `3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46`. Fresh schema checks and independent readback verify 118,064 unchanged daily rows, zero orphan references, all foreign/primary/check constraints preserved, and the six native snapshot-unique indexes. No row DML or other DDL occurred.
 - R2T-R2 now has explicit passing evidence for all 23 gates: 64 disposable PostgreSQL checks, 41 R1 checks, nine feature/model regressions and three operational guard checks. Actual R2B/R2I integration uses real multi-game features, persisted 76-value readback and unchanged Champion inference, structural odds fixtures, canonical downstream readback and zero-write retries. The production prediction plan matches the retained stored-input digest. Build passes with 400 pages.

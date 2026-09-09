@@ -36,10 +36,10 @@ export default function DashboardShellClient({
                 Pick Analyzer 2.0
               </p>
 
-              <h1 className="mt-2 text-2xl font-black">Product Reset</h1>
+              <p className="mt-2 text-2xl font-black">MLB command center</p>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Four clean product areas while the new prediction engine is rebuilt.
+                Canonical game evidence, model probabilities and market value.
               </p>
             </div>
 
@@ -78,11 +78,11 @@ export default function DashboardShellClient({
             </nav>
 
             <div className="fixed bottom-6 w-[224px] rounded-lg border border-slate-800 bg-slate-900/95 p-4">
-              <p className="text-xs text-slate-500">Pick 2 reset</p>
+              <p className="text-xs text-slate-500">Recommendation evidence</p>
 
               <div className="mt-2 flex flex-wrap gap-2">
                 <ProductStatusBadge tone="blue">
-                  Setup Pending
+                  Zero picks is valid
                 </ProductStatusBadge>
               </div>
             </div>
@@ -104,7 +104,7 @@ export default function DashboardShellClient({
                 <div className="flex min-w-0 items-center gap-3 overflow-x-auto">
                   <span className="hidden lg:inline-flex">
                     <ProductStatusBadge tone="blue">
-                      Clean Start
+                      Evidence first
                     </ProductStatusBadge>
                   </span>
 

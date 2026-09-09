@@ -1,0 +1,8 @@
+{
+  "activation": "DISABLED",
+  "hostCount": 1,
+  "dryCertification": "PASS",
+  "firstNonemptyRun": null,
+  "repeatability": null,
+  "reason": "Activation requires a successful nonempty current-slate run and subsequent real repeatability certification. No cron or scheduler has been enabled."
+}

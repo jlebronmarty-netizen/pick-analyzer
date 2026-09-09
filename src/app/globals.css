@@ -111,3 +111,8 @@ html.pa-light .text-sky-100 {
 html.pa-light .text-rose-100 {
   color: #9f1239;
 }
+
+html.pa-light .text-amber-100,
+html.pa-light .text-amber-200 {
+  color: #92400e;
+}
