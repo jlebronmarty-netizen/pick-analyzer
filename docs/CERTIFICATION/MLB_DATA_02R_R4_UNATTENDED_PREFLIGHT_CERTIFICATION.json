@@ -1,5 +1,5 @@
 {
-  "certificationVerdict": "MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_VERIFIED_ACTIVATION_BLOCKED",
+  "certificationVerdict": "MLB_DATA_02R_R4_BLOCKED",
   "startingSha": "3f13a5ceca78854824480ccdff91d48c267a93ec",
   "finalSha": "ENCLOSING_BOUNDED_COMMIT",
   "operationalCertified": false,
@@ -28,7 +28,7 @@
     {
       "gate": 5,
       "name": "MLB_02R_R4_UNATTENDED_SCHEMA_PREFLIGHT",
-      "status": "PASS"
+      "status": "EDGE_PASS_VERCEL_AUTH_BLOCKED"
     },
     {
       "gate": 6,
@@ -58,7 +58,7 @@
     {
       "gate": 11,
       "name": "MLB_02R_R4_UNATTENDED_DRY_CERTIFICATION",
-      "status": "PREFLIGHT_PASS_FULL_SCHEDULER_PENDING"
+      "status": "LOCAL_UNATTENDED_PREFLIGHT_PASS_PRODUCTION_SCHEDULER_BLOCKED"
     },
     {
       "gate": 12,
@@ -88,7 +88,7 @@
     {
       "gate": 17,
       "name": "MLB_02R_R4_UI_AUTOMATION_READBACK",
-      "status": "PENDING_ACTIVATION"
+      "status": "CANONICAL_UI_PASS_AUTOMATION_FRESHNESS_PENDING"
     },
     {
       "gate": 18,
@@ -102,15 +102,15 @@
     }
   ],
   "blocker": {
-    "code": "PERSISTENT_EXECUTOR_HOST_NOT_VERIFIED",
+    "code": "R4_RUNTIME_ACCESS_AND_HOST_UNVERIFIED",
     "hardStop": true,
-    "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
-    "requiredResolution": "Identify the existing persistent production runner or explicitly designate the current machine, then certify runtime/checkpoint access and activate the same prepared coordinator.",
+    "reason": "The fixed-query Edge preflight passes using the local server credential. Production Vercel presents a configured server credential rejected with HTTP 401 by exact legacy/modern server-key authentication. No authenticated Vercel secret-management channel or verified persistent R2 executor host is available in this session.",
+    "requiredResolution": "Securely align the Vercel production server credential through an authenticated management connection, and identify/verify the persistent R2 coordinator host. Do not paste credentials in chat.",
     "authorizationNeeded": false
   },
   "preflight": {
     "status": "PASS",
-    "checkedAt": "2026-09-09T15:40:22.483001+00:00",
+    "checkedAt": "2026-09-09T16:07:42.270657+00:00",
     "columnsCompared": 406,
     "preservedConstraintsCompared": 116,
     "requiredIndexesCompared": 84,
@@ -129,6 +129,7 @@
       "transaction": "READ_ONLY"
     },
     "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
     "featureCount": 76,
     "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1"
   },
@@ -185,6 +186,10 @@
       },
       {
         "name": "Authenticated fixed query uses read-only transaction",
+        "status": "PASS"
+      },
+      {
+        "name": "Modern Supabase server secret accepted; unknown and anon keys still rejected",
         "status": "PASS"
       },
       {
@@ -283,12 +288,12 @@
     "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
     "src/services/pick2-mlb-unattended-preflight.ts": "ccfe7dcf812f41c8fb9f7602d7fa7a45bec67eef942198fc1b6257a6f39f1cef",
     "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
-    "supabase/functions/mlb-operational-preflight/index.ts": "bde60830dfa75e0778da8db2047ab8d3cfeda323eb426656f1b0d5c09b39bc03",
+    "supabase/functions/mlb-operational-preflight/index.ts": "630006a001a94fedb729271f54c38820218976c2e18620e1042c8880bafdfc32",
     "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
     "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154",
     "scripts/mlb-operational-schema-preflight-review.mjs": "39198b35a636e21225f47e452987ce6cbb92e1471ee8bd4dadd4ee37715bb935",
     "tsconfig.json": "32b78a77b590d611e85442da45aa0909c35d2c910a2a5b1aaa3f1d7e94a5fc95",
-    "scripts/mlb-operational-r4-validate.mjs": "086101d60828bca69afb3b29169567bcb056dbe3ae371a780bc69217f70764ec",
+    "scripts/mlb-operational-r4-validate.mjs": "d580e61411e08dad6abcbaedbc97355406f6c68066d0431029685056bc29e467",
     "src/app/api/admin/mlb-operational-preflight/route.ts": "7162661a36e47f2467c0d754537371997315447a63594726c9f01a159f3d65f9"
   },
   "audit": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_AUDIT.md",
@@ -298,12 +303,78 @@
     "staticPages": 400
   },
   "productionVercelReadback": {
-    "status": "BLOCKED_UNDER_DIAGNOSIS",
-    "packageSha": "8b4ff2b379495075a4d6d116be988033ff19de6b",
-    "anonymousHttp": 401,
-    "authenticatedHttp": 503,
-    "queryRejectedHttp": 400,
-    "postHttp": 405
+    "checkedAt": "2026-09-09T16:05:12.583Z",
+    "http": 503,
+    "result": {
+      "status": "BLOCKED",
+      "reason": "PREFLIGHT_HTTP_401",
+      "connectionInventory": [
+        {
+          "name": "SUPABASE_URL",
+          "present": false,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "NEXT_PUBLIC_SUPABASE_URL",
+          "present": true,
+          "serverOnly": false,
+          "scope": "production"
+        },
+        {
+          "name": "SUPABASE_ANON_KEY",
+          "present": false,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "present": false,
+          "serverOnly": false,
+          "scope": "production"
+        },
+        {
+          "name": "SUPABASE_SERVICE_ROLE_KEY",
+          "present": true,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "SUPABASE_DB_URL",
+          "present": false,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "DATABASE_URL",
+          "present": false,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "DIRECT_URL",
+          "present": false,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "SUPABASE_ACCESS_TOKEN",
+          "present": false,
+          "serverOnly": true,
+          "scope": "production"
+        },
+        {
+          "name": "CRON_SECRET",
+          "present": true,
+          "serverOnly": true,
+          "scope": "production"
+        }
+      ],
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0
+    },
+    "packageSha": "e24bfb918d639903e501bdf3016e9bf5140d194e"
   },
   "lint": "PASS",
   "connectionInventory": [
@@ -367,5 +438,110 @@
       "serverOnly": true,
       "scope": "production"
     }
-  ]
+  ],
+  "edgeAuthentication": {
+    "gatewayJwtVerification": false,
+    "reason": "Opaque modern Supabase server keys are not JWTs; exact constant-time server-key authentication runs in the function before DB access.",
+    "acceptedKeySources": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "SUPABASE_SECRET_KEYS"
+    ],
+    "anonymousAccess": "DENIED",
+    "callerSql": "FORBIDDEN",
+    "productionEdgeVersion": 3
+  },
+  "productionUiReadback": {
+    "status": "PASS",
+    "checks": [
+      {
+        "route": "/",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/today",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/data-health",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/performance",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "apiCanonicalParity": "PASS",
+        "width": 390,
+        "gameCount": 15,
+        "valueCount": 28,
+        "performanceStatus": "NO_SETTLED_SAMPLE"
+      },
+      {
+        "route": "/",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/today",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/data-health",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/performance",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "apiCanonicalParity": "PASS",
+        "width": 1365,
+        "gameCount": 15,
+        "valueCount": 28,
+        "performanceStatus": "NO_SETTLED_SAMPLE"
+      }
+    ],
+    "failures": [],
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "screenshots": "PRIVATE_OS_TEMP_ONLY"
+  }
 }

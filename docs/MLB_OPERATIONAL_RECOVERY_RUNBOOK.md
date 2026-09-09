@@ -61,3 +61,5 @@ The first nonempty and subsequent real refresh are certified in `docs/CERTIFICAT
 ## R4 persistent-host activation gate
 
 The fixed-query unattended endpoint is verified; no new database credential is needed in Vercel. Full scheduled execution still requires one verified persistent Node/Git/private-checkpoint host. `runtimeHost.verified` must remain false until host identity, durable state, credential access, restart recovery and overlap checks pass. Do not infer this from a successful read-only Vercel preflight. Keep `settlementAutomation` DISABLED. See the R4 audit for exact proposed UTC triggers and the current blocker.
+
+R4 production access caveat: the local server credential passes the Edge preflight, but the Vercel configured server credential is rejected with HTTP 401. Before Vercel runtime use, correct that credential through an authenticated secure management channel and require the protected route to return PASS. Do not treat presence-only inventory as proof of valid credentials.

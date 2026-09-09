@@ -10,10 +10,21 @@ const reply = (status: number, body: unknown) => new Response(JSON.stringify(bod
   status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
 })
 Deno.serve(async request => {
-  const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  // Supabase runtime supplies both legacy and modern server keys. Modern
+  // sb_secret keys are not JWTs: authenticate exact server keys here, before DB.
+  const secrets = [Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')]
+  try {
+    const modern = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}')
+    if (!modern || typeof modern !== 'object' || Array.isArray(modern)) return reply(503, { status: 'BLOCKED', reason: 'SERVER_KEY_CONFIGURATION' })
+    for (const value of Object.values(modern)) if (typeof value === 'string' && value.length > 20) secrets.push(value)
+  } catch { return reply(503, { status: 'BLOCKED', reason: 'SERVER_KEY_CONFIGURATION' }) }
   const supplied = new TextEncoder().encode(request.headers.get('authorization') ?? '')
-  const expected = new TextEncoder().encode(`Bearer ${secret ?? ''}`)
-  if (!secret || supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return reply(401, { status: 'UNAUTHORIZED' })
+  const authorized = secrets.some(secret => {
+    if (!secret) return false
+    const expected = new TextEncoder().encode(`Bearer ${secret}`)
+    return supplied.length === expected.length && timingSafeEqual(supplied, expected)
+  })
+  if (!authorized) return reply(401, { status: 'UNAUTHORIZED' })
   if (request.method !== 'GET' || new URL(request.url).search) return reply(400, { status: 'INVALID_REQUEST' })
   const connection = Deno.env.get('SUPABASE_DB_URL')
   if (!connection) return reply(503, { status: 'BLOCKED', reason: 'DATABASE_CONNECTION_MISSING' })

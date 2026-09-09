@@ -300,34 +300,38 @@
     "preNonemptyPackage": "ENCLOSING_BOUNDED_COMMIT"
   },
   "remaining": [
+    "VERCEL_SERVER_CREDENTIAL_ALIGNMENT",
     "VERIFIED_PERSISTENT_EXECUTOR_HOST",
+    "AUTOMATION_UNATTENDED_DRY_CERTIFICATION",
     "AUTOMATION_ACTIVATION",
     "AUTOMATION_PRODUCTION_READBACK",
     "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED"
   ],
   "rollbackAndRecoveryRunbook": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_VERIFIED_ACTIVATION_BLOCKED",
-  "nextPhase": "VERIFY_PERSISTENT_EXECUTOR_HOST_THEN_ACTIVATION_AND_SCHEDULED_READBACK",
+  "currentPhase": "MLB_DATA_02R_R4_BLOCKED",
+  "nextPhase": "SECURE_VERCEL_CREDENTIAL_ALIGNMENT_AND_PERSISTENT_EXECUTOR_HOST",
   "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
   "automationImplementation": "DRY_CERTIFIED; ACTIVATION_DISABLED",
   "publishedR3Sha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
   "automationBlocker": {
-    "code": "PERSISTENT_EXECUTOR_HOST_NOT_VERIFIED",
+    "code": "R4_RUNTIME_ACCESS_AND_HOST_UNVERIFIED",
     "hardStop": true,
-    "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
-    "requiredResolution": "Identify the existing persistent production runner or explicitly designate the current machine, then certify runtime/checkpoint access and activate the same prepared coordinator.",
+    "reason": "The fixed-query Edge preflight passes using the local server credential. Production Vercel presents a configured server credential rejected with HTTP 401 by exact legacy/modern server-key authentication. No authenticated Vercel secret-management channel or verified persistent R2 executor host is available in this session.",
+    "requiredResolution": "Securely align the Vercel production server credential through an authenticated management connection, and identify/verify the persistent R2 coordinator host. Do not paste credentials in chat.",
     "authorizationNeeded": false
   },
   "pendingGates": [
+    "VERCEL_SERVER_CREDENTIAL_ALIGNMENT",
     "VERIFIED_PERSISTENT_EXECUTOR_HOST",
+    "AUTOMATION_UNATTENDED_DRY_CERTIFICATION",
     "AUTOMATION_ACTIVATION",
     "AUTOMATION_PRODUCTION_READBACK",
     "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED"
   ],
   "certifiedExecutionSha": "633768729b212746d03a5bf4d2ae542d1d84f945",
   "r4": {
-    "schemaPreflight": "PASS",
+    "schemaPreflight": "EDGE_PASS_VERCEL_AUTH_BLOCKED",
     "certification": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_CERTIFICATION.json",
     "providerCalls": 0,
     "productionDml": 0,

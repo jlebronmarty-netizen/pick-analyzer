@@ -2,7 +2,7 @@
 
 Starting package: `3f13a5ceca78854824480ccdff91d48c267a93ec`.
 
-Unattended schema access is implemented and production-verified. Full R4 activation is **blocked** pending a verified persistent executor host. The earlier missing schema-connection blocker is resolved; the interactive connector is no longer required for preflight.
+The fixed-query Edge preflight is implemented and passes against production using the local server credential without an interactive connector. Full R4 is **blocked**: Vercel's configured server credential is rejected with HTTP 401, and no persistent executor host is verified. An authenticated Vercel management connection is not available to correct the credential securely.
 
 ## Existing architecture and inventory
 
@@ -31,9 +31,9 @@ Unattended schema access is implemented and production-verified. Full R4 activat
 
 The existing server service-role key authenticates the fixed Supabase Edge endpoint. The Edge runtime supplies its own `SUPABASE_DB_URL`; that value never leaves the runtime. The connection has underlying database privileges, but this function executes only the reviewed SELECT in a read-only transaction with a 20-second statement timeout. This is application/transaction confinement, not a claim that the underlying credential is a separately provisioned read-only database role.
 
-The endpoint accepts GET only, forbids parameters, requires both gateway JWT verification and constant-time comparison with the existing service key, and returns aggregate structural results. It accepts no SQL or connection configuration from callers. Anonymous/user credentials cannot invoke database work. Driver errors are redacted. The protected Vercel route requires `CRON_SECRET`; it exposes only presence/scope, never secret values. No browser module imports the service.
+The endpoint accepts GET only, forbids parameters, requires constant-time comparison with an exact runtime-provided legacy service-role key or modern server secret key. Gateway JWT verification is disabled because modern server keys are opaque, not JWTs; custom server-key authentication remains mandatory before any DB connection, and returns aggregate structural results. It accepts no SQL or connection configuration from callers. Anonymous/user credentials cannot invoke database work. Driver errors are redacted. The protected Vercel route requires `CRON_SECRET`; it exposes only presence/scope, never secret values. No browser module imports the service.
 
-Local server credentials: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` present. `SUPABASE_URL`, anon keys, direct Postgres URLs, Supabase management token and Vercel token absent locally. Edge database access is independently verified present. Production Vercel inventory is read back through the protected route after publication.
+Local server credentials: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` present. `SUPABASE_URL`, anon keys, direct Postgres URLs, Supabase management token and Vercel token absent locally. Edge database access is independently verified present. Production Vercel inventory was read back: URL, service-role-key variable and CRON_SECRET present; direct DB URLs, anon variables and management token absent. Anonymous/invalid requests correctly return 401/400/405. Authenticated requests fail closed with PREFLIGHT_HTTP_401; the configured value is not accepted by the Edge server-key contract. No credential value was displayed.
 
 Schema verification reuses the previous pure checker: 406 columns, 116 preserved constraints, all 84 current indexes, six snapshot uniqueness contracts, six-domain orphan checks, and existing positivity-check integrity. The server client verifies the certified Champion, 76-feature count and Policy V1. The original R3 source-hash checker remains required by the executor. A database clock lead of at most 15 seconds is handled by waiting for actual time; larger skew blocks. No timestamp is replaced, backdated or accepted as future evidence.
 
@@ -59,8 +59,12 @@ Settlement remains separate. POSTGAME/OVERNIGHT cannot settle unless a future ac
 
 ## Validation and rollback
 
-26 R4 checks cover missing tables/columns/indexes, invalid indexes, orphan/FK drift, exact SQL/manifest compatibility, authentication, missing credentials, read-only transaction, redaction, Champion/feature/Policy drift, HTTP failure, expiry and clock skew. Existing 16 behavioral groups, five R3 guards and three operational guards also pass, including overlap, checkpoint recovery, pitch reuse, budget persistence and settlement isolation. Production preflight passed without a Codex connector. Final `npm.cmd run build` passed (400 static pages); targeted lint passed.
+27 R4 checks cover missing tables/columns/indexes, invalid indexes, orphan/FK drift, exact SQL/manifest compatibility, authentication, missing credentials, read-only transaction, redaction, Champion/feature/Policy drift, HTTP failure, expiry and clock skew. Existing 16 behavioral groups, five R3 guards and three operational guards also pass, including overlap, checkpoint recovery, pitch reuse, budget persistence and settlement isolation. Production preflight passed without a Codex connector. Final `npm.cmd run build` passed (400 static pages); targeted lint passed.
 
 Rollback: keep activation DISABLED and disable only a future canonical scheduler trigger; retain all private checkpoints, mission budget, write journal and production rows. Do not delete locks until owner exit and pending journal reconciliation are proved. The manual certified path and its original SELECT-catalog acceptance remain available. No rollback DDL is required. The new read-only endpoint alone never starts work.
 
 Final operational certification, scheduled invocation readback, pitch/daily scheduled readback and automation-driven UI freshness are NOT certified by these read-only tests. Next: identify the persistent host, verify its state/credentials/package, conduct unattended full dry certification, then activate and observe an actual scheduled invocation.
+
+Production readback on `e24bfb918d639903e501bdf3016e9bf5140d194e` confirmed the Vercel HTTP 401 blocker even after deployment of exact legacy/modern server-key support. Local-to-Edge readback continues to pass. Securely correct the Vercel server credential through an authenticated management channel; never loosen authentication or substitute an anon key. This credential blocker is separate from the persistent-host gate.
+
+Production UI regression passed all 12 mobile/desktop/API checks: Today, Value Board, Data Health and Performance preserve canonical data (15 games, 28 value side cards, NO_SETTLED_SAMPLE). These are read-only surface checks; they do not certify automation-driven freshness or a scheduled invocation.

@@ -14,12 +14,12 @@
     "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
     "conflicts": 0
   },
-  "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
+  "reason": "The fixed-query Edge preflight passes using the local server credential. Production Vercel presents a configured server credential rejected with HTTP 401 by exact legacy/modern server-key authentication. No authenticated Vercel secret-management channel or verified persistent R2 executor host is available in this session.",
   "blocker": {
-    "code": "PERSISTENT_EXECUTOR_HOST_NOT_VERIFIED",
+    "code": "R4_RUNTIME_ACCESS_AND_HOST_UNVERIFIED",
     "hardStop": true,
-    "reason": "The unattended schema channel is verified. The existing certified R2 executor requires one persistent Node host, Git checkout, private checkpoint volume and exclusive filesystem lock. No production host is identified/verified; Vercel ephemeral instances cannot provide these contracts.",
-    "requiredResolution": "Identify the existing persistent production runner or explicitly designate the current machine, then certify runtime/checkpoint access and activate the same prepared coordinator.",
+    "reason": "The fixed-query Edge preflight passes using the local server credential. Production Vercel presents a configured server credential rejected with HTTP 401 by exact legacy/modern server-key authentication. No authenticated Vercel secret-management channel or verified persistent R2 executor host is available in this session.",
+    "requiredResolution": "Securely align the Vercel production server credential through an authenticated management connection, and identify/verify the persistent R2 coordinator host. Do not paste credentials in chat.",
     "authorizationNeeded": false
   },
   "runtimeHost": {
@@ -27,7 +27,7 @@
   },
   "settlementAutomation": "DISABLED",
   "unattendedPreflight": {
-    "status": "PASS",
+    "status": "EDGE_PASS_VERCEL_AUTH_BLOCKED",
     "endpoint": "mlb-operational-preflight",
     "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
   }

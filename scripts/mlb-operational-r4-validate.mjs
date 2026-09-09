@@ -62,6 +62,12 @@ await test('Anonymous/wrong role blocked before DB access', async () => { assert
 await test('Request SQL/POST forbidden before DB access', async () => { assert.equal((await handler(request('POST'))).status, 400); assert.equal((await handler(request('GET', 'Bearer TEST_ONLY_FAKE_CREDENTIAL', '?sql=select'))).status, 400); assert.equal(calls, 0) })
 await test('Missing DB connection fails closed', async () => { delete env.SUPABASE_DB_URL; assert.equal((await handler(request())).status, 503); assert.equal(calls, 0); env.SUPABASE_DB_URL = 'TEST_ONLY_FAKE_CONNECTION' })
 await test('Authenticated fixed query uses read-only transaction', async () => { const r = await handler(request()); assert.equal(r.status, 200); assert.equal((await r.json()).status, 'PASS'); assert.equal(mode, 'read only'); assert.ok(sawQuery) })
+await test('Modern Supabase server secret accepted; unknown and anon keys still rejected', async () => {
+  env.SUPABASE_SECRET_KEYS = JSON.stringify({ default: 'TEST_ONLY_FAKE_MODERN_SECRET' })
+  assert.equal((await handler(request('GET', 'Bearer TEST_ONLY_FAKE_MODERN_SECRET'))).status, 200)
+  assert.equal((await handler(request('GET', 'Bearer TEST_ONLY_FAKE_ANON_KEY'))).status, 401)
+  delete env.SUPABASE_SECRET_KEYS
+})
 await test('Driver error redacted and fail closed', async () => { failure = true; const r = await handler(request()); assert.equal(r.status, 503); assert.doesNotMatch(await r.text(), /PRIVATE_DRIVER_ERROR|TEST_ONLY_FAKE/) })
 const serviceSource = fs.readFileSync('src/services/pick2-mlb-unattended-preflight.ts', 'utf8').replace(/^import .*\n/gm, '').replace('export async function', 'async function')
 const serviceCode = ts.transpileModule(serviceSource, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText
