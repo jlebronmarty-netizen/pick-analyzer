@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { assertR2TLiveReadiness } from './mlb-data-02r-r2t-real-feature-champion.mjs'
+import { buildAllPregameFeatureRows } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
+import { buildPersistedPredictions, persistDownstreamRows, assertDownstreamPayload, DOWNSTREAM_BINDINGS, downstreamSchemaColumns } from './mlb-data-02r-r2t-downstream-persistence.mjs'
+import { persistCanonicalMarkets, buildCanonicalValues, buildCanonicalOfficialPicks } from './mlb-data-02r-r2t-market-binding.mjs'
+import { assertCanonicalRawInsert } from './mlb-data-02r-r2t-raw-binding.mjs'
 import { fetchR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
 import {
   assertGameScope,
@@ -28,6 +32,7 @@ import {
 import {
   acceptOddsEvidence,
   calculateNativeValue,
+  classifyMarketFreshness,
   classifyMarketPersistence,
   classifyOfficialPickPersistence,
   classifyValuePersistence,
@@ -201,11 +206,17 @@ function featureSubjectForKey(row, field) {
 export function featureIdentityForDomain(domain, row) {
   const binding = featureBindingForDomain(domain)
   if (domain === 'snapshots') return String(row.deterministic_identity ?? row.identity)
-  return binding.nativeKey.map((field) => {
+  const nativeIdentity = binding.nativeKey.map((field) => {
     const value = field === 'target_game_pk' ? normalizeGamePk(row.target_game_pk ?? row.game_pk) : featureSubjectForKey(row, field)
     if (value === undefined || value === null || value === '') throw new Error(`FEATURE_IDENTITY_INCOMPLETE:${domain}:${field}`)
     return String(value)
   }).join(':')
+  // Physical native rows are immutable revisions after the authorized schema
+  // change. Unbound rows retain the legacy planning identity only; persistence
+  // requires a validated canonical FK before classification.
+  return row.feature_snapshot_id
+    ? `${nativeIdentity}:snapshot:${assertDbUuid(row.feature_snapshot_id, 'feature_snapshot_id')}`
+    : nativeIdentity
 }
 
 export function comparableFeatureRow(domain, row) {
@@ -263,10 +274,13 @@ async function readFeatureRowsByDomain(client, domain, ids, plannedRows = []) {
   }
   const gamePks = [...new Set(plannedRows.map((row) => normalizeGamePk(row.target_game_pk ?? row.game_pk)))]
   if (!gamePks.length) return []
-  const { data, error } = await client
+  const snapshotIds = [...new Set(plannedRows.map((row) => row.feature_snapshot_id).filter(Boolean))]
+  let query = client
     .from(binding.table)
     .select(binding.readColumns)
     .in('target_game_pk', gamePks)
+  if (snapshotIds.length) query = query.in('feature_snapshot_id', snapshotIds)
+  const { data, error } = await query
   if (error) throw new Error(`READ_FAILED:${binding.table}:${error.message}`)
   const requested = new Set(ids.map(String))
   return (data ?? []).map((row) => comparableFeatureRow(domain, row)).filter((row) => requested.has(String(row.identity)))
@@ -466,6 +480,51 @@ export async function classifyBoundDailyFeatures(repository, rowsByDomain, eligi
   return { plans, rows }
 }
 
+// Revision identity changes storage identity only, never feature semantics.
+// Equal evidence keeps a stable identity across new planner UUIDs and retries.
+export function revisionFeatureRows(rowsByDomain) {
+  return { ...rowsByDomain, snapshots: rowsByDomain.snapshots.map((row) => {
+    if (!/^[a-f0-9]{64}$/.test(row.input_digest ?? '') || !row.native_identity_metadata?.family) throw new Error('REAL_SNAPSHOT_PROVENANCE_REQUIRED')
+    const suffix = `:input:${row.input_digest}`
+    return { ...row, deterministic_identity: row.deterministic_identity.endsWith(suffix) ? row.deterministic_identity : `${row.deterministic_identity}${suffix}` }
+  }) }
+}
+
+export async function persistCanonicalFeaturePlan({ repository, rowsByDomain, eligibleGamePks, limits = {} }) {
+  const domains = ['snapshots', ...Object.keys(DAILY_FEATURE_ALLOWED_COLUMNS)]
+  const caps = {}
+  for (const domain of domains) {
+    const rows = rowsByDomain[domain] ?? []
+    assertGameScope(rows, eligibleGamePks, (r) => r.target_game_pk)
+    // Validate every physical shape before the first write. Builder UUIDs are
+    // valid provisional references; persisted references are resolved below.
+    featureInsertRowsForDomain(domain, rows)
+    caps[domain] = derivedCap(limits[domain], rows.length)
+  }
+  const snapshots = rowsByDomain.snapshots.map((r) => comparableFeatureRow('snapshots', r))
+  const existing = await repository.readFeatureRows('snapshots', snapshots.map((r) => r.identity), snapshots)
+  const snapshotPlan = classifyInsertReuseConflict({ plannedRows: snapshots, existingRows: existing,
+    identityFields: ['identity'], digestField: 'input_digest', eligibleGamePks, cap: caps.snapshots })
+  const snapshotWrite = await insertRowsFromClassifications(snapshotPlan.classifications, snapshots, 'identity',
+    (rows, cap) => repository.insertFeatureRows('snapshots', rows, cap), caps.snapshots)
+  const ids = await resolveCanonicalFeatureSnapshotIds({ repository, plannedSnapshotRows: snapshots, insertedSnapshotRows: snapshotWrite.rows ?? [] })
+  const bound = bindFeatureRowsToSnapshotIds(rowsByDomain, ids)
+  const daily = await classifyBoundDailyFeatures(repository, bound, eligibleGamePks, caps)
+  const writes = [snapshotWrite]
+  for (const [domain, plan] of Object.entries(daily.plans)) {
+    writes.push(await insertRowsFromClassifications(plan.classifications, daily.rows[domain], 'identity',
+      (rows, cap) => repository.insertFeatureRows(domain, rows, cap), caps[domain]))
+  }
+  const readback = { snapshots: await repository.readFeatureRows('snapshots', snapshots.map((r) => r.identity), snapshots), offense: rowsByDomain.offense ?? 0 }
+  for (const domain of Object.keys(DAILY_FEATURE_ALLOWED_COLUMNS)) {
+    readback[domain] = await repository.readFeatureRows(domain, daily.rows[domain].map((r) => r.identity), daily.rows[domain])
+    if (readback[domain].length !== daily.rows[domain].length) throw new Error(`FEATURE_READBACK_COUNT:${domain}`)
+  }
+  const verified = await classifyBoundDailyFeatures(repository, bound, eligibleGamePks, Object.fromEntries(domains.map((d) => [d, 0])))
+  for (const [domain, plan] of Object.entries(verified.plans)) if (plan.reuseNoOp !== bound[domain].length) throw new Error(`FEATURE_READBACK_REUSE:${domain}`)
+  return { rows: readback, caps, plans: { snapshots: snapshotPlan, ...daily.plans }, writes }
+}
+
 export function liveDependencyInventory() {
   return {
     '01 schedule': 'REAL_PROVIDER_CLIENT',
@@ -509,15 +568,22 @@ export function assertEligibleGamePkFreeze(value) {
   return value.map((gamePk) => normalizeGamePk(gamePk))
 }
 
-export function createProviderLedger(caps = {}) {
-  const consumed = new Map()
+export function createProviderLedger(caps = {}, { initial = {}, onConsume = null } = {}) {
+  const consumed = new Map(Object.entries(initial))
+  for (const [provider, count] of consumed) {
+    if (!Number.isInteger(count) || count < 0 || count > Number(caps[provider]?.maxCalls ?? 0)) throw new Error(`PROVIDER_INITIAL_CAP_INVALID:${provider}`)
+  }
   return {
     consume(provider, count = 1) {
+      if (!Number.isInteger(count) || count <= 0) throw new Error(`PROVIDER_INVALID_CALL_COUNT:${provider}`)
       const cap = caps[provider] ?? { allowed: false, maxCalls: 0 }
       if (!cap.allowed) throw new Error(`PROVIDER_NOT_ALLOWED:${provider}`)
       const prior = consumed.get(provider) ?? 0
       const max = Number(cap.maxCalls ?? 0)
+      if (!Number.isInteger(max) || max < 0) throw new Error(`PROVIDER_INVALID_CAP:${provider}`)
       if (prior + count > max) throw new Error(`PROVIDER_CAP_EXCEEDED:${provider}`)
+      const persisted = onConsume?.({ provider, count, consumed: prior + count })
+      if (persisted?.then) throw new Error('PROVIDER_ACCOUNTING_MUST_PERSIST_SYNCHRONOUSLY')
       consumed.set(provider, prior + count)
       return makeProviderAccounting(provider, count, prior + count)
     },
@@ -561,28 +627,47 @@ export function createTheOddsApiLiveClient({ fetchImpl = fetch, apiKey, ledger }
 export function createStatcastLiveClient({ fetchRowsForGames, ledger, fetchImpl = fetch, db = null, cacheDir = undefined } = {}) {
   return {
     async fetchRowsForGames(args) {
-      ledger?.consume('STATCAST', args.eligibleGamePks.length)
+      if (!ledger || !cacheDir) throw new Error('STATCAST_LEDGER_AND_EXPLICIT_CACHE_REQUIRED')
       const fetcher = fetchRowsForGames ?? fetchR2NStatcastRowsForGames
-      return fetcher({ ...args, fetchImpl, db, cacheDir })
+      const countedFetch = async (...request) => {
+        ledger.consume('STATCAST', 1)
+        return fetchImpl(...request)
+      }
+      return fetcher({ ...args, fetchImpl: countedFetch, db, cacheDir })
     },
   }
 }
 
 async function selectByIds(client, table, column, ids) {
   if (!ids.length) return []
-  const { data, error } = await client.from(table).select('*').in(column, ids)
-  if (error) throw new Error(`READ_FAILED:${table}:${error.message}`)
-  return data ?? []
+  const unique = [...new Set(ids)]
+  const rows = []
+  for (let start = 0; start < unique.length; start += 150) {
+    const batch = unique.slice(start, start + 150)
+    const { data, error } = await client.from(table).select('*').in(column, batch).limit(batch.length + 1)
+    if (error || !Array.isArray(data)) throw new Error(`READ_FAILED:${table}:${error?.code ?? 'MISSING_DATA'}`)
+    if (data.length > batch.length || data.some(r => !batch.map(String).includes(String(r[column])))) throw new Error(`READ_IDENTITY_SCOPE:${table}`)
+    rows.push(...data)
+  }
+  if (new Set(rows.map(r => String(r[column]))).size !== rows.length) throw new Error(`READ_DUPLICATE_IDENTITY:${table}`)
+  return rows
 }
 
-async function insertExactRows(client, table, rows, cap) {
+async function insertExactRows(client, table, rows, cap, writeJournal = null) {
   if (!rows.length) return { inserted: 0, table, rows: [] }
-  if (Number.isInteger(cap) && rows.length > cap) throw new Error(`DML_CAP_EXCEEDED:${table}:${rows.length}:${cap}`)
-  const { data, error } = await client.from(table).insert(rows).select('*')
-  if (error) throw new Error(`INSERT_FAILED:${table}:${error.message}`)
-  const inserted = data?.length ?? rows.length
-  if (inserted > rows.length || (Number.isInteger(cap) && inserted > cap)) throw new Error(`DML_ACTUAL_CAP_EXCEEDED:${table}:${inserted}:${cap}`)
-  return { inserted, table, rows: data ?? rows }
+  if (!Number.isInteger(cap) || cap < 0 || rows.length > cap) throw new Error(`DML_CAP_EXCEEDED:${table}:${rows.length}:${cap}`)
+  if (!Object.values(R2I_LIVE_TARGETS).includes(table)) throw new Error(`UNEXPECTED_WRITE_TARGET:${table}`)
+  const domain = Object.entries(DOWNSTREAM_BINDINGS).find(([, binding]) => binding.table === table)?.[0]
+  if (domain) rows.forEach(row => assertDownstreamPayload(domain, row))
+  if (table === R2I_LIVE_TARGETS.rawStatcast) rows.forEach(assertCanonicalRawInsert)
+  const execute = async () => {
+    const { data, error } = await client.from(table).insert(rows).select('*')
+    if (error) throw new Error(`INSERT_FAILED:${table}:${error.message}`)
+    const inserted = data?.length
+    if (inserted !== rows.length || inserted > cap) throw new Error(`DML_ACTUAL_CAP_EXCEEDED:${table}:${inserted}:${cap}`)
+    return { inserted, table, rows: data }
+  }
+  return writeJournal ? writeJournal.perform({ table, rows, cap }, execute) : execute()
 }
 
 function normalizeNullableInteger(value, label) {
@@ -663,9 +748,12 @@ export function mapScheduleGameToNativeInsertRow(game, { phase = 'MLB_DATA_02R_R
   return row
 }
 
-export function createSupabaseProductionRepository({ client, schemaFingerprint = {} } = {}) {
+export function createSupabaseProductionRepository({ client, schemaFingerprint = {}, writeJournal = null } = {}) {
   if (!client) throw new Error('SUPABASE_CLIENT_REQUIRED')
+  const write = (table, rows, cap) => insertExactRows(client, table, rows, cap, writeJournal)
   return {
+    writeJournal,
+    executionEnvironment: 'PRODUCTION_SUPABASE',
     methods: Object.freeze([
       'readNativeGames', 'insertNativeGames', 'readNativePlayers', 'insertNativePlayers',
       'readRawRows', 'insertRawRows', 'readFeatureRows', 'insertFeatureRows',
@@ -674,32 +762,48 @@ export function createSupabaseProductionRepository({ client, schemaFingerprint =
       'readOfficialPicks', 'insertOfficialPicks', 'readValueBoard', 'verifySchemaFingerprint',
     ]),
     async verifySchemaFingerprint(target) {
-      const expectation = schemaFingerprint[target] ?? { state: 'ADDITIVE_COMPATIBLE', columns: ['id'] }
-      if (!['EXACT_COMPATIBLE', 'ADDITIVE_COMPATIBLE'].includes(expectation.state)) throw new Error(`SCHEMA_GUARD_BLOCK:${target}:${expectation.state}`)
-      return { target, ...expectation }
+      const expectation = schemaFingerprint[target]
+      if (expectation && !['EXACT_COMPATIBLE', 'ADDITIVE_COMPATIBLE'].includes(expectation.state)) throw new Error(`SCHEMA_GUARD_BLOCK:${target}:${expectation.state}`)
+      const feature = Object.values(R2I_FEATURE_IDENTITY_BINDINGS).find(b => b.table === target)
+      const columns = feature?.readColumns.split(',') ?? downstreamSchemaColumns(target) ?? expectation?.columns
+      if (!columns?.length || !Object.values(R2I_LIVE_TARGETS).includes(target)) throw new Error(`SCHEMA_COLUMNS_REQUIRED:${target}`)
+      const { error } = await client.from(target).select(columns.join(',')).limit(0)
+      if (error) throw new Error(`SCHEMA_COLUMN_READBACK_FAILED:${target}:${error.code}`)
+      return { target, state: 'COLUMNS_READBACK_COMPATIBLE', columns, constraints: 'CERTIFIED_SCHEMA_MANIFEST_AND_DATABASE_ENFORCEMENT' }
     },
     async readNativeGames(ids) { return selectByIds(client, R2I_LIVE_TARGETS.nativeGames, 'game_pk', ids) },
     async insertNativeGames(rows, cap) {
       for (const row of rows) assertNativeGameInsertShape(row, { cap, rowCount: rows.length })
-      return insertExactRows(client, R2I_LIVE_TARGETS.nativeGames, rows, cap)
+      return write(R2I_LIVE_TARGETS.nativeGames, rows, cap)
     },
     async readNativePlayers(ids) { return selectByIds(client, R2I_LIVE_TARGETS.nativePlayers, 'mlbam_person_id', ids) },
-    async insertNativePlayers(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
+    async insertNativePlayers(rows, cap) { return write(R2I_LIVE_TARGETS.nativePlayers, rows, cap) },
     async readRawRows(ids) { return selectByIds(client, R2I_LIVE_TARGETS.rawStatcast, 'id', ids) },
-    async insertRawRows(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.rawStatcast, rows, cap) },
+    async insertRawRows(rows, cap) { return write(R2I_LIVE_TARGETS.rawStatcast, rows, cap) },
     async readFeatureRows(domain, ids, plannedRows = []) { return readFeatureRowsByDomain(client, domain, ids, plannedRows) },
-    async insertFeatureRows(domain, rows, cap) { return insertExactRows(client, liveTargetForFeatureDomain(domain), featureInsertRowsForDomain(domain, rows), cap) },
+    async insertFeatureRows(domain, rows, cap) { return write(liveTargetForFeatureDomain(domain), featureInsertRowsForDomain(domain, rows), cap) },
     async readPredictions(ids) { return selectByIds(client, R2I_LIVE_TARGETS.predictions, 'deterministic_identity', ids) },
-    async insertPredictions(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.predictions, rows, cap) },
+    async insertPredictions(rows, cap) { return write(R2I_LIVE_TARGETS.predictions, rows, cap) },
     async readMarketMappings(ids) { return selectByIds(client, R2I_LIVE_TARGETS.marketMappings, 'provider_event_id', ids) },
-    async insertMarketMappings(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.marketMappings, rows, cap) },
+    async readMarketMappingsByGames(ids) {
+      if (!ids.length) return []
+      const { data, error } = await client.from(R2I_LIVE_TARGETS.marketMappings).select('*').eq('market_provider', 'the-odds-api').in('game_pk', ids).limit(ids.length + 1)
+      if (error || data.length > ids.length) throw new Error('MARKET_MAPPING_READ_CONFLICT')
+      return data
+    },
+    async insertMarketMappings(rows, cap) { return write(R2I_LIVE_TARGETS.marketMappings, rows, cap) },
     async readMarketObservations(ids) { return selectByIds(client, R2I_LIVE_TARGETS.marketObservations, 'observation_identity', ids) },
-    async insertMarketObservations(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.marketObservations, rows, cap) },
+    async insertMarketObservations(rows, cap) { return write(R2I_LIVE_TARGETS.marketObservations, rows, cap) },
     async readValues(ids) { return selectByIds(client, R2I_LIVE_TARGETS.values, 'value_identity', ids) },
-    async insertValues(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.values, rows, cap) },
+    async insertValues(rows, cap) { return write(R2I_LIVE_TARGETS.values, rows, cap) },
     async readOfficialPicks(ids) { return selectByIds(client, R2I_LIVE_TARGETS.officialPicks, 'official_pick_identity', ids) },
-    async insertOfficialPicks(rows, cap) { return insertExactRows(client, R2I_LIVE_TARGETS.officialPicks, rows, cap) },
-    async readValueBoard() { return { rows: [], state: 'LIVE_READ_REPOSITORY_BOUND', freshness: 'UNKNOWN' } },
+    async insertOfficialPicks(rows, cap) { return write(R2I_LIVE_TARGETS.officialPicks, rows, cap) },
+    async readValueBoard({ valueIdentities, pickIdentities }) {
+      const values = await selectByIds(client, R2I_LIVE_TARGETS.values, 'value_identity', valueIdentities)
+      const picks = await selectByIds(client, R2I_LIVE_TARGETS.officialPicks, 'official_pick_identity', pickIdentities)
+      if (values.length !== valueIdentities.length || picks.length !== pickIdentities.length) throw new Error('VALUE_BOARD_READBACK_INCOMPLETE')
+      return { values, picks }
+    },
   }
 }
 
@@ -975,7 +1079,102 @@ function modelArtifact() {
   }
 }
 
-export async function runR2ILiveExecution({
+export async function runR2ILiveExecution(input = {}) {
+  if (input.mode === 'LIVE_EXECUTE' || input.mode === 'CERTIFICATION_SIMULATION') {
+    const runContext = createCurrentSlateRunFreeze({ ...input, clock: typeof input.clock === 'function' ? input.clock() : input.clock, mode: input.mode === 'LIVE_EXECUTE' ? 'LIVE_EXECUTE' : 'DRY_RUN' })
+    if (input.mode === 'LIVE_EXECUTE') {
+      requireRunScopedLiveAuthorization(input.authorization, runContext)
+      assertR2TLiveReadiness()
+      if (input.clock != null || input.repository?.executionEnvironment !== 'PRODUCTION_SUPABASE' || input.providers?.canonical?.executionEnvironment !== 'PRODUCTION' || !input.repository?.writeJournal) throw new Error('R2T_PRODUCTION_BINDINGS_REQUIRED')
+    } else if (input.repository?.executionEnvironment !== 'DISPOSABLE_PGLITE' || !process.env.R2S_VALIDATION_DIR) {
+      throw new Error('R2T_SIMULATION_REQUIRES_ISOLATED_POSTGRES')
+    }
+    return runCanonicalR2IStages({ ...input, runContext })
+  }
+  return runR2ILegacyDryExecution(input)
+}
+
+// The sole real feature/model/decision orchestration. Production remains behind
+// R3 containment. The certification harness traverses this same call graph with
+// disposable PostgreSQL and explicitly supplied evidence; no fallback exists.
+async function runCanonicalR2IStages({ mode, runContext, providers, repository, authorization = {}, clock = () => new Date() }) {
+  const canonical = providers?.canonical
+  if (!canonical || !repository || !canonical.checkpoint || typeof canonical.readContexts !== 'function' || typeof canonical.providerAccounting !== 'function' || typeof canonical.assertCurrentStarters !== 'function') throw new Error('R2T_CANONICAL_BINDINGS_REQUIRED')
+  await repository.writeJournal?.recover()
+  const frozenDigest = sha256(runContext)
+  let checkpoint = await canonical.checkpoint.load(runContext.run_id)
+  if (checkpoint && checkpoint.frozenDigest !== frozenDigest) throw new Error('R2T_CHECKPOINT_FREEZE_CONFLICT')
+  if (!checkpoint) {
+    checkpoint = { frozenDigest, runContext, evidence: await canonical.readContexts(runContext) }
+    checkpoint.evidenceDigest = sha256(checkpoint.evidence)
+    await canonical.checkpoint.save(runContext.run_id, checkpoint)
+  }
+  if (sha256(checkpoint.evidence) !== checkpoint.evidenceDigest) throw new Error('R2T_CHECKPOINT_EVIDENCE_DRIFT')
+  const { contexts, nativeGames, blockedGames = [] } = checkpoint.evidence
+  if (!Array.isArray(contexts) || !Array.isArray(nativeGames)) throw new Error('R2T_CANONICAL_EVIDENCE_SHAPE')
+  const scope = assertEligibleGamePkFreeze(contexts.map(c => c.target.gamePk))
+  const accounting = () => canonical.providerAccounting()
+  if (!scope.length) return { status: R2Q_EMPTY_SLATE_TERMINAL_STATUS, runContext, blockedGames, providerAccounting: accounting(), dmlAccounting: canonical.dmlAccounting?.() ?? null, writes: [], syntheticProductionPaths: 0 }
+  const now = () => new Date(typeof clock === 'function' ? clock() : clock ?? new Date()).toISOString()
+  const assertPregame = async ({ domain, rows }) => {
+    const table = DOWNSTREAM_BINDINGS[domain]?.table ?? R2I_FEATURE_IDENTITY_BINDINGS[domain]?.table
+    if (mode === 'LIVE_EXECUTE' && !authorization?.authorizedDmlTargets?.includes(table)) throw new Error('R2T_UNAUTHORIZED_WRITE_TARGET')
+    const at = now()
+    if (Date.parse(at) < Date.parse(runContext.run_as_of)) throw new Error('R2T_CLOCK_BEFORE_FREEZE')
+    for (const row of rows) {
+      const gamePk = row.game_pk ?? row.target_game_pk
+      const context = contexts.find(c => c.target.gamePk === gamePk)
+      if (!context || Date.parse(context.target.scheduledAt) <= Date.parse(at)) throw new Error('R2T_STARTED_GAME_WRITE_BLOCK')
+      if (domain === 'values' || domain === 'officialPicks') {
+        const fresh = classifyMarketFreshness({ provider_last_update: row.provider_last_update ?? row.metadata?.provider_last_update, acquired_at: at }).state
+        if ((domain === 'officialPicks' && fresh !== 'FRESH') || (domain === 'values' && fresh !== row.market_freshness)) throw new Error('R2T_MARKET_FRESHNESS_CHANGED_BEFORE_WRITE')
+      }
+    }
+    await canonical.assertCurrentStarters({ contexts, at, domain })
+  }
+  const limits = authorization?.dmlCaps ?? {}
+  for (const target of [...Object.values(R2I_FEATURE_IDENTITY_BINDINGS).map(b => b.table), ...Object.values(DOWNSTREAM_BINDINGS).map(b => b.table)]) await repository.verifySchemaFingerprint(target)
+  const generated = buildAllPregameFeatureRows({ contexts, runDate: runContext.run_date, runAsOf: runContext.run_as_of })
+  const guardedRepository = Object.create(repository)
+  guardedRepository.insertFeatureRows = async (domain, rows, cap) => {
+    if (rows.length) await assertPregame({ domain, rows })
+    return repository.insertFeatureRows(domain, rows, cap)
+  }
+  const features = await persistCanonicalFeaturePlan({ repository: guardedRepository, rowsByDomain: revisionFeatureRows(generated.rows), eligibleGamePks: scope, limits: limits.features ?? {} })
+  const plannedPredictions = await buildPersistedPredictions({ games: generated.games, persistedFeatures: features.rows, registryRepository: canonical.registryRepository, runAsOf: runContext.run_as_of })
+  const predictions = await persistDownstreamRows({ domain: 'predictions', rows: plannedPredictions, repository, eligibleGamePks: scope, cap: limits.predictions ?? plannedPredictions.length, beforeWrite: assertPregame })
+  if (!checkpoint.odds) {
+    checkpoint.odds = await canonical.getOddsEvidence({ runContext, eligibleGamePks: scope })
+    checkpoint.oddsDigest = sha256(checkpoint.odds)
+    checkpoint.evaluatedAt = now()
+    await canonical.checkpoint.save(runContext.run_id, checkpoint)
+  }
+  if (sha256(checkpoint.odds) !== checkpoint.oddsDigest) throw new Error('R2T_CHECKPOINT_ODDS_DRIFT')
+  const markets = await persistCanonicalMarkets({ evidence: checkpoint.odds, nativeGames, eligibleGamePks: scope, repository, limits, beforeWrite: assertPregame })
+  const valueRows = buildCanonicalValues({ predictions: predictions.rows, observations: markets.observations.rows, evaluatedAt: checkpoint.evaluatedAt })
+  const values = await persistDownstreamRows({ domain: 'values', rows: valueRows, repository, eligibleGamePks: scope, cap: limits.nativeValues ?? valueRows.length, beforeWrite: assertPregame })
+  const decision = buildCanonicalOfficialPicks({ values: values.rows, decisionAt: checkpoint.evaluatedAt, scheduledByGame: new Map(contexts.map(c => [c.target.gamePk, c.target.scheduledAt])) })
+  const picks = await persistDownstreamRows({ domain: 'officialPicks', rows: decision.rows, repository, eligibleGamePks: scope, cap: limits.officialPicks ?? decision.rows.length, beforeWrite: assertPregame })
+  const boardReadback = await repository.readValueBoard({ valueIdentities: values.rows.map(r => r.value_identity), pickIdentities: picks.rows.map(r => r.official_pick_identity) })
+  const boardValues = new Map(boardReadback.values.map(r => [r.id, r]))
+  if (boardReadback.values.length !== values.rows.length || boardReadback.picks.length !== picks.rows.length) throw new Error('VALUE_BOARD_READBACK_INCOMPLETE')
+  const boardRows = decision.decisions.map(d => {
+    const value = boardValues.get(d.candidate.id)
+    if (!value || sha256(value) !== sha256(d.candidate)) throw new Error('VALUE_BOARD_PAYLOAD_DRIFT')
+    const pick = boardReadback.picks.find(p => p.value_evaluation_id === value.id)
+    if (pick && !picks.rows.some(p => sha256(p) === sha256(pick))) throw new Error('VALUE_BOARD_PICK_DRIFT')
+    return { ...value, status: pick ? 'OFFICIAL_PICK' : d.status === 'OFFICIAL_PICK_ELIGIBLE' ? 'WATCHLIST' : d.status, official_pick_identity: pick?.official_pick_identity ?? null,
+      risk_flags: d.risk_flags, blocker_codes: d.blocker_codes, reason_codes: d.reason_codes }
+  })
+  const board = readValueBoardAdapter({ board: { rows: boardRows, state: 'CANONICAL_READBACK', freshness: 'PER_ROW' }, operatingDate: runContext.run_date, asOf: checkpoint.evaluatedAt })
+  const writes = [...features.writes, predictions, markets.mappings, markets.observations, values, picks]
+  return { status: 'CANONICAL_STAGES_READBACK_COMPLETE', mode, runContext, eligibleGamePks: scope, blockedGames,
+    features, predictions, markets, values, picks, board, decisions: decision.decisions, writes,
+    providerAccounting: accounting(), dmlAccounting: canonical.dmlAccounting?.() ?? null, insertedRows: writes.reduce((sum, w) => sum + w.inserted, 0),
+    syntheticProductionPaths: 0, checkpoint: { frozenDigest, evidenceDigest: checkpoint.evidenceDigest, oddsDigest: checkpoint.oddsDigest } }
+}
+
+async function runR2ILegacyDryExecution({
   mode = 'DRY_RUN',
   authorization = null,
   providers = {},
@@ -986,6 +1185,7 @@ export async function runR2ILiveExecution({
   runAsOf = null,
   clock = null,
 } = {}) {
+  if (mode === 'LIVE_EXECUTE') throw new Error('LEGACY_SYNTHETIC_LIVE_PATH_FORBIDDEN')
   const runContext = createCurrentSlateRunFreeze({ runId, executionPackageSha, mode, runDate, runAsOf, clock })
   const frozenRunAsOf = runContext.run_as_of
   if (mode === 'LIVE_EXECUTE') {

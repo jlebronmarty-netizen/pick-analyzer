@@ -1,0 +1,540 @@
+{
+  "description": "Physical canonical Statcast columns only; no source pitch payloads.",
+  "table": "pick2_raw_mlb_statcast_pitches",
+  "columns": [
+    {
+      "column": "id",
+      "type": "text",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "pick2_era",
+      "type": "text",
+      "nullable": "NO",
+      "default": "'PICK_2_ERA_V1'::text"
+    },
+    {
+      "column": "source",
+      "type": "text",
+      "nullable": "NO",
+      "default": "'statcast'::text"
+    },
+    {
+      "column": "source_version",
+      "type": "text",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "game_pk",
+      "type": "bigint",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "game_date",
+      "type": "date",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "game_year",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "game_type",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "source_home_team",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "source_away_team",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "canonical_home_team_id",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "canonical_away_team_id",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "event_id",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "event_mapping_state",
+      "type": "text",
+      "nullable": "NO",
+      "default": "'UNMAPPED'::text"
+    },
+    {
+      "column": "source_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "source_batter_id",
+      "type": "bigint",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "canonical_pitcher_id",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "canonical_batter_id",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "player_mapping_state",
+      "type": "text",
+      "nullable": "NO",
+      "default": "'UNMAPPED'::text"
+    },
+    {
+      "column": "source_player_name",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "pitch_type",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "pitch_name",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "type",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "release_speed",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "effective_speed",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "release_spin_rate",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "spin_axis",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "release_extension",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "release_pos_x",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "release_pos_y",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "release_pos_z",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "arm_angle",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "p_throws",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "stand",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "balls",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "strikes",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "outs_when_up",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "home_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "away_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "bat_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "fld_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "post_home_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "post_away_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "post_bat_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "post_fld_score",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "events",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "description",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "inning",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "inning_topbot",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "pfx_x",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "pfx_z",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "plate_x",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "plate_z",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "zone",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vx0",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vy0",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "vz0",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "ax",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "ay",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "az",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "api_break_z_with_gravity",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "api_break_x_arm",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "api_break_x_batter_in",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "launch_speed",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "launch_angle",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_ba_using_speedangle",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_woba_using_speedangle",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "estimated_slg_using_speedangle",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "launch_speed_angle",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "hit_distance_sc",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "bb_type",
+      "type": "text",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "hit_location",
+      "type": "integer",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "hc_x",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "hc_y",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "bat_speed",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "swing_length",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "attack_angle",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "attack_direction",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "swing_path_tilt",
+      "type": "numeric",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "at_bat_number",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "pitch_number",
+      "type": "integer",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "raw_payload",
+      "type": "jsonb",
+      "nullable": "NO",
+      "default": "'{}'::jsonb"
+    },
+    {
+      "column": "raw_payload_digest",
+      "type": "text",
+      "nullable": "NO",
+      "default": null
+    },
+    {
+      "column": "mapping_metadata",
+      "type": "jsonb",
+      "nullable": "NO",
+      "default": "'{}'::jsonb"
+    },
+    {
+      "column": "mapped_at",
+      "type": "timestamp with time zone",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "ingested_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": "timezone('utc'::text, now())"
+    },
+    {
+      "column": "created_at",
+      "type": "timestamp with time zone",
+      "nullable": "NO",
+      "default": "timezone('utc'::text, now())"
+    },
+    {
+      "column": "mlbam_pitcher_id",
+      "type": "bigint",
+      "nullable": "YES",
+      "default": null
+    },
+    {
+      "column": "mlbam_batter_id",
+      "type": "bigint",
+      "nullable": "YES",
+      "default": null
+    }
+  ]
+}

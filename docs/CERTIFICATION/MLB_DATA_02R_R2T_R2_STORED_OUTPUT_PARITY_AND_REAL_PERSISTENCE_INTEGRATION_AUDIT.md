@@ -1,67 +1,41 @@
-# R2T-R2 stored parity and native-binding audit
+# R2T-R2 real persistence and stored-output integration
 
-Verdict: **MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_BLOCKED**.
+Verdict: `MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_CERTIFIED`. All 23 integration gates have explicit passing evidence and publication quality review passes. Production live execution remains contained until R3. This supersedes the earlier Gate 4 stop after the separately certified R2D enrichment.
 
-Prior package: `f98cc3022cabe137a32ed0d31fd76ace60182191`. The new package is the enclosing bounded local commit; resolve it with `git log -1 --format=%H -- docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json`. No push.
+## What is proven
 
-## What passes
+The retained historical parity case keeps its exact certified stored-input digest and probability error below 3.7e-13. No completed stored-output investigation was restarted. The production prediction adapter now calls the existing 02I stored-input serializer; the shorter R2F inference summary digest is retained separately.
 
-The actual stored production prediction `612aa09f-6d63-4c57-9b57-560eeeed8a47` for game `824552` was read and compared at its original pregame as-of `2026-09-05T01:51:21.667Z`. Its Champion is `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`; feature set is `MLB_ML_FEATURE_SET_V1`. The same immutable R1 source cache contains 80,667 pitches from 270 dependency games, all available before the frozen as-of. No current or post-start source was substituted into the historical prediction.
+Two real archived eligible targets traverse the actual R2B -> R2I canonical path and production adapter body against disposable PostgreSQL. Real feature builders write entity snapshots and all applicable daily domains, resolve canonical UUIDs independently, and reconstruct the exact 76-value vector from persisted rows. Champion coefficients, preprocessing, feature order and semantics are unchanged.
 
-| Comparison | Result |
-| --- | --- |
-| Stored home probability | 0.581585665313 |
-| Reconstructed home probability | 0.5815856653133696 |
-| Stored away probability | 0.418414334687 |
-| Reconstructed away probability | 0.41841433468663036 |
-| Maximum absolute error | Less than 3.7e-13; tolerance 1e-12 |
-| Stored input digest | `85613791d32d1e6925a41f016b80fdc55a1fab4d049a6d61632daf626a9a950f` |
-| Reconstructed input digest | Exact match |
-| 76 features and ordering | PASS; exact values at the stored 12-decimal input precision |
-| Artifact and preprocessing | Original certified artifact, coefficients, intercept, medians, means and standard deviations |
+The batter domain is legitimately empty for the current moneyline contract: 0/76 inputs depend on lineups. A separate private real historical batter row validates physical schema, insertion, uniqueness and foreign keys without being supplied to moneyline inference.
 
-R1's JavaScript code-point sort put an ID ending `:10:1` ahead of `:1:1`. The database's text ordering used by certified 02I does the reverse. The unchanged historical builder uses the first encountered pitcher to distinguish starter/bullpen context, so this ordering difference changed bullpen features. The corrected binding uses explicit en-US text comparison. A complete sampled game's database order matches it, and the exact stored input digest independently verifies the reconstructed 76-input state. Feature definitions and formulas were not changed to fit the probability.
+Explicit structural odds fixtures exercise canonical market mappings, observations, no-vig/edge/EV, unchanged Policy V1, immutable Official Pick persistence and actual Value Board readback. They are isolated test inputs, never claimed as real market acquisition. Empty market/slate and zero-pick behavior are supported; a watchlist row cannot become a top Official Pick.
 
-The 02I pure helpers are now import-safe; their function bodies remain unchanged. The parity check uses the actual 02I stored-input serializer, including team identities, feature version, starter/data states, and missingness. The shorter legacy R2F executor digest has **not** been integrated with that contract yet.
+Snapshot revision retries, interruption after features, interruption after market handoff, uncertain writes before/after database commit, independent readback and zero-cap reuse pass. Provider budgets persist across restart; the shared Statcast cold-fetch test counts actual injected requests and reuses its cache. Raw availability, current starter/status vetoes, scope, physical shape and post-start guards remain fail-closed.
 
-## Gate 4 stop
+## Narrow integration corrections
 
-The user's instruction is explicit: **“If production data migration would be required, STOP and classify separately.”** This investigation reaches that boundary. Current native rows already exist and lack required same-game evidence. Code projection can recover some fields, but cannot repair the missing physical source state without separately scoped evidence recovery and production data repair. No such repair or migration was executed.
+Market matching normalizes equivalent PostgreSQL/ISO/offset timestamps to UTC. Journal readback compares timestamp instants rather than formatting. Physical numeric(18,15) storage coercion is checked against PostgreSQL, without altering model or policy formulas. The live wrapper cannot enter the legacy synthetic dry graph.
 
-All 15 inspected September 8 native games were inventoried across 18 required fields:
+Native enrichment preserves existing business facts on reuse and uses bounded expected-old provenance predicates for necessary updates. Newly acquired evidence is never backdated; evidence newer than the frozen run_as_of blocks that game until a subsequent freeze. R2D's 52 excluded fields were not promoted by this certification, and unknown starters remain blocked individually.
 
-| Fields | Current physical state | Safe code projection | Unresolved |
-| --- | --- | --- | --- |
-| home_team_id / away_team_id | Missing in 15/15 | Existing MLB Official ID observations resolve existing canonical team IDs | 0 |
-| game_type | Missing in 15/15 | No calendar/season guess | 15 |
-| metadata.officialDate | Missing in 15/15 | No fabricated copy of a derived date | 15 |
-| metadata.abstractGameState | Missing in 15/15 | No fabricated provider state | 15 |
-| Home/away probable pitcher metadata | Nested under starter_evidence | Preserve actual stored pitcher IDs | One unknown on each side, game 823092 |
-| Target, dates, doubleheader, game number, source/digest, season, status, observation timestamps | Present | Preserve existing fields | 0 missing |
+## Validation and limitations
 
-The canonical JSON includes every inspected native row, per-field affected game list, physical source, consumer, safe derivation and block. Prior native observations resolve aliases; no new identity table or provider lookup was added. Conflicting aliases fail closed. Projections do not mutate input rows. Same-game game type/date/state cannot be recovered from a source digest or from a different game's metadata.
+- Disposable PostgreSQL: 64 passing checks, including retained stored-input digest parity.
+- R1: 41 passing provenance/negative checks.
+- Feature/model regressions: all nine pass.
+- Private-store/provider/crosswalk guards: three pass.
+- Legacy stack: seven pass; nine return nonzero because their fixture-backed live expectations encounter deliberate R2T containment. These are recorded as failures with explicit containment-incompatibility classification, not relabeled PASS. Two also report Windows teardown assertions.
+- Legacy R2T: 29 assertions pass, but its deliberate containment status remains BLOCKED.
+- Build: exit 0, 400 static pages. Changed-file ESLint: zero warnings. Diff and 30-file publication scans pass: no configured secret values, JWT/private-key material or retained raw sample payloads.
 
-The schedule normalizer now preserves actual supplied game type, official date, abstract state and starter metadata through the existing native insert mapper. An injected historical schedule built only from observed fields passes the R1 target contract through that path. This prevents the same information loss on future supplied evidence; it does not retroactively fill existing production rows. Unknown evidence remains null/blocked.
+Sports-provider calls, production row DML and production DDL during this integration certification are all zero. The mission prerequisite is one separately authorized and already certified uniqueness migration; it was not repeated. No automation, cron, settlement, training or Champion changes occurred.
 
-## Gates not certified
+## Publication and reproduction
 
-Gates 1–2 pass and Gate 3 is complete. Gate 4 is blocked. Gates 5–19 were not executed after the required stop: real seven-domain persistence, per-entity canonical snapshot readback, post-persistence vector/inference parity, all-game generation, full R2B/R2I downstream traversal, checkpoint/resume and idempotency remain outstanding. R1's legitimate empty batter contract remains unchanged, but this audit does not claim a new batter persistence test.
+The canonical JSON records per-gate assertion evidence and aggregate conclusions. Raw vectors, sample predictions, native/player rows and detailed production payloads were removed from this updated artifact. Authorized private replay inputs stay outside the repository. No production data was modified for sanitization.
 
-Gate 20 passes: an actual R2B live-entrypoint call with trap providers/repository stops at the existing containment guard with zero side effects. Gate 21 is blocked: the legacy fixture implementation remains below that guard. Containment is not replacement completion. Gate 22 is partial: the new validator verifies stored-output/digest failure, alias conflicts and missing-evidence containment; R1's existing negative suite passes, but new persistence/executor negatives have not been implemented. Gate 23 passes for the bounded changes: 73 source-body/file parity checks preserve the business algorithms.
+Use the external private inputs documented in MLB_OPERATIONAL_MISSION_AUDIT.md, including R2T_MULTI_READ_CACHE and private-registry.json. Run mlb-operational-feature-schema-validate.mjs, mlb-data-02r-r2t-operational-guards-validate.mjs and mlb-data-02r-r2t-r2-integration-certify.mjs under the R2S isolation preload. Set R2T_LEGACY_VALIDATION_DIR to the completed private legacy stack directory. Missing evidence causes failure; there is no fixture fallback for real model replay.
 
-## Validation and protected state
-
-- Dedicated R2T-R2: 20 checks PASS; overall nonzero BLOCKED result at Gate 4.
-- R2T-R1: PASS, 41 checks. R2T: still BLOCKED, 29 checks and three historical cases; not falsely relabeled PASS.
-- Legacy frozen/R2A/R2D/R2F/R2G/R2H/R2K: PASS.
-- R2I/R2L/R2M/R2N/R2O/R2P/R2Q/R2R/R2S: expected live-containment incompatibilities. R2M and R2Q additionally show the existing Windows teardown assertion after the containment error. None is counted as PASS.
-- Nine relevant feature/model validators: PASS. Validation of existing model/training artifacts performs no training or promotion.
-- `npm.cmd run build`: exit 0, 400 static pages. Changed-file ESLint: five scripts, zero warnings. Final whitespace and targeted secret checks are recorded in the canonical JSON.
-- Read-only network ledger: 140 requests, zero forbidden requests. Provider calls = 0; production DML = 0; production DDL = 0. Live refresh, training, Champion changes, automation, cron and settlement = 0.
-- All 19 inherited generated-artifact files remain byte-identical to the inherited state and excluded from the commit. `.tmp/` and `.worktrees/` were not accessed or modified; legacy cache operations were redirected into OS temporary directories.
-
-Canonical evidence: [R2T-R2 JSON](MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json). Supplemental logs and the complete reconstructed lineage are in `C:/Users/jlebr/AppData/Local/Temp/pick-analyzer-r2tr2-oBXFBO`; validator stacks are in `pick-analyzer-r2s-rUj44N` and `pick-analyzer-r2tr2-stack-xfcomh` under the same OS temporary root. These supplemental files do not replace the canonical artifact.
-
-## Required next work
-
-Resolve Gate 4 through a separately authorized, bounded same-game evidence recovery/data-repair phase. Review exact proposed production changes before any mutation. Then resume R2T-R2 gates 5–23 from this preserved implementation. **R2T Completion Readiness = NO. R2B Live Execution Ready = NO.** Do not advance to `MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION` until full R2T-R2 certification passes.
+All 19 inherited tracked artifacts and .tmp/.worktrees remain untouched and excluded from the bounded commit. R3 live re-enablement is the next phase; nonempty live execution, repeatability, automation, settlement and Today remain incomplete mission gates.

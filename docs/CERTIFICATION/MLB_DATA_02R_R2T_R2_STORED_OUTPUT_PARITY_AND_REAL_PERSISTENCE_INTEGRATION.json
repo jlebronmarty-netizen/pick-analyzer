@@ -1,2360 +1,919 @@
 {
   "project": "MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION",
-  "certificationVerdict": "MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_BLOCKED",
-  "generatedAt": "2026-09-08T18:41:44.531Z",
-  "readAt": "2026-09-08T18:41:36.350Z",
-  "checks": [
-    {
-      "name": "immutable R1 production read cache digest",
-      "status": "PASS"
-    },
-    {
-      "name": "exact R1 target/asof",
-      "status": "PASS"
-    },
-    {
-      "name": "bounded complete native inventories",
-      "status": "PASS"
-    },
-    {
-      "name": "one matching stored prediction",
-      "status": "PASS"
-    },
-    {
-      "name": "stored game/asof",
-      "status": "PASS"
-    },
-    {
-      "name": "stored Champion/version/feature set",
-      "status": "PASS"
-    },
-    {
-      "name": "stored artifact/feature version",
-      "status": "PASS"
-    },
-    {
-      "name": "database ordering equals reconstruction ordering for complete sampled game",
-      "status": "PASS"
-    },
-    {
-      "name": "76 real source values and unchanged feature ordering",
-      "status": "PASS"
-    },
-    {
-      "name": "all 76 values equal certified current vector at stored input precision",
-      "status": "PASS"
-    },
-    {
-      "name": "stored output and exact input digest parity",
-      "status": "PASS"
-    },
-    {
-      "name": "stored probability mismatch fails closed",
-      "status": "PASS"
-    },
-    {
-      "name": "stored input digest mismatch fails closed",
-      "status": "PASS"
-    },
-    {
-      "name": "native inventory covers inspected games and required fields",
-      "status": "PASS"
-    },
-    {
-      "name": "both canonical team aliases resolved",
-      "status": "PASS"
-    },
-    {
-      "name": "conflicting canonical alias fails closed",
-      "status": "PASS"
-    },
-    {
-      "name": "actual schedule-to-native mapping preserves R1 required evidence",
-      "status": "PASS"
-    },
-    {
-      "name": "read projections do not mutate stored evidence",
-      "status": "PASS"
-    },
-    {
-      "name": "missing native evidence remains explicitly blocked",
-      "status": "PASS"
-    },
-    {
-      "name": "actual live entrypoint stops before providers and writes",
-      "status": "PASS"
-    }
-  ],
+  "certificationVerdict": "MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_CERTIFIED",
+  "generatedAt": "2026-09-09T02:27:23.036Z",
+  "priorPackageSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
+  "newPackageSha": "ENCLOSING_SANITIZED_COMMIT",
+  "newPackageShaResolution": "git log -1 --format=%H -- docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json",
   "storedOutputParity": {
     "status": "PASS",
+    "retainedPreviouslyCertifiedCase": true,
+    "historicalCaseCount": 1,
+    "storedInputDigest": "85613791d32d1e6925a41f016b80fdc55a1fab4d049a6d61632daf626a9a950f",
     "tolerance": 1e-12,
-    "actual": {
-      "homeProbability": 0.5815856653133696,
-      "awayProbability": 0.41841433468663036,
-      "inputDigest": "85613791d32d1e6925a41f016b80fdc55a1fab4d049a6d61632daf626a9a950f"
-    },
-    "stored": {
-      "id": "612aa09f-6d63-4c57-9b57-560eeeed8a47",
-      "deterministic_identity": "baseball_mlb::prediction::moneyline::824552::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::85613791d32d1e6925a41f016b80fdc55a1fab4d049a6d61632daf626a9a950f",
-      "pick2_era": "PICK_2_ERA_V1",
-      "sport_key": "baseball_mlb",
-      "event_id": null,
-      "model_version_id": "48cf39c6-5d56-4954-aa2f-679ed0c43270",
-      "feature_snapshot_id": null,
-      "predicted_at": "2026-09-05T01:51:21.667+00:00",
-      "target": "home_win_probability",
-      "home_probability": 0.581585665313,
-      "away_probability": 0.418414334687,
-      "expected_home_score": null,
-      "expected_away_score": null,
-      "expected_total": null,
-      "expected_margin": null,
-      "frozen_input_digest": "85613791d32d1e6925a41f016b80fdc55a1fab4d049a6d61632daf626a9a950f",
-      "model_artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
-      "metadata": {
-        "as_of": "2026-09-05T01:51:21.667Z",
-        "value": null,
-        "market": "moneyline",
-        "feature_set": "MLB_ML_FEATURE_SET_V1",
-        "away_team_id": "baseball_mlb:mlb:sportsdataio:team:20",
-        "home_team_id": "baseball_mlb:mlb:sportsdataio:team:16",
-        "scheduled_at": "2026-09-06T22:20:00Z",
-        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
-        "official_pick": false,
-        "recommendation": null,
-        "starter_status": "READY_PROBABLE_WITH_FLAG",
-        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
-        "data_completeness": "COMPLETE",
-        "persistence_phase": "MLB_DATA_02J_R3_CURRENT_MONEYLINE_PREDICTION_DML_RETRY",
-        "extrapolation_state": "IN_RANGE",
-        "source_certification": "MLB_DATA_02I_CURRENT_MONEYLINE_DRY_INFERENCE_CERTIFIED"
-      },
-      "created_at": "2026-09-05T15:38:32.715965+00:00",
-      "game_pk": 824552
-    },
     "absoluteHomeError": 3.695932448977146e-13,
     "absoluteAwayError": 3.6964875604894587e-13,
-    "inputPayload": {
-      "game_pk": 824552,
-      "market": "moneyline",
-      "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
-      "feature_set": "MLB_ML_FEATURE_SET_V1",
-      "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
-      "artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
-      "as_of": "2026-09-05T01:51:21.667Z",
-      "home_team_id": "baseball_mlb:mlb:sportsdataio:team:16",
-      "away_team_id": "baseball_mlb:mlb:sportsdataio:team:20",
-      "starter_status": "READY_PROBABLE_WITH_FLAG",
-      "data_completeness": "COMPLETE",
-      "ordered_feature_values": [
-        0.237757,
-        0.209398,
-        0.028359,
-        0.094019,
-        0.085338,
-        0.008681,
-        4.728571,
-        4.7,
-        0.028571,
-        0.3181,
-        0.3126,
-        0.0055,
-        0.260937,
-        0.165272,
-        0.095665,
-        0.084375,
-        0.064854,
-        0.019521,
-        0.176563,
-        0.100418,
-        0.076145,
-        0.228183,
-        0.1843,
-        0.043883,
-        0.284202,
-        0.249861,
-        0.034341,
-        0.503724,
-        0.446856,
-        0.056868,
-        0.489612,
-        0.489149,
-        0.000463,
-        89.6252,
-        83.543,
-        6.0822,
-        88.6029,
-        83.2513,
-        5.3516,
-        89.5016,
-        83.2844,
-        6.2172,
-        89.0275,
-        83.2444,
-        5.7831,
-        -0.4246,
-        0.0069,
-        -0.4315,
-        104,
-        80,
-        24,
-        5,
-        8,
-        -3,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0.223153,
-        0.208018,
-        0.015135,
-        0.103386,
-        0.111804,
-        -0.008418,
-        0.119767,
-        0.096214,
-        0.023553,
-        0.232246,
-        0.214322,
-        0.017924,
-        1
-      ],
-      "missingness": []
-    },
-    "vector": {
-      "gamePk": 824552,
-      "runAsOf": "2026-09-05T01:51:21.667Z",
-      "mode": "PREGAME_READ_ONLY_RECONSTRUCTION",
-      "values": [
-        0.237757,
-        0.209398,
-        0.028358999999999995,
-        0.094019,
-        0.085338,
-        0.008681000000000008,
-        4.728571,
-        4.7,
-        0.028570999999999458,
-        0.3181,
-        0.3126,
-        0.005500000000000005,
-        0.260937,
-        0.165272,
-        0.09566499999999997,
-        0.084375,
-        0.064854,
-        0.01952100000000001,
-        0.176563,
-        0.100418,
-        0.076145,
-        0.228183,
-        0.1843,
-        0.043883000000000005,
-        0.284202,
-        0.249861,
-        0.03434100000000001,
-        0.503724,
-        0.446856,
-        0.056867999999999974,
-        0.489612,
-        0.489149,
-        0.0004629999999999912,
-        89.6252,
-        83.543,
-        6.0822,
-        88.6029,
-        83.2513,
-        5.351600000000005,
-        89.5016,
-        83.2844,
-        6.217199999999991,
-        89.0275,
-        83.2444,
-        5.783100000000005,
-        -0.4246,
-        0.0069,
-        -0.4315,
-        104,
-        80,
-        24,
-        5,
-        8,
-        -3,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0.223153,
-        0.208018,
-        0.015134999999999982,
-        0.103386,
-        0.111804,
-        -0.008417999999999995,
-        0.119767,
-        0.096214,
-        0.023553000000000004,
-        0.232246,
-        0.214322,
-        0.017923999999999995,
-        1
-      ],
-      "featureNames": [
-        "home_team.recent_k_rate",
-        "away_team.recent_k_rate",
-        "diff.team.recent_k_rate",
-        "home_team.recent_bb_rate",
-        "away_team.recent_bb_rate",
-        "diff.team.recent_bb_rate",
-        "home_team.recent_runs_per_game",
-        "away_team.recent_runs_per_game",
-        "diff.team.recent_runs_per_game",
-        "home_team.recent_iso",
-        "away_team.recent_iso",
-        "diff.team.recent_iso",
-        "home_starter.k_rate",
-        "away_starter.k_rate",
-        "diff.starter.k_rate",
-        "home_starter.bb_rate",
-        "away_starter.bb_rate",
-        "diff.starter.bb_rate",
-        "home_starter.k_minus_bb_rate",
-        "away_starter.k_minus_bb_rate",
-        "diff.starter.k_minus_bb_rate",
-        "home_starter.whiff_rate",
-        "away_starter.whiff_rate",
-        "diff.starter.whiff_rate",
-        "home_starter.csw_rate",
-        "away_starter.csw_rate",
-        "diff.starter.csw_rate",
-        "home_starter.strike_rate",
-        "away_starter.strike_rate",
-        "diff.starter.strike_rate",
-        "home_starter.swing_rate",
-        "away_starter.swing_rate",
-        "diff.starter.swing_rate",
-        "home_starter.avg_release_speed",
-        "away_starter.avg_release_speed",
-        "diff.starter.avg_release_speed",
-        "home_starter.velocity_l1",
-        "away_starter.velocity_l1",
-        "diff.starter.velocity_l1",
-        "home_starter.velocity_l3",
-        "away_starter.velocity_l3",
-        "diff.starter.velocity_l3",
-        "home_starter.velocity_l5",
-        "away_starter.velocity_l5",
-        "diff.starter.velocity_l5",
-        "home_starter.velocity_delta",
-        "away_starter.velocity_delta",
-        "diff.starter.velocity_delta",
-        "home_starter.previous_pitch_count",
-        "away_starter.previous_pitch_count",
-        "diff.starter.previous_pitch_count",
-        "home_starter.days_rest",
-        "away_starter.days_rest",
-        "diff.starter.days_rest",
-        "home_bullpen.pitches_previous_24h",
-        "away_bullpen.pitches_previous_24h",
-        "diff.bullpen.pitches_previous_24h",
-        "home_bullpen.pitches_previous_72h",
-        "away_bullpen.pitches_previous_72h",
-        "diff.bullpen.pitches_previous_72h",
-        "home_bullpen.high_workload_reliever_count",
-        "away_bullpen.high_workload_reliever_count",
-        "diff.bullpen.high_workload_reliever_count",
-        "home_bullpen.bullpen_k_rate",
-        "away_bullpen.bullpen_k_rate",
-        "diff.bullpen.bullpen_k_rate",
-        "home_bullpen.bullpen_bb_rate",
-        "away_bullpen.bullpen_bb_rate",
-        "diff.bullpen.bullpen_bb_rate",
-        "home_bullpen.bullpen_k_minus_bb_rate",
-        "away_bullpen.bullpen_k_minus_bb_rate",
-        "diff.bullpen.bullpen_k_minus_bb_rate",
-        "home_bullpen.bullpen_whiff_rate",
-        "away_bullpen.bullpen_whiff_rate",
-        "diff.bullpen.bullpen_whiff_rate",
-        "home_field_constant"
-      ],
-      "featureSetVersion": "MLB_ML_FEATURE_SET_V1",
-      "sourceDigest": "61a81ac9bc8e4fbbcfb72ab502c28234c19194185c1236ee5ab605011df8adb5",
-      "liveEvidenceCertified": true,
-      "lineageEvidence": "76-row lineage retained in isolated r2t-r2-evidence.json; sourceDigest and ordered values recorded here"
-    },
-    "referenceVector": [
-      0.237757,
-      0.209398,
-      0.028359,
-      0.094019,
-      0.085338,
-      0.008681,
-      4.728571,
-      4.7,
-      0.028571,
-      0.3181,
-      0.3126,
-      0.0055,
-      0.260937,
-      0.165272,
-      0.095665,
-      0.084375,
-      0.064854,
-      0.019521,
-      0.176563,
-      0.100418,
-      0.076145,
-      0.228183,
-      0.1843,
-      0.043883,
-      0.284202,
-      0.249861,
-      0.034341,
-      0.503724,
-      0.446856,
-      0.056868,
-      0.489612,
-      0.489149,
-      0.000463,
-      89.6252,
-      83.543,
-      6.0822,
-      88.6029,
-      83.2513,
-      5.3516,
-      89.5016,
-      83.2844,
-      6.2172,
-      89.0275,
-      83.2444,
-      5.7831,
-      -0.4246,
-      0.0069,
-      -0.4315,
-      104,
-      80,
-      24,
-      5,
-      8,
-      -3,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0.223153,
-      0.208018,
-      0.015135,
-      0.103386,
-      0.111804,
-      -0.008418,
-      0.119767,
-      0.096214,
-      0.023553,
-      0.232246,
-      0.214322,
-      0.017924,
-      1
-    ],
     "preprocessingDigest": "bd9675b6f4ed17526537d896e3e934d03aca9a47182624cdef4315d6a2b79872",
     "artifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
     "orderingDigest": "3c2d35edcbeb5fd9cdbd7c2598af91f6ae9dbd19286d6a7381a03781a1c97ce4",
     "sourceCache": {
-      "originalReadAt": "2026-09-08T18:11:57.488Z",
       "digest": "e8e162b5d7aac1d50f4d456168e06a1b1d9b3316043729662022fb83a5609704",
       "rows": 80667,
       "games": 270
     },
-    "provenance": {
-      "source": "public.pick2_raw_mlb_statcast_pitches",
-      "dependencyGamePks": [
-        822740,
-        822741,
-        822743,
-        822786,
-        822789,
-        822790,
-        822828,
-        822829,
-        822830,
-        822871,
-        822873,
-        822874,
-        822887,
-        822888,
-        822889,
-        822943,
-        822944,
-        822945,
-        822989,
-        822991,
-        822992,
-        823107,
-        823109,
-        823111,
-        823134,
-        823136,
-        823137,
-        823220,
-        823222,
-        823223,
-        823258,
-        823261,
-        823262,
-        823307,
-        823308,
-        823309,
-        823373,
-        823375,
-        823377,
-        823453,
-        823454,
-        823455,
-        823525,
-        823526,
-        823527,
-        823533,
-        823535,
-        823536,
-        823639,
-        823640,
-        823641,
-        823660,
-        823661,
-        823662,
-        823663,
-        823664,
-        823665,
-        823666,
-        823667,
-        823668,
-        823669,
-        823670,
-        823671,
-        823672,
-        823673,
-        823674,
-        823675,
-        823676,
-        823677,
-        823678,
-        823679,
-        823680,
-        823681,
-        823682,
-        823683,
-        823684,
-        823685,
-        823686,
-        823687,
-        823688,
-        823689,
-        823690,
-        823691,
-        823692,
-        823693,
-        823694,
-        823695,
-        823696,
-        823697,
-        823698,
-        823699,
-        823700,
-        823701,
-        823702,
-        823703,
-        823704,
-        823705,
-        823706,
-        823707,
-        823708,
-        823709,
-        823710,
-        823711,
-        823712,
-        823713,
-        823714,
-        823715,
-        823716,
-        823717,
-        823718,
-        823719,
-        823720,
-        823721,
-        823722,
-        823723,
-        823724,
-        823725,
-        823726,
-        823727,
-        823728,
-        823729,
-        823730,
-        823732,
-        823750,
-        823751,
-        823752,
-        823810,
-        823811,
-        823812,
-        823888,
-        823889,
-        823890,
-        824036,
-        824039,
-        824040,
-        824080,
-        824082,
-        824084,
-        824126,
-        824128,
-        824129,
-        824130,
-        824133,
-        824135,
-        824136,
-        824144,
-        824147,
-        824148,
-        824149,
-        824174,
-        824175,
-        824176,
-        824236,
-        824237,
-        824239,
-        824260,
-        824263,
-        824264,
-        824265,
-        824266,
-        824267,
-        824406,
-        824408,
-        824409,
-        824410,
-        824413,
-        824415,
-        824416,
-        824417,
-        824440,
-        824443,
-        824444,
-        824555,
-        824556,
-        824557,
-        824558,
-        824559,
-        824560,
-        824561,
-        824562,
-        824563,
-        824564,
-        824565,
-        824566,
-        824567,
-        824568,
-        824569,
-        824570,
-        824571,
-        824572,
-        824573,
-        824574,
-        824575,
-        824576,
-        824577,
-        824578,
-        824579,
-        824580,
-        824581,
-        824582,
-        824583,
-        824584,
-        824585,
-        824586,
-        824587,
-        824588,
-        824589,
-        824590,
-        824591,
-        824592,
-        824593,
-        824594,
-        824595,
-        824596,
-        824597,
-        824598,
-        824599,
-        824600,
-        824601,
-        824602,
-        824603,
-        824604,
-        824605,
-        824606,
-        824607,
-        824608,
-        824609,
-        824610,
-        824611,
-        824612,
-        824613,
-        824614,
-        824615,
-        824616,
-        824617,
-        824618,
-        824619,
-        824620,
-        824621,
-        824622,
-        824639,
-        824640,
-        824641,
-        824653,
-        824655,
-        824657,
-        824728,
-        824729,
-        824731,
-        824759,
-        824760,
-        824761,
-        824818,
-        824819,
-        824822,
-        824862,
-        824864,
-        824865,
-        824962,
-        824963,
-        824964,
-        825018,
-        825019,
-        825020,
-        825067,
-        825068,
-        825069,
-        825096,
-        825097,
-        825099
-      ],
-      "rawRows": 80667,
-      "dependencyDigest": "e231dbd4e37ff8d5cf001add6a7b6012a8a7a61abfb8379216426ed96812afd6",
-      "latestSourceDate": "2026-09-03",
-      "latestAvailableAt": "2026-09-05T00:54:52.174099+00:00",
-      "runAsOf": "2026-09-05T01:51:21.667Z",
-      "performanceCutoff": "2026-09-04",
-      "rowSelectionRule": "complete games involving target teams or starter appearances; same-season prior-date only; all raw rows observed before run_as_of",
-      "auxiliaryBatterDomain": "EMPTY_NOT_REQUIRED_BY_MLB_ML_FEATURE_SET_V1",
-      "builder": "02H addDailyRows persistBatter=false"
-    },
     "correction": "R1 code-point raw-ID sort differed from certified database text order; en-US text comparison restores the stored input contract without formula changes",
-    "executorInputDigestBinding": "NOT_INTEGRATED: parity uses the existing 02I stored-input serializer; R2F executor digest remains unchanged pending Gate 4 resolution"
+    "executorInputDigestBinding": "PASS: actual persistence uses existing certified 02I inputPayload; independently matches retained stored digest",
+    "publication": "Raw vectors, native rows, sample predictions, input payloads and detailed production evidence removed. Authorized private replay inputs are required for reproduction."
   },
   "nativeFieldGapInventory": {
     "status": "COMPLETE",
-    "currentRows": [
-      {
-        "game_pk": 824792,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T22:35:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "521b55191bf08f5be5f044d0091e6bf90891b6db3f8b793e1f4a28c5528045e8",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 676440,
-              "link": "/api/v1/people/676440",
-              "fullName": "Tanner Bibee"
-            },
-            "homeProbablePitcher": {
-              "id": 687064,
-              "link": "/api/v1/people/687064",
-              "fullName": "Brandon Young"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 114,
-            "home_mlb_team_id": 110,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 824228,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T22:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "ff6c6d6fc840342c7c841e3f2fbbb5747827f86a6de40eef9bad6f0ea17f3748",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 665152,
-              "link": "/api/v1/people/665152",
-              "fullName": "Dean Kremer"
-            },
-            "homeProbablePitcher": {
-              "id": 623454,
-              "link": "/api/v1/people/623454",
-              "fullName": "Drew Anderson"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 142,
-            "home_mlb_team_id": 116,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823414,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T22:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "e71b0ca9658f00e1ce7ac21f02dd147b8e619a7eba41ffe0550ef1b706f2da03",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 669713,
-              "link": "/api/v1/people/669713",
-              "fullName": "Hayden Wesneski"
-            },
-            "homeProbablePitcher": {
-              "id": 691725,
-              "link": "/api/v1/people/691725",
-              "fullName": "Andrew Painter"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 117,
-            "home_mlb_team_id": 143,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823821,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T22:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "e13570ed577a2a9c1aa71b0f1d0716b417be51b2f6a42f57b4fe9058b80fcec5",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 640455,
-              "link": "/api/v1/people/640455",
-              "fullName": "Sean Manaea"
-            },
-            "homeProbablePitcher": {
-              "id": 645261,
-              "link": "/api/v1/people/645261",
-              "fullName": "Sandy Alcantara"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 121,
-            "home_mlb_team_id": 146,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 824714,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T22:45:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "3047eb303ea50bb770cd6735c1ead907c66266e8eca8545e7407a7c9c9d83a23",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 672282,
-              "link": "/api/v1/people/672282",
-              "fullName": "Reid Detmers"
-            },
-            "homeProbablePitcher": {
-              "id": 663776,
-              "link": "/api/v1/people/663776",
-              "fullName": "Patrick Sandoval"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 108,
-            "home_mlb_team_id": 111,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823500,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T23:05:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "48de025ef1ca42a7c80a58346fb8e390ef96a074d4b688dcbab11bed04503c88",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 687312,
-              "link": "/api/v1/people/687312",
-              "fullName": "Gabriel Hughes"
-            },
-            "homeProbablePitcher": {
-              "id": 693645,
-              "link": "/api/v1/people/693645",
-              "fullName": "Cam Schlittler"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 115,
-            "home_mlb_team_id": 147,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 824875,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T23:15:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "6b0da5f5a26f574fb89873f9ad33ea45196d34a92e6235457c0654899ab0816c",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 642547,
-              "link": "/api/v1/people/642547",
-              "fullName": "Freddy Peralta"
-            },
-            "homeProbablePitcher": {
-              "id": 700363,
-              "link": "/api/v1/people/700363",
-              "fullName": "AJ Smith-Shawver"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 139,
-            "home_mlb_team_id": 144,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 824063,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T23:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "2f0e0b551946f911ddc3214a61ae2c50ee3c11784d5653f0d65ddb3e2648bc1a",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 669203,
-              "link": "/api/v1/people/669203",
-              "fullName": "Corbin Burnes"
-            },
-            "homeProbablePitcher": {
-              "id": 608379,
-              "link": "/api/v1/people/608379",
-              "fullName": "Michael Wacha"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 109,
-            "home_mlb_team_id": 118,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 824551,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T23:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "e220ad095769d8423d3f4f31ed1a8fd0654bd69bfb085a17fddea141af45e559",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 696149,
-              "link": "/api/v1/people/696149",
-              "fullName": "Bubba Chandler"
-            },
-            "homeProbablePitcher": {
-              "id": 680732,
-              "link": "/api/v1/people/680732",
-              "fullName": "Sean Burke"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 134,
-            "home_mlb_team_id": 145,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823738,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-08T23:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "e9708db3233aa4d614d645c62981ce8a1f08d24d6b45ba9b5b981bf598706492",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 656849,
-              "link": "/api/v1/people/656849",
-              "fullName": "David Peterson"
-            },
-            "homeProbablePitcher": {
-              "id": 694819,
-              "link": "/api/v1/people/694819",
-              "fullName": "Jacob Misiorowski"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 112,
-            "home_mlb_team_id": 158,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823250,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-09T01:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "e9a282b7692858c73d7747dd263b52a457cb4aca09b608d218371e32c4bdb1d8",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 683000,
-              "link": "/api/v1/people/683000",
-              "fullName": "Riley Cornelio"
-            },
-            "homeProbablePitcher": {
-              "id": 663554,
-              "link": "/api/v1/people/663554",
-              "fullName": "Casey Mize"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 120,
-            "home_mlb_team_id": 135,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823092,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-09T01:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "4fa4c8672fd57e1b2da94fabc49a2b51d699db834b6516ea42ba9dfba4daae5b",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": null,
-            "homeProbablePitcher": null
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 140,
-            "home_mlb_team_id": 136,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 824957,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-09T01:40:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "3972a91c2f898bd768f674f6d4cd41fd48a01788ff9333578e80f76db60c843e",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 667755,
-              "link": "/api/v1/people/667755",
-              "fullName": "José Soriano"
-            },
-            "homeProbablePitcher": {
-              "id": 678022,
-              "link": "/api/v1/people/678022",
-              "fullName": "Jack Perkins"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 141,
-            "home_mlb_team_id": 133,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823174,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-09T01:45:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "1661260ef503d6ed6dc653c65410af4a2e359833481a86913b024d0ee28537c8",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 687273,
-              "link": "/api/v1/people/687273",
-              "fullName": "Quinn Mathews"
-            },
-            "homeProbablePitcher": {
-              "id": 694738,
-              "link": "/api/v1/people/694738",
-              "fullName": "Landen Roupp"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 138,
-            "home_mlb_team_id": 137,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      },
-      {
-        "game_pk": 823901,
-        "season": 2026,
-        "game_date": "2026-09-08",
-        "scheduled_at": "2026-09-09T02:10:00+00:00",
-        "home_team_id": null,
-        "away_team_id": null,
-        "game_type": null,
-        "official_status": "Scheduled",
-        "doubleheader": "N",
-        "game_number": 1,
-        "source": "mlb_official",
-        "source_payload_digest": "dd065f966cb0ba4e727413268b3b8015218e4aed44636360ea2ab8f66d5fae2d",
-        "legacy_sport_event_id": null,
-        "metadata": {
-          "phase": "MLB_DATA_02R_R2I_LIVE_EXECUTION",
-          "starter_evidence": {
-            "awayProbablePitcher": {
-              "id": 666157,
-              "link": "/api/v1/people/666157",
-              "fullName": "Nick Lodolo"
-            },
-            "homeProbablePitcher": {
-              "id": 669373,
-              "link": "/api/v1/people/669373",
-              "fullName": "Tarik Skubal"
-            }
-          },
-          "mlb_official_identity": {
-            "away_mlb_team_id": 113,
-            "home_mlb_team_id": 119,
-            "away_abbreviation": null,
-            "home_abbreviation": null
-          },
-          "source_schedule_fields_dropped": [
-            "home",
-            "away",
-            "starter_evidence",
-            "pregame_classification",
-            "doubleheader_identity",
-            "status",
-            "start_time"
-          ]
-        },
-        "created_at": "2026-09-08T11:40:54.85083+00:00",
-        "updated_at": "2026-09-08T11:40:54.85083+00:00"
-      }
-    ],
-    "fields": [
-      {
-        "field": "home_team_id",
-        "physicalSource": "public.pick2_mlb_games.home_team_id",
-        "consumer": "target/team/bullpen/first-inning identity",
-        "safeSource": "Stored MLB Official ID -> existing canonical alias",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [],
-        "state": "CODE_MAPPING_AVAILABLE",
-        "repairRequired": true,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "away_team_id",
-        "physicalSource": "public.pick2_mlb_games.away_team_id",
-        "consumer": "target/team/bullpen/first-inning identity",
-        "safeSource": "Stored MLB Official ID -> existing canonical alias",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [],
-        "state": "CODE_MAPPING_AVAILABLE",
-        "repairRequired": true,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "game_type",
-        "physicalSource": "public.pick2_mlb_games.game_type",
-        "consumer": "R1 certified regular-season target gate",
-        "safeSource": "Same-game MLB Official gameType; unavailable in inspected current native rows",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
-      },
-      {
-        "field": "metadata.officialDate",
-        "physicalSource": "public.pick2_mlb_games.metadata.officialDate",
-        "consumer": "R1 explicit official-date provenance",
-        "safeSource": "Same-game preserved MLB Official officialDate; no UTC-date guess",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
-      },
-      {
-        "field": "metadata.abstractGameState",
-        "physicalSource": "public.pick2_mlb_games.metadata.abstractGameState",
-        "consumer": "R1 pregame status provenance",
-        "safeSource": "Same-game preserved MLB Official abstractGameState; no status guess",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
-      },
-      {
-        "field": "metadata.homeProbablePitcher.id",
-        "physicalSource": "public.pick2_mlb_games.metadata.homeProbablePitcher.id",
-        "consumer": "home starter identity/provenance",
-        "safeSource": "Existing metadata.starter_evidence.homeProbablePitcher; unknown stays blocked",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          823092
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
-      },
-      {
-        "field": "metadata.awayProbablePitcher.id",
-        "physicalSource": "public.pick2_mlb_games.metadata.awayProbablePitcher.id",
-        "consumer": "away starter identity/provenance",
-        "safeSource": "Existing metadata.starter_evidence.awayProbablePitcher; unknown stays blocked",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          823092
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
-      },
-      {
-        "field": "game_pk",
-        "physicalSource": "public.pick2_mlb_games.game_pk",
-        "consumer": "all target/FK scope",
-        "safeSource": "Existing canonical native primary key",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "scheduled_at",
-        "physicalSource": "public.pick2_mlb_games.scheduled_at",
-        "consumer": "pre-start cutoff",
-        "safeSource": "Existing observed scheduled_at",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "game_date",
-        "physicalSource": "public.pick2_mlb_games.game_date",
-        "consumer": "target feature date",
-        "safeSource": "Existing stored game_date; does not independently recover omitted provenance",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "doubleheader",
-        "physicalSource": "public.pick2_mlb_games.doubleheader",
-        "consumer": "doubleheader disambiguation",
-        "safeSource": "Existing native doubleheader",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "game_number",
-        "physicalSource": "public.pick2_mlb_games.game_number",
-        "consumer": "doubleheader disambiguation",
-        "safeSource": "Existing native game_number",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "source_payload_digest",
-        "physicalSource": "public.pick2_mlb_games.source_payload_digest",
-        "consumer": "source identity",
-        "safeSource": "Existing stored digest; cannot reverse into missing payload fields",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "season",
-        "physicalSource": "public.pick2_mlb_games.season",
-        "consumer": "certified builder season",
-        "safeSource": "Existing native season",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "official_status",
-        "physicalSource": "public.pick2_mlb_games.official_status",
-        "consumer": "scheduled/pregame status guard",
-        "safeSource": "Existing native detailed status",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "source",
-        "physicalSource": "public.pick2_mlb_games.source",
-        "consumer": "MLB Official provenance",
-        "safeSource": "Existing native source",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "created_at",
-        "physicalSource": "public.pick2_mlb_games.created_at",
-        "consumer": "observation availability",
-        "safeSource": "Existing database observation timestamp",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      },
-      {
-        "field": "updated_at",
-        "physicalSource": "public.pick2_mlb_games.updated_at",
-        "consumer": "latest observed starter/target availability",
-        "safeSource": "Existing database observation timestamp",
-        "inspectedRows": 15,
-        "missingGamePks": [],
-        "unresolvedGamePks": [],
-        "state": "PRESENT",
-        "repairRequired": false,
-        "productionRepair": "NONE_FOR_READ_PROJECTION"
-      }
-    ],
-    "aliases": [
-      [
-        114,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:10",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824385
-        }
-      ],
-      [
-        116,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:17",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824385
-        }
-      ],
-      [
-        113,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:2",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824469
-        }
-      ],
-      [
-        158,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:32",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824469
-        }
-      ],
-      [
-        143,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:12",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823417
-        }
-      ],
-      [
-        144,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:26",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823417
-        }
-      ],
-      [
-        134,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:4",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823336
-        }
-      ],
-      [
-        108,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:21",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823336
-        }
-      ],
-      [
-        110,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:19",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824794
-        }
-      ],
-      [
-        111,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:25",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824794
-        }
-      ],
-      [
-        121,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:18",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823578
-        }
-      ],
-      [
-        137,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:15",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823578
-        }
-      ],
-      [
-        146,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:22",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823822
-        }
-      ],
-      [
-        112,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:9",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823822
-        }
-      ],
-      [
-        145,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:16",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824552
-        }
-      ],
-      [
-        142,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:20",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824552
-        }
-      ],
-      [
-        140,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:28",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 822848
-        }
-      ],
-      [
-        139,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:11",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 822848
-        }
-      ],
-      [
-        117,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:30",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824142
-        }
-      ],
-      [
-        109,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:14",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824142
-        }
-      ],
-      [
-        118,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:5",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824065
-        }
-      ],
-      [
-        141,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:3",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824065
-        }
-      ],
-      [
-        115,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:23",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824309
-        }
-      ],
-      [
-        138,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:31",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 824309
-        }
-      ],
-      [
-        135,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:33",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823253
-        }
-      ],
-      [
-        147,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:29",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823253
-        }
-      ],
-      [
-        119,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:1",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823903
-        }
-      ],
-      [
-        120,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:35",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823903
-        }
-      ],
-      [
-        136,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:13",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823091
-        }
-      ],
-      [
-        133,
-        {
-          "canonicalId": "baseball_mlb:mlb:sportsdataio:team:24",
-          "source": "pick2_mlb_games.metadata",
-          "sourceGamePk": 823091
-        }
-      ]
-    ],
-    "currentBlocks": [
-      {
-        "gamePk": 824792,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 824228,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823414,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823821,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 824714,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823500,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 824875,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 824063,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 824551,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823738,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823250,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823092,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 824957,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823174,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      },
-      {
-        "gamePk": 823901,
-        "reason": "R2TR1_BLOCK:OFFICIAL_DATE"
-      }
-    ]
+    "retainedPriorInventory": true,
+    "excludedUnsafeFields": 52,
+    "unknownStarterPolicy": "Unknown starters remain blocked per game; no fabricated IDs or retrospective authority"
   },
   "nativeFieldBinding": {
-    "status": "BLOCKED",
-    "futureMapping": "PASS",
-    "unresolved": [
+    "status": "PASS_WITH_PER_GAME_EVIDENCE_GUARDS",
+    "prerequisite": "MLB_DATA_02R_R2T_R2D_CANONICAL_NATIVE_ENRICHMENT_EXECUTION_CERTIFIED",
+    "previouslyCertifiedRowUpdates": 15,
+    "previouslyCertifiedFieldPatches": 90,
+    "excludedFieldsUnchanged": 52,
+    "historicalPregameProofNotImplied": true,
+    "newEvidence": "Actual observation timestamps; evidence newer than run_as_of blocks the game until a subsequent freeze."
+  },
+  "persistenceAndExecutorIntegration": {
+    "status": "PASS",
+    "engine": "@electric-sql/pglite@0.3.14",
+    "checks": [
       {
-        "field": "game_type",
-        "physicalSource": "public.pick2_mlb_games.game_type",
-        "consumer": "R1 certified regular-season target gate",
-        "safeSource": "Same-game MLB Official gameType; unavailable in inspected current native rows",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
+        "name": "PostgreSQL typed persistence preserves all 76 real values",
+        "status": "PASS"
       },
       {
-        "field": "metadata.officialDate",
-        "physicalSource": "public.pick2_mlb_games.metadata.officialDate",
-        "consumer": "R1 explicit official-date provenance",
-        "safeSource": "Same-game preserved MLB Official officialDate; no UTC-date guess",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
+        "name": "PostgreSQL persisted Champion inference parity",
+        "status": "PASS"
       },
       {
-        "field": "metadata.abstractGameState",
-        "physicalSource": "public.pick2_mlb_games.metadata.abstractGameState",
-        "consumer": "R1 pregame status provenance",
-        "safeSource": "Same-game preserved MLB Official abstractGameState; no status guess",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
+        "name": "production prediction plan preserves the already certified stored input digest",
+        "status": "PASS"
       },
       {
-        "field": "metadata.homeProbablePitcher.id",
-        "physicalSource": "public.pick2_mlb_games.metadata.homeProbablePitcher.id",
-        "consumer": "home starter identity/provenance",
-        "safeSource": "Existing metadata.starter_evidence.homeProbablePitcher; unknown stays blocked",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          823092
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
+        "name": "PostgreSQL defaults and timestamp readback reuse all eight rows",
+        "status": "PASS"
       },
       {
-        "field": "metadata.awayProbablePitcher.id",
-        "physicalSource": "public.pick2_mlb_games.metadata.awayProbablePitcher.id",
-        "consumer": "away starter identity/provenance",
-        "safeSource": "Existing metadata.starter_evidence.awayProbablePitcher; unknown stays blocked",
-        "inspectedRows": 15,
-        "missingGamePks": [
-          824792,
-          824228,
-          823414,
-          823821,
-          824714,
-          823500,
-          824875,
-          824063,
-          824551,
-          823738,
-          823250,
-          823092,
-          824957,
-          823174,
-          823901
-        ],
-        "unresolvedGamePks": [
-          823092
-        ],
-        "state": "MISSING_SAME_GAME_EVIDENCE",
-        "repairRequired": true,
-        "productionRepair": "SEPARATE_AUTHORIZATION_AND_SOURCE_EVIDENCE_REQUIRED"
+        "name": "separate real historical batter sample inserted for schema testing",
+        "status": "PASS"
+      },
+      {
+        "name": "team old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "starter old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "batter old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "exact rollback restores all original indexes and constraints before revisions",
+        "status": "PASS"
+      },
+      {
+        "name": "team migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "starter migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "batter migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "all feature foreign keys preserved by migration",
+        "status": "PASS"
+      },
+      {
+        "name": "real revision resume reuses committed snapshots/team/starter",
+        "status": "PASS"
+      },
+      {
+        "name": "snapshot-pinned real revision readback preserves 76-value vector and Champion",
+        "status": "PASS"
+      },
+      {
+        "name": "independent retry of real revision persists zero rows with zero caps",
+        "status": "PASS"
+      },
+      {
+        "name": "all real current-slate games expand into complete domain plans",
+        "status": "PASS"
+      },
+      {
+        "name": "every real slate game preserves persisted 76-vector and Champion parity",
+        "status": "PASS"
+      },
+      {
+        "name": "all-game retry is zero-write with exact zero caps",
+        "status": "PASS"
+      },
+      {
+        "name": "duplicate targets, stale run date and started-game drift fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "value and pick physical numeric(18,15) rounding matches PostgreSQL including decimal ties",
+        "status": "PASS"
+      },
+      {
+        "name": "all real predictions persist with canonical Champion and snapshot foreign keys",
+        "status": "PASS"
+      },
+      {
+        "name": "persisted prediction probabilities preserve real Champion inference",
+        "status": "PASS"
+      },
+      {
+        "name": "prediction retry reuses every immutable row with zero DML cap",
+        "status": "PASS"
+      },
+      {
+        "name": "prediction payload drift, immutable conflicts and scope escape fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "certified Policy V1 loads exact config, rejects threshold drift and accepts zero candidates",
+        "status": "PASS"
+      },
+      {
+        "name": "real prediction slate with no market evidence produces zero values and picks",
+        "status": "PASS"
+      },
+      {
+        "name": "isolated market fixture persists mappings and both book sides with canonical UUIDs",
+        "status": "PASS"
+      },
+      {
+        "name": "market retry reuses mappings and observations with zero caps",
+        "status": "PASS"
+      },
+      {
+        "name": "real model plus isolated odds fixture persists value math and all three observation FKs",
+        "status": "PASS"
+      },
+      {
+        "name": "isolated policy fixture persists Official Pick prediction/value UUID handoff",
+        "status": "PASS"
+      },
+      {
+        "name": "value and Official Pick retries preserve immutable decisions with zero writes",
+        "status": "PASS"
+      },
+      {
+        "name": "duplicate book sides, post-start values/picks and UNKNOWN starters fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "R2B to R2I real-model integration resumes after market handoff without reacquisition",
+        "status": "PASS"
+      },
+      {
+        "name": "R2B to R2I full real-model persistence retry performs zero writes",
+        "status": "PASS"
+      },
+      {
+        "name": "production source adapter reconstructs every real archived game from local SQL readback",
+        "status": "PASS"
+      },
+      {
+        "name": "production source adapter reuses canonical raw evidence without a Statcast request",
+        "status": "PASS"
+      },
+      {
+        "name": "actual production adapter R2B/R2I SQL pipeline completes and retries without provider reacquisition",
+        "status": "PASS"
+      },
+      {
+        "name": "shared Statcast cold fixture validates physical insert, canonical cache reuse and actual-request cap",
+        "status": "PASS"
+      },
+      {
+        "name": "raw backdating, corrupt digest and negative provider accounting fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "uncertain committed INSERT is recovered by exact independent readback and counted once",
+        "status": "PASS"
+      },
+      {
+        "name": "unapplied pending INSERT retries safely without double counting its cap",
+        "status": "PASS"
+      },
+      {
+        "name": "native enrichment UPDATE uses old predicates, reads back and never backdates new evidence",
+        "status": "PASS"
+      },
+      {
+        "name": "production adapter empty slate terminates after one injected schedule read with no downstream calls or writes",
+        "status": "PASS"
+      },
+      {
+        "name": "team distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "team orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "starter distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "starter orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "batter distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "batter orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "migration repeat or schema drift fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "rollback with revision conflicts aborts and preserves every row",
+        "status": "PASS"
       }
     ],
-    "stopRule": "Gate 4: If production data migration would be required, STOP and classify separately.",
-    "reason": "Existing native rows omit same-game evidence. A read-only projection can recover aliases and nested starter evidence, but cannot recover missing official game type/date/state or unknown starters. Existing rows require separately authorized evidence recovery/data repair; no migration executed."
+    "realArchivedMultiGameCount": 2,
+    "domains": [
+      "snapshot",
+      "team",
+      "pitcher/starter",
+      "bullpen",
+      "batter",
+      "matchup",
+      "firstInning"
+    ],
+    "batter": "Legitimately empty for Champion V1 (0/76 lineup inputs); separate private real historical row validates physical persistence.",
+    "fullPath": "Actual R2B -> R2I canonical core -> production adapter body -> disposable PostgreSQL -> persisted vector/Champion -> structural odds fixture -> values/Policy V1/picks -> readback board",
+    "providerEvidence": "Injected only in disposable certification; zero actual sports-provider requests",
+    "checkpoint": "Feature and market interruptions; uncertain committed/uncommitted writes; durable accounting; zero-write retries",
+    "limitation": "No production live refresh certified here. R3 remains mandatory."
   },
-  "persistenceAndExecutorIntegration": "NOT_RUN_GATE_4_STOP",
+  "gates": [
+    {
+      "gate": 1,
+      "name": "MLB_02R_R2T_R2_PARITY_CASE",
+      "previousStatus": "PASS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "previously certified parity case retained",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 2,
+      "name": "MLB_02R_R2T_R2_STORED_OUTPUT_PARITY",
+      "previousStatus": "PASS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "retained probability errors meet certified bound",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "production prediction plan preserves the already certified stored input digest",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 3,
+      "name": "MLB_02R_R2T_R2_NATIVE_FIELD_GAP_INVENTORY",
+      "previousStatus": "COMPLETE",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "prior native inventory completed",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 4,
+      "name": "MLB_02R_R2T_R2_NATIVE_FIELD_BINDING",
+      "previousStatus": "BLOCKED",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "safe native enrichment certified; unsafe fields excluded",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "production source adapter reconstructs every real archived game from local SQL readback",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "native enrichment UPDATE uses old predicates, reads back and never backdates new evidence",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "starter missing",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 5,
+      "name": "MLB_02R_R2T_R2_REAL_SNAPSHOT_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "real revision resume reuses committed snapshots/team/starter",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "snapshot-pinned real revision readback preserves 76-value vector and Champion",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 6,
+      "name": "MLB_02R_R2T_R2_TEAM_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "team distinct snapshot allowed and same snapshot duplicate rejected",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "team orphan snapshot FK rejected after migration",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 7,
+      "name": "MLB_02R_R2T_R2_STARTER_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "starter distinct snapshot allowed and same snapshot duplicate rejected",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "starter orphan snapshot FK rejected after migration",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 8,
+      "name": "MLB_02R_R2T_R2_BULLPEN_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "bullpen distinct snapshot allowed and same snapshot duplicate rejected",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "bullpen orphan snapshot FK rejected after migration",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 9,
+      "name": "MLB_02R_R2T_R2_BATTER_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "batter distinct snapshot allowed and same snapshot duplicate rejected",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "batter orphan snapshot FK rejected after migration",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "separate real historical batter sample inserted for schema testing",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "no fabricated batter rows",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 10,
+      "name": "MLB_02R_R2T_R2_MATCHUP_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "matchup distinct snapshot allowed and same snapshot duplicate rejected",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "matchup orphan snapshot FK rejected after migration",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 11,
+      "name": "MLB_02R_R2T_R2_FIRST_INNING_PERSISTENCE",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "firstInning distinct snapshot allowed and same snapshot duplicate rejected",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "firstInning orphan snapshot FK rejected after migration",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 12,
+      "name": "MLB_02R_R2T_R2_DOMAIN_REFERENTIAL_INTEGRITY",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "all feature foreign keys preserved by migration",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "cross-team snapshot FK",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "all real predictions persist with canonical Champion and snapshot foreign keys",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 13,
+      "name": "MLB_02R_R2T_R2_PERSISTED_READBACK_VECTOR_PARITY",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "PostgreSQL typed persistence preserves all 76 real values",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 14,
+      "name": "MLB_02R_R2T_R2_POST_PERSISTENCE_INFERENCE_PARITY",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "PostgreSQL persisted Champion inference parity",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "persisted prediction probabilities preserve real Champion inference",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 15,
+      "name": "MLB_02R_R2T_R2_ALL_GAME_TARGET_SET",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "all real current-slate games expand into complete domain plans",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "duplicate targets, stale run date and started-game drift fail closed",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 16,
+      "name": "MLB_02R_R2T_R2_ALL_GAME_FEATURE_GENERATION",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "all-game retry is zero-write with exact zero caps",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 17,
+      "name": "MLB_02R_R2T_R2_FULL_REAL_MODEL_DRY_INTEGRATION",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "actual production adapter R2B/R2I SQL pipeline completes and retries without provider reacquisition",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "real model plus isolated odds fixture persists value math and all three observation FKs",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "isolated policy fixture persists Official Pick prediction/value UUID handoff",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "production adapter empty slate terminates after one injected schedule read with no downstream calls or writes",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 18,
+      "name": "MLB_02R_R2T_R2_REAL_CHECKPOINT_RESUME",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "real revision resume reuses committed snapshots/team/starter",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "R2B to R2I real-model integration resumes after market handoff without reacquisition",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "uncertain committed INSERT is recovered by exact independent readback and counted once",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "unapplied pending INSERT retries safely without double counting its cap",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 19,
+      "name": "MLB_02R_R2T_R2_REAL_IDEMPOTENCY",
+      "previousStatus": "NOT_RUN_GATE_4_STOP",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "sql",
+          "assertion": "R2B to R2I full real-model persistence retry performs zero writes",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "value and Official Pick retries preserve immutable decisions with zero writes",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 20,
+      "name": "MLB_02R_R2T_R2_LIVE_CONTAINMENT",
+      "previousStatus": "PASS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "r1",
+          "assertion": "actual R2B live containment",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "no provider or write calls",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 21,
+      "name": "MLB_02R_R2T_R2_SYNTHETIC_PATH_AUDIT",
+      "previousStatus": "BLOCKED_LEGACY_SYNTHETIC_PATH_STILL_PRESENT",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "canonical core invokes real builder and persisted inference without fixture construction",
+          "status": "PASS"
+        },
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "legacy synthetic graph rejects live mode",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "fixture source in production",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 22,
+      "name": "MLB_02R_R2T_R2_NEGATIVE_TESTS",
+      "previousStatus": "PARTIAL_NOT_CERTIFIED",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "r1",
+          "assertion": "wrong game scope",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "started game",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "source observed after asof",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "starter changed",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "starter missing",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "cross-team snapshot FK",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "wrong feature version",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "stale feature row",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "feature count mismatch",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "feature order mismatch",
+          "status": "PASS"
+        },
+        {
+          "source": "champion",
+          "assertion": "artifact digest mismatch",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "prediction payload drift, immutable conflicts and scope escape fail closed",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "raw backdating, corrupt digest and negative provider accounting fail closed",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "gate": 23,
+      "name": "MLB_02R_R2T_R2_BUSINESS_LOGIC_PARITY",
+      "previousStatus": "PASS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "REVIEWED_CONTRACT",
+          "assertion": "all existing feature/model validators pass",
+          "status": "PASS"
+        },
+        {
+          "source": "sql",
+          "assertion": "certified Policy V1 loads exact config, rejects threshold drift and accepts zero candidates",
+          "status": "PASS"
+        },
+        {
+          "source": "r1",
+          "assertion": "no lineup dependency",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "source": "REVIEWED_CONTRACT",
+      "assertion": "all 23 gates have executed evidence",
+      "status": "PASS"
+    },
+    {
+      "source": "REVIEWED_CONTRACT",
+      "assertion": "no disposable assertion failed",
+      "status": "PASS"
+    },
+    {
+      "source": "REVIEWED_CONTRACT",
+      "assertion": "legacy stack complete and every non-pass explicitly classified",
+      "status": "PASS"
+    },
+    {
+      "source": "REVIEWED_CONTRACT",
+      "assertion": "private checkpoint/provider guard tests pass",
+      "status": "PASS"
+    },
+    {
+      "source": "REVIEWED_CONTRACT",
+      "assertion": "all 19 inherited files unchanged",
+      "status": "PASS"
+    },
+    {
+      "source": "REVIEWED_CONTRACT",
+      "assertion": "no providers or production row/schema writes during this certification",
+      "status": "PASS"
+    }
+  ],
   "liveContainment": "PASS",
+  "r2tCompletionReadiness": "READY_FOR_R3",
+  "r2bLiveExecutionReady": "NO_PENDING_R3",
+  "syntheticProductionPaths": 0,
+  "businessLogicParity": {
+    "Champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1_UNCHANGED",
+    "orderedFeatures": 76,
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
+    "preprocessing": "UNCHANGED",
+    "PolicyV1": "UNCHANGED",
+    "featureSemantics": "UNCHANGED"
+  },
+  "requiredStatements": {
+    "storedOutputParity": "PASS",
+    "realSevenDomainPersistence": "PASS",
+    "persistedReadbackVectorParity": "PASS",
+    "realChampionInference": "PASS",
+    "allGameRealFeatureIntegration": "PASS",
+    "fullRealModelDryPipeline": "PASS",
+    "liveStillContained": true,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
   "boundaries": {
     "providerCalls": 0,
     "productionDml": 0,
@@ -2366,151 +925,25 @@
     "cronChanges": 0,
     "settlement": 0
   },
-  "priorPackageSha": "f98cc3022cabe137a32ed0d31fd76ace60182191",
-  "newPackageSha": "ENCLOSING_LOCAL_COMMIT: resolve git log -1 --format=%H -- docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json",
-  "gates": [
-    {
-      "gate": 1,
-      "name": "MLB_02R_R2T_R2_PARITY_CASE",
-      "status": "PASS"
-    },
-    {
-      "gate": 2,
-      "name": "MLB_02R_R2T_R2_STORED_OUTPUT_PARITY",
-      "status": "PASS"
-    },
-    {
-      "gate": 3,
-      "name": "MLB_02R_R2T_R2_NATIVE_FIELD_GAP_INVENTORY",
-      "status": "COMPLETE"
-    },
-    {
-      "gate": 4,
-      "name": "MLB_02R_R2T_R2_NATIVE_FIELD_BINDING",
-      "status": "BLOCKED"
-    },
-    {
-      "gate": 5,
-      "name": "MLB_02R_R2T_R2_REAL_SNAPSHOT_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 6,
-      "name": "MLB_02R_R2T_R2_TEAM_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 7,
-      "name": "MLB_02R_R2T_R2_STARTER_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 8,
-      "name": "MLB_02R_R2T_R2_BULLPEN_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 9,
-      "name": "MLB_02R_R2T_R2_BATTER_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 10,
-      "name": "MLB_02R_R2T_R2_MATCHUP_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 11,
-      "name": "MLB_02R_R2T_R2_FIRST_INNING_PERSISTENCE",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 12,
-      "name": "MLB_02R_R2T_R2_DOMAIN_REFERENTIAL_INTEGRITY",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 13,
-      "name": "MLB_02R_R2T_R2_PERSISTED_READBACK_VECTOR_PARITY",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 14,
-      "name": "MLB_02R_R2T_R2_POST_PERSISTENCE_INFERENCE_PARITY",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 15,
-      "name": "MLB_02R_R2T_R2_ALL_GAME_TARGET_SET",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 16,
-      "name": "MLB_02R_R2T_R2_ALL_GAME_FEATURE_GENERATION",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 17,
-      "name": "MLB_02R_R2T_R2_FULL_REAL_MODEL_DRY_INTEGRATION",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 18,
-      "name": "MLB_02R_R2T_R2_REAL_CHECKPOINT_RESUME",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 19,
-      "name": "MLB_02R_R2T_R2_REAL_IDEMPOTENCY",
-      "status": "NOT_RUN_GATE_4_STOP"
-    },
-    {
-      "gate": 20,
-      "name": "MLB_02R_R2T_R2_LIVE_CONTAINMENT",
-      "status": "PASS"
-    },
-    {
-      "gate": 21,
-      "name": "MLB_02R_R2T_R2_SYNTHETIC_PATH_AUDIT",
-      "status": "BLOCKED_LEGACY_SYNTHETIC_PATH_STILL_PRESENT"
-    },
-    {
-      "gate": 22,
-      "name": "MLB_02R_R2T_R2_NEGATIVE_TESTS",
-      "status": "PARTIAL_NOT_CERTIFIED"
-    },
-    {
-      "gate": 23,
-      "name": "MLB_02R_R2T_R2_BUSINESS_LOGIC_PARITY",
-      "status": "PASS"
-    }
-  ],
-  "requiredStatements": {
-    "storedOutputParity": "PASS_EXACT_DIGEST_AND_NUMERICAL_TOLERANCE",
-    "realSevenDomainPersistence": "NOT_RUN_GATE_4_STOP",
-    "persistedReadbackVectorParity": "NOT_RUN_GATE_4_STOP",
-    "realChampionInference": "PASS_PRE_PERSISTENCE_ONLY",
-    "allGameRealFeatureIntegration": "NOT_RUN_GATE_4_STOP",
-    "fullRealModelDryPipeline": "NOT_RUN_GATE_4_STOP",
-    "liveStillContained": true,
-    "providerCalls": 0,
-    "productionDml": 0,
-    "productionDdl": 0
+  "missionPrerequisiteDdl": {
+    "appliedMigrations": 1,
+    "certificate": "MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_DDL.json",
+    "notRepeatedByIntegrationCertification": true
   },
   "validators": {
     "dedicated": {
-      "status": "BLOCKED_GATE_4",
-      "checksPassed": 20,
-      "nonzeroExit": true
+      "status": "INTEGRATION_GATES_VERIFIED_PENDING_PUBLICATION_QUALITY_REVIEW",
+      "gateCount": 23,
+      "sqlChecks": 64
     },
     "r1": {
-      "status": "PASS",
-      "checks": 41
+      "checks": 41,
+      "status": "MLB_DATA_02R_R2T_R1_PREGAME_EVIDENCE_PROVENANCE_AND_TARGET_BINDING_CERTIFIED"
     },
     "r2t": {
-      "status": "BLOCKED_NOT_CERTIFIED",
       "checks": 29,
-      "historicalCases": 3
+      "status": "BLOCKED",
+      "classification": "29 assertions passed; deliberate containment returns nonzero. Not a validator PASS."
     },
     "legacy": [
       {
@@ -2628,17 +1061,7 @@
         "windowsTeardownAssertion": false
       }
     ],
-    "featureModelAndR1R2T": [
-      {
-        "script": "mlb-data-02r-r2t-r1-pregame-validate.mjs",
-        "exitCode": 0,
-        "error": null
-      },
-      {
-        "script": "mlb-data-02r-r2t-real-feature-champion-validate.mjs",
-        "exitCode": 1,
-        "error": null
-      },
+    "featureModel": [
       {
         "script": "mlb-data-01d-2025-feature-build-dry-run-validate.mjs",
         "exitCode": 0,
@@ -2685,6 +1108,20 @@
         "error": null
       }
     ],
+    "operationalGuards": [
+      {
+        "name": "crosswalk normalizes equivalent UTC offsets and PostgreSQL timestamps; invalid and ambiguous times block",
+        "status": "PASS"
+      },
+      {
+        "name": "private checkpoint replacement, exclusive lock, release and repository/path escape guards",
+        "status": "PASS"
+      },
+      {
+        "name": "provider consumption survives restart and rejects cap overrun, negative calls and unauthorized providers",
+        "status": "PASS"
+      }
+    ],
     "build": {
       "command": "npm.cmd run build",
       "exitCode": 0,
@@ -2692,462 +1129,74 @@
     },
     "eslint": {
       "status": "PASS",
-      "files": 5,
       "maxWarnings": 0
     },
     "diffCheck": "PASS",
-    "targetedSecretScan": "PASS: nine bounded files; no configured credential values, JWTs or private keys"
-  },
-  "networkEvidence": {
-    "readOnlyRequests": 140,
-    "forbiddenRequests": 0,
-    "skippedOptionalReads": 0,
-    "providerCalls": 0,
-    "productionDml": 0,
-    "productionDdl": 0,
-    "guard": "scripts/mlb-data-02r-r2s-certification-guard.mjs",
-    "directories": [
-      "C:/Users/jlebr/AppData/Local/Temp/pick-analyzer-r2tr2-oBXFBO",
-      "C:/Users/jlebr/AppData/Local/Temp/pick-analyzer-r2s-rUj44N",
-      "C:/Users/jlebr/AppData/Local/Temp/pick-analyzer-r2tr2-stack-xfcomh"
-    ],
-    "initialSandboxRead": "One read-only network attempt failed; authorized read-only escalation succeeded. No write or provider attempt."
-  },
-  "businessLogicParity": {
-    "status": "PASS",
-    "checks": [
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "loadLocalEnv",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "requireEnv",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "dbClient",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "ensure",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "stable",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "sha256",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "dateKey",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "previousDate",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "dateDiffDays",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "dateRange",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isoDateTimeInTimeZone",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "fetchJson",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "countRows",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "readAll",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "readPredictionsByIdentity",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "readRawRowsByDates",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "readChampion",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "makeStats",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "average",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "safeRate",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "eventName",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "descriptionName",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isPaEnding",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isStrikeout",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isWalk",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isStrike",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isSwing",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "isWhiff",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "addGame",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "addGameStats",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "battingTeamId",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "pitchingTeamId",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "mergeStats",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "updateStatsFromGame",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "rates",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "buildHistory",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "probablePitcherId",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "buildCurrentVector",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "transformVector",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "sigmoid",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "dot",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "infer",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "probabilityStats",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "extrapolationState",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "inputPayload",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "buildDryRecord",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "classifyInventoryGame",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-        "name": "auditMarkdown",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "statusText",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "isCompleted",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "isInProgress",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "isPostponed",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "getCurrentSlate",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "classifyStarterReadiness",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "transformVector",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "sigmoid",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "inferMoneyline",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "num",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "normalizeStarterStatus",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "evaluateOfficialPickPolicy",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "readValueBoardAdapter",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "compareNullableText",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "assertNativeGameCompatibility",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "reconcileNativeIdentity",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "statcastRowIdentity",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "normalizeStatcastRows",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "reconcileCurrentSlateStatcast",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-        "name": "planCurrentSlateFeatures",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02h-2026-current-foundation.mjs",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02f-moneyline-prediction-generation-prep.mjs",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs",
-        "unchanged": true
-      },
-      {
-        "file": "scripts/mlb-data-02r-r2t-real-feature-champion.mjs",
-        "unchanged": true
-      },
-      {
-        "file": "artifacts/mlb/mlb-02c-moneyline-baseline-model.json",
-        "unchanged": true
-      }
-    ],
-    "count": 73,
-    "changedSemantics": "None. Source-order binding corrected to the existing database text order. Existing 02I serializer and formulas reused without changes.",
-    "unchanged": [
-      "76 feature definitions/order",
-      "Champion coefficients/intercept",
-      "certified preprocessing",
-      "value math",
-      "Policy V1",
-      "Official Pick semantics",
-      "Value Board semantics"
-    ]
-  },
-  "sourceHashes": {
-    "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
-    "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs": "ab32e3dd5e9b9158cdb6db537ade487d529d5fed91e3c41a04c78e9e4eb58c5d",
-    "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "bf0c6ce9316b985b6816e43e3d340e62c6d5f6c6108069f5067bdb08a35cabcf",
-    "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
-    "scripts/mlb-data-02r-r2t-r2-stored-output-parity-validate.mjs": "fcde87b1f8f9ed2da0de402eeab3d373bc0695605073ccc7c4830306ca8b1b56"
+    "targetedSecretScan": "PASS: 30 bounded files; no configured secret values, JWT/private-key material or retained raw sample payloads"
   },
   "protectedState": {
-    "inheritedArtifactCount": 19,
-    "inheritedSha256": {
-      "docs/CERTIFICATION/MLB_DATA_02R_R2A_LIVE_MANUAL_REFRESH_EXECUTOR_AUDIT.md": "aac2814e26d90a5b5734cf82929df1d84c73544d90ab386eb7beb2cf79c4aee8",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2F_COMPONENT_INTERFACE_REFACTOR_IMPLEMENTATION.json": "21a53b65f735e78524c1573fe3bf7595907512e6f97e12a8dc17c6d00f483627",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2G_PERSISTENCE_INTERFACE_REFACTOR_IMPLEMENTATION.json": "8c7b5aa3b838004ce475b300a22673e882ec1e826bf9291727bd064ce5f76ea8",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2H_EXECUTOR_BINDING_AND_FULL_DRY_INTEGRATION.json": "350b6f4524c0ac96d9b6943fba7fadc694ba5836998c53ec8bc1e56c8f7c3dc8",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION.json": "09b5e5dacc4c5f0af5d2ead846a1907991650760f2eedee948b22ea2df503c6c",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2K_STARTER_LIVE_TARGET_SCHEMA_GUARD_REPAIR.json": "266338e5ea0f2f104a2ac9006c181822be48515dd58d99494c9adf06cc997852",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR.json": "e32a7d6a6315c532c43f44e4acc31a00788a950334a8c6cba3c65180acfe83e6",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2L_LIVE_EXECUTOR_STAGE_BINDING_REPAIR_AUDIT.md": "813306807d3233419d9aac817bfcd526ed3d9510b7c88fb1a65b6f9e277a67d4",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR.json": "87f3f74a1dc0038e2b37bc43b4b21da3fe1308edf9445a57d3eb309768538a20",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2M_NATIVE_GAME_INSERT_PAYLOAD_SCHEMA_REPAIR_AUDIT.md": "1eec06da545d3db69ac21756dbdde8615fb9a2095e172089f3036d714e2b656a",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2N_STATCAST_LIVE_FETCH_BINDING_REPAIR.json": "e9169e3caf44b7dd922dbee830a22be94d8fba91de4062a40fa5481a07a06714",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2O_FEATURE_SNAPSHOT_IDENTITY_BINDING_REPAIR.json": "75eb42526039dbc2d2f7b1778972b337ef4f54394c1c7df7b36471c4e589bb6c",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2P_FEATURE_SNAPSHOT_DATE_FIELD_BINDING_REPAIR.json": "abc30ed6fb8632804d3bffe7baa185260966924783e35a4c8802834b7cf81792",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2Q_EMPTY_ELIGIBLE_SLATE_GUARD_REPAIR.json": "06f845b3580f6593691c17d728087d40fa540d0399c74eb6573377d7b86c43f5",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2R_CURRENT_RUN_DATE_ASOF_FREEZE_REPAIR.json": "5b9bc5ddd59186b3d592a478fe7d28c528f1aabc7334011328f442c1a54a4b04",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2R_CURRENT_RUN_DATE_ASOF_FREEZE_REPAIR_AUDIT.md": "c8bf6f4a869979f4e79189b61bb171963171120689690d881d6406bf8ce7c889",
-      "docs/CERTIFICATION/MLB_DATA_02R_R2_FROZEN_EXECUTION_PACKAGE.md": "c895bd690c01df6893da925fd692cb4dab5937e238c842143f28ee73eb2f0925",
-      "docs/CERTIFICATION/mlb-data-02r-r2-frozen-execution-package.json": "b9e3b80d92850939fa05d7bd724b2bd610d52051e020cafd3083104cdf28992b",
-      "docs/CERTIFICATION/mlb-data-02r-r2a-live-refresh-executor.json": "b3139e34993e82dedbb4affb124750afc2a1ab2c4b7d2a0353363038b4ba908b"
-    },
-    "inheritedUnchanged": true,
-    "protectedDirectories": "No access or mutation of .tmp/ or .worktrees/. Legacy cache operations redirected to OS temporary directories.",
-    "productionState": "No production mutation; existing immutable rows unchanged."
+    "inheritedTrackedFiles": 19,
+    "unchanged": true,
+    "protectedDirectories": "UNTOUCHED"
   },
+  "sourceHashes": {
+  "scripts/mlb-data-02n-current-moneyline-value-evaluation-prep.mjs": "163cd51c2d99db7bdb196a4021a925fa1dea07655ef41434e2aa7ee5286de7e5",
+  "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be79ed8d3ffbb584c5f971427b0867d9246e6310cbdd1b63fe1912fb1206ac67",
+  "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs": "ba5a7b74fa1b8c044835c14415b99655fc1bf213f1693871c47ad0bd8d14da81",
+  "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs": "1d6b0af10645ad3de4c87f9dc293a5ef8adf67f8f52f0cac6f8eea4e06c2e138",
+  "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "3da155d19c7d4a56f3ce77d47fb44a563bd6276b3e77eb7889b65cb2c7b57964",
+  "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "94665469a88d8601dbdd2410d07ad25067ce6419801a6038b7ee4827f30e512d",
+  "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "bd726afa116235412a794f44028093b1c23993674a14852cf78b25ff8959a0de",
+  "scripts/mlb-operational-feature-schema-validate.mjs": "e767a55851be91dceb5dcf81a24198c83f82c84ddd89651b831264028f2ce2b7",
+  "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "d243642d67bd65e3f3d1744e651192cbf12f1899b382ebbb8e629faebb58b294",
+  "scripts/mlb-data-02r-r2t-downstream-validate.mjs": "59c25483d5f66d5ef46351bdb946ce847bdc7da3280497c532c107f96e8e5c4d",
+  "scripts/mlb-data-02r-r2t-market-binding.mjs": "2d3a14c53f8fca19c32fba73303c22f2f96de4694588e891075670efbe49a067",
+  "scripts/mlb-data-02r-r2t-multi-game-cache.mjs": "003796e28bcab6dec0750a40ee6a836718b055d47a4d2663a76152f1a8b3987b",
+  "scripts/mlb-data-02r-r2t-operational-guards-validate.mjs": "a20aabeaebfa1818a7c22e3d5a4cb61ae51565aaf780e439efcf08b2ceb8a5a6",
+  "scripts/mlb-data-02r-r2t-pglite-client.mjs": "37e7b2417e40fb91a7fdf9e7d979ae4a83df737396148beaf55ee3c0f47d15dc",
+  "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
+  "scripts/mlb-data-02r-r2t-private-run-store.mjs": "bd3323062af220b4f83ee55811d025cf97ce21d4b768a5facb16aa4eb4cf2f6e",
+  "scripts/mlb-data-02r-r2t-production-bindings-validate.mjs": "e435cc6870f9632a38b7174bd9a80eb8b1a5b14b1bace24dbcea9c9756193170",
+  "scripts/mlb-data-02r-r2t-production-bindings.mjs": "2876e38d25ec3934e766f1774e1a60e79007d589e32e4679ec4555a2b17e74e8",
+  "scripts/mlb-data-02r-r2t-r2-integration-certify.mjs": "3274bb89a1c12dedd97ad9a43c1dcafd521643840a04722a16401d740a2d773e",
+  "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
+  "scripts/mlb-data-02r-r2t-write-journal.mjs": "53b06f154987e2d76efcf9e96279241cc7e0b9bf1bb8f7a2687344ce08340f0b"
+},
   "changedFiles": [
-    "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs",
-    "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
-    "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs",
-    "scripts/mlb-data-02r-r2t-r2-native-binding.mjs",
-    "scripts/mlb-data-02r-r2t-r2-stored-output-parity-validate.mjs",
-    "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json",
-    "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_AUDIT.md",
-    "docs/PROJECT_STATUS.md",
-    "docs/MASTER_ROADMAP.md"
-  ],
-  "commitPolicy": {
-    "boundedLocalCommits": 1,
-    "push": false,
-    "inheritedArtifactsIncluded": false
-  },
-  "r2tCompletionReadiness": "NO",
-  "r2bLiveExecutionReady": "NO",
+  "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json",
+  "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_AUDIT.md",
+  "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_AUDIT.md",
+  "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_STATUS.json",
+  "docs/MASTER_ROADMAP.md",
+  "docs/PROJECT_STATUS.md",
+  "scripts/mlb-data-02n-current-moneyline-value-evaluation-prep.mjs",
+  "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs",
+  "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs",
+  "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs",
+  "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs",
+  "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs",
+  "scripts/mlb-data-02r-r2t-r1-read-repository.mjs",
+  "scripts/mlb-operational-feature-schema-validate.mjs",
+  "docs/CERTIFICATION/MLB_OPERATIONAL_DOWNSTREAM_SCHEMA_REVIEW.json",
+  "docs/CERTIFICATION/MLB_OPERATIONAL_NATIVE_SCHEMA_REVIEW.json",
+  "docs/CERTIFICATION/MLB_OPERATIONAL_RAW_SCHEMA_REVIEW.json",
+  "scripts/mlb-data-02r-r2t-downstream-persistence.mjs",
+  "scripts/mlb-data-02r-r2t-downstream-validate.mjs",
+  "scripts/mlb-data-02r-r2t-market-binding.mjs",
+  "scripts/mlb-data-02r-r2t-multi-game-cache.mjs",
+  "scripts/mlb-data-02r-r2t-operational-guards-validate.mjs",
+  "scripts/mlb-data-02r-r2t-pglite-client.mjs",
+  "scripts/mlb-data-02r-r2t-policy-binding.mjs",
+  "scripts/mlb-data-02r-r2t-private-run-store.mjs",
+  "scripts/mlb-data-02r-r2t-production-bindings-validate.mjs",
+  "scripts/mlb-data-02r-r2t-production-bindings.mjs",
+  "scripts/mlb-data-02r-r2t-r2-integration-certify.mjs",
+  "scripts/mlb-data-02r-r2t-raw-binding.mjs",
+  "scripts/mlb-data-02r-r2t-write-journal.mjs"
+],
+  "commitPolicy": "Bounded sanitized commit; normal push authorized by standing mission; inherited artifact drift excluded",
   "remainingBlockers": [
-    "Gate 4: existing September 8 native rows omit same-game game_type, officialDate and abstractGameState; current evidence/data repair must be separately scoped and authorized.",
-    "Unknown probable starters remain blocked individually; no fake replacement.",
-    "Per-entity snapshot/domain persistence, readback, downstream executor integration, all-game real generation, checkpoint/resume and idempotency are not implemented/certified by this bounded stop.",
-    "R2F live executor retains its legacy fixture implementation and shorter input digest below the live containment guard. Stored parity uses 02I serializer only; containment is not replacement completion.",
-    "Full R2T-R2 certification and subsequent live re-enablement are not authorized by this partial evidence."
+    "R3 before live execution; later live/repeatability/automation/settlement/Today gates remain incomplete"
   ],
-  "recommendedNextPhase": "Resolve R2T-R2 Gate 4 evidence/data-repair blocker, then resume remaining R2T-R2 gates; do not advance to R3.",
-  "recommendedNextInstruction": "Recover same-game MLB Official evidence for the documented native gaps using an explicitly authorized bounded source/evidence-repair phase. Review exact required production data changes separately; do not infer missing values, mutate existing rows, or re-enable live without authorization. Preserve this parity repair and resume gates 5-23 after Gate 4 is resolved."
+  "recommendedNextPhase": "MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION"
 }

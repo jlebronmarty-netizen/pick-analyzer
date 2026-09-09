@@ -271,7 +271,7 @@ export function readValueBoardAdapter({ board, operatingDate = null, asOf = null
     acc[status] = (acc[status] ?? 0) + 1
     return acc
   }, {})
-  const topPick = board?.topPick ?? rows.find((row) => row.status === 'OFFICIAL_PICK') ?? rows[0] ?? null
+  const topPick = rows.find((row) => row.status === 'OFFICIAL_PICK') ?? null
   return stageResult({
     stage: '13 Value Board readback',
     mode: 'READBACK_ONLY',

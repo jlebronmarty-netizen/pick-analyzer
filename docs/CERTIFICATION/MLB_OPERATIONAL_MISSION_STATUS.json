@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-09T00:49:11.056Z",
-  "verdict": "DDL_CERTIFIED_R2T_REAL_INTEGRATION_IN_PROGRESS",
+  "generatedAt": "2026-09-09T02:27:23.036Z",
+  "verdict": "DDL_AND_R2T_R2_CERTIFIED_R3_PENDING",
   "operationalCertified": false,
   "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
   "packageSha": "ENCLOSING_SANITIZED_COMMIT",
@@ -18,16 +18,31 @@
     },
     "disposablePostgres": {
       "status": "PASS",
-      "checks": 32,
+      "checks": 64,
       "exactSchemaReproduction": true,
       "rowPreservation": true,
       "allSixDomainUniqueness": true,
       "foreignKeyPreservation": true,
-      "rollbackValidated": true
+      "rollbackValidated": true,
+      "actualR2BToR2ICanonicalPath": true,
+      "realMultiGameCount": 2,
+      "persisted76Parity": true,
+      "storedInputDigestParity": true,
+      "downstreamReadback": true,
+      "checkpointResume": true,
+      "zeroWriteRetry": true
     },
     "build": {
-      "status": "PASS_AFTER_SANITIZATION",
+      "status": "PASS",
+      "exitCode": 0,
       "staticPages": 400
+    },
+    "r2tR2": {
+      "gateCount": 23,
+      "gateEvidence": "MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json",
+      "r1Checks": 41,
+      "featureModelValidators": 9,
+      "operationalGuards": 3
     }
   },
   "providerAccounting": {
@@ -98,20 +113,23 @@
   "protectedDirectoriesTouched": false,
   "r2tR3Certified": false,
   "r2bLiveReady": false,
-  "syntheticPathState": "Legacy fixture code remains below the tested unconditional R2T live containment. Elimination/full real call-graph replacement is NOT yet certified.",
+  "syntheticPathState": "Actual canonical core validated against disposable PostgreSQL. Legacy dry graph explicitly rejects live mode; production live remains unconditionally blocked until R3.",
   "publication": {
     "rawProductionSamplesIncluded": false,
-    "privateReplayInputs": "Supplied only by external R1_READ_CACHE and BATTER_READ_CACHE; never committed.",
-    "amendUnpublishedCommit": true,
+    "privateReplayInputs": "External R1_READ_CACHE, BATTER_READ_CACHE, R2T_MULTI_READ_CACHE and private registry evidence; never committed.",
+    "sanitizedPrerequisitePublished": true,
+    "integrationCommitPending": true,
     "forcePush": false
   },
   "remaining": [
-    "Snapshot-pinned revision-aware identity/classification/read consumers; same-day changed-input snapshot identities and full real R2B call graph.",
-    "All-game targets, checkpoints/resume and full negative/regression stack.",
+    "Publish the bounded sanitized R2T-R2 certification commit; quality scans passed.",
     "R3 live reenablement before any production live execution.",
     "Nonempty live run and repeatability.",
     "Shared-engine automation and daily refresh automation.",
     "Settlement/performance and Today UI; final operational certification."
   ],
-  "rollbackAndRecoveryRunbook": "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_AUDIT.md"
+  "rollbackAndRecoveryRunbook": "docs/CERTIFICATION/MLB_OPERATIONAL_MISSION_AUDIT.md",
+  "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
+  "currentPhase": "R2T-R2 certified; bounded sanitized commit/publication",
+  "nextPhase": "MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION"
 }

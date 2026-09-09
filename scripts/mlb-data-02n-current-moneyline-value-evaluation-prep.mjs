@@ -10,7 +10,7 @@ const championModelVersion = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
 const modelArtifactDigest = '9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616'
 const predictionAsOf = '2026-09-05T01:51:21.667Z'
 const methodVersion = 'MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_PREP_V1'
-const freshnessPolicy = { freshMinutes: 10, agingMinutes: 30, staleBlocked: true }
+import { MARKET_FRESHNESS_POLICY as freshnessPolicy, classifyMarketFreshness as freshness } from './mlb-data-02r-r2g-persistence-interfaces.mjs'
 const tolerance = 1e-9
 
 function loadLocalEnv() {
@@ -125,16 +125,6 @@ function predictionTeams(row) {
   const away = row.metadata?.away_team_id ?? row.metadata?.awayTeamId ?? row.metadata?.away_team ?? 'away'
   const home = row.metadata?.home_team_id ?? row.metadata?.homeTeamId ?? row.metadata?.home_team ?? 'home'
   return `${away} @ ${home}`
-}
-
-function freshness(row) {
-  const providerLastUpdate = Date.parse(row.provider_last_update ?? '')
-  const acquiredAt = Date.parse(row.acquired_at ?? '')
-  if (!Number.isFinite(providerLastUpdate) || !Number.isFinite(acquiredAt)) return { state: 'STALE', ageMinutes: null }
-  const ageMinutes = Math.max(0, (acquiredAt - providerLastUpdate) / 60000)
-  if (ageMinutes <= freshnessPolicy.freshMinutes) return { state: 'FRESH', ageMinutes }
-  if (ageMinutes <= freshnessPolicy.agingMinutes) return { state: 'AGING', ageMinutes }
-  return { state: 'STALE', ageMinutes }
 }
 
 function makePairKey(row) {

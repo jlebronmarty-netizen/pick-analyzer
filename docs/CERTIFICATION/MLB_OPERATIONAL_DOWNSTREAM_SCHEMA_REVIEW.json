@@ -1,0 +1,1416 @@
+{
+  "description": "Physical downstream contracts; structural read-only evidence without production samples.",
+  "schema": [
+    {
+      "table_name": "pick2_game_predictions",
+      "columns": [
+        {
+          "type": "uuid",
+          "column": "id",
+          "default": "gen_random_uuid()",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "deterministic_identity",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "pick2_era",
+          "default": "'PICK_2_ERA_V1'::text",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "sport_key",
+          "default": "'baseball_mlb'::text",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "event_id",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "uuid",
+          "column": "model_version_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "feature_snapshot_id",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "predicted_at",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "target",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "numeric",
+          "column": "home_probability",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "numeric",
+          "column": "away_probability",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "numeric",
+          "column": "expected_home_score",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "numeric",
+          "column": "expected_away_score",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "numeric",
+          "column": "expected_total",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "numeric",
+          "column": "expected_margin",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "frozen_input_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "model_artifact_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "metadata",
+          "default": "'{}'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "created_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        },
+        {
+          "type": "bigint",
+          "column": "game_pk",
+          "default": null,
+          "nullable": "YES"
+        }
+      ]
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "columns": [
+        {
+          "type": "uuid",
+          "column": "id",
+          "default": "gen_random_uuid()",
+          "nullable": "NO"
+        },
+        {
+          "type": "bigint",
+          "column": "game_pk",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "market_provider",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "provider_event_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "market_sport_key",
+          "default": "'baseball_mlb'::text",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "matched_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "evidence",
+          "default": "'{}'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "mapping_version",
+          "default": "'R5_NATIVE_IDENTITY_FOUNDATION_V1'::text",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "source_payload_digest",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "legacy_sport_event_id",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "created_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "updated_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        }
+      ]
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "columns": [
+        {
+          "type": "uuid",
+          "column": "id",
+          "default": "gen_random_uuid()",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "observation_identity",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "bigint",
+          "column": "game_pk",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "provider",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "provider_event_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "market_event_mapping_id",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "region",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "bookmaker_key",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "bookmaker_name",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "market",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "provider_market_key",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "side",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "outcome_name",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "integer",
+          "column": "american_odds",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "provider_last_update",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "acquired_at",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "commence_time",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "source_payload_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "source_response_digest",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "jsonb",
+          "column": "source_provenance",
+          "default": "'{}'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "created_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        }
+      ]
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "columns": [
+        {
+          "type": "uuid",
+          "column": "id",
+          "default": "gen_random_uuid()",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "value_identity",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "prediction_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "bigint",
+          "column": "game_pk",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "side",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "model_version_id",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "model_version",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "numeric",
+          "column": "model_probability",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "text",
+          "column": "provider",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "provider_event_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "bookmaker_key",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "bookmaker_name",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "market",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "provider_market_key",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "integer",
+          "column": "american_odds",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "home_market_observation_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "away_market_observation_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "selected_side_market_observation_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "numeric",
+          "column": "raw_implied_probability",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "no_vig_probability",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "edge",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "unit_ev",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "consensus_probability",
+          "default": null,
+          "nullable": "YES",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "consensus_edge",
+          "default": null,
+          "nullable": "YES",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "market_dispersion",
+          "default": null,
+          "nullable": "YES",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "integer",
+          "column": "book_count",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "market_freshness",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "starter_status",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "text",
+          "column": "temporal_eligibility",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "eligibility_flags",
+          "default": "'[]'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "risk_flags",
+          "default": "'[]'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "evaluation_method_version",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "prediction_as_of",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "provider_last_update",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "market_acquired_at",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "evaluated_at",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "source_payload_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "evaluation_payload_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "metadata",
+          "default": "'{}'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "created_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        }
+      ]
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "columns": [
+        {
+          "type": "uuid",
+          "column": "id",
+          "default": "gen_random_uuid()",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "official_pick_identity",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "prediction_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "uuid",
+          "column": "value_evaluation_id",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "bigint",
+          "column": "game_pk",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "sport",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "market",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "side",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "bookmaker_key",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "bookmaker_name",
+          "default": null,
+          "nullable": "YES"
+        },
+        {
+          "type": "integer",
+          "column": "american_odds",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "model_version",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "numeric",
+          "column": "model_probability",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "consensus_probability",
+          "default": null,
+          "nullable": "YES",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "consensus_edge",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "numeric",
+          "column": "unit_ev",
+          "default": null,
+          "nullable": "NO",
+          "physical_type": "numeric(18,15)"
+        },
+        {
+          "type": "text",
+          "column": "policy_version",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "decision_status",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "eligibility_flags",
+          "default": "'[]'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "risk_flags",
+          "default": "'[]'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "reason_codes",
+          "default": "'[]'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "blocker_codes",
+          "default": "'[]'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "prediction_as_of",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "market_acquired_at",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "evaluated_at",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "decision_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "source_payload_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "text",
+          "column": "decision_payload_digest",
+          "default": null,
+          "nullable": "NO"
+        },
+        {
+          "type": "jsonb",
+          "column": "metadata",
+          "default": "'{}'::jsonb",
+          "nullable": "NO"
+        },
+        {
+          "type": "timestamp with time zone",
+          "column": "created_at",
+          "default": "timezone('utc'::text, now())",
+          "nullable": "NO"
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_away_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((away_probability IS NULL) OR ((away_probability >= (0)::numeric) AND (away_probability <= (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_deterministic_identity_key",
+      "contype": "u",
+      "definition": "UNIQUE (deterministic_identity)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_event_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (event_id) REFERENCES sport_events(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_feature_snapshot_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (feature_snapshot_id) REFERENCES pick2_feature_snapshots(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_game_pk_positive",
+      "contype": "c",
+      "definition": "CHECK (((game_pk IS NULL) OR (game_pk > 0))) NOT VALID"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_home_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((home_probability IS NULL) OR ((home_probability >= (0)::numeric) AND (home_probability <= (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_model_version_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (model_version_id) REFERENCES pick2_model_versions(id)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_pick2_era_check",
+      "contype": "c",
+      "definition": "CHECK ((pick2_era = 'PICK_2_ERA_V1'::text))"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "conname": "pick2_game_predictions_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappin_market_provider_provider_even_key",
+      "contype": "u",
+      "definition": "UNIQUE (market_provider, provider_event_id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_legacy_sport_event_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (legacy_sport_event_id) REFERENCES sport_events(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_market_provider_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM market_provider)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_market_provider_game_pk_key",
+      "contype": "u",
+      "definition": "UNIQUE (market_provider, game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "conname": "pick2_mlb_market_event_mappings_provider_event_id_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM provider_event_id)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observation_market_event_mapping_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (market_event_mapping_id) REFERENCES pick2_mlb_market_event_mappings(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_american_odds_check",
+      "contype": "c",
+      "definition": "CHECK ((american_odds <> 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_bookmaker_key_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM bookmaker_key)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_market_check",
+      "contype": "c",
+      "definition": "CHECK ((market = 'MONEYLINE'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_observation_identity_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM observation_identity)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_observation_identity_key",
+      "contype": "u",
+      "definition": "UNIQUE (observation_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_provider_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM provider)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_provider_event_id_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM provider_event_id)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_provider_market_key_check",
+      "contype": "c",
+      "definition": "CHECK ((provider_market_key = 'h2h'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_side_check",
+      "contype": "c",
+      "definition": "CHECK ((side = ANY (ARRAY['HOME'::text, 'AWAY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "conname": "pick2_mlb_market_price_observations_source_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM source_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evalua_selected_side_market_observa_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (selected_side_market_observation_id) REFERENCES pick2_mlb_market_price_observations(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_away_market_observation_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (away_market_observation_id) REFERENCES pick2_mlb_market_price_observations(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_evaluation_method_version_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM evaluation_method_version)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_evaluation_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM evaluation_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluati_home_market_observation_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (home_market_observation_id) REFERENCES pick2_mlb_market_price_observations(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluation_raw_implied_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((raw_implied_probability > (0)::numeric) AND (raw_implied_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_american_odds_check",
+      "contype": "c",
+      "definition": "CHECK ((american_odds <> 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_book_count_check",
+      "contype": "c",
+      "definition": "CHECK ((book_count >= 1))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_check",
+      "contype": "c",
+      "definition": "CHECK ((home_market_observation_id <> away_market_observation_id))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_check1",
+      "contype": "c",
+      "definition": "CHECK ((((side = 'HOME'::text) AND (selected_side_market_observation_id = home_market_observation_id)) OR ((side = 'AWAY'::text) AND (selected_side_market_observation_id = away_market_observation_id))))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_consensus_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((consensus_probability IS NULL) OR ((consensus_probability > (0)::numeric) AND (consensus_probability < (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_eligibility_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(eligibility_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_market_check",
+      "contype": "c",
+      "definition": "CHECK ((market = 'MONEYLINE'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_market_freshness_check",
+      "contype": "c",
+      "definition": "CHECK ((market_freshness = ANY (ARRAY['FRESH'::text, 'AGING'::text, 'STALE'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_model_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((model_probability > (0)::numeric) AND (model_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_model_version_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (model_version_id) REFERENCES pick2_model_versions(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_no_vig_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((no_vig_probability > (0)::numeric) AND (no_vig_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_prediction_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (prediction_id) REFERENCES pick2_game_predictions(id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_provider_market_key_check",
+      "contype": "c",
+      "definition": "CHECK ((provider_market_key = 'h2h'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_risk_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(risk_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_side_check",
+      "contype": "c",
+      "definition": "CHECK ((side = ANY (ARRAY['HOME'::text, 'AWAY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_source_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM source_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_temporal_eligibility_check",
+      "contype": "c",
+      "definition": "CHECK ((temporal_eligibility = ANY (ARRAY['PREGAME_VALID'::text, 'PREGAME_VALID_AT_MARKET_ACQUISITION'::text, 'STARTED_GAME_BLOCKED'::text, 'STALE_MARKET_BLOCKED'::text, 'AGING_ANALYTICAL_ONLY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_value_identity_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM value_identity)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "conname": "pick2_mlb_market_value_evaluations_value_identity_key",
+      "contype": "u",
+      "definition": "UNIQUE (value_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_american_odds_check",
+      "contype": "c",
+      "definition": "CHECK ((american_odds <> 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_blocker_codes_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(blocker_codes) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_bookmaker_key_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM bookmaker_key)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_consensus_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((consensus_probability IS NULL) OR ((consensus_probability > (0)::numeric) AND (consensus_probability < (1)::numeric))))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_decision_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM decision_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_decision_status_check",
+      "contype": "c",
+      "definition": "CHECK ((decision_status = 'OFFICIAL_PICK'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_eligibility_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(eligibility_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_game_pk_check",
+      "contype": "c",
+      "definition": "CHECK ((game_pk > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_game_pk_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (game_pk) REFERENCES pick2_mlb_games(game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_market_check",
+      "contype": "c",
+      "definition": "CHECK ((market = 'MONEYLINE'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_model_probability_check",
+      "contype": "c",
+      "definition": "CHECK (((model_probability > (0)::numeric) AND (model_probability < (1)::numeric)))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_model_version_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM model_version)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_official_pick_identity_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM official_pick_identity)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_official_pick_identity_key",
+      "contype": "u",
+      "definition": "UNIQUE (official_pick_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_policy_version_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM policy_version)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_prediction_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (prediction_id) REFERENCES pick2_game_predictions(id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_reason_codes_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(reason_codes) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_risk_flags_check",
+      "contype": "c",
+      "definition": "CHECK ((jsonb_typeof(risk_flags) = 'array'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_side_check",
+      "contype": "c",
+      "definition": "CHECK ((side = ANY (ARRAY['HOME'::text, 'AWAY'::text])))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_source_payload_digest_check",
+      "contype": "c",
+      "definition": "CHECK ((length(TRIM(BOTH FROM source_payload_digest)) > 0))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_sport_check",
+      "contype": "c",
+      "definition": "CHECK ((sport = 'MLB'::text))"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "conname": "pick2_mlb_official_picks_value_evaluation_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (value_evaluation_id) REFERENCES pick2_mlb_market_value_evaluations(id)"
+    }
+  ],
+  "indexes": [
+    {
+      "table_name": "pick2_game_predictions",
+      "indexname": "pick2_game_predictions_deterministic_identity_key",
+      "indexdef": "CREATE UNIQUE INDEX pick2_game_predictions_deterministic_identity_key ON public.pick2_game_predictions USING btree (deterministic_identity)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "indexname": "pick2_game_predictions_event_idx",
+      "indexdef": "CREATE INDEX pick2_game_predictions_event_idx ON public.pick2_game_predictions USING btree (sport_key, event_id, predicted_at DESC)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "indexname": "pick2_game_predictions_game_pk_idx",
+      "indexdef": "CREATE INDEX pick2_game_predictions_game_pk_idx ON public.pick2_game_predictions USING btree (sport_key, game_pk, predicted_at DESC) WHERE (game_pk IS NOT NULL)"
+    },
+    {
+      "table_name": "pick2_game_predictions",
+      "indexname": "pick2_game_predictions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX pick2_game_predictions_pkey ON public.pick2_game_predictions USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "indexname": "pick2_mlb_market_event_mappin_market_provider_provider_even_key",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_event_mappin_market_provider_provider_even_key ON public.pick2_mlb_market_event_mappings USING btree (market_provider, provider_event_id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "indexname": "pick2_mlb_market_event_mappings_game_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_event_mappings_game_idx ON public.pick2_mlb_market_event_mappings USING btree (game_pk, market_provider)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "indexname": "pick2_mlb_market_event_mappings_market_provider_game_pk_key",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_event_mappings_market_provider_game_pk_key ON public.pick2_mlb_market_event_mappings USING btree (market_provider, game_pk)"
+    },
+    {
+      "table_name": "pick2_mlb_market_event_mappings",
+      "indexname": "pick2_mlb_market_event_mappings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_event_mappings_pkey ON public.pick2_mlb_market_event_mappings USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "indexname": "pick2_mlb_market_price_observations_book_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_price_observations_book_idx ON public.pick2_mlb_market_price_observations USING btree (provider, bookmaker_key, market, acquired_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "indexname": "pick2_mlb_market_price_observations_event_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_price_observations_event_idx ON public.pick2_mlb_market_price_observations USING btree (provider, provider_event_id, market, acquired_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "indexname": "pick2_mlb_market_price_observations_game_latest_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_price_observations_game_latest_idx ON public.pick2_mlb_market_price_observations USING btree (game_pk, market, acquired_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "indexname": "pick2_mlb_market_price_observations_observation_identity_key",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_price_observations_observation_identity_key ON public.pick2_mlb_market_price_observations USING btree (observation_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "indexname": "pick2_mlb_market_price_observations_pair_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_price_observations_pair_idx ON public.pick2_mlb_market_price_observations USING btree (game_pk, provider, bookmaker_key, market, provider_market_key, COALESCE(provider_last_update, acquired_at))"
+    },
+    {
+      "table_name": "pick2_mlb_market_price_observations",
+      "indexname": "pick2_mlb_market_price_observations_pkey",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_price_observations_pkey ON public.pick2_mlb_market_price_observations USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_book_side_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_value_evaluations_book_side_idx ON public.pick2_mlb_market_value_evaluations USING btree (provider, bookmaker_key, side, evaluated_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_edge_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_value_evaluations_edge_idx ON public.pick2_mlb_market_value_evaluations USING btree (edge DESC, unit_ev DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_eligibility_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_value_evaluations_eligibility_idx ON public.pick2_mlb_market_value_evaluations USING btree (temporal_eligibility, market_freshness, evaluated_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_game_latest_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_value_evaluations_game_latest_idx ON public.pick2_mlb_market_value_evaluations USING btree (game_pk, market, evaluated_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_pkey",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_value_evaluations_pkey ON public.pick2_mlb_market_value_evaluations USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_prediction_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_market_value_evaluations_prediction_idx ON public.pick2_mlb_market_value_evaluations USING btree (prediction_id)"
+    },
+    {
+      "table_name": "pick2_mlb_market_value_evaluations",
+      "indexname": "pick2_mlb_market_value_evaluations_value_identity_key",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_market_value_evaluations_value_identity_key ON public.pick2_mlb_market_value_evaluations USING btree (value_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_book_side_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_official_picks_book_side_idx ON public.pick2_mlb_official_picks USING btree (bookmaker_key, side, decision_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_game_decision_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_official_picks_game_decision_idx ON public.pick2_mlb_official_picks USING btree (game_pk, decision_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_official_pick_identity_key",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_official_picks_official_pick_identity_key ON public.pick2_mlb_official_picks USING btree (official_pick_identity)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_pkey",
+      "indexdef": "CREATE UNIQUE INDEX pick2_mlb_official_picks_pkey ON public.pick2_mlb_official_picks USING btree (id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_policy_status_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_official_picks_policy_status_idx ON public.pick2_mlb_official_picks USING btree (policy_version, decision_status, decision_at DESC)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_prediction_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_official_picks_prediction_idx ON public.pick2_mlb_official_picks USING btree (prediction_id)"
+    },
+    {
+      "table_name": "pick2_mlb_official_picks",
+      "indexname": "pick2_mlb_official_picks_value_evaluation_idx",
+      "indexdef": "CREATE INDEX pick2_mlb_official_picks_value_evaluation_idx ON public.pick2_mlb_official_picks USING btree (value_evaluation_id)"
+    }
+  ]
+}

@@ -24,7 +24,7 @@ export function createPregameReadRepository(db) {
       const rows = await read(db.from('pick2_game_predictions').select('*').order('predicted_at', { ascending: false }).limit(100), 'prediction_candidates')
       return rows.data
     },
-    async readDependencies(target, starters) {
+    async readDependencies(target, starters, { inventoryMissing = false } = {}) {
       const seasonStart = `${target.gameDate.slice(0, 4)}-01-01`
       const teamIds = [target.homeTeamId, target.awayTeamId]
       const pitcherIds = [starters.home.mlbam_pitcher_id, starters.away.mlbam_pitcher_id]
@@ -51,6 +51,7 @@ export function createPregameReadRepository(db) {
       requireRead(ids.length > 0 && ids.length <= 500 && !ids.includes(target.gamePk), 'DEPENDENCY_SCOPE')
       const rows = []
       const counts = []
+      const missingGamePks = []
       for (let start = 0; start < ids.length; start += 8) {
         const scope = ids.slice(start, start + 8)
         const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW)
@@ -60,6 +61,10 @@ export function createPregameReadRepository(db) {
         requireRead(errors.length === 0, `RAW_GAME_READ:${errors.map((result) => result.reason.message).join('|')}`)
         for (const [index, result] of results.entries()) {
           const page = result.value
+          if (inventoryMissing && page.count === 0 && page.data.length === 0) {
+            missingGamePks.push(scope[index])
+            continue
+          }
           requireRead(Number.isInteger(page.count) && page.count > 0 && page.count <= 1000, 'RAW_READ_CAP_OR_MISSING_GAME')
           requireRead(page.data.length === page.count, 'RAW_READ_TRUNCATED')
           rows.push(...page.data)
@@ -69,7 +74,13 @@ export function createPregameReadRepository(db) {
       requireRead(rows.length <= ids.length * 1000, 'TOTAL_RAW_CAP')
       // Do not hide late ingestion with a timestamp WHERE filter: the pure
       // provenance gate must reject it instead of building incomplete history.
-      return { rows, dependencyGamePks: ids, exactCounts: counts, actualRows: rows.length }
+      const result = { rows, dependencyGamePks: ids, exactCounts: counts, actualRows: rows.length }
+      if (inventoryMissing) {
+        result.missingGamePks = missingGamePks
+        result.missingGameDates = games.data.filter(g => missingGamePks.includes(g.game_pk)).map(g => ({ gamePk: g.game_pk, gameDate: g.game_date }))
+        requireRead(result.missingGameDates.length === missingGamePks.length, 'MISSING_DEPENDENCY_DATE')
+      }
+      return result
     },
     async verifyPersistenceColumns(rows) {
       const result = []

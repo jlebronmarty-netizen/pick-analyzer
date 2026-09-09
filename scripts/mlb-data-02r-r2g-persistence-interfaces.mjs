@@ -163,11 +163,16 @@ export function normalizeMarketEvidence({ providerResponse, responseDigest, acqu
 
 export function crosswalkMarketEvents({ normalizedRows = [], nativeGames = [], eligibleGamePks = [], runAsOf } = {}) {
   assertIsoTimestamp(runAsOf, 'run_as_of')
+  const utcHour = value => {
+    const time = Date.parse(value)
+    if (!Number.isFinite(time)) throw new Error('MARKET_CROSSWALK_INVALID_TIME')
+    return new Date(time).toISOString().slice(0, 13)
+  }
   const eligible = new Set(uniqueGamePks(eligibleGamePks))
   const nativeByTeamsTime = new Map()
   for (const game of nativeGames) {
     const gamePk = normalizeGamePk(game.game_pk)
-    const key = `${normalizeTeamToken(game.away_team_name ?? game.away)}:${normalizeTeamToken(game.home_team_name ?? game.home)}:${String(game.scheduled_at ?? game.commence_time).slice(0, 13)}`
+    const key = `${normalizeTeamToken(game.away_team_name ?? game.away)}:${normalizeTeamToken(game.home_team_name ?? game.home)}:${utcHour(game.scheduled_at ?? game.commence_time)}`
     const list = nativeByTeamsTime.get(key) ?? []
     list.push({ ...game, game_pk: gamePk })
     nativeByTeamsTime.set(key, list)
@@ -179,7 +184,7 @@ export function crosswalkMarketEvents({ normalizedRows = [], nativeGames = [], e
   const rows = []
   for (const row of byEvent.values()) {
     const sourceEvent = row.source_event ?? {}
-    const key = `${normalizeTeamToken(sourceEvent.away_team ?? row.away_team)}:${normalizeTeamToken(sourceEvent.home_team ?? row.home_team)}:${String(row.commence_time).slice(0, 13)}`
+    const key = `${normalizeTeamToken(sourceEvent.away_team ?? row.away_team)}:${normalizeTeamToken(sourceEvent.home_team ?? row.home_team)}:${utcHour(row.commence_time)}`
     const matches = nativeByTeamsTime.get(key) ?? []
     if (matches.length === 0) rows.push({ provider_event_id: row.provider_event_id, classification: 'UNMATCHED', game_pk: null })
     else if (matches.length > 1) rows.push({ provider_event_id: row.provider_event_id, classification: 'AMBIGUOUS', game_pk: null, candidate_game_pks: matches.map((game) => game.game_pk) })
@@ -264,6 +269,18 @@ function median(values) {
   const sorted = values.map(Number).sort((a, b) => a - b)
   const mid = Math.floor(sorted.length / 2)
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+}
+
+export const MARKET_FRESHNESS_POLICY = Object.freeze({ freshMinutes: 10, agingMinutes: 30, staleBlocked: true })
+
+export function classifyMarketFreshness(row) {
+  const providerLastUpdate = Date.parse(row.provider_last_update ?? '')
+  const acquiredAt = Date.parse(row.acquired_at ?? '')
+  if (!Number.isFinite(providerLastUpdate) || !Number.isFinite(acquiredAt)) return { state: 'STALE', ageMinutes: null }
+  const ageMinutes = Math.max(0, (acquiredAt - providerLastUpdate) / 60000)
+  if (ageMinutes <= MARKET_FRESHNESS_POLICY.freshMinutes) return { state: 'FRESH', ageMinutes }
+  if (ageMinutes <= MARKET_FRESHNESS_POLICY.agingMinutes) return { state: 'AGING', ageMinutes }
+  return { state: 'STALE', ageMinutes }
 }
 
 export function calculateNativeValue({ prediction, observations, runAsOf } = {}) {

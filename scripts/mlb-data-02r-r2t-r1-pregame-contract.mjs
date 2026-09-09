@@ -235,3 +235,25 @@ export function runPregameModelDryPath({ target, starters, rawRows, dependencyGa
   const vector = assemblePregameVector({ target, starters, built })
   return { built, vector, inference: inferChampion({ vector }), writes: 0, providerCalls: 0, liveExecutionEnabled: false }
 }
+
+export function buildAllPregameFeatureRows({ contexts, runDate, runAsOf }) {
+  ensure(operatingDate(runAsOf) === runDate, 'RUN_DATE_FREEZE')
+  const inventory = expandAllGameTargets(contexts)
+  const rows = { snapshots: [], team: [], starter: [], bullpen: [], batter: [], matchup: [], firstInning: [], offense: 0 }
+  const games = []
+  for (const { target, starters, dependencies } of [...contexts].sort((a, b) => a.target.gamePk - b.target.gamePk)) {
+    ensure(target.runAsOf === runAsOf && target.gameDate === runDate, 'CURRENT_SLATE_FREEZE')
+    const verified = resolvePregameTarget({ native: target.native, runAsOf, eligibleGamePks: contexts.map(c => c.target.gamePk) })
+    for (const key of ['gamePk', 'gameDate', 'scheduledAt', 'homeTeamId', 'awayTeamId', 'performanceCutoff', 'asOfDate', 'sourceDigest']) ensure(target[key] === verified[key], 'TARGET_CONTEXT_DRIFT')
+    resolveStarterContext(verified, Object.values(starters))
+    const built = buildPregameFeatureRows({ target, starters, rawRows: dependencies.rows, dependencyGamePks: dependencies.dependencyGamePks })
+    const vector = assemblePregameVector({ target, starters, built })
+    for (const domain of Object.keys(rows)) {
+      if (domain === 'offense') rows.offense += built.rows.offense
+      else rows[domain].push(...built.rows[domain])
+    }
+    games.push({ target, starters, built, vector, inference: inferChampion({ vector }) })
+  }
+  for (const [domain, cap] of Object.entries(inventory.maximumCandidateCaps)) ensure(rows[domain].length === cap, 'ALL_GAME_ROW_CAP')
+  return { rows, games, inventory }
+}

@@ -182,10 +182,10 @@ export async function runR2BExecutableEntrypoint({
   runAsOf = null,
   clock = null,
 } = {}) {
-  if (mode === 'LIVE_EXECUTE') {
-    if (!authorization) throw new Error(R2I_AUTH_ERROR)
+  if (mode === 'LIVE_EXECUTE' || mode === 'CERTIFICATION_SIMULATION') {
+    if (mode === 'LIVE_EXECUTE' && !authorization) throw new Error(R2I_AUTH_ERROR)
     return runR2ILiveExecution({
-      mode: 'LIVE_EXECUTE',
+      mode,
       authorization,
       providers,
       repository,

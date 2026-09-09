@@ -4,13 +4,17 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import assert from 'node:assert/strict'
 import { sha256 } from './mlb-data-02r-r2f-stage-contracts.mjs'
-import { buildPregameFeatureRows, assemblePregameVector } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
+import { buildPregameFeatureRows, assemblePregameVector, buildAllPregameFeatureRows, operatingDate } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import { inferChampion } from './mlb-data-02r-r2t-real-feature-champion.mjs'
-import { featureInsertRowsForDomain, comparableFeatureRow, resolveCanonicalFeatureSnapshotIds, bindFeatureRowsToSnapshotIds, classifyBoundDailyFeatures, R2I_LIVE_TARGETS } from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
+import { validateLocalDownstream } from './mlb-data-02r-r2t-downstream-validate.mjs'
+import { buildPersistedPredictions } from './mlb-data-02r-r2t-downstream-persistence.mjs'
+import { featureInsertRowsForDomain, comparableFeatureRow, resolveCanonicalFeatureSnapshotIds, bindFeatureRowsToSnapshotIds, classifyBoundDailyFeatures, R2I_LIVE_TARGETS, revisionFeatureRows, persistCanonicalFeaturePlan } from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
 
 const root = process.env.R2S_VALIDATION_DIR
 if (!root || !process.env.R1_READ_CACHE) throw new Error('ISOLATED_VALIDATION_REQUIRED')
 const { PGlite } = await import(pathToFileURL(path.join(root, 'validation-tools/node_modules/@electric-sql/pglite/dist/index.js')))
+// This database is ephemeral WASM PostgreSQL in this process. No connection
+// URL or Supabase client exists here; every SQL insert below is local-only.
 const db = new PGlite()
 const manifest = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SCHEMA_REVIEW.json', 'utf8'))
 const migration = fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_PROPOSED.sql', 'utf8')
@@ -62,6 +66,11 @@ const vector = assemblePregameVector({ target, starters, built })
 const actualVector = assemblePregameVector({ target, starters, built: { ...built, rows: actualRows } })
 check('PostgreSQL typed persistence preserves all 76 real values', sha256(vector.values) === sha256(actualVector.values))
 check('PostgreSQL persisted Champion inference parity', inferChampion({ vector }).artifact.home_probability === inferChampion({ vector: actualVector }).artifact.home_probability)
+const privateRegistry = JSON.parse(fs.readFileSync(path.join(root, 'private-registry.json'), 'utf8'))
+const storedParity = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json', 'utf8')).storedOutputParity
+const parityPlan = await buildPersistedPredictions({ games: [{ target, starters, built, vector }], persistedFeatures: actualRows,
+  registryRepository: { readChampion: async () => privateRegistry }, runAsOf: target.runAsOf })
+check('production prediction plan preserves the already certified stored input digest', parityPlan[0].frozen_input_digest === (storedParity.storedInputDigest ?? storedParity.stored.frozen_input_digest))
 const second = await classifyBoundDailyFeatures(repository, bound, [target.gamePk], caps)
 check('PostgreSQL defaults and timestamp readback reuse all eight rows', Object.values(second.plans).reduce((sum, p) => sum + p.reuseNoOp, 0) === 8)
 // A separate real stored batter row exercises the physical batter table; it
@@ -105,6 +114,52 @@ await db.exec(migration)
 for (const domain of domains) check(`${domain} migration preserves exact existing rows`, sha256(before[domain]) === sha256(await selectAll(tableFor(domain))))
 const fkCount = (await db.query("select count(*)::int as n from pg_constraint where contype='f'")).rows[0].n
 check('all feature foreign keys preserved by migration', fkCount === manifest.constraints.filter((c) => c.contype === 'f').length)
+const realRevision = revisionFeatureRows(built.rows)
+assert.deepEqual(revisionFeatureRows(realRevision), realRevision)
+const interruptedRepository = { ...repository, async insertFeatureRows(domain, rows, cap) {
+  if (domain === 'bullpen') throw new Error('INJECTED_AFTER_STARTER_CHECKPOINT')
+  return repository.insertFeatureRows(domain, rows, cap)
+} }
+await assert.rejects(() => persistCanonicalFeaturePlan({ repository: interruptedRepository, rowsByDomain: realRevision, eligibleGamePks: [target.gamePk] }), /INJECTED_AFTER_STARTER_CHECKPOINT/)
+const resumed = await persistCanonicalFeaturePlan({ repository, rowsByDomain: realRevision, eligibleGamePks: [target.gamePk] })
+check('real revision resume reuses committed snapshots/team/starter', resumed.plans.snapshots.reuseNoOp === 10 && resumed.plans.team.reuseNoOp === 2 && resumed.plans.starter.reuseNoOp === 2)
+const revisionVector = assemblePregameVector({ target, starters, built: { ...built, rows: resumed.rows } })
+check('snapshot-pinned real revision readback preserves 76-value vector and Champion', sha256(revisionVector.values) === sha256(vector.values) && inferChampion({ vector: revisionVector }).artifact.home_probability === inferChampion({ vector }).artifact.home_probability)
+const newPlannerRows = buildPregameFeatureRows({ target, starters, rawRows: cache.dependencies.rows, dependencyGamePks: cache.dependencies.dependencyGamePks }).rows
+const repeated = await persistCanonicalFeaturePlan({ repository, rowsByDomain: revisionFeatureRows(newPlannerRows), eligibleGamePks: [target.gamePk], limits: Object.fromEntries(['snapshots', ...domains].map(d => [d, 0])) })
+check('independent retry of real revision persists zero rows with zero caps', repeated.writes.every(w => w.inserted === 0))
+if (process.env.R2T_MULTI_READ_CACHE) {
+  const multi = JSON.parse(fs.readFileSync(process.env.R2T_MULTI_READ_CACHE, 'utf8'))
+  assert.ok(multi.cases.length >= 2)
+  for (const c of multi.cases) {
+    assert.equal(sha256(c.dependencies), c.digest)
+    // Fixture FK parents in the in-memory PGlite instance, never production.
+    for (const team of [c.target.homeTeamId, c.target.awayTeamId]) await db.query('insert into sports_teams(id) values ($1) on conflict do nothing', [team])
+  }
+  const frozenAsOf = multi.cases[0].target.runAsOf
+  const args = { contexts: multi.cases, runAsOf: frozenAsOf, runDate: operatingDate(frozenAsOf) }
+  const all = buildAllPregameFeatureRows(args)
+  const scope = all.games.map(g => g.target.gamePk)
+  const stored = await persistCanonicalFeaturePlan({ repository, rowsByDomain: revisionFeatureRows(all.rows), eligibleGamePks: scope })
+  check('all real current-slate games expand into complete domain plans', all.games.length === multi.cases.length && stored.rows.snapshots.length === 10 * scope.length)
+  for (const game of all.games) {
+    const readbackRows = { offense: 2 }
+    for (const domain of ['snapshots', ...domains]) readbackRows[domain] = stored.rows[domain].filter(r => r.target_game_pk === game.target.gamePk)
+    const rebuilt = assemblePregameVector({ target: game.target, starters: game.starters, built: { ...game.built, rows: readbackRows } })
+    assert.deepEqual(rebuilt.values, game.vector.values)
+    assert.equal(inferChampion({ vector: rebuilt }).artifact.home_probability, game.inference.artifact.home_probability)
+  }
+  check('every real slate game preserves persisted 76-vector and Champion parity', true)
+  const reused = await persistCanonicalFeaturePlan({ repository, rowsByDomain: revisionFeatureRows(buildAllPregameFeatureRows(args).rows), eligibleGamePks: scope, limits: Object.fromEntries(['snapshots', ...domains].map(d => [d, 0])) })
+  check('all-game retry is zero-write with exact zero caps', reused.writes.every(w => w.inserted === 0))
+  assert.throws(() => buildAllPregameFeatureRows({ ...args, contexts: [...multi.cases, multi.cases[0]] }), /DUPLICATE_TARGET_GAME/)
+  assert.throws(() => buildAllPregameFeatureRows({ ...args, runDate: '2000-01-01' }), /RUN_DATE_FREEZE/)
+  const changed = structuredClone(multi.cases)
+  changed[0].target.native.scheduled_at = frozenAsOf
+  assert.throws(() => buildAllPregameFeatureRows({ ...args, contexts: changed }), /STARTED_GAME/)
+  check('duplicate targets, stale run date and started-game drift fail closed', true)
+  await validateLocalDownstream({ db, root, games: all.games, storedFeatures: stored.rows, runAsOf: frozenAsOf, check, contexts: multi.cases, featureRepository: repository })
+}
 for (const { domain, row } of probes) {
   await repository.insertFeatureRows(domain, [row], 1)
   await assert.rejects(() => repository.insertFeatureRows(domain, [row], 1), (e) => e.code === '23505')
