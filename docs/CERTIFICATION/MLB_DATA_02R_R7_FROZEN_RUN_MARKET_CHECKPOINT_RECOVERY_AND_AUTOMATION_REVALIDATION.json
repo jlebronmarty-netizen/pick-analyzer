@@ -1,0 +1,103 @@
+{
+  "phase": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION",
+  "verdict": "BLOCKED_FORENSIC_EVIDENCE_GAP",
+  "startingSha": "df1fb78e9a90d06becf6702b46158a34c2bfe974",
+  "executionPackageUnchanged": true,
+  "frozenRun": {
+    "runId": "automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2",
+    "packageSha": "e49fd02cd98b95c3a1a50bc057290b66d09679b2",
+    "runDate": "2026-09-09",
+    "runAsOf": "2026-09-10T00:00:48.874Z",
+    "operatingTimezone": "America/Puerto_Rico",
+    "eligibleGameCount": 1,
+    "lastDurableStage": "FEATURES",
+    "completed": ["SCOPE", "DEPENDENCY_SCOPE", "CONTEXTS", "FEATURES"],
+    "revision": 10,
+    "status": "RUNNING",
+    "predictionInserts": 1,
+    "predictionReadback": "PASS",
+    "existingMappingCount": 1,
+    "mappingPredatesRun": true,
+    "newMarketObservations": 0,
+    "newValues": 0,
+    "newOfficialPicks": 0,
+    "activeLease": false,
+    "providers": {"MLB_OFFICIAL": 2, "STATCAST": 0, "THE_ODDS_API": 1},
+    "reservationCount": 3,
+    "marketReferencePresent": false,
+    "responseDigestPresent": false,
+    "dispositionAssessment": "TERMINAL_PARTIAL_PRESERVED",
+    "dispositionApplied": false
+  },
+  "forensics": {
+    "status": "INCOMPLETE_EXACT_FIRST_EXCEPTION_NOT_RETAINED",
+    "firstFailedInvocation": "2026-09-10T00:00:42Z",
+    "firstHttpStatus": 503,
+    "firstException": "UNRECOVERABLE_OBSERVABILITY_GAP",
+    "exceptionClaimIsHistoricalFact": false,
+    "logsRetainStatusOnly": true,
+    "providerOutcome": "RESERVED_RESPONSE_NOT_DURABLY_OBSERVED",
+    "knownDefects": ["PAID_EVIDENCE_EPHEMERAL", "MARKET_CHECKPOINT_AFTER_PERSISTENCE", "ERROR_DETAIL_NOT_RECORDED"],
+    "reproducedFailClosedReasons": ["R6_CHECKPOINT:ODDS_OUTCOME_UNCERTAIN", "R6_STATE:FROZEN_PACKAGE_CONFLICT", "R6_STATE:STALE_PENDING_RUN_REQUIRES_REVIEW"],
+    "historicalRetryExceptionAttribution": "NOT_OBSERVED_DO_NOT_SUBSTITUTE_REPRODUCTION_FOR_LOGS",
+    "recoverySourcesReviewed": ["runtime checkpoint and reservations", "canonical market mappings and observations", "Vercel runtime logs", "public evidence/cache table inventory", "historical raw records", "sports sync acquisition metadata", "Storage bucket inventory"],
+    "certifiedOriginalResponseRecoverable": false,
+    "freshOddsMayReplaceFrozenEvidence": false,
+    "additionalOddsRequested": false
+  },
+  "midnight": {
+    "operatingDateAudit": "PASS",
+    "utcDate": "2026-09-10",
+    "puertoRicoDate": "2026-09-09",
+    "utcRolloverIdentityDefectReproduced": false,
+    "crossMidnightRepairRegression": "NOT_RUN_REPAIR_NOT_IMPLEMENTED"
+  },
+  "diagnostics": {
+    "command": "node scripts/mlb-operational-r7-forensics-validate.mjs",
+    "infrastructure": "DISPOSABLE_PGLITE",
+    "passed": 6,
+    "status": "DIAGNOSTIC_REPRODUCTION_PASS",
+    "repairCertified": false,
+    "build": "PASS_400_PAGES"
+  },
+  "schedulerInventory": {
+    "r6MlbCron": "DISABLED",
+    "nbaChanged": false,
+    "otherMlbAcquisitionsObserved": 2,
+    "otherSource": "GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK",
+    "otherAcquisitionsAreFrozenRunEvidence": false,
+    "otherAcquisitionsIncludedInR6Ledger": false,
+    "requiresSeparateOwnershipAndBudgetReconciliation": true
+  },
+  "remainingGates": {
+    "providerDurability": "PENDING",
+    "marketResume": "PENDING",
+    "503Recovery": "PENDING",
+    "crossInstanceMarketRecovery": "PENDING",
+    "productionRecovery": "BLOCKED_BY_GATES_1_TO_10",
+    "automationRevalidation": "PENDING",
+    "automationReactivation": "NOT_PERFORMED",
+    "scheduledReadback": "NOT_PERFORMED",
+    "finalOperationalCertification": "NOT_ISSUED"
+  },
+  "phaseAccounting": {
+    "providerCalls": 0,
+    "missionOddsCalls": 3,
+    "missionOddsCap": 20,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "settlementWrites": 0,
+    "syntheticProductionPathsExecuted": 0,
+    "startedGameWrites": 0,
+    "newConflicts": 0
+  },
+  "settlement": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
+  "performance": "NO_SETTLED_SAMPLE",
+  "protectedState": {
+    "inheritedTrackedChanges": 19,
+    "protectedDirectoriesTouched": false,
+    "frozenRunMutated": false,
+    "predictionDeletedOrChanged": false,
+    "modelFeaturePolicyChanges": false
+  }
+}
