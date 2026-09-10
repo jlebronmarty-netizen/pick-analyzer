@@ -1,5 +1,7 @@
 # Master Roadmap
 
+Phase 2 continuation: approved Edge v7 is active with exact code/auth readback. Original failure disposition passed. A new real run reproduced R6_CLIENT:WRITE_REQUEST_SIZE: 100 canonical raw rows exceed the 500KB client cap. Byte-aware batching is under validation; no UI work, no business DML, no Odds call. One new Official and one Statcast acquisition are retained. The new failed run remains guarded until the bounded Vercel repair is deployed.
+
 Phase 2 production recovery is blocked on exact Edge deployment approval after automatic review rejected candidate 2c287299c007fbf4620b4a63f1d460c97a7634ac. The repair is published and Vercel READY; Edge remains version 6. Failed run revision 8 and all evidence/accounting are preserved. Current five-game outputs remain zero. See docs/CERTIFICATION/MLB_PHASE2_DEPENDENCY_RECOVERY_AUDIT.md. No new provider calls or production DML/DDL.
 
 Phase 2 dependency recovery: five-game production-shaped inventory and injected Statcast replay pass offline. Confirmed diagnostic-code loss and malformed-CSV acceptance are repaired; the exact historical exception remains unknown. All 72 real-feature/Champion SQL checks and 17 behavior groups pass. An exact-state dependency-failure disposition requires zero Odds and zero business writes, preserves evidence/counters and retains FAILED status. Production deployment/disposition and successful current-slate progression remain pending; no UI changes, provider calls or production DML/DDL in this phase yet.

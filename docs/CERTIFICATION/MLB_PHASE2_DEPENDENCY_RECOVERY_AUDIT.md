@@ -2,6 +2,14 @@
 
 Status: LOCAL_REPAIR_CERTIFIED_EDGE_DEPLOYMENT_APPROVAL_BLOCKED. Operational recovery is not certified.
 
+## Authorized deployment and fresh reproduction
+
+The subsequent exact authorization was executed: Edge version 7 is ACTIVE, all ten downloaded files match commit 2c287299 and its manifest, and actual missing/wrong/public bearer checks return 401 while server-only inspect returns 200. The original failed run is TERMINAL_PARTIAL_PRESERVED at revision 9 with its failure, evidence and accounting unchanged. No unresolved guard remained immediately after disposition.
+
+A fresh current-slate execution from fcf140e reproduced R6_CLIENT:WRITE_REQUEST_SIZE in the actual Vercel response after one Official and one Statcast acquisition, with zero business DML and zero Odds. This is observed current evidence, not a reconstruction of the original historical exception. The durable failure remained generic because that client code was not in the approved Edge classification vocabulary.
+
+An indexed read of 100 existing canonical raw rows reproduced a 512,964-byte write request, exceeding the existing 500,000-byte client limit. The narrow Vercel repair plans batches by both UTF-8 byte size (400,000 maximum) and row count (100 maximum), validates every single row before the first write, and preserves row order, identity, values and cumulative caps. The same production-shaped payload now splits into two requests; a repeat reuses every row. Oversized single rows fail before mutation with RangeError/WRITE_PAYLOAD_SHAPE, already accepted by the exact approved Edge candidate. No Edge files or endpoint limits are changed by this additional repair.
+
 The executable repair is published in `2c287299c007fbf4620b4a63f1d460c97a7634ac`. Its exact ten-file Edge manifest is `MLB_PHASE2_DEPENDENCY_EDGE_MANIFEST.json`. Server-only bearer authentication is unchanged. No production DDL is included.
 
 ## Reproducible findings

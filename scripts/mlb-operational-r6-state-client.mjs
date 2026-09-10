@@ -56,7 +56,7 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
       const result=await call({...token(),op:'fail',failure});run=result.run;return structuredClone(run)
     }),
     write:write=>serial(async()=>{
-      ensure(Buffer.byteLength(JSON.stringify(write))<=500000,'WRITE_REQUEST_SIZE')
+      if(Buffer.byteLength(JSON.stringify(write))>500000)throw new RangeError('R6_STATE:WRITE_PAYLOAD_SHAPE')
       const result=await call({...token(),op:'write',revision:Number(run.revision),write});run=result.run;return result.result
     }),
     ledger:{
