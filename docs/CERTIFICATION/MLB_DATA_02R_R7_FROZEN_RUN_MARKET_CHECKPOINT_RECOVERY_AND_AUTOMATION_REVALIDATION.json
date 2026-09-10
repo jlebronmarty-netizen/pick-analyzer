@@ -1,6 +1,6 @@
 {
   "phase": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION",
-  "verdict": "R7_PRODUCTION_RECOVERY_CERTIFIED_SCHEDULED_READBACK_PENDING",
+  "verdict": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION_CERTIFIED",
   "startingSha": "df1fb78e9a90d06becf6702b46158a34c2bfe974",
   "executionPackageUnchanged": true,
   "frozenRun": {
@@ -101,21 +101,21 @@
     "accountingReconciliation": "R6 mission ledger remains 3/20; two distinct historical legacy acquisitions are separately retained and are not frozen-run evidence. No counter was reset or discounted."
   },
   "remainingGates": {
-    "providerDurability": "EXACT_CODE_LOCAL_PASS_PRODUCTION_PRIVATE_STORAGE_PASS",
+    "providerDurability": "PASS",
     "marketResume": "PASS_DISPOSABLE_REAL_R2",
-    "503Recovery": "PENDING",
+    "503Recovery": "PASS_PRESERVED_DISPOSITION_AND_NEW_HTTP_200",
     "crossInstanceMarketRecovery": "PASS_DISPOSABLE_REAL_R2",
     "productionRecovery": "PASS",
     "automationRevalidation": "PASS",
-    "automationReactivation": "PREPARED_AWAITING_DEPLOYMENT",
-    "scheduledReadback": "PENDING_NATURAL_INVOCATION",
-    "finalOperationalCertification": "NOT_ISSUED"
+    "automationReactivation": "PASS",
+    "scheduledReadback": "PASS",
+    "finalOperationalCertification": "ISSUED"
   },
   "phaseAccounting": {
-    "providerCalls": 0,
+    "providerCalls": 2,
     "missionOddsCalls": 3,
     "missionOddsCap": 20,
-    "productionDml": 7,
+    "productionDml": 38,
     "productionDdl": 0,
     "settlementWrites": 0,
     "syntheticProductionPathsExecuted": 0,
@@ -123,27 +123,39 @@
     "newConflicts": 0,
     "productionDmlBreakdown": {
       "storageBucketMetadataCreates": 1,
-      "storageObjectWrites": 0,
-      "runtimeInserts": 1,
-      "runtimeUpdates": 5,
-      "businessWrites": 0
+      "storageObjectCreates": 1,
+      "runtimeInserts": 3,
+      "runtimeUpdates": 28,
+      "businessInserts": 5,
+      "businessUpdates": 0
     },
     "currentAuthorizationTurn": {
-      "providerCalls": 0,
-      "runtimeInserts": 1,
-      "runtimeUpdates": 5,
-      "businessWrites": 0,
+      "providers": {
+        "MLB_OFFICIAL": 2,
+        "STATCAST": 0,
+        "THE_ODDS_API": 0,
+        "BALLDONTLIE": 0,
+        "SPORTSDATAIO": 0,
+        "OTHER": 0
+      },
+      "runtimeInserts": 3,
+      "runtimeUpdates": 28,
+      "storageObjectCreates": 1,
+      "businessInserts": 5,
+      "businessUpdates": 0,
       "productionDdl": 0
-    }
+    },
+    "productionDmlUnit": "Committed logical row/object mutations; excludes platform-internal Storage bookkeeping"
   },
   "settlement": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
   "performance": "NO_SETTLED_SAMPLE",
   "protectedState": {
     "inheritedTrackedChanges": 19,
     "protectedDirectoriesTouched": false,
-    "frozenRunMutated": false,
+    "frozenRunMutated": true,
     "predictionDeletedOrChanged": false,
-    "modelFeaturePolicyChanges": false
+    "modelFeaturePolicyChanges": false,
+    "frozenRunMutation": "AUTHORIZED_EXACT_STATE_TERMINAL_PARTIAL_DISPOSITION_ONLY"
   },
   "localRepair": {
     "durableEvidence": "IMMUTABLE_PRIVATE_STORAGE_WITH_FENCED_REFERENCE",
@@ -263,10 +275,10 @@
     "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036"
   },
   "productionRepairReadback": {
-    "checkedAt": "2026-09-10T13:08:00Z",
+    "checkedAt": "2026-09-10T14:19:31.064Z",
     "candidateSha": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
     "vercelProduction": "READY",
-    "vercelPackageSha": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+    "vercelPackageSha": "2926c068ed37db8eae86bee9ec120faaecc2775b",
     "schema": {
       "status": "PASS",
       "columns": 406,
@@ -285,18 +297,22 @@
     },
     "cron": [
       {
+        "path": "/api/cron/mlb-operational",
+        "schedule": "*/15 * * * *"
+      },
+      {
         "path": "/api/cron/nba-current-era-shadow",
         "schedule": "*/30 * * * *"
       }
     ],
-    "mlbActivation": "PREPARED_AWAITING_DEPLOYMENT",
+    "mlbActivation": "ENABLED",
     "evidenceBucket": {
       "private": true,
       "maxBytes": 4194304,
       "mime": [
         "application/json"
       ],
-      "objects": 0,
+      "objects": 1,
       "objectsRls": true,
       "objectPolicies": 0
     },
@@ -312,7 +328,7 @@
     },
     "frozenRunRevision": 11,
     "frozenPredictionUnchanged": true,
-    "productionRowCountsUnchanged": true,
+    "productionRowCountsUnchanged": false,
     "host": {
       "status": "HOST_DRY_PASS",
       "packageSha": "ac669d8815de5c394105a9e6b716cfd68c304910",
@@ -327,6 +343,31 @@
       "implementation": "PASS_DISPOSABLE_SQL_AND_EXACT_DEPLOYED_CODE",
       "productionExceptionObserved": false,
       "limitation": "No exception manufactured in production; database outage or abrupt termination can prevent durable acknowledgement."
-    }
-  }
+    },
+    "scheduledEvidence": "MLB_R7_SCHEDULED_PRODUCTION_READBACK.json",
+    "existingProductionRowsPreserved": true,
+    "newNativeGameRows": 5
+  },
+  "finalOperationalVerdict": "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED",
+  "certificationAsOf": "2026-09-10T14:19:31.064Z",
+  "operationalFlags": {
+    "RECOMMENDATION_SYSTEM_OPERATIONAL": "YES",
+    "AUTOMATION_OPERATIONAL": "YES",
+    "SETTLEMENT_IMPLEMENTATION_CERTIFIED": "YES",
+    "PRODUCTION_SETTLEMENT_ENABLED": "NO",
+    "PRODUCTION_SETTLED_SAMPLE_OBSERVED": "NO",
+    "PERFORMANCE_SAMPLE_STATUS": "NO_SETTLED_SAMPLE"
+  },
+  "followupGates": [
+    "First legitimate production settlement only after separate write authorization",
+    "First natural postgame scheduled execution",
+    "First natural overnight scheduled execution"
+  ],
+  "knownLimitations": [
+    "Exact historical first exception unknown; observability gap explicitly accepted",
+    "No production exception manufactured; atomic recording verified in disposable SQL and exact deployed code",
+    "This slot produced no eligible predictions or new pitches; retained genuine nonempty/repeatability evidence supports earlier gates",
+    "Production settlement disabled; no settled sample; unsupported ROI/CLV unavailable",
+    "Natural postgame/overnight observations pending"
+  ]
 }

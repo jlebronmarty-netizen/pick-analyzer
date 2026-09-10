@@ -32,8 +32,8 @@
     "endpoint": "mlb-operational-preflight",
     "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
   },
-  "scheduledProductionReadback": "R7_PENDING_NATURAL_INVOCATION",
-  "scheduledEvidence": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION.json",
+  "scheduledProductionReadback": "PASS",
+  "scheduledEvidence": "MLB_R7_SCHEDULED_PRODUCTION_READBACK.json",
   "settlementStatus": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
   "r7": {
     "edgeVersion": 6,
@@ -48,6 +48,8 @@
     "hostDry": "PASS",
     "concurrency": "ONE_COMPLETED_ONE_DEFERRED",
     "missionOdds": 3,
-    "freshPreflight": "2026-09-10T13:57:10.877327+00:00"
+    "freshPreflight": "2026-09-10T13:57:10.877327+00:00",
+    "scheduledPackageSha": "2926c068ed37db8eae86bee9ec120faaecc2775b",
+    "scheduledHttp": 200
   }
 }

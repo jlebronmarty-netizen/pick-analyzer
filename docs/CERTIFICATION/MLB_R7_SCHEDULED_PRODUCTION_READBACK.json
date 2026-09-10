@@ -1,0 +1,139 @@
+{
+  "status": "PASS",
+  "observedAt": "2026-09-10T14:19:31.064Z",
+  "deploymentId": "dpl_ENqyzzZHfhpqzC237VMeM59Vpgwf",
+  "packageSha": "2926c068ed37db8eae86bee9ec120faaecc2775b",
+  "actualScheduledRequest": {
+    "method": "GET",
+    "path": "/api/cron/mlb-operational",
+    "at": "2026-09-10T14:15:06Z",
+    "http": 200,
+    "manuallyTriggered": false
+  },
+  "stages": [
+    {
+      "runId": "automation-5b985d43de839556edc597858d3d8b8c16258e29fe84f8b6ecdbb1e938b43b41",
+      "runDate": "2026-09-10",
+      "runAsOf": "2026-09-10T14:15:09.394+00:00",
+      "mode": "PREGAME",
+      "status": "COMPLETE",
+      "revision": 16,
+      "completed": [
+        "SCOPE",
+        "DEPENDENCY_SCOPE",
+        "CONTEXTS"
+      ],
+      "result": {
+        "picks": 0,
+        "reused": 0,
+        "status": "NO_VALID_PREGAME_SLATE",
+        "values": 0,
+        "inserted": 5,
+        "readback": "PASS",
+        "conflicts": 0,
+        "predictions": 0
+      },
+      "scopeCount": 5,
+      "blockedCount": 5,
+      "blockedReasons": [
+        "NEW_CANONICAL_EVIDENCE_AFTER_RUN_FREEZE"
+      ],
+      "providers": {
+        "MLB_OFFICIAL": 1,
+        "STATCAST": 0,
+        "THE_ODDS_API": 0
+      },
+      "dml": [
+        {
+          "cap": 5,
+          "stage": "PERSISTENCE",
+          "reused": 0,
+          "target": "pick2_mlb_games",
+          "planned": 5,
+          "updated": 0,
+          "inserted": 5,
+          "readback": "PASS",
+          "conflicts": 0
+        }
+      ]
+    },
+    {
+      "runId": "automation-caf7975116e697d1abab59a943527a0dddfcf9979d8ec95effa5aeecce34d706",
+      "runDate": "2026-09-10",
+      "runAsOf": "2026-09-10T14:15:26.501+00:00",
+      "mode": "INCREMENTAL",
+      "status": "COMPLETE",
+      "revision": 3,
+      "completed": [
+        "PITCH_SCOPE"
+      ],
+      "result": {
+        "picks": 0,
+        "reused": 0,
+        "status": "NO_SCOPED_GAMES",
+        "values": 0,
+        "inserted": 0,
+        "readback": "PASS",
+        "conflicts": 0,
+        "predictions": 0
+      },
+      "scopeCount": 0,
+      "blockedCount": 0,
+      "blockedReasons": [],
+      "providers": {
+        "MLB_OFFICIAL": 1,
+        "STATCAST": 0,
+        "THE_ODDS_API": 0
+      },
+      "dml": []
+    }
+  ],
+  "providers": {
+    "MLB_OFFICIAL": 2,
+    "STATCAST": 0,
+    "THE_ODDS_API": 0,
+    "BALLDONTLIE": 0,
+    "SPORTSDATAIO": 0,
+    "OTHER": 0
+  },
+  "missionOdds": {
+    "consumed": 3,
+    "cap": 20,
+    "separateHistoricalLegacyAcquisitions": 2
+  },
+  "businessDml": {
+    "nativeGameInserts": 5,
+    "updates": 0,
+    "cap": 5,
+    "conflicts": 0,
+    "readback": "PASS"
+  },
+  "runtimeDml": {
+    "inserts": 2,
+    "updates": 23
+  },
+  "storageObjectCreates": 1,
+  "privateEvidence": {
+    "kind": "schedule",
+    "independentClients": 2,
+    "referenceDigestMatch": true,
+    "additionalProviderCalls": 0,
+    "rawEvidencePublished": false
+  },
+  "predictionCount": 0,
+  "valueCount": 0,
+  "officialPickCount": 0,
+  "totalExistingPredictions": 52,
+  "totalExistingPicks": 20,
+  "frozenPredictionUnchanged": true,
+  "frozenDisposition": "TERMINAL_PARTIAL_PRESERVED",
+  "leaseReleased": true,
+  "uiChecks": 12,
+  "uiStatus": "PASS",
+  "todayGameCount": 5,
+  "boardValueCount": 0,
+  "productionDdl": 0,
+  "settlementWrites": 0,
+  "syntheticProductionPaths": 0,
+  "startedGameLeakage": 0
+}

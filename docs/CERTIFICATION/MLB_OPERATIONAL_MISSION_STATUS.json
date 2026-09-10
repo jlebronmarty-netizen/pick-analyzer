@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-09T14:07:24.580Z",
-  "verdict": "MLB_DATA_02R_REPEATABILITY_CERTIFIED",
-  "operationalCertified": false,
+  "generatedAt": "2026-09-10T14:19:31.064Z",
+  "verdict": "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED",
+  "operationalCertified": true,
   "basePackageSha": "f0b004ca0b58498e35fb73e34bea1d2431dd5720",
   "packageSha": "ENCLOSING_SANITIZED_COMMIT",
   "ddlCertification": "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SNAPSHOT_UNIQUENESS_DDL.json",
@@ -88,18 +88,18 @@
     }
   },
   "providerAccounting": {
-    "MLBOfficial": 14,
-    "sharedStatcast": 1,
-    "OddsAPI": 2,
+    "MLBOfficial": 20,
+    "sharedStatcast": 2,
+    "OddsAPI": 3,
     "BALLDONTLIE": 0,
     "SportsDataIO": 0,
     "otherSportsProviders": 0,
-    "missionOddsConsumed": 2,
-    "missionOddsRemaining": 18,
+    "missionOddsConsumed": 3,
+    "missionOddsRemaining": 17,
     "perRunCaps": {
       "MLBOfficial": 50,
       "sharedStatcast": 100,
-      "OddsAPI": 5
+      "OddsAPI": 1
     },
     "runs": [
       {
@@ -236,7 +236,19 @@
         "officialPicks": 7
       }
     ],
-    "nonProviderActivity": "Read-only Supabase metadata/evidence, Git publication, production version GET, OS-temp-only pinned PostgreSQL test-engine package download."
+    "nonProviderActivity": "Read-only Supabase metadata/evidence, Git publication, production version GET, OS-temp-only pinned PostgreSQL test-engine package download.",
+    "scope": "RETAINED_MANUAL_PLUS_DURABLE_RUNTIME_MISSION",
+    "retainedManualTotals": {
+      "MLBOfficial": 14,
+      "sharedStatcast": 1,
+      "OddsAPI": 2
+    },
+    "durableRuntimeTotals": {
+      "MLBOfficial": 6,
+      "sharedStatcast": 1,
+      "OddsAPI": 1
+    },
+    "separatelyRetainedHistoricalLegacyOdds": 2
   },
   "productionDml": {
     "insert": 5667,
@@ -306,17 +318,13 @@
   ],
   "rollbackAndRecoveryRunbook": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "R7_RECOVERY_COMPLETE_SCHEDULED_READBACK_PENDING",
-  "nextPhase": "R7_NATURAL_SCHEDULED_OBSERVATION",
+  "currentPhase": "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED",
+  "nextPhase": "OBSERVE_NATURAL_POSTGAME_OVERNIGHT_AND_AUTHORIZED_FIRST_SETTLEMENT",
   "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
-  "automationImplementation": "R7_REACTIVATION_PREPARED",
+  "automationImplementation": "ENABLED_PRODUCTION_VERIFIED",
   "publishedR3Sha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
   "automationBlocker": null,
-  "pendingGates": [
-    "R7_REACTIVATION_DEPLOYMENT",
-    "R7_NATURAL_SCHEDULED_READBACK",
-    "FINAL_OPERATIONAL_CERTIFICATION"
-  ],
+  "pendingGates": [],
   "certifiedExecutionSha": "633768729b212746d03a5bf4d2ae542d1d84f945",
   "r4": {
     "schemaPreflight": "EDGE_PASS_VERCEL_AUTH_BLOCKED",
@@ -362,6 +370,34 @@
     "productionRecovery": "PASS",
     "hostDry": "PASS",
     "concurrency": "PASS",
-    "scheduledReadback": "PENDING"
-  }
+    "scheduledReadback": "PASS",
+    "scheduledEvidence": "docs/CERTIFICATION/MLB_R7_SCHEDULED_PRODUCTION_READBACK.json",
+    "executionPackageSha": "2926c068ed37db8eae86bee9ec120faaecc2775b",
+    "finalCertification": "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED",
+    "providers": {
+      "MLB_OFFICIAL": 2,
+      "STATCAST": 0,
+      "THE_ODDS_API": 0,
+      "BALLDONTLIE": 0,
+      "SPORTSDATAIO": 0,
+      "OTHER": 0
+    },
+    "missionOdds": 3,
+    "accountingEvidence": "MLB_R7_SCHEDULED_PRODUCTION_READBACK.json"
+  },
+  "operationalFlags": {
+    "RECOMMENDATION_SYSTEM_OPERATIONAL": "YES",
+    "AUTOMATION_OPERATIONAL": "YES",
+    "SETTLEMENT_IMPLEMENTATION_CERTIFIED": "YES",
+    "PRODUCTION_SETTLEMENT_ENABLED": "NO",
+    "PRODUCTION_SETTLED_SAMPLE_OBSERVED": "NO",
+    "PERFORMANCE_SAMPLE_STATUS": "NO_SETTLED_SAMPLE"
+  },
+  "knownLimitations": [
+    "Exact historical first exception unknown; observability gap explicitly accepted",
+    "No production exception manufactured; atomic recording verified in disposable SQL and exact deployed code",
+    "This slot produced no eligible predictions or new pitches; retained genuine nonempty/repeatability evidence supports earlier gates",
+    "Production settlement disabled; no settled sample; unsupported ROI/CLV unavailable",
+    "Natural postgame/overnight observations pending"
+  ]
 }
