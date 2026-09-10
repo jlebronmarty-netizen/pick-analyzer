@@ -1,6 +1,7 @@
 {
   "phase": "PICK_ANALYZER_PHASE2_MARKET_PERSISTENCE_RECOVERY",
-  "verdict": "PROSPECTIVE_MARKET_PERSISTENCE_REPLAY_PASS_PRODUCTION_RECOVERY_PENDING",
+  "verdict": "PROSPECTIVE_REPLAY_CERTIFIED_EDGE_DEPLOYMENT_BLOCKED",
+  "publication": {"status":"AUTO_REVIEW_REJECTED","branch":"codex/phase2-market-forensics","reason":"BRANCH_SPECIFIC_AUTHORIZATION_AND_PRODUCTION_METADATA_REVIEW_REQUIRED","remoteChanged":false},
   "startingSha": "c133d12c8a37bf9f8933dace34b4d3c907738ee2",
   "failedExecutionPackage": "bd87727f9072369349096d62a361b8439ab31f9c",
   "failedRunId": "automation-73eebadf495e03f5bd4ad4df343bf7ab97fe4c6b2aab3c8c1c5d59f6002f6df3",
@@ -34,7 +35,7 @@
   },
   "marketStateCommandFailureClassification": "PASS_GENERIC_TRANSACTION_RESPONSE_DETAIL_UNRECOVERABLE",
   "marketPartialRunResume": "PASS_DISPOSABLE_LOST_ACKNOWLEDGEMENT_REUSE_EXPIRED_PRODUCTION_FREEZE_NOT_RESUMABLE",
-  "marketProductionRecovery": "NOT_EXECUTED_PRIOR_GATES_NOT_ALL_PASSED",
+  "marketProductionRecovery": "NOT_EXECUTED_EXACT_CANDIDATE_DEPLOYMENT_REJECTED",
   "downstreamValuePickRecovery": "NOT_EXECUTED",
   "automationRevalidation": "PARTIAL_SCHEMA_AND_OFFLINE_CHECKS_PASS",
   "postRepairScheduledRun": "NOT_EXECUTED_UNRESOLVED_RUN_GUARD_PRESERVED",
@@ -58,13 +59,15 @@
     "r7RuntimeChecks": 5,
     "auth": "PASS_UNCHANGED_HANDLER",
     "schemaPreflight": "PASS_406_COLUMNS_116_CONSTRAINTS_84_INDEXES",
-    "orphanSnapshotReferences": 0
+    "orphanSnapshotReferences": 0,
+    "freshProductionPreflight": "PASS_2026-09-10T19:02:50.754344Z",
+    "productionBearerAuth": "PASS_MISSING_WRONG_PUBLIC_401_SERVER_INSPECT_200"
   },
-  "diagnosticCandidate": "LOCAL_REVIEW_BRANCH_NOT_PRODUCTION_DEPLOYED",
+  "diagnosticCandidate": "4f0ebd30e1683efe2ea6c77a9d6cbcb3517b5d7c",
   "syntheticProductionPaths": 0,
   "startedGameLeakage": 0,
   "uiRedesignReady": false,
-  "remainingEvidence": "No further historical telemetry required; paired diagnostic deployment, safe expired-run disposition and a new eligible scheduled production run remain pending",
+  "remainingEvidence": "Exact-candidate Edge approval, paired Vercel deployment, safe terminal disposition and a new eligible scheduled production run. Historical response detail is no longer a gate.",
   "limits": [
     "No historical exception reconstruction",
     "No failed-run reset",
@@ -98,6 +101,15 @@
     "immutableConflictRollback": "PASS",
     "oldClientNamedGuardPreservation": "PASS",
     "futureDurableClassification": "PASS",
-    "providerReacquisition": 0
+    "providerReacquisition": 0,
+    "canonicalResumeFromDurableOdds": "PASS_NO_UPSTREAM_REEXECUTION"
+  },
+  "deployment": {
+    "status": "AUTO_REVIEW_REJECTED",
+    "productionEdgeVersion": 7,
+    "reason": "EXACT_PRIVILEGED_CANDIDATE_AUTHORIZATION_REQUIRED",
+    "fileCount": 10,
+    "manifest": "docs/CERTIFICATION/MLB_PHASE2_MARKET_DIAGNOSTIC_EDGE_MANIFEST.json",
+    "productionMutation": 0
   }
 }
