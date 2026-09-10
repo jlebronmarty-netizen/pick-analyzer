@@ -1,0 +1,92 @@
+name: MLB 02H Historical Digest Proof
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  historical-digest-proof:
+    if: github.head_ref == 'diag/mlb-02h-historical-digest-proof'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Recompute exact historical MLB Official digests
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { createHash } = require('node:crypto')
+          const fs = require('node:fs')
+
+          const expected = new Map(Object.entries({
+            '822853': '73704df35df0f7c49248de13ecf86072a713625a32c5798b0c4fc1742d88b443',
+            '823095': '10485895c809dd6ad39667beb45d236e183753ae80ca8154b776f18911a0b502',
+            '823337': 'df01fc58ca8f33477ee89378feaa5c6be009b797509fad2fc3b47be354f5a90b',
+            '823907': 'fcbde302a94423496ec03be074a178c04836134deab52c0d534ef7a3805718fd',
+            '824069': 'cf024106379be05273da7935c5c6de2b4b0de61a31e21c4ac2eceffccc91897a',
+            '824144': '31281fe788259dd63b604876149854095f0479685a546fcf888d745547c88176',
+            '824388': '30566f400eeb476ced4630ffe446a6bd8a44d749c622978308c74927cc43a475',
+            '824632': 'a6b139c98362a1f75a6810d338f13b58aef8077ce7c65d7685e0d932693dabc2',
+            '824796': 'fed4a02279984b187444ed0e4da28a747704642e2dc3deb0e65b2c38fea762b6',
+          }))
+
+          function stable(value) {
+            if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`
+            if (value && typeof value === 'object') {
+              return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`
+            }
+            return JSON.stringify(value)
+          }
+
+          function sha256(value) {
+            return createHash('sha256').update(value).digest('hex')
+          }
+
+          const endpoint = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-01-01&endDate=2026-09-04&hydrate=probablePitcher'
+
+          async function main() {
+            const response = await fetch(endpoint)
+            if (!response.ok) throw new Error(`MLB_HTTP_${response.status}`)
+            const payload = await response.json()
+            const games = (payload.dates ?? []).flatMap((date) => date.games ?? []).filter((game) => game.officialDate === '2026-09-03')
+            const results = games.map((game) => {
+              const gamePk = String(game.gamePk)
+              const actual = sha256(stable(game))
+              const expectedDigest = expected.get(gamePk) ?? null
+              return { gamePk: Number(gamePk), expected: expectedDigest, actual, match: expectedDigest === actual }
+            }).sort((a, b) => a.gamePk - b.gamePk)
+            const actualPks = new Set(results.map((row) => String(row.gamePk)))
+            const missing = [...expected.keys()].filter((gamePk) => !actualPks.has(gamePk))
+            const unexpected = results.filter((row) => !expected.has(String(row.gamePk))).map((row) => row.gamePk)
+            const proof = {
+              endpoint,
+              targetDate: '2026-09-03',
+              expectedCount: expected.size,
+              actualCount: results.length,
+              uniqueGamePk: actualPks.size,
+              allMatch: results.length === expected.size && missing.length === 0 && unexpected.length === 0 && results.every((row) => row.match),
+              missing,
+              unexpected,
+              results,
+            }
+            fs.writeFileSync('digest-proof.json', JSON.stringify(proof, null, 2))
+            console.log(JSON.stringify(proof, null, 2))
+            if (!proof.allMatch) process.exit(1)
+          }
+
+          main().catch((error) => {
+            console.error(error)
+            process.exit(1)
+          })
+          NODE
+
+      - name: Upload digest proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-02h-historical-digest-proof
+          path: digest-proof.json
+          if-no-files-found: error
+          retention-days: 7
