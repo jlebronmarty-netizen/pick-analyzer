@@ -1,6 +1,15 @@
 {
   "phase": "PICK_ANALYZER_PHASE_2_CURRENT_SLATE_DEPENDENCY_RECOVERY",
-  "status": "EDGE_DEPLOYED_BYTE_BATCH_REPAIR_LOCALLY_CERTIFIED",
+  "status": "DEPENDENCY_RECOVERY_VERIFIED_MARKET_PERSISTENCE_BLOCKED",
+  "executionPackage": "bd87727f9072369349096d62a361b8439ab31f9c",
+  "scheduledRun": "automation-73eebadf495e03f5bd4ad4df343bf7ab97fe4c6b2aab3c8c1c5d59f6002f6df3",
+  "scheduledRunStatus": "FAILED_MARKET_PERSISTENCE_REVISION_43",
+  "scheduledRunException": "STATE_COMMAND_FAILED",
+  "marketFailureUnderlyingCause": "UNRESOLVED_EXACT_STORED_88_OBSERVATION_PLAN_PASSES_OFFLINE_FENCED_SQL",
+  "durableOddsEvidence": "DIGEST_VERIFIED_PRESERVED_NO_REACQUISITION",
+  "progression": {"schedule":"PASS","dependencyScope":"PASS","statcast":"PASS","features":"PASS_4_GAMES","vector76":"PASS_4_GAMES","champion":"PASS_4_GAMES","predictions":4,"marketMappings":4,"marketObservations":0,"values":0,"picks":0},
+  "nextScheduledRun": "BLOCKED_RUN_REQUIRES_REVIEW",
+  "uiImplementation": "NOT_STARTED",
   "byteBatchValidation": {"productionShapedReplay":"PASS","idempotency":"PASS","oversizedRowNoPartialWrites":"PASS","sqlChecks":72,"stateChecks":21,"fencedWriteChecks":8,"behaviorGroups":17,"r7Checks":5,"build":"PASS","lint":"PASS"},
   "repairPackage": "2c287299c007fbf4620b4a63f1d460c97a7634ac",
   "vercelDeployment": "READY",
@@ -69,7 +78,7 @@
     "STATCAST": 1,
     "THE_ODDS_API": 0
   },
-  "missionOdds": 3,
+  "missionOdds": 4,
   "missionOddsCap": 20,
   "failedRunDisposition": "TERMINAL_PARTIAL_PRESERVED_REVISION_9",
   "repair": [
@@ -85,8 +94,8 @@
     "r7RuntimeChecks": 5,
     "build": "PASS"
   },
-  "providerCalls": 0,
-  "productionDml": 0,
+  "providerCalls": {"MLB_OFFICIAL":5,"STATCAST":7,"THE_ODDS_API":1,"other":0},
+  "productionDml": {"businessInserts":1770,"businessUpdates":1,"runtimeStateInserts":4,"runtimeStateUpdatesFromRevisionDeltas":140,"runtimeUpdatesIncludeTwoGuardedDispositions":true,"readback":"PASS","conflicts":0},
   "productionDdl": 0,
   "sourceHashes": {
     "scripts/mlb-data-02h-2026-current-foundation.mjs": "aadde955a68ad566ba135edeb984f123f10aa49063e454159fd1d83e6b826572",

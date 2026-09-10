@@ -29,6 +29,14 @@
   "offlineReplayStatus": "PASS",
   "missionOddsAtDisposition": 3,
   "missionOddsCap": 20,
-  "freshExecution": "IN_PROGRESS",
-  "operationalFreshness": "NOT_YET_CERTIFIED"
+  "byteBatchRepairPackage": "bd87727f9072369349096d62a361b8439ab31f9c",
+  "freshExecution": "COMPLETE_NO_VALID_PREGAME_SLATE_NEW_EVIDENCE_AFTER_FREEZE",
+  "dependencyRecovery": {"rawRowsInserted":1384,"rawRowCap":6000,"nativeRowsUpdated":1,"nativeRowCap":5,"readback":"PASS","conflicts":0,"officialCalls":2,"statcastCalls":5,"oddsCalls":0},
+  "secondFailedRunDisposition": "TERMINAL_PARTIAL_PRESERVED_REVISION_9",
+  "scheduledFreshFreeze": "OBSERVED_2026_09_10_154513_UTC",
+  "scheduledProgression": "FEATURES_76_CHAMPION_FOUR_PREDICTIONS_PERSISTED",
+  "scheduledBlocker": "MARKET_PERSISTENCE_STATE_COMMAND_FAILED",
+  "scheduledOddsEvidence": "DURABLY_PRESERVED_DIGEST_VERIFIED",
+  "missionOddsAfterScheduledRun": 4,
+  "operationalFreshness": "NOT_CERTIFIED_MARKET_RECOVERY_REQUIRED"
 }

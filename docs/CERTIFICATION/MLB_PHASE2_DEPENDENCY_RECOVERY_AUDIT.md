@@ -1,6 +1,20 @@
 # Phase 2 current-slate dependency recovery
 
-Status: LOCAL_REPAIR_CERTIFIED_EDGE_DEPLOYMENT_APPROVAL_BLOCKED. Operational recovery is not certified.
+Status: DEPENDENCY_RECOVERY_VERIFIED_MARKET_PERSISTENCE_BLOCKED. End-to-end operational freshness is not certified. The approval blocker below is historical and was resolved by the user's exact authorization.
+
+## Final production result
+
+Byte-batching repair bd87727f9072369349096d62a361b8439ab31f9c passed build, lint, 72 feature/Champion SQL checks, 21 state checks, eight fenced-write checks, 17 behavior groups, five R7 runtime checks and the production-shaped byte/idempotency test. It is published and production-aligned. Edge version 7 retains the exact ten approved files.
+
+The recovery tick completed with HTTP 200 and readback PASS: 1,384 raw inserts under cap 6,000 and one bounded native update under cap five. It correctly blocked all five target games for newly acquired evidence after its freeze. The natural 11:45 AM Puerto Rico Cron invocation then ran from a fresh freeze at 2026-09-10T15:45:13.150Z. It inserted the remaining 306 raw rows under cap 1,000, generated and persisted 40 snapshot records and 32 daily-feature rows, and persisted four real Champion predictions with ten snapshot links each. HOU-PHI was correctly blocked because its remaining raw evidence arrived after that freeze. Batter daily rows remain zero under the unchanged certified contract.
+
+The scheduled run acquired one Odds response and persisted four canonical event mappings, then failed at MARKET_PERSISTENCE with durable STATE_COMMAND_FAILED. The 88-observation plan reconstructed from the exact stored Odds evidence passes offline fenced SQL; the underlying production endpoint failure remains unresolved. Table INSERT/SELECT permission, constraints, indexes and non-insert triggers were inspected read-only without establishing a cause. No speculative cause is certified.
+
+The new frozen run automation-73eebadf495e03f5bd4ad4df343bf7ab97fe4c6b2aab3c8c1c5d59f6002f6df3 remains FAILED at revision 43. Its prediction rows, snapshots, mappings, accounting, and private digest-verified Odds response are preserved. The zero-business-write dependency disposition does not apply to this run. No failed-state bypass, additional Odds acquisition, or retroactive completion was attempted. The released lease and unresolved failed-run guard contain subsequent Cron execution.
+
+Current target counts are four games with ten feature snapshots and one prediction each; the fifth has neither yet. All five still have zero market observations, value evaluations and Official Picks. Phase provider accounting is Official 5, Statcast 7, Odds 1, other providers zero. Mission Odds is 4/20; the two historical legacy acquisitions remain separate. Business DML is 1,770 inserts (1,690 raw, 40 snapshots, 32 daily features, four predictions, four mappings) and one native update. All committed business receipts show readback PASS and zero conflicts. Runtime-state accounting is four RUN inserts and 140 updates derived from revision deltas, including the two guarded dispositions. DDL and deletes are zero. Private provider-evidence storage is separate from business-row accounting.
+
+Dependency repair is production-proven, but the market-stage hard stop prevents full operational certification and UI work. The next phase must diagnose the preserved market failure and prepare a reviewed frozen-run recovery contract; use the existing durable Odds evidence and preserve as-of/start-time boundaries. Do not treat the zero-write disposition as authorization to reset this partial business run.
 
 ## Authorized deployment and fresh reproduction
 
