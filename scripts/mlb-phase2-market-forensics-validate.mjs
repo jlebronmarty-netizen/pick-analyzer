@@ -9,6 +9,7 @@ import {execFileSync} from 'node:child_process'
 import ts from 'typescript'
 import {persistCanonicalMarkets} from './mlb-data-02r-r2t-market-binding.mjs'
 import {createRuntimeStateAuthority} from '../supabase/functions/_shared/mlb-runtime-state.mjs'
+import {evidenceEnvelope,evidenceIdentity} from '../supabase/functions/_shared/mlb-provider-evidence.mjs'
 import {performFencedWrite} from '../supabase/functions/_shared/mlb-fenced-write.mjs'
 import {planDurableWriteBatches} from './mlb-operational-r6-write-journal.mjs'
 import {sha256} from './mlb-data-02r-r2f-stage-contracts.mjs'
@@ -56,9 +57,11 @@ try {
   let handler
   const source=fs.readFileSync('supabase/functions/mlb-runtime-state/index.ts','utf8').replace(/^import .*\r?\n/gm,'')
   const frozenClock=c.evidence.acquiredAt
+  let injectedFailure=null
   const postgres=()=>({end:async()=>{},begin:fn=>db.transaction(async tx=>{
     const sql=async strings=>tx.exec(strings.join(''))
     sql.unsafe=async(q,p=[])=>{
+      if(injectedFailure && q.includes(injectedFailure.at))throw Object.assign(new Error('DISPOSABLE_SQL_FAILURE'),{code:injectedFailure.code})
       if(q.startsWith('WITH frozen AS MATERIALIZED'))return [{at:frozenClock,date:'2026-09-10'}]
       if(q.includes('scheduled_at <= clock_timestamp()'))q=q.replace('clock_timestamp()',`'${frozenClock}'::timestamptz`)
       return (await tx.query(q,p)).rows
@@ -66,7 +69,29 @@ try {
     return fn(sql)
   })})
   const env={SUPABASE_SERVICE_ROLE_KEY:'DISPOSABLE_ONLY_SERVER_KEY',SUPABASE_SECRET_KEYS:'{}',SUPABASE_DB_URL:'DISPOSABLE_DATABASE'}
-  vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText,{Response,URL,TextEncoder,TextDecoder,timingSafeEqual,postgres,columnsByTable,createRuntimeStateAuthority,performFencedWrite,EVIDENCE_LIMIT:4194304,createEvidenceStorage:()=>({}),assertRuntimeSchema:async()=>{},assertEvidenceAccess:async()=>{},Deno:{env:{get:k=>env[k]},serve:fn=>{handler=fn}}})
+  vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText,{Error,TypeError,RangeError,Response,URL,TextEncoder,TextDecoder,timingSafeEqual,postgres,columnsByTable,createRuntimeStateAuthority,performFencedWrite,EVIDENCE_LIMIT:4194304,createEvidenceStorage:()=>({}),assertRuntimeSchema:async()=>{},assertEvidenceAccess:async()=>{},Deno:{env:{get:k=>env[k]},serve:fn=>{handler=fn}}})
+  const invoke=async command=>{
+    const response=await handler(new Request('https://disposable.invalid',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY},body:JSON.stringify(command)}))
+    return {status:response.status,body:await response.json()}
+  }
+  const writeCommand=revision=>({op:'write',holder,fence,runId:c.run.run_id,revision,write:{table,rows:planned,cap,operation:'INSERT',expectedOld:null}})
+  const beforeRaces=(await db.query('select * from pick2_mlb_runtime_state order by scope_key')).rows
+  for(const [command,reason] of [[writeCommand(41),'REVISION_CONFLICT'],[{...writeCommand(42),fence:fence-1},'STALE_FENCE_OR_LEASE'],[{...writeCommand(42),holder:'00000000-0000-4000-8000-000000000002'},'STALE_FENCE_OR_LEASE']]) {
+    const reply=await invoke(command)
+    assert.equal(reply.status,409);assert.equal(reply.body.reason,`R6_STATE:${reason}`)
+    checks.push({guard:reason,status:'PASS'})
+  }
+  assert.deepEqual((await db.query('select * from pick2_mlb_runtime_state order by scope_key')).rows,beforeRaces)
+  assert.equal((await db.query(`select count(*)::int as n from ${table}`)).rows[0].n,0)
+  for(const fault of [{at:'WITH inserted AS',code:'23503'},{at:'SET dml_accounting=',code:'40001'}]) {
+    injectedFailure=fault
+    const reply=await invoke(writeCommand(42))
+    injectedFailure=null
+    assert.equal(reply.status,409);assert.equal(reply.body.reason,'RUNTIME_STATE_TRANSACTION_FAILED');assert.equal(reply.body.code,fault.code)
+    assert.equal((await db.query(`select count(*)::int as n from ${table}`)).rows[0].n,0)
+    assert.deepEqual((await db.query('select * from pick2_mlb_runtime_state order by scope_key')).rows,beforeRaces)
+    checks.push({injectedSqlState:fault.code,atomicRollback:'PASS',historicalAttribution:false})
+  }
   let revision=42,maxBytes=0
   for(let pass=0;pass<2;pass++) {
     let inserted=0,reused=0
@@ -81,6 +106,34 @@ try {
     assert.equal(inserted,pass===0?88:0);assert.equal(reused,pass===0?0:88)
     checks.push({pass,inserted,reused})
   }
+  // A lost successful response cannot replay using the old revision. A fresh
+  // authority reads the committed revision and then reuses every immutable row.
+  const stale=await invoke(writeCommand(42))
+  assert.equal(stale.status,409);assert.equal(stale.body.reason,'R6_STATE:REVISION_CONFLICT')
+  let evidenceReads=0
+  const storage={preflight:async()=>{},read:async key=>{assert.equal(key,evidenceIdentity(c.run,'odds').key);evidenceReads++;return evidenceEnvelope(c.run,'odds',c.evidence)},create:async()=>{throw Error('UNEXPECTED_EVIDENCE_REACQUISITION')}}
+  const fresh=createRuntimeStateAuthority({evidenceStorage:storage,transaction:fn=>postgres().begin(sql=>fn(sql.unsafe)),writeRows:args=>performFencedWrite({...args,columnsByTable})})
+  const recoveredEvidence=await fresh({op:'evidence',holder,fence,runId:c.run.run_id,kind:'odds'})
+  assert.deepEqual(recoveredEvidence.evidence,c.evidence);assert.equal(evidenceReads,1)
+  const inspected=await fresh({op:'inspect'})
+  const committed=inspected.rows.find(r=>r.run_id===c.run.run_id&&r.state_kind==='RUN')
+  const recovered=await fresh(writeCommand(Number(committed.revision)))
+  assert.equal(recovered.result.inserted,0);assert.equal(recovered.result.reused,88)
+  assert.deepEqual(recovered.run.dml_accounting,committed.dml_accounting)
+  assert.equal(recovered.run.odds_calls,1)
+  assert.equal(inspected.rows.find(r=>r.state_kind==='MISSION').mission_odds_calls,4)
+  checks.push({crossInstanceLostAcknowledgement:'PASS',inserted:0,reused:88,additionalProviderCalls:0})
+  const canonicalRepeat=await persistCanonicalMarkets({evidence:recoveredEvidence.evidence,nativeGames:c.run.checkpoint.marketGames,eligibleGamePks:c.run.checkpoint.marketGames.map(g=>g.game_pk),beforeWrite:async()=>{},repository:{readMarketMappingsByGames:async()=>c.mappings,readMarketMappings:async()=>c.mappings,readMarketObservations:async()=>(await db.query(`select * from ${table}`)).rows,insertMarketObservations:async()=>{throw Error('UNEXPECTED_REPEAT_INSERT')}}})
+  assert.equal(canonicalRepeat.observations.inserted,0)
+  checks.push({canonicalResumeFromDurableOdds:'PASS',scheduleStatcastFeaturesInferencePredictionReexecution:0})
+  const conflict=writeCommand(Number(recovered.run.revision))
+  conflict.write.rows=planned.map((r,i)=>i? r:{...r,american_odds:r.american_odds+1})
+  const rejected=await invoke(conflict)
+  assert.equal(rejected.status,409);assert.equal(rejected.body.reason,'R6_STATE:BLOCK_CONFLICT')
+  const afterConflict=(await fresh({op:'inspect'})).rows.find(r=>r.state_kind==='RUN')
+  assert.equal(Number(afterConflict.revision),Number(recovered.run.revision))
+  assert.deepEqual(afterConflict.dml_accounting,recovered.run.dml_accounting)
+  checks.push({immutableConflictRollback:'PASS'})
   assert.ok(maxBytes<500000)
   const rows=(await db.query(`select * from ${table}`)).rows
   assert.equal(rows.length,88)
@@ -98,6 +151,11 @@ try {
   const old=await import(`data:text/javascript;base64,${Buffer.from(oldSource).toString('base64')}`)
   const originalFetch=globalThis.fetch
   try {
+    for(const reason of ['REVISION_CONFLICT','STALE_FENCE_OR_LEASE','BLOCK_CONFLICT','CUMULATIVE_DML_CAP','WRITE_IDENTITY','WRITE_READBACK','DML_CAP_DRIFT','STARTED_GAME_WRITE']) {
+      globalThis.fetch=async()=>new Response(JSON.stringify({status:'BLOCKED',reason:`R6_STATE:${reason}`}),{status:409})
+      await assert.rejects(old.createDurableRuntimeClient({url:'https://ynuocvexviorgdjrfthw.supabase.co',key:'DISPOSABLE_ONLY_SERVER_KEY',packageSha:c.run.package_sha}).inspect(),e=>e.message===`R6_STATE:${reason}`)
+    }
+    checks.push({oldClientPreservesNamed409Guards:'PASS',historicalInternalReason:'UNRECOVERABLE_EDGE_RESPONSE_DETAIL'})
     for(const [status,body,code] of [[409,{code:'23503',message:'PRIVATE_UNTRUSTED'},'RUNTIME_SQLSTATE_23503_HTTP_409'],[413,{},'RUNTIME_HTTP_413'],[546,{},'RUNTIME_HTTP_546']]) {
       globalThis.fetch=async()=>new Response(JSON.stringify(body),{status})
       const options={url:'https://ynuocvexviorgdjrfthw.supabase.co',key:'DISPOSABLE_ONLY_SERVER_KEY',packageSha:c.run.package_sha}

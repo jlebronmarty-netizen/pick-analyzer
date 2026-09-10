@@ -369,7 +369,7 @@
     "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
     "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92",
     "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
-    "scripts/mlb-operational-r7-errors.mjs": "d93acf7215c04d651309e121265443c5207571441cebace10437739503f97752",
+    "scripts/mlb-operational-r7-errors.mjs": "92ecc751edbbb177652e273838b2649d7be43c24b3c787d368db6349d5b39d16",
     "supabase/functions/_shared/mlb-provider-evidence.mjs": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01",
     "src/app/api/cron/operating-day/route.ts": "e43cf1ef095c2f16bc74b5a4e1737bc9e88ebaddbf12754ec2b4cea7c93436fb",
     ".github/workflows/production-operating-day.yml": "69c9f6b41e955ece839ea08fde63db5493ce66476cbf1eaecacdb006ccf4d30b"
