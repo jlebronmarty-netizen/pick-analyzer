@@ -1,7 +1,17 @@
 {
   "phase": "PICK_ANALYZER_PHASE2_MARKET_PERSISTENCE_RECOVERY",
-  "verdict": "PROSPECTIVE_REPLAY_CERTIFIED_EDGE_DEPLOYMENT_BLOCKED",
-  "publication": {"status":"AUTO_REVIEW_REJECTED","branch":"codex/phase2-market-forensics","reason":"BRANCH_SPECIFIC_AUTHORIZATION_AND_PRODUCTION_METADATA_REVIEW_REQUIRED","remoteChanged":false},
+  "verdict": "DIAGNOSTIC_EDGE_DEPLOYMENT_CERTIFIED_DISPOSITION_TIME_GATE_PENDING",
+  "publication": {
+    "status": "PASS_SANITIZED_NORMAL_PUSH",
+    "branches": [
+      "codex/phase2-market-forensics",
+      "main"
+    ],
+    "publishedSha": "bc6bd7c4dcedf5d4946b9dfb331c2a8bc15c8c1b",
+    "rawPrivateEvidencePublished": false,
+    "secretScan": "PASS",
+    "clientBundleFilesScanned": 614
+  },
   "startingSha": "c133d12c8a37bf9f8933dace34b4d3c907738ee2",
   "failedExecutionPackage": "bd87727f9072369349096d62a361b8439ab31f9c",
   "failedRunId": "automation-73eebadf495e03f5bd4ad4df343bf7ab97fe4c6b2aab3c8c1c5d59f6002f6df3",
@@ -35,9 +45,9 @@
   },
   "marketStateCommandFailureClassification": "PASS_GENERIC_TRANSACTION_RESPONSE_DETAIL_UNRECOVERABLE",
   "marketPartialRunResume": "PASS_DISPOSABLE_LOST_ACKNOWLEDGEMENT_REUSE_EXPIRED_PRODUCTION_FREEZE_NOT_RESUMABLE",
-  "marketProductionRecovery": "NOT_EXECUTED_EXACT_CANDIDATE_DEPLOYMENT_REJECTED",
+  "marketProductionRecovery": "PENDING_EXISTING_ALL_STARTED_DISPOSITION_GUARD",
   "downstreamValuePickRecovery": "NOT_EXECUTED",
-  "automationRevalidation": "PARTIAL_SCHEMA_AND_OFFLINE_CHECKS_PASS",
+  "automationRevalidation": "PASS_SOURCE_AUTH_SCHEMA_CONTAINMENT_SUCCESSFUL_LIVE_RUN_PENDING",
   "postRepairScheduledRun": "NOT_EXECUTED_UNRESOLVED_RUN_GUARD_PRESERVED",
   "providerCallsThisPhase": 0,
   "missionOddsCalls": 4,
@@ -63,11 +73,11 @@
     "freshProductionPreflight": "PASS_2026-09-10T19:02:50.754344Z",
     "productionBearerAuth": "PASS_MISSING_WRONG_PUBLIC_401_SERVER_INSPECT_200"
   },
-  "diagnosticCandidate": "4f0ebd30e1683efe2ea6c77a9d6cbcb3517b5d7c",
+  "diagnosticCandidate": "DEPLOYED_EDGE_V8",
   "syntheticProductionPaths": 0,
   "startedGameLeakage": 0,
   "uiRedesignReady": false,
-  "remainingEvidence": "Exact-candidate Edge approval, paired Vercel deployment, safe terminal disposition and a new eligible scheduled production run. Historical response detail is no longer a gate.",
+  "remainingEvidence": "Existing all-started disposition after 2026-09-10T23:40:00Z and fresh readback; then a genuinely eligible later production run. No historical exception reconstruction or retroactive Odds acquisition.",
   "limits": [
     "No historical exception reconstruction",
     "No failed-run reset",
@@ -105,11 +115,37 @@
     "canonicalResumeFromDurableOdds": "PASS_NO_UPSTREAM_REEXECUTION"
   },
   "deployment": {
-    "status": "AUTO_REVIEW_REJECTED",
-    "productionEdgeVersion": 7,
-    "reason": "EXACT_PRIVILEGED_CANDIDATE_AUTHORIZATION_REQUIRED",
+    "status": "PASS",
+    "productionEdgeVersion": 8,
+    "exactCandidate": "4f0ebd30e1683efe2ea6c77a9d6cbcb3517b5d7c",
     "fileCount": 10,
+    "hashReadback": "PASS_ALL_TEN_EXACT",
     "manifest": "docs/CERTIFICATION/MLB_PHASE2_MARKET_DIAGNOSTIC_EDGE_MANIFEST.json",
+    "verifyJwt": false,
+    "mandatoryServerOnlyBearer": true,
+    "missingWrongPublicCredentials": 401,
+    "validServerInspect": 200,
+    "productionGuardClassification": "STALE_FENCE_OR_LEASE_HTTP_409",
     "productionMutation": 0
+  },
+  "disposition": {
+    "status": "PENDING_TIME_GATE",
+    "allFrozenGamesStarted": false,
+    "earliestAt": "2026-09-10T23:40:00Z",
+    "requiresFreshReadback": true,
+    "noGuardBypass": true,
+    "preservedRunReviewDigest": "EXACT_MATCH",
+    "preservedOddsEvidenceDigest": "EXACT_MATCH",
+    "revision": 43
+  },
+  "priorAutoReviewRejections": "SUPERSEDED_BY_EXPLICIT_USER_AUTHORIZATION",
+  "vercelReadback": {
+    "status": "PASS",
+    "packageSha": "bc6bd7c4dcedf5d4946b9dfb331c2a8bc15c8c1b",
+    "deployment": "READY",
+    "schemaPreflight": "PASS_406_COLUMNS_116_CONSTRAINTS_84_INDEXES_ZERO_ORPHANS",
+    "hostDry": "EXPECTED_503_R6_HOST_LIVE_RUN_PENDING",
+    "providerCalls": 0,
+    "productionDml": 0
   }
 }

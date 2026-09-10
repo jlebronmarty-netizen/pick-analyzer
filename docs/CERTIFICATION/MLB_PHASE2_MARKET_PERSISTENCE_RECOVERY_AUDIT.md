@@ -1,8 +1,16 @@
 # Market persistence recovery forensic audit
 
-Verdict: PROSPECTIVE_REPLAY_CERTIFIED_EDGE_DEPLOYMENT_BLOCKED. Missing historical telemetry is no longer a gate that blocks prospective certification. Production recovery and operational freshness are not yet certified.
+Verdict: DIAGNOSTIC_EDGE_DEPLOYMENT_CERTIFIED_DISPOSITION_TIME_GATE_PENDING. Missing historical telemetry is no longer a gate that blocks prospective certification. Production recovery and operational freshness are not yet certified.
 
 The starting production/audit package is c133d12c8a37bf9f8933dace34b4d3c907738ee2. The preserved partial run executed bd87727f9072369349096d62a361b8439ab31f9c and remains FAILED / MARKET_PERSISTENCE at revision 43. Its four predictions, four mappings, 40 feature snapshots, committed raw/daily-feature data, and digest-verified private Odds response are unchanged.
+
+## Authorized deployment and current continuation gate
+
+The subsequent explicit authorization superseded both earlier review rejections. Exact candidate 4f0ebd30e1683efe2ea6c77a9d6cbcb3517b5d7c deployed as ACTIVE Edge v8; all ten downloaded files match the approved manifest and no extra files were deployed. Missing, wrong and public credentials return 401; valid server-only inspect returns 200. A rejected invalid-holder lease request returns HTTP409 / STALE_FENCE_OR_LEASE through the repaired classifier with zero mutation. Future SQLSTATE durability remains supported by exact deployed source plus disposable failure tests; no synthetic production failure record was created.
+
+Sanitized normal publication succeeded for the review branch and main at bc6bd7c4dcedf5d4946b9dfb331c2a8bc15c8c1b. Its Vercel production deployment is READY and the live preflight reports that exact SHA with 406 columns, 116 constraints, 84 indexes and zero orphan references. The provider-free host probe passes source/schema checks and stops as expected at HTTP503 / R6_HOST:LIVE_RUN_PENDING before mutation. The nine-file publication review contains only code, validators and structural certification. No raw private evidence was included. Known credential-value and private-key scans pass; 614 built client files contain neither server credential nor CRON_SECRET.
+
+Independent readback matches the entire original run review digest and preserved private Odds evidence digest. Run revision43, mission Odds4/20 and all evidence/accounting remain unchanged. Providers, production DML and DDL for this deployment are zero. The existing disposition guard reports allFrozenGamesStarted=false; earliest possible disposition is 2026-09-10T23:40:00Z (19:40 Puerto Rico), requiring fresh identity, digest, lease, prediction and accounting readback. No earlier disposition or new-slate execution is authorized by a bypass. Live market/value/pick recovery and successful scheduled readback remain pending. Earlier rejection paragraphs below describe historical attempts only.
 
 ## Evidence and reproduced behavior
 
