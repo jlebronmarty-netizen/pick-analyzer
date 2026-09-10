@@ -1,0 +1,99 @@
+{
+  "status": "AWAITING_EXPLICIT_ENDPOINT_CANDIDATE_AUTHORIZATION",
+  "packageSha": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+  "projectRef": "ynuocvexviorgdjrfthw",
+  "endpoint": "mlb-runtime-state",
+  "entrypoint": "supabase/functions/mlb-runtime-state/index.ts",
+  "verify_jwt": false,
+  "authentication": "SERVER_ONLY_CONSTANT_TIME_BEARER_REQUIRED_BEFORE_DATABASE_ACCESS",
+  "fileCount": 10,
+  "normalization": "CRLF to LF; trim trailing whitespace at end of file; exactly one final LF",
+  "files": [
+    {
+      "path": "scripts/mlb-data-02r-r2f-stage-contracts.mjs",
+      "normalizedSha256": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
+      "bytes": 9017
+    },
+    {
+      "path": "scripts/mlb-data-02r-r2t-write-contract.mjs",
+      "normalizedSha256": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82",
+      "bytes": 1562
+    },
+    {
+      "path": "scripts/mlb-operational-r7-errors.mjs",
+      "normalizedSha256": "129d7edb502ff2c920d3c9d208fa2203984cb97d34cc9c4754d850b02d1fb556",
+      "bytes": 1083
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-fenced-write.mjs",
+      "normalizedSha256": "78ccbffc7d9ba849f51c8171131c22360b53dcf7350213307ec9f0aed64b7b72",
+      "bytes": 7334
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-schema.mjs",
+      "normalizedSha256": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951",
+      "bytes": 2113
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-state.mjs",
+      "normalizedSha256": "b7d3af221da2835c0d49c58251309bb60411b0d4934914930a1328c3fb3a0960",
+      "bytes": 21587
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-provider-evidence.mjs",
+      "normalizedSha256": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01",
+      "bytes": 4758
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/index.ts",
+      "normalizedSha256": "1b151beed1458f15ad53dbd4098950fc264dfe5a4991ca0b87466cd38af7e68c",
+      "bytes": 4672
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/schema-contract.json",
+      "normalizedSha256": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
+      "bytes": 6533
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/write-contract.json",
+      "normalizedSha256": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92",
+      "bytes": 8955
+    }
+  ],
+  "manifestSha256": "931026da69bd38c1b5a1469755b46f483d2eb763810b9e8fc0a3ac16276e2adb",
+  "localActualHandlerAuth": {
+    "missingBearer": 401,
+    "wrongBearer": 401,
+    "publicCredential": 401,
+    "validServerInspect": 200,
+    "unauthorizedDatabaseConnections": 0
+  },
+  "productionEndpointVersion": 5,
+  "deploymentPerformed": false,
+  "approvalReview": {
+    "rejections": 2,
+    "reason": "Exact ten-file R7 candidate differs from prior explicitly authorized eight-file candidate; immutable commit and disposable bearer checks did not satisfy deployment approval."
+  },
+  "scope": [
+    "Private immutable evidence with fenced compact references",
+    "Atomic sanitized failure checkpoint and accounting",
+    "Exact-state expired terminal-partial disposition",
+    "Existing bounded business persistence and lease/provider/DML guards"
+  ],
+  "excluded": [
+    "DDL",
+    "DELETE",
+    "Unrestricted UPDATE",
+    "Arbitrary SQL",
+    "Anonymous or public mutation",
+    "Provider substitution",
+    "Model/features/preprocessing/policy changes"
+  ],
+  "requiredReadback": [
+    "No bearer, wrong bearer and public credential rejected",
+    "Server-only operation accepted",
+    "Schema and Storage access preflight",
+    "Distributed lease and durable evidence/checkpoint/accounting",
+    "No unintended business mutation in host dry invocation"
+  ]
+}

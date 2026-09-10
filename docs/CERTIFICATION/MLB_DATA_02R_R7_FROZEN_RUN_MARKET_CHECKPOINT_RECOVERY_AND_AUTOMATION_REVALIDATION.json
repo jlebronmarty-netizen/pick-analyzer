@@ -1,6 +1,6 @@
 {
   "phase": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION",
-  "verdict": "R7_LOCAL_REPAIR_CERTIFIED_PRODUCTION_REVALIDATION_PENDING",
+  "verdict": "R7_LOCAL_REPAIR_CERTIFIED_BLOCKED_EDGE_DEPLOYMENT_AUTHORIZATION",
   "startingSha": "df1fb78e9a90d06becf6702b46158a34c2bfe974",
   "executionPackageUnchanged": true,
   "frozenRun": {
@@ -101,12 +101,12 @@
     "accountingReconciliation": "R6 mission ledger remains 3/20; two distinct historical legacy acquisitions are separately retained and are not frozen-run evidence. No counter was reset or discounted."
   },
   "remainingGates": {
-    "providerDurability": "LOCAL_PASS_PRODUCTION_STORAGE_READBACK_PENDING",
+    "providerDurability": "LOCAL_PASS_PRIVATE_BUCKET_VERIFIED_EDGE_DEPLOYMENT_PENDING",
     "marketResume": "PASS_DISPOSABLE_REAL_R2",
     "503Recovery": "PENDING",
     "crossInstanceMarketRecovery": "PASS_DISPOSABLE_REAL_R2",
-    "productionRecovery": "BLOCKED_BY_GATES_1_TO_10",
-    "automationRevalidation": "PENDING",
+    "productionRecovery": "BLOCKED_EDGE_DEPLOYMENT_AUTHORIZATION",
+    "automationRevalidation": "SCHEMA_AND_UI_PASS_HOST_REVALIDATION_PENDING",
     "automationReactivation": "NOT_PERFORMED",
     "scheduledReadback": "NOT_PERFORMED",
     "finalOperationalCertification": "NOT_ISSUED"
@@ -115,12 +115,18 @@
     "providerCalls": 0,
     "missionOddsCalls": 3,
     "missionOddsCap": 20,
-    "productionDml": 0,
+    "productionDml": 1,
     "productionDdl": 0,
     "settlementWrites": 0,
     "syntheticProductionPathsExecuted": 0,
     "startedGameWrites": 0,
-    "newConflicts": 0
+    "newConflicts": 0,
+    "productionDmlBreakdown": {
+      "storageBucketMetadataCreates": 1,
+      "storageObjectWrites": 0,
+      "runtimeWrites": 0,
+      "businessWrites": 0
+    }
   },
   "settlement": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
   "performance": "NO_SETTLED_SAMPLE",
@@ -150,7 +156,8 @@
     "stateChecks": 21,
     "fencedWriteChecks": 8,
     "hostChecks": 8,
-    "schemaChecks": 27
+    "schemaChecks": 27,
+    "actualPublishedHandlerAuthCases": 4
   },
   "sourceHashes": {
     ".github/workflows/production-operating-day.yml": "69c9f6b41e955ece839ea08fde63db5493ce66476cbf1eaecacdb006ccf4d30b",
@@ -246,5 +253,52 @@
     "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
     "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92",
     "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036"
+  },
+  "productionRepairReadback": {
+    "checkedAt": "2026-09-10T13:08:00Z",
+    "candidateSha": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+    "vercelProduction": "READY",
+    "vercelPackageSha": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+    "schema": {
+      "status": "PASS",
+      "columns": 406,
+      "preservedConstraints": 116,
+      "indexes": 84,
+      "snapshotUniquenessContracts": 6,
+      "orphanReferences": 0
+    },
+    "uiChecks": 12,
+    "uiStatus": "PASS",
+    "legacyRoute": {
+      "http": 200,
+      "mode": "MLB_LEGACY_WRITER_DISABLED",
+      "providerCalls": 0,
+      "writes": 0
+    },
+    "cron": [
+      {
+        "path": "/api/cron/nba-current-era-shadow",
+        "schedule": "*/30 * * * *"
+      }
+    ],
+    "mlbActivation": "DISABLED",
+    "evidenceBucket": {
+      "private": true,
+      "maxBytes": 4194304,
+      "mime": [
+        "application/json"
+      ],
+      "objects": 0,
+      "objectsRls": true,
+      "objectPolicies": 0
+    },
+    "edge": {
+      "version": 5,
+      "r7Deployment": "NOT_PERFORMED",
+      "approvalPacket": "MLB_OPERATIONAL_R7_EDGE_DEPLOYMENT_APPROVAL_PACKET.json"
+    },
+    "frozenRunRevision": 10,
+    "frozenPredictionUnchanged": true,
+    "productionRowCountsUnchanged": true
   }
 }

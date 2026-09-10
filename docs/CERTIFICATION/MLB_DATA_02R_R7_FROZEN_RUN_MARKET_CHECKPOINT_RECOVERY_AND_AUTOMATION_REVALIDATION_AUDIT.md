@@ -1,3 +1,11 @@
+# R7 current production checkpoint: endpoint deployment authorization blocked
+
+R7 production checkpoint: candidate `be19887e3eb9f9f60359e89a81ee34e490c9ffe1` is published and Vercel Production READY. Fresh schema preflight and 12 UI checks pass; the legacy MLB writer returns a zero-call/zero-write no-op. The private JSON evidence bucket is provisioned and empty (one metadata creation; zero business/runtime DML, providers or DDL). Frozen revision 10 and its prediction remain unchanged; mission Odds remains 3/20, with two separate historical legacy acquisitions retained. Automatic approval review rejected deployment of the exact ten-file R7 Edge candidate twice because the earlier explicit approval covered eight files. Edge remains version 5. Exact candidate hashes and bearer tests are in `docs/CERTIFICATION/MLB_OPERATIONAL_R7_EDGE_DEPLOYMENT_APPROVAL_PACKET.json`. Frozen-run disposition, host revalidation, MLB activation and scheduled readback remain pending this deployment authorization. NBA is unchanged. Final operational certification is NOT ISSUED.
+
+The actual published handler passes missing/wrong/public bearer denial before any database connection, and accepts server-only inspect in disposable validation. These are local candidate checks, not production readback of the undeployed endpoint. The historical first exception remains unknown and explicitly accepted as `UNRECOVERABLE_OBSERVABILITY_GAP`; no original Odds response exists and fresh prices cannot complete the expired freeze. `TERMINAL_PARTIAL_PRESERVED` remains the reviewed disposition, not an applied transition. Settlement stays `IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE`, with zero production settlement writes and `NO_SETTLED_SAMPLE`.
+
+## Earlier candidate and forensic checkpoints (historical)
+
 # R7 repair — local certification complete, production readback pending
 
 The user explicitly accepted Gate 1's `UNRECOVERABLE_OBSERVABILITY_GAP`. The exact historical exception remains unknown; no message is inferred or backfilled. This acceptance does not turn the old run into a success. The prior clarification request below is resolved.
