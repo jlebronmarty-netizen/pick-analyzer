@@ -1,4 +1,5 @@
 import { randomUUID, createHash } from 'node:crypto'
+import {runtimeResponseFailure} from './mlb-operational-r7-errors.mjs'
 const ensure = (ok, reason) => { if (!ok) throw Error(`R6_CLIENT:${reason}`) }
 const columns = {MLB_OFFICIAL:'mlb_official_calls',STATCAST:'statcast_calls',THE_ODDS_API:'odds_calls'}
 const providerCaps = {MLB_OFFICIAL:50,STATCAST:100,THE_ODDS_API:1}
@@ -15,9 +16,8 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
   async function call(command) {
     if(['reserve','write'].includes(command.op))ensure(Date.now()<deadline,'INVOCATION_BUDGET_YIELD')
     const response=await fetch(`${url}/functions/v1/mlb-runtime-state`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},body:JSON.stringify(command),signal:AbortSignal.timeout(30000),redirect:'error'})
-    const body=await response.json()
-    if(!response.ok && typeof body.reason==='string' && /^R6_STATE:[A-Z_]+$/.test(body.reason))throw Error(body.reason)
-    ensure(response.ok && body.status === 'PASS' && body.protocol==='MLB_R6_FENCED_RUNTIME_V1' && body.result,'STATE_COMMAND_FAILED')
+    const body=await response.json().catch(()=>null)
+    if(!response.ok || body?.status!=='PASS' || body?.protocol!=='MLB_R6_FENCED_RUNTIME_V1' || !body?.result)throw Error(runtimeResponseFailure(response.status,body))
     return body.result
   }
   function token() {
