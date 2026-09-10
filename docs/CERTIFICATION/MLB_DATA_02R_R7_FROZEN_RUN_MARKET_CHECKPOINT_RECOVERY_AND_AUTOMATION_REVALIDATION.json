@@ -1,6 +1,6 @@
 {
   "phase": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION",
-  "verdict": "R7_LOCAL_REPAIR_CERTIFIED_BLOCKED_EDGE_DEPLOYMENT_AUTHORIZATION",
+  "verdict": "R7_PRODUCTION_RECOVERY_CERTIFIED_SCHEDULED_READBACK_PENDING",
   "startingSha": "df1fb78e9a90d06becf6702b46158a34c2bfe974",
   "executionPackageUnchanged": true,
   "frozenRun": {
@@ -10,15 +10,15 @@
     "runAsOf": "2026-09-10T00:00:48.874Z",
     "operatingTimezone": "America/Puerto_Rico",
     "eligibleGameCount": 1,
-    "lastDurableStage": "FEATURES",
+    "lastDurableStage": "TERMINAL_PARTIAL_PRESERVED",
     "completed": [
       "SCOPE",
       "DEPENDENCY_SCOPE",
       "CONTEXTS",
       "FEATURES"
     ],
-    "revision": 10,
-    "status": "RUNNING",
+    "revision": 11,
+    "status": "FAILED",
     "predictionInserts": 1,
     "predictionReadback": "PASS",
     "existingMappingCount": 1,
@@ -36,7 +36,7 @@
     "marketReferencePresent": false,
     "responseDigestPresent": false,
     "dispositionAssessment": "TERMINAL_PARTIAL_PRESERVED",
-    "dispositionApplied": false
+    "dispositionApplied": true
   },
   "forensics": {
     "status": "COMPLETE_WITH_EXPLICITLY_AUTHORIZED_OBSERVABILITY_GAP",
@@ -101,21 +101,21 @@
     "accountingReconciliation": "R6 mission ledger remains 3/20; two distinct historical legacy acquisitions are separately retained and are not frozen-run evidence. No counter was reset or discounted."
   },
   "remainingGates": {
-    "providerDurability": "LOCAL_PASS_PRIVATE_BUCKET_VERIFIED_EDGE_DEPLOYMENT_PENDING",
+    "providerDurability": "EXACT_CODE_LOCAL_PASS_PRODUCTION_PRIVATE_STORAGE_PASS",
     "marketResume": "PASS_DISPOSABLE_REAL_R2",
     "503Recovery": "PENDING",
     "crossInstanceMarketRecovery": "PASS_DISPOSABLE_REAL_R2",
-    "productionRecovery": "BLOCKED_EDGE_DEPLOYMENT_AUTHORIZATION",
-    "automationRevalidation": "SCHEMA_AND_UI_PASS_HOST_REVALIDATION_PENDING",
-    "automationReactivation": "NOT_PERFORMED",
-    "scheduledReadback": "NOT_PERFORMED",
+    "productionRecovery": "PASS",
+    "automationRevalidation": "PASS",
+    "automationReactivation": "PREPARED_AWAITING_DEPLOYMENT",
+    "scheduledReadback": "PENDING_NATURAL_INVOCATION",
     "finalOperationalCertification": "NOT_ISSUED"
   },
   "phaseAccounting": {
     "providerCalls": 0,
     "missionOddsCalls": 3,
     "missionOddsCap": 20,
-    "productionDml": 1,
+    "productionDml": 7,
     "productionDdl": 0,
     "settlementWrites": 0,
     "syntheticProductionPathsExecuted": 0,
@@ -124,8 +124,16 @@
     "productionDmlBreakdown": {
       "storageBucketMetadataCreates": 1,
       "storageObjectWrites": 0,
-      "runtimeWrites": 0,
+      "runtimeInserts": 1,
+      "runtimeUpdates": 5,
       "businessWrites": 0
+    },
+    "currentAuthorizationTurn": {
+      "providerCalls": 0,
+      "runtimeInserts": 1,
+      "runtimeUpdates": 5,
+      "businessWrites": 0,
+      "productionDdl": 0
     }
   },
   "settlement": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
@@ -281,7 +289,7 @@
         "schedule": "*/30 * * * *"
       }
     ],
-    "mlbActivation": "DISABLED",
+    "mlbActivation": "PREPARED_AWAITING_DEPLOYMENT",
     "evidenceBucket": {
       "private": true,
       "maxBytes": 4194304,
@@ -293,12 +301,32 @@
       "objectPolicies": 0
     },
     "edge": {
-      "version": 5,
-      "r7Deployment": "NOT_PERFORMED",
-      "approvalPacket": "MLB_OPERATIONAL_R7_EDGE_DEPLOYMENT_APPROVAL_PACKET.json"
+      "version": 6,
+      "r7Deployment": "PASS",
+      "approvedCandidate": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+      "exactTenFilesMatch": true,
+      "missingBearer": 401,
+      "wrongBearer": 401,
+      "publicBearer": 401,
+      "serverInspect": 200
     },
-    "frozenRunRevision": 10,
+    "frozenRunRevision": 11,
     "frozenPredictionUnchanged": true,
-    "productionRowCountsUnchanged": true
+    "productionRowCountsUnchanged": true,
+    "host": {
+      "status": "HOST_DRY_PASS",
+      "packageSha": "ac669d8815de5c394105a9e6b716cfd68c304910",
+      "concurrency": "ONE_COMPLETED_ONE_DEFERRED",
+      "checkpointBytes": 470,
+      "checkpointReadback": "COMPLETE",
+      "leaseReleased": true,
+      "providerCalls": 0,
+      "businessDml": 0
+    },
+    "futureExceptionRecording": {
+      "implementation": "PASS_DISPOSABLE_SQL_AND_EXACT_DEPLOYED_CODE",
+      "productionExceptionObserved": false,
+      "limitation": "No exception manufactured in production; database outage or abrupt termination can prevent durable acknowledgement."
+    }
   }
 }

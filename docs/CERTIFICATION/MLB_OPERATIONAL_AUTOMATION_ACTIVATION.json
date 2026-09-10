@@ -1,5 +1,5 @@
 {
-  "activation": "DISABLED",
+  "activation": "ENABLED",
   "hostCount": 1,
   "dryCertification": "PASS",
   "firstNonemptyRun": {
@@ -14,22 +14,14 @@
     "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
     "conflicts": 0
   },
-  "reason": "Containment: later scheduled PREGAME run is unresolved at FEATURES after one consumed Odds request with no durable market reference or persisted observations.",
-  "blocker": {
-    "code": "R6_UNRESOLVED_MARKET_ACQUISITION",
-    "hardStop": true,
-    "authorizationNeeded": false,
-    "runId": "automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2",
-    "packageSha": "e49fd02cd98b95c3a1a50bc057290b66d09679b2",
-    "preserveRun": true,
-    "preserveCounters": true
-  },
+  "reason": "R7 exact approved Edge version 6, private storage, frozen terminal-partial preservation, actual-host concurrency/checkpoint and fresh schema preflight pass.",
+  "blocker": null,
   "runtimeHost": {
     "type": "VERCEL_PRODUCTION_FUNCTION",
     "scheduler": "VERCEL_CRON",
     "path": "/api/cron/mlb-operational",
     "verified": true,
-    "verifiedPackageSha": "0cd4ef6be1a8f1f146b5604b6bfa75e923142ff1",
+    "verifiedPackageSha": "ac669d8815de5c394105a9e6b716cfd68c304910",
     "schedule": "*/15 * * * *",
     "hostDry": "HOST_DRY_PASS",
     "concurrency": "ONE_COMPLETED_ONE_DEFERRED"
@@ -40,7 +32,22 @@
     "endpoint": "mlb-operational-preflight",
     "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
   },
-  "scheduledProductionReadback": "PASS",
-  "scheduledEvidence": "MLB_R6_SCHEDULED_PRODUCTION_READBACK.json",
-  "settlementStatus": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE"
+  "scheduledProductionReadback": "R7_PENDING_NATURAL_INVOCATION",
+  "scheduledEvidence": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION.json",
+  "settlementStatus": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
+  "r7": {
+    "edgeVersion": 6,
+    "approvedCandidate": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+    "deployedFiles": 10,
+    "deployedCodeMatch": true,
+    "auth": "PASS",
+    "storage": "PRIVATE_REACHABLE",
+    "frozenDisposition": "TERMINAL_PARTIAL_PRESERVED",
+    "frozenRevision": 11,
+    "predictionPreserved": true,
+    "hostDry": "PASS",
+    "concurrency": "ONE_COMPLETED_ONE_DEFERRED",
+    "missionOdds": 3,
+    "freshPreflight": "2026-09-10T13:57:10.877327+00:00"
+  }
 }

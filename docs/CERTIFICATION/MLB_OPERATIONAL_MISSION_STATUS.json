@@ -306,29 +306,15 @@
   ],
   "rollbackAndRecoveryRunbook": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
   "publishedPrerequisiteSha": "eedecaec58abe8d2b9b8c804a8e1d490cad9f423",
-  "currentPhase": "MLB_OPERATIONAL_CERTIFICATION_BLOCKED_UNRESOLVED_SCHEDULED_RUN",
-  "nextPhase": "BOUNDED_UNRESOLVED_MARKET_ACQUISITION_RECOVERY",
+  "currentPhase": "R7_RECOVERY_COMPLETE_SCHEDULED_READBACK_PENDING",
+  "nextPhase": "R7_NATURAL_SCHEDULED_OBSERVATION",
   "publishedIntegrationSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
-  "automationImplementation": "DISABLED_PENDING_CONTAINMENT_DEPLOYMENT",
+  "automationImplementation": "R7_REACTIVATION_PREPARED",
   "publishedR3Sha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
-  "automationBlocker": {
-    "runId": "automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2",
-    "packageSha": "e49fd02cd98b95c3a1a50bc057290b66d09679b2",
-    "runAsOf": "2026-09-10T00:00:48.874Z",
-    "lastCheckpoint": "FEATURES",
-    "status": "RUNNING_UNRESOLVED",
-    "predictionInserts": 1,
-    "oddsCalls": 1,
-    "marketReference": null,
-    "persistedMarketObservationsAfterStart": 0,
-    "http503ObservedFrom": "2026-09-10T00:00:42Z",
-    "originalError": "NOT_EXPOSED_IN_AVAILABLE_LOGS",
-    "recovery": "Cannot replace lost frozen market evidence with a new post-start request; preserve run and counters.",
-    "containment": "MLB_CRON_REMOVED_ACTIVATION_DISABLED_PENDING_DEPLOYMENT"
-  },
+  "automationBlocker": null,
   "pendingGates": [
-    "RESOLVE_UNFINISHED_FROZEN_RUN",
-    "REVERIFY_AUTOMATION",
+    "R7_REACTIVATION_DEPLOYMENT",
+    "R7_NATURAL_SCHEDULED_READBACK",
     "FINAL_OPERATIONAL_CERTIFICATION"
   ],
   "certifiedExecutionSha": "633768729b212746d03a5bf4d2ae542d1d84f945",
@@ -366,5 +352,16 @@
     "Observe first legitimate production settlement only after separate write authorization",
     "Observe first natural postgame scheduled execution after safe automation reactivation",
     "Observe first natural overnight scheduled execution after safe automation reactivation"
-  ]
+  ],
+  "r7": {
+    "certificate": "docs/CERTIFICATION/MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION.json",
+    "edgeVersion": 6,
+    "approvedCandidate": "be19887e3eb9f9f60359e89a81ee34e490c9ffe1",
+    "frozenDisposition": "TERMINAL_PARTIAL_PRESERVED",
+    "historicalFirstException": "UNRECOVERABLE_OBSERVABILITY_GAP",
+    "productionRecovery": "PASS",
+    "hostDry": "PASS",
+    "concurrency": "PASS",
+    "scheduledReadback": "PENDING"
+  }
 }

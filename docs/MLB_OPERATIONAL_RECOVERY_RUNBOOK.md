@@ -1,3 +1,17 @@
+# Current R7 recovery contract
+
+Edge version 6 matches the exact authorized ten-file candidate be19887e3eb9f9f60359e89a81ee34e490c9ffe1. The old frozen run is preserved at revision 11 as FAILED with TERMINAL_PARTIAL_PRESERVED; its original exception is UNRECOVERABLE_OBSERVABILITY_GAP. Its prediction and consumed Odds request remain intact. Never retry that expired freeze with fresh odds. Mission accounting is 3/20 plus two separately retained historical legacy acquisitions.
+
+Successful provider evidence is saved immutably to private mlb-operational-evidence Storage before downstream processing; checkpoints retain fenced digest references. Recovery loads the same object without a second provider request. If durable acknowledgement is unavailable, the reservation remains consumed and recovery fails closed. Never overwrite evidence, publish raw objects or put raw responses into runtime metadata.
+
+Stage exceptions are atomically recorded with sanitized class/code/message, server timestamp, run/stage/revision, lease holder and provider/DML accounting. If the database is unavailable or the Function is killed before acknowledgement, preserve uncertainty; bounded logging does not substitute for a durable commit. Do not invent an exception to fill historical gaps.
+
+For exact-state expired disposition, independently review run, prediction and accounting, then use the certified dispose operation with its current review digest and no active lease. The operation preserves failed status and all prior receipts. No direct SQL repair, deletion, counter reset or unbounded update is authorized.
+
+Actual-host POST is a bodyless authenticated dry probe; GET is the scheduled live coordinator. The two concurrent dry probes passed with one completion and one deferral. Reactivation restores only the single MLB 15-minute Cron after preflight and preservation gates; NBA and disabled settlement remain unchanged. Observe a natural invocation before claiming post-repair operational certification. The legacy MLB writer is blocked before planning and its GitHub schedule is removed.
+
+The sections below are historical checkpoints; this R7 contract supersedes obsolete host, unresolved-run and accounting descriptions.
+
 # MLB operational recovery
 
 ## Current unresolved-run containment
