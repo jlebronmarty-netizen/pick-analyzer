@@ -5,12 +5,18 @@ import assert from 'node:assert/strict'
 import {pathToFileURL} from 'node:url'
 import {createHash} from 'node:crypto'
 import {createRuntimeStateAuthority} from '../supabase/functions/_shared/mlb-runtime-state.mjs'
-import {createDurableRunStore} from './mlb-operational-r6-run-store.mjs'
+import vm from 'node:vm'
+import {execFileSync} from 'node:child_process'
 import {operatingDate} from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import {sha256} from './mlb-data-02r-r2f-stage-contracts.mjs'
 
 assert.ok(process.env.R6_PGLITE_MODULE, 'Disposable PostgreSQL required')
 const {PGlite}=await import(pathToFileURL(process.env.R6_PGLITE_MODULE).href)
+// Pin the historical defect; the current store is being repaired by R7.
+const historical=execFileSync('git',['show','df1fb78e9a90d06becf6702b46158a34c2bfe974:scripts/mlb-operational-r6-run-store.mjs'],{encoding:'utf8'}).replace(/^import .*\n/gm,'').replaceAll('export ','')
+const sandbox=vm.createContext({sha256,Buffer})
+vm.runInContext(historical,sandbox)
+const createDurableRunStore=vm.runInContext('createDurableRunStore',sandbox)
 const db=new PGlite(),checks=[]
 let at='2026-09-09T23:59:00.000Z'
 // Only this disposable adapter overrides the DB clock. Production accepts no clock input.

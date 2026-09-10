@@ -4,6 +4,7 @@ import { createRuntimeStateAuthority } from '../_shared/mlb-runtime-state.mjs'
 import { performFencedWrite } from '../_shared/mlb-fenced-write.mjs'
 import columnsByTable from './write-contract.json' with { type: 'json' }
 import { assertRuntimeSchema } from '../_shared/mlb-runtime-schema.mjs'
+import {createEvidenceStorage,assertEvidenceAccess,EVIDENCE_LIMIT} from '../_shared/mlb-provider-evidence.mjs'
 
 const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), {
   status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
@@ -33,19 +34,21 @@ Deno.serve(async request => {
       const chunk = await reader.read()
       if (chunk.done) break
       size += chunk.value.byteLength
-      if (size > 524288) { await reader.cancel(); return reply(413, { status: 'REQUEST_LIMIT' }) }
+      if (size > EVIDENCE_LIMIT+8192) { await reader.cancel(); return reply(413, { status: 'REQUEST_LIMIT' }) }
       body += decoder.decode(chunk.value, { stream: true })
     }
     body += decoder.decode()
   } catch { return reply(400, { status: 'INVALID_REQUEST' }) }
   let command
   try { command = JSON.parse(body) } catch { return reply(400, { status: 'INVALID_REQUEST' }) }
-  if (command?.op !== 'write' && size > 62000) return reply(413, { status: 'METADATA_LIMIT' })
+  if(command?.op==='write' && size>524288)return reply(413,{status:'REQUEST_LIMIT'})
+  if (!['write','evidence'].includes(command?.op) && size > 62000) return reply(413, { status: 'METADATA_LIMIT' })
   const connection = Deno.env.get('SUPABASE_DB_URL')
   if (!connection) return reply(503, { status: 'BLOCKED', reason: 'DATABASE_CONNECTION_MISSING' })
   const sql = postgres(connection, { max: 1, prepare: false, connect_timeout: 10, idle_timeout: 5 })
   try {
-    const execute = createRuntimeStateAuthority({ preflight: assertRuntimeSchema, writeRows: args => performFencedWrite({ ...args, columnsByTable }), transaction: async (fn: (query: (text: string, values?: unknown[]) => Promise<unknown>) => Promise<unknown>) => sql.begin(async tx => {
+    const evidenceStorage=createEvidenceStorage({url:Deno.env.get('SUPABASE_URL'),key:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')})
+    const execute = createRuntimeStateAuthority({ evidenceStorage, preflight: async query=>{await assertRuntimeSchema(query);await assertEvidenceAccess(query)}, writeRows: args => performFencedWrite({ ...args, columnsByTable }), transaction: async (fn: (query: (text: string, values?: unknown[]) => Promise<unknown>) => Promise<unknown>) => sql.begin(async tx => {
       await tx`SET LOCAL statement_timeout = '15000ms'`
       await tx`SET LOCAL lock_timeout = '5000ms'`
       await tx`SET LOCAL ROLE service_role`

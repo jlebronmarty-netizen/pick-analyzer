@@ -1,6 +1,11 @@
 // Fixed transactional operations for the exact authorized R6 table. No SQL,
 // target, clock, cap, or counter reset can be supplied by the caller.
+import {sha256} from '../../../scripts/mlb-data-02r-r2f-stage-contracts.mjs'
+import {persistOrRecoverEvidence} from './mlb-provider-evidence.mjs'
+import {sanitizedStageException} from '../../../scripts/mlb-operational-r7-errors.mjs'
 const TABLE = 'public.pick2_mlb_runtime_state'
+const PENDING = "state_kind='RUN' AND status <> 'COMPLETE' AND (status <> 'FAILED' OR checkpoint #>> '{disposition,status}' IS DISTINCT FROM 'TERMINAL_PARTIAL_PRESERVED')"
+export const reviewDigest=run=>sha256({runId:run.run_id,packageSha:run.package_sha,runAsOf:new Date(run.run_as_of).toISOString(),revision:Number(run.revision),status:run.status,checkpoint:run.checkpoint,dml:run.dml_accounting,providers:[run.mlb_official_calls,run.statcast_calls,run.odds_calls]})
 const LEASE = 'MLB_OPERATIONAL_GLOBAL', MISSION = 'MLB_OPERATIONAL_MISSION'
 const PROVIDERS = Object.freeze({ MLB_OFFICIAL: ['mlb_official_calls',50], STATCAST: ['statcast_calls',100], THE_ODDS_API: ['odds_calls',1] })
 const ensure = (ok, reason) => { if (!ok) throw Error(`R6_STATE:${reason}`) }
@@ -13,7 +18,7 @@ const canonical = x => JSON.stringify(x, Object.keys(x).sort())
 export const MODES = ['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS','INCREMENTAL','POSTGAME','OVERNIGHT','HOST_DRY']
 
 export function validateCheckpoint(x) {
-  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference'])
+  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition'])
   ensure(x.version === 1 && MODES.includes(x.mode) && id(x.stage), 'CHECKPOINT_HEADER')
   ensure(Array.isArray(x.scope) && x.scope.length <= 50 && x.scope.every(n => integer(n) && n > 0) && new Set(x.scope).size === x.scope.length, 'SCOPE')
   if(x.dependencyScope !== undefined)ensure(Array.isArray(x.dependencyScope) && x.dependencyScope.length<=500 && x.dependencyScope.every(n=>integer(n)&&n>0) && new Set(x.dependencyScope).size===x.dependencyScope.length,'DEPENDENCY_SCOPE')
@@ -71,16 +76,16 @@ export function validateDml(x) {
 
 // query(sql, parameters) returns rows. transaction(callback) must hold one real
 // DB transaction/connection for its entire callback, including rollback on error.
-export function createRuntimeStateAuthority({ transaction, writeRows = null, preflight = null }) {
+export function createRuntimeStateAuthority({ transaction, writeRows = null, preflight = null, evidenceStorage = null }) {
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
-    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write'].includes(input.op), 'OPERATION')
+    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest'])
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
       const one = async (sql,p=[]) => (await query(sql,p))[0]
-      if (input.op === 'inspect') return { rows: await query(`SELECT * FROM ${TABLE} WHERE scope_key IN ($1,$2) OR (state_kind='RUN' AND status <> 'COMPLETE') ORDER BY scope_key LIMIT 102`, [MISSION,LEASE]) }
+      if (input.op === 'inspect') return { rows: await query(`SELECT * FROM ${TABLE} WHERE scope_key IN ($1,$2) OR (${PENDING}) ORDER BY scope_key LIMIT 102`, [MISSION,LEASE]) }
       if (input.op === 'initialize') {
         // Separate bounded initialization, never migration seed or reset.
         await query(`INSERT INTO ${TABLE}(scope_key,state_kind) VALUES ($1,'LEASE') ON CONFLICT(scope_key) DO NOTHING`, [LEASE])
@@ -96,15 +101,29 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(lease, 'NOT_INITIALIZED')
       const clock = await one("WITH frozen AS MATERIALIZED (SELECT clock_timestamp() AS at) SELECT at, (at AT TIME ZONE 'America/Puerto_Rico')::date::text AS date FROM frozen")
       const active = lease.lease_holder && Date.parse(lease.lease_expires_at) > Date.parse(clock.at)
+      if(input.op==='dispose') {
+        ensure(!active && id(input.runId) && digest(input.expectedDigest),'DISPOSITION_REVIEW_REQUIRED')
+        const run=await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1 FOR UPDATE`,[`RUN:${input.runId}`])
+        ensure(run && ['RUNNING','FAILED'].includes(run.status) && reviewDigest(run)===input.expectedDigest,'DISPOSITION_STATE_CONFLICT')
+        ensure(run.checkpoint.scope.length>0 && run.dml_accounting.stages.every(s=>s.readback==='PASS' && s.conflicts===0),'DISPOSITION_READBACK')
+        const games=await query('SELECT game_pk,scheduled_at FROM public.pick2_mlb_games WHERE game_pk=ANY($1::bigint[]) FOR SHARE',[run.checkpoint.scope])
+        ensure(games.length===run.checkpoint.scope.length && games.every(g=>Date.parse(g.scheduled_at)<=Date.parse(clock.at)),'DISPOSITION_NOT_EXPIRED')
+        const predictions=await query('SELECT id FROM public.pick2_game_predictions WHERE game_pk=ANY($1::bigint[]) AND predicted_at=$2::timestamptz FOR SHARE',[run.checkpoint.scope,run.run_as_of])
+        ensure(predictions.length===run.dml_accounting.stages.filter(s=>s.target==='pick2_game_predictions').reduce((n,s)=>n+s.inserted,0),'DISPOSITION_PREDICTION_READBACK')
+        const checkpoint={...run.checkpoint,stage:'TERMINAL_PARTIAL_PRESERVED',disposition:{status:'TERMINAL_PARTIAL_PRESERVED',reviewedAt:new Date(clock.at).toISOString(),reviewDigest:input.expectedDigest,reason:'EXPIRED_FREEZE_NO_RETROACTIVE_MARKETS',predictionCount:predictions.length,readback:'PASS'}}
+        validateCheckpoint(checkpoint)
+        return {status:'TERMINAL_PARTIAL_PRESERVED',run:await one(`UPDATE ${TABLE} SET checkpoint=$2::text::jsonb,status='FAILED',revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])}
+      }
       if (input.op === 'acquire') {
         ensure(id(input.runId) && /^[a-f0-9]{40}$/.test(input.packageSha) && MODES.includes(input.mode), 'RUN_PACKAGE_MODE')
         if (active) return { status:'DEFER_ACTIVE_LEASE', expiresAt:lease.lease_expires_at }
         const mission = await one(`SELECT mission_odds_calls FROM ${TABLE} WHERE scope_key=$1`, [MISSION])
         ensure(mission && mission.mission_odds_calls >= 2 && mission.mission_odds_calls <= 20, 'MISSION_LEDGER')
-        const pending = await query(`SELECT * FROM ${TABLE} WHERE state_kind='RUN' AND status <> 'COMPLETE' ORDER BY created_at LIMIT 2`)
+        const pending = await query(`SELECT * FROM ${TABLE} WHERE ${PENDING} ORDER BY created_at LIMIT 2`)
         ensure(pending.length <= 1, 'AMBIGUOUS_PENDING_RUN')
         let run = pending[0] ?? await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1`, [`RUN:${input.runId}`])
         if (run) {
+          if(run.status==='FAILED' && run.checkpoint.disposition?.status==='TERMINAL_PARTIAL_PRESERVED')return {status:'TERMINAL_PARTIAL_PRESERVED',run,missionOddsCalls:mission.mission_odds_calls}
           ensure(run.package_sha === input.packageSha, 'FROZEN_PACKAGE_CONFLICT')
           if (run.status === 'COMPLETE') return { status:'REUSE_NO_OP', run, missionOddsCalls:mission.mission_odds_calls }
           const date = run.run_date instanceof Date ? run.run_date.toISOString().slice(0,10) : String(run.run_date).slice(0,10)
@@ -120,7 +139,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         const next = await one(`UPDATE ${TABLE} SET lease_holder=$2,lease_acquired_at=$3,lease_expires_at=$3::timestamptz+interval '5 minutes',fence=fence+1,revision=revision+1,run_id=$4,package_sha=$5,updated_at=$3 WHERE scope_key=$1 RETURNING *`, [LEASE,input.holder,clock.at,run.run_id,run.package_sha])
         return {status:'ACQUIRED',lease:next,run,missionOddsCalls:mission.mission_odds_calls}
       }
-      ensure(active && lease.lease_holder === input.holder && Number(lease.fence) === input.fence && lease.run_id === input.runId, 'STALE_FENCE_OR_LEASE')
+      ensure((active || input.op==='fail') && lease.lease_holder === input.holder && Number(lease.fence) === input.fence && lease.run_id === input.runId, 'STALE_FENCE_OR_LEASE')
       const run = await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1 FOR UPDATE`, [`RUN:${input.runId}`])
       ensure(run && run.package_sha === lease.package_sha, 'RUN_IDENTITY')
       if (input.op === 'renew') {
@@ -132,6 +151,25 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         return {status:'RELEASED'}
       }
       ensure(run.status === 'RUNNING','TERMINAL_RUN')
+      if(input.op==='fail') {
+        keys(input.failure,['code','exceptionClass','message'])
+        ensure(id(input.failure.code) && ['Error','TypeError','RangeError','SyntaxError','AbortError','TimeoutError'].includes(input.failure.exceptionClass),'FAILURE_SHAPE')
+        ensure(input.failure.message===`Stage stopped: ${input.failure.code}.` || (input.failure.code==='UNCLASSIFIED_STAGE_EXCEPTION' && input.failure.message==='Stage failed; untrusted exception text withheld.'),'FAILURE_MESSAGE')
+        ensure(sha256(sanitizedStageException({name:input.failure.exceptionClass,message:`R6_STATE:${input.failure.code}`}))===sha256(input.failure),'FAILURE_SANITIZATION')
+        const failure={...input.failure,runId:run.run_id,stage:run.checkpoint.stage,timestamp:new Date(clock.at).toISOString(),checkpointRevision:Number(run.revision),leaseHolder:lease.lease_holder,providers:{MLB_OFFICIAL:run.mlb_official_calls,STATCAST:run.statcast_calls,THE_ODDS_API:run.odds_calls},dml:run.dml_accounting}
+        const checkpoint={...run.checkpoint,failure}
+        validateCheckpoint(checkpoint)
+        return {status:'FAILED',run:await one(`UPDATE ${TABLE} SET checkpoint=$2::text::jsonb,status='FAILED',revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])}
+      }
+      if(input.op==='evidence') {
+        const recovered=await persistOrRecoverEvidence({run,kind:input.kind,evidence:input.evidence,storage:evidenceStorage})
+        if(!recovered)return {run,evidence:null}
+        const prior=run.checkpoint.references.find(r=>r.kind===recovered.reference.kind)
+        if(prior){ensure(sha256(prior)===sha256(recovered.reference),'EVIDENCE_REFERENCE_CONFLICT');return {run,evidence:recovered.evidence}}
+        const checkpoint={...run.checkpoint,references:[...run.checkpoint.references,recovered.reference]}
+        validateCheckpoint(checkpoint)
+        return {run:await one(`UPDATE ${TABLE} SET checkpoint=$2::text::jsonb,revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at]),evidence:recovered.evidence}
+      }
       if(input.op==='write') {
         ensure(typeof writeRows==='function','FENCED_WRITE_NOT_CONFIGURED')
         ensure(integer(input.revision) && Number(run.revision)===input.revision,'REVISION_CONFLICT')
@@ -143,6 +181,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       }
       if (input.op === 'reserve') {
         ensure(Object.hasOwn(PROVIDERS,input.provider) && digest(input.reservationId),'PROVIDER_NOT_AUTHORIZED')
+        if(evidenceStorage && ['THE_ODDS_API','MLB_OFFICIAL'].includes(input.provider))await evidenceStorage.preflight()
         const [column,cap] = PROVIDERS[input.provider], receipts = run.dml_accounting.providerReservations ?? []
         ensure(!receipts.includes(input.reservationId),'RESERVATION_ALREADY_CONSUMED')
         ensure(Number(run[column]) < cap,'PROVIDER_CAP')
@@ -159,6 +198,8 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       }
       ensure(integer(input.revision) && Number(run.revision) === input.revision,'REVISION_CONFLICT')
       validateCheckpoint(input.checkpoint); validateDml(input.dml)
+      ensure(serializedBytes(input.checkpoint)<=28000,'FAILURE_RECORD_HEADROOM')
+      ensure(sha256(input.checkpoint.failure??null)===sha256(run.checkpoint.failure??null) && sha256(input.checkpoint.disposition??null)===sha256(run.checkpoint.disposition??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(input.checkpoint.mode === run.checkpoint.mode,'MODE_DRIFT')
       ensure(run.checkpoint.completed.every(s => input.checkpoint.completed.includes(s)),'CHECKPOINT_REGRESSION')
       for (const reference of run.checkpoint.references) ensure(input.checkpoint.references.some(r => canonical(r) === canonical(reference)), 'REFERENCE_DRIFT')

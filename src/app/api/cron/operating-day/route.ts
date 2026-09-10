@@ -509,6 +509,10 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
   }
 }
 
+function legacyMlbWriterResponse(dryRun: boolean, id: string) {
+  return dryRun ? null : apiOk({success:true,status:'NOT_DUE',selectedAction:null,mode:'MLB_LEGACY_WRITER_DISABLED',reason:'MLB_R2_DURABLE_COORDINATOR_OWNS_EXECUTION',writes:0,remoteMutationsMade:0,providerCallsMade:0,steps:[],schedulerContract:{runtimeOwner:'MLB_R2_DURABLE_COORDINATOR',legacyWriterEnabled:false}}, id)
+}
+
 async function handle(request: NextRequest) {
   const id = requestId(request)
   if (!authorized(request)) {
@@ -516,6 +520,12 @@ async function handle(request: NextRequest) {
   }
   const dryRun = parseDryRun(request)
   const source = schedulerSource(request, dryRun)
+  // R7 ownership reconciliation: both execution branches in this route are MLB.
+  // runAdaptiveRefresh fixes SPORT_KEY='baseball_mlb' and LEAGUE_KEY='mlb';
+  // the fallback executeOperatingDay call also passes those literal MLB keys.
+  // NBA runs through /api/cron/nba-current-era-shadow and is not changed here.
+  const legacyWriterResponse=legacyMlbWriterResponse(dryRun,id)
+  if(legacyWriterResponse)return legacyWriterResponse
   if (source === GITHUB_FALLBACK_SOURCE && dryRun === false) {
     const lease = await recentPrimarySchedulerLease()
     if (lease.primaryRecent) return fallbackLeaseSkipResponse({ id, dryRun, source, lease })

@@ -8,6 +8,7 @@ import {executeDailyJob,reconcileAutomatedPitches,assertAutomationActivation,aut
 import {requireCanonicalR3Readiness,normalizedFileDigest} from './mlb-data-02r-r2t-r3-readiness.mjs'
 import {operatingDate} from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import {sha256} from './mlb-data-02r-r2f-stage-contracts.mjs'
+import {sanitizedStageException} from './mlb-operational-r7-errors.mjs'
 import {runMlbOperationalSchemaPreflight} from '../src/services/pick2-mlb-unattended-preflight.ts'
 const ensure=(ok,why)=>{if(!ok)throw Error(`R6_HOST:${why}`)}
 const activationPath='docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json'
@@ -88,6 +89,13 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
       results.push({...result,runId:runtime.run.run_id,mode,providers:runtime.ledger.snapshot(),missionOddsCalls:runtime.ledger.missionOddsConsumed(),checkpointBytes:Buffer.byteLength(JSON.stringify(runtime.run.checkpoint)),readback:'PASS'})
     } catch(error) {
       if(error.message==='R6_CLIENT:INVOCATION_BUDGET_YIELD')return {status:'YIELDED',packageSha,results}
+      // Persist only bounded sanitized diagnostics. The authority supplies the
+      // actual stage, revision, lease and accounting atomically with FAILED.
+      try {await runtime.fail(sanitizedStageException(error))}
+      catch(recordError) {
+        console.error(JSON.stringify({event:'MLB_DURABLE_FAILURE_RECORD_UNAVAILABLE',runId:runtime.run.run_id,stage:runtime.run.checkpoint.stage,checkpointRevision:runtime.run.revision,exception:sanitizedStageException(error),recordingException:sanitizedStageException(recordError)}))
+        throw recordError
+      }
       throw error
     } finally {clearInterval(heartbeat);await runtime.release()}
   }

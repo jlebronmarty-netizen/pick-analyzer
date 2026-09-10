@@ -7,8 +7,8 @@ on:
         description: "Use true for observer-only validation; scheduled fallback runs use false"
         required: false
         default: "false"
-  schedule:
-    - cron: "7-57/10 * * * *"
+  # R7: MLB writes belong to the single Vercel R2 scheduler. Keep this legacy
+  # workflow manually inspectable; it no longer schedules an independent writer.
 
 concurrency:
   group: production-operating-day-writer

@@ -1,4 +1,20 @@
-# R7 forensic review — recovery not certified
+# R7 repair — local certification complete, production readback pending
+
+The user explicitly accepted Gate 1's `UNRECOVERABLE_OBSERVABILITY_GAP`. The exact historical exception remains unknown; no message is inferred or backfilled. This acceptance does not turn the old run into a success. The prior clarification request below is resolved.
+
+The repaired candidate passes 72 disposable real-feature/Champion/R2 SQL checks, including independent-instance recovery after paid acquisition and partial observation insertion with exactly one Odds reservation. Five additional SQL checks cover UTC midnight, immutable object recovery before reference acknowledgement, atomic sanitized failure recording and exact-state expired disposition. Four storage/legacy-route security checks, 21 runtime-state checks, eight fenced-write checks, six provider-await checks, eight host checks, 27 schema checks, 17 behavior groups, targeted ESLint and the 400-page production build pass.
+
+Provider evidence uses one private Storage bucket, `mlb-operational-evidence`, with JSON-only objects limited to 4 MiB and at most schedule/odds objects per run. Object identities bind package, run and provider reservation. Immutable create plus independent readback precedes downstream processing. The coordination table continues to contain compact references, never raw Odds responses. Bucket privacy, object RLS and absence of client object policies fail closed. This requires no DDL. A crash before durable acknowledgement still retains an uncertain consumed reservation and never authorizes automatic reacquisition.
+
+The failure operation records server-authoritative run, stage, timestamp, revision, lease holder, provider counts and full DML accounting together with FAILED status. Messages use a strict code allowlist; arbitrary exception text is withheld. Stage markers precede prediction, Odds, market, value, pick and board processing. When the durable database itself is unavailable, a sanitized recording-failure event is emitted; no system can guarantee a database commit through a database outage or abrupt process kill.
+
+The disposition operation requires an exact review digest, no active lease, expired native games, matching prediction readback and conflict-free DML receipts. It preserves the old package, freeze, prediction and counters. The physical state remains FAILED with an explicit `TERMINAL_PARTIAL_PRESERVED` disposition; the scheduler excludes only reviewed terminal partials from pending work. It does not relabel failure as COMPLETE.
+
+Legacy ownership is reconciled: both branches of `/api/cron/operating-day` are explicitly MLB-only (the adaptive service fixes `SPORT_KEY='baseball_mlb'`, and the fallback passes literal MLB keys). Non-dry legacy requests now return a zero-provider/zero-write disposition before the planner. The GitHub writer schedule is removed; NBA's route and Cron are unchanged. Two historical legacy Odds calls remain separately reported; the R6 mission ledger remains 3/20. An initial automatic review rejection of this guard was resolved by inspecting and proving that MLB-only call graph before applying it.
+
+Production bucket provisioning, endpoint deployment/readback, frozen-run disposition, host dry/concurrency, activation and natural scheduled readback remain pending at this candidate checkpoint. Final operational certification has not been issued.
+
+## Preserved initial forensic review
 
 Starting production package: `df1fb78e9a90d06becf6702b46158a34c2bfe974`.
 The frozen run and its prediction remain intact. No production mutation or provider call was made by this review. MLB Cron remains disabled; NBA configuration is unchanged.

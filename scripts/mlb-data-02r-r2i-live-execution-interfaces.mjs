@@ -1175,13 +1175,16 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
     checkpoint.featureReferences=pinnedFeatureReferences({generated,persistedRows:features.rows})
     await canonical.checkpoint.save(runContext.run_id,checkpoint)
   }
+  await canonical.checkpoint.markStage?.('PREDICTIONS')
   const predictions = await persistDownstreamRows({ domain: 'predictions', rows: plannedPredictions, repository, eligibleGamePks: scope, cap: limits.predictions ?? plannedPredictions.length, beforeWrite: assertPregame })
   let markets
   if(canonical.checkpoint.referenceOnly) {
     if(checkpoint.marketReference)markets=await restoreCanonicalMarkets({reference:checkpoint.marketReference,repository,eligibleGamePks:scope,beforeWrite:assertPregame})
     else {
+      await canonical.checkpoint.markStage?.('ODDS_ACQUISITION')
       const evidence=await canonical.getOddsEvidence({runContext,eligibleGamePks:scope})
       checkpoint.evaluatedAt=now()
+      await canonical.checkpoint.markStage?.('MARKET_PERSISTENCE')
       markets=await persistCanonicalMarkets({evidence,nativeGames,eligibleGamePks:scope,repository,limits,beforeWrite:assertPregame})
       checkpoint.marketReference=canonicalMarketReference({markets,evidence,evaluatedAt:checkpoint.evaluatedAt})
       checkpoint.oddsDigest=checkpoint.marketReference.oddsDigest
@@ -1197,10 +1200,13 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
   if (sha256(checkpoint.odds) !== checkpoint.oddsDigest) throw new Error('R2T_CHECKPOINT_ODDS_DRIFT')
   markets = await persistCanonicalMarkets({ evidence: checkpoint.odds, nativeGames, eligibleGamePks: scope, repository, limits, beforeWrite: assertPregame })
   }
+  await canonical.checkpoint.markStage?.('VALUES')
   const valueRows = buildCanonicalValues({ predictions: predictions.rows, observations: markets.observations.rows, evaluatedAt: checkpoint.evaluatedAt })
   const values = await persistDownstreamRows({ domain: 'values', rows: valueRows, repository, eligibleGamePks: scope, cap: limits.nativeValues ?? valueRows.length, beforeWrite: assertPregame })
+  await canonical.checkpoint.markStage?.('OFFICIAL_PICKS')
   const decision = buildCanonicalOfficialPicks({ values: values.rows, decisionAt: checkpoint.evaluatedAt, scheduledByGame: new Map(contexts.map(c => [c.target.gamePk, c.target.scheduledAt])) })
   const picks = await persistDownstreamRows({ domain: 'officialPicks', rows: decision.rows, repository, eligibleGamePks: scope, cap: limits.officialPicks ?? decision.rows.length, beforeWrite: assertPregame })
+  await canonical.checkpoint.markStage?.('BOARD_READBACK')
   const boardReadback = await repository.readValueBoard({ valueIdentities: values.rows.map(r => r.value_identity), pickIdentities: picks.rows.map(r => r.official_pick_identity) })
   const boardValues = new Map(boardReadback.values.map(r => [r.id, r]))
   if (boardReadback.values.length !== values.rows.length || boardReadback.picks.length !== picks.rows.length) throw new Error('VALUE_BOARD_READBACK_INCOMPLETE')

@@ -19,7 +19,12 @@ export async function validateDurableR2Resume({db,client,root,runContext,authori
   // Only this isolated SQL harness projects the archived evidence clock. No
   // caller-supplied clock exists in the production authority or Function.
   const transaction=fn=>db.transaction(tx=>fn(async(sql,p=[]) => (await tx.query(sql.replaceAll('clock_timestamp()',`'${at}'::timestamptz`),p)).rows))
-  const makeAuthority=()=>createRuntimeStateAuthority({transaction,writeRows:args=>performFencedWrite({...args,columnsByTable})})
+  // Storage uses an independent SQL instance in this disposable test, matching
+  // the independent durable acknowledgement boundary of production Storage.
+  const objects=new (db.constructor)()
+  await objects.exec('CREATE TABLE evidence(key text primary key,body jsonb not null)')
+  const evidenceStorage={preflight:async()=>{},read:async key=>(await objects.query('SELECT body FROM evidence WHERE key=$1',[key])).rows[0]?.body??null,create:async(key,body)=>{await objects.query('INSERT INTO evidence VALUES($1,$2::jsonb)',[key,JSON.stringify(body)])}}
+  const makeAuthority=()=>createRuntimeStateAuthority({transaction,evidenceStorage,writeRows:args=>performFencedWrite({...args,columnsByTable})})
   let authority=makeAuthority()
   await authority({op:'initialize'})
   const originalFetch=globalThis.fetch
@@ -35,9 +40,17 @@ export async function validateDurableR2Resume({db,client,root,runContext,authori
     const store=createDurableRunStore({runtime,runContext:freeze,root})
     const journal=createDurableWriteJournal(runtime)
     const repository={...createSupabaseProductionRepository({client,writeJournal:journal}),executionEnvironment:'DISPOSABLE_PGLITE'}
-    if(interrupt)repository.insertPredictions=async()=>{throw Error('FORCED_INTERRUPTION_AFTER_FEATURES')}
+    if(interrupt==='features')repository.insertPredictions=async()=>{throw Error('FORCED_INTERRUPTION_AFTER_FEATURES')}
+    if(interrupt==='observations'){
+      const insert=repository.insertMarketObservations
+      repository.insertMarketObservations=async(rows,cap)=>{await insert(rows.slice(0,Math.max(1,Math.floor(rows.length/2))),cap);throw Error('FORCED_INTERRUPTION_DURING_OBSERVATIONS')}
+    }
     const canonical=await createCanonicalCertificationBindings({client,repository,store,runContext:freeze,authorization,compactContexts:true,oddsApiKey:'ISOLATED_TEST_VALUE',fetchImpl,now:()=>new Date(at)})
     store.setCanonical(canonical)
+    if(interrupt==='odds'){
+      const acquire=canonical.getOddsEvidence
+      canonical.getOddsEvidence=async args=>{await acquire(args);throw Error('FORCED_INTERRUPTION_AFTER_ODDS')}
+    }
     const execute=()=>runR2BExecutableEntrypoint({mode:'CERTIFICATION_SIMULATION',providers:{canonical},repository,authorization,runId:freeze.run_id,executionPackageSha:freeze.execution_package_sha,runDate:freeze.run_date,runAsOf:at,clock:at})
     return {execute,store,canonical}
   }
@@ -45,7 +58,7 @@ export async function validateDurableR2Resume({db,client,root,runContext,authori
   try {
     first=makeClient()
     assert.equal((await first.acquire({runId:'r6-r2-durable-simulation',mode:'PREGAME'})).status,'ACQUIRED')
-    const a=await configure(first,true)
+    const a=await configure(first,'features')
     await assert.rejects(a.execute(),/FORCED_INTERRUPTION_AFTER_FEATURES/)
     assert.ok(first.run.checkpoint.completed.includes('FEATURES'))
     const saved=first.run
@@ -55,11 +68,26 @@ export async function validateDurableR2Resume({db,client,root,runContext,authori
     assert.equal((await second.acquire({runId:'r6-next-slot',mode:'PREGAME'})).status,'ACQUIRED')
     assert.equal(second.run.run_id,saved.run_id)
     assert.deepEqual(second.run.checkpoint,saved.checkpoint)
+    const paid=await configure(second,'odds')
+    await assert.rejects(paid.execute(),/FORCED_INTERRUPTION_AFTER_ODDS/)
+    assert.equal(second.run.odds_calls,1)
+    assert.ok(second.run.checkpoint.references.some(r=>r.kind==='odds_evidence'))
+    const predictionsBefore=(await db.query('SELECT count(*)::int AS n FROM pick2_game_predictions')).rows[0].n
+    await second.release()
+    authority=makeAuthority();second=makeClient();await second.acquire({runId:'r7-after-paid-crash',mode:'PREGAME'})
+    const partial=await configure(second,'observations')
+    await assert.rejects(partial.execute(),/FORCED_INTERRUPTION_DURING_OBSERVATIONS/)
+    assert.equal(second.run.odds_calls,1)
+    await second.release()
+    authority=makeAuthority();second=makeClient();await second.acquire({runId:'r7-after-partial-market',mode:'PREGAME'})
     const b=await configure(second,false)
     b.canonical.buildFeaturePlan=async()=>{throw Error('RAW_REBUILD_AFTER_FEATURES_FORBIDDEN')}
     const result=await b.execute()
     assert.equal(result.status,'CANONICAL_STAGES_READBACK_COMPLETE')
     assert.equal(result.features.writes.reduce((n,w)=>n+w.inserted,0),0)
+    assert.equal((await db.query('SELECT count(*)::int AS n FROM pick2_game_predictions')).rows[0].n,predictionsBefore)
+    assert.equal(second.run.odds_calls,1)
+    check('R7 independent instances recover durable paid evidence and partial market writes with one Odds reservation and preserved predictions',true)
     check('separate R2 runtime resumes after features using durable SQL references and no raw rebuild',true)
     const accounting=second.accounting(),before=second.run.checkpoint
     const again=await b.execute()
@@ -74,5 +102,5 @@ export async function validateDurableR2Resume({db,client,root,runContext,authori
     assert.equal((await third.acquire({runId:saved.run_id,mode:'PREGAME'})).status,'REUSE_NO_OP')
     check('completed durable scheduled identity cannot repeat immutable work',true)
     return {status:'PASS',checkpointBytes:serializedBytes(cp),games:result.eligibleGamePks.length,providerCalls:0,productionDml:0,productionDdl:0}
-  } finally {if(first?.locked)await first.release();if(second?.locked)await second.release();globalThis.fetch=originalFetch}
+  } finally {if(first?.locked)await first.release();if(second?.locked)await second.release();globalThis.fetch=originalFetch;await objects.close()}
 }

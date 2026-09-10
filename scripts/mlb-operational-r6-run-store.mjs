@@ -2,17 +2,21 @@ import {sha256} from './mlb-data-02r-r2f-stage-contracts.mjs'
 import {durableContextReferences} from './mlb-operational-r6-compact-features.mjs'
 const ensure=(ok,reason)=>{if(!ok)throw Error(`R6_CHECKPOINT:${reason}`)}
 
-// Durable state contains references/counts only. Short-lived provider responses
-// may be held during this invocation; loss before canonical persistence is an
-// explicit ambiguous-outcome stop, never permission for an extra Odds request.
+// Provider responses are immutable private objects. Runtime checkpoints retain
+// compact references only; missing consumed evidence never permits reacquisition.
 export function createDurableRunStore({runtime,runContext,root}) {
-  const ephemeral=new Map(),runId=runContext.run_id
+  const runId=runContext.run_id
   let canonical=null
   const persist=checkpoint=>runtime.checkpoint(checkpoint,{stages:runtime.run.dml_accounting.stages})
   const store={
     root,referenceOnly:true,providerLedger:runtime.ledger,
     get locked(){return runtime.locked},
     setCanonical(bindings){canonical=bindings},
+    async markStage(stage) {
+      ensure(['PREDICTIONS','ODDS_ACQUISITION','MARKET_PERSISTENCE','VALUES','OFFICIAL_PICKS','BOARD_READBACK'].includes(stage),'STAGE')
+      const cp=runtime.run.checkpoint
+      if(cp.stage!==stage)await persist({...cp,stage})
+    },
     async freezeScope(scope) {
       const cp=runtime.run.checkpoint
       if(cp.completed.includes('SCOPE')){ensure(JSON.stringify(cp.scope)===JSON.stringify(scope),'FROZEN_SCOPE_DRIFT');return}
@@ -37,15 +41,20 @@ export function createDurableRunStore({runtime,runContext,root}) {
         ensure(cp.references.find(r=>r.kind==='context_evidence')?.digest===digest,'EVIDENCE_REFERENCE_DRIFT')
         return {frozenDigest:frozen.digest,runContext,evidence,evidenceDigest:digest,...(cp.completed.includes('FEATURES')?{featureReferences:cp.references.filter(r=>r.kind==='persisted_features')} : {}),...(cp.marketReference?{marketReference:cp.marketReference,evaluatedAt:cp.marketReference.evaluatedAt,oddsDigest:cp.marketReference.oddsDigest}:{})}
       }
-      if(ephemeral.has(key))return ephemeral.get(key)
-      if(key===`schedule-${runId}`){ensure(runtime.ledger.read('MLB_OFFICIAL')===0,'INCOMPLETE_SOURCE_ACQUISITION');return null}
-      if(key===`odds-${runId}`){ensure(runtime.ledger.read('THE_ODDS_API')===0,'ODDS_OUTCOME_UNCERTAIN');return null}
+      if(key===`schedule-${runId}` || key===`odds-${runId}`){
+        const kind=key===`odds-${runId}`?'odds':'schedule',provider=kind==='odds'?'THE_ODDS_API':'MLB_OFFICIAL'
+        if(runtime.ledger.read(provider)===0)return null
+        const evidence=await runtime.evidence(kind)
+        ensure(evidence,kind==='odds'?'ODDS_OUTCOME_UNCERTAIN':'INCOMPLETE_SOURCE_ACQUISITION')
+        return evidence
+      }
       throw Error('R6_CHECKPOINT:UNSUPPORTED_DOCUMENT')
     },
     async save(key,value) {
       if(key===`schedule-${runId}` || key===`odds-${runId}`) {
         ensure(Buffer.byteLength(JSON.stringify(value))<=4*1024*1024,'PROVIDER_RESPONSE_MEMORY_CAP')
-        ephemeral.set(key,value);return
+        const recovered=await runtime.evidence(key===`odds-${runId}`?'odds':'schedule',value)
+        ensure(sha256(recovered)===sha256(value),'PROVIDER_DURABLE_READBACK');return
       }
       if(key===`accounting-${runId}`) {
         ensure(value.frozen===sha256(runContext),'ACCOUNTING_FREEZE')

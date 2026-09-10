@@ -321,9 +321,9 @@
     "scripts/mlb-operational-automation.mjs": "879688583a22d27c3b3da4b60924d84ee234ee8b8392b531e91df54e731256bb",
     "scripts/mlb-operational-preflight.mjs": "c8e76badafcbfd13d1ac549799e3b8984e2faecd377542f331358e7c491e4005",
     "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
-    "scripts/mlb-operational-r6-run-store.mjs": "915bbfc48cf33b489709252638c43f330f853e3102e68aa714f8bbcb5d2042a5",
-    "scripts/mlb-operational-r6-state-client.mjs": "e0f32ef8493fa8dac0a802732a3090c1c23697d762ecf81305faf5b3addb8250",
-    "scripts/mlb-operational-r6-vercel-runtime.mjs": "021b3e94918735f0c2d389f65a5b4dfaa264ced13af9d4c75a517fbc48a8d8f4",
+    "scripts/mlb-operational-r6-run-store.mjs": "775df9323d8992947ab41585c4b0e9181a848dab069a824918048918a90d7b25",
+    "scripts/mlb-operational-r6-state-client.mjs": "1eebc9302582847a54f781f437563abb10e161f0260fea568d0ed33cb02e78ce",
+    "scripts/mlb-operational-r6-vercel-runtime.mjs": "9e25341834a0015eee1f829bab73ad0f26b3493d3f26211604c9fe09f4522a57",
     "scripts/mlb-operational-r6-write-journal.mjs": "c3ef967cf269d1a98bd19cdb3d331bd167ab6e40f14fadfc3cf8e76c6d8515ec",
     "scripts/mlb-operational-readonly-network-guard.mjs": "b4c535d64cce41aa85ee40be0fbdd351fd47d873262c549711d8c265d3aad383",
     "scripts/mlb-operational-schema-preflight.sql": "6e796b5416eebea92dfc937ed757d05cc03bd753dad4da8b50769b66a035c30a",
@@ -348,7 +348,7 @@
     "src/components/pick2/CanonicalDashboardBoundary.tsx": "547379819564ac87b38b58d643c0419cace11891d0a0671c3e977455b65da409",
     "src/components/pick2/MlbToday.tsx": "00a6e704557d1771f80c68d916debf1b8b5174dd56edd21ec654cc5b9cb41154",
     "src/components/pick2/MlbValueBoardClient.tsx": "150d61a6c979036c1bd8015d522a298bb96fa4bb49a90035fd257f722a5a87cc",
-    "src/services/pick2-mlb-health.service.ts": "ed6d57ae95b6106ba020e12ac75857e9aa3d02611ed08600b4d3d6157baba09b",
+    "src/services/pick2-mlb-health.service.ts": "c100f329eeba054a806ee18cd87973e21ef6901aa572cbb71b3cb453f4e8628b",
     "src/services/pick2-mlb-performance-read.service.ts": "537131cd7484a68959ff1ca94509e422ffe0e13a5982a14f9b374438ad4d923d",
     "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
     "src/services/pick2-mlb-settlement.ts": "7e61d78f9831637df24bae110c88ecf8937794a91cfaa3920a0d7cfdb76df2fe",
@@ -360,15 +360,19 @@
     "src/types/pick2-value-board.ts": "2da78bf1bb81ff0cc589a35780900d65f91a6f0d6089b350f6482d6247f56ec8",
     "supabase/functions/_shared/mlb-fenced-write.mjs": "78ccbffc7d9ba849f51c8171131c22360b53dcf7350213307ec9f0aed64b7b72",
     "supabase/functions/_shared/mlb-runtime-schema.mjs": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951",
-    "supabase/functions/_shared/mlb-runtime-state.mjs": "5e4d9bcf61d60a6ea4570d3116c3df212eafdcc7a02d9c68c932e40654bfe418",
+    "supabase/functions/_shared/mlb-runtime-state.mjs": "b7d3af221da2835c0d49c58251309bb60411b0d4934914930a1328c3fb3a0960",
     "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
     "supabase/functions/mlb-operational-preflight/index.ts": "630006a001a94fedb729271f54c38820218976c2e18620e1042c8880bafdfc32",
     "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
     "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154",
-    "supabase/functions/mlb-runtime-state/index.ts": "2c721c56da6393163fc75651ef32f776636c76755d371cdd49f41adcecc8ebbd",
+    "supabase/functions/mlb-runtime-state/index.ts": "1b151beed1458f15ad53dbd4098950fc264dfe5a4991ca0b87466cd38af7e68c",
     "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
     "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92",
-    "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036"
+    "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
+    "scripts/mlb-operational-r7-errors.mjs": "129d7edb502ff2c920d3c9d208fa2203984cb97d34cc9c4754d850b02d1fb556",
+    "supabase/functions/_shared/mlb-provider-evidence.mjs": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01",
+    "src/app/api/cron/operating-day/route.ts": "e43cf1ef095c2f16bc74b5a4e1737bc9e88ebaddbf12754ec2b4cea7c93436fb",
+    ".github/workflows/production-operating-day.yml": "69c9f6b41e955ece839ea08fde63db5493ce66476cbf1eaecacdb006ccf4d30b"
   },
   "nonemptyUiRevision": {
     "certificate": "MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json",
@@ -398,5 +402,11 @@
     "businessRegressionChecks": 71,
     "httpHostChecks": 7,
     "activation": "DISABLED"
+  },
+  "r7Revalidation": {
+    "status": "LOCAL_REPAIR_PASS",
+    "productionActivation": "PENDING",
+    "sqlChecks": 72,
+    "behaviorGroups": 17
   }
 }

@@ -49,6 +49,12 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
     complete:(status,checkpoint,dml)=>serial(async()=>{
       const result=await call({...token(),op:'complete',status,revision:Number(run.revision),checkpoint,dml});run=result.run;return structuredClone(run)
     }),
+    evidence:(kind,evidence)=>serial(async()=>{
+      const result=await call({...token(),op:'evidence',kind,...(evidence?{evidence}:{})});run=result.run;return result.evidence
+    }),
+    fail:failure=>serial(async()=>{
+      const result=await call({...token(),op:'fail',failure});run=result.run;return structuredClone(run)
+    }),
     write:write=>serial(async()=>{
       ensure(Buffer.byteLength(JSON.stringify(write))<=500000,'WRITE_REQUEST_SIZE')
       const result=await call({...token(),op:'write',revision:Number(run.revision),write});run=result.run;return result.result
