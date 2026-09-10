@@ -1,6 +1,10 @@
 {
   "phase": "PICK_ANALYZER_PHASE_2_CURRENT_SLATE_DEPENDENCY_RECOVERY",
-  "status": "LOCAL_REPAIR_CERTIFIED_PRODUCTION_RECOVERY_PENDING",
+  "status": "LOCAL_REPAIR_CERTIFIED_EDGE_DEPLOYMENT_APPROVAL_BLOCKED",
+  "repairPackage": "2c287299c007fbf4620b4a63f1d460c97a7634ac",
+  "vercelDeployment": "READY",
+  "edgeVersion": 6,
+  "deploymentBlocker": "Automatic review requires explicit authorization of the changed exact Edge candidate",
   "baseline": "5e57a7313bee0837226951a8a772adfa30ce30da",
   "failedRun": "automation-a19415cb611d8916808ed1a1dab011cb4cb81592326884a4a82ab5d667d3ccf5",
   "historicalException": "UNKNOWN_NOT_RECONSTRUCTED",
