@@ -412,7 +412,9 @@ export async function* streamR2NStatcastRowsForGames({
       text = fs.readFileSync(cachePath, 'utf8')
       cacheReuses += 1
     } else {
-      const response=await fetchImpl(statcastUrl(date,date))
+      let response
+      try {response=await fetchImpl(statcastUrl(date,date))}
+      catch(error){throw new Error(['TimeoutError','AbortError'].includes(error?.name)?'R2N_STATCAST_TIMEOUT':'R2N_STATCAST_NETWORK_FAILURE',{cause:error})}
       if(!response.ok)throw new Error(`R2N_STATCAST_HTTP_${response.status ?? 'UNKNOWN'}`)
       if(response.body?.getReader) {
         const reader=response.body.getReader(),decoder=new TextDecoder();let bytes=0;text=''
@@ -428,6 +430,11 @@ export async function* streamR2NStatcastRowsForGames({
       if(cachePath)fs.writeFileSync(cachePath, text)
       calls += 1
     }
+    const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(line=>line.trim())
+    const header=lines.length?parseCsvLine(lines[0]):[]
+    const required=['game_pk','game_date','pitcher','batter','at_bat_number','pitch_number','home_team','away_team']
+    if(!required.every(name=>header.includes(name)) || new Set(header).size!==header.length)throw new Error('R2N_CSV_SCHEMA')
+    if(lines.slice(1).some(line=>parseCsvLine(line).length!==header.length))throw new Error('R2N_CSV_ROW_SHAPE')
     const parsed = parseCsv(text).map((row) => transformStatcastRow(row, teams)).filter(Boolean)
     if (parsed.length >= 25000) throw new Error(`STATCAST_DAILY_CAP_SUSPECT:${date}:${parsed.length}`)
     const scopedRows=parsed.filter(row=>gamePks.includes(Number(row.game_pk)))

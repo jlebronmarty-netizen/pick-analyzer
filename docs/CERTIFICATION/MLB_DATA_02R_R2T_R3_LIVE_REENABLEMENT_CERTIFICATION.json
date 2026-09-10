@@ -246,7 +246,7 @@
     "package-lock.json": "921fc3e1888157cd4acc3b208c8516649fa65b6124d8ebc759fa25bef25d035d",
     "package.json": "de9d954c4c94443c6c35425d9d26f93b9ab4e2c4427a1be219d2990d1bfd2edd",
     "scripts/mlb-data-02f-moneyline-prediction-generation-prep.mjs": "082ca798c70de4d60c7cc32465b39717fd6e4ebbcd4e025a5dee5dc7aa3773cd",
-    "scripts/mlb-data-02h-2026-current-foundation.mjs": "706a22996083b6f18ae605dfe10fe1e944b370cd0dc50f5c01f45305ce6cdc01",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "aadde955a68ad566ba135edeb984f123f10aa49063e454159fd1d83e6b826572",
     "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
     "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be46aede40ca583ecfafc9f8675f50cc0a44782d663b2b5f6a60cb8aaf608fc7",
     "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs": "7ca9358eced88174739fe88b09acb6e789e256bf23dd3b6f3795038b41945f74",
@@ -415,5 +415,9 @@
     "sqlChecks": 72,
     "championAnd76FeatureParity": "PASS",
     "source": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION.json"
+  },
+  "phase2Revalidation": {
+    "sqlChecks": 72,
+    "featureAndChampionParity": "PASS"
   }
 }

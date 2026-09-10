@@ -80,7 +80,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
     keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose'].includes(input.op), 'OPERATION')
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
@@ -101,16 +101,20 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(lease, 'NOT_INITIALIZED')
       const clock = await one("WITH frozen AS MATERIALIZED (SELECT clock_timestamp() AS at) SELECT at, (at AT TIME ZONE 'America/Puerto_Rico')::date::text AS date FROM frozen")
       const active = lease.lease_holder && Date.parse(lease.lease_expires_at) > Date.parse(clock.at)
-      if(input.op==='dispose') {
+      if(input.op==='dispose'||input.op==='disposeDependencyFailure') {
         ensure(!active && id(input.runId) && digest(input.expectedDigest),'DISPOSITION_REVIEW_REQUIRED')
         const run=await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1 FOR UPDATE`,[`RUN:${input.runId}`])
         ensure(run && ['RUNNING','FAILED'].includes(run.status) && reviewDigest(run)===input.expectedDigest,'DISPOSITION_STATE_CONFLICT')
         ensure(run.checkpoint.scope.length>0 && run.dml_accounting.stages.every(s=>s.readback==='PASS' && s.conflicts===0),'DISPOSITION_READBACK')
         const games=await query('SELECT game_pk,scheduled_at FROM public.pick2_mlb_games WHERE game_pk=ANY($1::bigint[]) FOR SHARE',[run.checkpoint.scope])
-        ensure(games.length===run.checkpoint.scope.length && games.every(g=>Date.parse(g.scheduled_at)<=Date.parse(clock.at)),'DISPOSITION_NOT_EXPIRED')
+        const dependencyFailure=input.op==='disposeDependencyFailure'
+        if(dependencyFailure) {
+          ensure(run.status==='FAILED' && run.checkpoint.stage==='DEPENDENCY_SCOPE' && run.checkpoint.failure?.stage==='DEPENDENCY_SCOPE' && run.checkpoint.completed.includes('DEPENDENCY_SCOPE') && run.odds_calls===0 && run.dml_accounting.stages.length===0,'DEPENDENCY_DISPOSITION_NOT_SAFE')
+          ensure(run.checkpoint.references.some(r=>r.kind==='schedule_evidence' && digest(r.digest)) && games.length===run.checkpoint.scope.length,'DEPENDENCY_DISPOSITION_EVIDENCE')
+        } else ensure(games.length===run.checkpoint.scope.length && games.every(g=>Date.parse(g.scheduled_at)<=Date.parse(clock.at)),'DISPOSITION_NOT_EXPIRED')
         const predictions=await query('SELECT id FROM public.pick2_game_predictions WHERE game_pk=ANY($1::bigint[]) AND predicted_at=$2::timestamptz FOR SHARE',[run.checkpoint.scope,run.run_as_of])
         ensure(predictions.length===run.dml_accounting.stages.filter(s=>s.target==='pick2_game_predictions').reduce((n,s)=>n+s.inserted,0),'DISPOSITION_PREDICTION_READBACK')
-        const checkpoint={...run.checkpoint,stage:'TERMINAL_PARTIAL_PRESERVED',disposition:{status:'TERMINAL_PARTIAL_PRESERVED',reviewedAt:new Date(clock.at).toISOString(),reviewDigest:input.expectedDigest,reason:'EXPIRED_FREEZE_NO_RETROACTIVE_MARKETS',predictionCount:predictions.length,readback:'PASS'}}
+        const checkpoint={...run.checkpoint,stage:'TERMINAL_PARTIAL_PRESERVED',disposition:{status:'TERMINAL_PARTIAL_PRESERVED',reviewedAt:new Date(clock.at).toISOString(),reviewDigest:input.expectedDigest,reason:dependencyFailure?'DEPENDENCY_FAILURE_NO_BUSINESS_WRITES':'EXPIRED_FREEZE_NO_RETROACTIVE_MARKETS',predictionCount:predictions.length,readback:'PASS'}}
         validateCheckpoint(checkpoint)
         return {status:'TERMINAL_PARTIAL_PRESERVED',run:await one(`UPDATE ${TABLE} SET checkpoint=$2::text::jsonb,status='FAILED',revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])}
       }

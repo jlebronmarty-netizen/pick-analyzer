@@ -1,0 +1,89 @@
+{
+  "phase": "PICK_ANALYZER_PHASE_2_CURRENT_SLATE_DEPENDENCY_RECOVERY",
+  "status": "LOCAL_REPAIR_CERTIFIED_PRODUCTION_RECOVERY_PENDING",
+  "baseline": "5e57a7313bee0837226951a8a772adfa30ce30da",
+  "failedRun": "automation-a19415cb611d8916808ed1a1dab011cb4cb81592326884a4a82ab5d667d3ccf5",
+  "historicalException": "UNKNOWN_NOT_RECONSTRUCTED",
+  "reproducedDefects": [
+    "Statcast HTTP and timeout exceptions lose their specific code",
+    "HTTP 200 non-CSV response silently produces no rows"
+  ],
+  "dependencyInventory": [
+    {
+      "dependencyGames": 288,
+      "cachedRows": 82066,
+      "missingGames": 2,
+      "missingDates": [
+        "2026-09-08",
+        "2026-09-09"
+      ]
+    },
+    {
+      "dependencyGames": 289,
+      "cachedRows": 85814,
+      "missingGames": 1,
+      "missingDates": [
+        "2026-09-09"
+      ]
+    },
+    {
+      "dependencyGames": 280,
+      "cachedRows": 81197,
+      "missingGames": 1,
+      "missingDates": [
+        "2026-09-09"
+      ]
+    },
+    {
+      "dependencyGames": 288,
+      "cachedRows": 84264,
+      "missingGames": 1,
+      "missingDates": [
+        "2026-09-09"
+      ]
+    },
+    {
+      "dependencyGames": 289,
+      "cachedRows": 86762,
+      "missingGames": 1,
+      "missingDates": [
+        "2026-09-09"
+      ]
+    }
+  ],
+  "targets": 5,
+  "uniqueMissingGames": 6,
+  "uniqueMissingDates": 2,
+  "checkpointBytes": 1296,
+  "failureRevision": 8,
+  "failedRunProviders": {
+    "MLB_OFFICIAL": 1,
+    "STATCAST": 1,
+    "THE_ODDS_API": 0
+  },
+  "missionOdds": 3,
+  "missionOddsCap": 20,
+  "failedRunDisposition": "PENDING_EXACT_STATE_REVIEW",
+  "repair": [
+    "Preserve bounded transport/schema/read classifications",
+    "Reject invalid CSV before transformation",
+    "Exact-review terminal partial for failed dependency scope with zero Odds/business mutations"
+  ],
+  "validation": {
+    "offlineDependencyChecks": 6,
+    "sqlChecks": 72,
+    "behaviorGroups": 17,
+    "stateChecks": 21,
+    "r7RuntimeChecks": 5,
+    "build": "PASS"
+  },
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "sourceHashes": {
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "aadde955a68ad566ba135edeb984f123f10aa49063e454159fd1d83e6b826572",
+    "scripts/mlb-operational-r7-errors.mjs": "49b30414a61da0610e29f2a9be2a07d4ce1a090a6d0e57e32648df029ac02925",
+    "supabase/functions/_shared/mlb-runtime-state.mjs": "d5517ed6b113c838f36479e212d17adbebab617b2b45cfc22af7e9e1cb5f2d7d",
+    "scripts/mlb-phase2-dependency-recovery-validate.mjs": "a8e2d2dc980479b8bc73b984f7484988888c3e8468c32f6430ec38e9bf849364"
+  }
+}

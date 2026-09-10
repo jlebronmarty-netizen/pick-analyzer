@@ -314,7 +314,7 @@
   ],
   "sourceHashes": {
     "next.config.ts": "bb7842ba4738b6d2ae30a7ae32965f31d13e294693f1070ae204e8b4bef0bef5",
-    "scripts/mlb-data-02h-2026-current-foundation.mjs": "706a22996083b6f18ae605dfe10fe1e944b370cd0dc50f5c01f45305ce6cdc01",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "aadde955a68ad566ba135edeb984f123f10aa49063e454159fd1d83e6b826572",
     "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
     "scripts/mlb-data-02r-r2t-r3-validate.mjs": "7ad6543d0a6efb7b7cacb34ff912418b970bd3aa6991198bf558be429635cacf",
     "scripts/mlb-data-02r-r2t-write-contract.mjs": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82",
@@ -360,7 +360,7 @@
     "src/types/pick2-value-board.ts": "2da78bf1bb81ff0cc589a35780900d65f91a6f0d6089b350f6482d6247f56ec8",
     "supabase/functions/_shared/mlb-fenced-write.mjs": "78ccbffc7d9ba849f51c8171131c22360b53dcf7350213307ec9f0aed64b7b72",
     "supabase/functions/_shared/mlb-runtime-schema.mjs": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951",
-    "supabase/functions/_shared/mlb-runtime-state.mjs": "b7d3af221da2835c0d49c58251309bb60411b0d4934914930a1328c3fb3a0960",
+    "supabase/functions/_shared/mlb-runtime-state.mjs": "d5517ed6b113c838f36479e212d17adbebab617b2b45cfc22af7e9e1cb5f2d7d",
     "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
     "supabase/functions/mlb-operational-preflight/index.ts": "630006a001a94fedb729271f54c38820218976c2e18620e1042c8880bafdfc32",
     "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
@@ -369,7 +369,7 @@
     "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
     "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92",
     "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
-    "scripts/mlb-operational-r7-errors.mjs": "129d7edb502ff2c920d3c9d208fa2203984cb97d34cc9c4754d850b02d1fb556",
+    "scripts/mlb-operational-r7-errors.mjs": "49b30414a61da0610e29f2a9be2a07d4ce1a090a6d0e57e32648df029ac02925",
     "supabase/functions/_shared/mlb-provider-evidence.mjs": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01",
     "src/app/api/cron/operating-day/route.ts": "e43cf1ef095c2f16bc74b5a4e1737bc9e88ebaddbf12754ec2b4cea7c93436fb",
     ".github/workflows/production-operating-day.yml": "69c9f6b41e955ece839ea08fde63db5493ce66476cbf1eaecacdb006ccf4d30b"
@@ -408,5 +408,10 @@
     "productionActivation": "PENDING",
     "sqlChecks": 72,
     "behaviorGroups": 17
+  },
+  "phase2Revalidation": {
+    "sqlChecks": 72,
+    "behaviorGroups": 17,
+    "status": "LOCAL_PASS_PRODUCTION_PENDING"
   }
 }
