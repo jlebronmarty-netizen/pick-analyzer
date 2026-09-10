@@ -1,5 +1,5 @@
 {
-  "certificationVerdict": "MLB_DATA_02R_R6_SCHEDULED_READBACK_VERIFIED_FINAL_AUDIT_PENDING",
+  "certificationVerdict": "MLB_OPERATIONAL_CERTIFICATION_BLOCKED_UNRESOLVED_SCHEDULED_RUN",
   "generatedAt": "2026-09-09T23:52:00.187Z",
   "startingSha": "661377ed7f08838033c71bb426be4b6c03892238",
   "executionStartSha": "769f901dc8691fd18b578fc4c1ad6f3172ed09cd",
@@ -217,7 +217,7 @@
     "OTHER": 0
   },
   "cumulativeOddsCalls": {
-    "consumed": 2,
+    "consumed": 3,
     "cap": 20
   },
   "productionDml": {
@@ -255,7 +255,7 @@
     "entrypoint": "executeProductionTick",
     "businessEngine": "EXISTING_R2B_R2I",
     "rawStore": "public.pick2_raw_mlb_statcast_pitches",
-    "activation": "ENABLED",
+    "activation": "DISABLED_PENDING_CONTAINMENT_DEPLOYMENT",
     "sportsProviderAndBusinessWritesInHostDry": 0,
     "temporaryCheckpointOrCsvWrites": 0,
     "scheduledReadback": "PASS"
@@ -287,10 +287,9 @@
   "productionConflicts": 0,
   "finalOperationalCertification": "NOT_ISSUED",
   "remainingLimitations": [
-    "Final certification blocked by automatic review over disabled production settlement and absent settled sample",
-    "Latest scheduled pregame result was empty; earlier genuine nonempty/repeatability certifications retained",
-    "Latest incremental request returned zero new pitch rows",
-    "Postgame/overnight dry-certified, not observed in this slot"
+    "Unresolved later scheduled run blocks operational certification and automation reactivation",
+    "Settlement observation explicitly deferred and no longer a certification blocker",
+    "Natural postgame and overnight observations remain follow-up gates"
   ],
   "edgeDeployment": {
     "version": 5,
@@ -457,14 +456,45 @@
     "additionalProductionDdl": 0
   },
   "finalAudit": {
-    "status": "BLOCKED_AUTOMATIC_REVIEW",
-    "attempts": 2,
-    "reason": "Final certification rejected because production settlement remains disabled and no settled sample exists.",
-    "rejectedWritesApplied": false,
-    "evidenceAudit": "MLB_R6_FINAL_EXIT_CRITERIA_AUDIT.md",
-    "sourceHashCheck": "PASS_56",
-    "disposableSqlChecks": 71,
-    "automationProductGroups": 17,
-    "productionUiChecks": 12
-  }
+    "status": "SETTLEMENT_REQUIREMENT_RESOLVED_BY_EXPLICIT_USER_AUTHORIZATION",
+    "settlementStatus": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE",
+    "productionSettlementEnabled": false,
+    "productionSettledSampleObserved": false,
+    "performanceSampleStatus": "NO_SETTLED_SAMPLE",
+    "productionSettlementWrites": 0
+  },
+  "currentOperationalBlocker": {
+    "runId": "automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2",
+    "packageSha": "e49fd02cd98b95c3a1a50bc057290b66d09679b2",
+    "runAsOf": "2026-09-10T00:00:48.874Z",
+    "lastCheckpoint": "FEATURES",
+    "status": "RUNNING_UNRESOLVED",
+    "predictionInserts": 1,
+    "oddsCalls": 1,
+    "marketReference": null,
+    "persistedMarketObservationsAfterStart": 0,
+    "http503ObservedFrom": "2026-09-10T00:00:42Z",
+    "originalError": "NOT_EXPOSED_IN_AVAILABLE_LOGS",
+    "recovery": "Cannot replace lost frozen market evidence with a new post-start request; preserve run and counters.",
+    "containment": "MLB_CRON_REMOVED_ACTIVATION_DISABLED_PENDING_DEPLOYMENT"
+  },
+  "currentReviewAccounting": {
+    "sportsProviderCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "productionSettlementWrites": 0
+  },
+  "operationalDeclarations": {
+    "RECOMMENDATION_SYSTEM_OPERATIONAL": "NOT_CERTIFIED_UNRESOLVED_RUN",
+    "AUTOMATION_OPERATIONAL": "NO_CONTAINMENT",
+    "SETTLEMENT_IMPLEMENTATION_CERTIFIED": "YES",
+    "PRODUCTION_SETTLEMENT_ENABLED": "NO",
+    "PRODUCTION_SETTLED_SAMPLE_OBSERVED": "NO",
+    "PERFORMANCE_SAMPLE_STATUS": "NO_SETTLED_SAMPLE"
+  },
+  "followupGates": [
+    "FIRST_LEGITIMATE_PRODUCTION_SETTLEMENT_AFTER_SEPARATE_AUTHORIZATION",
+    "FIRST_NATURAL_POSTGAME_EXECUTION_AFTER_REACTIVATION",
+    "FIRST_NATURAL_OVERNIGHT_EXECUTION_AFTER_REACTIVATION"
+  ]
 }

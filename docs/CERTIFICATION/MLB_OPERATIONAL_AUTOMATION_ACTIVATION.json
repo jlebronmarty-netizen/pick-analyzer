@@ -1,5 +1,5 @@
 {
-  "activation": "ENABLED",
+  "activation": "DISABLED",
   "hostCount": 1,
   "dryCertification": "PASS",
   "firstNonemptyRun": {
@@ -14,8 +14,16 @@
     "secondRunId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
     "conflicts": 0
   },
-  "reason": "Production Function dry invocation, actual-host concurrency, durable checkpoint readback, zero-write replay and fresh unattended schema preflight pass.",
-  "blocker": null,
+  "reason": "Containment: later scheduled PREGAME run is unresolved at FEATURES after one consumed Odds request with no durable market reference or persisted observations.",
+  "blocker": {
+    "code": "R6_UNRESOLVED_MARKET_ACQUISITION",
+    "hardStop": true,
+    "authorizationNeeded": false,
+    "runId": "automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2",
+    "packageSha": "e49fd02cd98b95c3a1a50bc057290b66d09679b2",
+    "preserveRun": true,
+    "preserveCounters": true
+  },
   "runtimeHost": {
     "type": "VERCEL_PRODUCTION_FUNCTION",
     "scheduler": "VERCEL_CRON",
@@ -33,5 +41,6 @@
     "access": "SERVER_ROLE_AUTHENTICATED_FIXED_READ_ONLY_SQL"
   },
   "scheduledProductionReadback": "PASS",
-  "scheduledEvidence": "MLB_R6_SCHEDULED_PRODUCTION_READBACK.json"
+  "scheduledEvidence": "MLB_R6_SCHEDULED_PRODUCTION_READBACK.json",
+  "settlementStatus": "IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE"
 }

@@ -1,5 +1,11 @@
 # MLB operational recovery
 
+## Current unresolved-run containment
+
+The later scheduled run `automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2` freezes package `e49fd02` and as-of `2026-09-10T00:00:48.874Z`. It has one persisted prediction and one consumed Odds request, no durable market reference and no persisted observations after its start. Subsequent Cron calls return 503. Original failure details are unavailable in the route logs. Do not substitute current odds for frozen pregame evidence, clear the run, reset the ledger, or mark it COMPLETE. Preserve all committed rows. Disable MLB activation and remove only its Cron definition; leave NBA unchanged. Recovery requires a bounded, evidence-reviewed disposition and prevention of recurrence before activation.
+
+The settlement implementation gate is explicitly accepted as `IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE`. Production settlement remains disabled and unauthorized; no fabricated or retroactive sample is allowed. Performance stays `NO_SETTLED_SAMPLE`, with unsupported ROI/CLV unavailable. Natural settlement, postgame and overnight observations remain follow-up gates rather than grounds to manufacture events.
+
 Current scheduled readback is verified in `MLB_R6_SCHEDULED_PRODUCTION_READBACK.json`: actual production GET 200, two completed modes, released lease, bounded native update and Odds 2/20. Automation is enabled. Final operational certification is withheld following automatic approval review over the disabled production-settlement boundary; that review did not identify an execution/authentication failure. Preserve settlement disabled pending resolution of the final certification requirement. Do not reset runtime counters or rerun completed jobs to manufacture evidence.
 
 ## Current R6 production contract

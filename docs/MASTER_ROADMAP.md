@@ -1,5 +1,7 @@
 # Master Roadmap
 
+Current hard stop: recover or explicitly close the unresolved frozen 00:00 UTC pregame run without inventing/backdating market evidence, resetting counters or altering valid predictions/picks. Contain MLB scheduling; preserve NBA. Then reverify automation before final certification. The settlement implementation gate is accepted under the user's exact deferred-production status; retain future legitimate-settlement and natural postgame/overnight observation gates, with no production settlement writes authorized now.
+
 Current gate: R6 production endpoint, host authentication/concurrency, activation and actual scheduled readback are verified. The single MLB Cron is enabled; daily and incremental modes completed on the actual production Function. Preserve the successful nonempty/repeatability evidence and all existing guards. Final mission certification remains withheld by automatic approval review over production-settlement evidence; do not silently relabel disposable settlement tests as production settlement or bypass the preserved disabled settlement boundary.
 
 R6 Gates 1–18: production host dry/concurrency/checkpoint/reuse now pass alongside retained offline regression evidence. Publish the single MLB durable Cron activation, observe a genuine scheduled invocation, verify canonical surfaces and accounting, then certify Gate 21 only if all required readbacks pass. NBA scheduling and settlement boundaries remain unchanged.

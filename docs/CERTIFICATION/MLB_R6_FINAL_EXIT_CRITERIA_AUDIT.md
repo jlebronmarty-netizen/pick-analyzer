@@ -1,5 +1,11 @@
 # R6 final exit-criteria evidence audit
 
+## Current review supersedes the earlier settlement objection
+
+The user explicitly accepts `IMPLEMENTATION_CERTIFIED_PRODUCTION_DISABLED_PENDING_FIRST_SETTLEABLE_SAMPLE` for final certification. Production settlement remains disabled with zero stored results; Performance is `NO_SETTLED_SAMPLE`. That limitation no longer blocks certification, and no production settlement action is authorized.
+
+Fresh production review nevertheless found a new substantive blocker after the successful 23:45 observation: the 00:00 scheduled run remains RUNNING at FEATURES, with one prediction persisted and one Odds request consumed, but no durable market reference and no persisted market observations after run start. Cron logs show 503 at 00:00 and subsequent slots through 03:45 UTC. This is not a successful terminal run. The original error is unavailable in those logs. Mission Odds is 3/20. MLB scheduling is being contained without resetting or deleting the run, its counters or valid predictions/picks. Final operational certification remains unissued for this separate blocker.
+
 **Final verdict remains NOT ISSUED.** After this evidence audit, automatic review still rejected the final certificate because production settlement is disabled and no settled sample exists. The table below inventories the evidence actually available; it does not override that rejection or promote test evidence to production evidence.
 
 This audit separates retained certification, fresh production observation and disposable tests. It does not assert that the latest scheduled run was nonempty, that it inserted pitches, or that production settlement occurred.
