@@ -1,6 +1,6 @@
 {
   "phase": "PICK_ANALYZER_PHASE2_MARKET_PERSISTENCE_RECOVERY",
-  "verdict": "DIAGNOSTIC_EDGE_DEPLOYMENT_CERTIFIED_DISPOSITION_TIME_GATE_PENDING",
+  "verdict": "FROZEN_RUN_DISPOSITION_AND_SCHEDULED_RECOVERY_CERTIFIED_PREGAME_MARKET_VALIDATION_PENDING",
   "publication": {
     "status": "PASS_SANITIZED_NORMAL_PUSH",
     "branches": [
@@ -15,7 +15,7 @@
   "startingSha": "c133d12c8a37bf9f8933dace34b4d3c907738ee2",
   "failedExecutionPackage": "bd87727f9072369349096d62a361b8439ab31f9c",
   "failedRunId": "automation-73eebadf495e03f5bd4ad4df343bf7ab97fe4c6b2aab3c8c1c5d59f6002f6df3",
-  "preservedRevision": 43,
+  "preservedRevision": 44,
   "marketPersistenceRootCause": "UNRECOVERABLE_EDGE_RESPONSE_DETAIL",
   "confirmedDiagnosticDefect": "DISTINCT_RUNTIME_RESPONSE_FAILURES_COLLAPSE_TO_STATE_COMMAND_FAILED",
   "market88RowPlan": "PASS_OBSERVATION_PROVENANCE_ONLY",
@@ -45,15 +45,59 @@
   },
   "marketStateCommandFailureClassification": "PASS_GENERIC_TRANSACTION_RESPONSE_DETAIL_UNRECOVERABLE",
   "marketPartialRunResume": "PASS_DISPOSABLE_LOST_ACKNOWLEDGEMENT_REUSE_EXPIRED_PRODUCTION_FREEZE_NOT_RESUMABLE",
-  "marketProductionRecovery": "PENDING_EXISTING_ALL_STARTED_DISPOSITION_GUARD",
-  "downstreamValuePickRecovery": "NOT_EXECUTED",
-  "automationRevalidation": "PASS_SOURCE_AUTH_SCHEMA_CONTAINMENT_SUCCESSFUL_LIVE_RUN_PENDING",
-  "postRepairScheduledRun": "NOT_EXECUTED_UNRESOLVED_RUN_GUARD_PRESERVED",
-  "providerCallsThisPhase": 0,
+  "marketProductionRecovery": "EXPIRED_RUN_PRESERVED_NEW_ELIGIBLE_RUN_REQUIRED",
+  "downstreamValuePickRecovery": "PENDING_GENUINE_PREGAME_SCOPE",
+  "automationRevalidation": "PASS_PRODUCTION_SCHEMA_AUTH_DISTRIBUTED_LEASE_CHECKPOINT_ACCOUNTING",
+  "postRepairScheduledRun": {
+    "status": "PASS",
+    "requestAt": "2026-09-11T00:30:06Z",
+    "http": 200,
+    "packageSha": "b99f9fdda6075d8857c518d6035ddf442bc2cc97",
+    "pregame": {
+      "runId": "automation-8e545f1969ba4cf3d56e517c88bd7d0ebe8ae7ae7faa42ca499d89fbaa055440",
+      "status": "COMPLETE",
+      "result": "NO_VALID_PREGAME_SLATE",
+      "eligibleGames": 0,
+      "blockedGames": 5,
+      "blockReason": "NOT_PREGAME",
+      "revision": 6,
+      "officialCalls": 1,
+      "statcastCalls": 0,
+      "oddsCalls": 0,
+      "businessWrites": 0
+    },
+    "incremental": {
+      "runId": "automation-e4bc17a3c7036bec52c069b7fbeea4d5fe9a361add2a75456b2c61b36884b231",
+      "status": "COMPLETE",
+      "scopedGames": 2,
+      "revision": 5,
+      "officialCalls": 1,
+      "statcastCalls": 1,
+      "oddsCalls": 0,
+      "businessWrites": 0
+    },
+    "readback": "PASS",
+    "leaseReleased": true,
+    "unresolvedRuns": 0
+  },
+  "providerCallsThisPhase": {
+    "MLB_OFFICIAL": 2,
+    "STATCAST": 1,
+    "THE_ODDS_API": 0,
+    "BALLDONTLIE": 0,
+    "SportsDataIO": 0,
+    "other": 0
+  },
   "missionOddsCalls": 4,
   "missionOddsCap": 20,
   "historicalLegacyAcquisitions": "TWO_SEPARATELY_RETAINED",
-  "productionDmlThisPhase": 0,
+  "productionDmlThisPhase": {
+    "businessInserts": 0,
+    "businessUpdates": 0,
+    "runtimeInserts": 3,
+    "runtimeUpdates": 20,
+    "derivation": "3 new RUN rows; 13 new-run revision updates + 6 lease revision updates + 1 frozen-run disposition update"
+  },
   "productionDdlThisPhase": 0,
   "newObservations": 0,
   "newValues": 0,
@@ -77,7 +121,7 @@
   "syntheticProductionPaths": 0,
   "startedGameLeakage": 0,
   "uiRedesignReady": false,
-  "remainingEvidence": "Existing all-started disposition after 2026-09-10T23:40:00Z and fresh readback; then a genuinely eligible later production run. No historical exception reconstruction or retroactive Odds acquisition.",
+  "remainingEvidence": "Successful production market observations, eligible value/Policy V1/pick readback on a genuinely pregame slate. Current five games correctly excluded; no UI redesign yet.",
   "limits": [
     "No historical exception reconstruction",
     "No failed-run reset",
@@ -129,14 +173,17 @@
     "productionMutation": 0
   },
   "disposition": {
-    "status": "PENDING_TIME_GATE",
-    "allFrozenGamesStarted": false,
-    "earliestAt": "2026-09-10T23:40:00Z",
-    "requiresFreshReadback": true,
-    "noGuardBypass": true,
-    "preservedRunReviewDigest": "EXACT_MATCH",
-    "preservedOddsEvidenceDigest": "EXACT_MATCH",
-    "revision": 43
+    "status": "TERMINAL_PARTIAL_PRESERVED",
+    "reviewedAt": "2026-09-11T00:23:07.142Z",
+    "allFrozenGamesStarted": true,
+    "readback": "PASS",
+    "runStatus": "FAILED",
+    "preservedPredictions": 4,
+    "preservedMappings": 4,
+    "preservedOddsEvidence": "EXACT_DIGEST_MATCH",
+    "providerAccounting": "UNCHANGED",
+    "dmlAccounting": "UNCHANGED",
+    "unresolvedPendingRuns": 0
   },
   "priorAutoReviewRejections": "SUPERSEDED_BY_EXPLICIT_USER_AUTHORIZATION",
   "vercelReadback": {
@@ -147,5 +194,12 @@
     "hostDry": "EXPECTED_503_R6_HOST_LIVE_RUN_PENDING",
     "providerCalls": 0,
     "productionDml": 0
+  },
+  "hostConcurrency": {
+    "status": "PASS",
+    "winner": "HOST_DRY_PASS",
+    "contender": "DEFER_ACTIVE_LEASE",
+    "providerCalls": 0,
+    "businessDml": 0
   }
 }

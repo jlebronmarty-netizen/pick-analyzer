@@ -1,10 +1,22 @@
 # Market persistence recovery forensic audit
 
-Verdict: DIAGNOSTIC_EDGE_DEPLOYMENT_CERTIFIED_DISPOSITION_TIME_GATE_PENDING. Missing historical telemetry is no longer a gate that blocks prospective certification. Production recovery and operational freshness are not yet certified.
+Verdict: FROZEN_RUN_DISPOSITION_AND_SCHEDULED_RECOVERY_CERTIFIED_PREGAME_MARKET_VALIDATION_PENDING. Missing historical telemetry is no longer a gate that blocks prospective certification. Production recovery and operational freshness are not yet certified.
 
 The starting production/audit package is c133d12c8a37bf9f8933dace34b4d3c907738ee2. The preserved partial run executed bd87727f9072369349096d62a361b8439ab31f9c and remains FAILED / MARKET_PERSISTENCE at revision 43. Its four predictions, four mappings, 40 feature snapshots, committed raw/daily-feature data, and digest-verified private Odds response are unchanged.
 
-## Authorized deployment and current continuation gate
+## Natural scheduled production readback
+
+Vercel recorded the natural GET /api/cron/mlb-operational at 2026-09-11T00:30:06Z with HTTP200 on package b99f9fdda6075d8857c518d6035ddf442bc2cc97. PREGAME run automation-8e545f1969ba4cf3d56e517c88bd7d0ebe8ae7ae7faa42ca499d89fbaa055440 completed at revision6 with NO_VALID_PREGAME_SLATE: all five original games were correctly blocked NOT_PREGAME, one MLB Official call, zero Statcast/Odds and zero business writes. INCREMENTAL run automation-e4bc17a3c7036bec52c069b7fbeea4d5fe9a361add2a75456b2c61b36884b231 completed at revision5 for two live games, using one Official and one Statcast call with zero inserted rows. Empty incremental output is not claimed as new pitch-row ingestion. Both have readback PASS, no conflicts, and no failure.
+
+The final lease is released (revision81), unresolved run count is zero, and mission Odds remains4/20. This continuation used Official2 / Statcast1 / Odds0 / other0; production business DML0, DDL0, runtime inserts3 and runtime updates20. Runtime updates derive from new-run revisions totaling13, lease revision delta6, and frozen disposition delta1. The old predictions/mappings remain4/4, observations/values/picks0/0/0, and zero post-start predictions or duplicate identities are observed. Normal scheduled execution is restored, but non-empty market persistence is not production-certified by an empty slate. UI_REDESIGN_READY=NO pending a genuine pregame market/value/pick readback.
+
+## Guarded disposition and recovery readback
+
+At 2026-09-11T00:23:07.142Z, fresh production all-started and inactive-lease checks passed. The exact revision43 review digest matched, as did the private Odds evidence. The certified dispose operation transitioned the run to TERMINAL_PARTIAL_PRESERVED at revision44, retaining FAILED status rather than claiming a historical success. Independent before/after full-row comparisons preserve all four predictions, four mappings, and zero market/value/pick rows; provider/DML accounting and private Odds evidence are identical. No unresolved run remains.
+
+Actual production auth rejects missing/wrong/public credentials. Two concurrent provider-free host probes produce one HOST_DRY_PASS and one DEFER_ACTIVE_LEASE, with durable completion and released lease. Mission Odds remains4/20. Disposition plus host probes used one runtime insert and five runtime updates, zero business writes, zero providers and zero DDL. Production identity checks find zero duplicates and zero post-start predictions. The next natural scheduled tick is pending; a genuine pregame scope is still required for market/value/pick certification.
+
+## Authorized deployment and prior continuation gate
 
 The subsequent explicit authorization superseded both earlier review rejections. Exact candidate 4f0ebd30e1683efe2ea6c77a9d6cbcb3517b5d7c deployed as ACTIVE Edge v8; all ten downloaded files match the approved manifest and no extra files were deployed. Missing, wrong and public credentials return 401; valid server-only inspect returns 200. A rejected invalid-holder lease request returns HTTP409 / STALE_FENCE_OR_LEASE through the repaired classifier with zero mutation. Future SQLSTATE durability remains supported by exact deployed source plus disposable failure tests; no synthetic production failure record was created.
 

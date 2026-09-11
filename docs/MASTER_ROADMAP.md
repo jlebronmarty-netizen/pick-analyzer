@@ -1,4 +1,6 @@
-# Master Roadmap
+#Frozen market run disposition certified: TERMINAL_PARTIAL_PRESERVED at revision44 after fresh all-started/lease/digest readback. Four predictions, four mappings, private Odds and all accounting preserved; unresolved pending runs0. Actual host concurrency/auth/schema/checkpoint checks pass. Natural 00:30UTC Cron returned HTTP200: PREGAME safely completed NO_VALID_PREGAME_SLATE (five NOT_PREGAME), INCREMENTAL completed for two live games with no new rows. Providers Official2/Statcast1/Odds0, business DML0, runtime inserts3/updates20; pending runs0 and lease released. A genuine pregame production market/value/pick readback remains pending; UI_REDESIGN_READY=NO. Mission Odds4/20; no UI redesign. Earlier entries below are historical.
+
+ Master Roadmap
 
 Market diagnostic deployment: exact authorized candidate 4f0ebd30e1683efe2ea6c77a9d6cbcb3517b5d7c is ACTIVE as Edge v8; all ten downloaded files match, server-only auth and production rejected-lease classification pass. Sanitized review branch and paired main client are published; Vercel READY, live schema PASS and host containment LIVE_RUN_PENDING verified. Frozen revision43 and private Odds evidence match their original digests; mission Odds4/20, phase provider/DML/DDL0. Existing disposition requires all frozen games started: earliest 2026-09-10 23:40UTC / 19:40 Puerto Rico, subject to fresh readback. No guard bypass or UI redesign; live market/value/pick recovery remains pending.
 
