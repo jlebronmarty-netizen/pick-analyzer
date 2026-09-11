@@ -46,8 +46,8 @@
       "normalizedSha256": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92"
     }
   ],
-  "status": "LOCALLY_CERTIFIED_PENDING_DEPLOYMENT",
-  "candidateSha": "ENCLOSING_COMMIT",
+  "status": "DEPLOYED_EXACT_HASH_AND_BEARER_AUTH_VERIFIED",
+  "candidateSha": "8691e7a64b97a6dffb74418c741eb6a89263348c",
   "ddl": 0,
   "permissionBroadening": false,
   "bounds": [
@@ -66,5 +66,6 @@
     "resumeMarket",
     "rebindMarketExecutor",
     "resumeMarketCheckpoint"
-  ]
+  ],
+  "deployedVersion": 12
 }

@@ -1,77 +1,23 @@
 {
   "phase": "MLB_PHASE2_R9_IMMUTABLE_MARKET_READ_AND_GUARDED_RESUME_REPAIR",
-  "certificationVerdict": "R9_PRODUCTION_OBSERVATIONS_PERSISTED_CHECKPOINT_RECOVERY_PENDING",
+  "certificationVerdict": "R9_MARKET_PERSISTENCE_CERTIFIED_UI_FRESHNESS_BLOCKED",
   "startingSha": "e3cfca7c54036130b6435be0da543eefaf32db43",
-  "generatedAt": "2026-09-11T16:37:06.564Z",
-  "failedRun": {
-    "id": "automation-9756864d6172709d333ee55f5522d6d400b8983f0e2038a064bb05463b895c95",
-    "runAsOf": "2026-09-11T15:45:11.92+00:00",
-    "packageSha": "b654a3d74cff473ab6917f15078a95925b3e2ab2",
-    "revision": 50,
-    "status": "FAILED",
-    "stage": "MARKET_PERSISTENCE",
-    "reviewDigest": "54fa016f52faed66137ffc4eef64e8f55b11b298a22a3c03020055869fa6b7ed",
-    "predictionCount": 13,
-    "predictionIdentityDigest": "7e30ef6522dc348f1cc46c742e1ea12be51850a92cc82cdccb77df816152dc68",
-    "mappingCount": 13,
-    "mappingIdentityDigest": "c68e4c18361b29d66ec6fe13e282348d214c3ad97bb773cd76892eec28709c81",
-    "oddsReferenceDigest": "21c0e13f11a0e8103eb06ff3a7df78156dd54b409dd243827722b3d49e3ea408",
-    "marketReadbackDigest": "d2f50517a505facb4cd344f085e5f548b0fea68b6362bcfc7b02a8cadeae201c",
-    "marketPlanCount": 286,
-    "marketPlanDigest": "4cc909824a425888cc796b404ae2f1ee628431e1db7753311d95ebeef80b8b23",
-    "providers": {
-      "MLB_OFFICIAL": 2,
-      "STATCAST": 0,
-      "THE_ODDS_API": 1
-    },
-    "businessInserts": 260
+  "executionPackageSha": "8691e7a64b97a6dffb74418c741eb6a89263348c",
+  "finalCertificationSha": "ENCLOSING_COMMIT",
+  "gates": {
+    "failedRunInventory": "PASS_PRIVATE_EVIDENCE_RETAINED",
+    "immutableAccess": "PASS",
+    "immutableReadRepair": "PASS",
+    "concurrency": "PASS_ACTUAL_WRITER_INTERLEAVING",
+    "marketPlan": "PASS_286_ROWS",
+    "writerUnderProductionGrants": "PASS",
+    "guardedResume": "PASS",
+    "productionRecovery": "PERSISTENCE_PASS_BOARD_FRESHNESS_INCOMPLETE",
+    "secondPass": "PASS",
+    "automationRuntime": "PASS_AT_COMPLETED_SCHEDULED_READBACK",
+    "nextNaturalScheduledMarketPersistence": "PASS",
+    "currentBoardFreshness": "BLOCKED_READ_MODEL_REVIEW_REQUIRED"
   },
-  "gates": [
-    {
-      "gate": 1,
-      "status": "PASS"
-    },
-    {
-      "gate": 2,
-      "status": "PASS"
-    },
-    {
-      "gate": 3,
-      "status": "PASS"
-    },
-    {
-      "gate": 4,
-      "status": "PASS"
-    },
-    {
-      "gate": 5,
-      "status": "PASS"
-    },
-    {
-      "gate": 6,
-      "status": "PASS"
-    },
-    {
-      "gate": 7,
-      "status": "PASS"
-    },
-    {
-      "gate": 8,
-      "status": "PENDING_PRODUCTION"
-    },
-    {
-      "gate": 9,
-      "status": "PENDING_PRODUCTION"
-    },
-    {
-      "gate": 10,
-      "status": "PENDING_PRODUCTION"
-    },
-    {
-      "gate": 11,
-      "status": "PENDING_PRODUCTION"
-    }
-  ],
   "immutableAccess": {
     "select": true,
     "insert": true,
@@ -79,150 +25,121 @@
     "delete": false,
     "unchanged": true
   },
-  "rootCause": "SELECT FOR UPDATE requires UPDATE privilege; immutable market tables intentionally grant SELECT/INSERT only.",
-  "repair": {
-    "tables": [
-      "pick2_mlb_market_price_observations",
-      "pick2_mlb_market_value_evaluations",
-      "pick2_mlb_official_picks"
-    ],
-    "read": "ORDINARY_SELECT",
-    "insert": "IDENTITY_ON_CONFLICT_DO_NOTHING",
-    "race": "SEPARATE_CANONICAL_REREAD_MATCH_OR_BLOCK",
-    "uniqueConstraints": "UNCHANGED",
-    "nativeEnrichmentLock": "UNCHANGED_FOR_UPDATE",
-    "upstreamClassifier": "Reports actual inserted versus raced reused rows; independent full readback retained"
+  "rootCause": "SELECT FOR UPDATE required forbidden UPDATE privilege on immutable market rows.",
+  "repair": "Ordinary SELECT, identity-scoped INSERT ON CONFLICT DO NOTHING, then exact canonical reread. Matching race reuses; mismatch blocks. Grants and uniqueness unchanged.",
+  "deployment": {
+    "edgeVersion": 12,
+    "fileCount": 10,
+    "exactManifestHashes": "PASS",
+    "serverOnlyBearer": "PASS",
+    "missingWrongPublicCredentials": "REJECTED"
   },
-  "validators": {
-    "r9": [
-      {
-        "name": "Exact paid evidence reconstructs 286 observations without new acquisition",
-        "status": "PASS"
-      },
-      {
-        "name": "Production-equivalent immutable SELECT/INSERT grants, UPDATE/DELETE denied",
-        "status": "PASS"
-      },
-      {
-        "name": "Wrong review/readback/package, reservations and downstream state fail without mutation",
-        "status": "PASS"
-      },
-      {
-        "name": "Started target and missing/corrupt paid evidence reject before resume",
-        "status": "PASS"
-      },
-      {
-        "name": "Guarded resume preserves original freeze, rows, reservations, counters and failure",
-        "status": "PASS"
-      },
-      {
-        "name": "Certificate-only executor rebind preserves an unexecuted resume and rejects repeated/advanced state",
-        "status": "PASS"
-      },
-      {
-        "name": "Actual runtime writer inserts 286 rows under production grants and a new instance reuses all",
-        "status": "PASS"
-      },
-      {
-        "name": "Real value and Policy V1 persistence/reuse under the same immutable grants",
-        "status": "PASS"
-      },
-      {
-        "name": "R2 persistence accepts a raced canonical reuse and reports zero inserts",
-        "status": "PASS"
-      },
-      {
-        "name": "Two interleaved writer instances: one winner, matching loser rereads, mismatch blocks",
-        "status": "PASS"
-      }
-    ],
-    "physicalRealModel": 74,
-    "runtime": 21,
-    "fencedWrite": 8,
-    "r7": 5,
-    "r8": 10,
-    "r3": 5,
-    "auth": "PASS_UNCHANGED_TESTED_ENTRYPOINT",
-    "build": "PASS",
-    "checkpoint": {
-      "status": "PASS",
-      "checks": [
-        "Exact partial observation resume preserves 286 rows and complete history/accounting",
-        "Exact market checkpoint exceeds obsolete threshold but retains full bounded failure reserve",
-        "Oversized future checkpoints reject and known exception remains durably classified within unchanged limits"
-      ],
-      "oldCheckpointBytes": 32054,
-      "ceiling": 48000,
-      "reserve": 16500,
-      "providers": 0,
-      "productionDml": 0,
-      "productionDdl": 0
-    }
-  },
-  "productionResume": {
-    "status": "PARTIAL_PRESERVED",
-    "revision": 59,
-    "observationsInserted": 286,
-    "observationsIndependentReuse": 286,
-    "observationsAdditionalInserts": 0,
-    "values": 0,
-    "officialPicks": 0,
-    "providerCalls": 0,
-    "rootCause": "FAILURE_RECORD_HEADROOM",
-    "originatingHostResponse": "R6_STATE:FAILURE_RECORD_HEADROOM",
-    "historicalDurableClassification": "UNCLASSIFIED_STAGE_EXCEPTION",
-    "historicalClassificationPreserved": true
-  },
-  "secondPass": "DISPOSABLE_286_REUSES_ZERO_INSERTS; PRODUCTION_PENDING",
-  "providerCallsThisPhase": 0,
-  "cumulativeOdds": {
-    "consumed": 5,
-    "cap": 20,
-    "legacy": "RETAINED_SEPARATELY"
-  },
-  "productionDml": {
-    "businessInserts": 286,
-    "businessUpdates": 0,
-    "runtimeInserts": 0,
-    "runtimeUpdates": 15,
-    "deletes": 0
-  },
-  "productionDdl": 0,
-  "conflicts": 0,
-  "startedGameLeakage": 0,
-  "automation": "ENABLED_GUARDED_FAILED_RUN_PENDING_REPAIR",
-  "MARKET_PERSISTENCE_PRODUCTION_CERTIFIED": false,
-  "UI_REDESIGN_READY": false,
-  "protected": {
-    "champion": "UNCHANGED",
-    "features": 76,
-    "preprocessing": "UNCHANGED",
-    "policy": "UNCHANGED",
-    "permissions": "UNCHANGED",
-    "inheritedChanges": 19
-  },
-  "limitations": [
-    "Exact286 observations are production-persisted; values/policy and overall repeat/scheduled readback remain pending.",
-    "A32,054-byte projected recovery checkpoint now passes with the original48,000-byte ceiling and16,500-byte replacement failure reserve.",
-    "Original failure classifications and all paid evidence/lineage remain preserved."
-  ],
-  "docs": [
-    "https://www.postgresql.org/docs/current/sql-select.html",
-    "https://www.postgresql.org/docs/current/sql-insert.html"
-  ],
-  "initialProductionResume": {
-    "status": "ACQUIRED_THEN_RELEASED",
-    "revision": 51,
+  "recoveredRun": {
+    "status": "COMPLETE",
     "preservedPredictions": 13,
     "preservedMappings": 13,
-    "odds": 5,
-    "businessDml": 0,
-    "runtimeUpdates": 3
+    "marketObservations": 286,
+    "values": 286,
+    "officialPicks": 0,
+    "oddsReacquisition": 0,
+    "originalFreezeEvidenceHistoryAccounting": "PRESERVED"
   },
-  "readinessRecovery": {
-    "cause": "Three pre-R9 hashes remained in the automation readiness certificate; natural 16:45 Cron rejected before lease acquisition.",
-    "repaired": "Refreshed exact tested hashes; narrowly guarded unexecuted executor rebind",
+  "secondPass": {
+    "predictionsReused": 13,
+    "mappingsReused": 13,
+    "observationsReused": 286,
+    "valuesReused": 286,
+    "newRows": 0,
     "providerCalls": 0,
-    "businessDml": 0
-  }
+    "runtime": "REUSE_NO_OP"
+  },
+  "naturalScheduledReadback": {
+    "httpStatus": 200,
+    "status": "COMPLETE",
+    "eligibleGames": 12,
+    "blockedGames": 3,
+    "blockReasons": {
+      "missingStarter": 2,
+      "evidenceAfterFreeze": 1
+    },
+    "predictions": 12,
+    "marketObservations": 264,
+    "values": 264,
+    "officialPicks": 8,
+    "valueSecondPassReuse": 264,
+    "pickSecondPassReuse": 8,
+    "newRowsOnSecondPass": 0,
+    "policy": {
+      "watchlist": 13,
+      "valueCandidate": 3,
+      "officialPickEligible": 8
+    }
+  },
+  "accounting": {
+    "scope": "R9 recovery through the first completed natural scheduled validation and companion pitch modes; excludes subsequent automation",
+    "providers": {
+      "MLB_OFFICIAL": 8,
+      "STATCAST": 0,
+      "THE_ODDS_API": 1,
+      "other": 0
+    },
+    "cumulativeOdds": {
+      "consumed": 6,
+      "cap": 20,
+      "legacy": "RETAINED_SEPARATELY"
+    },
+    "businessInserts": 1120,
+    "guardedNativeUpdates": 1,
+    "immutableUpdates": 0,
+    "runtimeInserts": 4,
+    "runtimeUpdates": 115,
+    "deletes": 0,
+    "productionDdl": 0
+  },
+  "integrity": {
+    "duplicates": 0,
+    "conflicts": 0,
+    "startedGameLeakage": 0,
+    "unresolvedFailedRunsAtReadback": 0,
+    "leaseReleasedAtReadback": true
+  },
+  "validators": {
+    "focusedR9": 10,
+    "checkpoint": 3,
+    "physicalRealChampion": 74,
+    "runtime": 21,
+    "fencedWriter": 8,
+    "r7Midnight": 5,
+    "r8": 10,
+    "r3": 5,
+    "build": "PASS"
+  },
+  "board": {
+    "readErrors": 0,
+    "rows": 26,
+    "blocked": 26,
+    "staleNativeEvidenceRows": 24,
+    "olderMarketTemporalBlockedRows": 2,
+    "currentClassificationFreshness": "NOT_CERTIFIED"
+  },
+  "MARKET_PERSISTENCE_PRODUCTION_CERTIFIED": true,
+  "UI_REDESIGN_READY": false,
+  "protected": {
+    "Champion": "UNCHANGED",
+    "features": 76,
+    "preprocessing": "UNCHANGED",
+    "PolicyV1": "UNCHANGED",
+    "privileges": "UNCHANGED",
+    "settlementWrites": 0,
+    "uiChanges": 0,
+    "inheritedTrackedChanges": 19
+  },
+  "remainingLimitations": [
+    "Current board freshness is unresolved; do not claim full end-to-end UI recovery.",
+    "Native-row timestamp freshness blocks presentation despite newly persisted market/value/pick data; review the canonical read model before UI implementation.",
+    "Two missing-starter targets and one post-freeze evidence target were blocked individually.",
+    "Concurrency test interleaves actual writer instances in disposable PGlite; it does not claim two independent PostgreSQL connections.",
+    "Original and intermediate failure history remains preserved privately.",
+    "Public certificate contains aggregate structural evidence only; no raw production rows, provider payloads, storage objects, bearer hashes or runtime reservation records."
+  ]
 }
