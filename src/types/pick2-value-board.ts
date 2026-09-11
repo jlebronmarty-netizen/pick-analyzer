@@ -25,6 +25,7 @@ export interface Pick2MlbValueBoardFactorEdge {
 }
 
 export interface Pick2MlbValueBoardRow {
+  opportunity_status?: 'OFFICIAL_PICK' | 'VALUE_CANDIDATE' | 'WATCHLIST' | 'BLOCKED' | 'NO_EDGE'
   game_pk: number
   game_date: string | null
   start_time: string | null

@@ -39,6 +39,8 @@ export type Pick2MlbValueBoardSourceStatus =
   | 'BLOCKED'
 
 export interface Pick2MlbValueBoardSourceRow {
+  // Canonical classification; the existing UI groups NO_EDGE under Watchlist.
+  opportunity_status?: 'OFFICIAL_PICK' | 'VALUE_CANDIDATE' | 'WATCHLIST' | 'BLOCKED' | 'NO_EDGE'
   game_pk: number
   game_date?: string | null
   start_time?: string | null
@@ -216,6 +218,7 @@ export function buildPick2MlbValueBoardRows(sourceRows: Pick2MlbValueBoardSource
       market: row.market ?? 'MONEYLINE',
       status,
       status_rank: PICK2_MLB_VALUE_BOARD_STATUS_RANK[status],
+      opportunity_status: row.opportunity_status ?? status,
       board_rank: 0,
       value_score: buildPick2MlbValueScore({
         consensus_edge: row.consensus_edge,

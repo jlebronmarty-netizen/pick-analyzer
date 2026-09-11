@@ -137,17 +137,21 @@ await check('performance reports supported units and denominators; no fabricated
 await check('Today projection has truthful empty, no-prediction, stale, and started-game states', () => {
   const input = { games: [], predictions: [], values: [], picks: [], teams: [], at }
   assert.equal(projectMlbOperations(input).games.length, 0)
-  const game = { game_pk: 1, game_date: job.date, scheduled_at: '2026-09-09T18:00:00Z', official_status: 'Scheduled', updated_at: at, metadata: {} }
-  assert.equal(projectMlbOperations({ ...input, games: [game] }).games[0].reason, 'NO_CURRENT_PREDICTION')
-  assert.equal(projectMlbOperations({ ...input, games: [{ ...game, updated_at: '2026-09-08T00:00:00Z' }] }).games[0].reason, 'STALE_GAME_EVIDENCE')
+  const game = { game_pk: 1, game_date: job.date, scheduled_at: '2026-09-09T18:00:00Z', official_status: 'Scheduled', updated_at: at, metadata: { homeProbablePitcher: { id: 1 }, awayProbablePitcher: { id: 2 } } }
+  const observed = { game_pk: 1, scheduled_at: game.scheduled_at, official_status: 'Scheduled', observed_at: at, homeStarter: { id: 1 }, awayStarter: { id: 2 } }
+  assert.equal(projectMlbOperations({ ...input, games: [game], schedules: [observed] }).games[0].reason, 'NO_CURRENT_PREDICTION')
+  assert.equal(projectMlbOperations({ ...input, games: [game], schedules: [{ ...observed, observed_at: '2026-09-08T00:00:00Z' }] }).games[0].reason, 'STALE_GAME_EVIDENCE')
   assert.equal(projectMlbOperations({ ...input, games: [{ ...game, scheduled_at: '2026-09-09T15:00:00Z' }] }).games[0].reason, 'STARTED_GAME_BLOCKED')
 })
 await check('Today and Value Board preserve canonical values, require stored pick linkage and block starter changes', () => {
   const game = { game_pk: 1, game_date: job.date, scheduled_at: '2026-09-09T18:00:00Z', official_status: 'Scheduled', updated_at: at, metadata: { homeProbablePitcher: { id: 1 }, awayProbablePitcher: { id: 2 } } }
-  const prediction = { id: 'pred', game_pk: 1, predicted_at: '2026-09-09T15:50:00Z', home_probability: .57, away_probability: .43, metadata: { model_version: MLB_CHAMPION, starters: { home: { mlbam_pitcher_id: 1 }, away: { mlbam_pitcher_id: 2 } } } }
+  const prediction = { id: 'pred', game_pk: 1, predicted_at: '2026-09-09T15:50:00Z', home_probability: .57, away_probability: .43, metadata: { model_version: MLB_CHAMPION, scheduled_at: game.scheduled_at, evidence_digest: 'a'.repeat(64), starters: { home: { mlbam_pitcher_id: 1 }, away: { mlbam_pitcher_id: 2 } } } }
   const value = { id: 'value', game_pk: 1, prediction_id: 'pred', model_version: MLB_CHAMPION, side: 'HOME', model_probability: .57, consensus_edge: .07, unit_ev: .14, book_count: 8, market_dispersion: .01, american_odds: 100, market_freshness: 'FRESH', starter_status: 'CONFIRMED', provider_last_update: at, evaluated_at: at, market_acquired_at: at, prediction_as_of: prediction.predicted_at, temporal_eligibility: 'PREGAME_VALID', bookmaker_key: 'test-only' }
   Object.assign(value, { home_market_observation_id: 'home-observation', away_market_observation_id: 'away-observation', selected_side_market_observation_id: 'home-observation', source_payload_digest: 'a'.repeat(64), evaluation_payload_digest: 'b'.repeat(64) })
-  const input = { games: [game], predictions: [prediction], values: [value], picks: [], teams: [], at }
+  value.provider_event_id = 'event'
+  const mappings = [{ id: 'mapping', game_pk: 1, market_provider: 'the-odds-api', provider_event_id: 'event', matched_at: at }]
+  const observations = ['HOME', 'AWAY'].map(side => ({ id: side.toLowerCase() + '-observation', observation_identity: side, game_pk: 1, side, provider: 'the-odds-api', provider_event_id: 'event', market_event_mapping_id: 'mapping', bookmaker_key: 'test-only', market: 'MONEYLINE', american_odds: 100, provider_last_update: at, acquired_at: at, commence_time: game.scheduled_at }))
+  const input = { games: [game], predictions: [prediction], values: [value], picks: [], teams: [], mappings, observations, at }
   const projected = projectMlbOperations(input)
   assert.equal(projected.sources[0].status, 'VALUE_CANDIDATE')
   const board = buildPick2MlbValueBoardRows(projected.sources)
