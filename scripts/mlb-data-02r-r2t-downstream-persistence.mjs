@@ -100,15 +100,18 @@ export async function persistDownstreamRows({ domain, rows, repository, eligible
   const missing = new Set(plan.classifications.filter(c => c.classification === 'INSERT_ELIGIBLE').map(c => c.identity))
   const inserts = rows.filter(row => missing.has(String(row[binding.identity])))
   ensure(inserts.length === plan.insertEligible && inserts.length <= cap, 'INSERT_CAP_OR_LINKAGE')
+  let actualInserted=0
   if (inserts.length) {
     await beforeWrite({ domain, rows: inserts, cap, plan })
     const write = await repository[binding.insert](inserts, cap)
-    ensure(write.inserted === inserts.length, 'INSERT_COUNT')
+    const raceReuse=['marketObservations','values','officialPicks'].includes(domain)?(write.reused??0):0
+    ensure(Number.isSafeInteger(write.inserted) && write.inserted>=0 && Number.isSafeInteger(raceReuse) && raceReuse>=0 && write.inserted+raceReuse===inserts.length, 'INSERT_COUNT')
+    actualInserted=write.inserted
   }
   const stored = rows.length ? await repository[binding.read](identities) : []
   const readback = classify(stored)
   ensure(stored.length === rows.length && readback.insertEligible === 0 && readback.reuseNoOp === rows.length, 'INDEPENDENT_READBACK')
-  return { rows: stored, plan, readback, inserted: inserts.length, cap }
+  return { rows: stored, plan, readback, inserted: actualInserted, cap }
 }
 
 export async function buildPersistedPredictions({ games, persistedFeatures, registryRepository, runAsOf }) {

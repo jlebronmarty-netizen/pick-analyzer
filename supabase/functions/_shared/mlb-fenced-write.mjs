@@ -4,6 +4,7 @@ import { identityColumns, matches } from '../../../scripts/mlb-data-02r-r2t-writ
 import { sha256 } from '../../../scripts/mlb-data-02r-r2f-stage-contracts.mjs'
 const ensure=(ok,reason)=>{if(!ok)throw Error(`R6_STATE:${reason}`)}
 const quote=x=>{ensure(/^[a-z_][a-z0-9_]*$/.test(x),'WRITE_COLUMN');return `"${x}"`}
+const immutableMarkets=new Set(['pick2_mlb_market_price_observations','pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'])
 
 export async function performFencedWrite({query,run,write,columnsByTable,clock}) {
   ensure(write && Object.keys(write).every(k=>['table','rows','cap','operation','expectedOld'].includes(k)),'WRITE_FIELDS')
@@ -36,7 +37,9 @@ export async function performFencedWrite({query,run,write,columnsByTable,clock})
   }
   // Cast caller identities through text. SQL identifiers come exclusively from
   // the fixed contract; values always remain bound parameters.
-  const existing=await query(`SELECT to_jsonb(t) AS row FROM public.${quote(table)} t WHERE ${quote(column)}::text = ANY($1::text[]) FOR UPDATE`,[ids.map(String)])
+  const immutable=immutableMarkets.has(table)
+  const readSql=`SELECT to_jsonb(t) AS row FROM public.${quote(table)} t WHERE ${quote(column)}::text = ANY($1::text[])${immutable?'':' FOR UPDATE'}`
+  const existing=await query(readSql,[ids.map(String)])
   const stored=existing.map(r=>r.row),inserts=[],reused=[]
   ensure(new Set(stored.map(r=>String(r[column]))).size===stored.length,'WRITE_DUPLICATE_IDENTITY')
   for(const planned of rows) {
@@ -54,7 +57,19 @@ export async function performFencedWrite({query,run,write,columnsByTable,clock})
   let changed=[]
   if(operation==='INSERT' && inserts.length) {
     const names=fields.map(quote).join(',')
-    changed=(await query(`WITH inserted AS (INSERT INTO public.${quote(table)} (${names}) SELECT ${names} FROM jsonb_populate_recordset(NULL::public.${quote(table)},$1::text::jsonb) RETURNING *) SELECT to_jsonb(inserted) AS row FROM inserted`,[JSON.stringify(inserts)])).map(r=>r.row)
+    changed=(await query(`WITH inserted AS (INSERT INTO public.${quote(table)} (${names}) SELECT ${names} FROM jsonb_populate_recordset(NULL::public.${quote(table)},$1::text::jsonb)${immutable?` ON CONFLICT (${quote(column)}) DO NOTHING`:''} RETURNING *) SELECT to_jsonb(inserted) AS row FROM inserted`,[JSON.stringify(inserts)])).map(r=>r.row)
+    if(immutable && changed.length<inserts.length) {
+      // A separate READ COMMITTED statement sees a competing committed insert.
+      // Never UPDATE an immutable row, and never swallow a different unique key.
+      const missing=inserts.filter(p=>!changed.some(r=>String(r[column])===String(p[column])))
+      const canonical=(await query(readSql,[missing.map(p=>String(p[column]))])).map(r=>r.row)
+      ensure(canonical.length===missing.length && new Set(canonical.map(r=>String(r[column]))).size===canonical.length,'BLOCK_CONFLICT')
+      for(const p of missing) {
+        const prior=canonical.find(r=>String(r[column])===String(p[column]))
+        ensure(prior && matches(prior,p),'BLOCK_CONFLICT')
+        reused.push(prior)
+      }
+    }
   } else if(operation==='UPDATE' && !reused.length) {
     ensure(Object.keys(expectedOld).every(k=>columnsByTable[table].includes(k)),'OLD_PAYLOAD_SHAPE')
     const assignments=fields.filter(k=>k!==column).map(k=>`${quote(k)}=p.${quote(k)}`).join(',')

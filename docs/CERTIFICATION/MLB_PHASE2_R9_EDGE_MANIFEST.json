@@ -1,0 +1,63 @@
+{
+  "phase": "MLB_PHASE2_R9_IMMUTABLE_MARKET_READ_AND_GUARDED_RESUME_REPAIR",
+  "fileCount": 10,
+  "entrypoint": "supabase/functions/mlb-runtime-state/index.ts",
+  "verify_jwt": false,
+  "authentication": "MANDATORY_SERVER_ONLY_BEARER_BEFORE_DATABASE",
+  "files": [
+    {
+      "path": "scripts/mlb-data-02r-r2f-stage-contracts.mjs",
+      "normalizedSha256": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7"
+    },
+    {
+      "path": "scripts/mlb-data-02r-r2t-write-contract.mjs",
+      "normalizedSha256": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82"
+    },
+    {
+      "path": "scripts/mlb-operational-r7-errors.mjs",
+      "normalizedSha256": "c725f0948fa3a6dc0ea028d3dab6c7a4a57d906e8128fa7b07fb14199ffba5af"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-fenced-write.mjs",
+      "normalizedSha256": "751e2e759076adf18193a0566f2f246e5ac8570a501cf8c7bd89808319c2b286"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-schema.mjs",
+      "normalizedSha256": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-state.mjs",
+      "normalizedSha256": "58ee7e001e9501f38458a1cbdd5b659d1744248fc971a1c445d8c98927d88980"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-provider-evidence.mjs",
+      "normalizedSha256": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/index.ts",
+      "normalizedSha256": "1b151beed1458f15ad53dbd4098950fc264dfe5a4991ca0b87466cd38af7e68c"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/schema-contract.json",
+      "normalizedSha256": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/write-contract.json",
+      "normalizedSha256": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92"
+    }
+  ],
+  "status": "LOCALLY_CERTIFIED_PENDING_DEPLOYMENT",
+  "candidateSha": "ENCLOSING_COMMIT",
+  "ddl": 0,
+  "permissionBroadening": false,
+  "newOperation": "resumeMarket",
+  "bounds": [
+    "Exact failed MARKET_PERSISTENCE 42501 run and reviewed state/readback digests",
+    "All original market targets still pregame; same operating date",
+    "One guarded recovery; original package/freeze/failure retained",
+    "Predictions and mappings read back; paid Odds reference/digest verified",
+    "Initial zero-observation state only; unexpected downstream writes reject",
+    "No provider reservations or counters reset; no Odds reacquisition",
+    "Global lease plus identity unique constraints; immutable SELECT/INSERT only"
+  ]
+}

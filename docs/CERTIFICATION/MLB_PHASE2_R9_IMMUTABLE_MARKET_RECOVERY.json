@@ -1,0 +1,176 @@
+{
+  "phase": "MLB_PHASE2_R9_IMMUTABLE_MARKET_READ_AND_GUARDED_RESUME_REPAIR",
+  "certificationVerdict": "R9_LOCAL_IMMUTABLE_REPAIR_CERTIFIED_PRODUCTION_PENDING",
+  "startingSha": "e3cfca7c54036130b6435be0da543eefaf32db43",
+  "generatedAt": "2026-09-11T16:37:06.564Z",
+  "failedRun": {
+    "id": "automation-9756864d6172709d333ee55f5522d6d400b8983f0e2038a064bb05463b895c95",
+    "runAsOf": "2026-09-11T15:45:11.92+00:00",
+    "packageSha": "b654a3d74cff473ab6917f15078a95925b3e2ab2",
+    "revision": 50,
+    "status": "FAILED",
+    "stage": "MARKET_PERSISTENCE",
+    "reviewDigest": "54fa016f52faed66137ffc4eef64e8f55b11b298a22a3c03020055869fa6b7ed",
+    "predictionCount": 13,
+    "predictionIdentityDigest": "7e30ef6522dc348f1cc46c742e1ea12be51850a92cc82cdccb77df816152dc68",
+    "mappingCount": 13,
+    "mappingIdentityDigest": "c68e4c18361b29d66ec6fe13e282348d214c3ad97bb773cd76892eec28709c81",
+    "oddsReferenceDigest": "21c0e13f11a0e8103eb06ff3a7df78156dd54b409dd243827722b3d49e3ea408",
+    "marketReadbackDigest": "d2f50517a505facb4cd344f085e5f548b0fea68b6362bcfc7b02a8cadeae201c",
+    "marketPlanCount": 286,
+    "marketPlanDigest": "4cc909824a425888cc796b404ae2f1ee628431e1db7753311d95ebeef80b8b23",
+    "providers": {
+      "MLB_OFFICIAL": 2,
+      "STATCAST": 0,
+      "THE_ODDS_API": 1
+    },
+    "businessInserts": 260
+  },
+  "gates": [
+    {
+      "gate": 1,
+      "status": "PASS"
+    },
+    {
+      "gate": 2,
+      "status": "PASS"
+    },
+    {
+      "gate": 3,
+      "status": "PASS"
+    },
+    {
+      "gate": 4,
+      "status": "PASS"
+    },
+    {
+      "gate": 5,
+      "status": "PASS"
+    },
+    {
+      "gate": 6,
+      "status": "PASS"
+    },
+    {
+      "gate": 7,
+      "status": "PASS"
+    },
+    {
+      "gate": 8,
+      "status": "PENDING_PRODUCTION"
+    },
+    {
+      "gate": 9,
+      "status": "PENDING_PRODUCTION"
+    },
+    {
+      "gate": 10,
+      "status": "PENDING_PRODUCTION"
+    },
+    {
+      "gate": 11,
+      "status": "PENDING_PRODUCTION"
+    }
+  ],
+  "immutableAccess": {
+    "select": true,
+    "insert": true,
+    "update": false,
+    "delete": false,
+    "unchanged": true
+  },
+  "rootCause": "SELECT FOR UPDATE requires UPDATE privilege; immutable market tables intentionally grant SELECT/INSERT only.",
+  "repair": {
+    "tables": [
+      "pick2_mlb_market_price_observations",
+      "pick2_mlb_market_value_evaluations",
+      "pick2_mlb_official_picks"
+    ],
+    "read": "ORDINARY_SELECT",
+    "insert": "IDENTITY_ON_CONFLICT_DO_NOTHING",
+    "race": "SEPARATE_CANONICAL_REREAD_MATCH_OR_BLOCK",
+    "uniqueConstraints": "UNCHANGED",
+    "nativeEnrichmentLock": "UNCHANGED_FOR_UPDATE",
+    "upstreamClassifier": "Reports actual inserted versus raced reused rows; independent full readback retained"
+  },
+  "validators": {
+    "r9": [
+      {
+        "name": "Exact paid evidence reconstructs 286 observations without new acquisition",
+        "status": "PASS"
+      },
+      {
+        "name": "Production-equivalent immutable SELECT/INSERT grants, UPDATE/DELETE denied",
+        "status": "PASS"
+      },
+      {
+        "name": "Wrong review/readback/package, reservations and downstream state fail without mutation",
+        "status": "PASS"
+      },
+      {
+        "name": "Started target and missing/corrupt paid evidence reject before resume",
+        "status": "PASS"
+      },
+      {
+        "name": "Guarded resume preserves original freeze, rows, reservations, counters and failure",
+        "status": "PASS"
+      },
+      {
+        "name": "Actual runtime writer inserts 286 rows under production grants and a new instance reuses all",
+        "status": "PASS"
+      },
+      {
+        "name": "Real value and Policy V1 persistence/reuse under the same immutable grants",
+        "status": "PASS"
+      },
+      {
+        "name": "R2 persistence accepts a raced canonical reuse and reports zero inserts",
+        "status": "PASS"
+      },
+      {
+        "name": "Two interleaved writer instances: one winner, matching loser rereads, mismatch blocks",
+        "status": "PASS"
+      }
+    ],
+    "physicalRealModel": 74,
+    "runtime": 21,
+    "fencedWrite": 8,
+    "r7": 5,
+    "r8": 10,
+    "r3": 5,
+    "auth": "PASS_UNCHANGED_TESTED_ENTRYPOINT",
+    "build": "PASS"
+  },
+  "productionResume": "PENDING",
+  "secondPass": "DISPOSABLE_286_REUSES_ZERO_INSERTS; PRODUCTION_PENDING",
+  "providerCallsThisPhase": 0,
+  "cumulativeOdds": {
+    "consumed": 5,
+    "cap": 20,
+    "legacy": "RETAINED_SEPARATELY"
+  },
+  "productionDml": 0,
+  "productionDdl": 0,
+  "conflicts": 0,
+  "startedGameLeakage": 0,
+  "automation": "ENABLED_GUARDED_FAILED_RUN_PENDING_REPAIR",
+  "MARKET_PERSISTENCE_PRODUCTION_CERTIFIED": false,
+  "UI_REDESIGN_READY": false,
+  "protected": {
+    "champion": "UNCHANGED",
+    "features": 76,
+    "preprocessing": "UNCHANGED",
+    "policy": "UNCHANGED",
+    "permissions": "UNCHANGED",
+    "inheritedChanges": 19
+  },
+  "limitations": [
+    "Production deployment, exact resume, second-pass and next natural scheduled readback remain pending.",
+    "Resume intentionally rejects any started market target or unexpected downstream rows; it does not extend frozen temporal eligibility.",
+    "Race test interleaves two actual writers on disposable PostgreSQL; PGlite serializes SQL statements. Runtime global lease remains mandatory in production."
+  ],
+  "docs": [
+    "https://www.postgresql.org/docs/current/sql-select.html",
+    "https://www.postgresql.org/docs/current/sql-insert.html"
+  ]
+}

@@ -13,6 +13,20 @@ const id = x => typeof x === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(x)
 const digest = x => typeof x === 'string' && /^[a-f0-9]{64}$/.test(x)
 const integer = x => Number.isSafeInteger(x) && x >= 0
 const dateText=x=>x instanceof Date?x.toISOString().slice(0,10):String(x).slice(0,10)
+export function marketReadbackDigest({predictions,mappings,observations,oddsReference}) {
+  const normalize=x=>{
+    if(Array.isArray(x))return x.map(normalize)
+    if(x && typeof x==='object')return Object.fromEntries(Object.entries(x).map(([k,v])=>[k,normalize(v)]))
+    if(typeof x==='string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(x) && Number.isFinite(Date.parse(x))) {
+      // Normalize UTC spelling without truncating PostgreSQL microseconds.
+      const fraction=(x.match(/\.(\d+)(?:Z|[+-]\d{2}:?\d{2})$/)?.[1]??'').replace(/0+$/,'')
+      return new Date(x).toISOString().slice(0,19)+(fraction?'.'+fraction:'')+'Z'
+    }
+    return x
+  }
+  const ordered=(rows,key)=>rows.map(normalize).sort((a,b)=>String(a[key]).localeCompare(String(b[key])))
+  return sha256({predictions:ordered(predictions,'id'),mappings:ordered(mappings,'id'),observations:ordered(observations,'observation_identity'),oddsReference:normalize(oddsReference)})
+}
 // Original provider column order from the existing 01A schema certificate.
 // JSONB reorders keys, so source-byte digests cannot use JSONB iteration order.
 const STATCAST_COLUMNS = 'pitch_type,game_date,release_speed,release_pos_x,release_pos_z,player_name,batter,pitcher,events,description,spin_dir,spin_rate_deprecated,break_angle_deprecated,break_length_deprecated,zone,des,game_type,stand,p_throws,home_team,away_team,type,hit_location,bb_type,balls,strikes,game_year,pfx_x,pfx_z,plate_x,plate_z,on_3b,on_2b,on_1b,outs_when_up,inning,inning_topbot,hc_x,hc_y,tfs_deprecated,tfs_zulu_deprecated,umpire,sv_id,vx0,vy0,vz0,ax,ay,az,sz_top,sz_bot,hit_distance_sc,launch_speed,launch_angle,effective_speed,release_spin_rate,release_extension,game_pk,fielder_2,fielder_3,fielder_4,fielder_5,fielder_6,fielder_7,fielder_8,fielder_9,release_pos_y,estimated_ba_using_speedangle,estimated_woba_using_speedangle,woba_value,woba_denom,babip_value,iso_value,launch_speed_angle,at_bat_number,pitch_number,pitch_name,home_score,away_score,bat_score,fld_score,post_away_score,post_home_score,post_bat_score,post_fld_score,if_fielding_alignment,of_fielding_alignment,spin_axis,delta_home_win_exp,delta_run_exp,bat_speed,swing_length,miss_distance,estimated_slg_using_speedangle,delta_pitcher_run_exp,hyper_speed,home_score_diff,bat_score_diff,home_win_exp,bat_win_exp,age_pit_legacy,age_bat_legacy,age_pit,age_bat,n_thruorder_pitcher,n_priorpa_thisgame_player_at_bat,pitcher_days_since_prev_game,batter_days_since_prev_game,pitcher_days_until_next_game,batter_days_until_next_game,api_break_z_with_gravity,api_break_x_arm,api_break_x_batter_in,arm_angle,attack_angle,attack_direction,swing_path_tilt,intercept_ball_minus_batter_pos_x_inches,intercept_ball_minus_batter_pos_y_inches'.split(',')
@@ -41,7 +55,14 @@ const canonical = x => JSON.stringify(x, Object.keys(x).sort())
 export const MODES = ['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS','INCREMENTAL','POSTGAME','OVERNIGHT','HOST_DRY']
 
 export function validateCheckpoint(x) {
-  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries'])
+  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries','marketRecoveries'])
+  if(x.marketRecoveries!==undefined) {
+    ensure(Array.isArray(x.marketRecoveries) && x.marketRecoveries.length===1,'MARKET_RECOVERY_CAP')
+    for(const r of x.marketRecoveries) {
+      keys(r,['reviewDigest','reviewedAt','fromRevision','readbackDigest','priorFailure','executorPackageSha'])
+      ensure(digest(r.reviewDigest) && digest(r.readbackDigest) && integer(r.fromRevision) && Number.isFinite(Date.parse(r.reviewedAt)) && /^[a-f0-9]{40}$/.test(r.executorPackageSha) && r.priorFailure?.stage==='MARKET_PERSISTENCE','MARKET_RECOVERY_SHAPE')
+    }
+  }
   if(x.dependencyRecoveries!==undefined) {
     ensure(Array.isArray(x.dependencyRecoveries) && x.dependencyRecoveries.length>0 && x.dependencyRecoveries.length<=3,'DEPENDENCY_RECOVERY_CAP')
     for(const r of x.dependencyRecoveries) {
@@ -109,8 +130,8 @@ export function validateDml(x) {
 export function createRuntimeStateAuthority({ transaction, writeRows = null, preflight = null, evidenceStorage = null }) {
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
-    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency'].includes(input.op), 'OPERATION')
+    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest','marketReadbackDigest'])
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
@@ -131,6 +152,47 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(lease, 'NOT_INITIALIZED')
       const clock = await one("WITH frozen AS MATERIALIZED (SELECT clock_timestamp() AS at) SELECT at, (at AT TIME ZONE 'America/Puerto_Rico')::date::text AS date FROM frozen")
       const active = lease.lease_holder && Date.parse(lease.lease_expires_at) > Date.parse(clock.at)
+      if(input.op==='resumeMarket') {
+        ensure(!active && id(input.runId) && digest(input.expectedDigest) && digest(input.marketReadbackDigest) && /^[a-f0-9]{40}$/.test(input.executorPackageSha),'MARKET_RESUME_REVIEW_REQUIRED')
+        const pending=await query(`SELECT * FROM ${TABLE} WHERE ${PENDING} ORDER BY created_at LIMIT 2`),run=pending[0]
+        ensure(pending.length===1 && run.run_id===input.runId && run.package_sha===input.packageSha && reviewDigest(run)===input.expectedDigest,'MARKET_RESUME_STATE_CONFLICT')
+        const cp=run.checkpoint,stages=run.dml_accounting.stages
+        ensure(run.status==='FAILED' && cp.stage==='MARKET_PERSISTENCE' && cp.failure?.stage==='MARKET_PERSISTENCE' && cp.failure.code==='RUNTIME_SQLSTATE_42501_HTTP_409' && cp.completed.includes('FEATURES') && !cp.completed.includes('MARKETS') && !cp.marketReference && !cp.disposition && !cp.marketRecoveries,'MARKET_RESUME_STAGE')
+        validateDml({stages})
+        ensure(stages.every(s=>s.readback==='PASS' && s.conflicts===0) && dateText(run.run_date)===clock.date,'MARKET_RESUME_RECEIPTS_DATE')
+        ensure(run.odds_calls===1 && run.mlb_official_calls>=1 && run.mlb_official_calls<=50 && run.statcast_calls>=0 && run.statcast_calls<=100,'MARKET_RESUME_PROVIDER')
+        const expected=Object.entries(PROVIDERS).flatMap(([provider,[column]])=>Array.from({length:run[column]},(_,i)=>sha256(`${run.run_id}:${provider}:${i+1}`))),reservations=run.dml_accounting.providerReservations??[]
+        ensure(reservations.length===expected.length && new Set(reservations).size===reservations.length && expected.every(r=>reservations.includes(r)),'MARKET_RESUME_RESERVATIONS')
+        const mission=await one(`SELECT mission_odds_calls FROM ${TABLE} WHERE scope_key=$1`,[MISSION])
+        ensure(mission && mission.mission_odds_calls>=2 && mission.mission_odds_calls<=20,'MISSION_LEDGER')
+        const recovered=await persistOrRecoverEvidence({run,kind:'odds',storage:evidenceStorage})
+        ensure(recovered && sha256(recovered.reference)===sha256(cp.references.find(r=>r.kind==='odds_evidence')),'MARKET_RESUME_ODDS_DRIFT')
+        const scope=cp.marketGames?.map(g=>g.game_pk)
+        ensure(scope?.length>0 && new Set(scope).size===scope.length && scope.every(g=>cp.scope.includes(g)),'MARKET_RESUME_SCOPE')
+        const games=await query('SELECT game_pk,scheduled_at,official_status FROM public.pick2_mlb_games WHERE game_pk=ANY($1::bigint[]) FOR SHARE',[scope])
+        // This reviewed operation resumes only a wholly still-pregame market
+        // plan. A partially started plan requires a separate bounded review.
+        ensure(games.length===scope.length && games.every(g=>Date.parse(g.scheduled_at)>Date.parse(clock.at) && ['Scheduled','Pre-Game','Warmup'].includes(g.official_status) && Date.parse(g.scheduled_at)===Date.parse(cp.marketGames.find(m=>m.game_pk===Number(g.game_pk)).scheduled_at)),'MARKET_RESUME_STARTED_TARGET')
+        const predictions=(await query('SELECT to_jsonb(t) AS row FROM public.pick2_game_predictions t WHERE game_pk=ANY($1::bigint[]) AND predicted_at=$2::timestamptz ORDER BY id',[scope,run.run_as_of])).map(r=>r.row)
+        const mappings=(await query('SELECT to_jsonb(t) AS row FROM public.pick2_mlb_market_event_mappings t WHERE game_pk=ANY($1::bigint[]) ORDER BY id',[scope])).map(r=>r.row)
+        const observations=(await query('SELECT to_jsonb(t) AS row FROM public.pick2_mlb_market_price_observations t WHERE game_pk=ANY($1::bigint[]) AND source_response_digest=$2 ORDER BY observation_identity',[scope,recovered.evidence.responseDigest])).map(r=>r.row)
+        for(const [table,rows] of [['pick2_game_predictions',predictions],['pick2_mlb_market_event_mappings',mappings]]) {
+          const receipt=stages.find(s=>s.target===table)
+          ensure(rows.length===scope.length && new Set(rows.map(r=>Number(r.game_pk))).size===scope.length && receipt && receipt.inserted+receipt.reused===rows.length && receipt.updated===0,'MARKET_RESUME_UPSTREAM_READBACK')
+        }
+        ensure(predictions.every(p=>cp.references.some(r=>r.kind==='persisted_features' && Number(r.identity)===Number(p.game_pk) && r.identities.includes(p.feature_snapshot_id)) && Date.parse(p.created_at)<Date.parse(games.find(g=>Number(g.game_pk)===Number(p.game_pk)).scheduled_at)),'MARKET_RESUME_PREDICTION_LINKAGE')
+        // The initial 42501 fails before any observation INSERT. Reject any
+        // unexpected partial downstream state rather than approving it implicitly.
+        ensure(observations.length===0 && !stages.some(s=>['pick2_mlb_market_price_observations','pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'].includes(s.target)),'MARKET_RESUME_DOWNSTREAM_STATE')
+        for(const table of ['pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'])ensure((await query(`SELECT 1 FROM public.${table} WHERE prediction_id=ANY($1::uuid[]) LIMIT 1`,[predictions.map(p=>p.id)])).length===0,'MARKET_RESUME_DOWNSTREAM_STATE')
+        const readback=marketReadbackDigest({predictions,mappings,observations,oddsReference:recovered.reference})
+        ensure(readback===input.marketReadbackDigest,'MARKET_RESUME_READBACK_DRIFT')
+        const recovery={reviewDigest:input.expectedDigest,reviewedAt:new Date(clock.at).toISOString(),fromRevision:Number(run.revision),readbackDigest:readback,priorFailure:cp.failure,executorPackageSha:input.executorPackageSha}
+        const checkpoint={...cp,marketRecoveries:[recovery]};validateCheckpoint(checkpoint)
+        const updated=await one(`UPDATE ${TABLE} SET status='RUNNING',checkpoint=$2::text::jsonb,revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])
+        const next=await one(`UPDATE ${TABLE} SET lease_holder=$2,lease_acquired_at=$3,lease_expires_at=$3::timestamptz+interval '5 minutes',fence=fence+1,revision=revision+1,run_id=$4,package_sha=$5,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[LEASE,input.holder,clock.at,run.run_id,run.package_sha])
+        return {status:'ACQUIRED',run:updated,lease:next,missionOddsCalls:mission.mission_odds_calls,readback:{predictions:predictions.length,mappings:mappings.length,observations:0,digest:readback}}
+      }
       if(input.op==='resumeDependency') {
         ensure(!active && id(input.runId) && digest(input.expectedDigest) && digest(input.rawReadbackDigest) && /^[a-f0-9]{40}$/.test(input.executorPackageSha),'DEPENDENCY_RESUME_REVIEW_REQUIRED')
         const pending=await query(`SELECT * FROM ${TABLE} WHERE ${PENDING} ORDER BY created_at LIMIT 2`)
@@ -191,7 +253,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         let run = pending[0] ?? await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1`, [`RUN:${input.runId}`])
         if (run) {
           if(run.status==='FAILED' && run.checkpoint.disposition?.status==='TERMINAL_PARTIAL_PRESERVED')return {status:'TERMINAL_PARTIAL_PRESERVED',run,missionOddsCalls:mission.mission_odds_calls}
-          ensure(run.package_sha === input.packageSha || run.checkpoint.dependencyRecoveries?.at(-1)?.executorPackageSha===input.packageSha, 'FROZEN_PACKAGE_CONFLICT')
+          ensure(run.package_sha === input.packageSha || (run.checkpoint.marketRecoveries??run.checkpoint.dependencyRecoveries)?.at(-1)?.executorPackageSha===input.packageSha, 'FROZEN_PACKAGE_CONFLICT')
           if (run.status === 'COMPLETE') return { status:'REUSE_NO_OP', run, missionOddsCalls:mission.mission_odds_calls }
           const date = run.run_date instanceof Date ? run.run_date.toISOString().slice(0,10) : String(run.run_date).slice(0,10)
           ensure(date === clock.date, 'STALE_PENDING_RUN_REQUIRES_REVIEW')
@@ -268,6 +330,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(serializedBytes(input.checkpoint)<=28000,'FAILURE_RECORD_HEADROOM')
       ensure(sha256(input.checkpoint.failure??null)===sha256(run.checkpoint.failure??null) && sha256(input.checkpoint.disposition??null)===sha256(run.checkpoint.disposition??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(sha256(input.checkpoint.dependencyRecoveries??null)===sha256(run.checkpoint.dependencyRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
+      ensure(sha256(input.checkpoint.marketRecoveries??null)===sha256(run.checkpoint.marketRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(input.checkpoint.mode === run.checkpoint.mode,'MODE_DRIFT')
       ensure(run.checkpoint.completed.every(s => input.checkpoint.completed.includes(s)),'CHECKPOINT_REGRESSION')
       for (const reference of run.checkpoint.references) ensure(input.checkpoint.references.some(r => canonical(r) === canonical(reference)), 'REFERENCE_DRIFT')

@@ -255,7 +255,7 @@
     "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs": "1d6b0af10645ad3de4c87f9dc293a5ef8adf67f8f52f0cac6f8eea4e06c2e138",
     "scripts/mlb-data-02r-r2h-full-dry-integration.mjs": "a876c44443fb79ee75d36181a62d1be0c0d103e7bbdc351e205fc2c6056d1cac",
     "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "53dee79c041338a0b931ce3556960b3c626e9d9c3900c72a1f507ab17f26e17f",
-    "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "d243642d67bd65e3f3d1744e651192cbf12f1899b382ebbb8e629faebb58b294",
+    "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "57c032fe029bb7d10a6a7ac2b04c00591f589ff0a2b110c7c1a080025d8c877c",
     "scripts/mlb-data-02r-r2t-market-binding.mjs": "cf78bba4bd7b29cffe657fcdd32471b77c6450052e7ecac74cf3c3f6c924cfa3",
     "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
     "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
@@ -268,7 +268,7 @@
     "scripts/mlb-data-02r-r2t-real-feature-champion.mjs": "f9c614afadebc90209e028306eefacb46ab6de4930cbcbb03fdd847a0de3b077",
     "scripts/mlb-data-02r-r2t-write-contract.mjs": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82",
     "scripts/mlb-data-02r-r2t-write-journal.mjs": "81c4deacba2189fa2013e8fd76610f0ea93af0d04b2c22fbbeec5f67a298e8b9",
-    "scripts/mlb-operational-manual-refresh.mjs": "18451612401db2d17d9c974eccb85a7ffc26b4ab6574077ea40d2c8605d01d1d",
+    "scripts/mlb-operational-manual-refresh.mjs": "b29e7786ea155733fea2b20cdd420ea0f89621803810a120bfd29ede2e7b63db",
     "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
     "scripts/mlb-operational-r6-run-store.mjs": "5166ee8a801dbe16d0022e9437a4b0bc4c7f0d9bad32af1104966ef4c1f26a0f",
     "scripts/mlb-operational-r6-write-journal.mjs": "2b2c4c79c06e28265f3340c223c9c291fee4421b60a6066644f24bfb13859c78"
@@ -419,5 +419,12 @@
   "phase2Revalidation": {
     "sqlChecks": 72,
     "featureAndChampionParity": "PASS"
+  },
+  "r9Revalidation": {
+    "at": "2026-09-11T16:37:06.512Z",
+    "physicalChecks": 74,
+    "immutableMarketChecks": 9,
+    "build": "PASS",
+    "productionRecovery": "PENDING"
   }
 }
