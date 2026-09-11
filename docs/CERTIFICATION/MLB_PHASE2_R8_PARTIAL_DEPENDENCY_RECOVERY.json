@@ -1,6 +1,6 @@
 {
   "phase": "MLB_PHASE2_R8_PARTIAL_DEPENDENCY_WRITE_RECOVERY",
-  "certificationVerdict": "R8_PARTIAL_DEPENDENCY_LOCAL_GATES_CERTIFIED_PRODUCTION_PENDING",
+  "certificationVerdict": "R8_LOCAL_RECOVERY_CERTIFIED_EXACT_EDGE_DEPLOYMENT_APPROVAL_REQUIRED",
   "startingSha": "8e96cfea93a2293047e8a22d019bda3a65b71db2",
   "originalFrozenPackageSha": "cc1a359b3c7492cb5f62efc39eb5f5b05e85c6d4",
   "failedRunId": "automation-0271e170de9e0280a03f773c6cd7a7fc18ac9226c4643bcc4bc0fcef018a1f21",
@@ -608,9 +608,47 @@
     "inheritedGeneratedFiles": 19
   },
   "remainingLimitations": [
-    "Deploy and read back R8 exact candidate before production resume",
+    "Explicit deployment authorization for the exact ten-file R8 candidate is required by automatic approval review; production resume was not attempted.",
     "Observe genuine eligible scheduled production market/value readback",
     "No original failed request date or low-level network detail retained",
     "Coverage uses certified canonical stored-game contract; no provider refetch to manufacture historical completeness"
-  ]
+  ],
+  "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c",
+  "deployment": {
+    "status": "REJECTED_BY_AUTOMATIC_APPROVAL_REVIEW",
+    "productionEdgeVersion": 8,
+    "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c",
+    "manifest": "docs/CERTIFICATION/MLB_PHASE2_R8_EDGE_MANIFEST.json",
+    "reason": "Exact R8 privileged candidate deployment authorization required; no bypass attempted."
+  },
+  "finalProductionReadback": {
+    "checkedAt": "2026-09-11T15:18:57.690Z",
+    "edgeVersion": 8,
+    "exactV8Manifest": "PASS",
+    "r8Deployed": false,
+    "bearerAuth": {
+      "missing": 401,
+      "wrong": 401,
+      "public": 401,
+      "serverOnlyInspect": 200
+    },
+    "schema": "PASS",
+    "runRevision": 159,
+    "status": "FAILED",
+    "rawRowsPreserved": 3795,
+    "unresolvedRuns": 1,
+    "leaseActive": false,
+    "futureTargets": 15,
+    "features": 0,
+    "predictions": 0,
+    "mappings": 0,
+    "observations": 0,
+    "values": 0,
+    "picks": 0,
+    "runOfficial": 1,
+    "runStatcast": 10,
+    "runOdds": 0,
+    "missionOdds": 4,
+    "productionMutationsThisPhase": 0
+  }
 }

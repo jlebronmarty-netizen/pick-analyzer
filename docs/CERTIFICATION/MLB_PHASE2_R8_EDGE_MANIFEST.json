@@ -58,5 +58,6 @@
   ],
   "ddl": 0,
   "publicMutation": false,
-  "status": "LOCALLY_CERTIFIED_NOT_DEPLOYED"
+  "status": "LOCALLY_CERTIFIED_DEPLOYMENT_REJECTED_APPROVAL_REQUIRED",
+  "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c"
 }

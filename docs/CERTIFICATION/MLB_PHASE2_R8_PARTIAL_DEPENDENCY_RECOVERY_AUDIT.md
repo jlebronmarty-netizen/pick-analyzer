@@ -33,3 +33,5 @@ Validation passed:
 The ten-file candidate is bound by `MLB_PHASE2_R8_EDGE_MANIFEST.json`. No migration, UI, Champion, feature definition, preprocessing, Policy V1, provider substitution or scheduler configuration changed. The 19 inherited generated-artifact modifications are excluded from the R8 package.
 
 Next: deploy and independently verify the exact candidate, repeat fresh state/raw/schema/auth preconditions, use the guarded resume, preserve evidence/accounting, and read back completion. Then observe a genuinely eligible scheduled run for production market/value persistence. `MARKET_PERSISTENCE_PRODUCTION_CERTIFIED=NO`; `UI_REDESIGN_READY=NO` until those production gates pass.
+
+Deployment stop: automatic approval review rejected production deployment of exact candidate `20f8c944b009cd774cc4e228061ce09eb3c9ed0c` because explicit authorization for this R8 privileged candidate is required. No alternate deployment or production resume was attempted. Edge remains v8. Local Gates 1-8 remain certified; Gates 9-11 remain pending.
