@@ -88,6 +88,16 @@ try {
     for(const batch of planDurableWriteBatches({table,rows,cap})) {const r=await authority({...token,op:'write',revision:Number(run.revision),write:{table,rows:batch,cap}});run=r.run;inserted+=r.result.inserted;reused+=r.result.reused}
     return {inserted,reused}
   }
+  await check('Certificate-only executor rebind preserves an unexecuted resume and rejects repeated/advanced state',async()=>{
+    await authority({...token,op:'release'})
+    const rebind={...command,op:'rebindMarketExecutor',executorPackageSha:'f'.repeat(40),expectedDigest:reviewDigest(run)}
+    const r=await authority(rebind);run=r.run;token={...token,fence:Number(r.lease.fence)}
+    assert.equal(run.checkpoint.marketRecoveries.length,2);assert.deepEqual(run.dml_accounting,c.run.dml_accounting)
+    assert.equal(run.checkpoint.marketRecoveries[0].executorPackageSha,'e'.repeat(40));assert.equal(run.checkpoint.marketRecoveries[1].executorPackageSha,'f'.repeat(40))
+    await authority({...token,op:'release'})
+    await assert.rejects(authority({...rebind,executorPackageSha:'a'.repeat(40),expectedDigest:reviewDigest(run)}),/MARKET_REBIND_ALREADY_EXECUTED/)
+    const acquired=await authority({op:'acquire',holder,runId:run.run_id,mode:run.checkpoint.mode,packageSha:'f'.repeat(40)});token={...token,fence:Number(acquired.lease.fence)}
+  })
   await check('Actual runtime writer inserts 286 rows under production grants and a new instance reuses all',async()=>{
     assert.deepEqual(await persist(table,planned,286),{inserted:286,reused:0});const prior=run.dml_accounting
     authority=make();assert.deepEqual(await persist(table,planned,286),{inserted:0,reused:286});assert.deepEqual(run.dml_accounting,prior)

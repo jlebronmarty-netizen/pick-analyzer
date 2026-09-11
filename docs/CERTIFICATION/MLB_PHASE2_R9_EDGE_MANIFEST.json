@@ -27,7 +27,7 @@
     },
     {
       "path": "supabase/functions/_shared/mlb-runtime-state.mjs",
-      "normalizedSha256": "58ee7e001e9501f38458a1cbdd5b659d1744248fc971a1c445d8c98927d88980"
+      "normalizedSha256": "a8bc69249770a2f99343b2d7ce0325e590d4cdca1674dcc83f9b78b059fe4463"
     },
     {
       "path": "supabase/functions/_shared/mlb-provider-evidence.mjs",
@@ -50,7 +50,6 @@
   "candidateSha": "ENCLOSING_COMMIT",
   "ddl": 0,
   "permissionBroadening": false,
-  "newOperation": "resumeMarket",
   "bounds": [
     "Exact failed MARKET_PERSISTENCE 42501 run and reviewed state/readback digests",
     "All original market targets still pregame; same operating date",
@@ -58,6 +57,11 @@
     "Predictions and mappings read back; paid Odds reference/digest verified",
     "Initial zero-observation state only; unexpected downstream writes reject",
     "No provider reservations or counters reset; no Odds reacquisition",
-    "Global lease plus identity unique constraints; immutable SELECT/INSERT only"
+    "Global lease plus identity unique constraints; immutable SELECT/INSERT only",
+    "One unexecuted executor rebind only: revision exactly initial resume revision, inactive lease, unchanged failure/counters/DML, fresh state/readback review"
+  ],
+  "newOperations": [
+    "resumeMarket",
+    "rebindMarketExecutor"
   ]
 }

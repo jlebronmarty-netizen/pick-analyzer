@@ -116,6 +116,10 @@
         "status": "PASS"
       },
       {
+        "name": "Certificate-only executor rebind preserves an unexecuted resume and rejects repeated/advanced state",
+        "status": "PASS"
+      },
+      {
         "name": "Actual runtime writer inserts 286 rows under production grants and a new instance reuses all",
         "status": "PASS"
       },
@@ -172,5 +176,20 @@
   "docs": [
     "https://www.postgresql.org/docs/current/sql-select.html",
     "https://www.postgresql.org/docs/current/sql-insert.html"
-  ]
+  ],
+  "initialProductionResume": {
+    "status": "ACQUIRED_THEN_RELEASED",
+    "revision": 51,
+    "preservedPredictions": 13,
+    "preservedMappings": 13,
+    "odds": 5,
+    "businessDml": 0,
+    "runtimeUpdates": 3
+  },
+  "readinessRecovery": {
+    "cause": "Three pre-R9 hashes remained in the automation readiness certificate; natural 16:45 Cron rejected before lease acquisition.",
+    "repaired": "Refreshed exact tested hashes; narrowly guarded unexecuted executor rebind",
+    "providerCalls": 0,
+    "businessDml": 0
+  }
 }

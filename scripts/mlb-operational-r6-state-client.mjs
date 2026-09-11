@@ -53,6 +53,12 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
       if(result.status==='ACQUIRED'){lease=result.lease;run=result.run;missionOddsCalls=result.missionOddsCalls}
       return result
     },
+    async rebindMarketExecutor({runId,originalPackageSha,expectedDigest,marketReadbackDigest}) {
+      ensure(!lease,'ALREADY_HELD')
+      const result=await call({op:'rebindMarketExecutor',holder,runId,packageSha:originalPackageSha,executorPackageSha:packageSha,expectedDigest,marketReadbackDigest})
+      if(result.status==='ACQUIRED'){lease=result.lease;run=result.run;missionOddsCalls=result.missionOddsCalls}
+      return result
+    },
     renew:()=>serial(async()=>{const result=await call({...token(),op:'renew'});lease=result.lease;return result}),
     release:()=>serial(async()=>{if(!lease)return;const result=await call({...token(),op:'release'});lease=null;return result}),
     checkpoint:(checkpoint,dml)=>serial(async()=>{

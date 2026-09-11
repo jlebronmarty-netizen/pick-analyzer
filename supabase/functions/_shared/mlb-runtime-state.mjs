@@ -57,7 +57,7 @@ export const MODES = ['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS','
 export function validateCheckpoint(x) {
   keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries','marketRecoveries'])
   if(x.marketRecoveries!==undefined) {
-    ensure(Array.isArray(x.marketRecoveries) && x.marketRecoveries.length===1,'MARKET_RECOVERY_CAP')
+    ensure(Array.isArray(x.marketRecoveries) && x.marketRecoveries.length>=1 && x.marketRecoveries.length<=2,'MARKET_RECOVERY_CAP')
     for(const r of x.marketRecoveries) {
       keys(r,['reviewDigest','reviewedAt','fromRevision','readbackDigest','priorFailure','executorPackageSha'])
       ensure(digest(r.reviewDigest) && digest(r.readbackDigest) && integer(r.fromRevision) && Number.isFinite(Date.parse(r.reviewedAt)) && /^[a-f0-9]{40}$/.test(r.executorPackageSha) && r.priorFailure?.stage==='MARKET_PERSISTENCE','MARKET_RECOVERY_SHAPE')
@@ -131,7 +131,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
     keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest','marketReadbackDigest'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket'].includes(input.op), 'OPERATION')
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket','rebindMarketExecutor'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
@@ -152,12 +152,20 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(lease, 'NOT_INITIALIZED')
       const clock = await one("WITH frozen AS MATERIALIZED (SELECT clock_timestamp() AS at) SELECT at, (at AT TIME ZONE 'America/Puerto_Rico')::date::text AS date FROM frozen")
       const active = lease.lease_holder && Date.parse(lease.lease_expires_at) > Date.parse(clock.at)
-      if(input.op==='resumeMarket') {
+      if(input.op==='resumeMarket' || input.op==='rebindMarketExecutor') {
         ensure(!active && id(input.runId) && digest(input.expectedDigest) && digest(input.marketReadbackDigest) && /^[a-f0-9]{40}$/.test(input.executorPackageSha),'MARKET_RESUME_REVIEW_REQUIRED')
         const pending=await query(`SELECT * FROM ${TABLE} WHERE ${PENDING} ORDER BY created_at LIMIT 2`),run=pending[0]
         ensure(pending.length===1 && run.run_id===input.runId && run.package_sha===input.packageSha && reviewDigest(run)===input.expectedDigest,'MARKET_RESUME_STATE_CONFLICT')
         const cp=run.checkpoint,stages=run.dml_accounting.stages
-        ensure(run.status==='FAILED' && cp.stage==='MARKET_PERSISTENCE' && cp.failure?.stage==='MARKET_PERSISTENCE' && cp.failure.code==='RUNTIME_SQLSTATE_42501_HTTP_409' && cp.completed.includes('FEATURES') && !cp.completed.includes('MARKETS') && !cp.marketReference && !cp.disposition && !cp.marketRecoveries,'MARKET_RESUME_STAGE')
+        const rebind=input.op==='rebindMarketExecutor'
+        if(rebind) {
+          // A readiness-certificate repair may require a new published SHA
+          // before the resumed run executes even one operation. No active or
+          // partially executed recovery can change its selected executor.
+          const prior=cp.marketRecoveries?.[0]
+          ensure(run.status==='RUNNING' && cp.marketRecoveries?.length===1 && Number(run.revision)===prior.fromRevision+1 && input.executorPackageSha!==prior.executorPackageSha && sha256(run.dml_accounting)===sha256(cp.failure?.dml) && run.mlb_official_calls===cp.failure?.providers.MLB_OFFICIAL && run.statcast_calls===cp.failure?.providers.STATCAST && run.odds_calls===cp.failure?.providers.THE_ODDS_API,'MARKET_REBIND_ALREADY_EXECUTED')
+        } else ensure(run.status==='FAILED' && !cp.marketRecoveries,'MARKET_RESUME_STAGE')
+        ensure(cp.stage==='MARKET_PERSISTENCE' && cp.failure?.stage==='MARKET_PERSISTENCE' && cp.failure.code==='RUNTIME_SQLSTATE_42501_HTTP_409' && cp.completed.includes('FEATURES') && !cp.completed.includes('MARKETS') && !cp.marketReference && !cp.disposition,'MARKET_RESUME_STAGE')
         validateDml({stages})
         ensure(stages.every(s=>s.readback==='PASS' && s.conflicts===0) && dateText(run.run_date)===clock.date,'MARKET_RESUME_RECEIPTS_DATE')
         ensure(run.odds_calls===1 && run.mlb_official_calls>=1 && run.mlb_official_calls<=50 && run.statcast_calls>=0 && run.statcast_calls<=100,'MARKET_RESUME_PROVIDER')
@@ -188,7 +196,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         const readback=marketReadbackDigest({predictions,mappings,observations,oddsReference:recovered.reference})
         ensure(readback===input.marketReadbackDigest,'MARKET_RESUME_READBACK_DRIFT')
         const recovery={reviewDigest:input.expectedDigest,reviewedAt:new Date(clock.at).toISOString(),fromRevision:Number(run.revision),readbackDigest:readback,priorFailure:cp.failure,executorPackageSha:input.executorPackageSha}
-        const checkpoint={...cp,marketRecoveries:[recovery]};validateCheckpoint(checkpoint)
+        const checkpoint={...cp,marketRecoveries:[...(cp.marketRecoveries??[]),recovery]};validateCheckpoint(checkpoint)
         const updated=await one(`UPDATE ${TABLE} SET status='RUNNING',checkpoint=$2::text::jsonb,revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])
         const next=await one(`UPDATE ${TABLE} SET lease_holder=$2,lease_acquired_at=$3,lease_expires_at=$3::timestamptz+interval '5 minutes',fence=fence+1,revision=revision+1,run_id=$4,package_sha=$5,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[LEASE,input.holder,clock.at,run.run_id,run.package_sha])
         return {status:'ACQUIRED',run:updated,lease:next,missionOddsCalls:mission.mission_odds_calls,readback:{predictions:predictions.length,mappings:mappings.length,observations:0,digest:readback}}
