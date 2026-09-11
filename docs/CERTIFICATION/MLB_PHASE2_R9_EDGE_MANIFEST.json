@@ -15,7 +15,7 @@
     },
     {
       "path": "scripts/mlb-operational-r7-errors.mjs",
-      "normalizedSha256": "c725f0948fa3a6dc0ea028d3dab6c7a4a57d906e8128fa7b07fb14199ffba5af"
+      "normalizedSha256": "a0c9e1760d9f4240969b9470d4cfe6b4e9979774cb1560737af9f9c5df87c3cc"
     },
     {
       "path": "supabase/functions/_shared/mlb-fenced-write.mjs",
@@ -27,7 +27,7 @@
     },
     {
       "path": "supabase/functions/_shared/mlb-runtime-state.mjs",
-      "normalizedSha256": "a8bc69249770a2f99343b2d7ce0325e590d4cdca1674dcc83f9b78b059fe4463"
+      "normalizedSha256": "db40b2159366bcb57dc58483109e85c4146906819d4d4e98364c2b1e5099875b"
     },
     {
       "path": "supabase/functions/_shared/mlb-provider-evidence.mjs",
@@ -55,13 +55,16 @@
     "All original market targets still pregame; same operating date",
     "One guarded recovery; original package/freeze/failure retained",
     "Predictions and mappings read back; paid Odds reference/digest verified",
-    "Initial zero-observation state only; unexpected downstream writes reject",
     "No provider reservations or counters reset; no Odds reacquisition",
     "Global lease plus identity unique constraints; immutable SELECT/INSERT only",
-    "One unexecuted executor rebind only: revision exactly initial resume revision, inactive lease, unchanged failure/counters/DML, fresh state/readback review"
+    "One unexecuted executor rebind only: revision exactly initial resume revision, inactive lease, unchanged failure/counters/DML, fresh state/readback review",
+    "Initial zero-observation resume or separately reviewed exact full-observation checkpoint recovery; no values/picks may preexist",
+    "At most three immutable lineage entries: initial resume, unexecuted handoff, reviewed checkpoint recovery",
+    "Checkpoint ceiling remains48000 bytes; replacement failure reserves16500 bytes including maximum15000-byte accounting"
   ],
   "newOperations": [
     "resumeMarket",
-    "rebindMarketExecutor"
+    "rebindMarketExecutor",
+    "resumeMarketCheckpoint"
   ]
 }

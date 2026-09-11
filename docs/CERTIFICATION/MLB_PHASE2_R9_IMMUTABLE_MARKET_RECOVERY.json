@@ -1,6 +1,6 @@
 {
   "phase": "MLB_PHASE2_R9_IMMUTABLE_MARKET_READ_AND_GUARDED_RESUME_REPAIR",
-  "certificationVerdict": "R9_LOCAL_IMMUTABLE_REPAIR_CERTIFIED_PRODUCTION_PENDING",
+  "certificationVerdict": "R9_PRODUCTION_OBSERVATIONS_PERSISTED_CHECKPOINT_RECOVERY_PENDING",
   "startingSha": "e3cfca7c54036130b6435be0da543eefaf32db43",
   "generatedAt": "2026-09-11T16:37:06.564Z",
   "failedRun": {
@@ -143,9 +143,36 @@
     "r8": 10,
     "r3": 5,
     "auth": "PASS_UNCHANGED_TESTED_ENTRYPOINT",
-    "build": "PASS"
+    "build": "PASS",
+    "checkpoint": {
+      "status": "PASS",
+      "checks": [
+        "Exact partial observation resume preserves 286 rows and complete history/accounting",
+        "Exact market checkpoint exceeds obsolete threshold but retains full bounded failure reserve",
+        "Oversized future checkpoints reject and known exception remains durably classified within unchanged limits"
+      ],
+      "oldCheckpointBytes": 32054,
+      "ceiling": 48000,
+      "reserve": 16500,
+      "providers": 0,
+      "productionDml": 0,
+      "productionDdl": 0
+    }
   },
-  "productionResume": "PENDING",
+  "productionResume": {
+    "status": "PARTIAL_PRESERVED",
+    "revision": 59,
+    "observationsInserted": 286,
+    "observationsIndependentReuse": 286,
+    "observationsAdditionalInserts": 0,
+    "values": 0,
+    "officialPicks": 0,
+    "providerCalls": 0,
+    "rootCause": "FAILURE_RECORD_HEADROOM",
+    "originatingHostResponse": "R6_STATE:FAILURE_RECORD_HEADROOM",
+    "historicalDurableClassification": "UNCLASSIFIED_STAGE_EXCEPTION",
+    "historicalClassificationPreserved": true
+  },
   "secondPass": "DISPOSABLE_286_REUSES_ZERO_INSERTS; PRODUCTION_PENDING",
   "providerCallsThisPhase": 0,
   "cumulativeOdds": {
@@ -153,7 +180,13 @@
     "cap": 20,
     "legacy": "RETAINED_SEPARATELY"
   },
-  "productionDml": 0,
+  "productionDml": {
+    "businessInserts": 286,
+    "businessUpdates": 0,
+    "runtimeInserts": 0,
+    "runtimeUpdates": 15,
+    "deletes": 0
+  },
   "productionDdl": 0,
   "conflicts": 0,
   "startedGameLeakage": 0,
@@ -169,9 +202,9 @@
     "inheritedChanges": 19
   },
   "limitations": [
-    "Production deployment, exact resume, second-pass and next natural scheduled readback remain pending.",
-    "Resume intentionally rejects any started market target or unexpected downstream rows; it does not extend frozen temporal eligibility.",
-    "Race test interleaves two actual writers on disposable PostgreSQL; PGlite serializes SQL statements. Runtime global lease remains mandatory in production."
+    "Exact286 observations are production-persisted; values/policy and overall repeat/scheduled readback remain pending.",
+    "A32,054-byte projected recovery checkpoint now passes with the original48,000-byte ceiling and16,500-byte replacement failure reserve.",
+    "Original failure classifications and all paid evidence/lineage remain preserved."
   ],
   "docs": [
     "https://www.postgresql.org/docs/current/sql-select.html",

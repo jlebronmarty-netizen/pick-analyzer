@@ -57,7 +57,7 @@ export const MODES = ['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS','
 export function validateCheckpoint(x) {
   keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries','marketRecoveries'])
   if(x.marketRecoveries!==undefined) {
-    ensure(Array.isArray(x.marketRecoveries) && x.marketRecoveries.length>=1 && x.marketRecoveries.length<=2,'MARKET_RECOVERY_CAP')
+    ensure(Array.isArray(x.marketRecoveries) && x.marketRecoveries.length>=1 && x.marketRecoveries.length<=3,'MARKET_RECOVERY_CAP')
     for(const r of x.marketRecoveries) {
       keys(r,['reviewDigest','reviewedAt','fromRevision','readbackDigest','priorFailure','executorPackageSha'])
       ensure(digest(r.reviewDigest) && digest(r.readbackDigest) && integer(r.fromRevision) && Number.isFinite(Date.parse(r.reviewedAt)) && /^[a-f0-9]{40}$/.test(r.executorPackageSha) && r.priorFailure?.stage==='MARKET_PERSISTENCE','MARKET_RECOVERY_SHAPE')
@@ -131,7 +131,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
     keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest','marketReadbackDigest'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket','rebindMarketExecutor'].includes(input.op), 'OPERATION')
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket','rebindMarketExecutor','resumeMarketCheckpoint'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
@@ -152,20 +152,21 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(lease, 'NOT_INITIALIZED')
       const clock = await one("WITH frozen AS MATERIALIZED (SELECT clock_timestamp() AS at) SELECT at, (at AT TIME ZONE 'America/Puerto_Rico')::date::text AS date FROM frozen")
       const active = lease.lease_holder && Date.parse(lease.lease_expires_at) > Date.parse(clock.at)
-      if(input.op==='resumeMarket' || input.op==='rebindMarketExecutor') {
+      if(['resumeMarket','rebindMarketExecutor','resumeMarketCheckpoint'].includes(input.op)) {
         ensure(!active && id(input.runId) && digest(input.expectedDigest) && digest(input.marketReadbackDigest) && /^[a-f0-9]{40}$/.test(input.executorPackageSha),'MARKET_RESUME_REVIEW_REQUIRED')
         const pending=await query(`SELECT * FROM ${TABLE} WHERE ${PENDING} ORDER BY created_at LIMIT 2`),run=pending[0]
         ensure(pending.length===1 && run.run_id===input.runId && run.package_sha===input.packageSha && reviewDigest(run)===input.expectedDigest,'MARKET_RESUME_STATE_CONFLICT')
         const cp=run.checkpoint,stages=run.dml_accounting.stages
-        const rebind=input.op==='rebindMarketExecutor'
+        const rebind=input.op==='rebindMarketExecutor',partial=input.op==='resumeMarketCheckpoint'
         if(rebind) {
           // A readiness-certificate repair may require a new published SHA
           // before the resumed run executes even one operation. No active or
           // partially executed recovery can change its selected executor.
           const prior=cp.marketRecoveries?.[0]
           ensure(run.status==='RUNNING' && cp.marketRecoveries?.length===1 && Number(run.revision)===prior.fromRevision+1 && input.executorPackageSha!==prior.executorPackageSha && sha256(run.dml_accounting)===sha256(cp.failure?.dml) && run.mlb_official_calls===cp.failure?.providers.MLB_OFFICIAL && run.statcast_calls===cp.failure?.providers.STATCAST && run.odds_calls===cp.failure?.providers.THE_ODDS_API,'MARKET_REBIND_ALREADY_EXECUTED')
-        } else ensure(run.status==='FAILED' && !cp.marketRecoveries,'MARKET_RESUME_STAGE')
-        ensure(cp.stage==='MARKET_PERSISTENCE' && cp.failure?.stage==='MARKET_PERSISTENCE' && cp.failure.code==='RUNTIME_SQLSTATE_42501_HTTP_409' && cp.completed.includes('FEATURES') && !cp.completed.includes('MARKETS') && !cp.marketReference && !cp.disposition,'MARKET_RESUME_STAGE')
+        } else if(partial)ensure(run.status==='FAILED' && cp.marketRecoveries?.length===2 && ['UNCLASSIFIED_STAGE_EXCEPTION','FAILURE_RECORD_HEADROOM'].includes(cp.failure?.code) && cp.marketRecoveries.every(r=>r.priorFailure?.code==='RUNTIME_SQLSTATE_42501_HTTP_409'),'MARKET_RESUME_STAGE')
+        else ensure(run.status==='FAILED' && !cp.marketRecoveries,'MARKET_RESUME_STAGE')
+        ensure(cp.stage==='MARKET_PERSISTENCE' && cp.failure?.stage==='MARKET_PERSISTENCE' && (partial || cp.failure.code==='RUNTIME_SQLSTATE_42501_HTTP_409') && cp.completed.includes('FEATURES') && !cp.completed.includes('MARKETS') && !cp.marketReference && !cp.disposition,'MARKET_RESUME_STAGE')
         validateDml({stages})
         ensure(stages.every(s=>s.readback==='PASS' && s.conflicts===0) && dateText(run.run_date)===clock.date,'MARKET_RESUME_RECEIPTS_DATE')
         ensure(run.odds_calls===1 && run.mlb_official_calls>=1 && run.mlb_official_calls<=50 && run.statcast_calls>=0 && run.statcast_calls<=100,'MARKET_RESUME_PROVIDER')
@@ -191,7 +192,10 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         ensure(predictions.every(p=>cp.references.some(r=>r.kind==='persisted_features' && Number(r.identity)===Number(p.game_pk) && r.identities.includes(p.feature_snapshot_id)) && Date.parse(p.created_at)<Date.parse(games.find(g=>Number(g.game_pk)===Number(p.game_pk)).scheduled_at)),'MARKET_RESUME_PREDICTION_LINKAGE')
         // The initial 42501 fails before any observation INSERT. Reject any
         // unexpected partial downstream state rather than approving it implicitly.
-        ensure(observations.length===0 && !stages.some(s=>['pick2_mlb_market_price_observations','pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'].includes(s.target)),'MARKET_RESUME_DOWNSTREAM_STATE')
+        const observationReceipt=stages.find(s=>s.target==='pick2_mlb_market_price_observations')
+        if(partial)ensure(observations.length>0 && observations.length<=5000 && new Set(observations.map(r=>r.observation_identity)).size===observations.length && observationReceipt?.inserted===observations.length && observationReceipt.updated===0 && observationReceipt.cap===observations.length && observations.every(r=>scope.includes(Number(r.game_pk)) && r.source_response_digest===recovered.evidence.responseDigest && Date.parse(r.acquired_at)===Date.parse(recovered.evidence.acquiredAt) && mappings.some(m=>m.id===r.market_event_mapping_id && Number(m.game_pk)===Number(r.game_pk))),'MARKET_RESUME_OBSERVATION_READBACK')
+        else ensure(observations.length===0 && !observationReceipt,'MARKET_RESUME_DOWNSTREAM_STATE')
+        ensure(!stages.some(s=>['pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'].includes(s.target)),'MARKET_RESUME_DOWNSTREAM_STATE')
         for(const table of ['pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'])ensure((await query(`SELECT 1 FROM public.${table} WHERE prediction_id=ANY($1::uuid[]) LIMIT 1`,[predictions.map(p=>p.id)])).length===0,'MARKET_RESUME_DOWNSTREAM_STATE')
         const readback=marketReadbackDigest({predictions,mappings,observations,oddsReference:recovered.reference})
         ensure(readback===input.marketReadbackDigest,'MARKET_RESUME_READBACK_DRIFT')
@@ -199,7 +203,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         const checkpoint={...cp,marketRecoveries:[...(cp.marketRecoveries??[]),recovery]};validateCheckpoint(checkpoint)
         const updated=await one(`UPDATE ${TABLE} SET status='RUNNING',checkpoint=$2::text::jsonb,revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])
         const next=await one(`UPDATE ${TABLE} SET lease_holder=$2,lease_acquired_at=$3,lease_expires_at=$3::timestamptz+interval '5 minutes',fence=fence+1,revision=revision+1,run_id=$4,package_sha=$5,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[LEASE,input.holder,clock.at,run.run_id,run.package_sha])
-        return {status:'ACQUIRED',run:updated,lease:next,missionOddsCalls:mission.mission_odds_calls,readback:{predictions:predictions.length,mappings:mappings.length,observations:0,digest:readback}}
+        return {status:'ACQUIRED',run:updated,lease:next,missionOddsCalls:mission.mission_odds_calls,readback:{predictions:predictions.length,mappings:mappings.length,observations:observations.length,digest:readback}}
       }
       if(input.op==='resumeDependency') {
         ensure(!active && id(input.runId) && digest(input.expectedDigest) && digest(input.rawReadbackDigest) && /^[a-f0-9]{40}$/.test(input.executorPackageSha),'DEPENDENCY_RESUME_REVIEW_REQUIRED')
@@ -335,7 +339,10 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       }
       ensure(integer(input.revision) && Number(run.revision) === input.revision,'REVISION_CONFLICT')
       validateCheckpoint(input.checkpoint); validateDml(input.dml)
-      ensure(serializedBytes(input.checkpoint)<=28000,'FAILURE_RECORD_HEADROOM')
+      // Failure replaces the current failure member; it does not append it.
+      // Reserve the full 15000-byte accounting ceiling plus bounded exception
+      // metadata, retaining the existing 48000-byte checkpoint ceiling.
+      ensure(serializedBytes({...input.checkpoint,failure:null})+16500<=48000,'FAILURE_RECORD_HEADROOM')
       ensure(sha256(input.checkpoint.failure??null)===sha256(run.checkpoint.failure??null) && sha256(input.checkpoint.disposition??null)===sha256(run.checkpoint.disposition??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(sha256(input.checkpoint.dependencyRecoveries??null)===sha256(run.checkpoint.dependencyRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(sha256(input.checkpoint.marketRecoveries??null)===sha256(run.checkpoint.marketRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
