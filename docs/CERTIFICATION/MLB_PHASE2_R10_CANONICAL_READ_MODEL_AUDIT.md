@@ -1,6 +1,8 @@
 # R10 canonical freshness and classification
 
-Local read-model repair is validated; deployment readback is pending. This phase does not claim to repair the separate unresolved prediction-stage automation failure.
+R10 canonical read-model certification passes on the actual production deployment. The operations API, Today, Value Board and Data Health agree; mobile and desktop integration checks pass without rendering errors, horizontal overflow or read warnings. The full slate contains fifteen games: one started and fourteen waiting for evidence, including two missing starters. Thirteen games expose stored probabilities and prices; twenty-six opportunities remain truthfully blocked by current temporal/age conditions. Current actionable picks are zero.
+
+UI_REDESIGN_READY=YES means the requested canonical read-model gate passes. It does not certify current operational freshness or resolve the separate PREDICTIONS/CANONICAL_GUARD_FAILURE. That run, its data and accounting remain preserved for a separate operational phase. No UI component implementation occurred. The final matrix and screenshots remain private and are reported directly to the user. R10 provider calls and production DML/DDL are zero.
 
 ## Inventory and source of truth
 
