@@ -54,7 +54,9 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
     }
     try {
       let result
-      const row=runtime.run,job={date:String(row.run_date).slice(0,10),mode,at:new Date(row.run_as_of).toISOString(),packageSha}
+      // An explicitly reviewed dependency recovery may use compatible repaired
+      // runtime code. The original execution package remains part of the freeze.
+      const row=runtime.run,job={date:String(row.run_date).slice(0,10),mode,at:new Date(row.run_as_of).toISOString(),packageSha:row.package_sha}
       if(hostDry) {
         await checkpoint('HOST_DRY',{count:0,digest:sha256({packageSha,contract:'R6_REAL_HOST_PREFLIGHT_ONLY'})})
         result={status:'HOST_DRY_PASS',predictions:0,values:0,officialPicks:0,dml:[]}

@@ -11,6 +11,7 @@ export function createDurableRunStore({runtime,runContext,root}) {
   const store={
     root,referenceOnly:true,providerLedger:runtime.ledger,
     get locked(){return runtime.locked},
+    get frozenScope(){return runtime.run.checkpoint.completed.includes('SCOPE')?[...runtime.run.checkpoint.scope]:null},
     setCanonical(bindings){canonical=bindings},
     async markStage(stage) {
       ensure(['PREDICTIONS','ODDS_ACQUISITION','MARKET_PERSISTENCE','VALUES','OFFICIAL_PICKS','BOARD_READBACK'].includes(stage),'STAGE')

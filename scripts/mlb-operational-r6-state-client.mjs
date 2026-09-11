@@ -41,6 +41,12 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
       if(result.status === 'ACQUIRED') {lease=result.lease;run=result.run;missionOddsCalls=result.missionOddsCalls}
       return result
     },
+    async resumeDependency({runId,originalPackageSha,expectedDigest,rawReadbackDigest}) {
+      ensure(!lease,'ALREADY_HELD')
+      const result=await call({op:'resumeDependency',holder,runId,packageSha:originalPackageSha,executorPackageSha:packageSha,expectedDigest,rawReadbackDigest})
+      if(result.status==='ACQUIRED'){lease=result.lease;run=result.run;missionOddsCalls=result.missionOddsCalls}
+      return result
+    },
     renew:()=>serial(async()=>{const result=await call({...token(),op:'renew'});lease=result.lease;return result}),
     release:()=>serial(async()=>{if(!lease)return;const result=await call({...token(),op:'release'});lease=null;return result}),
     checkpoint:(checkpoint,dml)=>serial(async()=>{

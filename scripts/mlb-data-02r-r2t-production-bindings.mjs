@@ -171,9 +171,10 @@ async function createBindings({ client, repository, store, runContext, authoriza
       const aliases = await canonicalAliases()
       const slate = await getCurrentSlate({ mode: 'LIVE_EXECUTE', runDate: runContext.run_date, runAsOf: runContext.run_as_of, injectedEvidence: scheduleEvidence.payload, teamMap: aliases, liveAuthorization: true })
       ensure(slate.artifact.games.length <= 50, 'SLATE_CAP')
-      const eligible = slate.artifact.games.filter(g => g.pregame_classification === 'PREGAME_SAFE' && g.metadata.abstractGameState === 'Preview' && ['Scheduled', 'Pre-Game', 'Warmup'].includes(g.status) && g.game_type === 'R' && Date.parse(g.scheduled_at) > now().getTime())
+      const frozenScope=store.frozenScope
+      const eligible = slate.artifact.games.filter(g => (!frozenScope || frozenScope.includes(g.game_pk)) && g.pregame_classification === 'PREGAME_SAFE' && g.metadata.abstractGameState === 'Preview' && ['Scheduled', 'Pre-Game', 'Warmup'].includes(g.status) && g.game_type === 'R' && Date.parse(g.scheduled_at) > now().getTime())
       const blockedGames = slate.artifact.games.filter(g => !eligible.includes(g)).map(g => ({ gamePk: g.game_pk, reason: 'NOT_PREGAME' }))
-      const scope = eligible.map(g => g.game_pk)
+      const scope = frozenScope ?? eligible.map(g => g.game_pk)
       await store.freezeScope?.(scope)
       const existing = await repository.readNativeGames(scope)
       if(store.freezeDependencyScope) {

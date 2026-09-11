@@ -106,7 +106,8 @@ export async function runManualRefresh({ packageSha, resumeRunId = null, durable
 // Same R2 coordinator and bindings; only runtime ownership differs on Vercel.
 // The database has already frozen the actual start and owns all counters/writes.
 async function runDurableManualRefresh({packageSha,runtime,cacheRoot}) {
-  ensure(process.env.VERCEL==='1' && process.env.VERCEL_ENV==='production' && process.env.VERCEL_GIT_COMMIT_SHA===packageSha,'VERCEL_FROZEN_PACKAGE')
+  const reviewedExecutor=runtime.run.checkpoint.dependencyRecoveries?.at(-1)?.executorPackageSha
+  ensure(process.env.VERCEL==='1' && process.env.VERCEL_ENV==='production' && (process.env.VERCEL_GIT_COMMIT_SHA===packageSha || /^[a-f0-9]{40}$/.test(reviewedExecutor??'') && process.env.VERCEL_GIT_COMMIT_SHA===reviewedExecutor),'VERCEL_FROZEN_PACKAGE')
   ensure(!process.env.R2S_VALIDATION_DIR && runtime.locked && runtime.run.package_sha===packageSha,'DURABLE_RUNTIME_REQUIRED')
   const row=runtime.run,runDate=String(row.run_date).slice(0,10),runAsOf=new Date(row.run_as_of).toISOString()
   ensure(runDate===operatingDate(new Date().toISOString()) && typeof cacheRoot==='string','CURRENT_DURABLE_RUN')

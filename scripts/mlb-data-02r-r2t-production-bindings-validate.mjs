@@ -71,6 +71,16 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   assert.equal(evidence.contexts.length, contexts.length)
   assert.ok(evidence.contexts.every(c => !Object.hasOwn(c.dependencies,'rows') && /^[a-f0-9]{64}$/.test(c.dependencies.dependencyDigest)))
   check('compact production contexts retain canonical digest references without raw rows', true)
+  const temporalScope=contexts.map(c=>c.target.gamePk),temporalDocuments=new Map()
+  const temporalStore={...store,frozenScope:temporalScope,load:key=>temporalDocuments.get(key)??null,save:(key,value)=>temporalDocuments.set(key,value),freezeScope:async scope=>assert.deepEqual(scope,temporalScope)}
+  const temporalJournal=createWriteJournal({client,store:temporalStore,runContext})
+  const temporalRepository={...createSupabaseProductionRepository({client,writeJournal:temporalJournal}),executionEnvironment:'DISPOSABLE_PGLITE'}
+  const temporalCanonical=await createCanonicalCertificationBindings({client,repository:temporalRepository,store:temporalStore,runContext,authorization,compactContexts:true,oddsApiKey:'ISOLATED_TEST_VALUE',fetchImpl,now:()=>new Date(Math.max(...contexts.map(c=>Date.parse(c.target.scheduledAt)))+1)})
+  const temporal=await temporalCanonical.readContexts()
+  assert.equal(temporal.contexts.length,0)
+  assert.ok(temporalScope.every(pk=>temporal.blockedGames.some(g=>g.gamePk===pk && g.reason==='NOT_PREGAME')))
+  assert.equal(temporalJournal.summary().length,0)
+  check('R8 resumed scope stays frozen when wall-clock excludes started games individually',true)
   check('production source adapter reconstructs every real archived game from local SQL readback', true)
   assert.equal(canonical.providerAccounting().MLB_OFFICIAL, 1)
   assert.equal(canonical.providerAccounting().STATCAST ?? 0, 0)
@@ -108,6 +118,18 @@ export async function validateProductionBindingsLocally({ db, root, contexts, od
   // no HTTP transport. It is never supplied to the real-model archived cases.
   const rawSchema = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_RAW_SCHEMA_REVIEW.json', 'utf8'))
   for (const c of rawSchema.columns) await db.exec(`alter table pick2_raw_mlb_statcast_pitches add column if not exists ${c.column} ${c.type}${c.default ? ` default ${c.default}` : ''}`)
+  // Disposable adversarial timestamps: valid historical pitches acquired after
+  // the freeze may be kept, but must not become inputs to that frozen run.
+  await db.query('update pick2_raw_mlb_statcast_pitches set ingested_at=$1',[new Date(Date.parse(runAsOf)+60000).toISOString()])
+  const lateDocuments=new Map(),lateStore={...store,frozenScope:temporalScope,load:key=>lateDocuments.get(key)??null,save:(key,value)=>lateDocuments.set(key,value)}
+  const lateJournal=createWriteJournal({client,store:lateStore,runContext})
+  const lateRepository={...createSupabaseProductionRepository({client,writeJournal:lateJournal}),executionEnvironment:'DISPOSABLE_PGLITE'}
+  const lateCanonical=await createCanonicalCertificationBindings({client,repository:lateRepository,store:lateStore,runContext,authorization,compactContexts:true,oddsApiKey:'ISOLATED_TEST_VALUE',fetchImpl,now:()=>new Date(runAsOf)})
+  const late=await lateCanonical.readContexts()
+  assert.equal(late.contexts.length,0)
+  assert.ok(temporalScope.every(pk=>late.blockedGames.some(g=>g.gamePk===pk && g.reason==='NEW_RAW_EVIDENCE_AFTER_RUN_FREEZE')))
+  assert.equal(lateCanonical.providerAccounting().STATCAST??0,0)
+  check('R8 preserves late-acquired raw evidence but blocks every affected frozen target without refetching',true)
   const coldPk = 900000001
   const csv = 'game_pk,game_date,game_year,game_type,home_team,away_team,pitcher,batter,at_bat_number,pitch_number,inning\n900000001,2026-09-03,2026,R,HME,AWY,900000002,900000003,1,1,1\n'
   const coldLedger = createProviderLedger({ STATCAST: { allowed: true, maxCalls: 1 } })

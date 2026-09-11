@@ -1,0 +1,616 @@
+{
+  "phase": "MLB_PHASE2_R8_PARTIAL_DEPENDENCY_WRITE_RECOVERY",
+  "certificationVerdict": "R8_PARTIAL_DEPENDENCY_LOCAL_GATES_CERTIFIED_PRODUCTION_PENDING",
+  "startingSha": "8e96cfea93a2293047e8a22d019bda3a65b71db2",
+  "originalFrozenPackageSha": "cc1a359b3c7492cb5f62efc39eb5f5b05e85c6d4",
+  "failedRunId": "automation-0271e170de9e0280a03f773c6cd7a7fc18ac9226c4643bcc4bc0fcef018a1f21",
+  "generatedAt": "2026-09-11T15:13:20.476Z",
+  "productionRun": {
+    "revision": 159,
+    "status": "FAILED",
+    "stage": "DEPENDENCY_SCOPE",
+    "runAsOf": "2026-09-11T12:15:10.378+00:00",
+    "scope": [
+      824631,
+      824227,
+      822684,
+      823498,
+      822767,
+      824711,
+      822930,
+      823817,
+      824873,
+      823736,
+      823659,
+      823012,
+      824954,
+      825036,
+      823173
+    ],
+    "dependencyScope": [
+      823088,
+      823172,
+      823251,
+      823413,
+      823499,
+      823739,
+      823818,
+      823900,
+      824064,
+      824226,
+      824550,
+      824713,
+      824791,
+      824872,
+      824956
+    ],
+    "checkpointBytes": 2190,
+    "completed": [
+      "SCOPE",
+      "DEPENDENCY_SCOPE"
+    ],
+    "leaseActive": false
+  },
+  "gates": [
+    {
+      "gate": 1,
+      "status": "PASS"
+    },
+    {
+      "gate": 2,
+      "status": "PASS"
+    },
+    {
+      "gate": 3,
+      "status": "PASS"
+    },
+    {
+      "gate": 4,
+      "status": "PASS"
+    },
+    {
+      "gate": 5,
+      "status": "PASS"
+    },
+    {
+      "gate": 6,
+      "status": "PASS"
+    },
+    {
+      "gate": 7,
+      "status": "PASS"
+    },
+    {
+      "gate": 8,
+      "status": "PASS"
+    },
+    {
+      "gate": 9,
+      "status": "PENDING_PRODUCTION"
+    },
+    {
+      "gate": 10,
+      "status": "PENDING_PRODUCTION"
+    },
+    {
+      "gate": 11,
+      "status": "PENDING_PRODUCTION"
+    }
+  ],
+  "rawReadback": {
+    "status": "PASS",
+    "rows": 3795,
+    "sourcePayloadDigestsVerified": 3795,
+    "identityDigest": "6a81b9a937a2e965823ce753cee94414fa43ed3a92f8ef3f7c0d8d6f2ba6f9ff",
+    "sourceDigestOrder": "Existing 01A certified 119-column Statcast order",
+    "readbackDigest": "bfdbaf26e4ad99cd822203adb505ebf104e747a83ab4ad7c85aa184848dad945",
+    "duplicates": 0,
+    "scopeEscapes": 0,
+    "conflicts": 0,
+    "originalReceipt": {
+      "cap": 15000,
+      "stage": "PERSISTENCE",
+      "digest": "0f3ac1ed7759fa831331c7d2f76b7388468dfbf811ceb605730a82a3f0cb1071",
+      "reused": 0,
+      "target": "pick2_raw_mlb_statcast_pitches",
+      "planned": 3795,
+      "updated": 0,
+      "inserted": 3795,
+      "readback": "PASS",
+      "conflicts": 0
+    }
+  },
+  "dependencyPlan": [
+    {
+      "gamePk": 823088,
+      "count": 0,
+      "classification": "MISSING_FETCH_REQUIRED"
+    },
+    {
+      "gamePk": 823172,
+      "count": 0,
+      "classification": "MISSING_FETCH_REQUIRED"
+    },
+    {
+      "gamePk": 823251,
+      "count": 311,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823413,
+      "count": 258,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823499,
+      "count": 332,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823739,
+      "count": 324,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823818,
+      "count": 385,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823900,
+      "count": 285,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824064,
+      "count": 283,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824226,
+      "count": 318,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824550,
+      "count": 258,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824713,
+      "count": 279,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824791,
+      "count": 288,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824872,
+      "count": 225,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824956,
+      "count": 249,
+      "classification": "SATISFIED_REUSE"
+    }
+  ],
+  "providerAccounting": {
+    "failedRun": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 10,
+      "THE_ODDS_API": 0
+    },
+    "reservationsPreserved": 11,
+    "statcastRemainingPerRun": 90,
+    "missingDateUpperBound": 2,
+    "missionOddsConsumed": 4,
+    "missionOddsCap": 20,
+    "legacyAcquisitions": "RETAINED_SEPARATELY_UNCHANGED",
+    "thisPhase": 0
+  },
+  "forensics": {
+    "classification": "R2N_STATCAST_NETWORK_FAILURE",
+    "boundary": "Fetch rejected before a successful response for the failing request; earlier yielded raw batches remain committed.",
+    "failedRequestDate": "NOT_DURABLY_RETAINED",
+    "underlyingNetworkCause": "NOT_DURABLY_RETAINED",
+    "historicalSuccess": false
+  },
+  "resumeContract": {
+    "operation": "resumeDependency",
+    "reviewDigestRequired": true,
+    "independentRawDigestRequired": true,
+    "failureHistoryPreserved": true,
+    "maximumReviewedRecoveries": 3,
+    "cumulativeAccounting": true,
+    "originalPackagePreserved": true,
+    "repairedExecutorShaRecorded": true,
+    "missingOnly": true
+  },
+  "temporalGuard": {
+    "status": "PASS",
+    "rule": "Historical raw acquisition may persist; raw created/ingested after the original freeze cannot support that frozen target. Started targets block individually without changing frozen scope."
+  },
+  "validators": {
+    "recoveryChecks": [
+      {
+        "name": "Independent 3795-row identity/scope/source-digest readback",
+        "status": "PASS"
+      },
+      {
+        "name": "Wrong review, readback, or package fails without writes",
+        "status": "PASS"
+      },
+      {
+        "name": "Ineligible failure, accounting and receipt states reject",
+        "status": "PASS"
+      },
+      {
+        "name": "Source payload tampering fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "Any downstream row prevents partial dependency resume",
+        "status": "PASS"
+      },
+      {
+        "name": "New isolated authority preserves freeze, receipts, counters and original failure",
+        "status": "PASS"
+      },
+      {
+        "name": "Active lease and repeated recovery cannot double-acquire",
+        "status": "PASS"
+      },
+      {
+        "name": "Second-pass reuse leaves every raw row and DML receipt unchanged",
+        "status": "PASS"
+      },
+      {
+        "name": "Frozen readback rejects duplicate identities and out-of-scope dates",
+        "status": "PASS"
+      },
+      {
+        "name": "Shared Statcast stream: committed batches, network failure, isolated missing-only resume",
+        "status": "PASS"
+      }
+    ],
+    "schemaChecks": [
+      {
+        "name": "PostgreSQL typed persistence preserves all 76 real values",
+        "status": "PASS"
+      },
+      {
+        "name": "PostgreSQL persisted Champion inference parity",
+        "status": "PASS"
+      },
+      {
+        "name": "production prediction plan preserves the already certified stored input digest",
+        "status": "PASS"
+      },
+      {
+        "name": "PostgreSQL defaults and timestamp readback reuse all eight rows",
+        "status": "PASS"
+      },
+      {
+        "name": "separate real historical batter sample inserted for schema testing",
+        "status": "PASS"
+      },
+      {
+        "name": "team old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "starter old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "batter old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning old physical uniqueness blocks distinct as-of snapshot",
+        "status": "PASS"
+      },
+      {
+        "name": "exact rollback restores all original indexes and constraints before revisions",
+        "status": "PASS"
+      },
+      {
+        "name": "team migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "starter migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "batter migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning migration preserves exact existing rows",
+        "status": "PASS"
+      },
+      {
+        "name": "all feature foreign keys preserved by migration",
+        "status": "PASS"
+      },
+      {
+        "name": "real revision resume reuses committed snapshots/team/starter",
+        "status": "PASS"
+      },
+      {
+        "name": "snapshot-pinned real revision readback preserves 76-value vector and Champion",
+        "status": "PASS"
+      },
+      {
+        "name": "independent retry of real revision persists zero rows with zero caps",
+        "status": "PASS"
+      },
+      {
+        "name": "all real current-slate games expand into complete domain plans",
+        "status": "PASS"
+      },
+      {
+        "name": "every real slate game preserves persisted 76-vector and Champion parity",
+        "status": "PASS"
+      },
+      {
+        "name": "all-game retry is zero-write with exact zero caps",
+        "status": "PASS"
+      },
+      {
+        "name": "duplicate targets, stale run date and started-game drift fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "value and pick physical numeric(18,15) rounding matches PostgreSQL including decimal ties",
+        "status": "PASS"
+      },
+      {
+        "name": "all real predictions persist with canonical Champion and snapshot foreign keys",
+        "status": "PASS"
+      },
+      {
+        "name": "persisted prediction probabilities preserve real Champion inference",
+        "status": "PASS"
+      },
+      {
+        "name": "prediction retry reuses every immutable row with zero DML cap",
+        "status": "PASS"
+      },
+      {
+        "name": "prediction payload drift, immutable conflicts and scope escape fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "certified Policy V1 loads exact config, rejects threshold drift and accepts zero candidates",
+        "status": "PASS"
+      },
+      {
+        "name": "real prediction slate with no market evidence produces zero values and picks",
+        "status": "PASS"
+      },
+      {
+        "name": "isolated market fixture persists mappings and both book sides with canonical UUIDs",
+        "status": "PASS"
+      },
+      {
+        "name": "market retry reuses mappings and observations with zero caps",
+        "status": "PASS"
+      },
+      {
+        "name": "real model plus isolated odds fixture persists value math and all three observation FKs",
+        "status": "PASS"
+      },
+      {
+        "name": "isolated policy fixture persists Official Pick prediction/value UUID handoff",
+        "status": "PASS"
+      },
+      {
+        "name": "value and Official Pick retries preserve immutable decisions with zero writes",
+        "status": "PASS"
+      },
+      {
+        "name": "duplicate book sides, post-start values/picks and UNKNOWN starters fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "R2B to R2I real-model integration resumes after market handoff without reacquisition",
+        "status": "PASS"
+      },
+      {
+        "name": "R2B to R2I full real-model persistence retry performs zero writes",
+        "status": "PASS"
+      },
+      {
+        "name": "compact production contexts retain canonical digest references without raw rows",
+        "status": "PASS"
+      },
+      {
+        "name": "R8 resumed scope stays frozen when wall-clock excludes started games individually",
+        "status": "PASS"
+      },
+      {
+        "name": "production source adapter reconstructs every real archived game from local SQL readback",
+        "status": "PASS"
+      },
+      {
+        "name": "production source adapter reuses canonical raw evidence without a Statcast request",
+        "status": "PASS"
+      },
+      {
+        "name": "canonical snapshot-pinned recovery preserves all vectors without raw reads",
+        "status": "PASS"
+      },
+      {
+        "name": "actual production adapter R2B/R2I SQL pipeline completes and retries without provider reacquisition",
+        "status": "PASS"
+      },
+      {
+        "name": "R7 independent instances recover durable paid evidence and partial market writes with one Odds reservation and preserved predictions",
+        "status": "PASS"
+      },
+      {
+        "name": "separate R2 runtime resumes after features using durable SQL references and no raw rebuild",
+        "status": "PASS"
+      },
+      {
+        "name": "durable R2 repeat reuses features predictions markets values and picks without duplicate provider reservations",
+        "status": "PASS"
+      },
+      {
+        "name": "completed durable scheduled identity cannot repeat immutable work",
+        "status": "PASS"
+      },
+      {
+        "name": "fresh Official evidence vetoes started games and changed starters without replacing frozen inputs",
+        "status": "PASS"
+      },
+      {
+        "name": "R8 preserves late-acquired raw evidence but blocks every affected frozen target without refetching",
+        "status": "PASS"
+      },
+      {
+        "name": "shared Statcast cold fixture validates physical insert, canonical cache reuse and actual-request cap",
+        "status": "PASS"
+      },
+      {
+        "name": "raw backdating, corrupt digest and negative provider accounting fail closed",
+        "status": "PASS"
+      },
+      {
+        "name": "uncertain committed INSERT is recovered by exact independent readback and counted once",
+        "status": "PASS"
+      },
+      {
+        "name": "unapplied pending INSERT retries safely without double counting its cap",
+        "status": "PASS"
+      },
+      {
+        "name": "native enrichment UPDATE uses old predicates, reads back and never backdates new evidence",
+        "status": "PASS"
+      },
+      {
+        "name": "concurrent native metadata change without timestamp advance prevents the planned UPDATE",
+        "status": "PASS"
+      },
+      {
+        "name": "production adapter empty slate terminates after one injected schedule read with no downstream calls or writes",
+        "status": "PASS"
+      },
+      {
+        "name": "team distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "team orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "starter distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "starter orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "bullpen orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "batter distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "batter orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "matchup orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning distinct snapshot allowed and same snapshot duplicate rejected",
+        "status": "PASS"
+      },
+      {
+        "name": "firstInning orphan snapshot FK rejected after migration",
+        "status": "PASS"
+      },
+      {
+        "name": "migration repeat or schema drift fails closed",
+        "status": "PASS"
+      },
+      {
+        "name": "rollback with revision conflicts aborts and preserves every row",
+        "status": "PASS"
+      }
+    ],
+    "stateAuthorityChecks": 21,
+    "r7Checks": 5,
+    "edgeAuth": "PASS_CURRENT_HANDLER_EQUALS_TESTED_HANDLER",
+    "marketReplay": {
+      "rows": 88,
+      "firstInsert": 88,
+      "secondReuse": 88,
+      "additionalOdds": 0
+    },
+    "r3": "PASS",
+    "build": "PASS"
+  },
+  "productionResume": "NOT_EXECUTED",
+  "currentCounts": {
+    "featureSnapshots": 0,
+    "predictions": 0,
+    "marketObservations": 0,
+    "values": 0,
+    "officialPicks": 0
+  },
+  "productionDmlThisPhase": 0,
+  "productionDdl": 0,
+  "startedGameLeakage": 0,
+  "automation": "ENABLED_BUT_FAILED_RUN_GUARD_BLOCKS_EXECUTION",
+  "MARKET_PERSISTENCE_PRODUCTION_CERTIFIED": false,
+  "UI_REDESIGN_READY": false,
+  "protectedState": {
+    "Champion": "UNCHANGED",
+    "featureCount": 76,
+    "preprocessing": "UNCHANGED",
+    "PolicyV1": "UNCHANGED",
+    "inheritedGeneratedFiles": 19
+  },
+  "remainingLimitations": [
+    "Deploy and read back R8 exact candidate before production resume",
+    "Observe genuine eligible scheduled production market/value readback",
+    "No original failed request date or low-level network detail retained",
+    "Coverage uses certified canonical stored-game contract; no provider refetch to manufacture historical completeness"
+  ]
+}

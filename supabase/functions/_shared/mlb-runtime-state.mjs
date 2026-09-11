@@ -12,13 +12,43 @@ const ensure = (ok, reason) => { if (!ok) throw Error(`R6_STATE:${reason}`) }
 const id = x => typeof x === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(x)
 const digest = x => typeof x === 'string' && /^[a-f0-9]{64}$/.test(x)
 const integer = x => Number.isSafeInteger(x) && x >= 0
+const dateText=x=>x instanceof Date?x.toISOString().slice(0,10):String(x).slice(0,10)
+// Original provider column order from the existing 01A schema certificate.
+// JSONB reorders keys, so source-byte digests cannot use JSONB iteration order.
+const STATCAST_COLUMNS = 'pitch_type,game_date,release_speed,release_pos_x,release_pos_z,player_name,batter,pitcher,events,description,spin_dir,spin_rate_deprecated,break_angle_deprecated,break_length_deprecated,zone,des,game_type,stand,p_throws,home_team,away_team,type,hit_location,bb_type,balls,strikes,game_year,pfx_x,pfx_z,plate_x,plate_z,on_3b,on_2b,on_1b,outs_when_up,inning,inning_topbot,hc_x,hc_y,tfs_deprecated,tfs_zulu_deprecated,umpire,sv_id,vx0,vy0,vz0,ax,ay,az,sz_top,sz_bot,hit_distance_sc,launch_speed,launch_angle,effective_speed,release_spin_rate,release_extension,game_pk,fielder_2,fielder_3,fielder_4,fielder_5,fielder_6,fielder_7,fielder_8,fielder_9,release_pos_y,estimated_ba_using_speedangle,estimated_woba_using_speedangle,woba_value,woba_denom,babip_value,iso_value,launch_speed_angle,at_bat_number,pitch_number,pitch_name,home_score,away_score,bat_score,fld_score,post_away_score,post_home_score,post_bat_score,post_fld_score,if_fielding_alignment,of_fielding_alignment,spin_axis,delta_home_win_exp,delta_run_exp,bat_speed,swing_length,miss_distance,estimated_slg_using_speedangle,delta_pitcher_run_exp,hyper_speed,home_score_diff,bat_score_diff,home_win_exp,bat_win_exp,age_pit_legacy,age_bat_legacy,age_pit,age_bat,n_thruorder_pitcher,n_priorpa_thisgame_player_at_bat,pitcher_days_since_prev_game,batter_days_since_prev_game,pitcher_days_until_next_game,batter_days_until_next_game,api_break_z_with_gravity,api_break_x_arm,api_break_x_batter_in,arm_angle,attack_angle,attack_direction,swing_path_tilt,intercept_ball_minus_batter_pos_x_inches,intercept_ball_minus_batter_pos_y_inches'.split(',')
+export function dependencyRawReadback(rows, run) {
+  const scope=run.checkpoint.dependencyScope, receipt=run.dml_accounting.stages[0]
+  ensure(scope?.length && rows.length<=scope.length*1000,'DEPENDENCY_RAW_CAP')
+  ensure(new Set(rows.map(r=>r.id)).size===rows.length,'DEPENDENCY_RAW_DUPLICATE')
+  const counts=new Map(scope.map(g=>[g,0]))
+  for(const r of rows) {
+    ensure(scope.includes(Number(r.game_pk)) && r.id===`statcast:mlb:2026:${r.game_pk}:${r.at_bat_number}:${r.pitch_number}`,'DEPENDENCY_RAW_IDENTITY')
+    ensure(dateText(r.game_date)<dateText(run.run_date),'DEPENDENCY_RAW_DATE')
+    const p=r.raw_payload
+    ensure(p && Object.keys(p).length===STATCAST_COLUMNS.length && STATCAST_COLUMNS.every(k=>Object.hasOwn(p,k)),'DEPENDENCY_RAW_PAYLOAD')
+    ensure(sha256(JSON.stringify(Object.fromEntries(STATCAST_COLUMNS.map(k=>[k,p[k]]))))===r.raw_payload_digest,'DEPENDENCY_RAW_SOURCE_DIGEST')
+    ensure(Number(p.game_pk)===Number(r.game_pk) && Number(p.at_bat_number)===Number(r.at_bat_number) && Number(p.pitch_number)===Number(r.pitch_number) && p.game_date===String(r.game_date).slice(0,10),'DEPENDENCY_RAW_SOURCE_IDENTITY')
+    counts.set(Number(r.game_pk),counts.get(Number(r.game_pk))+1)
+  }
+  ensure([...counts.values()].every(n=>n<=1000),'DEPENDENCY_RAW_GAME_CAP')
+  const committed=rows.filter(r=>Date.parse(r.created_at)>=Date.parse(run.run_as_of) && Date.parse(r.created_at)<=Date.parse(run.checkpoint.failure.timestamp))
+  ensure(committed.length===receipt.inserted,'DEPENDENCY_RAW_RECEIPT_COUNT')
+  return {count:rows.length,committed:committed.length,digest:sha256(rows.map(r=>({id:r.id,sourceDigest:r.raw_payload_digest})).sort((a,b)=>a.id.localeCompare(b.id))),coverage:scope.map(gamePk=>({gamePk,count:counts.get(gamePk),classification:counts.get(gamePk)?'SATISFIED_REUSE':'MISSING_FETCH_REQUIRED'}))}
+}
 const keys = (x, allowed) => ensure(x && typeof x === 'object' && !Array.isArray(x) && Object.keys(x).every(k => allowed.includes(k)), 'METADATA_FIELDS')
 export const serializedBytes = x => new TextEncoder().encode(JSON.stringify(x)).length
 const canonical = x => JSON.stringify(x, Object.keys(x).sort())
 export const MODES = ['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS','INCREMENTAL','POSTGAME','OVERNIGHT','HOST_DRY']
 
 export function validateCheckpoint(x) {
-  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition'])
+  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries'])
+  if(x.dependencyRecoveries!==undefined) {
+    ensure(Array.isArray(x.dependencyRecoveries) && x.dependencyRecoveries.length>0 && x.dependencyRecoveries.length<=3,'DEPENDENCY_RECOVERY_CAP')
+    for(const r of x.dependencyRecoveries) {
+      keys(r,['reviewDigest','reviewedAt','fromRevision','rawReadbackDigest','rawCount','priorFailure','executorPackageSha'])
+      ensure(digest(r.reviewDigest) && digest(r.rawReadbackDigest) && integer(r.fromRevision) && integer(r.rawCount) && r.rawCount>0 && Number.isFinite(Date.parse(r.reviewedAt)) && /^[a-f0-9]{40}$/.test(r.executorPackageSha) && r.priorFailure?.stage==='DEPENDENCY_SCOPE','DEPENDENCY_RECOVERY_SHAPE')
+    }
+  }
   ensure(x.version === 1 && MODES.includes(x.mode) && id(x.stage), 'CHECKPOINT_HEADER')
   ensure(Array.isArray(x.scope) && x.scope.length <= 50 && x.scope.every(n => integer(n) && n > 0) && new Set(x.scope).size === x.scope.length, 'SCOPE')
   if(x.dependencyScope !== undefined)ensure(Array.isArray(x.dependencyScope) && x.dependencyScope.length<=500 && x.dependencyScope.every(n=>integer(n)&&n>0) && new Set(x.dependencyScope).size===x.dependencyScope.length,'DEPENDENCY_SCOPE')
@@ -79,8 +109,8 @@ export function validateDml(x) {
 export function createRuntimeStateAuthority({ transaction, writeRows = null, preflight = null, evidenceStorage = null }) {
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
-    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure'].includes(input.op), 'OPERATION')
+    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest'])
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
@@ -101,6 +131,39 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(lease, 'NOT_INITIALIZED')
       const clock = await one("WITH frozen AS MATERIALIZED (SELECT clock_timestamp() AS at) SELECT at, (at AT TIME ZONE 'America/Puerto_Rico')::date::text AS date FROM frozen")
       const active = lease.lease_holder && Date.parse(lease.lease_expires_at) > Date.parse(clock.at)
+      if(input.op==='resumeDependency') {
+        ensure(!active && id(input.runId) && digest(input.expectedDigest) && digest(input.rawReadbackDigest) && /^[a-f0-9]{40}$/.test(input.executorPackageSha),'DEPENDENCY_RESUME_REVIEW_REQUIRED')
+        const pending=await query(`SELECT * FROM ${TABLE} WHERE ${PENDING} ORDER BY created_at LIMIT 2`)
+        const run=pending[0]
+        ensure(pending.length===1 && run.run_id===input.runId && run.package_sha===input.packageSha && reviewDigest(run)===input.expectedDigest,'DEPENDENCY_RESUME_STATE_CONFLICT')
+        const cp=run.checkpoint,stages=run.dml_accounting.stages
+        ensure(run.status==='FAILED' && cp.stage==='DEPENDENCY_SCOPE' && cp.failure?.stage==='DEPENDENCY_SCOPE' && ['R2N_STATCAST_NETWORK_FAILURE','R2N_STATCAST_TIMEOUT'].includes(cp.failure.code) && cp.completed.includes('DEPENDENCY_SCOPE') && !cp.completed.includes('CONTEXTS') && !cp.disposition,'DEPENDENCY_RESUME_STAGE')
+        ensure(stages.length===1 && stages[0].target==='pick2_raw_mlb_statcast_pitches' && stages[0].inserted>0 && stages[0].updated===0 && stages[0].readback==='PASS' && stages[0].conflicts===0 && stages[0].cap===cp.dependencyScope?.length*1000,'DEPENDENCY_RESUME_RECEIPT')
+        validateDml({stages})
+        ensure(dateText(run.run_date)===clock.date && cp.scope.length>0,'DEPENDENCY_RESUME_DATE')
+        ensure(run.odds_calls===0 && run.mlb_official_calls===1 && run.statcast_calls>0 && run.statcast_calls<100,'DEPENDENCY_RESUME_PROVIDER')
+        const reservations=run.dml_accounting.providerReservations??[],expected=[sha256(`${run.run_id}:MLB_OFFICIAL:1`),...Array.from({length:run.statcast_calls},(_,i)=>sha256(`${run.run_id}:STATCAST:${i+1}`))]
+        ensure(reservations.length===expected.length && new Set(reservations).size===reservations.length && expected.every(r=>reservations.includes(r)),'DEPENDENCY_RESUME_RESERVATIONS')
+        const mission=await one(`SELECT mission_odds_calls FROM ${TABLE} WHERE scope_key=$1`,[MISSION])
+        ensure(mission && mission.mission_odds_calls>=2 && mission.mission_odds_calls<=20,'MISSION_LEDGER')
+        ensure(cp.references.some(r=>r.kind==='schedule_evidence' && digest(r.digest)) && !cp.references.some(r=>r.kind==='odds_evidence'||r.kind==='persisted_features'),'DEPENDENCY_RESUME_EVIDENCE')
+        // Fixed table allowlist. No caller SQL, table name, or time predicate.
+        for(const table of ['pick2_feature_snapshots','pick2_mlb_team_daily_features','pick2_mlb_pitcher_daily_features','pick2_mlb_bullpen_daily_features','pick2_mlb_batter_daily_features','pick2_mlb_matchup_daily_features','pick2_mlb_first_inning_daily_features','pick2_game_predictions','pick2_mlb_market_event_mappings','pick2_mlb_market_price_observations','pick2_mlb_market_value_evaluations','pick2_mlb_official_picks']) {
+          const found=await query(`SELECT 1 FROM public.${table} t WHERE COALESCE(to_jsonb(t)->>'target_game_pk',to_jsonb(t)->>'game_pk',to_jsonb(t)#>>'{metadata,source_game_pk}')=ANY($1::text[]) LIMIT 1`,[cp.scope.map(String)])
+          ensure(found.length===0,'DEPENDENCY_RESUME_DOWNSTREAM_ROWS')
+        }
+        const games=await query('SELECT game_pk,scheduled_at,official_status FROM public.pick2_mlb_games WHERE game_pk=ANY($1::bigint[]) FOR SHARE',[cp.scope])
+        ensure(games.length===cp.scope.length,'DEPENDENCY_RESUME_TARGETS')
+        const rows=await query('SELECT id,game_pk,game_date::text,at_bat_number,pitch_number,raw_payload,raw_payload_digest,created_at FROM public.pick2_raw_mlb_statcast_pitches WHERE game_pk=ANY($1::bigint[]) ORDER BY id LIMIT $2 FOR SHARE',[cp.dependencyScope,cp.dependencyScope.length*1000+1])
+        const readback=dependencyRawReadback(rows,run)
+        ensure(readback.digest===input.rawReadbackDigest,'DEPENDENCY_RESUME_READBACK_DRIFT')
+        const recovery={reviewDigest:input.expectedDigest,reviewedAt:new Date(clock.at).toISOString(),fromRevision:Number(run.revision),rawReadbackDigest:readback.digest,rawCount:readback.count,priorFailure:cp.failure,executorPackageSha:input.executorPackageSha}
+        const checkpoint={...cp,dependencyRecoveries:[...(cp.dependencyRecoveries??[]),recovery]}
+        validateCheckpoint(checkpoint)
+        const updated=await one(`UPDATE ${TABLE} SET status='RUNNING',checkpoint=$2::text::jsonb,revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])
+        const next=await one(`UPDATE ${TABLE} SET lease_holder=$2,lease_acquired_at=$3,lease_expires_at=$3::timestamptz+interval '5 minutes',fence=fence+1,revision=revision+1,run_id=$4,package_sha=$5,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[LEASE,input.holder,clock.at,run.run_id,run.package_sha])
+        return {status:'ACQUIRED',run:updated,lease:next,missionOddsCalls:mission.mission_odds_calls,readback}
+      }
       if(input.op==='dispose'||input.op==='disposeDependencyFailure') {
         ensure(!active && id(input.runId) && digest(input.expectedDigest),'DISPOSITION_REVIEW_REQUIRED')
         const run=await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1 FOR UPDATE`,[`RUN:${input.runId}`])
@@ -128,7 +191,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         let run = pending[0] ?? await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1`, [`RUN:${input.runId}`])
         if (run) {
           if(run.status==='FAILED' && run.checkpoint.disposition?.status==='TERMINAL_PARTIAL_PRESERVED')return {status:'TERMINAL_PARTIAL_PRESERVED',run,missionOddsCalls:mission.mission_odds_calls}
-          ensure(run.package_sha === input.packageSha, 'FROZEN_PACKAGE_CONFLICT')
+          ensure(run.package_sha === input.packageSha || run.checkpoint.dependencyRecoveries?.at(-1)?.executorPackageSha===input.packageSha, 'FROZEN_PACKAGE_CONFLICT')
           if (run.status === 'COMPLETE') return { status:'REUSE_NO_OP', run, missionOddsCalls:mission.mission_odds_calls }
           const date = run.run_date instanceof Date ? run.run_date.toISOString().slice(0,10) : String(run.run_date).slice(0,10)
           ensure(date === clock.date, 'STALE_PENDING_RUN_REQUIRES_REVIEW')
@@ -204,6 +267,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       validateCheckpoint(input.checkpoint); validateDml(input.dml)
       ensure(serializedBytes(input.checkpoint)<=28000,'FAILURE_RECORD_HEADROOM')
       ensure(sha256(input.checkpoint.failure??null)===sha256(run.checkpoint.failure??null) && sha256(input.checkpoint.disposition??null)===sha256(run.checkpoint.disposition??null),'REVIEW_METADATA_IMMUTABLE')
+      ensure(sha256(input.checkpoint.dependencyRecoveries??null)===sha256(run.checkpoint.dependencyRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(input.checkpoint.mode === run.checkpoint.mode,'MODE_DRIFT')
       ensure(run.checkpoint.completed.every(s => input.checkpoint.completed.includes(s)),'CHECKPOINT_REGRESSION')
       for (const reference of run.checkpoint.references) ensure(input.checkpoint.references.some(r => canonical(r) === canonical(reference)), 'REFERENCE_DRIFT')

@@ -1,0 +1,62 @@
+{
+  "phase": "MLB_PHASE2_R8_PARTIAL_DEPENDENCY_WRITE_RECOVERY",
+  "fileCount": 10,
+  "entrypoint": "supabase/functions/mlb-runtime-state/index.ts",
+  "verify_jwt": false,
+  "authentication": "UNCHANGED_SERVER_ONLY_BEARER_BEFORE_DATABASE",
+  "files": [
+    {
+      "path": "scripts/mlb-data-02r-r2f-stage-contracts.mjs",
+      "normalizedSha256": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7"
+    },
+    {
+      "path": "scripts/mlb-data-02r-r2t-write-contract.mjs",
+      "normalizedSha256": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82"
+    },
+    {
+      "path": "scripts/mlb-operational-r7-errors.mjs",
+      "normalizedSha256": "c725f0948fa3a6dc0ea028d3dab6c7a4a57d906e8128fa7b07fb14199ffba5af"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-fenced-write.mjs",
+      "normalizedSha256": "78ccbffc7d9ba849f51c8171131c22360b53dcf7350213307ec9f0aed64b7b72"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-schema.mjs",
+      "normalizedSha256": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-state.mjs",
+      "normalizedSha256": "51000af0040802f9b75c4e2b7f9f910bfa71afc25d72368f487daa6e8952524d"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-provider-evidence.mjs",
+      "normalizedSha256": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/index.ts",
+      "normalizedSha256": "1b151beed1458f15ad53dbd4098950fc264dfe5a4991ca0b87466cd38af7e68c"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/schema-contract.json",
+      "normalizedSha256": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/write-contract.json",
+      "normalizedSha256": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92"
+    }
+  ],
+  "newOperation": "resumeDependency",
+  "bounds": [
+    "FAILED dependency network/timeout only",
+    "Exact reviewed run and raw readback digests",
+    "Raw-only PASS receipts, zero conflicts and no downstream rows",
+    "No counter resets; original run/package/as-of/scopes preserved",
+    "New fenced lease and immutable failure/recovery lineage",
+    "Compatible repaired executor SHA explicitly recorded; no arbitrary main following",
+    "Fixed queries only; no new DDL"
+  ],
+  "ddl": 0,
+  "publicMutation": false,
+  "status": "LOCALLY_CERTIFIED_NOT_DEPLOYED"
+}
