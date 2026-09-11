@@ -1,5 +1,41 @@
 # R8 partial dependency recovery
 
+Current verdict: `R8_PARTIAL_DEPENDENCY_PRODUCTION_RECOVERY_CERTIFIED_DOWNSTREAM_PRIVILEGE_BLOCKED`.
+
+The user-authorized exact ten-file candidate `20f8c944b009cd774cc4e228061ce09eb3c9ed0c` is deployed as Edge **v9**. Downloaded production code matches all ten manifest hashes with no extra files. Missing, wrong and public credentials return 401; the server-only read operation returns 200. No production DDL or credential/privilege change occurred. Vercel executed the compatible published package `b654a3d74cff473ab6917f15078a95925b3e2ab2`. Champion V1, the 76-feature contract, preprocessing and Policy V1 remain unchanged.
+
+The reviewed `resumeDependency` advanced the original failed run from revision159 to160 and acquired a new fence. The original identity, package, freeze, scopes, eleven provider reservations, DML receipts and failure history were preserved. Independent readback confirms that all **3,795 original raw rows are unchanged**, including their source payloads and timestamps. Only two missing dependency items were acquired: game823088 added269 rows and game823172 added282 rows. The canonical raw total is **4,346**; every source digest verifies. The 3,795 existing rows were reused as evidence, without rewriting them. The cumulative raw INSERT receipt is4,346, cap15,000, with receipt reuse counter0; these are distinct accounting concepts.
+
+The original run completed at revision209 at `2026-09-11T15:42:34.847Z`, honestly returning `NO_VALID_PREGAME_SLATE`. Thirteen targets were blocked by `NEW_RAW_EVIDENCE_AFTER_RUN_FREEZE`; games823817 and825036 lacked required starters. No Odds were acquired for that freeze. A local host request lost its response, but durable independent readback proved production completion; no duplicate manual execution was issued. The subsequent INCREMENTAL run completed at revision3 with `NO_SCOPED_GAMES`.
+
+The **natural 15:45 UTC scheduled PREGAME** invocation then exercised the recovered cache without Statcast calls. Run `automation-9756864d6172709d333ee55f5522d6d400b8983f0e2038a064bb05463b895c95`, frozen at `2026-09-11T15:45:11.920Z`, processed13 independently eligible games and blocked the same two missing-starter targets. It persisted130 feature snapshots,104 daily-feature rows,13 Champion predictions and13 market mappings. It acquired one Odds response and preserved it in private durable evidence. At `2026-09-11T15:55:54.611Z`, it failed at `MARKET_PERSISTENCE`, revision50, with durable **`RUNTIME_SQLSTATE_42501_HTTP_409`**. Production Vercel logs record the scheduled503. Market observations, values and Official Picks remain0; zero picks here reflects an unexecuted policy stage, not a successful no-pick policy decision.
+
+The new cause is reproducible with the actual `performFencedWrite` implementation and production grants. The runtime uses `SET LOCAL ROLE service_role`. Market observations, value evaluations and Official Picks permit SELECT and INSERT but deliberately withhold UPDATE. The writer unconditionally performs `SELECT ... FOR UPDATE` while reading existing identities. PostgreSQL requires UPDATE privilege for this statement, even when no row matches. Disposable PostgreSQL using those grants throws42501 on that exact query before any INSERT. Market mappings permit UPDATE and therefore passed the same read. Earlier disposable persistence tests granted UPDATE to all tables and missed this production permission mismatch. Structural schema preflight still passes; its success does not certify this required-privilege relationship. This finding does not reconstruct the unknown internal reason for the older v7 HTTP409.
+
+The stored new Odds evidence passed reference/digest readback. Reconstructing its286-row prospective market plan required no provider calls or production writes; plan digest is `4cc909824a425888cc796b404ae2f1ee628431e1db7753311d95ebeef80b8b23`. It remains a plan, not persisted observations. No broad UPDATE grant, ad hoc failed-run mutation, dependency-resume misuse or fresh Odds reconstruction was attempted.
+
+Accounting for this deployment authorization, including the observed scheduled execution:
+
+| Item | Result |
+|---|---|
+| Provider calls | MLB Official3, Statcast2, Odds1; all other providers0 |
+| Mission Odds | 5/20; historical legacy acquisitions separately retained |
+| New business INSERTs | 811 = raw551 + snapshots130 + daily features104 + predictions13 + mappings13 |
+| Business UPDATE / DELETE | 0 / 0 |
+| Runtime coordination INSERT / UPDATE | 2 / 133 |
+| Runtime update derivation | Original run50 + incremental3 + scheduled50 + lease29 + mission1 |
+| Production DDL | 0 |
+| Committed receipt conflicts / started-game leakage | 0 / 0 |
+| New unresolved failed runs / active lease | 1 / none |
+
+Runtime accounting is independently derived from revision deltas: original159->209, new incremental0->3, new scheduled0->50, lease236->265, mission2->3. It excludes the previously committed3,795 business inserts. All committed write receipts pass readback and caps. Production count queries confirm130 snapshots,26 team,26 pitcher,26 bullpen,0 batter,13 matchup,13 first-inning,13 predictions,13 mappings and0 observations/values/picks. Prediction duplicate count and prediction start-time leakage are0. No market/value/pick rows were written that could introduce duplicates at those stages.
+
+Local R8 Gates1-8 remain supported by the unchanged implementation's recorded tests/build. Production recovery Gate9 passes. Gate10 recovered the original failed-run guard, but the subsequent scheduled invocation introduced a distinct unresolved market failure. Gate11 is blocked. Automation remains enabled and fail-closed behind that new guard; it is not currently healthy end to end. A narrow immutable-read repair under the existing transaction lease/unique constraints, exact-ACL regression tests, and certified guarded market resume from stored paid Odds are the next requirements. R8 dependency-only resume cannot apply to this downstream failure. Temporal eligibility must be rechecked before any future market/value/pick write.
+
+`MARKET_PERSISTENCE_PRODUCTION_CERTIFIED=NO`; `UI_REDESIGN_READY=NO`. UI work is untouched. Private payloads, storage paths and credentials are excluded from this public audit. The nineteen inherited generated-artifact modifications remain excluded. The following record is historical pre-deployment evidence, retained without treating the original failure as a historical success.
+
+---
+
 Local Gates 1–8 pass. Production recovery and subsequent scheduled market/value certification remain pending. This certificate does not turn the failed historical execution into a success.
 
 Starting package: `8e96cfea93a2293047e8a22d019bda3a65b71db2`.

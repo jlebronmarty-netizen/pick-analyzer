@@ -1,14 +1,14 @@
 {
   "phase": "MLB_PHASE2_R8_PARTIAL_DEPENDENCY_WRITE_RECOVERY",
-  "certificationVerdict": "R8_LOCAL_RECOVERY_CERTIFIED_EXACT_EDGE_DEPLOYMENT_APPROVAL_REQUIRED",
+  "certificationVerdict": "R8_PARTIAL_DEPENDENCY_PRODUCTION_RECOVERY_CERTIFIED_DOWNSTREAM_PRIVILEGE_BLOCKED",
   "startingSha": "8e96cfea93a2293047e8a22d019bda3a65b71db2",
   "originalFrozenPackageSha": "cc1a359b3c7492cb5f62efc39eb5f5b05e85c6d4",
   "failedRunId": "automation-0271e170de9e0280a03f773c6cd7a7fc18ac9226c4643bcc4bc0fcef018a1f21",
-  "generatedAt": "2026-09-11T15:13:20.476Z",
+  "generatedAt": "2026-09-11T16:05:43.737Z",
   "productionRun": {
-    "revision": 159,
-    "status": "FAILED",
-    "stage": "DEPENDENCY_SCOPE",
+    "revision": 209,
+    "status": "COMPLETE",
+    "stage": "COMPLETE",
     "runAsOf": "2026-09-11T12:15:10.378+00:00",
     "scope": [
       824631,
@@ -44,12 +44,8 @@
       824872,
       824956
     ],
-    "checkpointBytes": 2190,
-    "completed": [
-      "SCOPE",
-      "DEPENDENCY_SCOPE"
-    ],
-    "leaseActive": false
+    "leaseActive": false,
+    "result": "NO_VALID_PREGAME_SLATE"
   },
   "gates": [
     {
@@ -86,15 +82,16 @@
     },
     {
       "gate": 9,
-      "status": "PENDING_PRODUCTION"
+      "status": "PASS"
     },
     {
       "gate": 10,
-      "status": "PENDING_PRODUCTION"
+      "status": "PASS_RECOVERY_THEN_NEW_SCHEDULED_FAILURE",
+      "detail": "Original unresolved guard cleared; subsequent natural scheduled run created a distinct MARKET_PERSISTENCE failure."
     },
     {
       "gate": 11,
-      "status": "PENDING_PRODUCTION"
+      "status": "BLOCKED_MARKET_PRIVILEGE"
     }
   ],
   "rawReadback": {
@@ -123,93 +120,105 @@
   "dependencyPlan": [
     {
       "gamePk": 823088,
-      "count": 0,
-      "classification": "MISSING_FETCH_REQUIRED"
+      "count": 269,
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823172,
-      "count": 0,
-      "classification": "MISSING_FETCH_REQUIRED"
+      "count": 282,
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823251,
       "count": 311,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823413,
       "count": 258,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823499,
       "count": 332,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823739,
       "count": 324,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823818,
       "count": 385,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 823900,
       "count": 285,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824064,
       "count": 283,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824226,
       "count": 318,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824550,
       "count": 258,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824713,
       "count": 279,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824791,
       "count": 288,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824872,
       "count": 225,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     },
     {
       "gamePk": 824956,
       "count": 249,
-      "classification": "SATISFIED_REUSE"
+      "classification": "SATISFIED_CANONICAL_CACHE"
     }
   ],
   "providerAccounting": {
-    "failedRun": {
+    "preResume": {
       "MLB_OFFICIAL": 1,
       "STATCAST": 10,
-      "THE_ODDS_API": 0
+      "THE_ODDS_API": 0,
+      "reservations": 11
     },
-    "reservationsPreserved": 11,
-    "statcastRemainingPerRun": 90,
-    "missingDateUpperBound": 2,
-    "missionOddsConsumed": 4,
+    "recoveredRun": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 12,
+      "THE_ODDS_API": 0,
+      "reservations": 13
+    },
+    "thisAuthorization": {
+      "MLB_OFFICIAL": 3,
+      "STATCAST": 2,
+      "THE_ODDS_API": 1,
+      "BALLDONTLIE": 0,
+      "SPORTSDATAIO": 0,
+      "OTHER": 0
+    },
+    "missionOddsConsumed": 5,
     "missionOddsCap": 20,
     "legacyAcquisitions": "RETAINED_SEPARATELY_UNCHANGED",
-    "thisPhase": 0
+    "originalReservationsPreserved": 11
   },
   "forensics": {
     "classification": "R2N_STATCAST_NETWORK_FAILURE",
@@ -586,18 +595,106 @@
     "r3": "PASS",
     "build": "PASS"
   },
-  "productionResume": "NOT_EXECUTED",
+  "productionResume": {
+    "status": "COMPLETE",
+    "revisionBefore": 159,
+    "resumeRevision": 160,
+    "revisionAfter": 209,
+    "completedAt": "2026-09-11T15:42:34.847Z",
+    "result": "NO_VALID_PREGAME_SLATE",
+    "originalIdentityFreezePackageScopesPreserved": true,
+    "originalFailureLineagePreserved": true,
+    "originalRawRowsPreserved": 3795,
+    "newRawRows": 551,
+    "totalRawRows": 4346,
+    "rawSourceDigestsVerified": 4346,
+    "newDependencies": [
+      {
+        "gamePk": 823088,
+        "rows": 269
+      },
+      {
+        "gamePk": 823172,
+        "rows": 282
+      }
+    ],
+    "lateFreezeBlockedTargets": [
+      824631,
+      824227,
+      822684,
+      823498,
+      822767,
+      824711,
+      822930,
+      824873,
+      823736,
+      823659,
+      823012,
+      824954,
+      823173
+    ],
+    "missingStarterTargets": [
+      823817,
+      825036
+    ],
+    "rawReceipt": {
+      "cap": 15000,
+      "inserted": 4346,
+      "updated": 0,
+      "reused": 0,
+      "conflicts": 0,
+      "readback": "PASS",
+      "digest": "7d6b6ebbba8b2ea379bfdffa705a4608a19afa144e0cd4a94eed72357245ff9a"
+    },
+    "reuseMeaning": "3795 rows reused as existing dependency evidence, never rewritten. Cumulative INSERT receipt remains 4346; receipt reuse counter is 0.",
+    "localHostResponse": "UNAVAILABLE_CLIENT_FETCH_FAILED; independent durable production completion verified; no duplicate manual invocation"
+  },
   "currentCounts": {
-    "featureSnapshots": 0,
-    "predictions": 0,
+    "featureSnapshots": 130,
+    "team": 26,
+    "pitcher": 26,
+    "bullpen": 26,
+    "batter": 0,
+    "matchup": 13,
+    "firstInning": 13,
+    "predictions": 13,
+    "marketMappings": 13,
     "marketObservations": 0,
     "values": 0,
     "officialPicks": 0
   },
-  "productionDmlThisPhase": 0,
+  "productionDmlThisPhase": {
+    "business": {
+      "inserted": 811,
+      "updated": 0,
+      "deleted": 0,
+      "breakdown": {
+        "raw": 551,
+        "featureSnapshots": 130,
+        "dailyFeatures": 104,
+        "predictions": 13,
+        "marketMappings": 13
+      }
+    },
+    "runtime": {
+      "inserted": 2,
+      "updated": 133,
+      "deleted": 0,
+      "updateRevisionDeltas": {
+        "recoveredRun": 50,
+        "incrementalRun": 3,
+        "scheduledRun": 50,
+        "lease": 29,
+        "missionOdds": 1
+      },
+      "leaseRevisionBefore": 236,
+      "leaseRevisionAfter": 265
+    },
+    "definition": "Committed database row changes since this deployment authorization; existing 3795 raw inserts are not counted again. Runtime coordination is reported separately."
+  },
   "productionDdl": 0,
   "startedGameLeakage": 0,
-  "automation": "ENABLED_BUT_FAILED_RUN_GUARD_BLOCKS_EXECUTION",
+  "automation": "ENABLED_BUT_NEW_MARKET_FAILURE_GUARD_BLOCKS_EXECUTION",
   "MARKET_PERSISTENCE_PRODUCTION_CERTIFIED": false,
   "UI_REDESIGN_READY": false,
   "protectedState": {
@@ -608,47 +705,253 @@
     "inheritedGeneratedFiles": 19
   },
   "remainingLimitations": [
-    "Explicit deployment authorization for the exact ten-file R8 candidate is required by automatic approval review; production resume was not attempted.",
-    "Observe genuine eligible scheduled production market/value readback",
-    "No original failed request date or low-level network detail retained",
-    "Coverage uses certified canonical stored-game contract; no provider refetch to manufacture historical completeness"
+    "New scheduled MARKET_PERSISTENCE run is unresolved at revision50; 13 predictions, 13 mappings and paid Odds evidence preserved.",
+    "Immutable writer SELECT FOR UPDATE requires a privilege deliberately absent from market observations, values and Official Picks. No grants or code bypass applied.",
+    "R8 dependency-only resume cannot recover a downstream market failure. A separately certified narrow writer repair and guarded market resume are needed.",
+    "Production market/value/policy/pick persistence and second-pass reuse remain unproved.",
+    "Two targets have missing starters; old freeze additionally rejects 13 targets supported only by late-acquired raw evidence.",
+    "Original dependency network detail remains unavailable; no historical cause fabricated."
   ],
   "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c",
   "deployment": {
-    "status": "REJECTED_BY_AUTOMATIC_APPROVAL_REVIEW",
-    "productionEdgeVersion": 8,
+    "status": "DEPLOYED_VERIFIED",
+    "productionEdgeVersion": 9,
     "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c",
     "manifest": "docs/CERTIFICATION/MLB_PHASE2_R8_EDGE_MANIFEST.json",
-    "reason": "Exact R8 privileged candidate deployment authorization required; no bypass attempted."
-  },
-  "finalProductionReadback": {
-    "checkedAt": "2026-09-11T15:18:57.690Z",
-    "edgeVersion": 8,
-    "exactV8Manifest": "PASS",
-    "r8Deployed": false,
+    "exactTenFiles": "PASS_DOWNLOADED_PRODUCTION_CODE",
+    "verify_jwt": false,
     "bearerAuth": {
       "missing": 401,
       "wrong": 401,
       "public": 401,
       "serverOnlyInspect": 200
     },
-    "schema": "PASS",
-    "runRevision": 159,
-    "status": "FAILED",
-    "rawRowsPreserved": 3795,
+    "secretScan": "PASS",
+    "newDdl": 0
+  },
+  "finalProductionReadback": {
+    "checkedAt": "2026-09-11T16:05:43.737Z",
+    "edgeVersion": 9,
+    "r8Deployed": true,
+    "schema": "PASS_STRUCTURAL_PREFLIGHT",
+    "privileges": "BLOCKED_IMMUTABLE_WRITER_LOCK_MISMATCH",
+    "recoveredRunRevision": 209,
+    "recoveredRunStatus": "COMPLETE",
+    "newFailedRunRevision": 50,
     "unresolvedRuns": 1,
     "leaseActive": false,
-    "futureTargets": 15,
-    "features": 0,
-    "predictions": 0,
-    "mappings": 0,
-    "observations": 0,
-    "values": 0,
-    "picks": 0,
-    "runOfficial": 1,
-    "runStatcast": 10,
-    "runOdds": 0,
-    "missionOdds": 4,
-    "productionMutationsThisPhase": 0
+    "rawRows": 4346,
+    "originalRawRowsPreserved": 3795,
+    "missionOdds": 5,
+    "predictionDuplicates": 0,
+    "startedGameLeakage": 0,
+    "committedReceiptConflicts": 0
+  },
+  "preDeploymentProductionRun": {
+    "revision": 159,
+    "status": "FAILED",
+    "stage": "DEPENDENCY_SCOPE",
+    "runAsOf": "2026-09-11T12:15:10.378+00:00",
+    "scope": [
+      824631,
+      824227,
+      822684,
+      823498,
+      822767,
+      824711,
+      822930,
+      823817,
+      824873,
+      823736,
+      823659,
+      823012,
+      824954,
+      825036,
+      823173
+    ],
+    "dependencyScope": [
+      823088,
+      823172,
+      823251,
+      823413,
+      823499,
+      823739,
+      823818,
+      823900,
+      824064,
+      824226,
+      824550,
+      824713,
+      824791,
+      824872,
+      824956
+    ],
+    "checkpointBytes": 2190,
+    "completed": [
+      "SCOPE",
+      "DEPENDENCY_SCOPE"
+    ],
+    "leaseActive": false
+  },
+  "preDeploymentDependencyPlan": [
+    {
+      "gamePk": 823088,
+      "count": 0,
+      "classification": "MISSING_FETCH_REQUIRED"
+    },
+    {
+      "gamePk": 823172,
+      "count": 0,
+      "classification": "MISSING_FETCH_REQUIRED"
+    },
+    {
+      "gamePk": 823251,
+      "count": 311,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823413,
+      "count": 258,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823499,
+      "count": 332,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823739,
+      "count": 324,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823818,
+      "count": 385,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 823900,
+      "count": 285,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824064,
+      "count": 283,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824226,
+      "count": 318,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824550,
+      "count": 258,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824713,
+      "count": 279,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824791,
+      "count": 288,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824872,
+      "count": 225,
+      "classification": "SATISFIED_REUSE"
+    },
+    {
+      "gamePk": 824956,
+      "count": 249,
+      "classification": "SATISFIED_REUSE"
+    }
+  ],
+  "incrementalRun": {
+    "runId": "automation-176156eeeeb4dea5a9d91b48b17615bccda60f6c81620267197e6d2860fc0d03",
+    "status": "COMPLETE",
+    "revision": 3,
+    "result": "NO_SCOPED_GAMES",
+    "providerCalls": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 0,
+      "THE_ODDS_API": 0
+    },
+    "businessInserts": 0
+  },
+  "scheduledRun": {
+    "runId": "automation-9756864d6172709d333ee55f5522d6d400b8983f0e2038a064bb05463b895c95",
+    "packageSha": "b654a3d74cff473ab6917f15078a95925b3e2ab2",
+    "runAsOf": "2026-09-11T15:45:11.920Z",
+    "naturalScheduledInvocation": true,
+    "status": "FAILED",
+    "revision": 50,
+    "stage": "MARKET_PERSISTENCE",
+    "failureAt": "2026-09-11T15:55:54.611Z",
+    "failureCheckpointRevision": 49,
+    "errorCode": "RUNTIME_SQLSTATE_42501_HTTP_409",
+    "scopeGames": 15,
+    "eligibleGames": 13,
+    "blocked": [
+      {
+        "gamePk": 823817,
+        "reason": "STARTER_MISSING"
+      },
+      {
+        "gamePk": 825036,
+        "reason": "STARTER_MISSING"
+      }
+    ],
+    "providerCalls": {
+      "MLB_OFFICIAL": 2,
+      "STATCAST": 0,
+      "THE_ODDS_API": 1
+    },
+    "oddsEvidenceReadback": "PASS_PRIVATE_DURABLE_REFERENCE",
+    "prospectiveMarketPlanRows": 286,
+    "prospectiveMarketPlanDigest": "4cc909824a425888cc796b404ae2f1ee628431e1db7753311d95ebeef80b8b23",
+    "businessInserts": 260,
+    "allCommittedReceipts": "PASS",
+    "scheduledHostHttpStatus": 503
+  },
+  "marketPrivilegeDiagnosis": {
+    "status": "REPRODUCED",
+    "code": "RUNTIME_SQLSTATE_42501_HTTP_409",
+    "source": "supabase/functions/_shared/mlb-fenced-write.mjs",
+    "runtimeRole": "service_role",
+    "actualWriter": true,
+    "productionCatalogReadback": {
+      "marketMappings": [
+        "SELECT",
+        "INSERT",
+        "UPDATE"
+      ],
+      "marketObservations": [
+        "SELECT",
+        "INSERT"
+      ],
+      "valueEvaluations": [
+        "SELECT",
+        "INSERT"
+      ],
+      "officialPicks": [
+        "SELECT",
+        "INSERT"
+      ]
+    },
+    "cause": "Immutable INSERT preclassification executes SELECT FOR UPDATE. PostgreSQL requires UPDATE privilege for this lock, including an empty result. The immutable market tables correctly withhold UPDATE.",
+    "disposableResult": {
+      "sqlstate": "42501",
+      "inserts": 0,
+      "productionDml": 0,
+      "productionDdl": 0,
+      "providerCalls": 0
+    },
+    "testGap": "Earlier disposable persistence harness granted UPDATE on all tables and did not reproduce production ACLs.",
+    "historical409Attribution": "NOT_INFERRED; this proof concerns the new scheduled v9 failure only.",
+    "proposedRepair": "Use an immutable-compatible identity read under the existing transactional global lease and unique constraints; retain row locks for explicitly authorized enrichment UPDATE; test exact production ACLs and guarded market resume from preserved Odds."
   }
 }

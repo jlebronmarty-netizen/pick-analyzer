@@ -58,6 +58,8 @@
   ],
   "ddl": 0,
   "publicMutation": false,
-  "status": "LOCALLY_CERTIFIED_DEPLOYMENT_REJECTED_APPROVAL_REQUIRED",
-  "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c"
+  "status": "DEPLOYED_VERIFIED",
+  "candidateSha": "20f8c944b009cd774cc4e228061ce09eb3c9ed0c",
+  "productionEdgeVersion": 9,
+  "productionHashReadback": "PASS_EXACT_TEN_FILES"
 }
