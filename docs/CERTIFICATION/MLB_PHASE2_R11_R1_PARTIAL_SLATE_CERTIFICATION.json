@@ -1,6 +1,6 @@
 {
   "phase": "MLB_PHASE2_R11_R1_PER_GAME_VETO_AND_PARTIAL_SLATE_PERSISTENCE_CERTIFICATION",
-  "verdict": "R11_R1_DEPLOYMENT_CERTIFIED_DISPOSITION_TIME_GATE_PENDING",
+  "verdict": "R11_R1_DISPOSITION_AND_SCHEDULED_RECOVERY_CERTIFIED_NONEMPTY_PREGAME_PENDING",
   "startingLocalSha": "fba7e2b84c58d76dc6ef267a89e27cd11ec6f060",
   "productionBaseline": "d5b489ecb7060cbb6c4ce39060f2ec432408a985",
   "gates": {
@@ -12,8 +12,8 @@
     "R11_R1_DOWNSTREAM_SCOPE": "PASS",
     "DEPLOYMENT": "PASS",
     "R11_R1_FAILED_RUN_PRESERVATION": "PASS",
-    "R11_R1_HISTORICAL_RUN_DISPOSITION": "PENDING_EXISTING_TIME_STATE_GUARD",
-    "NEXT_GENUINE_PRODUCTION_RUN": "PENDING"
+    "R11_R1_HISTORICAL_RUN_DISPOSITION": "PASS",
+    "NEXT_GENUINE_PRODUCTION_RUN": "PENDING_NONEMPTY_PREGAME_SLATE"
   },
   "frozenMatrix": {
     "games": 15,
@@ -89,9 +89,9 @@
     "build": "PASS",
     "candidateAuth": "PASS"
   },
-  "providerCallsThisPhase": 0,
+  "providerCallsThisPhase": 5,
   "cumulativeOdds": "7/20",
-  "productionDmlThisPhase": 0,
+  "productionDmlThisPhase": 31,
   "productionDdlThisPhase": 0,
   "introducedConflicts": 0,
   "introducedStartedGameLeakage": 0,
@@ -123,18 +123,203 @@
     "freezePreserved": true,
     "providerAccountingPreserved": true,
     "dmlAccountingPreserved": true,
-    "unresolvedRuns": 1,
+    "unresolvedRuns": 0,
     "activeLeases": 0,
     "frozenGameRows": 15,
     "futureScheduledGames": 3,
     "lastFrozenScheduledStart": "2026-09-12T02:15:00Z",
-    "disposition": "PENDING_EXISTING_TIME_GUARD",
+    "disposition": "TERMINAL_PARTIAL_PRESERVED",
     "productionVetoObservation": "PENDING_GUARDED_RUN_CLEARANCE_AND_GENUINE_SLATE",
     "productionVetoRemovalRejection": "PENDING_PRODUCTION_OBSERVATION_DISPOSABLE_SQL_PASS",
     "productionBlockedWriteRejection": "PENDING_PRODUCTION_OBSERVATION_DISPOSABLE_SQL_PASS",
-    "hostDry": "BLOCKED_BY_EXISTING_LIVE_RUN_PENDING_GUARD_NOT_INVOKED",
+    "hostDry": "HOST_DRY_PASS",
     "cronConfiguration": "UNCHANGED_EVERY_15_MINUTES",
-    "automation": "CONFIGURED_WITH_UNRESOLVED_RUN_GUARD",
-    "nextScheduledRun": "GUARDED_UNTIL_CERTIFIED_DISPOSITION"
-  }
+    "automation": "NATURAL_SCHEDULED_TICK_COMPLETE",
+    "nextScheduledRun": "ALLOW_NEXT_GENUINE_PREGAME_SLATE",
+    "observationNote": "Original pre-disposition time snapshot above; followup is the authoritative latest disposition and scheduler readback."
+  },
+  "followup": {
+    "productionSha": "3c8560073431ccbff6f46a63760114366a1e04bb",
+    "historicalDisposition": "TERMINAL_PARTIAL_PRESERVED",
+    "revisionLineage": [
+      38,
+      39
+    ],
+    "priorCheckpointEvidenceFreezeAccountingPreserved": true,
+    "historicalVeto": "UNRECOVERABLE_HISTORICAL_VETO_DETAIL",
+    "initialDispositionAttempt": "REJECTED_HOLDER_REQUIRED_ZERO_MUTATION",
+    "correctedGuardedDisposition": "PASS",
+    "unresolvedRuns": 0,
+    "leaseActive": false,
+    "auth": [
+      401,
+      401,
+      401,
+      200
+    ],
+    "schemaPreflight": "PASS",
+    "hostDry": "HOST_DRY_PASS",
+    "scheduledRuns": [
+      {
+        "runId": "automation-c3814b19408084279e608e6e4b9d7f8ef0f7eef15987409adc82da8072475b98",
+        "at": "2026-09-12T03:00:23.184+00:00",
+        "mode": "POSTGAME",
+        "status": "COMPLETE",
+        "result": {
+          "picks": 0,
+          "reused": 0,
+          "status": "COMPLETE",
+          "values": 0,
+          "inserted": 0,
+          "readback": "PASS",
+          "conflicts": 0,
+          "predictions": 0
+        },
+        "scope": 10,
+        "blocked": [],
+        "gameVetoes": [],
+        "providers": {
+          "MLB_OFFICIAL": 1,
+          "STATCAST": 1,
+          "THE_ODDS_API": 0
+        },
+        "businessDml": 0
+      },
+      {
+        "runId": "automation-d8e2497dddbb9052410b65e9ace30298997ca334e445add571a45712449e6eaa",
+        "at": "2026-09-12T03:00:17.629+00:00",
+        "mode": "INCREMENTAL",
+        "status": "COMPLETE",
+        "result": {
+          "picks": 0,
+          "reused": 0,
+          "status": "COMPLETE",
+          "values": 0,
+          "inserted": 0,
+          "readback": "PASS",
+          "conflicts": 0,
+          "predictions": 0
+        },
+        "scope": 5,
+        "blocked": [],
+        "gameVetoes": [],
+        "providers": {
+          "MLB_OFFICIAL": 1,
+          "STATCAST": 1,
+          "THE_ODDS_API": 0
+        },
+        "businessDml": 0
+      },
+      {
+        "runId": "automation-393d11cb5e0c1cb2966f3b9976ffc89b7cb147d6210722ab3fdf4f471be339f1",
+        "at": "2026-09-12T03:00:08.937+00:00",
+        "mode": "PREGAME",
+        "status": "COMPLETE",
+        "result": {
+          "picks": 0,
+          "reused": 0,
+          "status": "NO_VALID_PREGAME_SLATE",
+          "values": 0,
+          "inserted": 0,
+          "readback": "PASS",
+          "conflicts": 0,
+          "predictions": 0
+        },
+        "scope": 0,
+        "blocked": [
+          {
+            "gamePk": 824631,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 824227,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 822684,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 823498,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 822767,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 824711,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 822930,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 823817,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 824873,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 823736,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 823659,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 823012,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 824954,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 825036,
+            "reason": "NOT_PREGAME"
+          },
+          {
+            "gamePk": 823173,
+            "reason": "NOT_PREGAME"
+          }
+        ],
+        "gameVetoes": [],
+        "providers": {
+          "MLB_OFFICIAL": 1,
+          "STATCAST": 0,
+          "THE_ODDS_API": 0
+        },
+        "businessDml": 0
+      }
+    ],
+    "providerCalls": {
+      "manualRecovery": 0,
+      "scheduled": {
+        "MLB_OFFICIAL": 3,
+        "STATCAST": 2,
+        "THE_ODDS_API": 0
+      }
+    },
+    "cumulativeOdds": "7/20",
+    "businessDml": 0,
+    "runtimeDml": {
+      "inserts": 4,
+      "updates": 27,
+      "total": 31,
+      "basis": "4 new runs; 19 run revision increments including disposition; 8 lease revision increments; mission revision unchanged"
+    },
+    "productionDdl": 0,
+    "conflicts": 0,
+    "startedGameLeakage": 0,
+    "duplicatesIntroduced": 0,
+    "automation": "NATURAL_PREGAME_INCREMENTAL_POSTGAME_COMPLETE",
+    "limitation": "All 15 games NOT_PREGAME; no nonempty partial-slate downstream production proof and no new gameVetoes exercised"
+  },
+  "productionBusinessDmlThisPhase": 0,
+  "dispositionRevision": 39
 }
