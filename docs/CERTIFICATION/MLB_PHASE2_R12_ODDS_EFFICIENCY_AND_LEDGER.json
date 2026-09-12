@@ -1,0 +1,365 @@
+{
+  "analysisDate": "2026-09-12",
+  "observedAt": "2026-09-12T20:00:38.161Z",
+  "source": "DIGEST_VERIFIED_PRIVATE_ODDS_RESPONSES",
+  "scope": "ALL_H2H_QUOTES_IN_PRESERVED_RESPONSES_NOT_ONLY_PERSISTED_ELIGIBLE_SUBSET",
+  "historicalMission": {
+    "consumed": 20,
+    "cap": 20,
+    "unchangedDuringRead": true,
+    "ledger": [
+      {
+        "ordinal": 1,
+        "runId": "mlb-operational-04035c55-b6b8-47f6-9882-4553fc43df85",
+        "classification": "ACQUIRED",
+        "basis": "CERTIFIED_MANUAL_BASELINE",
+        "consumed": 1
+      },
+      {
+        "ordinal": 2,
+        "runId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
+        "classification": "ACQUIRED",
+        "basis": "CERTIFIED_MANUAL_BASELINE",
+        "consumed": 1
+      },
+      {
+        "ordinal": 3,
+        "runId": "automation-d380f6101b7ee019b63790b3342f24269cfb64e837782be4ebfe3a34acb987e2",
+        "runAsOf": "2026-09-10T00:00:48.874+00:00",
+        "classification": "CONSUMED_UNCERTAIN",
+        "consumed": 1,
+        "durableEvidenceVerified": false
+      },
+      {
+        "ordinal": 4,
+        "runId": "automation-73eebadf495e03f5bd4ad4df343bf7ab97fe4c6b2aab3c8c1c5d59f6002f6df3",
+        "runAsOf": "2026-09-10T15:45:13.15+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 5,
+        "runId": "automation-9756864d6172709d333ee55f5522d6d400b8983f0e2038a064bb05463b895c95",
+        "runAsOf": "2026-09-11T15:45:11.92+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 6,
+        "runId": "automation-e69f771c65f4675304a463144406704e12ef6e3ddb1a20e169e0da272c4b5666",
+        "runAsOf": "2026-09-11T17:15:08.814+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 7,
+        "runId": "automation-5049531e00d6c34dc08f1c855e42ba8e15db63c9fc827a4b4b17273fd39be50b",
+        "runAsOf": "2026-09-11T17:30:10.085+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 8,
+        "runId": "automation-6ddab51ff4ad34e88d2046103e33ee85d6097eeaa3d191d52c326b8adfc399f5",
+        "runAsOf": "2026-09-12T12:30:09.846+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 9,
+        "runId": "automation-06d43a53c90b13dd52c07261525d4671252f5d2d824a6d4f4350b9a690d77666",
+        "runAsOf": "2026-09-12T12:45:10.256+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 10,
+        "runId": "automation-da0adaa953b12d1a7d9cfd579ef5966620148047fe4bcea309ffd5517173b689",
+        "runAsOf": "2026-09-12T13:00:10.724+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 11,
+        "runId": "automation-b9f25969cc0261366ac934435d07d8354128b81898cf771364cf1be5d96e6221",
+        "runAsOf": "2026-09-12T13:15:13.517+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 12,
+        "runId": "automation-dc98da3b7fadf6a1564d142a2f413336348dd00355e25f5c9374eda5d3c0b48c",
+        "runAsOf": "2026-09-12T13:30:10.977+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 13,
+        "runId": "automation-0b5e2a873103ef1835e0c16c8b5a9c21bf7f0533989e9260d442da5e449d2555",
+        "runAsOf": "2026-09-12T13:45:11.852+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 14,
+        "runId": "automation-47acc93ac80120e7a5797d01ee8b00d88482c48ef32a736298be68497d4477c3",
+        "runAsOf": "2026-09-12T14:00:10.779+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 15,
+        "runId": "automation-5d242e5370fe2504be3714c50e97852cba652ec3aca53a5e789d93f9b3eaa17a",
+        "runAsOf": "2026-09-12T14:15:10.612+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 16,
+        "runId": "automation-09da4282dce81fdcaf2bc29700fa71d162ebcbd3b51b6d4ca2e2859bb5c5b3c4",
+        "runAsOf": "2026-09-12T14:30:10.609+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 17,
+        "runId": "automation-fb01defcf4e55e30e996b455e2c6c4da2502f66ba3a3636651caa6aaf7822b88",
+        "runAsOf": "2026-09-12T14:45:10.225+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 18,
+        "runId": "automation-2396a3503161bb46ecb35ef1bd3746713149e3bd75756b76f7964cd4a8141c9f",
+        "runAsOf": "2026-09-12T15:00:10.504+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 19,
+        "runId": "automation-df9139a0e00ee02df8c71597c76d5d2b7b4753a9a044cd5ec9139f2c7a168799",
+        "runAsOf": "2026-09-12T15:15:13.575+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      },
+      {
+        "ordinal": 20,
+        "runId": "automation-8ef1fe8ed72c2e3ffdab2e29992cf6891d91dab9b2d8f1e77bfbfb5f0cbbd20f",
+        "runAsOf": "2026-09-12T15:30:10.458+00:00",
+        "classification": "RESERVED_AND_ACQUIRED",
+        "consumed": 1,
+        "durableEvidenceVerified": true
+      }
+    ],
+    "separateLegacyAcquisitions": 2
+  },
+  "rejectedCurrentAttempt": {
+    "runId": "automation-2be095cab0b8e3aea0c0d5d92d39f897210507393791bd625d742de74e2d8303",
+    "classification": "REJECTED_BEFORE_PROVIDER",
+    "consumed": 0
+  },
+  "snapshotCount": 13,
+  "meaningfulThreshold": "Absolute raw implied probability movement >= 1 percentage point; analysis threshold, not Policy V1 logic",
+  "comparisons": [
+    {
+      "acquiredAt": "2026-09-12T12:54:46.403Z",
+      "comparableQuotes": 320,
+      "changedPrices": 26,
+      "changedGames": 6,
+      "changedSides": 12,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 5,
+      "unchangedPrices": 294,
+      "timestampOnlyChanges": 294,
+      "addedQuotes": 0,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 1.7146
+    },
+    {
+      "acquiredAt": "2026-09-12T13:09:41.402Z",
+      "comparableQuotes": 316,
+      "changedPrices": 20,
+      "changedGames": 8,
+      "changedSides": 14,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 3,
+      "unchangedPrices": 296,
+      "timestampOnlyChanges": 296,
+      "addedQuotes": 0,
+      "removedQuotes": 4,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 1.5564
+    },
+    {
+      "acquiredAt": "2026-09-12T13:24:48.269Z",
+      "comparableQuotes": 316,
+      "changedPrices": 48,
+      "changedGames": 9,
+      "changedSides": 18,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 17,
+      "unchangedPrices": 268,
+      "timestampOnlyChanges": 268,
+      "addedQuotes": 2,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 2.8608
+    },
+    {
+      "acquiredAt": "2026-09-12T13:39:41.716Z",
+      "comparableQuotes": 318,
+      "changedPrices": 54,
+      "changedGames": 7,
+      "changedSides": 14,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 21,
+      "unchangedPrices": 264,
+      "timestampOnlyChanges": 264,
+      "addedQuotes": 0,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 2.9138
+    },
+    {
+      "acquiredAt": "2026-09-12T13:54:45.084Z",
+      "comparableQuotes": 316,
+      "changedPrices": 94,
+      "changedGames": 14,
+      "changedSides": 28,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 34,
+      "unchangedPrices": 222,
+      "timestampOnlyChanges": 222,
+      "addedQuotes": 0,
+      "removedQuotes": 2,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 4.0476
+    },
+    {
+      "acquiredAt": "2026-09-12T14:09:49.999Z",
+      "comparableQuotes": 316,
+      "changedPrices": 84,
+      "changedGames": 10,
+      "changedSides": 20,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 55,
+      "unchangedPrices": 232,
+      "timestampOnlyChanges": 232,
+      "addedQuotes": 2,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 4.2502
+    },
+    {
+      "acquiredAt": "2026-09-12T14:24:31.046Z",
+      "comparableQuotes": 318,
+      "changedPrices": 67,
+      "changedGames": 11,
+      "changedSides": 22,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 15,
+      "unchangedPrices": 251,
+      "timestampOnlyChanges": 251,
+      "addedQuotes": 0,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 2.439
+    },
+    {
+      "acquiredAt": "2026-09-12T14:39:41.188Z",
+      "comparableQuotes": 318,
+      "changedPrices": 88,
+      "changedGames": 13,
+      "changedSides": 26,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 32,
+      "unchangedPrices": 230,
+      "timestampOnlyChanges": 230,
+      "addedQuotes": 0,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 4.0966
+    },
+    {
+      "acquiredAt": "2026-09-12T14:54:21.201Z",
+      "comparableQuotes": 318,
+      "changedPrices": 56,
+      "changedGames": 11,
+      "changedSides": 22,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 12,
+      "unchangedPrices": 262,
+      "timestampOnlyChanges": 262,
+      "addedQuotes": 6,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 2.2306
+    },
+    {
+      "acquiredAt": "2026-09-12T15:10:02.743Z",
+      "comparableQuotes": 324,
+      "changedPrices": 46,
+      "changedGames": 10,
+      "changedSides": 20,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 5,
+      "unchangedPrices": 278,
+      "timestampOnlyChanges": 278,
+      "addedQuotes": 0,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 1.3369
+    },
+    {
+      "acquiredAt": "2026-09-12T15:24:49.579Z",
+      "comparableQuotes": 324,
+      "changedPrices": 34,
+      "changedGames": 11,
+      "changedSides": 21,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 2,
+      "unchangedPrices": 290,
+      "timestampOnlyChanges": 290,
+      "addedQuotes": 2,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 1.8116
+    },
+    {
+      "acquiredAt": "2026-09-12T15:39:18.087Z",
+      "comparableQuotes": 326,
+      "changedPrices": 27,
+      "changedGames": 12,
+      "changedSides": 23,
+      "meaningfulMovesAtLeastOneImpliedProbabilityPoint": 3,
+      "unchangedPrices": 299,
+      "timestampOnlyChanges": 299,
+      "addedQuotes": 0,
+      "removedQuotes": 0,
+      "identicalPriceSnapshot": false,
+      "maxImpliedProbabilityPointMove": 1.1614
+    }
+  ],
+  "totals": {
+    "comparableQuotes": 3830,
+    "changedPrices": 644,
+    "unchangedPrices": 3186,
+    "meaningfulMoves": 204,
+    "identicalSnapshots": 0
+  },
+  "cadenceSimulation": {
+    "date": "2026-09-12",
+    "assumption": "All 15 stored start times potentially eligible; fixed 15-minute ticks from 08:00 PR; zero latency; no live eligibility claim",
+    "proposedCalls": 42,
+    "every15MinuteEligibleSlots": 55
+  },
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

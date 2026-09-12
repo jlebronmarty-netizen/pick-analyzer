@@ -1,0 +1,141 @@
+{
+  "phase": "MLB_PHASE2_R12_OPERATIONAL_PROVIDER_BUDGET_AND_GRACEFUL_EXHAUSTION_REPAIR",
+  "verdict": "R12_LOCAL_REPAIR_AND_OPERATIONAL_BUDGET_PROPOSAL_CERTIFIED_ACTIVATION_PENDING",
+  "startingSha": "5019efd81a8a482641f036cf23995ea4b2d772ca",
+  "generatedAt": "2026-09-12T20:10:11.655Z",
+  "gates": {
+    "R12_MISSION_LEDGER_PRESERVED": "PASS",
+    "R12_BUDGET_DIAGNOSTICS": "PASS",
+    "R12_GRACEFUL_EXHAUSTION": "PASS",
+    "R12_OPERATIONAL_BUDGET_PROPOSAL": "READY",
+    "R12_ODDS_EFFICIENCY_ANALYSIS": "COMPLETE",
+    "R12_BUDGET_EXHAUSTED_RUN_DISPOSITION": "PASS",
+    "R12_SCHEDULER_MODE_ISOLATION": "PASS",
+    "R12_DATA_HEALTH_CONTRACT": "PASS",
+    "R12_SHADOW_BOARD_POSITIONING": "PASS"
+  },
+  "gateScope": "Ledger/efficiency use read-only production evidence. Repair/disposition/isolation are local disposable/injected certifications, not production recovery. Data Health and shadow positioning are test-first proposals only.",
+  "historicalMission": {
+    "consumed": 20,
+    "cap": 20,
+    "classificationCounts": {
+      "ACQUIRED": 2,
+      "RESERVED_AND_ACQUIRED": 17,
+      "CONSUMED_UNCERTAIN": 1
+    },
+    "rejectedCurrentAttempt": {
+      "classification": "REJECTED_BEFORE_PROVIDER",
+      "consumed": 0
+    },
+    "separateLegacyAcquisitions": 2,
+    "originalR7Exception": "UNRECOVERABLE_OBSERVABILITY_GAP",
+    "ledgerArtifact": "MLB_PHASE2_R12_ODDS_EFFICIENCY_AND_LEDGER.json"
+  },
+  "gracefulExhaustion": {
+    "stage": "ODDS_BUDGET_EXHAUSTED",
+    "coordinatorStatus": "COMPLETE",
+    "recommendationRefreshSuccess": false,
+    "beforeDailyExecution": true,
+    "inFlightCapRefreshesFencedState": true,
+    "paidEvidenceResumeAtCap": true,
+    "independentModes": [
+      "INCREMENTAL",
+      "POSTGAME",
+      "OVERNIGHT"
+    ],
+    "productionDeployed": false
+  },
+  "currentRun": {
+    "runId": "automation-2be095cab0b8e3aea0c0d5d92d39f897210507393791bd625d742de74e2d8303",
+    "productionStatus": "FAILED",
+    "revision": 39,
+    "stage": "ODDS_ACQUISITION",
+    "predictionsPreserved": 13,
+    "oddsCalls": 0,
+    "productionDispositionExecuted": false,
+    "dispositionContract": "EXISTING_EXPIRED_FREEZE_DISPOSE",
+    "earliestRecordedTimeGuard": "2026-09-13T01:40:00Z",
+    "freshPredicateReadbackRequired": true
+  },
+  "efficiency": {
+    "responseDigestsVerified": 17,
+    "sep12Snapshots": 13,
+    "comparableQuotes": 3830,
+    "changedPrices": 644,
+    "unchangedPrices": 3186,
+    "meaningfulMoves": 204,
+    "identicalSnapshots": 0,
+    "unchangedPricePercent": 83.1854,
+    "meaningfulPricePercent": 5.3264,
+    "meaningfulThreshold": ">=1 raw implied probability percentage point; analysis only",
+    "noWhollyIdenticalSnapshots": true,
+    "scope": "ALL_H2H_QUOTES_IN_PRESERVED_RESPONSES_NOT_ONLY_PERSISTED_ELIGIBLE_SUBSET",
+    "limitation": "One observed morning; no claim that reduced cadence preserves every opportunity or continuous freshness."
+  },
+  "proposal": {
+    "version": "MLB_ODDS_OPERATIONAL_BUDGET_V1",
+    "activation": "NOT_ACTIVE",
+    "dailyCap": 48,
+    "perRunCap": 1,
+    "timezone": "America/Puerto_Rico",
+    "minIntervalMinutes": 15,
+    "cadenceMinutes": {
+      "moreThan180ToStart": 60,
+      "moreThan60To180": 30,
+      "moreThan5To60": 15
+    },
+    "freshMinutes": 10,
+    "reset": "NEW_DATED_COUNTER_AT_00_00_PR_NO_OLD_COUNTER_RESET",
+    "expectedCallsForAnalyzedSchedule": 42,
+    "originalQuarterHourSlots": 55,
+    "maximumCallsPerDay": 48,
+    "estimatedCreditsForAnalyzedSchedule": 42,
+    "maximumCreditsPerDay": 48,
+    "creditSource": "https://the-odds-api.com/liveapi/guides/v4/",
+    "creditAssumption": "one US region, h2h only, current odds endpoint; subscription adequacy unverified",
+    "newSchema": "REQUIRED_FOR_DISTINCT_RECURRING_LEDGER_SEPARATE_EXACT_DDL_AUTHORIZATION",
+    "raceContract": "Atomic dated-counter and cross-day reservation lock under existing lease; unique policy/run/provider receipt; retain uncertain consumption"
+  },
+  "dataHealth": "TEST_FIRST_CONTRACT_ONLY_NO_UI_CHANGE",
+  "shadowBoard": {
+    "proposedLabel": "MLB Research Lab",
+    "subtitle": "Experimental Decision Board - shadow projections, not Champion/Policy V1 recommendations",
+    "engineChanged": false,
+    "routeChanged": false
+  },
+  "validation": {
+    "r12Groups": 10,
+    "r6StateChecks": 21,
+    "r7RuntimeChecks": 5,
+    "r6HostAuthChecks": 8,
+    "r10ReadModelChecks": 17,
+    "readinessChecks": 17,
+    "build": "PASS_400_PAGES",
+    "scopedEslint": "PASS",
+    "sourceHashes": "PASS",
+    "productionProviderCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  },
+  "publication": {
+    "productionChanged": false,
+    "recurringBudgetActivated": false,
+    "edgeCandidate": "LOCAL_ONLY_TEN_FILES",
+    "edgeManifest": "MLB_PHASE2_R12_EDGE_MANIFEST.json"
+  },
+  "protectedState": {
+    "Champion": "UNCHANGED",
+    "features76": "UNCHANGED",
+    "preprocessing": "UNCHANGED",
+    "PolicyV1": "UNCHANGED",
+    "marketMath": "UNCHANGED",
+    "UI": "UNCHANGED",
+    "cronConfiguration": "UNCHANGED",
+    "inheritedWorktreeChangesPreserved": 19
+  },
+  "authorizationNeeded": [
+    "Explicit approval of the proposed recurring48/day1/run PR-day policy and cadence before activation",
+    "Exact R12 privileged Edge candidate approval before deployment; paired host/recovery remains subject to existing guards",
+    "Separate exact additive migration authorization after recurring-ledger schema design/validation; no DDL included here"
+  ]
+}

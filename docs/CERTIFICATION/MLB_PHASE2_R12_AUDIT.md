@@ -1,0 +1,17 @@
+# R12 local repair and operational budget review
+
+Verdict: R12_LOCAL_REPAIR_AND_OPERATIONAL_BUDGET_PROPOSAL_CERTIFIED_ACTIVATION_PENDING. Baseline5019efd81a8a482641f036cf23995ea4b2d772ca.
+
+The mission remains20/20:2 certified manual acquisitions,17 digest-verified reserved/acquired responses,1 consumed-uncertain historical request. The current rejected attempt consumed0. Two historical legacy acquisitions remain separate. The missing R7 exception/response is not reconstructed. See the full classified ledger and aggregate response comparison in MLB_PHASE2_R12_ODDS_EFFICIENCY_AND_LEDGER.json. No raw private payloads, storage paths or credential material are published.
+
+Thirteen Sept12 response snapshots yield3830 comparable quotes:644 changed,3186 unchanged(83.1854%),204 moved at least1 implied-probability percentage point. All12 consecutive snapshots have some price/coverage change; none is wholly identical. Changed game/side/quote counts are supplied per snapshot. Timestamps often change while prices do not. This is one morning, not proof that slower polling loses no information.
+
+The local repair preserves MISSION_ODDS_CAP and related bounded diagnostics, skips expensive daily execution when the historical mission is exhausted, and records explicit ODDS_BUDGET_EXHAUSTED completion. Known in-flight exhaustion reloads fenced authority before preserving existing upstream rows. Other exceptions/conflicts still fail closed. Previously paid evidence can resume at the cap. The actual Vercel loop, with injected transports, continues independent incremental/postgame/overnight work and releases leases. Existing disposable SQL confirms revision, overlap and budget race guards.
+
+Current production run remainsFAILED revision39 with13 predictions and0 Odds calls. No disposition occurred. The existing disposition guard requires all frozen starts to pass(current maximum01:40Z Sep13), a fresh review digest, inactive lease and exact13-row readback. Disposable SQL proves early/stale rejection and immutable preservation. A local PASS on that plan is not a claim of production recovery.
+
+All nine requested R12 gate contracts pass/are ready in their stated scope. Validation:10 R12 groups,21 R6 state,5 R7 runtime,8 host/auth,17 R10 and17 readiness checks; build400pages and scoped ESLint PASS. The ten-file Edge manifest is a local candidate only; its auth handler rejects missing/wrong/public credentials before database connection. No production deployment or recurring-budget activation occurred.
+
+Proposal:separate versioned recurring ledger,48/day,1/run,PR-day reset via new rows,60/30/15-minute cadence at >180/>60/>5 minutes to nearest eligible start. Today's start-time simulation projects42 calls versus55 quarter-hour slots. Keep10-minute freshness and all temporal/Policy guards; stale intervals remain explicitly unavailable. Full race, reuse, reset, credit and authorization contract:MLB_PHASE2_R12_OPERATIONAL_BUDGET_PROPOSAL.md.
+
+Data Health changes remain a tested conceptual contract distinguishing web/Edge/frozen-run package/configuration/observed health and historical/operational budgets. /mlb remains unchanged; proposed label MLB Research Lab identifies its separate experimental engine. No Champion/features/preprocessing/Policy/math/UI/cron changes; production provider calls/DML/DDL0. Preserve19 inherited worktree modifications. Stop for explicit budget review and later exact Edge/schema approval; do not reset historical20/20.

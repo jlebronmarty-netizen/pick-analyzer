@@ -9,6 +9,7 @@ import {requireCanonicalR3Readiness,normalizedFileDigest} from './mlb-data-02r-r
 import {operatingDate} from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import {sha256} from './mlb-data-02r-r2f-stage-contracts.mjs'
 import {sanitizedStageException} from './mlb-operational-r7-errors.mjs'
+import {withMissionOddsBudget} from './mlb-operational-budget-exhaustion.mjs'
 import {runMlbOperationalSchemaPreflight} from '../src/services/pick2-mlb-unattended-preflight.ts'
 const ensure=(ok,why)=>{if(!ok)throw Error(`R6_HOST:${why}`)}
 const activationPath='docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json'
@@ -60,7 +61,7 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
       if(hostDry) {
         await checkpoint('HOST_DRY',{count:0,digest:sha256({packageSha,contract:'R6_REAL_HOST_PREFLIGHT_ONLY'})})
         result={status:'HOST_DRY_PASS',predictions:0,values:0,officialPicks:0,dml:[]}
-      } else if(['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS'].includes(mode))result=await executeDailyJob({job,durableRuntime:runtime})
+      } else if(['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS'].includes(mode))result=await withMissionOddsBudget({runtime,mode,execute:()=>executeDailyJob({job,durableRuntime:runtime})})
       else {
         ensure(activation.settlementAutomation==='DISABLED','SETTLEMENT_BOUNDARY')
         const client=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}})
@@ -87,7 +88,7 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
       }
       if(heartbeatError)throw heartbeatError
       const cp=runtime.run.checkpoint,dml=runtime.run.dml_accounting
-      await runtime.complete('COMPLETE',{...cp,stage:'COMPLETE',result:{status:result.status,predictions:result.predictions??0,values:result.values??0,picks:result.officialPicks??0,inserted:dml.stages.reduce((n,s)=>n+s.inserted,0),reused:dml.stages.reduce((n,s)=>n+s.reused,0),conflicts:0,readback:'PASS'}},{stages:dml.stages})
+      await runtime.complete('COMPLETE',{...cp,stage:result.status==='ODDS_BUDGET_EXHAUSTED'?'ODDS_BUDGET_EXHAUSTED':'COMPLETE',result:{status:result.status,predictions:result.predictions??0,values:result.values??0,picks:result.officialPicks??0,inserted:dml.stages.reduce((n,s)=>n+s.inserted,0),reused:dml.stages.reduce((n,s)=>n+s.reused,0),conflicts:0,readback:'PASS'}},{stages:dml.stages})
       results.push({...result,runId:runtime.run.run_id,mode,providers:runtime.ledger.snapshot(),missionOddsCalls:runtime.ledger.missionOddsConsumed(),checkpointBytes:Buffer.byteLength(JSON.stringify(runtime.run.checkpoint)),readback:'PASS'})
     } catch(error) {
       if(error.message==='R6_CLIENT:INVOCATION_BUDGET_YIELD')return {status:'YIELDED',packageSha,results}

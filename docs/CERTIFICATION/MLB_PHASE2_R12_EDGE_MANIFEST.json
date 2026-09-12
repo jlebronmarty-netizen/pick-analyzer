@@ -1,0 +1,79 @@
+{
+  "phase": "MLB_PHASE2_R12_OPERATIONAL_PROVIDER_BUDGET_AND_GRACEFUL_EXHAUSTION_REPAIR",
+  "status": "LOCAL_CANDIDATE_ONLY_DEPLOYMENT_NOT_AUTHORIZED",
+  "fileCount": 10,
+  "entrypoint": "supabase/functions/mlb-runtime-state/index.ts",
+  "verify_jwt": false,
+  "authentication": "MANDATORY_SERVER_ONLY_BEARER_BEFORE_DATABASE",
+  "files": [
+    {
+      "path": "scripts/mlb-data-02r-r2f-stage-contracts.mjs",
+      "normalizedSha256": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7"
+    },
+    {
+      "path": "scripts/mlb-data-02r-r2t-write-contract.mjs",
+      "normalizedSha256": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82"
+    },
+    {
+      "path": "scripts/mlb-operational-r7-errors.mjs",
+      "normalizedSha256": "9be6bcd7b531e12dd2d407fe56c01ad4414c66eb4bd96270ab2535619cf40860"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-fenced-write.mjs",
+      "normalizedSha256": "cabe2cba9e9b43bad0fd200fe149295ba05ce4571804ade7afea2bbebf875624"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-schema.mjs",
+      "normalizedSha256": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-runtime-state.mjs",
+      "normalizedSha256": "79828cf68280a807ea76421627c67c85a520abe2dce4bf62e129e775b0ee0e5f"
+    },
+    {
+      "path": "supabase/functions/_shared/mlb-provider-evidence.mjs",
+      "normalizedSha256": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/index.ts",
+      "normalizedSha256": "1b151beed1458f15ad53dbd4098950fc264dfe5a4991ca0b87466cd38af7e68c"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/schema-contract.json",
+      "normalizedSha256": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a"
+    },
+    {
+      "path": "supabase/functions/mlb-runtime-state/write-contract.json",
+      "normalizedSha256": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92"
+    }
+  ],
+  "functionSourceHashes": {
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "10b537c3393c3cbeb3e431b4a6945abdad01d07e46117b13e941c15285bc20ba",
+    "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "0342010394598ad616daba889266890216fb597dbb356953e65e48ab6ef7de97",
+    "scripts/mlb-data-02r-r2t-market-binding.mjs": "c7a27a932d457552f6c23cb1f72d0dd87683c710188c1cb64275e3bee04772ba",
+    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "d130e5794fd53ed48e84a7d6da05209dcb9cc77948a4b9ae464433c8ad46bcbc",
+    "scripts/mlb-operational-r6-run-store.mjs": "65e1be3f4203743cd100f917f5758c25343685e0d05f5a5bc022d141977239d2",
+    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6",
+    "scripts/mlb-operational-r7-errors.mjs": "9be6bcd7b531e12dd2d407fe56c01ad4414c66eb4bd96270ab2535619cf40860",
+    "scripts/mlb-operational-r6-vercel-runtime.mjs": "8350ed61382af908a4044d6bed7b6d2ffe360c638ec24ee1431d589034f55311",
+    "scripts/mlb-operational-budget-exhaustion.mjs": "566ead72e3aa281ba5a6b44a9074674d1650f0d20cdcc80b68474d7d7da7602c"
+  },
+  "security": {
+    "missingToken": 401,
+    "wrongToken": 401,
+    "publicCredential": 401,
+    "serverOnlyInspect": 200,
+    "unauthorizedDatabaseConnections": 0,
+    "scope": "EXACT_LOCAL_HANDLER_WITH_INJECTED_DATABASE",
+    "productionCandidateDeployed": false
+  },
+  "privilegedChanges": [
+    "Preserve exact allowlisted provider-budget diagnostic codes; all existing authority operations, bearer authentication and business guards unchanged"
+  ],
+  "newOperations": [],
+  "ddl": 0,
+  "permissionBroadening": false,
+  "modelChanges": false,
+  "policyChanges": false,
+  "pairedHostChange": "Explicit terminal mission-budget exhaustion, paid-evidence resume preserved, safe modes continue"
+}
