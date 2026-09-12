@@ -5,12 +5,12 @@ import { getMlbOperationalView } from '@/services/pick2-operational-read.service
 export const dynamic = 'force-dynamic'
 
 export default async function MlbValueBoardPage() {
-  const { board, warnings } = await getMlbOperationalView()
+  const { board, games, warnings } = await getMlbOperationalView()
 
   return (
     <DashboardShell>
-      {warnings.map(w => <p key={w} role="status" className="p-4 text-amber-200">{w}</p>)}
-      <MlbValueBoardClient board={board} />
+      {warnings.length > 0 && <p role="status" className="p-4 text-amber-200">Some analysis is unavailable. Check Data Health for details.</p>}
+      <MlbValueBoardClient board={board} games={games} />
     </DashboardShell>
   )
 }

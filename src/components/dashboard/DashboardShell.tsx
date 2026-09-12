@@ -4,7 +4,6 @@ import {
   PICK2_MLB_VALUE_BOARD_NAVIGATION_ICON,
   PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
   PICK2_MLB_VALUE_BOARD_ROUTE,
-  isPick2MlbValueBoardNavigationEnabled,
 } from '@/config/pick2-value-board-navigation'
 
 const baseProductNavItems: DashboardNavItem[] = [
@@ -26,14 +25,13 @@ const titleByPath: DashboardTitleByPath = {
 }
 
 function getProductNavItems(): DashboardNavItem[] {
-  if (!isPick2MlbValueBoardNavigationEnabled()) return baseProductNavItems
 
   return [
     baseProductNavItems[0],
     baseProductNavItems[1],
     {
       href: PICK2_MLB_VALUE_BOARD_ROUTE,
-      label: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
+      label: 'Value Board',
       icon: PICK2_MLB_VALUE_BOARD_NAVIGATION_ICON,
     },
     ...baseProductNavItems.slice(2),

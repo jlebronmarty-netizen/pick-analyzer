@@ -1,1 +1,1 @@
-export default function Loading() { return <p role="status" className="p-6 text-slate-300">Loading current MLB evidence…</p> }
+export default function Loading() { return <main aria-busy="true" aria-label="Loading MLB analysis" className="min-h-screen bg-slate-950 p-6 text-slate-200"><p role="status">Loading game analysis?</p><div className="mt-6 grid gap-4 sm:grid-cols-2">{[1,2,3,4].map(n => <div key={n} className="h-72 animate-pulse rounded-2xl border border-slate-800 bg-slate-900 motion-reduce:animate-none" />)}</div></main> }

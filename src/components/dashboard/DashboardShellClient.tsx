@@ -29,6 +29,7 @@ export default function DashboardShellClient({
   return (
     <SportProvider>
       <div className="min-h-screen bg-slate-950 text-white">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-slate-950 focus:p-4">Skip to content</a>
         <div className="flex">
           <aside className="sticky top-0 hidden h-screen w-72 overflow-y-auto border-r border-slate-800 bg-slate-950/95 p-6 xl:block">
             <div className="rounded-lg border border-sky-500/20 bg-sky-950/10 p-5">
@@ -36,10 +37,10 @@ export default function DashboardShellClient({
                 Pick Analyzer 2.0
               </p>
 
-              <p className="mt-2 text-2xl font-black">MLB command center</p>
+              <p className="mt-2 text-2xl font-black">Baseball, in focus.</p>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Canonical game evidence, model probabilities and market value.
+                Understand the matchup. Evaluate the price.
               </p>
             </div>
 
@@ -88,7 +89,7 @@ export default function DashboardShellClient({
             </div>
           </aside>
 
-          <main className="min-w-0 flex-1 overflow-x-hidden pb-32 xl:pb-0">
+          <main id="main-content" className="min-w-0 flex-1 overflow-x-hidden pb-32 xl:pb-0">
             <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 px-4 py-4 backdrop-blur md:px-8">
               <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-4">
                 <div>
@@ -118,6 +119,7 @@ export default function DashboardShellClient({
               </div>
             </header>
 
+            <nav aria-label="More navigation" className="flex flex-wrap gap-4 border-b border-slate-800 px-4 py-3 text-sm text-slate-300 xl:hidden">{productNavItems.slice(3).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-2 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav>
             <div className="mx-auto max-w-[1800px] space-y-10 p-4 md:p-8">
               {children}
             </div>
@@ -131,8 +133,8 @@ export default function DashboardShellClient({
           data-b5-1-mobile-bottom-nav="true"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
         >
-          <div className={`mx-auto grid max-w-2xl gap-1 ${productNavItems.length > 4 ? 'grid-cols-5' : 'grid-cols-4'}`}>
-            {productNavItems.map((item) => {
+          <div className={`mx-auto grid max-w-2xl gap-1 grid-cols-3`}>
+            {productNavItems.slice(0, 3).map((item) => {
               const active = pathname === item.href || (pathname === '/' && item.href === '/today')
               const baseClasses = 'flex min-h-14 min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-sky-300'
               const stateClasses = active

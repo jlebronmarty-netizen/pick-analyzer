@@ -337,17 +337,17 @@
     "src/app/api/mlb/operations/route.ts": "4259aca43582e249c7e3e1ebd868a09465c41d920d7a6cfa2ab69d3fd5d720f5",
     "src/app/api/mlb/performance/route.ts": "bbb38e8cc200396b0417f09cf2863d9c6439f0d8d4f1ca9fa8e6952f3fb76f5c",
     "src/app/data-health/page.tsx": "7d79c2fcdbc41a18d1645aeeca1eb644a6944194d4401d1b1812be739aa680ee",
-    "src/app/globals.css": "f8571ae9b040ac55e908ef9dbf76a1725784b08251684fee2d48005a4e739bf4",
+    "src/app/globals.css": "5cf55edf128b191147aaad76374a872423a4889dfd444a8cbff9f2061a35f542",
     "src/app/layout.tsx": "40006cd7e1103ebc51528e19700a3ee7832b9e9ba881e45f5bce70d5d9d340b3",
-    "src/app/mlb-value-board/page.tsx": "01c0a5e87dd1e224731f89ed7459a4cf2d1fd3e032c87e76cb8e4f00220df3db",
+    "src/app/mlb-value-board/page.tsx": "37eb4ae1160dba01388204500444c083ba4de45e58a29a6627bad6795a832a45",
     "src/app/page.tsx": "8ce9cf3e1720b7abbca7bf22c61714c8e26bd1679aa0e0edb8b3234d0c90a470",
     "src/app/performance/page.tsx": "70661f96548baa6285a3c209cea300701c7b9fc5817184adc119ac367412f276",
-    "src/app/today/loading.tsx": "81038d6e39c56878d6228e5c8e87bb86628be06032c671fc18ccb6ce65e2c5a4",
+    "src/app/today/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
     "src/app/today/page.tsx": "211d45e7a6afd244db71c31c5c064daf8b2fc6d321a394739a8b387d74958ef6",
-    "src/components/dashboard/DashboardShellClient.tsx": "de8385945419569fdba9257a2df95f249ee8177dfa89c2b450b60b17a4335b03",
+    "src/components/dashboard/DashboardShellClient.tsx": "4ac7e52f4861ded9f6755950b50faf992fd9d34deb390275a4b8ee93802bdb7f",
     "src/components/pick2/CanonicalDashboardBoundary.tsx": "547379819564ac87b38b58d643c0419cace11891d0a0671c3e977455b65da409",
-    "src/components/pick2/MlbToday.tsx": "00a6e704557d1771f80c68d916debf1b8b5174dd56edd21ec654cc5b9cb41154",
-    "src/components/pick2/MlbValueBoardClient.tsx": "150d61a6c979036c1bd8015d522a298bb96fa4bb49a90035fd257f722a5a87cc",
+    "src/components/pick2/MlbToday.tsx": "45175c9ddc1a8f66009547915e1f201de5cbd20d009627fb419abb4cf08acfc2",
+    "src/components/pick2/MlbValueBoardClient.tsx": "a08b276b37fc111f8342c410b4412e7bc62ca7a8c45c17788f6ba657dbf9aa5d",
     "src/services/pick2-mlb-health.service.ts": "c100f329eeba054a806ee18cd87973e21ef6901aa572cbb71b3cb453f4e8628b",
     "src/services/pick2-mlb-performance-read.service.ts": "537131cd7484a68959ff1ca94509e422ffe0e13a5982a14f9b374438ad4d923d",
     "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
@@ -375,7 +375,13 @@
     ".github/workflows/production-operating-day.yml": "69c9f6b41e955ece839ea08fde63db5493ce66476cbf1eaecacdb006ccf4d30b",
     "scripts/mlb-phase2-r10-read-model-validate.mjs": "91732a12b0bff5a95b34937fa5c4684bb7b8ffe624a7374e6ef208e5c389acf7",
     "src/services/pick2-mlb-observed-evidence.service.ts": "8063062810edfb8fce881c7cf43d5e79d1193b8bc7197f2c1e47175a1e4be539",
-    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6"
+    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6",
+    "src/components/pick2/MlbCards.tsx": "ffbe309bc11ebaa33bee712c07dc8c50fc28d96bd29538a28875bf0369fbc6dc",
+    "src/components/pick2/mlb-presentation.ts": "ecb5b01fac3ddc12ee4a59d30cdeea9b7bd22bd249d3b46ca39c53a9b37312cc",
+    "src/components/dashboard/DashboardShell.tsx": "340730854e00e537d86fd08a97379b572bd56f0395f92eda11de1c7e329a16f7",
+    "src/app/today/error.tsx": "dc8a83da95361570cd05dc62882ee7f94379e71976f4d1b07356ca03a4b2ab52",
+    "src/app/mlb-value-board/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
+    "src/app/mlb-value-board/error.tsx": "dc8a83da95361570cd05dc62882ee7f94379e71976f4d1b07356ca03a4b2ab52"
   },
   "nonemptyUiRevision": {
     "certificate": "MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json",
@@ -428,5 +434,12 @@
     "productionRecovery": "OBSERVATIONS_286_PERSISTED_CHECKPOINT_RECOVERY_PENDING",
     "permissions": "UNCHANGED",
     "checkpointChecks": 3
+  },
+  "uiPresentationRevalidation": {
+    "phase": "PICK_ANALYZER_PHASE2_UI_REDESIGN_V1",
+    "scope": "PRESENTATION_HASHES_ONLY",
+    "protectedRuntimeChanges": 0,
+    "providerChanges": 0,
+    "policyChanges": 0
   }
 }

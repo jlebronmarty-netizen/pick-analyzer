@@ -1,22 +1,15 @@
 import Link from 'next/link'
 import DashboardShell from '@/components/dashboard/DashboardShell'
-import MlbValueBoardClient from './MlbValueBoardClient'
 import { getMlbOperationalView } from '@/services/pick2-operational-read.service'
-
-const probability = (value: number | null) => value === null ? 'Unavailable' : `${(value * 100).toFixed(1)}%`
-export default async function MlbToday() {
-  const view = await getMlbOperationalView()
-  return <DashboardShell><div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-    <header><p className="text-sm text-emerald-300">MLB · {view.date} · Puerto Rico</p><h1 className="text-3xl font-bold text-white">Today</h1><p className="mt-2 text-slate-300">Stored game evidence, model probabilities and market value. Prices are snapshots, not live sportsbook quotes.</p><nav className="mt-3 flex flex-wrap gap-4 text-sm text-emerald-300"><Link href="/mlb-value-board">Value Board</Link><Link href="/data-health">Data Health</Link><Link href="/performance">Performance</Link></nav></header>
-    {view.warnings.map(w => <p key={w} role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-100">{w}</p>)}
-    <section aria-label="Today's MLB games" className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{view.games.map(g => <article key={g.gamePk} className="rounded-xl border border-slate-700 bg-slate-900 p-5">
-      <div className="flex justify-between gap-3 text-xs text-slate-400"><time dateTime={g.scheduledAt}>{new Date(g.scheduledAt).toLocaleTimeString('en-US', { timeZone: 'America/Puerto_Rico', hour: 'numeric', minute: '2-digit' })} PR</time><span>{g.status}</span></div>
-      <h2 className="mt-3 text-lg font-bold text-white">{g.away} @ {g.home}</h2><p className="mt-2 text-sm text-slate-300">Starters: {g.awayStarter} / {g.homeStarter}</p>
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><div><dt className="text-slate-400">Away model probability</dt><dd className="text-white">{probability(g.awayProbability)}</dd></div><div><dt className="text-slate-400">Home model probability</dt><dd className="text-white">{probability(g.homeProbability)}</dd></div></dl>
-      <div className="mt-3 space-y-1 text-sm text-slate-300">{[['Away', g.awayMarket], ['Home', g.homeMarket]].map(([side, market]) => typeof market === 'object' && market ? <p key={String(side)}>{String(side)} price: {market.americanOdds > 0 ? '+' : ''}{market.americanOdds} · {market.book} · {market.freshness}<span className="block text-xs text-slate-400">Acquired {market.acquiredAt}</span></p> : <p key={String(side)}>{String(side)} price unavailable</p>)}</div>
-      {g.reason && <p className="mt-3 text-sm text-amber-200">Blocked: {g.reason.replaceAll('_', ' ').toLowerCase()}</p>}
-      <p className="mt-3 break-words text-xs text-slate-400">Game evidence: {g.evidenceAt}. Prediction: {g.predictionAt ?? 'not available'}.</p>
-    </article>)}</section>
-    <MlbValueBoardClient board={view.board} />
-  </div></DashboardShell>
+import { GameCard } from './MlbCards'
+import { presentationStatus, type MlbView } from './mlb-presentation'
+export function TodayContent({ view }: { view: MlbView }) {
+ const official = view.board.rows.filter(r => presentationStatus(r) === 'OFFICIAL_PICK').length
+ return <div className="mlb-ui mx-auto max-w-7xl space-y-6">
+ <header className="rounded-2xl border border-slate-700/70 bg-gradient-to-br from-slate-900 to-slate-950 p-6 sm:p-8"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">MLB | {new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', timeZone: 'America/Puerto_Rico' }).format(new Date(view.date + 'T12:00:00Z'))}</p><h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Your day in baseball.</h1><p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">The matchup. The probability. The price. A clearer view of where the analysis stands.</p><div className="mt-6 flex flex-wrap items-center gap-3 text-sm"><span data-slate-count={view.games.length} className="rounded-full border border-slate-700 px-3 py-2">{view.games.length} games</span><span className="rounded-full border border-teal-400/30 px-3 py-2 text-teal-200">{official} Official Picks</span><Link href="/mlb-value-board" className="rounded-full bg-teal-300 px-4 py-2 font-semibold text-slate-950 hover:bg-teal-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-300">Explore Value Board</Link></div></header>
+ {view.warnings.length > 0 && <div role="status" className="rounded-xl border border-amber-300/30 p-4 text-sm text-amber-100">Some game data is unavailable. Analysis may be incomplete. <Link href="/data-health" className="underline">Check Data Health</Link></div>}
+ {!view.games.length ? <section className="rounded-2xl border border-slate-700 p-8"><h2 className="text-xl font-semibold">Today&apos;s games are not available yet</h2><p className="mt-2 text-sm text-slate-300">Waiting for the latest schedule and game data. This does not mean there are no games today.</p></section> : <section aria-label="Today's MLB games" className="grid items-start gap-5 lg:grid-cols-2 2xl:grid-cols-3">{view.games.map(game => <GameCard key={game.gamePk} game={game} rows={view.board.rows.filter(r => r.game_pk === game.gamePk)} />)}</section>}
+ <p className="text-xs leading-5 text-slate-400">All times Puerto Rico. Prices are snapshots, not live sportsbook quotes. Official Picks meet the recommendation criteria; no outcome is guaranteed.</p>
+ </div>
 }
+export default async function MlbToday() { return <DashboardShell><TodayContent view={await getMlbOperationalView()} /></DashboardShell> }
