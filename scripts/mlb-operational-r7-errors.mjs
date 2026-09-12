@@ -14,6 +14,14 @@ export function runtimeResponseFailure(status,body) {
   }
   return 'R6_STATE:RUNTIME_RESPONSE_CONTRACT'
 }
+// Exact allowlist, never arbitrary error suffixes: preserve the prewrite veto
+// that failed without persisting provider text, identifiers, headers or secrets.
+const canonicalGuardCodes = new Set([
+  'NATIVE_REVALIDATION_COUNT', 'STARTER_OR_STATUS_CHANGED',
+  'CURRENT_STARTED_GAME_VETO', 'CURRENT_GAME_IDENTITY_VETO',
+  'CURRENT_STARTER_CHANGE_VETO',
+])
+for (const code of canonicalGuardCodes) codes.add(code)
 export function sanitizedStageException(error) {
   const message=typeof error?.message==='string'?error.message:''
   const part=message.startsWith('R6_STATE:')?message.slice(9):message.split(':')[1]
@@ -21,7 +29,8 @@ export function sanitizedStageException(error) {
   const candidate=message.startsWith('R6_STATE:')?part:message.split(':')[0]
   const readCodes=new Set(['DEPENDENCY_READ_FAILURE','CANONICAL_READ_FAILURE','CANONICAL_GUARD_FAILURE','DATABASE_READ_FAILURE','PERSISTENCE_INSERT_FAILURE'])
   const classifiedRead=readCodes.has(candidate)?candidate:message.startsWith('R2TR1_READ_BLOCK:')?'DEPENDENCY_READ_FAILURE':message.startsWith('R2T_PRODUCTION_BLOCK:READ:')?'CANONICAL_READ_FAILURE':message.startsWith('R2T_PRODUCTION_BLOCK:')?'CANONICAL_GUARD_FAILURE':message.startsWith('READ_FAILED:')?'DATABASE_READ_FAILURE':message.startsWith('INSERT_FAILED:')?'PERSISTENCE_INSERT_FAILURE':null
-  const dependency=dependencyCodes.has(candidate)||/^R2N_STATCAST_HTTP_[45][0-9]{2}$/.test(candidate)||runtimeCode(candidate)?candidate:classifiedRead
+  const canonicalGuard=message.startsWith('R2T_PRODUCTION_BLOCK:') && canonicalGuardCodes.has(message.slice('R2T_PRODUCTION_BLOCK:'.length)) ? message.slice('R2T_PRODUCTION_BLOCK:'.length) : null
+  const dependency=canonicalGuard??(dependencyCodes.has(candidate)||/^R2N_STATCAST_HTTP_[45][0-9]{2}$/.test(candidate)||runtimeCode(candidate)?candidate:classifiedRead)
   const code=dependency??(codes.has(part)?part:error?.name==='TimeoutError'?'OPERATION_TIMEOUT':error?.name==='AbortError'?'OPERATION_ABORTED':'UNCLASSIFIED_STAGE_EXCEPTION')
   const exceptionClass=['Error','TypeError','RangeError','SyntaxError','AbortError','TimeoutError'].includes(error?.name)?error.name:'Error'
   return {code,exceptionClass,message:code==='UNCLASSIFIED_STAGE_EXCEPTION'?'Stage failed; untrusted exception text withheld.':`Stage stopped: ${code}.`}

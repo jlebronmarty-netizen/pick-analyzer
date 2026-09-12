@@ -1,0 +1,75 @@
+{
+  "phase": "MLB_PHASE2_R11_PREDICTION_STAGE_CANONICAL_GUARD_FAILURE_RECOVERY",
+  "verdict": "R11_DIAGNOSTIC_DEFECT_REPRODUCED_OPERATIONAL_RECOVERY_NOT_CERTIFIED",
+  "startingSha": "d5b489ecb7060cbb6c4ce39060f2ec432408a985",
+  "failedExecutionPackage": "415c8d749bff58c28724c8a923b81c677d756428",
+  "forensicState": {
+    "revision": 38,
+    "mode": "PREGAME",
+    "stage": "PREDICTIONS",
+    "scopeCount": 15,
+    "preparedContexts": 13,
+    "completed": ["SCOPE", "DEPENDENCY_SCOPE", "CONTEXTS", "FEATURES"],
+    "unresolvedRuns": 1,
+    "activeLeases": 0,
+    "historicalProviders": { "MLB_OFFICIAL": 2, "STATCAST": 0, "THE_ODDS_API": 0 },
+    "historicalDml": { "guardedNativeUpdates": 1, "predictionInserts": 0, "conflicts": 0, "readback": "PASS" },
+    "exactPrivateEvidence": "RETAINED_OUTSIDE_REPOSITORY"
+  },
+  "rootCause": {
+    "reproducedDefect": "CANONICAL_VETO_DIAGNOSTIC_COLLISION",
+    "historicalExactVeto": "NOT_UNIQUELY_IDENTIFIABLE",
+    "possibleHistoricalVetoes": ["CURRENT_STARTED_GAME_VETO", "CURRENT_GAME_IDENTITY_VETO", "CURRENT_STARTER_CHANGE_VETO"],
+    "missingEvidence": "SECOND_VETO_ONLY_SCHEDULE_RESPONSE_NOT_DURABLY_PERSISTED",
+    "initialPreservedScheduleVeto": "PASS_ALL_13",
+    "historicalSuccessClaimed": false
+  },
+  "inputReadback": {
+    "contextDigestMatches": 13,
+    "snapshotLinks": 130,
+    "dailyFeatureRows": 104,
+    "snapshotsPerGame": 10,
+    "orderedInputsPerGame": 76,
+    "reconstructedPredictionPayloads": 13,
+    "productionPredictionsWritten": 0,
+    "vectorAndLineageParity": "PASS"
+  },
+  "repair": {
+    "scope": "EXACT_ALLOWLISTED_DIAGNOSTIC_CODES_ONLY",
+    "sanitizerSha256": "34d7d461499741e96d85e6324ce59e8fa75b12abb877c2fefa7e6eeb5118eecc",
+    "safetyDecisionsChanged": false,
+    "unknownTextWithheld": true,
+    "serverEdgeRoundTrip": "PASS_LOCAL",
+    "deployed": false,
+    "partialSlatePersistence": "NOT_CERTIFIED"
+  },
+  "validators": {
+    "r11ForensicsAndNegativeChecks": 24,
+    "physicalSchemaRealChampionChecks": 74,
+    "runtimeStateChecks": 21,
+    "fencedWriteChecks": 8,
+    "r7DurabilityAndMidnightChecks": 5,
+    "r10ReadModelChecks": 17,
+    "preNonemptyReadinessChecks": 17,
+    "allListedChecks": "PASS",
+    "build": "PASS"
+  },
+  "productionRecovery": "NOT_PERFORMED",
+  "providerCallsThisPhase": 0,
+  "cumulativeOdds": "7/20",
+  "productionDmlThisPhase": 0,
+  "productionDdlThisPhase": 0,
+  "introducedConflicts": 0,
+  "introducedStartedGameLeakage": 0,
+  "automation": "ENABLED_BLOCKED_BY_PRESERVED_FAILED_RUN",
+  "R11_OPERATIONAL_FRESHNESS_RESTORED": "NO",
+  "UI_REDESIGN_READY": "YES",
+  "UI_IMPLEMENTATION_CAN_START": "NO",
+  "remainingGates": [
+    "Exact historical veto cannot be established from retained records",
+    "Durable game-level blocking and partial-slate persistence certification",
+    "Compatible Function and Edge diagnostic deployment",
+    "Fresh all-started disposition guard and exact preservation readback",
+    "Automation recovery and genuine scheduled successful run"
+  ]
+}
