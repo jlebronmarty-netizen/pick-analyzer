@@ -1,0 +1,160 @@
+{
+  "phase": "MLB_PHASE2_R11_R2_GENUINE_NONEMPTY_PREGAME_PRODUCTION_CERTIFICATION",
+  "verdict": "MLB_PHASE2_R11_R2_GENUINE_NONEMPTY_PREGAME_PRODUCTION_CERTIFIED",
+  "executionPackage": "3797f1129b7ab6e5449a90194c5f98d3aea14e1a",
+  "edgeVersion": 13,
+  "edgeExactCode": "PASS",
+  "runDate": "2026-09-12",
+  "gates": {
+    "R11_R2_CURRENT_SLATE": "COMPLETE",
+    "R11_R2_PER_GAME_VETO_PRODUCTION": "PASS_FOR_NATURALLY_OBSERVED_MISSING_STARTER_ISOLATION",
+    "R11_R2_PREDICTION_PIPELINE": "PASS",
+    "R11_R2_DOWNSTREAM_PRODUCTION": "PASS",
+    "R11_R2_REPEATABILITY": "PASS"
+  },
+  "currentSlateCount": 15,
+  "eligibleGamePks": [
+    824224,
+    823496,
+    824630,
+    822768,
+    822685,
+    823170,
+    824712,
+    823657,
+    823819,
+    822927,
+    823009,
+    825035,
+    824955
+  ],
+  "blockedGames": [
+    {
+      "gamePk": 823737,
+      "reason": "R2TR1_BLOCK:STARTER_MISSING"
+    },
+    {
+      "gamePk": 824870,
+      "reason": "R2TR1_BLOCK:STARTER_MISSING"
+    }
+  ],
+  "first": {
+    "runId": "automation-6ddab51ff4ad34e88d2046103e33ee85d6097eeaa3d191d52c326b8adfc399f5",
+    "runAsOf": "2026-09-12T12:30:09.846+00:00",
+    "status": "CANONICAL_STAGES_READBACK_COMPLETE",
+    "featureSnapshotsInserted": 130,
+    "dailyFeatureRows": {
+      "team": 26,
+      "pitcher": 26,
+      "bullpen": 26,
+      "batter": 0,
+      "matchup": 13,
+      "firstInning": 13
+    },
+    "predictionsInserted": 13,
+    "mappingsInserted": 13,
+    "observationsInserted": 286,
+    "valuesInserted": 286,
+    "picksInserted": 6,
+    "providers": {
+      "MLB_OFFICIAL": 4,
+      "STATCAST": 0,
+      "THE_ODDS_API": 1
+    },
+    "businessDml": {
+      "inserted": 838,
+      "updated": 0
+    }
+  },
+  "subsequent": {
+    "runId": "automation-06d43a53c90b13dd52c07261525d4671252f5d2d824a6d4f4350b9a690d77666",
+    "runAsOf": "2026-09-12T12:45:10.256+00:00",
+    "status": "CANONICAL_STAGES_READBACK_COMPLETE",
+    "predictionsInserted": 13,
+    "mappingsReused": 13,
+    "observationsInserted": 286,
+    "valuesInserted": 286,
+    "picksInserted": 6,
+    "featureSnapshotsReused": true,
+    "providers": {
+      "MLB_OFFICIAL": 4,
+      "STATCAST": 0,
+      "THE_ODDS_API": 1
+    },
+    "businessDml": {
+      "inserted": 591,
+      "updated": 0
+    }
+  },
+  "reuseProbe": {
+    "predictions": {
+      "reused": 13,
+      "inserted": 0
+    },
+    "marketMappings": {
+      "reused": 13,
+      "inserted": 0
+    },
+    "marketObservations": {
+      "reused": 286,
+      "inserted": 0
+    },
+    "values": {
+      "reused": 286,
+      "inserted": 0
+    },
+    "officialPicks": {
+      "reused": 6,
+      "inserted": 0
+    },
+    "method": "Existing persistence path with stored current-run payload projections and two independent live reads; every write/provider callback disabled",
+    "productionDml": 0,
+    "providerCalls": 0
+  },
+  "independentChecks": {
+    "frozenScheduleDigest": "PASS",
+    "snapshotForeignKeys": "PASS",
+    "vectors": 13,
+    "featuresPerVector": 76,
+    "featureOrderDigest": "PASS",
+    "championProbabilityParity": "PASS",
+    "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+    "blockedRowsDownstream": 0,
+    "duplicatesAcrossTwoFreezes": 0,
+    "startedGameLeakage": 0,
+    "conflicts": 0,
+    "unresolvedRuns": 0,
+    "leaseActive": false,
+    "preflight": "PASS",
+    "canonicalBoardRows": 26,
+    "canonicalBoardWarnings": 0
+  },
+  "accounting": {
+    "cumulativeOddsStart": 7,
+    "cumulativeOddsEnd": 9,
+    "missionCap": 20,
+    "observedTwoRuns": {
+      "MLB_OFFICIAL": 8,
+      "STATCAST": 0,
+      "THE_ODDS_API": 2,
+      "businessInserts": 1429,
+      "businessUpdates": 0
+    },
+    "observerProviderCalls": 0,
+    "observerProductionDml": 0,
+    "productionDdl": 0,
+    "scopeNote": "Counts cover the two named genuine refreshes, not all overnight/day automation. Earlier initialization and dependency ingestion remain in their original ledgers. Coordination records are separate from business-write journals."
+  },
+  "R11_PARTIAL_SLATE_PRODUCTION_CERTIFIED": "YES",
+  "R11_OPERATIONAL_FRESHNESS_RESTORED": "YES",
+  "UI_REDESIGN_READY": "YES",
+  "UI_IMPLEMENTATION_CAN_START": "YES",
+  "limitations": [
+    "The observed mixed slate proves initial durable STARTER_MISSING exclusion while 13 games continue. No in-flight gameVetoes entries naturally occurred.",
+    "Starter-change, identity-conflict, started-game and post-freeze in-flight veto cases remain locally certified but not individually observed in this production sample. Veto-removal rejection was not actively probed against live data.",
+    "Batter daily rows are empty by the existing Champion moneyline feature contract; no synthetic batter features were created.",
+    "Fresh frozen runs create new immutable prediction/market/value/pick revisions; these are not duplicates. The separate write-disabled reuse probe verifies exact existing-row reuse.",
+    "No UI changes were made. Settlement remains production-disabled and performance requires a legitimate settled sample."
+  ],
+  "publicEvidence": "AGGREGATES_AND_SANITIZED_IDENTITIES_ONLY_PRIVATE_PAYLOADS_OUTSIDE_GIT"
+}
