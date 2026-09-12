@@ -1,0 +1,158 @@
+{
+  "phase": "PICK_ANALYZER_PHASE2_UI_REDESIGN_V1",
+  "verdict": "PICK_ANALYZER_PHASE2_UI_REDESIGN_V1_CERTIFIED",
+  "startingSha": "492d3334eb32dca0b9992701ce3534e7b21fae39",
+  "testedUiSha": "aa93dc26118600b5adc5381c59b44bd63f2e8551",
+  "scope": "Presentation only; unchanged R10 canonical read model",
+  "observedAt": "2026-09-12T17:36:57.678Z",
+  "preview": {
+    "url": "https://pick-analyzer-d7qturtxt-pick-analyzer.vercel.app",
+    "state": "READY",
+    "validatedBeforeProduction": true
+  },
+  "production": {
+    "url": "https://pick-analyzer.vercel.app",
+    "state": "READY",
+    "systemVersionSha": "aa93dc26118600b5adc5381c59b44bd63f2e8551"
+  },
+  "currentCanonicalCounts": {
+    "asOf": "2026-09-12T17:36:31.515Z",
+    "date": "2026-09-12",
+    "games": 15,
+    "officialPick": 0,
+    "valueCandidate": 0,
+    "watchlist": 0,
+    "noEdge": 0,
+    "blockedOpportunities": 0,
+    "totalOpportunities": 0,
+    "gameReasons": {
+      "STARTED_GAME_BLOCKED": 2,
+      "STALE_GAME_EVIDENCE": 11,
+      "STARTER_EVIDENCE_UNKNOWN": 2
+    }
+  },
+  "validation": {
+    "productionBuild": "PASS",
+    "scopedEslint": "PASS",
+    "presentationGroups": 7,
+    "r10RegressionChecks": 17,
+    "providerDisabledReadinessChecks": 17,
+    "canonicalParity": "PASS",
+    "responsiveWidths": [
+      375,
+      390,
+      430,
+      768,
+      1440
+    ],
+    "productionPageCases": [
+      {
+        "route": "/today",
+        "width": 375,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 375,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/today",
+        "width": 390,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": 0
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 390,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": 0
+      },
+      {
+        "route": "/today",
+        "width": 430,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 430,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/today",
+        "width": 768,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 768,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/today",
+        "width": 1440,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 1440,
+        "httpStatus": 200,
+        "horizontalOverflow": false,
+        "browserErrorCount": 0,
+        "axeViolationCount": null
+      }
+    ],
+    "previewResponsiveCases": 10,
+    "privateNonemptyLightDarkResponsiveCases": 20,
+    "keyboardLabelsFocusAndNavigation": "PASS",
+    "emptyPartialMissingStaleStartedFinalNoEdge": "PASS",
+    "protectedSourceHashes": "PASS"
+  },
+  "design": {
+    "today": "Complete canonical game cards with PR times, starters, model probabilities, coherent prices and opportunity metrics",
+    "valueBoard": "Official Pick, Value Candidate, Watchlist, neutral No Edge, then Blocked; preserved within-class canonical ranks",
+    "navigation": "Today / MLB / Value Board primary; Performance / Model Lab / Data Health secondary",
+    "noEdge": "Neutral independent category; never promoted to Watchlist",
+    "missingData": "Unavailable remains unavailable; no synthetic or fixture data in production"
+  },
+  "providerCallsByUiWork": 0,
+  "businessProductionDml": 0,
+  "productionDdl": 0,
+  "automationBehaviorChanges": 0,
+  "readinessMetadata": "Presentation source hashes refreshed in existing readiness certificate; protected source hashes unchanged",
+  "limitations": [
+    "Current canonical snapshot has no current board opportunities; prior production opportunities were used only in private offline presentation validation.",
+    "Single-book no-vig probability is unavailable in the existing canonical contract; consensus probability is labeled accurately and no replacement math is introduced.",
+    "Automated accessibility checks and representative keyboard/visual review are not exhaustive assistive-technology certification."
+  ],
+  "privateEvidencePublication": "No private canonical payloads, authenticated share links or screenshots published",
+  "inheritedWorktreeChangesPreserved": 19,
+  "UI_CANONICAL_DATA_PARITY": "PASS",
+  "UI_REDESIGN_CERTIFIED": "YES",
+  "recommendedNextPhase": "User review of the deployed design and natural fresh-opportunity usability observation; operational freshness remains owned by the existing engine."
+}
