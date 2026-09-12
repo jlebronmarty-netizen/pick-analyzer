@@ -347,7 +347,7 @@
     "src/components/dashboard/DashboardShellClient.tsx": "4ac7e52f4861ded9f6755950b50faf992fd9d34deb390275a4b8ee93802bdb7f",
     "src/components/pick2/CanonicalDashboardBoundary.tsx": "547379819564ac87b38b58d643c0419cace11891d0a0671c3e977455b65da409",
     "src/components/pick2/MlbToday.tsx": "45175c9ddc1a8f66009547915e1f201de5cbd20d009627fb419abb4cf08acfc2",
-    "src/components/pick2/MlbValueBoardClient.tsx": "a08b276b37fc111f8342c410b4412e7bc62ca7a8c45c17788f6ba657dbf9aa5d",
+    "src/components/pick2/MlbValueBoardClient.tsx": "0f1b04ab075187add9deacd5a09f1af471e81fa84703659f64b18cfe99ba6df2",
     "src/services/pick2-mlb-health.service.ts": "c100f329eeba054a806ee18cd87973e21ef6901aa572cbb71b3cb453f4e8628b",
     "src/services/pick2-mlb-performance-read.service.ts": "537131cd7484a68959ff1ca94509e422ffe0e13a5982a14f9b374438ad4d923d",
     "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
