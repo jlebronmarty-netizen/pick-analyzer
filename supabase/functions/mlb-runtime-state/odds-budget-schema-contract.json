@@ -1,0 +1,193 @@
+{
+  "rls": true,
+  "bypass": true,
+  "grants": [
+    {
+      "role": "service_role",
+      "privilege": "INSERT"
+    },
+    {
+      "role": "service_role",
+      "privilege": "SELECT"
+    }
+  ],
+  "columns": [
+    {
+      "name": "policy_version",
+      "type": "text",
+      "grants": null,
+      "default": "'MLB_ODDS_OPERATIONAL_BUDGET_V1'::text",
+      "notNull": true
+    },
+    {
+      "name": "run_scope_key",
+      "type": "text",
+      "grants": null,
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "reservation_id",
+      "type": "text",
+      "grants": null,
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "operational_day",
+      "type": "date",
+      "grants": null,
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "daily_slot",
+      "type": "smallint",
+      "grants": null,
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "reserved_at",
+      "type": "timestamp with time zone",
+      "grants": null,
+      "default": null,
+      "notNull": true
+    },
+    {
+      "name": "response_at",
+      "type": "timestamp with time zone",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "http_status",
+      "type": "smallint",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "credits_last",
+      "type": "integer",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "credits_used",
+      "type": "bigint",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "default": null,
+      "notNull": false
+    },
+    {
+      "name": "credits_remaining",
+      "type": "bigint",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "default": null,
+      "notNull": false
+    }
+  ],
+  "indexes": [
+    "CREATE UNIQUE INDEX pick2_mlb_odds_operational_daily_slot ON public.pick2_mlb_odds_operational_requests USING btree (operational_day, daily_slot)",
+    "CREATE UNIQUE INDEX pick2_mlb_odds_operational_pk ON public.pick2_mlb_odds_operational_requests USING btree (run_scope_key)",
+    "CREATE UNIQUE INDEX pick2_mlb_odds_operational_reservation ON public.pick2_mlb_odds_operational_requests USING btree (reservation_id)",
+    "CREATE INDEX pick2_mlb_odds_operational_reserved_at ON public.pick2_mlb_odds_operational_requests USING btree (reserved_at DESC)"
+  ],
+  "policies": 0,
+  "constraints": [
+    {
+      "name": "pick2_mlb_odds_operational_cap",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK (((daily_slot >= 1) AND (daily_slot <= 48)))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_credits",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((((credits_last IS NULL) OR (credits_last >= 0)) AND ((credits_used IS NULL) OR (credits_used >= 0)) AND ((credits_remaining IS NULL) OR (credits_remaining >= 0))))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_daily_slot",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (operational_day, daily_slot)"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_day",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((operational_day = ((reserved_at AT TIME ZONE 'America/Puerto_Rico'::text))::date))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_pk",
+      "type": "p",
+      "validated": true,
+      "definition": "PRIMARY KEY (run_scope_key)"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_policy",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((policy_version = 'MLB_ODDS_OPERATIONAL_BUDGET_V1'::text))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_receipt",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((reservation_id ~ '^[a-f0-9]{64}$'::text))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_reservation",
+      "type": "u",
+      "validated": true,
+      "definition": "UNIQUE (reservation_id)"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_response",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((((response_at IS NULL) AND (http_status IS NULL) AND (credits_last IS NULL) AND (credits_used IS NULL) AND (credits_remaining IS NULL)) OR ((response_at IS NOT NULL) AND (response_at >= reserved_at) AND (http_status IS NOT NULL) AND ((http_status >= 100) AND (http_status <= 599)))))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_run",
+      "type": "c",
+      "validated": true,
+      "definition": "CHECK ((run_scope_key ~ '^RUN:[A-Za-z0-9_-]{1,100}$'::text))"
+    },
+    {
+      "name": "pick2_mlb_odds_operational_runtime_fk",
+      "type": "f",
+      "validated": true,
+      "definition": "FOREIGN KEY (run_scope_key) REFERENCES pick2_mlb_runtime_state(scope_key) ON UPDATE RESTRICT ON DELETE RESTRICT"
+    }
+  ]
+}

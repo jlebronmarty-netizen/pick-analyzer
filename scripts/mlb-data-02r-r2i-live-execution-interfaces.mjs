@@ -615,6 +615,10 @@ export function createTheOddsApiLiveClient({ fetchImpl = fetch, apiKey, ledger }
       await ledger?.consume('THE_ODDS_API', 1)
       const url = `https://api.the-odds-api.com/v4/sports/baseball_mlb/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=${encodeURIComponent(apiKey)}`
       const response = await fetchImpl(url)
+      if(ledger?.recordOddsCredits && ledger.operationalBudget?.()?.activation==='ACTIVE' && response) {
+        const number=key=>{const value=response.headers?.get(key);return typeof value==='string'&&/^\d+$/.test(value)&&Number.isSafeInteger(Number(value))?Number(value):null}
+        await ledger.recordOddsCredits({httpStatus:response.status,last:number('x-requests-last'),used:number('x-requests-used'),remaining:number('x-requests-remaining')})
+      }
       if (!response?.ok) throw new Error(`THE_ODDS_API_HTTP_${response?.status ?? 'UNKNOWN'}`)
       const events = await response.json()
       return { events }
@@ -1187,6 +1191,9 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
   const limits = authorization?.dmlCaps ?? {}
   for (const target of [...Object.values(R2I_FEATURE_IDENTITY_BINDINGS).map(b => b.table), ...Object.values(DOWNSTREAM_BINDINGS).map(b => b.table)]) await repository.verifySchemaFingerprint(target)
   const featureInput = { contexts, runDate: runContext.run_date, runAsOf: runContext.run_as_of }
+  // Scheduling only: no alteration to feature or market freshness semantics.
+  // Paid frozen evidence resumes through the existing digest/lineage guards.
+  await canonical.checkpoint.checkOddsBudget?.()
   const pinned=checkpoint.featureReferences && canonical.restoreFeaturePlan
   const generated = pinned ? await canonical.restoreFeaturePlan({contexts,references:checkpoint.featureReferences}) : canonical.buildFeaturePlan ? await canonical.buildFeaturePlan(featureInput) : buildAllPregameFeatureRows(featureInput)
   const guardedRepository = Object.create(repository)

@@ -13,6 +13,11 @@ export function createDurableRunStore({runtime,runContext,root}) {
     get locked(){return runtime.locked},
     get frozenScope(){return runtime.run.checkpoint.completed.includes('SCOPE')?[...runtime.run.checkpoint.scope]:null},
     setCanonical(bindings){canonical=bindings},
+    async checkOddsBudget() {
+      if(runtime.ledger.operationalBudget?.()?.activation!=='ACTIVE')return
+      const plan=await runtime.ledger.planOdds()
+      if(!['ACQUIRE','RESUME_DURABLE_EVIDENCE'].includes(plan.decision))throw Error(`R6_STATE:${plan.decision==='ODDS_BUDGET_EXHAUSTED'?'OPERATIONAL_ODDS_DAILY_CAP':plan.decision==='ODDS_CADENCE_DEFERRED'?'ODDS_MIN_INTERVAL':'NO_ELIGIBLE_PREGAME_SCOPE'}`)
+    },
     async recordGameVetoes(entries) {
       const cp=runtime.run.checkpoint,prior=cp.gameVetoes??[]
       const added=entries.filter(r=>!prior.some(p=>p.gamePk===r.gamePk))

@@ -1,8 +1,9 @@
-// Fixed transactional operations for the exact authorized R6 table. No SQL,
+// Fixed transactional R6 operations and optional R12 operational reservations. No SQL,
 // target, clock, cap, or counter reset can be supplied by the caller.
 import {sha256} from '../../../scripts/mlb-data-02r-r2f-stage-contracts.mjs'
 import {persistOrRecoverEvidence} from './mlb-provider-evidence.mjs'
 import {sanitizedStageException} from '../../../scripts/mlb-operational-r7-errors.mjs'
+import {inspectOddsBudget,planOddsBudget,reserveOperationalOdds,recordOddsCredits} from './mlb-odds-operational-budget.mjs'
 const TABLE = 'public.pick2_mlb_runtime_state'
 const PENDING = "state_kind='RUN' AND status <> 'COMPLETE' AND (status <> 'FAILED' OR checkpoint #>> '{disposition,status}' IS DISTINCT FROM 'TERMINAL_PARTIAL_PRESERVED')"
 export const reviewDigest=run=>sha256({runId:run.run_id,packageSha:run.package_sha,runAsOf:new Date(run.run_as_of).toISOString(),revision:Number(run.revision),status:run.status,checkpoint:run.checkpoint,dml:run.dml_accounting,providers:[run.mlb_official_calls,run.statcast_calls,run.odds_calls]})
@@ -134,16 +135,16 @@ export function validateDml(x) {
 
 // query(sql, parameters) returns rows. transaction(callback) must hold one real
 // DB transaction/connection for its entire callback, including rollback on error.
-export function createRuntimeStateAuthority({ transaction, writeRows = null, preflight = null, evidenceStorage = null }) {
+export function createRuntimeStateAuthority({ transaction, writeRows = null, preflight = null, evidenceStorage = null, operationalOdds = false }) {
   ensure(typeof transaction === 'function', 'TRANSACTION_ADAPTER')
   return async input => {
-    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest','marketReadbackDigest'])
-    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket','rebindMarketExecutor','resumeMarketCheckpoint'].includes(input.op), 'OPERATION')
+    keys(input, ['op','holder','fence','runId','packageSha','mode','revision','checkpoint','dml','provider','reservationId','status','write','kind','evidence','failure','expectedDigest','executorPackageSha','rawReadbackDigest','marketReadbackDigest','credits'])
+    ensure(['inspect','initialize','acquire','renew','release','checkpoint','reserve','complete','write','evidence','fail','dispose','disposeDependencyFailure','resumeDependency','resumeMarket','rebindMarketExecutor','resumeMarketCheckpoint','oddsPlan','oddsCredits'].includes(input.op), 'OPERATION')
     if (!['inspect','initialize'].includes(input.op)) ensure(typeof input.holder === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(input.holder), 'HOLDER')
     return transaction(async query => {
       if(preflight)await preflight(query)
       const one = async (sql,p=[]) => (await query(sql,p))[0]
-      if (input.op === 'inspect') return { rows: await query(`SELECT * FROM ${TABLE} WHERE scope_key IN ($1,$2) OR (${PENDING}) ORDER BY scope_key LIMIT 102`, [MISSION,LEASE]) }
+      if (input.op === 'inspect') return { rows: await query(`SELECT * FROM ${TABLE} WHERE scope_key IN ($1,$2) OR (${PENDING}) ORDER BY scope_key LIMIT 102`, [MISSION,LEASE]),...(operationalOdds?{operationalBudget:await inspectOddsBudget(query)}:{}) }
       if (input.op === 'initialize') {
         // Separate bounded initialization, never migration seed or reset.
         await query(`INSERT INTO ${TABLE}(scope_key,state_kind) VALUES ($1,'LEASE') ON CONFLICT(scope_key) DO NOTHING`, [LEASE])
@@ -285,7 +286,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
           run = await one(`INSERT INTO ${TABLE}(scope_key,state_kind,run_id,package_sha,run_date,run_as_of,status,checkpoint,dml_accounting) VALUES ($1,'RUN',$2,$3,$4,$5,'RUNNING',$6::text::jsonb,'{"stages":[]}') RETURNING *`, [`RUN:${input.runId}`,input.runId,input.packageSha,clock.date,clock.at,JSON.stringify(checkpoint)])
         }
         const next = await one(`UPDATE ${TABLE} SET lease_holder=$2,lease_acquired_at=$3,lease_expires_at=$3::timestamptz+interval '5 minutes',fence=fence+1,revision=revision+1,run_id=$4,package_sha=$5,updated_at=$3 WHERE scope_key=$1 RETURNING *`, [LEASE,input.holder,clock.at,run.run_id,run.package_sha])
-        return {status:'ACQUIRED',lease:next,run,missionOddsCalls:mission.mission_odds_calls}
+        return {status:'ACQUIRED',lease:next,run,missionOddsCalls:mission.mission_odds_calls,...(operationalOdds?{operationalBudget:await inspectOddsBudget(query)}:{})}
       }
       ensure((active || input.op==='fail') && lease.lease_holder === input.holder && Number(lease.fence) === input.fence && lease.run_id === input.runId, 'STALE_FENCE_OR_LEASE')
       const run = await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1 FOR UPDATE`, [`RUN:${input.runId}`])
@@ -299,6 +300,10 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         return {status:'RELEASED'}
       }
       ensure(run.status === 'RUNNING','TERMINAL_RUN')
+      if(input.op==='oddsPlan' || input.op==='oddsCredits') {
+        ensure(operationalOdds,'OPERATIONAL_BUDGET_NOT_ACTIVE')
+        return input.op==='oddsPlan'?planOddsBudget(query,run,clock):recordOddsCredits(query,run,clock,input.credits)
+      }
       if(input.op==='fail') {
         keys(input.failure,['code','exceptionClass','message'])
         ensure(id(input.failure.code) && ['Error','TypeError','RangeError','SyntaxError','AbortError','TimeoutError'].includes(input.failure.exceptionClass),'FAILURE_SHAPE')
@@ -335,14 +340,16 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         ensure(Number(run[column]) < cap,'PROVIDER_CAP')
         const mission = await one(`SELECT * FROM ${TABLE} WHERE scope_key=$1 FOR UPDATE`,[MISSION])
         ensure(mission && mission.mission_odds_calls >= 2,'MISSION_LEDGER')
-        if (input.provider === 'THE_ODDS_API') {
+        let operationalBudget
+        if (input.provider === 'THE_ODDS_API' && operationalOdds) operationalBudget=await reserveOperationalOdds(query,run,clock,input.reservationId)
+        else if (input.provider === 'THE_ODDS_API') {
           ensure(mission.mission_odds_calls < 20,'MISSION_ODDS_CAP')
           await query(`UPDATE ${TABLE} SET mission_odds_calls=mission_odds_calls+1,revision=revision+1,updated_at=$2 WHERE scope_key=$1`,[MISSION,clock.at])
         }
         const dml = {...run.dml_accounting,providerReservations:[...receipts,input.reservationId]}
         ensure(serializedBytes(dml) <= 15000,'ACCOUNTING_SIZE')
         const updated = await one(`UPDATE ${TABLE} SET ${column}=${column}+1,dml_accounting=$2::text::jsonb,revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(dml),clock.at])
-        return {status:'RESERVED',run:updated,missionOddsCalls:mission.mission_odds_calls+(input.provider === 'THE_ODDS_API'?1:0)}
+        return {status:'RESERVED',run:updated,missionOddsCalls:mission.mission_odds_calls+(input.provider === 'THE_ODDS_API'&&!operationalOdds?1:0),...(operationalBudget?{operationalBudget}:{})}
       }
       ensure(integer(input.revision) && Number(run.revision) === input.revision,'REVISION_CONFLICT')
       validateCheckpoint(input.checkpoint); validateDml(input.dml)

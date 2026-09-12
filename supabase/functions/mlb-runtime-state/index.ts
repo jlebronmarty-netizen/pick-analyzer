@@ -4,6 +4,7 @@ import { createRuntimeStateAuthority } from '../_shared/mlb-runtime-state.mjs'
 import { performFencedWrite } from '../_shared/mlb-fenced-write.mjs'
 import columnsByTable from './write-contract.json' with { type: 'json' }
 import { assertRuntimeSchema } from '../_shared/mlb-runtime-schema.mjs'
+import { assertOddsBudgetSchema } from '../_shared/mlb-odds-budget-schema.mjs'
 import {createEvidenceStorage,assertEvidenceAccess,EVIDENCE_LIMIT} from '../_shared/mlb-provider-evidence.mjs'
 
 const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), {
@@ -48,14 +49,15 @@ Deno.serve(async request => {
   const sql = postgres(connection, { max: 1, prepare: false, connect_timeout: 10, idle_timeout: 5 })
   try {
     const evidenceStorage=createEvidenceStorage({url:Deno.env.get('SUPABASE_URL'),key:Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')})
-    const execute = createRuntimeStateAuthority({ evidenceStorage, preflight: async query=>{await assertRuntimeSchema(query);await assertEvidenceAccess(query)}, writeRows: args => performFencedWrite({ ...args, columnsByTable }), transaction: async (fn: (query: (text: string, values?: unknown[]) => Promise<unknown>) => Promise<unknown>) => sql.begin(async tx => {
+    const execute = createRuntimeStateAuthority({ operationalOdds:true, evidenceStorage, preflight: async query=>{await assertRuntimeSchema(query);await assertOddsBudgetSchema(query);await assertEvidenceAccess(query)}, writeRows: args => performFencedWrite({ ...args, columnsByTable }), transaction: async (fn: (query: (text: string, values?: unknown[]) => Promise<unknown>) => Promise<unknown>) => sql.begin(async tx => {
       await tx`SET LOCAL statement_timeout = '15000ms'`
       await tx`SET LOCAL lock_timeout = '5000ms'`
       await tx`SET LOCAL ROLE service_role`
       return fn((text, values = []) => tx.unsafe(text, values))
     }) })
     const result = await execute(command)
-    return reply(200, { status: 'PASS', protocol: 'MLB_R6_FENCED_RUNTIME_V1', result })
+    const deploymentVersion=Deno.env.get('DENO_DEPLOYMENT_ID')?.match(/_(\d+)$/)?.[1]
+    return reply(200, { status: 'PASS', protocol: 'MLB_R6_FENCED_RUNTIME_V1', result:{...result,edgeVersion:deploymentVersion?Number(deploymentVersion):null} })
   } catch (error) {
     const reason = error instanceof Error && /^R6_STATE:[A-Z_]+$/.test(error.message) ? error.message : 'RUNTIME_STATE_TRANSACTION_FAILED'
     const code = error && typeof error === 'object' && 'code' in error && typeof error.code === 'string' && /^[A-Z0-9_]{1,40}$/.test(error.code) ? error.code : null

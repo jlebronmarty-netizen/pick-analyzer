@@ -8,7 +8,7 @@ import {
 
 const baseProductNavItems: DashboardNavItem[] = [
   { href: '/today', label: 'Today', icon: 'T' },
-  { href: '/mlb', label: 'MLB', icon: 'B' },
+  { href: '/mlb', label: 'MLB Research Lab', icon: 'B' },
   { href: '/performance', label: 'Performance', icon: 'P' },
   { href: '/model-lab', label: 'Model Lab', icon: 'M' },
   { href: '/data-health', label: 'Data Health', icon: 'D' },
@@ -17,7 +17,7 @@ const baseProductNavItems: DashboardNavItem[] = [
 const titleByPath: DashboardTitleByPath = {
   '/': 'Today',
   '/today': 'Today',
-  '/mlb': 'MLB Decision Board',
+  '/mlb': 'MLB Research Lab',
   [PICK2_MLB_VALUE_BOARD_ROUTE]: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
   '/performance': 'Performance',
   '/model-lab': 'Model Lab',

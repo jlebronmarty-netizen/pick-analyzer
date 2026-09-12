@@ -2,7 +2,7 @@ export default function MlbLoading() {
   return (
     <div className="space-y-6" aria-busy="true" aria-live="polite">
       <section className="rounded-3xl border border-sky-500/20 bg-slate-950 p-6 md:p-8">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-sky-300">MLB Decision Board V1</p>
+        <p className="text-xs font-black uppercase tracking-[0.28em] text-sky-300">MLB Research Lab</p>
         <h1 className="mt-2 text-2xl font-black text-white md:text-3xl">Cargando decisiones MLB…</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
           Consultando juegos, odds y proyecciones actuales. No se muestran líneas de relleno mientras llega la data real.

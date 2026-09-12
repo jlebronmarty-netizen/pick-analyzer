@@ -10,7 +10,7 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
   ensure(url === 'https://ynuocvexviorgdjrfthw.supabase.co' && typeof key === 'string' && key.length > 20,'SERVER_CREDENTIALS')
   ensure(/^[a-f0-9]{40}$/.test(packageSha),'PACKAGE')
   const holder=randomUUID()
-  let lease=null,run=null,missionOddsCalls=null
+  let lease=null,run=null,missionOddsCalls=null,operationalBudget=null
   let queue=Promise.resolve()
   const serial = fn => { const result=queue.then(fn);queue=result.catch(()=>{});return result }
   async function call(command) {
@@ -33,12 +33,12 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
       const result=await call({op:'inspect'}),current=result.rows.find(r=>r.state_kind==='RUN' && r.run_id===run?.run_id)
       const active=result.rows.find(r=>r.state_kind==='LEASE'),mission=result.rows.find(r=>r.state_kind==='MISSION')
       ensure(current && active?.lease_holder===holder && Number(active.fence)===Number(lease?.fence),'REFRESH_FENCE')
-      run=current;lease=active;missionOddsCalls=mission?.mission_odds_calls;return structuredClone(run)
+      run=current;lease=active;missionOddsCalls=mission?.mission_odds_calls;operationalBudget=result.operationalBudget??null;return structuredClone(run)
     }),
     async acquire({runId,mode}) {
       ensure(!lease,'ALREADY_HELD')
       const result=await call({op:'acquire',holder,runId,packageSha,mode})
-      if(result.status === 'ACQUIRED') {lease=result.lease;run=result.run;missionOddsCalls=result.missionOddsCalls}
+      if(result.status === 'ACQUIRED') {lease=result.lease;run=result.run;missionOddsCalls=result.missionOddsCalls;operationalBudget=result.operationalBudget??null}
       return result
     },
     async resumeDependency({runId,originalPackageSha,expectedDigest,rawReadbackDigest}) {
@@ -84,13 +84,16 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
       const result=await call({...token(),op:'write',revision:Number(run.revision),write});run=result.run;return result.result
     }),
     ledger:{
+      operationalBudget:()=>structuredClone(operationalBudget),
+      planOdds:()=>serial(async()=>{const result=await call({...token(),op:'oddsPlan'});if(result.budget)operationalBudget=result.budget;return result}),
+      recordOddsCredits:credits=>serial(()=>call({...token(),op:'oddsCredits',credits})),
       consume:(provider,count=1)=>serial(async()=>{
         ensure(Object.hasOwn(columns,provider) && count===1,'PROVIDER_OR_COUNT')
         const current=Number(run?.[columns[provider]] ?? 0)
         ensure(current < providerCaps[provider],'PROVIDER_CAP')
         const reservationId=createHash('sha256').update(`${run?.run_id}:${provider}:${current+1}`).digest('hex')
         const result=await call({...token(),op:'reserve',provider,reservationId})
-        run=result.run;missionOddsCalls=result.missionOddsCalls
+        run=result.run;missionOddsCalls=result.missionOddsCalls;if(result.operationalBudget)operationalBudget=result.operationalBudget
         return {provider,calls:1,consumed:Number(run[columns[provider]])}
       }),
       read:provider=>Number(run?.[columns[provider]] ?? 0),

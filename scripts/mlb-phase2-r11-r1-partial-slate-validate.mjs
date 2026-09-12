@@ -15,7 +15,7 @@ import { sha256 } from './mlb-data-02r-r2f-stage-contracts.mjs'
 import { FEATURE_TABLES } from './mlb-data-02r-r2t-real-feature-champion.mjs'
 import { gameVetoClassification } from './mlb-operational-game-veto.mjs'
 
-export async function validatePartialSlate({db,root}) {
+export async function validatePartialSlate({db,root,operationalOdds=false}) {
   const client=createPgliteClient(db),checks=[]
   const pass=name=>checks.push({name,status:'PASS'})
   const inventory=JSON.parse(fs.readFileSync(path.join(root,'r11-inventory-private.json')))
@@ -40,7 +40,11 @@ export async function validatePartialSlate({db,root}) {
   const objects=new (db.constructor)()
   await objects.exec('create table evidence(key text primary key,body jsonb)')
   const evidenceStorage={preflight:async()=>{},read:async key=>(await objects.query('select body from evidence where key=$1',[key])).rows[0]?.body??null,create:async(key,body)=>objects.query('insert into evidence values($1,$2::jsonb)',[key,JSON.stringify(body)])}
-  const makeAuthority=()=>createRuntimeStateAuthority({transaction,evidenceStorage,writeRows:args=>performFencedWrite({...args,columnsByTable})})
+  if(operationalOdds) {
+    await db.exec(fs.readFileSync('supabase/migrations/20260912203030_mlb_r12_operational_odds_budget.sql','utf8'))
+    await db.exec("UPDATE pick2_mlb_runtime_state SET mission_odds_calls=20 WHERE state_kind='MISSION'")
+  }
+  const makeAuthority=()=>createRuntimeStateAuthority({operationalOdds,transaction,evidenceStorage,writeRows:args=>performFencedWrite({...args,columnsByTable})})
   let authority=makeAuthority(),runtime
   const savedFetch=globalThis.fetch
   globalThis.fetch=async(url,options)=>{
@@ -64,7 +68,7 @@ export async function validatePartialSlate({db,root}) {
     const host=new URL(url).hostname
     if(host==='statsapi.mlb.com'){providerRequests++;return {ok:true,json:async()=>payload}}
     assert.equal(host,'api.the-odds-api.com');oddsRequests++
-    return {ok:true,json:async()=>contexts.map(c=>{const g=sourceGame(c.target.gamePk);return {id:`r11-market-${g.gamePk}`,sport_key:'baseball_mlb',commence_time:c.target.scheduledAt,home_team:g.teams.home.team.name,away_team:g.teams.away.team.name,bookmakers:[{key:'isolated_book',title:'Isolated Book',last_update:at,markets:[{key:'h2h',last_update:at,outcomes:[{name:g.teams.home.team.name,price:-110},{name:g.teams.away.team.name,price:100}]}]}]}})}
+    return {ok:true,status:200,json:async()=>contexts.map(c=>{const g=sourceGame(c.target.gamePk);return {id:`r11-market-${g.gamePk}`,sport_key:'baseball_mlb',commence_time:c.target.scheduledAt,home_team:g.teams.home.team.name,away_team:g.teams.away.team.name,bookmakers:[{key:'isolated_book',title:'Isolated Book',last_update:at,markets:[{key:'h2h',last_update:at,outcomes:[{name:g.teams.home.team.name,price:-110},{name:g.teams.away.team.name,price:100}]}]}]}})}
   }
   const configure=async(interrupt=false)=>{
     const store=createDurableRunStore({runtime,runContext:freeze,root})
@@ -153,7 +157,12 @@ export async function validatePartialSlate({db,root}) {
     assert.equal(gameVetoClassification('R2TR1_BLOCK:STARTER_MISSING'),'BLOCK_MISSING_STARTER')
     assert.equal(gameVetoClassification('NEW_CANONICAL_EVIDENCE_AFTER_RUN_FREEZE'),'BLOCK_POST_FREEZE_EVIDENCE')
     const report={status:'PASS',checks,eligible:8,durableVetoes:5,initialExcluded:2,predictions:8,mappings:8,observations:16,values:16,picks:result.picks.rows.length,secondPassInserts:0,providerCalls:0,productionDml:0,productionDdl:0,injectedOfficialRequests:providerRequests,injectedOddsRequests:oddsRequests,historicalVeto:'UNRECOVERABLE_HISTORICAL_VETO_DETAIL'}
-    fs.writeFileSync(path.join(root,'r11-r1-local-validation.json'),JSON.stringify(report,null,2))
+    if(operationalOdds) {
+      assert.equal((await authority({op:'inspect'})).operationalBudget.consumed,1)
+      assert.equal((await db.query("SELECT mission_odds_calls FROM pick2_mlb_runtime_state WHERE state_kind='MISSION'")).rows[0].mission_odds_calls,20)
+      pass('R12 operational ledger owns the single injected acquisition; historical 20 remains unchanged through real R2 partial-slate resume')
+    }
+    fs.writeFileSync(path.join(root,operationalOdds?'r12-partial-slate-validation.json':'r11-r1-local-validation.json'),JSON.stringify(report,null,2))
     console.log(JSON.stringify(report))
     return report
   } finally {if(runtime?.locked)await runtime.release();globalThis.fetch=savedFetch;await objects.close()}

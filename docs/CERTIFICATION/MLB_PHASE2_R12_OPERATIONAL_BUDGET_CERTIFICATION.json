@@ -1,0 +1,76 @@
+{
+  "verdict": "R12_OPERATIONAL_BUDGET_IMPLEMENTATION_CERTIFIED_DDL_APPROVAL_PENDING",
+  "policy": {
+    "version": "MLB_ODDS_OPERATIONAL_BUDGET_V1",
+    "authorized": true,
+    "productionActive": false,
+    "dailyCap": 48,
+    "perRunCap": 1,
+    "timezone": "America/Puerto_Rico",
+    "cadenceMinutes": {
+      "over180": 60,
+      "over60Through180": 30,
+      "over5Through60": 15
+    },
+    "freshnessMinutes": 10,
+    "noEligibleScopeCalls": 0,
+    "uncertainAttemptsConsume": true,
+    "requestsAreNotSubscriptionCredits": true
+  },
+  "migration": "supabase/migrations/20260912203030_mlb_r12_operational_odds_budget.sql",
+  "normalizedMigrationSha256": "004f52deaf94b6cddae9094c131bc36208001b0483e98ad42674f2f1b03bc1ce",
+  "edgeManifest": "docs/CERTIFICATION/MLB_PHASE2_R12_OPERATIONAL_EDGE_MANIFEST.json",
+  "edgeFiles": 13,
+  "productionReadOnlyBaseline": {
+    "historicalMissionConsumed": 20,
+    "operationalTableExists": false,
+    "unresolvedRuns": 1,
+    "preservedPredictions": 13
+  },
+  "disposition": "NOT_EXECUTED_PENDING_DDL_AND_DEPLOYMENT_SEQUENCE",
+  "validators": {
+    "operationalBudgetSql": 6,
+    "healthProjection": 4,
+    "r12LegacyGracefulAndEdgeAuth": 10,
+    "r6State": 21,
+    "r6Host": 8,
+    "r7Runtime": 5,
+    "r8DependencyRecovery": 10,
+    "r9ImmutableMarkets": 10,
+    "r9Checkpoint": 3,
+    "r11PartialSlateWithOperationalLedger": 9,
+    "r10ReadModel": 17,
+    "preNonemptyReadiness": 17,
+    "uiPresentation": 6
+  },
+  "passingChecks": 126,
+  "build": "PASS_400_PAGES",
+  "scopedEslint": "PASS",
+  "readinessHashes": "PASS",
+  "disposablePartialSlate": {
+    "predictions": 8,
+    "mappings": 8,
+    "observations": 16,
+    "values": 16,
+    "picks": 0,
+    "secondPassInserts": 0,
+    "additionalOddsOnResume": 0
+  },
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "productionAutomationChanges": 0,
+  "championChanges": 0,
+  "featureContractChanges": 0,
+  "preprocessingChanges": 0,
+  "policyChanges": 0,
+  "publicEvidence": "STRUCTURAL_AND_AGGREGATE_ONLY",
+  "inheritedGeneratedFilesPreserved": 19,
+  "limitations": [
+    "Production migration not approved/applied",
+    "Paired Edge/web deployment pending",
+    "Historical failed-run disposition pending existing predicates",
+    "Natural scheduled operational-budget readback pending",
+    "Observed subscription credits will be unknown until actual response headers exist"
+  ]
+}
