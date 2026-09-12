@@ -1,6 +1,6 @@
 {
   "phase": "MLB_PHASE2_R11_R1_PER_GAME_VETO_AND_PARTIAL_SLATE_PERSISTENCE_CERTIFICATION",
-  "verdict": "R11_R1_LOCAL_PARTIAL_SLATE_CERTIFIED_DEPLOYMENT_PENDING",
+  "verdict": "R11_R1_DEPLOYMENT_CERTIFIED_DISPOSITION_TIME_GATE_PENDING",
   "startingLocalSha": "fba7e2b84c58d76dc6ef267a89e27cd11ec6f060",
   "productionBaseline": "d5b489ecb7060cbb6c4ce39060f2ec432408a985",
   "gates": {
@@ -10,7 +10,7 @@
     "R11_R1_PARTIAL_SLATE_PERSISTENCE": "PASS",
     "R11_R1_MIXED_SLATE_TEST": "PASS",
     "R11_R1_DOWNSTREAM_SCOPE": "PASS",
-    "DEPLOYMENT": "PENDING",
+    "DEPLOYMENT": "PASS",
     "R11_R1_FAILED_RUN_PRESERVATION": "PASS",
     "R11_R1_HISTORICAL_RUN_DISPOSITION": "PENDING_EXISTING_TIME_STATE_GUARD",
     "NEXT_GENUINE_PRODUCTION_RUN": "PENDING"
@@ -100,5 +100,41 @@
   "R11_OPERATIONAL_FRESHNESS_RESTORED": "NO",
   "UI_REDESIGN_READY": "YES",
   "UI_IMPLEMENTATION_CAN_START": "NO",
-  "publicEvidence": "AGGREGATE_ONLY_PRIVATE_INPUTS_RETAINED_OUTSIDE_GIT"
+  "publicEvidence": "AGGREGATE_ONLY_PRIVATE_INPUTS_RETAINED_OUTSIDE_GIT",
+  "deployment": {
+    "candidateSha": "ae65ff3ce8c6c6275769e1e72c61da2dac4ad0a5",
+    "edgeVersion": 13,
+    "exactDeployedFiles": 10,
+    "extraFiles": 0,
+    "manifestAlignment": "PASS",
+    "missingBearer": 401,
+    "wrongBearer": 401,
+    "publicCredential": 401,
+    "serverOnlyInspect": 200,
+    "vercelProductionSha": "ae65ff3ce8c6c6275769e1e72c61da2dac4ad0a5",
+    "vercelReady": true,
+    "unattendedSchemaPreflight": "PASS",
+    "systemVersionReadback": "PASS"
+  },
+  "productionReadback": {
+    "observedAt": "2026-09-12T00:49:55.983Z",
+    "frozenRevision": 38,
+    "checkpointPreserved": true,
+    "freezePreserved": true,
+    "providerAccountingPreserved": true,
+    "dmlAccountingPreserved": true,
+    "unresolvedRuns": 1,
+    "activeLeases": 0,
+    "frozenGameRows": 15,
+    "futureScheduledGames": 3,
+    "lastFrozenScheduledStart": "2026-09-12T02:15:00Z",
+    "disposition": "PENDING_EXISTING_TIME_GUARD",
+    "productionVetoObservation": "PENDING_GUARDED_RUN_CLEARANCE_AND_GENUINE_SLATE",
+    "productionVetoRemovalRejection": "PENDING_PRODUCTION_OBSERVATION_DISPOSABLE_SQL_PASS",
+    "productionBlockedWriteRejection": "PENDING_PRODUCTION_OBSERVATION_DISPOSABLE_SQL_PASS",
+    "hostDry": "BLOCKED_BY_EXISTING_LIVE_RUN_PENDING_GUARD_NOT_INVOKED",
+    "cronConfiguration": "UNCHANGED_EVERY_15_MINUTES",
+    "automation": "CONFIGURED_WITH_UNRESOLVED_RUN_GUARD",
+    "nextScheduledRun": "GUARDED_UNTIL_CERTIFIED_DISPOSITION"
+  }
 }

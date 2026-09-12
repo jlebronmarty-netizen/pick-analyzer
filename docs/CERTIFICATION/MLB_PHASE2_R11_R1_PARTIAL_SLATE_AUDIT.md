@@ -56,3 +56,9 @@ After exact-candidate deployment and host readback, safely disposition the histo
 - UI_IMPLEMENTATION_CAN_START = NO
 
 No UI implementation is included.
+
+## Authorized deployment readback
+
+R11-R1 exact deployment certified: Edge v13 matches all ten ae65ff3 manifest files with no extras; production missing/wrong/public bearer tests return401, server-only inspect200. Paired Vercel ae65ff3 is READY and system version/unattended schema preflight PASS. Fresh readback preserves failed revision38, checkpoint, freeze and provider/DML accounting; Odds7/20, phase provider/DML/DDL0. At 2026-09-12T00:49:55Z three frozen games remain future-scheduled; last start02:15Z (22:15PR), so disposition and production host-dry/veto observation remain guarded. Eight disposable partial-slate groups PASS again. Do not invent historical veto or bypass time guard. Next: fresh guarded disposition, then genuine scheduled partial-slate production readback. R11_OPERATIONAL_FRESHNESS_RESTORED=NO; R10 UI_REDESIGN_READY=YES; UI_IMPLEMENTATION_CAN_START=NO. Earlier entries below are historical.
+
+Production veto mutation/rejection observations remain pending; the deployed code is identical to the disposable SQL-tested authority, but that is not a substitute for actual production observation. No synthetic business data or historical veto was written. No disposition command was sent while three targets remained future-scheduled. Cron configuration is unchanged. The subsequent genuine scheduled production run remains pending.
