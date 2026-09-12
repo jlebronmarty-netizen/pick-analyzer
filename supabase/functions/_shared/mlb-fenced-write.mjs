@@ -24,6 +24,9 @@ export async function performFencedWrite({query,run,write,columnsByTable,clock})
     const gamePk=Number(row.target_game_pk ?? row.game_pk ?? row.metadata?.source_game_pk)
     if(table==='pick2_raw_mlb_statcast_pitches')ensure(rawScope.includes(gamePk),'RAW_SCOPE_ESCAPE')
     else {ensure(scope.includes(gamePk),'WRITE_SCOPE_ESCAPE');games.add(gamePk)}
+    if(['pick2_game_predictions','pick2_mlb_market_event_mappings','pick2_mlb_market_price_observations','pick2_mlb_market_value_evaluations','pick2_mlb_official_picks'].includes(table)) {
+      ensure(!(run.checkpoint.gameVetoes??[]).some(r=>r.gamePk===gamePk) && !(run.checkpoint.blocked??[]).some(r=>r.gamePk===gamePk),'GAME_VETO_WRITE_BLOCKED')
+    }
     if(table.endsWith('_daily_features'))ensure(typeof row.feature_snapshot_id==='string' && /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(row.feature_snapshot_id),'SNAPSHOT_ID_REQUIRED')
   }
   if(table!=='pick2_raw_mlb_statcast_pitches') {

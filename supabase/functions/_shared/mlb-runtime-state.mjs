@@ -55,7 +55,7 @@ const canonical = x => JSON.stringify(x, Object.keys(x).sort())
 export const MODES = ['INITIALIZE','PREGAME','STARTER_CHANGE','ODDS_FRESHNESS','INCREMENTAL','POSTGAME','OVERNIGHT','HOST_DRY']
 
 export function validateCheckpoint(x) {
-  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries','marketRecoveries'])
+  keys(x, ['version','mode','stage','scope','dependencyScope','completed','references','blocked','result','marketGames','marketReference','failure','disposition','dependencyRecoveries','marketRecoveries','gameVetoes'])
   if(x.marketRecoveries!==undefined) {
     ensure(Array.isArray(x.marketRecoveries) && x.marketRecoveries.length>=1 && x.marketRecoveries.length<=3,'MARKET_RECOVERY_CAP')
     for(const r of x.marketRecoveries) {
@@ -82,6 +82,13 @@ export function validateCheckpoint(x) {
     else ensure(r.identities===undefined && r.vectorDigest===undefined,'UNEXPECTED_FEATURE_REFERENCE')
   }
   ensure(Array.isArray(x.blocked) && x.blocked.length <= 50, 'BLOCKED')
+  if(x.gameVetoes!==undefined) {
+    ensure(Array.isArray(x.gameVetoes) && x.gameVetoes.length<=50 && new Set(x.gameVetoes.map(r=>r.gamePk)).size===x.gameVetoes.length,'GAME_VETO_CAP')
+    for(const r of x.gameVetoes) {
+      keys(r,['gamePk','reason','stage','at','evidenceDigest'])
+      ensure(x.scope.includes(r.gamePk) && ['CURRENT_STARTED_GAME_VETO','CURRENT_GAME_IDENTITY_VETO','CURRENT_STARTER_CHANGE_VETO','STARTER_MISSING','NEW_CANONICAL_EVIDENCE_AFTER_RUN_FREEZE','NEW_RAW_EVIDENCE_AFTER_RUN_FREEZE','STALE_GAME_EVIDENCE','FEATURE_INCOMPLETE','STARTER_OR_STATUS_CHANGED'].includes(r.reason) && ['predictions','marketMappings','marketObservations','values','officialPicks'].includes(r.stage) && Number.isFinite(Date.parse(r.at)) && digest(r.evidenceDigest),'GAME_VETO_SHAPE')
+    }
+  }
   for (const r of x.blocked) { keys(r, ['gamePk','reason']); ensure(integer(r.gamePk) && r.gamePk > 0 && typeof r.reason==='string' && /^[A-Za-z0-9_:.-]{1,160}$/.test(r.reason), 'BLOCKED_SHAPE') }
   if(x.marketGames !== undefined) {
     ensure(Array.isArray(x.marketGames) && x.marketGames.length<=50,'MARKET_GAME_CAP')
@@ -347,6 +354,7 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
       ensure(sha256(input.checkpoint.dependencyRecoveries??null)===sha256(run.checkpoint.dependencyRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(sha256(input.checkpoint.marketRecoveries??null)===sha256(run.checkpoint.marketRecoveries??null),'REVIEW_METADATA_IMMUTABLE')
       ensure(input.checkpoint.mode === run.checkpoint.mode,'MODE_DRIFT')
+      for(const veto of run.checkpoint.gameVetoes??[])ensure((input.checkpoint.gameVetoes??[]).some(r=>sha256(r)===sha256(veto)),'GAME_VETO_REGRESSION')
       ensure(run.checkpoint.completed.every(s => input.checkpoint.completed.includes(s)),'CHECKPOINT_REGRESSION')
       for (const reference of run.checkpoint.references) ensure(input.checkpoint.references.some(r => canonical(r) === canonical(reference)), 'REFERENCE_DRIFT')
       for (const prior of run.dml_accounting.stages ?? []) {

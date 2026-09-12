@@ -3,6 +3,7 @@ import { assertR2TLiveReadiness } from './mlb-data-02r-r2t-real-feature-champion
 import { buildAllPregameFeatureRows } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import {pinnedFeatureReferences} from './mlb-operational-r6-compact-features.mjs'
 import { buildPersistedPredictions, persistDownstreamRows, assertDownstreamPayload, DOWNSTREAM_BINDINGS, downstreamSchemaColumns } from './mlb-data-02r-r2t-downstream-persistence.mjs'
+import { gameVetoClassification } from './mlb-operational-game-veto.mjs'
 import { persistCanonicalMarkets, buildCanonicalValues, buildCanonicalOfficialPicks, canonicalMarketReference, restoreCanonicalMarkets } from './mlb-data-02r-r2t-market-binding.mjs'
 import { assertCanonicalRawInsert } from './mlb-data-02r-r2t-raw-binding.mjs'
 import { fetchR2NStatcastRowsForGames, streamR2NStatcastRowsForGames } from './mlb-data-02h-2026-current-foundation.mjs'
@@ -1141,13 +1142,37 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
   if (!Array.isArray(contexts) || !Array.isArray(nativeGames)) throw new Error('R2T_CANONICAL_EVIDENCE_SHAPE')
   const scope = assertEligibleGamePkFreeze(contexts.map(c => c.target.gamePk))
   const accounting = () => canonical.providerAccounting()
-  if (!scope.length) return { status: R2Q_EMPTY_SLATE_TERMINAL_STATUS, runContext, blockedGames, providerAccounting: accounting(), dmlAccounting: canonical.dmlAccounting?.() ?? null, writes: [], syntheticProductionPaths: 0 }
+  const vetoes = new Map((checkpoint.gameVetoes??[]).map(r=>[r.gamePk,r]))
+  const activeRows = rows => rows.filter(r=>!vetoes.has(r.game_pk??r.target_game_pk))
+  const blockedResult = () => [...blockedGames,...[...vetoes.values()].map(r=>({gamePk:r.gamePk,reason:r.reason}))].map(r=>({...r,classification:gameVetoClassification(r.reason)}))
+  if (!scope.length) return { status: R2Q_EMPTY_SLATE_TERMINAL_STATUS, runContext, blockedGames:blockedResult(), providerAccounting: accounting(), dmlAccounting: canonical.dmlAccounting?.() ?? null, writes: [], syntheticProductionPaths: 0 }
   const now = () => new Date(typeof clock === 'function' ? clock() : clock ?? new Date()).toISOString()
-  const assertPregame = async ({ domain, rows }) => {
+  const assertPregame = async ({ domain, rows, plannedRows=rows }) => {
     const table = DOWNSTREAM_BINDINGS[domain]?.table ?? R2I_FEATURE_IDENTITY_BINDINGS[domain]?.table
     if (mode === 'LIVE_EXECUTE' && !authorization?.authorizedDmlTargets?.includes(table)) throw new Error('R2T_UNAUTHORIZED_WRITE_TARGET')
     const at = now()
     if (Date.parse(at) < Date.parse(runContext.run_as_of)) throw new Error('R2T_CLOCK_BEFORE_FREEZE')
+    if(DOWNSTREAM_BINDINGS[domain] && canonical.classifyCurrentGames) {
+      const candidates=contexts.filter(c=>plannedRows.some(r=>r.game_pk===c.target.gamePk) && !vetoes.has(c.target.gamePk))
+      if(plannedRows.some(r=>!contexts.some(c=>c.target.gamePk===r.game_pk)))throw Error('R2T_GAME_VETO_SCOPE_ESCAPE')
+      const assessment=await canonical.classifyCurrentGames({contexts:candidates,at,domain})
+      if(assessment.results.length!==candidates.length || new Set(assessment.results.map(r=>r.gamePk)).size!==candidates.length || assessment.results.some(r=>!candidates.some(c=>c.target.gamePk===r.gamePk)))throw Error('R2T_GAME_VETO_SCOPE_ESCAPE')
+      const added=assessment.results.filter(r=>r.classification!=='ELIGIBLE').map(r=>({gamePk:r.gamePk,reason:r.reason,stage:domain,at:assessment.at,evidenceDigest:assessment.evidenceDigest}))
+      for(const entry of added)vetoes.set(entry.gamePk,entry)
+      if(added.length) {
+        checkpoint.gameVetoes=[...vetoes.values()]
+        if(canonical.checkpoint.recordGameVetoes)await canonical.checkpoint.recordGameVetoes(added)
+        else await canonical.checkpoint.save(runContext.run_id,checkpoint)
+      }
+      const eligibleGamePks=assessment.results.filter(r=>r.classification==='ELIGIBLE').map(r=>r.gamePk)
+      for(const row of rows.filter(r=>eligibleGamePks.includes(r.game_pk)))if(domain==='values'||domain==='officialPicks') {
+        const fresh=classifyMarketFreshness({provider_last_update:row.provider_last_update??row.metadata?.provider_last_update,acquired_at:now()}).state
+        if((domain==='officialPicks'&&fresh!=='FRESH')||(domain==='values'&&fresh!==row.market_freshness))throw Error('R2T_MARKET_FRESHNESS_CHANGED_BEFORE_WRITE')
+      }
+      // Classification filters the batch; the transaction still rechecks actual
+      // start time and durable vetoes before committing any row.
+      return {eligibleGamePks}
+    }
     for (const row of rows) {
       const gamePk = row.game_pk ?? row.target_game_pk
       const context = contexts.find(c => c.target.gamePk === gamePk)
@@ -1157,7 +1182,7 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
         if ((domain === 'officialPicks' && fresh !== 'FRESH') || (domain === 'values' && fresh !== row.market_freshness)) throw new Error('R2T_MARKET_FRESHNESS_CHANGED_BEFORE_WRITE')
       }
     }
-    await canonical.assertCurrentStarters({ contexts, at, domain })
+    await canonical.assertCurrentStarters({ contexts:contexts.filter(c=>rows.some(r=>(r.game_pk??r.target_game_pk)===c.target.gamePk)), at, domain })
   }
   const limits = authorization?.dmlCaps ?? {}
   for (const target of [...Object.values(R2I_FEATURE_IDENTITY_BINDINGS).map(b => b.table), ...Object.values(DOWNSTREAM_BINDINGS).map(b => b.table)]) await repository.verifySchemaFingerprint(target)
@@ -1176,35 +1201,42 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
     await canonical.checkpoint.save(runContext.run_id,checkpoint)
   }
   await canonical.checkpoint.markStage?.('PREDICTIONS')
-  const predictions = await persistDownstreamRows({ domain: 'predictions', rows: plannedPredictions, repository, eligibleGamePks: scope, cap: limits.predictions ?? plannedPredictions.length, beforeWrite: assertPregame })
+  const predictions = await persistDownstreamRows({ domain: 'predictions', rows: activeRows(plannedPredictions), repository, eligibleGamePks: scope, cap: limits.predictions ?? plannedPredictions.length, beforeWrite: assertPregame })
+  const predictionScope=predictions.rows.map(r=>r.game_pk)
+  if(!predictionScope.length)return {status:'NO_VALID_PREGAME_SLATE',mode,runContext,eligibleGamePks:[],blockedGames:blockedResult(),features,predictions,writes:[...features.writes,predictions],insertedRows:features.writes.reduce((n,w)=>n+w.inserted,0),providerAccounting:accounting(),dmlAccounting:canonical.dmlAccounting?.()??null,syntheticProductionPaths:0}
+  const marketScope=()=>predictionScope.filter(pk=>!vetoes.has(pk))
   let markets
   if(canonical.checkpoint.referenceOnly) {
-    if(checkpoint.marketReference)markets=await restoreCanonicalMarkets({reference:checkpoint.marketReference,repository,eligibleGamePks:scope,beforeWrite:assertPregame})
+    if(checkpoint.marketReference) {
+      const preservedScope=[...new Set(checkpoint.marketReference.crosswalk.filter(r=>r.classification==='MATCHED').map(r=>r.game_pk))]
+      if(preservedScope.some(pk=>!nativeGames.some(g=>g.game_pk===pk)))throw Error('R2T_GAME_VETO_SCOPE_ESCAPE')
+      markets=await restoreCanonicalMarkets({reference:checkpoint.marketReference,repository,eligibleGamePks:preservedScope,beforeWrite:assertPregame})
+    }
     else {
       await canonical.checkpoint.markStage?.('ODDS_ACQUISITION')
-      const evidence=await canonical.getOddsEvidence({runContext,eligibleGamePks:scope})
+      const evidence=await canonical.getOddsEvidence({runContext,eligibleGamePks:marketScope()})
       checkpoint.evaluatedAt=now()
       await canonical.checkpoint.markStage?.('MARKET_PERSISTENCE')
-      markets=await persistCanonicalMarkets({evidence,nativeGames,eligibleGamePks:scope,repository,limits,beforeWrite:assertPregame})
+      markets=await persistCanonicalMarkets({evidence,nativeGames:nativeGames.filter(g=>marketScope().includes(g.game_pk)),eligibleGamePks:marketScope(),repository,limits,beforeWrite:assertPregame})
       checkpoint.marketReference=canonicalMarketReference({markets,evidence,evaluatedAt:checkpoint.evaluatedAt})
       checkpoint.oddsDigest=checkpoint.marketReference.oddsDigest
       await canonical.checkpoint.save(runContext.run_id,checkpoint)
     }
   } else {
   if (!checkpoint.odds) {
-    checkpoint.odds = await canonical.getOddsEvidence({ runContext, eligibleGamePks: scope })
+    checkpoint.odds = await canonical.getOddsEvidence({ runContext, eligibleGamePks: marketScope() })
     checkpoint.oddsDigest = sha256(checkpoint.odds)
     checkpoint.evaluatedAt = now()
     await canonical.checkpoint.save(runContext.run_id, checkpoint)
   }
   if (sha256(checkpoint.odds) !== checkpoint.oddsDigest) throw new Error('R2T_CHECKPOINT_ODDS_DRIFT')
-  markets = await persistCanonicalMarkets({ evidence: checkpoint.odds, nativeGames, eligibleGamePks: scope, repository, limits, beforeWrite: assertPregame })
+  markets = await persistCanonicalMarkets({ evidence: checkpoint.odds, nativeGames:nativeGames.filter(g=>marketScope().includes(g.game_pk)), eligibleGamePks: marketScope(), repository, limits, beforeWrite: assertPregame })
   }
   await canonical.checkpoint.markStage?.('VALUES')
-  const valueRows = buildCanonicalValues({ predictions: predictions.rows, observations: markets.observations.rows, evaluatedAt: checkpoint.evaluatedAt })
+  const valueRows = buildCanonicalValues({ predictions: activeRows(predictions.rows), observations: activeRows(markets.observations.rows), evaluatedAt: checkpoint.evaluatedAt })
   const values = await persistDownstreamRows({ domain: 'values', rows: valueRows, repository, eligibleGamePks: scope, cap: limits.nativeValues ?? valueRows.length, beforeWrite: assertPregame })
   await canonical.checkpoint.markStage?.('OFFICIAL_PICKS')
-  const decision = buildCanonicalOfficialPicks({ values: values.rows, decisionAt: checkpoint.evaluatedAt, scheduledByGame: new Map(contexts.map(c => [c.target.gamePk, c.target.scheduledAt])) })
+  const decision = buildCanonicalOfficialPicks({ values: activeRows(values.rows), decisionAt: checkpoint.evaluatedAt, scheduledByGame: new Map(contexts.map(c => [c.target.gamePk, c.target.scheduledAt])) })
   const picks = await persistDownstreamRows({ domain: 'officialPicks', rows: decision.rows, repository, eligibleGamePks: scope, cap: limits.officialPicks ?? decision.rows.length, beforeWrite: assertPregame })
   await canonical.checkpoint.markStage?.('BOARD_READBACK')
   const boardReadback = await repository.readValueBoard({ valueIdentities: values.rows.map(r => r.value_identity), pickIdentities: picks.rows.map(r => r.official_pick_identity) })
@@ -1215,12 +1247,12 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
     if (!value || sha256(value) !== sha256(d.candidate)) throw new Error('VALUE_BOARD_PAYLOAD_DRIFT')
     const pick = boardReadback.picks.find(p => p.value_evaluation_id === value.id)
     if (pick && !picks.rows.some(p => sha256(p) === sha256(pick))) throw new Error('VALUE_BOARD_PICK_DRIFT')
-    return { ...value, status: pick ? 'OFFICIAL_PICK' : d.status === 'OFFICIAL_PICK_ELIGIBLE' ? 'WATCHLIST' : d.status, official_pick_identity: pick?.official_pick_identity ?? null,
-      risk_flags: d.risk_flags, blocker_codes: d.blocker_codes, reason_codes: d.reason_codes }
+    return { ...value, status: vetoes.has(value.game_pk)?'BLOCKED':pick ? 'OFFICIAL_PICK' : d.status === 'OFFICIAL_PICK_ELIGIBLE' ? 'WATCHLIST' : d.status, official_pick_identity: pick?.official_pick_identity ?? null,
+      risk_flags: d.risk_flags, blocker_codes: vetoes.has(value.game_pk)?[...d.blocker_codes,vetoes.get(value.game_pk).reason]:d.blocker_codes, reason_codes: d.reason_codes }
   })
   const board = readValueBoardAdapter({ board: { rows: boardRows, state: 'CANONICAL_READBACK', freshness: 'PER_ROW' }, operatingDate: runContext.run_date, asOf: checkpoint.evaluatedAt })
   const writes = [...features.writes, predictions, markets.mappings, markets.observations, values, picks]
-  return { status: 'CANONICAL_STAGES_READBACK_COMPLETE', mode, runContext, eligibleGamePks: scope, blockedGames,
+  return { status: 'CANONICAL_STAGES_READBACK_COMPLETE', mode, runContext, eligibleGamePks: marketScope(), blockedGames:blockedResult(),
     features, predictions, markets, values, picks, board, decisions: decision.decisions, writes,
     providerAccounting: accounting(), dmlAccounting: canonical.dmlAccounting?.() ?? null, insertedRows: writes.reduce((sum, w) => sum + w.inserted, 0),
     syntheticProductionPaths: 0, checkpoint: { frozenDigest, evidenceDigest: checkpoint.evidenceDigest, oddsDigest: checkpoint.oddsDigest } }

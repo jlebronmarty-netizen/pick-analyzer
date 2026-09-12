@@ -11,6 +11,7 @@ import { createPregameReadRepository } from './mlb-data-02r-r2t-r1-read-reposito
 import { resolveStoredOfficialTeamAliases, bindStoredNativeContext } from './mlb-data-02r-r2t-r2-native-binding.mjs'
 import { resolvePregameTarget, resolveStarterContext, buildPregameFeatureRows, operatingDate } from './mlb-data-02r-r2t-r1-pregame-contract.mjs'
 import { prepareCompactFeatureContext, buildCompactFeaturePlan, restorePinnedFeaturePlan } from './mlb-operational-r6-compact-features.mjs'
+import { classifyCurrentGame } from './mlb-operational-game-veto.mjs'
 
 const ensure = (condition, reason) => { if (!condition) throw new Error(`R2T_PRODUCTION_BLOCK:${reason}`) }
 const read = async (query, label) => { const { data, error } = await query; ensure(!error && Array.isArray(data), `READ:${label}:${error?.code ?? 'UNKNOWN'}`); return data }
@@ -278,6 +279,20 @@ async function createBindings({ client, repository, store, runContext, authoriza
         contexts.push({target,starters,dependencies:{scopeDigest:dependency.digest,dependencyCount:dependency.count,actualRows:raw.count,dependencyDigest:raw.digest,latestAvailableAt:raw.asOf}})
       }
       return contexts
+    },
+    async classifyCurrentGames({ contexts, at, domain }) {
+      const rows = await repository.readNativeGames(contexts.map(c => c.target.gamePk))
+      ensure(new Set(rows.map(r=>r.game_pk)).size===rows.length && rows.every(r=>contexts.some(c=>c.target.gamePk===r.game_pk)), 'NATIVE_REVALIDATION_COUNT')
+      const requireCurrent = ['predictions','values','officialPicks'].includes(domain)
+      let games = [], evidenceDigest = sha256(rows)
+      if (requireCurrent && contexts.length) {
+        const fresh = await mlb.getSchedule({ runDate: runContext.run_date })
+        evidenceDigest = sha256(fresh)
+        const slate = await getCurrentSlate({ mode: 'LIVE_EXECUTE', runDate: runContext.run_date, runAsOf: at, injectedEvidence: fresh, teamMap: await canonicalAliases(), liveAuthorization: true })
+        games = slate.artifact.games
+      }
+      const observedAt=now().toISOString()
+      return { at: observedAt, evidenceDigest, results: contexts.map(context=>classifyCurrentGame({ context, native: rows.find(r=>r.game_pk===context.target.gamePk), currentGame: games.find(g=>g.game_pk===context.target.gamePk), at: observedAt, requireCurrent })) }
     },
     async assertCurrentStarters({ contexts, at, domain }) {
       const rows = await repository.readNativeGames(contexts.map(c => c.target.gamePk))

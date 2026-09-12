@@ -83,7 +83,7 @@ export async function persistDownstreamRows({ domain, rows, repository, eligible
   ensure(Number.isInteger(cap) && cap >= 0, 'INVALID_CAP')
   rows = rows.map(row => normalizeDownstreamPayload(domain, row))
   assertGameScope(rows, eligibleGamePks)
-  const identities = rows.map(row => row[binding.identity])
+  let identities = rows.map(row => row[binding.identity])
   ensure(new Set(identities).size === rows.length, 'DUPLICATE_PLAN_IDENTITY')
   const plannedById = new Map(rows.map(row => [row[binding.identity], row]))
   const classify = stored => {
@@ -95,18 +95,29 @@ export async function persistDownstreamRows({ domain, rows, repository, eligible
       identityFields: [binding.identity], digestField: 'physical_digest', eligibleGamePks, cap,
     })
   }
-  const existing = rows.length ? await repository[binding.read](identities) : []
-  const plan = classify(existing)
+  let existing = rows.length ? await repository[binding.read](identities) : []
+  let plan = classify(existing)
   const missing = new Set(plan.classifications.filter(c => c.classification === 'INSERT_ELIGIBLE').map(c => c.identity))
-  const inserts = rows.filter(row => missing.has(String(row[binding.identity])))
+  let inserts = rows.filter(row => missing.has(String(row[binding.identity])))
   ensure(inserts.length === plan.insertEligible && inserts.length <= cap, 'INSERT_CAP_OR_LINKAGE')
   let actualInserted=0
   if (inserts.length) {
-    await beforeWrite({ domain, rows: inserts, cap, plan })
+    const selection = await beforeWrite({ domain, rows: inserts, plannedRows: rows, cap, plan })
+    if(selection?.eligibleGamePks) {
+      ensure(Array.isArray(selection.eligibleGamePks) && new Set(selection.eligibleGamePks).size===selection.eligibleGamePks.length && selection.eligibleGamePks.every(pk=>rows.some(r=>r.game_pk===pk)),'VETO_SCOPE_ESCAPE')
+      rows=rows.filter(r=>selection.eligibleGamePks.includes(r.game_pk))
+      identities=rows.map(r=>r[binding.identity])
+      existing=existing.filter(r=>identities.includes(r[binding.identity]))
+      plan=classify(existing)
+      inserts=inserts.filter(r=>identities.includes(r[binding.identity]))
+      ensure(inserts.length===plan.insertEligible,'VETO_PLAN_LINKAGE')
+    }
+    if(inserts.length) {
     const write = await repository[binding.insert](inserts, cap)
     const raceReuse=['marketObservations','values','officialPicks'].includes(domain)?(write.reused??0):0
     ensure(Number.isSafeInteger(write.inserted) && write.inserted>=0 && Number.isSafeInteger(raceReuse) && raceReuse>=0 && write.inserted+raceReuse===inserts.length, 'INSERT_COUNT')
     actualInserted=write.inserted
+    }
   }
   const stored = rows.length ? await repository[binding.read](identities) : []
   const readback = classify(stored)

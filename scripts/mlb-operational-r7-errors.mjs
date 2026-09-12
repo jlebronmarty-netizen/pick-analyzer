@@ -22,6 +22,7 @@ const canonicalGuardCodes = new Set([
   'CURRENT_STARTER_CHANGE_VETO',
 ])
 for (const code of canonicalGuardCodes) codes.add(code)
+for (const code of ['GAME_VETO_CAP','GAME_VETO_SHAPE','GAME_VETO_REGRESSION','GAME_VETO_WRITE_BLOCKED']) codes.add(code)
 export function sanitizedStageException(error) {
   const message=typeof error?.message==='string'?error.message:''
   const part=message.startsWith('R6_STATE:')?message.slice(9):message.split(':')[1]

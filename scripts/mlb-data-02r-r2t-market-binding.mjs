@@ -46,7 +46,7 @@ export async function persistCanonicalMarkets({ evidence, nativeGames, eligibleG
   }
   const mappingResult = await persistDownstreamRows({ domain: 'marketMappings', rows: plannedMappings, repository, eligibleGamePks, cap: limits.marketMappings ?? plannedMappings.length, beforeWrite })
   const mappingByEvent = new Map(mappingResult.rows.map(r => [r.provider_event_id, r]))
-  const observations = normalized.rows.filter(row => matched.has(row.provider_event_id)).map(row => {
+  const observations = normalized.rows.filter(row => mappingByEvent.has(row.provider_event_id)).map(row => {
     const mapping = mappingByEvent.get(row.provider_event_id)
     const native = nativeGames.find(g => g.game_pk === mapping.game_pk)
     ensure(timestamp(row.commence_time) && timestamp(row.provider_last_update), 'MISSING_MARKET_TIME')

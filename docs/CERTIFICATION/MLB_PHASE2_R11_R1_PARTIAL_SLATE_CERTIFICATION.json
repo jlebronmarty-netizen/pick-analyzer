@@ -1,0 +1,104 @@
+{
+  "phase": "MLB_PHASE2_R11_R1_PER_GAME_VETO_AND_PARTIAL_SLATE_PERSISTENCE_CERTIFICATION",
+  "verdict": "R11_R1_LOCAL_PARTIAL_SLATE_CERTIFIED_DEPLOYMENT_PENDING",
+  "startingLocalSha": "fba7e2b84c58d76dc6ef267a89e27cd11ec6f060",
+  "productionBaseline": "d5b489ecb7060cbb6c4ce39060f2ec432408a985",
+  "gates": {
+    "R11_R1_VETO_DIAGNOSTICS": "PASS",
+    "R11_R1_GAME_LEVEL_VETO_CONTRACT": "PASS",
+    "R11_R1_FROZEN_SLATE_MATRIX": "COMPLETE",
+    "R11_R1_PARTIAL_SLATE_PERSISTENCE": "PASS",
+    "R11_R1_MIXED_SLATE_TEST": "PASS",
+    "R11_R1_DOWNSTREAM_SCOPE": "PASS",
+    "DEPLOYMENT": "PENDING",
+    "R11_R1_FAILED_RUN_PRESERVATION": "PASS",
+    "R11_R1_HISTORICAL_RUN_DISPOSITION": "PENDING_EXISTING_TIME_STATE_GUARD",
+    "NEXT_GENUINE_PRODUCTION_RUN": "PENDING"
+  },
+  "frozenMatrix": {
+    "games": 15,
+    "inputEligible": 13,
+    "missingStarter": 1,
+    "postFreezeEvidence": 1,
+    "unknownVetoForPreparedGames": "UNRECOVERABLE_HISTORICAL_VETO_DETAIL",
+    "snapshots": 130,
+    "orderedInputsPerGame": 76
+  },
+  "disposable": {
+    "status": "PASS",
+    "checks": [
+      {
+        "name": "Mixed slate durably blocks missing/changed starter, started, wrong identity and post-freeze evidence before predictions",
+        "status": "PASS"
+      },
+      {
+        "name": "Independent runtime resumes eight valid games through predictions, mappings, observations, values and unchanged Policy V1",
+        "status": "PASS"
+      },
+      {
+        "name": "Second pass reuses deterministic rows with zero additional provider requests or inserts",
+        "status": "PASS"
+      },
+      {
+        "name": "Frozen scope and all original evidence references survive per-game exclusion and cross-instance resume",
+        "status": "PASS"
+      },
+      {
+        "name": "Edge transaction authority rejects veto removal, scope escape and every downstream write target before SQL",
+        "status": "PASS"
+      },
+      {
+        "name": "Later durable veto excludes one target on cross-instance market restore without deleting committed predictions or values",
+        "status": "PASS"
+      },
+      {
+        "name": "All targets vetoed terminate cleanly without reacquisition or new downstream writes",
+        "status": "PASS"
+      },
+      {
+        "name": "Frozen matrix uses only pre-freeze native and snapshot evidence; missing historical veto remains unknown",
+        "status": "PASS"
+      }
+    ],
+    "eligible": 8,
+    "durableVetoes": 5,
+    "initialExcluded": 2,
+    "predictions": 8,
+    "mappings": 8,
+    "observations": 16,
+    "values": 16,
+    "picks": 0,
+    "secondPassInserts": 0,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "injectedOfficialRequests": 3,
+    "injectedOddsRequests": 1,
+    "historicalVeto": "UNRECOVERABLE_HISTORICAL_VETO_DETAIL"
+  },
+  "validators": {
+    "physicalSchemaChampion": 74,
+    "priorR11": 24,
+    "partialSlateGroups": 8,
+    "runtimeState": 21,
+    "fencedWrite": 8,
+    "r7DurabilityMidnight": 5,
+    "security": 4,
+    "r10ReadModel": 17,
+    "readiness": 17,
+    "build": "PASS",
+    "candidateAuth": "PASS"
+  },
+  "providerCallsThisPhase": 0,
+  "cumulativeOdds": "7/20",
+  "productionDmlThisPhase": 0,
+  "productionDdlThisPhase": 0,
+  "introducedConflicts": 0,
+  "introducedStartedGameLeakage": 0,
+  "failedRevisionPreserved": 38,
+  "checkpointAndAccountingPreserved": true,
+  "R11_OPERATIONAL_FRESHNESS_RESTORED": "NO",
+  "UI_REDESIGN_READY": "YES",
+  "UI_IMPLEMENTATION_CAN_START": "NO",
+  "publicEvidence": "AGGREGATE_ONLY_PRIVATE_INPUTS_RETAINED_OUTSIDE_GIT"
+}

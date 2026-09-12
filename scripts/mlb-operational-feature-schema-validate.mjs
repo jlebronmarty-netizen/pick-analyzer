@@ -185,4 +185,10 @@ const report = { generatedAt: new Date().toISOString(), status: 'DISPOSABLE_SCHE
 for (const [file, hash] of Object.entries(testedSourceHashes)) assert.equal(normalizedFileDigest(file), hash, 'source changed during validation')
 fs.writeFileSync(path.join(root, 'schema-validation.json'), JSON.stringify(report, null, 2))
 console.log(JSON.stringify(report))
+if(process.env.R11_R1_VALIDATE==='1') {
+  const archive=await db.dumpDataDir()
+  fs.writeFileSync(path.join(root,'r11-r1-disposable-base.tar'),Buffer.from(await archive.arrayBuffer()))
+  const {validatePartialSlate}=await import('./mlb-phase2-r11-r1-partial-slate-validate.mjs')
+  await validatePartialSlate({db,root})
+}
 await db.close()

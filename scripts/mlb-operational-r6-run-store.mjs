@@ -13,6 +13,12 @@ export function createDurableRunStore({runtime,runContext,root}) {
     get locked(){return runtime.locked},
     get frozenScope(){return runtime.run.checkpoint.completed.includes('SCOPE')?[...runtime.run.checkpoint.scope]:null},
     setCanonical(bindings){canonical=bindings},
+    async recordGameVetoes(entries) {
+      const cp=runtime.run.checkpoint,prior=cp.gameVetoes??[]
+      const added=entries.filter(r=>!prior.some(p=>p.gamePk===r.gamePk))
+      if(added.length)await persist({...cp,gameVetoes:[...prior,...added]})
+      return runtime.run.checkpoint.gameVetoes??[]
+    },
     async markStage(stage) {
       ensure(['PREDICTIONS','ODDS_ACQUISITION','MARKET_PERSISTENCE','VALUES','OFFICIAL_PICKS','BOARD_READBACK'].includes(stage),'STAGE')
       const cp=runtime.run.checkpoint
@@ -37,10 +43,14 @@ export function createDurableRunStore({runtime,runContext,root}) {
         ensure(canonical,'CANONICAL_RESOLVER_REQUIRED')
         const frozen=cp.references.find(r=>r.kind==='run_freeze')
         ensure(frozen?.digest===sha256(runContext),'FROZEN_CONTEXT_DRIFT')
-        const evidence={contexts:await canonical.restoreContexts({references:cp.references,scope:cp.scope}),nativeGames:cp.marketGames,blockedGames:cp.blocked}
+        const vetoed=new Set((cp.gameVetoes??[]).map(r=>r.gamePk))
+        const activeReferences=cp.references.filter(r=>!vetoed.has(Number(r.identity)))
+        const evidence={contexts:await canonical.restoreContexts({references:activeReferences,scope:cp.scope}),nativeGames:cp.marketGames,blockedGames:cp.blocked}
         const digest=sha256(evidence)
-        ensure(cp.references.find(r=>r.kind==='context_evidence')?.digest===digest,'EVIDENCE_REFERENCE_DRIFT')
-        return {frozenDigest:frozen.digest,runContext,evidence,evidenceDigest:digest,...(cp.completed.includes('FEATURES')?{featureReferences:cp.references.filter(r=>r.kind==='persisted_features')} : {}),...(cp.marketReference?{marketReference:cp.marketReference,evaluatedAt:cp.marketReference.evaluatedAt,oddsDigest:cp.marketReference.oddsDigest}:{})}
+        // Keep the aggregate immutable; restoreContexts verifies every remaining
+        // game's exact frozen digest. Vetoed targets are never reconstructed.
+        if(!vetoed.size)ensure(cp.references.find(r=>r.kind==='context_evidence')?.digest===digest,'EVIDENCE_REFERENCE_DRIFT')
+        return {frozenDigest:frozen.digest,runContext,evidence,evidenceDigest:digest,gameVetoes:cp.gameVetoes??[],...(cp.completed.includes('FEATURES')?{featureReferences:activeReferences.filter(r=>r.kind==='persisted_features')} : {}),...(cp.marketReference?{marketReference:cp.marketReference,evaluatedAt:cp.marketReference.evaluatedAt,oddsDigest:cp.marketReference.oddsDigest}:{})}
       }
       if(key===`schedule-${runId}` || key===`odds-${runId}`){
         const kind=key===`odds-${runId}`?'odds':'schedule',provider=kind==='odds'?'THE_ODDS_API':'MLB_OFFICIAL'
@@ -66,11 +76,11 @@ export function createDurableRunStore({runtime,runContext,root}) {
       ensure(key===runId && value.frozenDigest===sha256(runContext) && value.evidenceDigest===sha256(value.evidence),'DOCUMENT_FREEZE')
       ensure(!value.odds,'RAW_ODDS_CHECKPOINT_FORBIDDEN')
       const cp=runtime.run.checkpoint,evidence=value.evidence
-      const references=[{kind:'run_freeze',identity:runId,digest:value.frozenDigest,count:1,asOf:runContext.run_as_of},
+      const references=cp.completed.includes('CONTEXTS')?[...cp.references]:[{kind:'run_freeze',identity:runId,digest:value.frozenDigest,count:1,asOf:runContext.run_as_of},
         {kind:'context_evidence',identity:runId,digest:value.evidenceDigest,count:evidence.contexts.length,asOf:runContext.run_as_of},...evidence.contexts.flatMap(durableContextReferences)]
-      if(value.featureReferences)references.push(...value.featureReferences)
+      if(value.featureReferences)for(const ref of value.featureReferences)if(!references.some(r=>r.kind===ref.kind && r.identity===ref.identity))references.push(ref)
       for(const old of cp.references)if(!references.some(r=>r.kind===old.kind && r.identity===old.identity))references.push(old)
-      await persist({...cp,stage:value.marketReference?'MARKETS':value.featureReferences?'FEATURES':'CONTEXTS',references,marketGames:evidence.nativeGames,blocked:evidence.blockedGames??[],completed:[...new Set([...cp.completed,'CONTEXTS',...(value.featureReferences?['FEATURES']:[]),...(value.marketReference?['MARKETS']:[])])],...(value.marketReference?{marketReference:value.marketReference}:{})})
+      await persist({...cp,stage:value.marketReference?'MARKETS':value.featureReferences?'FEATURES':'CONTEXTS',references,marketGames:cp.completed.includes('CONTEXTS')?cp.marketGames:evidence.nativeGames,blocked:cp.completed.includes('CONTEXTS')?cp.blocked:evidence.blockedGames??[],completed:[...new Set([...cp.completed,'CONTEXTS',...(value.featureReferences?['FEATURES']:[]),...(value.marketReference?['MARKETS']:[])])],...(value.marketReference?{marketReference:value.marketReference}:{})})
     },
   }
   return store
