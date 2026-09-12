@@ -1,0 +1,80 @@
+{
+  "verdict": "R12_DDL_AND_EDGE_DEPLOYMENT_CERTIFIED_WEB_PUBLICATION_AND_DISPOSITION_PENDING",
+  "observedAt": "2026-09-12T21:07:24Z",
+  "candidateSha": "ea28d4104bd153dc925c9ca1586cc1ef68c6a737",
+  "migration": "supabase/migrations/20260912203030_mlb_r12_operational_odds_budget.sql",
+  "normalizedMigrationSha256": "004f52deaf94b6cddae9094c131bc36208001b0483e98ad42674f2f1b03bc1ce",
+  "migrationAppliedExactlyOnce": true,
+  "preflight": { "status": "PASS", "columns": 406, "constraints": 116, "indexes": 84, "orphanReferences": 0, "transaction": "READ_ONLY" },
+  "schemaReadback": {
+    "exactApprovedCatalog": "PASS",
+    "columns": 11,
+    "constraints": 11,
+    "indexes": 4,
+    "rls": true,
+    "clientPolicies": 0,
+    "serviceTableGrants": ["SELECT", "INSERT"],
+    "serviceUpdateColumns": ["response_at", "http_status", "credits_last", "credits_used", "credits_remaining"],
+    "serviceDelete": false,
+    "anonymousSelect": false,
+    "authenticatedSelect": false,
+    "initialRows": 0,
+    "orphanReferences": 0,
+    "existingPublicSchemaFingerprintUnchanged": true,
+    "checkedRuntimePredictionMarketValuePickRawCountsUnchanged": true
+  },
+  "edge": {
+    "versionBefore": 13,
+    "versionAfter": 14,
+    "status": "ACTIVE",
+    "manifest": "docs/CERTIFICATION/MLB_PHASE2_R12_OPERATIONAL_EDGE_MANIFEST.json",
+    "exactDeployedFileMatches": 13,
+    "extraFiles": 0,
+    "verifyJwt": false,
+    "mandatoryServerOnlyBearer": true,
+    "missingBearerStatus": 401,
+    "wrongBearerStatus": 401,
+    "publicCredentialStatus": 401,
+    "serverInspectStatus": 200,
+    "nonHolderOddsPlanStatus": 409,
+    "nonHolderReason": "R6_STATE:STALE_FENCE_OR_LEASE"
+  },
+  "accounting": {
+    "historicalMission": { "consumed": 20, "cap": 20, "entireRowDigestUnchanged": true },
+    "operational": { "version": "MLB_ODDS_OPERATIONAL_BUDGET_V1", "edgePolicy": "ACTIVE", "day": "2026-09-12", "timezone": "America/Puerto_Rico", "consumed": 0, "cap": 48, "remaining": 48, "observedCredits": null, "naturalRunVerified": false },
+    "sportsProviderCallsThisPhase": 0,
+    "productionBusinessDml": 0,
+    "productionRuntimeDml": 0,
+    "productionDdlMigrations": 1,
+    "migrationHistoryRecordedByMigrationTool": true
+  },
+  "historicalFailedRun": {
+    "revision": 39,
+    "status": "FAILED",
+    "stage": "ODDS_ACQUISITION",
+    "preservedPredictions": 13,
+    "oddsCalls": 0,
+    "leaseActive": false,
+    "unresolvedRunCount": 1,
+    "dispositionAttempted": false,
+    "earliestDispositionAt": "2026-09-13T01:40:00Z",
+    "earliestDispositionPuertoRico": "2026-09-12T21:40:00-04:00"
+  },
+  "web": {
+    "productionSha": "5019efd81a8a482641f036cf23995ea4b2d772ca",
+    "candidatePreview": "READY",
+    "mainPushExecuted": false,
+    "publicationBlocker": "AUTOMATIC_APPROVAL_REVIEW_REJECTED_EXACT_MAIN_PUSH",
+    "dataHealthAndResearchLabProductionRelease": "PENDING"
+  },
+  "localRegression": { "passingChecks": 126, "build": "PASS", "edgeAuthRegressionRerun": "PASS", "gracefulExhaustionAndModeIsolation": "PASS_DISPOSABLE_INJECTED" },
+  "protectedContractsChanged": false,
+  "inheritedUnstagedFilesPreserved": 19,
+  "remaining": [
+    "Explicit main-push approval accepted by automatic review for the exact candidate",
+    "Paired Vercel production deployment and readback",
+    "Fresh guarded disposition after the actual time gate passes",
+    "Lease/host and natural scheduled operational-budget execution readback",
+    "Production request/credit and downstream canonical readback"
+  ]
+}
