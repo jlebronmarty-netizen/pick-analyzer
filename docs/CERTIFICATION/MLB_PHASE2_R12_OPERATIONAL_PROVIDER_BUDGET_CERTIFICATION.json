@@ -1,0 +1,67 @@
+{
+  "verdict": "MLB_PHASE2_R12_OPERATIONAL_PROVIDER_BUDGET_CERTIFIED",
+  "observedAt": "2026-09-13T02:16:34.814Z",
+  "executionPackageSha": "ea28d4104bd153dc925c9ca1586cc1ef68c6a737",
+  "edgeVersion": 14,
+  "gates": {
+    "R12_HISTORICAL_RUN_DISPOSITION": "PASS",
+    "R12_RUNTIME_CLEARANCE": "PASS",
+    "R12_OPERATIONAL_LEDGER": "PASS",
+    "R12_FIRST_OPERATIONAL_SCHEDULED_RUN": "PASS",
+    "R12_PROVIDER_ACCOUNTING": "PASS",
+    "R12_CADENCE_ENFORCEMENT": "PASS",
+    "R12_GRACEFUL_EXHAUSTION_PRODUCTION_CONTRACT": "PASS_DISPOSABLE_RUNTIME",
+    "R12_MODE_ISOLATION": "PASS_PRODUCTION_PREGAME_INCREMENTAL_AND_DISPOSABLE_OTHER_MODES",
+    "R12_DATA_HEALTH_PRODUCTION": "PASS",
+    "R12_RESEARCH_LAB_POSITIONING": "PASS"
+  },
+  "historicalDisposition": {
+    "status": "TERMINAL_PARTIAL_PRESERVED",
+    "revisionBefore": 39,
+    "revisionAfter": 40,
+    "frozenTargetsPastScheduledStart": 15,
+    "preservedPredictions": 13,
+    "predictionDigestUnchanged": true,
+    "providerAndDmlAccountingUnchanged": true,
+    "freezePackageAndHistoricalFailurePreserved": true,
+    "successfulTerminalTransitions": 1
+  },
+  "scheduledInvocation": {
+    "at": "2026-09-13T02:15:06Z",
+    "path": "/api/cron/mlb-operational",
+    "method": "GET",
+    "httpStatus": 200,
+    "naturalCron": true,
+    "runs": [
+      {"id":"automation-5668e451ad99bb0de768d8ddaa4e4be9bac583802eace2d9a9cc1eceb2e83cdb","mode":"PREGAME","revision":6,"status":"COMPLETE","result":"NO_VALID_PREGAME_SLATE","MLB_OFFICIAL":1,"STATCAST":0,"THE_ODDS_API":0,"businessDml":0,"readback":"PASS"},
+      {"id":"automation-8612949edab39fa2cd8044060464f5df2b37480a416c4f2557b123e4b6ac2a49","mode":"INCREMENTAL","revision":5,"status":"COMPLETE","result":"COMPLETE","MLB_OFFICIAL":1,"STATCAST":1,"THE_ODDS_API":0,"businessDml":0,"readback":"PASS"}
+    ]
+  },
+  "accounting": {
+    "historicalMission": {"consumed":20,"cap":20,"entireRowUnchanged":true},
+    "operational": {"version":"MLB_ODDS_OPERATIONAL_BUDGET_V1","day":"2026-09-12","timezone":"America/Puerto_Rico","consumed":0,"cap":48,"perRunCap":1,"observedCredits":null,"creditSample":"NO_ODDS_REQUEST_REQUIRED"},
+    "providers": {"MLB_OFFICIAL":2,"STATCAST":1,"THE_ODDS_API":0,"BALLDONTLIE":0,"SportsDataIO":0,"other":0},
+    "businessDml": 0,
+    "productionDdl": 0,
+    "runtimeDml": {"dispositionRowUpdates":1,"newRunRows":2,"runRevisionUpdates":11,"leaseAcquireReleaseUpdates":4,"basis":"Certified authority starts run revisions at zero and increments each update; each mode completed before the first heartbeat."},
+    "counterResets": 0,
+    "rawPredictionMarketValuePickCountsUnchanged": true
+  },
+  "cadence": {"productionDecision":"NO_VALID_PREGAME_SLATE_NO_ODDS_REQUEST","over180Minutes":60,"over60Through180Minutes":30,"over5Through60Minutes":15,"marketFreshnessMinutes":10,"boundaryProof":"PASS_DISPOSABLE"},
+  "gracefulExhaustion": {"result":"ODDS_BUDGET_EXHAUSTED","proof":"PASS_DISPOSABLE_RUNTIME_AND_HOST_LOOP","productionCapIntentionallyExhausted":false},
+  "dataHealth": {"httpStatus":200,"configured":"ENABLED","observedHealth":"OBSERVED_RECENT_COMPLETION","currentRun":"COMPLETE","separateWebEdgeFrozenVersions":true,"separateHistoricalOperationalBudgets":true,"staleEdgeV6Explanation":false},
+  "researchLab": {"httpStatus":200,"label":"MLB Research Lab","experimentalShadow":true,"engineChanged":false},
+  "validation": {"operationalGroups":6,"budgetGroups":10,"healthChecks":4,"allPassed":true,"build":"PASS_400_PAGES","runtimeSourceHashes":73,"sourceMismatches":0,"missingWrongPublicBearer":401,"serverInspect":200,"schemaPreflight":"PASS"},
+  "AUTOMATION_OPERATIONAL": "YES",
+  "UNRESOLVED_RUNS": 0,
+  "leaseReleased": true,
+  "conflicts": 0,
+  "protectedModelFeaturePreprocessingPolicyChanges": 0,
+  "automationConfigurationChanges": 0,
+  "limitations": [
+    "No operational Odds request was required. Actual quota/credit headers remain unobserved; credits are not inferred from request counts.",
+    "First naturally required operational Odds acquisition remains a follow-up observation.",
+    "POSTGAME and OVERNIGHT isolation passed disposable tests; neither mode was due in this quarter-hour window.",
+    "Production settlement remains disabled. No settlement writes occurred."
+  ]
+}
