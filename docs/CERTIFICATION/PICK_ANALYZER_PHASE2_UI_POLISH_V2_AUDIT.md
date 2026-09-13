@@ -1,0 +1,15 @@
+# UI Polish V2 validation
+
+Status: local implementation validated; Preview publication blocked by automatic approval review. Do not treat this as production UI certification.
+
+R12 closeout publication completed first. Local HEAD, origin/main and Vercel Production aligned at 99d24d49862913f07fc546630a9441beeec07d70. Edge v14 remained active; historical mission accounting stayed 20/20, operational accounting was truthfully 0/48, unresolved runs were zero, and observed automation reported recent completion.
+
+Today now hides missing metrics without substituting zeros, keeps available probabilities/prices/starters/freshness, and provides one page-level probability explanation. Five compact summary counts and six display-only filters consume the unchanged canonical snapshot. Value Board retains Official Pick, Value Candidate, Watchlist, No Edge and Waiting/Blocked ordering, with a compact empty state. Data Health has a readable summary and a closed Advanced Diagnostics disclosure; failure codes remain visible. Primary navigation is Today and Value Board; Research Lab remains an independent experimental/shadow surface.
+
+Validation passed: nine presentation checks, seventeen R10 canonical read-model regressions, scoped lint, TypeScript and the 400-page build. The local browser matrix passed 153 checks: four rendered routes at 375/390/430/768/1440 pixels in dark/light appearances, eleven isolated UI states at the same sizes/appearances, and canonical/keyboard assertions. Accessibility violations, browser errors and document horizontal overflow were zero. Initial theme-switch contrast measurements were transient CSS-transition artifacts; the reproducible harness now waits for transitions to finish. No production styling exception or accessibility rule was waived.
+
+Fixtures cover current data, missing starter, waiting evidence, stale odds, started game, Official Pick, Value Candidate, No Edge, empty board, unhealthy automation and healthy automation. Fixtures and screenshots remain outside Git and are never imported by application code. The actual local view contained all 15 stored current-slate games and matched canonical API counts/classifications. Local sandbox network denial first produced the expected unavailable-data state; a network-enabled read-only local server verified actual canonical data.
+
+Services, schemas, model artifacts, 76-feature definitions, preprocessing, Policy V1 and automation configuration are unchanged. Seven existing presentation-source hashes were refreshed in the readiness certificate; all 73 checked source hashes match. UI provider calls, production business DML and production DDL are zero. Natural background automation remains independent of these read-only UI checks.
+
+Limitations: single-book no-vig probability is unavailable from this read model and is not reconstructed by the UI. A non-COMPLETE current health snapshot does not supply the last-completed-run timestamp; the summary reports that absence. Preview rendered validation and Production deployment/readback remain required before PICK_ANALYZER_PHASE2_UI_POLISH_V2_CERTIFIED. Full System Audit has not begun.

@@ -28,6 +28,7 @@ try {
       for (const theme of ['dark', 'light']) {
         await page.evaluate(theme => { document.documentElement.classList.remove('pa-light', 'pa-dark'); document.documentElement.classList.add('pa-' + theme) }, theme)
         await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
+        await page.evaluate(async () => { document.body.getBoundingClientRect(); await Promise.all(document.getAnimations().filter(a => a.constructor.name === 'CSSTransition').map(a => a.finished.catch(() => {}))) })
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${route}/${width}/${theme}: overflow`)
         const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
         results.push({ route, width, theme, violations: axe.violations.map(v => ({ id: v.id, count: v.nodes.length })) })
@@ -75,6 +76,7 @@ try {
         await page.setViewportSize({ width, height: 900 })
         for (const theme of ['dark', 'light']) {
           await page.evaluate(theme => { document.documentElement.className = 'pa-' + theme }, theme)
+          await page.evaluate(async () => { document.body.getBoundingClientRect(); await Promise.all(document.getAnimations().filter(a => a.constructor.name === 'CSSTransition').map(a => a.finished.catch(() => {}))) })
           assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${file}/${width}/${theme}: overflow`)
           const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
           results.push({ fixture: file, width, theme, violations: axe.violations.map(v => ({ id: v.id, count: v.nodes.length })) })
