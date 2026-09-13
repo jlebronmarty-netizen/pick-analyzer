@@ -30,6 +30,10 @@ try {
         await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
         await page.evaluate(async () => { document.body.getBoundingClientRect(); await Promise.all(document.getAnimations().filter(a => a.constructor.name === 'CSSTransition').map(a => a.finished.catch(() => {}))) })
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${route}/${width}/${theme}: overflow`)
+        if (route === '/mlb' && theme === 'light') {
+          const gradient = await page.getByRole('heading', { name: 'MLB Research Lab', exact: true, level: 1 }).evaluate(el => getComputedStyle(el.closest('section')).backgroundImage)
+          assert(gradient.includes('rgb(255, 255, 255)'), 'Research Lab gradient must use the existing light-theme surface')
+        }
         const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
         results.push({ route, width, theme, violations: axe.violations.map(v => ({ id: v.id, count: v.nodes.length })) })
         if (width === 390 || width === 1440) await page.screenshot({ path: path.join(output, route.slice(1) + '-' + width + '-' + theme + '.png'), fullPage: width === 1440 })

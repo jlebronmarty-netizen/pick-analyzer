@@ -1,6 +1,10 @@
 # UI Polish V2 validation
 
-Status: local implementation validated; Preview publication blocked by automatic approval review. Do not treat this as production UI certification.
+Status: repaired UI locally recertified; new exact publication approval pending. Do not treat this as production UI certification.
+
+September 13 publication review: authorized SHA 62dbbe441561132cc51d9c9676733ec2957f550f was normally pushed to codex/ui-polish-v2. Vercel Preview was READY at that SHA. Temporary authenticated access preserved deployment protection. All 153 automated checks passed, including canonical parity, but visual inspection found dark text on the Research Lab dark gradient in light appearance. Main was not updated. Preview Data Health truthfully reported unavailable runtime access; no environment or authentication setting was changed.
+
+The narrow repair adds the existing mlb-ui theme scope to Research Lab and reuses its sky-200 text mapping. An explicit gradient assertion supplements axe, which missed this gradient contrast defect. The repaired 400-page build, scoped lint, nine presentation checks, seventeen canonical regressions and all 153 local browser checks passed. Visual inspection confirmed the repair. Backend and calculation logic are unchanged. The user requires stopping before main when a repair changes the authorized SHA; this replacement is local only and needs its own Preview publication/review. Main and Vercel Production remain 99d24d49862913f07fc546630a9441beeec07d70. Earlier validation details below are retained as history.
 
 R12 closeout publication completed first. Local HEAD, origin/main and Vercel Production aligned at 99d24d49862913f07fc546630a9441beeec07d70. Edge v14 remained active; historical mission accounting stayed 20/20, operational accounting was truthfully 0/48, unresolved runs were zero, and observed automation reported recent completion.
 

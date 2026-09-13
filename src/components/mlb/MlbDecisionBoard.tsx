@@ -215,11 +215,11 @@ export default function MlbDecisionBoard({ initialData }: { initialData: MlbDeci
     .slice(0, 8), [data])
 
   return (
-    <div className="space-y-6">
+    <div className="mlb-ui space-y-6">
       <section className="overflow-hidden rounded-3xl border border-sky-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-sky-950/30 p-5 md:p-7">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-300">Experimental / Shadow</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-200">Experimental / Shadow</p>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-white md:text-4xl">MLB Research Lab</h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-amber-200">Separate from the certified Pick Analyzer Champion / Policy V1 recommendation engine. These independent research models do not publish Policy V1 Official Picks. Find certified recommendations on Today and Value Board.</p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
