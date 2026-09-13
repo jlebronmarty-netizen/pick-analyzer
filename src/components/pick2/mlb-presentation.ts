@@ -5,6 +5,19 @@ export type MlbView = Awaited<ReturnType<typeof getMlbOperationalView>>
 export type MlbGame = MlbView['games'][number]
 export const displayStatuses = ['OFFICIAL_PICK', 'VALUE_CANDIDATE', 'WATCHLIST', 'NO_EDGE', 'BLOCKED'] as const
 export type DisplayStatus = typeof displayStatuses[number]
+export const slateFilters = ['All', 'Picks', 'Value', 'No Edge', 'Waiting', 'Started'] as const
+export type SlateFilter = typeof slateFilters[number]
+export const hasMetric = (value: number | null | undefined): value is number => value != null && Number.isFinite(value)
+export function isStarted(game: MlbGame) {
+  return /STARTED|NOT_PREGAME/.test(game.reason ?? '') || /^(Final|Completed|Live|In Progress|Game Over)$/i.test(game.status)
+}
+export function matchesSlateFilter(game: MlbGame, rows: Pick2MlbValueBoardRow[], filter: SlateFilter) {
+  const statuses = rows.filter(row => row.game_pk === game.gamePk).map(presentationStatus)
+  if (filter === 'All') return true
+  if (filter === 'Started') return isStarted(game)
+  if (filter === 'Waiting') return !isStarted(game) && (Boolean(game.reason) || !game.predictionAt || statuses.includes('BLOCKED'))
+  return statuses.includes(filter === 'Picks' ? 'OFFICIAL_PICK' : filter === 'Value' ? 'VALUE_CANDIDATE' : 'NO_EDGE')
+}
 export const labels: Record<DisplayStatus, string> = { OFFICIAL_PICK: 'Official Pick', VALUE_CANDIDATE: 'Value Candidate', WATCHLIST: 'Watchlist', NO_EDGE: 'No Edge', BLOCKED: 'Waiting / Blocked' }
 export const presentationStatus = (row: Pick2MlbValueBoardRow): DisplayStatus => row.opportunity_status ?? row.status
 export const percent = (v: number | null | undefined, signed = false) => v == null || !Number.isFinite(v) ? '—' : `${signed && v > 0 ? '+' : ''}${(v * 100).toFixed(1)}%`

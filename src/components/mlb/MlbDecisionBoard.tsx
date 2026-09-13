@@ -219,9 +219,9 @@ export default function MlbDecisionBoard({ initialData }: { initialData: MlbDeci
       <section className="overflow-hidden rounded-3xl border border-sky-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-sky-950/30 p-5 md:p-7">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-sky-300">MLB Research Lab</p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-white md:text-4xl">Experimental / shadow MLB research</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-amber-200">Separate from the certified Champion V1 / Policy V1 recommendation system. Research signals are not Official Picks. Certified recommendations appear on Today and Value Board.</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-300">Experimental / Shadow</p>
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-white md:text-4xl">MLB Research Lab</h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-amber-200">Separate from the certified Pick Analyzer Champion / Policy V1 recommendation engine. These independent research models do not publish Policy V1 Official Picks. Find certified recommendations on Today and Value Board.</p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
               Pick data + proyecciones + FanDuel/Caesars actuales. V1 es read-only y shadow: no guarda Official Picks y no eleva una señal a APOSTAR hasta completar la certificación.
             </p>

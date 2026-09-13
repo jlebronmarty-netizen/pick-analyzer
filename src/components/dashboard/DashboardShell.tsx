@@ -28,13 +28,12 @@ function getProductNavItems(): DashboardNavItem[] {
 
   return [
     baseProductNavItems[0],
-    baseProductNavItems[1],
     {
       href: PICK2_MLB_VALUE_BOARD_ROUTE,
       label: 'Value Board',
       icon: PICK2_MLB_VALUE_BOARD_NAVIGATION_ICON,
     },
-    ...baseProductNavItems.slice(2),
+    ...baseProductNavItems.slice(1),
   ]
 }
 

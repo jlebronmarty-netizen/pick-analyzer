@@ -13,6 +13,7 @@ export function Classification({ status }: { status: DisplayStatus }) {
   return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${tones[status]}`}>{labels[status]}</span>
 }
 export function Metric({ label, value, prominent = false }: { label: string; value: string; prominent?: boolean }) {
+  if (value === '—') return null
   return <div className="min-w-0"><dt className="text-xs text-slate-400">{label}</dt><dd className={`mt-1 tabular-nums tracking-tight text-slate-100 ${prominent ? 'text-3xl font-semibold' : 'text-base font-semibold'}`}>{value}</dd></div>
 }
 export function EvidenceNote({ game }: { game: MlbGame }) {
@@ -20,22 +21,22 @@ export function EvidenceNote({ game }: { game: MlbGame }) {
 }
 export function GameCard({ game, rows }: { game: MlbGame; rows: Pick2MlbValueBoardRow[] }) {
   return <article data-game-card={game.gamePk} className="min-w-0 rounded-2xl border border-slate-700/70 bg-slate-900/75 shadow-lg shadow-black/10">
-    <header className="border-b border-slate-800 p-5"><div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300"><time dateTime={game.scheduledAt}>{prTime(game.scheduledAt)}</time><span>{gameMessage(game)}</span></div><h2 className="mt-3 text-xl font-semibold tracking-tight text-white">{game.away} <span className="font-normal text-slate-400">at</span> {game.home}</h2></header>
+    <header className="border-b border-slate-800 p-4"><div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-300"><time dateTime={game.scheduledAt}>{prTime(game.scheduledAt)}</time><span>{gameMessage(game)}</span></div><h2 className="mt-2 text-lg font-semibold tracking-tight text-white">{game.away} <span className="font-normal text-slate-400">at</span> {game.home}</h2></header>
     <div className="grid grid-cols-2 divide-x divide-slate-800">{(['AWAY', 'HOME'] as const).map(side => {
       const row = rows.find(r => r.side === side), status = row ? presentationStatus(row) : null
       const market = side === 'AWAY' ? game.awayMarket : game.homeMarket
       const name = side === 'AWAY' ? game.away : game.home
       const highlight = !game.reason && (status === 'OFFICIAL_PICK' || status === 'VALUE_CANDIDATE')
       return <section aria-label={`${name} analysis`} key={side} className={`min-w-0 p-4 sm:p-5 ${highlight ? 'bg-teal-400/5' : ''}`}>
-        <p className="text-xs text-slate-400">{side === 'AWAY' ? 'Away' : 'Home'}</p><h3 className="mt-1 min-h-12 text-sm font-semibold text-white">{name}</h3>
-        <dl className="mt-3 space-y-4"><Metric prominent label="Model probability" value={percent(side === 'AWAY' ? game.awayProbability : game.homeProbability)} /><Metric label={row ? 'ML price · selected book' : 'Best available ML'} value={price(row?.american_odds ?? market?.americanOdds)} /><Metric label="Consensus probability" value={percent(row?.consensus_probability)} /><Metric label="Consensus edge" value={percent(row?.consensus_edge, true)} /><Metric label="EV per unit" value={percent(row?.unit_ev, true)} /></dl>
-        <p className="mt-2 break-words text-xs text-slate-400">{row?.bookmaker_name ?? row?.best_book ?? market?.book ?? 'Price unavailable'}</p>
-        <div className="mt-4">{status ? <Classification status={status} /> : <span className="text-xs text-slate-300">Analysis pending</span>}</div>
-        <p className="mt-3 text-xs leading-5 text-slate-300">Starter: {side === 'AWAY' ? game.awayStarter : game.homeStarter}</p>
+        <p className="text-xs text-slate-400">{side === 'AWAY' ? 'Away' : 'Home'}</p><h3 className="mt-1 text-sm font-semibold text-white">{name}</h3>
+        <dl className="mt-3 grid gap-3"><Metric prominent label="Model probability" value={percent(side === 'AWAY' ? game.awayProbability : game.homeProbability)} /><Metric label={row ? 'ML price · selected book' : 'Best available ML'} value={price(row?.american_odds ?? market?.americanOdds)} /><Metric label="Consensus probability" value={percent(row?.consensus_probability)} /><Metric label="Consensus edge" value={percent(row?.consensus_edge, true)} /><Metric label="EV per unit" value={percent(row?.unit_ev, true)} /></dl>
+        {(row?.bookmaker_name ?? row?.best_book ?? market?.book) && <p className="mt-2 break-words text-xs text-slate-400">{row?.bookmaker_name ?? row?.best_book ?? market?.book}</p>}
+        <div className="mt-3">{status ? <Classification status={status} /> : <span className="text-xs text-slate-300">Analysis pending</span>}</div>
+        <p className="mt-2 text-xs leading-5 text-slate-300">Starter: {side === 'AWAY' ? game.awayStarter : game.homeStarter}</p>
         <p className="mt-2 text-xs text-slate-400">{freshness(row?.market_freshness ?? market?.freshness)}{(row?.market_acquired_at ?? market?.acquiredAt) ? ` · ${prTime(row?.market_acquired_at ?? market?.acquiredAt)}` : ''}</p>
       </section>
     })}</div>
-    <footer className="space-y-2 border-t border-slate-800 p-4"><EvidenceNote game={game} /><details className="text-xs text-slate-400"><summary className="cursor-pointer py-1 focus-visible:outline-2 focus-visible:outline-teal-300">How to read this game</summary><p className="mt-2 leading-5">A higher probability does not always mean better value. Consensus probability is not a single-book no-vig quote; that quote is unavailable in this view. Prices are recorded snapshots.</p>{rows.map(r => <p key={r.side} className="mt-2">{r.side === 'AWAY' ? game.away : game.home}: {rowExplanation(r)}</p>)}<Link className="mt-2 inline-block underline" href="/data-health">Data Health details</Link></details></footer>
+    <footer className="border-t border-slate-800 px-4 py-3"><EvidenceNote game={game} />{rows.some(r => r.blocker_codes.length > 0) && <p className="mt-1 text-xs text-slate-300">{[...new Set(rows.filter(r => r.blocker_codes.length > 0).map(rowExplanation))].join(' · ')}</p>}</footer>
   </article>
 }
 export function OpportunityCard({ row, game }: { row: Pick2MlbValueBoardRow; game?: MlbGame }) {

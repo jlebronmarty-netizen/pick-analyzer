@@ -51,11 +51,12 @@ export default function DashboardShellClient({
                 </p>
 
                 <div className="mt-2 space-y-1">
-                  {productNavItems.map((item) => {
+                  {productNavItems.map((item, index) => {
                     const active = pathname === item.href || (pathname === '/' && item.href === '/today')
                     return (
+                      <div key={item.href}>
+                      {index === 2 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Research &amp; tools</p>}
                       <a
-                        key={item.href}
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
                         className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition ${
@@ -71,7 +72,7 @@ export default function DashboardShellClient({
                         <span className="min-w-0 flex-1 truncate">
                           {item.label}
                         </span>
-                      </a>
+                      </a></div>
                     )
                   })}
                 </div>
@@ -119,7 +120,7 @@ export default function DashboardShellClient({
               </div>
             </header>
 
-            <nav aria-label="More navigation" className="flex flex-wrap gap-4 border-b border-slate-800 px-4 py-3 text-sm text-slate-300 xl:hidden">{productNavItems.slice(3).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-2 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav>
+            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Research &amp; tools</summary><nav aria-label="Research and secondary navigation" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{productNavItems.slice(2).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
             <div className="mx-auto max-w-[1800px] space-y-10 p-4 md:p-8">
               {children}
             </div>
@@ -133,8 +134,8 @@ export default function DashboardShellClient({
           data-b5-1-mobile-bottom-nav="true"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
         >
-          <div className={`mx-auto grid max-w-2xl gap-1 grid-cols-3`}>
-            {productNavItems.slice(0, 3).map((item) => {
+          <div className="mx-auto grid max-w-2xl grid-cols-2 gap-1">
+            {productNavItems.slice(0, 2).map((item) => {
               const active = pathname === item.href || (pathname === '/' && item.href === '/today')
               const baseClasses = 'flex min-h-14 min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-sky-300'
               const stateClasses = active
