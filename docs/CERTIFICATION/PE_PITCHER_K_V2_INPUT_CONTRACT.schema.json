@@ -1,0 +1,438 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0"
+    },
+    "status": {
+      "enum": [
+        "OK",
+        "PARTIAL",
+        "BLOCKED",
+        "EMPTY"
+      ]
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "canonicalGamePk": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "pitcherMlbamId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "targetStart": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "dataAsOf": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "cutoff": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "contractVersion": {
+            "const": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0"
+          },
+          "builderVersion": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sourceVersions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[ -~]+$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "enum": [
+                    "SCHEDULE",
+                    "STARTER",
+                    "SOURCE_GAME",
+                    "PITCHES",
+                    "TERMINAL",
+                    "BOX_SCORE",
+                    "CENSUS"
+                  ]
+                },
+                "canonicalGamePk": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "pitcherMlbamId": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sourceVersion": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[ -~]+$"
+                },
+                "authoritativeAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                },
+                "availableBy": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+                },
+                "evidenceDigest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "role",
+                "canonicalGamePk",
+                "pitcherMlbamId",
+                "sourceVersion",
+                "authoritativeAt",
+                "availableBy",
+                "evidenceDigest"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "features": {
+            "type": "object",
+            "properties": {
+              "seasonPitches": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "multipleOf": 1e-08
+              },
+              "l5Pitches": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "multipleOf": 1e-08
+              },
+              "seasonBF": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "multipleOf": 1e-08
+              },
+              "l5BF": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "multipleOf": 1e-08
+              },
+              "daysRest": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 366
+              },
+              "pitcherKRateV2": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "multipleOf": 1e-08
+              },
+              "opponentKRateV2": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "multipleOf": 1e-08
+              },
+              "avgReleaseSpeedV2": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "multipleOf": 1e-08
+              },
+              "strikeRateV2": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "multipleOf": 1e-08
+              }
+            },
+            "required": [
+              "seasonPitches",
+              "l5Pitches",
+              "seasonBF",
+              "l5BF",
+              "daysRest",
+              "pitcherKRateV2",
+              "opponentKRateV2",
+              "avgReleaseSpeedV2",
+              "strikeRateV2"
+            ],
+            "additionalProperties": false
+          },
+          "statistics": {
+            "type": "object",
+            "properties": {
+              "seasonStarts": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "seasonDeliveredPitches": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "l5DeliveredPitches": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "seasonBFCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "l5BFCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "pitcherStrikeouts": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "opponentStrikeouts": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "opponentPA": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "speedCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "strikeCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "speedSumMph": {
+                "type": "string",
+                "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]*[1-9])?$"
+              }
+            },
+            "required": [
+              "seasonStarts",
+              "seasonDeliveredPitches",
+              "l5DeliveredPitches",
+              "seasonBFCount",
+              "l5BFCount",
+              "pitcherStrikeouts",
+              "opponentStrikeouts",
+              "opponentPA",
+              "speedCount",
+              "strikeCount",
+              "speedSumMph"
+            ],
+            "additionalProperties": false
+          },
+          "lineageDigest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "canonicalGamePk",
+          "pitcherMlbamId",
+          "targetStart",
+          "dataAsOf",
+          "cutoff",
+          "contractVersion",
+          "builderVersion",
+          "sourceVersions",
+          "dependencies",
+          "features",
+          "statistics",
+          "lineageDigest"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "blocked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "canonicalGamePk": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "pitcherMlbamId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "SHORT_HISTORY",
+                "MISSING_VELOCITY",
+                "SOURCE_VOCABULARY_INVALID",
+                "STRIKE_TYPE_CONFLICT",
+                "INCOMPLETE_PA",
+                "IDENTITY_CONFLICT",
+                "TEMPORAL_PROVENANCE_MISSING",
+                "CUTOFF_VIOLATION",
+                "COVERAGE_INCOMPLETE",
+                "BF_UNRECONCILED",
+                "STARTER_STATE_INVALID",
+                "SOURCE_INCOMPLETE",
+                "ORDERING_AMBIGUOUS",
+                "ZERO_DENOMINATOR"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "canonicalGamePk",
+          "pitcherMlbamId",
+          "reasons"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "status",
+    "asOf",
+    "data",
+    "blocked"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "OK"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "minItems": 1
+          },
+          "blocked": {
+            "minItems": 0,
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "PARTIAL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "minItems": 1
+          },
+          "blocked": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "BLOCKED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "minItems": 0,
+            "maxItems": 0
+          },
+          "blocked": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "EMPTY"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "minItems": 0,
+            "maxItems": 0
+          },
+          "blocked": {
+            "minItems": 0,
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}
