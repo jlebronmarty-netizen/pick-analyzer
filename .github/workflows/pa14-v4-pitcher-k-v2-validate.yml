@@ -1,0 +1,34 @@
+name: PA14 V2 Pitcher K Builder Validate
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/pe-pitcher-k-v2-builder.ts'
+      - 'scripts/pa14-v4-builder-self-test.mjs'
+      - 'docs/CERTIFICATION/PA14_V4_STORED_EVIDENCE_BUILDER_AUDIT.md'
+      - 'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.md'
+      - 'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.schema.json'
+      - '.github/workflows/pa14-v4-pitcher-k-v2-validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: PA14 V2 deterministic builder checks
+        run: node --loader ./scripts/local-ts-loader.mjs scripts/pa14-v4-builder-self-test.mjs
+      - name: Production TypeScript build
+        run: npm run build
