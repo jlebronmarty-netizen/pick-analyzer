@@ -28,6 +28,22 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Verify frozen V2 contract hashes
+        run: |
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          expected = {
+              'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.md': 'd263b24cbf97ce43d0990ac1034b94cc1f8d8e2920e3cb1cea42d14ec4ef1f50',
+              'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.schema.json': '6ed57c47a257330ff22fb1de44d81b1223ce54996ef224445d49d76c686950b8',
+          }
+          for name, wanted in expected.items():
+              raw = Path(name).read_bytes().replace(b'\r\n', b'\n')
+              got = hashlib.sha256(raw).hexdigest()
+              print(name, got)
+              if got != wanted:
+                  raise SystemExit(f'frozen contract hash mismatch: {name}: {got} != {wanted}')
+          PY
       - name: PA14 V2 deterministic builder checks
         run: node --loader ./scripts/local-ts-loader.mjs scripts/pa14-v4-builder-self-test.mjs
       - name: Production TypeScript build
