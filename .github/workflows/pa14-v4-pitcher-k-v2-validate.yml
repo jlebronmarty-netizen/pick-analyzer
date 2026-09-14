@@ -1,6 +1,17 @@
 name: PA14 V2 Pitcher K Builder Validate
 
 on:
+  push:
+    branches:
+      - 'pa14-v4-pitcher-k-v2-builder'
+    paths:
+      - 'src/lib/pe-pitcher-k-v2-builder.ts'
+      - 'scripts/pa14-v4-builder-self-test.mjs'
+      - 'docs/CERTIFICATION/PA14_V4_STORED_EVIDENCE_BUILDER_AUDIT.md'
+      - 'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.md'
+      - 'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.schema.json'
+      - 'tsconfig.json'
+      - '.github/workflows/pa14-v4-pitcher-k-v2-validate.yml'
   pull_request:
     paths:
       - 'src/lib/pe-pitcher-k-v2-builder.ts'
@@ -8,6 +19,7 @@ on:
       - 'docs/CERTIFICATION/PA14_V4_STORED_EVIDENCE_BUILDER_AUDIT.md'
       - 'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.md'
       - 'docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.schema.json'
+      - 'tsconfig.json'
       - '.github/workflows/pa14-v4-pitcher-k-v2-validate.yml'
 
 permissions:
