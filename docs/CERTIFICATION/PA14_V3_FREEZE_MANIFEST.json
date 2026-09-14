@@ -1,0 +1,22 @@
+{
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "normalization": "UTF-8; CRLF normalized to LF; preserve all other bytes and final newline",
+  "files": [
+    {
+      "path": "docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.md",
+      "normalizedSha256": "d263b24cbf97ce43d0990ac1034b94cc1f8d8e2920e3cb1cea42d14ec4ef1f50"
+    },
+    {
+      "path": "docs/CERTIFICATION/PE_PITCHER_K_V2_INPUT_CONTRACT.schema.json",
+      "normalizedSha256": "6ed57c47a257330ff22fb1de44d81b1223ce54996ef224445d49d76c686950b8"
+    },
+    {
+      "path": "scripts/pa14-v3-contract-check.py",
+      "normalizedSha256": "de3db366f901b8d7349e06ad0d9b7a8c65a34e5ae0dc33f33a819925aa70006d"
+    },
+    {
+      "path": "scripts/pa14-v3-schema-check.cjs",
+      "normalizedSha256": "70f12ff93ae60bf55e9a82d99f558f4316f04b89bd3ca3b840e9eede0a1d7bba"
+    }
+  ]
+}
