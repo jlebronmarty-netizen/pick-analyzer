@@ -18,8 +18,8 @@
   },
   "storedEvidenceBundle": {
     "id": "2f4815cf-38d0-4ad7-92f6-44e462f9338a",
-    "deterministicKey": "PA14_V2_EVIDENCE_BUNDLE|823574|669358|18d8505557ad20037a3dbc9a8f63a052a4b83e12d93b96f93e5959f591cec90f",
-    "inputDigest": "18d8505557ad20037a3dbc9a8f63a052a4b83e12d93b96f93e5959f591cec90f",
+    "deterministicKey": "PA14_V2_EVIDENCE_BUNDLE|823574|669358|7455ff4b864bc2e63431b421d86e3a80b99a53ab0f82dc8ec0ae11dd1eff7ffb",
+    "inputDigest": "7455ff4b864bc2e63431b421d86e3a80b99a53ab0f82dc8ec0ae11dd1eff7ffb",
     "lineageDigest": "cabaa3b596efa025febef7f0cd3868a59c4924c48b55a724d3d0f93e0fdff6e9",
     "censusDigest": "37f88be2582b5a7c1c4bcaba32f4a40dcbaf8efaa85dd91461460d25140bc8d5",
     "replayStatus": "PASS",
@@ -81,8 +81,9 @@
     "apostarActivated": false,
     "mainMerged": false,
     "productionDeployment": false,
-    "consumerImplemented": false,
+    "consumerImplemented": true,
+    "consumerPreviewReadback": "PENDING",
     "publication": "NONE"
   },
-  "remainingGate": "Implement and validate a read-only Consumer feed, then obtain authorized production readback before setting PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY=YES."
+  "remainingGate": "Validate the read-only Consumer feed in preview, then obtain authorized production readback before setting PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY=YES."
 }
