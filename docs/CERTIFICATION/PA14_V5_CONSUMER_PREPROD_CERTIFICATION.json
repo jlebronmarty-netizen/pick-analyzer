@@ -1,0 +1,59 @@
+{
+  "phase": "PA14_V5_CONSUMER_PREPRODUCTION_CERTIFICATION",
+  "verdict": "CONSUMER_PREPRODUCTION_BOUNDARY_PASS",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "PE_PITCHER_K_V2_INPUT_CONTRACT_FROZEN": "YES",
+  "PA14_V2_STORED_EVIDENCE_BUILDER_CERTIFIED": "YES",
+  "PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY": "NO",
+  "consumer": {
+    "route": "/api/consumer/v1/mlb/pitcher-k-v2",
+    "implementationCommit": "f3af297769029af4ac27a21e42ec396cf68c0dc4",
+    "readOnly": true,
+    "rawBuildInputExposed": false,
+    "rawPitchesExposed": false,
+    "oddsExposed": false,
+    "picksExposed": false,
+    "bettingDecisionExposed": false
+  },
+  "realStoredEvidenceBoundary": {
+    "targetGamePk": 823574,
+    "pitcherMlbamId": 669358,
+    "candidateCount": 1,
+    "eligibleStatusCheck": "PASS",
+    "gameIdentityCheck": "PASS",
+    "pitcherIdentityCheck": "PASS",
+    "contractVersionCheck": "PASS",
+    "builderVersionCheck": "PASS",
+    "lineageCheck": "PASS",
+    "targetStartInstantCheck": "PASS",
+    "cutoffInstantCheck": "PASS",
+    "dataAsOfInstantCheck": "PASS",
+    "bundleId": "2f4815cf-38d0-4ad7-92f6-44e462f9338a",
+    "inputDigest": "7455ff4b864bc2e63431b421d86e3a80b99a53ab0f82dc8ec0ae11dd1eff7ffb",
+    "lineageDigest": "cabaa3b596efa025febef7f0cd3868a59c4924c48b55a724d3d0f93e0fdff6e9",
+    "censusDigest": "37f88be2582b5a7c1c4bcaba32f4a40dcbaf8efaa85dd91461460d25140bc8d5"
+  },
+  "preview": {
+    "build": "PASS",
+    "deploymentState": "READY",
+    "httpReadback": "BLOCKED_BY_VERCEL_DEPLOYMENT_PROTECTION",
+    "httpReadbackInterpretation": "The request is redirected by Vercel Authentication before the application route is invoked; this is not an application Consumer failure.",
+    "deploymentProtectionBypassAttempted": true,
+    "shareTokenAttempted": true
+  },
+  "dailyHistory": {
+    "readyThrough": "2026-09-14",
+    "DAILY_HISTORY_READY": "YES"
+  },
+  "safety": {
+    "builderModified": false,
+    "frozenContractModified": false,
+    "pickEdgeModified": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "mainMerged": false,
+    "productionDeployment": false
+  },
+  "remainingGate": "Merge/deploy only with explicit authorization, then require an actual production HTTP readback of the Consumer before setting PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY=YES."
+}
