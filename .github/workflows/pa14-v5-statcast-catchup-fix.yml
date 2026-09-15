@@ -1,0 +1,33 @@
+name: PA14 V5 Statcast catchup service fix
+
+on:
+  push:
+    branches:
+      - pa14-v5-daily-history-ingestion-20260914
+    paths:
+      - .github/workflows/pa14-v5-statcast-catchup-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pa14-v5-daily-history-ingestion-20260914
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply catchup service patch
+        run: python scripts/pa14-v5-statcast-catchup-route-patch.py
+      - name: Commit branch-only service fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/services/mlb-statcast-daily-refresh.service.ts
+          git diff --cached --check
+          git diff --cached --quiet && { echo 'Expected service patch was not produced'; exit 1; } || true
+          git commit -m 'fix: support multi-day Statcast catchup with single analytics refresh'
+          git push origin HEAD:pa14-v5-daily-history-ingestion-20260914
