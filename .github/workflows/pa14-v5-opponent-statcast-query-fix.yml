@@ -1,0 +1,58 @@
+name: PA14 V5 opponent Statcast query fix
+
+on:
+  push:
+    branches:
+      - pa14-v5-daily-history-ingestion-20260914
+    paths:
+      - .github/workflows/pa14-v5-opponent-statcast-query-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pa14-v5-daily-history-ingestion-20260914
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch opponent Statcast lookup to canonical game census
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('src/services/pa14-v2-real-evidence.service.ts')
+          s = p.read_text()
+
+          old = 'async function loadOpponentStatcast(): Promise<StatcastRow[]> {'
+          new = 'async function loadOpponentStatcast(opponentGamePks: number[]): Promise<StatcastRow[]> {'
+          assert s.count(old) == 1, f'signature count={s.count(old)}'
+          s = s.replace(old, new)
+
+          old = "      .or(`canonical_home_team_id.eq.${TARGET_OPPONENT_CANONICAL},canonical_away_team_id.eq.${TARGET_OPPONENT_CANONICAL}`)"
+          new = "      .in('game_pk', opponentGamePks)"
+          assert s.count(old) == 1, f'team scan pattern count={s.count(old)}'
+          s = s.replace(old, new)
+
+          old = '    loadOpponentStatcast(),'
+          new = '    loadOpponentStatcast(opponentGamePks),'
+          assert s.count(old) == 1, f'call count={s.count(old)}'
+          s = s.replace(old, new)
+
+          p.write_text(s)
+          PY
+      - name: Verify and commit branch-only fix
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/services/pa14-v2-real-evidence.service.ts
+          git diff --cached --check
+          git diff --cached --exit-code && { echo 'Expected query fix was not produced'; exit 1; } || true
+          git commit -m 'fix: bound PA14 opponent Statcast lookup by game census'
+          git push origin HEAD:pa14-v5-daily-history-ingestion-20260914
