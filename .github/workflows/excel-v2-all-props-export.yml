@@ -1,0 +1,43 @@
+name: Excel V2 All MLB Props Export
+
+on:
+  push:
+    branches:
+      - excel-v2-all-props-20260915
+    paths:
+      - '.github/workflows/excel-v2-all-props-export.yml'
+      - 'scripts/excel-v2-export-all-mlb-props.py'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      TARGET_DATE: '2026-09-15'
+      OUT_DIR: data/excel-v2-all-props
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Export all currently available MLB player props
+        run: python scripts/excel-v2-export-all-mlb-props.py
+
+      - name: Summarize export
+        run: cat data/excel-v2-all-props/summary.json
+
+      - name: Upload Excel V2 props artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-v2-all-props-20260915
+          path: data/excel-v2-all-props/
+          if-no-files-found: error
+          retention-days: 2
