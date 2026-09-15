@@ -58,6 +58,29 @@ const COMPLETED_EVENTS = new Set([
 
 const RUNNER_WITNESS_EVENT = /(?:caught_stealing|pickoff)/
 
+const OFFICIAL_TYPE_BY_DESCRIPTION = new Map<string, 'S' | 'B' | 'X'>([
+  ['called_strike', 'S'],
+  ['swinging_strike', 'S'],
+  ['swinging_strike_blocked', 'S'],
+  ['foul', 'S'],
+  ['foul_tip', 'S'],
+  ['foul_bunt', 'S'],
+  ['missed_bunt', 'S'],
+  ['bunt_foul_tip', 'S'],
+  ['swinging_pitchout', 'S'],
+  ['foul_pitchout', 'S'],
+  ['automatic_strike', 'S'],
+  ['ball', 'B'],
+  ['blocked_ball', 'B'],
+  ['pitchout', 'B'],
+  ['hit_by_pitch', 'B'],
+  ['intentional_ball', 'B'],
+  ['automatic_ball', 'B'],
+  ['hit_into_play', 'X'],
+  ['hit_into_play_no_out', 'X'],
+  ['hit_into_play_score', 'X'],
+])
+
 const OFFICIAL_DESCRIPTION_MAP = new Map<string, string>([
   ['Called Strike', 'called_strike'],
   ['Swinging Strike', 'swinging_strike'],
@@ -414,8 +437,8 @@ function normalizeOfficialGame(feed: FetchedJson, gamePk: number) {
     for (let index = 0; index < pitchEvents.length; index += 1) {
       const event = pitchEvents[index]
       const description = normalizeOfficialDescription(event?.details?.description)
-      const type = String(event?.details?.code ?? '')
-      if (!['S', 'B', 'X'].includes(type)) throw new Error(`SOURCE_VOCABULARY_INVALID: ${gamePk}/${atBatNumber} code ${type}`)
+      const type = OFFICIAL_TYPE_BY_DESCRIPTION.get(description)
+      if (!type) throw new Error(`SOURCE_VOCABULARY_INVALID: ${gamePk}/${atBatNumber} description ${description}`)
       const lastPitch = index === pitchEvents.length - 1
       const completed = COMPLETED_EVENTS.has(resultEvent)
       const release = event?.pitchData?.startSpeed
