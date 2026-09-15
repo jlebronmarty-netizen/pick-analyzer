@@ -243,7 +243,7 @@ async function coverage() {
   return data
 }
 
-export async function refreshMlbStatcastDaily(input: { date?: string | null } = {}) {
+export async function refreshMlbStatcastDaily(input: { date?: string | null; refreshAnalytics?: boolean } = {}) {
   const startedAt = new Date().toISOString()
   let targetDate: string | null = null
   let schedule: Awaited<ReturnType<typeof scheduleForDate>> | null = null
@@ -315,7 +315,8 @@ export async function refreshMlbStatcastDaily(input: { date?: string | null } = 
   ensure(readbackConflicts === 0, `STATCAST_READBACK_DIGEST_MISMATCH:${targetDate}:${readbackConflicts}`)
   ensure(new Set(readback.map((row) => `${row.game_pk}:${row.id}`)).size === readback.length, `STATCAST_READBACK_DUPLICATE:${targetDate}`)
 
-  await refreshAnalytics()
+  const shouldRefreshAnalytics = input.refreshAnalytics !== false
+  if (shouldRefreshAnalytics) await refreshAnalytics()
   const finalCoverage = await coverage()
   return {
     success: true,
@@ -329,7 +330,7 @@ export async function refreshMlbStatcastDaily(input: { date?: string | null } = 
     reuses,
     conflicts: 0,
     unexpectedExisting: 0,
-    analyticsRefreshed: true,
+    analyticsRefreshed: shouldRefreshAnalytics,
     coverage: finalCoverage,
     startedAt,
     completedAt: new Date().toISOString(),
