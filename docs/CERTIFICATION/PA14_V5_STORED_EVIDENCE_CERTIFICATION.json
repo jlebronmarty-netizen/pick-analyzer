@@ -1,0 +1,88 @@
+{
+  "phase": "PA14_V5_STORED_EVIDENCE_BUILDER_CERTIFICATION",
+  "verdict": "STORED_EVIDENCE_BUILDER_CERTIFIED",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "PE_PITCHER_K_V2_INPUT_CONTRACT_FROZEN": "YES",
+  "PA14_V2_STORED_EVIDENCE_BUILDER_CERTIFIED": "YES",
+  "PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY": "NO",
+  "consumerProductionReadback": "NOT_YET_CERTIFIED",
+  "target": {
+    "canonicalGamePk": 823574,
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79543",
+    "pitcherMlbamId": 669358,
+    "opponentMlbTeamId": 121,
+    "targetStart": "2026-09-15T23:10:00.000Z",
+    "dataAsOf": "2026-09-15T04:06:51.000Z",
+    "cutoff": "2026-09-15T04:07:01.128Z"
+  },
+  "storedEvidenceBundle": {
+    "id": "2f4815cf-38d0-4ad7-92f6-44e462f9338a",
+    "deterministicKey": "PA14_V2_EVIDENCE_BUNDLE|823574|669358|18d8505557ad20037a3dbc9a8f63a052a4b83e12d93b96f93e5959f591cec90f",
+    "inputDigest": "18d8505557ad20037a3dbc9a8f63a052a4b83e12d93b96f93e5959f591cec90f",
+    "lineageDigest": "cabaa3b596efa025febef7f0cd3868a59c4924c48b55a724d3d0f93e0fdff6e9",
+    "censusDigest": "37f88be2582b5a7c1c4bcaba32f4a40dcbaf8efaa85dd91461460d25140bc8d5",
+    "replayStatus": "PASS",
+    "certificationCandidate": true,
+    "productionEligible": false,
+    "shadowOnly": true,
+    "storageAccess": "service_role_only"
+  },
+  "proof": {
+    "realStoredEvidence": true,
+    "networkCallsDuringStoredReplay": 0,
+    "deterministicReplay": "PASS",
+    "expectedResultMatch": "PASS",
+    "oracleMatch": "PASS",
+    "lineageMatch": "PASS",
+    "temporalLeakage": 0,
+    "storedReplayRequiresExternalFetch": false,
+    "resultStatus": "ELIGIBLE",
+    "qualifyingStarts": 29,
+    "opponentGames": 150,
+    "maxHistoricalCompletion": "2026-09-15T01:58:59.000Z"
+  },
+  "statistics": {
+    "seasonStarts": 29,
+    "seasonDeliveredPitches": 2751,
+    "l5DeliveredPitches": 479,
+    "seasonBFCount": 721,
+    "l5BFCount": 123,
+    "pitcherStrikeouts": 150,
+    "opponentStrikeouts": 1266,
+    "opponentPA": 5641,
+    "speedSumMph": "249504.9",
+    "speedCount": 2751,
+    "strikeCount": 1257
+  },
+  "features": {
+    "seasonPitches": 94.86206897,
+    "l5Pitches": 95.8,
+    "seasonBF": 24.86206897,
+    "l5BF": 24.6,
+    "daysRest": 6,
+    "pitcherKRateV2": 0.20804438,
+    "opponentKRateV2": 0.22442829,
+    "avgReleaseSpeedV2": 90.69607415,
+    "strikeRateV2": 0.45692475
+  },
+  "dailyHistory": {
+    "statusThrough": "2026-09-14",
+    "DAILY_HISTORY_READY": "YES",
+    "sep07": { "pitches": 3239, "games": 11, "manualSavantParity": "PASS" },
+    "sep13": { "pitches": 4426, "games": 15, "manualSavantParity": "PASS" },
+    "sep14": { "pitches": 3026, "games": 10, "manualSavantParity": "PASS", "officialScheduleParity": "10_OF_10" }
+  },
+  "implementation": {
+    "builderModified": false,
+    "frozenContractModified": false,
+    "pickEdgeModified": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "mainMerged": false,
+    "productionDeployment": false,
+    "consumerImplemented": false,
+    "publication": "NONE"
+  },
+  "remainingGate": "Implement and validate a read-only Consumer feed, then obtain authorized production readback before setting PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY=YES."
+}
