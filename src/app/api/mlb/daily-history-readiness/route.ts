@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return apiError({
       id,
-      code: 'DAILY_HISTORY_READINESS_ERROR',
+      code: 'INTERNAL_ERROR',
       message: errorMessage(error, 'Unable to evaluate MLB daily history readiness'),
     })
   }
