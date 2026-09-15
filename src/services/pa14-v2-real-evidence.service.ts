@@ -782,6 +782,7 @@ export async function materializePa14V2RealBazRow() {
     builderVersion,
   }
 
+  const inputDigest = pa14V2Sha256(pa14V2CanonicalJson(input))
   const first = buildPePitcherKV2Row(input)
   const second = buildPePitcherKV2Row(input)
   const replayMatch = pa14V2CanonicalJson(first) === pa14V2CanonicalJson(second)
@@ -805,6 +806,8 @@ export async function materializePa14V2RealBazRow() {
       providerTimestamp,
     },
     result: first,
+    storedInput: input,
+    inputDigest,
     replayMatch,
     oracleMatch,
     certificationCandidate: first.status === 'ELIGIBLE' && replayMatch && oracleMatch,
