@@ -259,6 +259,9 @@ async function loadPitcherStatcast(startGamePks: number[]): Promise<StatcastRow[
       .lt('game_date', TARGET_DATE)
       .eq('mlbam_pitcher_id', TARGET_PITCHER_ID)
       .in('game_pk', startGamePks)
+      .order('game_pk', { ascending: true })
+      .order('at_bat_number', { ascending: true })
+      .order('pitch_number', { ascending: true })
       .range(from, from + PAGE_SIZE - 1)
     if (error) throw new Error(`Pitcher Statcast query failed: ${error.message}`)
     const page = (data ?? []) as unknown as StatcastRow[]
@@ -278,6 +281,9 @@ async function loadOpponentStatcast(): Promise<StatcastRow[]> {
       .eq('game_type', 'R')
       .lt('game_date', TARGET_DATE)
       .or(`canonical_home_team_id.eq.${TARGET_OPPONENT_CANONICAL},canonical_away_team_id.eq.${TARGET_OPPONENT_CANONICAL}`)
+      .order('game_pk', { ascending: true })
+      .order('at_bat_number', { ascending: true })
+      .order('pitch_number', { ascending: true })
       .range(from, from + PAGE_SIZE - 1)
     if (error) throw new Error(`Opponent Statcast query failed: ${error.message}`)
     const page = (data ?? []) as unknown as StatcastRow[]
@@ -358,7 +364,7 @@ async function verifyUnfinishedWitnesses(unfinished: Map<number, number[]>) {
         eventType,
         description: String(play?.result?.description ?? ''),
         feedSha256: feed.sha256,
-        playDigest: canonicalDigest(play),
+        playDigest: sha256Text(JSON.stringify(play)),
       })
     }
     evidence.set(gamePk, selected)
@@ -400,7 +406,7 @@ function normalizeOfficialGame(feed: FetchedJson, gamePk: number) {
           atBatNumber,
           pitcherMlbamId: pitcherId,
           event: resultEvent,
-          evidenceDigest: canonicalDigest(play),
+          evidenceDigest: sha256Text(JSON.stringify(play)),
         })
         continue
       }
@@ -745,8 +751,8 @@ export async function materializePa14V2RealBazRow() {
         canonicalGamePk: TARGET_GAME_PK,
         pitcherMlbamId: TARGET_PITCHER_ID,
         sourceVersion: `${SOURCE_GAMELOG}+${SOURCE_TIMECODES}`,
-        authoritativeAt: providerTimestamp,
-        availableBy: observedAt,
+        authoritativeAt: new Date(maxCompletion).toISOString(),
+        availableBy: new Date(maxCompletion).toISOString(),
         evidenceDigest: censusDigest,
       },
     },
