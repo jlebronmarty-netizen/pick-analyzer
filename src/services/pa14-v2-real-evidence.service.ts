@@ -271,7 +271,7 @@ async function loadPitcherStatcast(startGamePks: number[]): Promise<StatcastRow[
   return rows
 }
 
-async function loadOpponentStatcast(): Promise<StatcastRow[]> {
+async function loadOpponentStatcast(opponentGamePks: number[]): Promise<StatcastRow[]> {
   const rows: StatcastRow[] = []
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await supabaseAdmin
@@ -280,7 +280,7 @@ async function loadOpponentStatcast(): Promise<StatcastRow[]> {
       .eq('game_year', SEASON)
       .eq('game_type', 'R')
       .lt('game_date', TARGET_DATE)
-      .or(`canonical_home_team_id.eq.${TARGET_OPPONENT_CANONICAL},canonical_away_team_id.eq.${TARGET_OPPONENT_CANONICAL}`)
+      .in('game_pk', opponentGamePks)
       .order('game_pk', { ascending: true })
       .order('at_bat_number', { ascending: true })
       .order('pitch_number', { ascending: true })
@@ -582,7 +582,7 @@ export async function materializePa14V2RealBazRow() {
   const opponentGamePks = logs.opponentGames.map((row) => row.gamePk)
   const [pitcherStatcastRaw, opponentStatcastRaw, schedules] = await Promise.all([
     loadPitcherStatcast(startGamePks),
-    loadOpponentStatcast(),
+    loadOpponentStatcast(opponentGamePks),
     loadSchedules(startGamePks),
   ])
 
