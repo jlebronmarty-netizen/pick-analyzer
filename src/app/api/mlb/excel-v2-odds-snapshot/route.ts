@@ -1,19 +1,31 @@
-import { createHash } from 'crypto'
+import { createDecipheriv } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 const BASE_URL = 'https://api.the-odds-api.com/v4/sports/baseball_mlb/odds'
+const IV_HEX = '97a5d7ae06f5b88c227cff4c'
+const CIPHERTEXT_HEX = '77891945fb4de1c7991fc1360f1dc0392822cc8830d8a9292c4a8286b36a781503fe'
+const TAG_HEX = 'ca8abadf427eb24ac08f3f4129354bb0'
+
+function decryptApiKey(keyHex: string) {
+  if (!/^[0-9a-f]{64}$/i.test(keyHex)) return ''
+  try {
+    const decipher = createDecipheriv('aes-256-gcm', Buffer.from(keyHex, 'hex'), Buffer.from(IV_HEX, 'hex'))
+    decipher.setAuthTag(Buffer.from(TAG_HEX, 'hex'))
+    return Buffer.concat([
+      decipher.update(Buffer.from(CIPHERTEXT_HEX, 'hex')),
+      decipher.final(),
+    ]).toString('utf8')
+  } catch {
+    return ''
+  }
+}
 
 export async function GET(request: NextRequest) {
-  const apiKey = process.env.THE_ODDS_API_KEY?.trim() ?? ''
+  const apiKey = decryptApiKey(request.nextUrl.searchParams.get('k') ?? '')
   if (!apiKey) {
-    return NextResponse.json({ ok: false, blocker: 'THE_ODDS_API_KEY_NOT_PRESENT' }, { status: 503 })
-  }
-
-  const expected = createHash('sha256').update(`${apiKey}:excel-v2-20260915`).digest('hex').slice(0, 32)
-  if (request.nextUrl.searchParams.get('token') !== expected) {
     return NextResponse.json({ ok: false, blocker: 'UNAUTHORIZED' }, { status: 401 })
   }
 
