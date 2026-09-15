@@ -1,0 +1,74 @@
+{
+  "phase": "PA14_V5_PRODUCTION_READBACK_CLOSEOUT",
+  "verdict": "PA14_V2_DATA_CONTRACT_READY",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "PE_PITCHER_K_V2_INPUT_CONTRACT_FROZEN": "YES",
+  "PA14_V2_STORED_EVIDENCE_BUILDER_CERTIFIED": "YES",
+  "PICK_EDGE_PA_14_V2_DATA_CONTRACT_READY": "YES",
+  "productionDeployment": {
+    "mainCommit": "98b87fd63bd0e2b47394d8d2ad528268d1dcbbaf",
+    "vercelDeploymentId": "dpl_vxboTbwT7TUu9VNinyYQAhQqPSQV",
+    "state": "READY",
+    "productionAlias": "https://pick-analyzer.vercel.app"
+  },
+  "productionConsumerReadback": {
+    "route": "/api/consumer/v1/mlb/pitcher-k-v2?gamePk=823574&pitcherId=669358",
+    "checkedAt": "2026-09-15T15:02:49.662Z",
+    "httpStatus": 200,
+    "status": "AVAILABLE",
+    "canonicalGamePk": 823574,
+    "pitcherMlbamId": 669358,
+    "storedEvidenceBundleId": "2f4815cf-38d0-4ad7-92f6-44e462f9338a",
+    "replayStatus": "PASS",
+    "certificationCandidate": true,
+    "inputDigest": "7455ff4b864bc2e63431b421d86e3a80b99a53ab0f82dc8ec0ae11dd1eff7ffb",
+    "lineageDigest": "cabaa3b596efa025febef7f0cd3868a59c4924c48b55a724d3d0f93e0fdff6e9",
+    "censusDigest": "37f88be2582b5a7c1c4bcaba32f4a40dcbaf8efaa85dd91461460d25140bc8d5",
+    "contractVersionMatch": "PASS",
+    "builderVersionMatch": "PASS",
+    "bundleIdentityMatch": "PASS",
+    "lineageMatch": "PASS"
+  },
+  "negativeBoundaryReadback": {
+    "invalidRequest": {
+      "httpStatus": 400,
+      "status": "INVALID_REQUEST",
+      "result": "PASS"
+    },
+    "missingCertifiedRow": {
+      "httpStatus": 404,
+      "status": "NO_CERTIFIED_STORED_EVIDENCE_ROW",
+      "result": "PASS"
+    }
+  },
+  "dailyHistoryProductionReadiness": {
+    "checkedAt": "2026-09-15T15:03:26.835Z",
+    "httpStatus": 200,
+    "status": "DAILY_HISTORY_READY",
+    "ready": true,
+    "targetDate": "2026-09-14",
+    "scheduledGames": 10,
+    "finalGames": 10,
+    "storedRows": 3026,
+    "storedGames": 10,
+    "missingGamePks": [],
+    "unexpectedGamePks": [],
+    "exactCoverage": true,
+    "historyCoverageReady": true
+  },
+  "storedEvidenceSafety": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "shadowOnly": true,
+    "meaning": "YES certifies the upstream PA-14 V2 data contract and production Consumer readback for downstream research consumption. It does not authorize betting production use, Official Picks, APOSTAR, or model training/promotion."
+  },
+  "safety": {
+    "pickEdgeModified": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "frozenContractModified": false,
+    "builderModified": false
+  },
+  "nextBoundary": "Pick Edge may now consume PE_PITCHER_K_V2 as a new versioned research path. Do not treat it as recovered V1. Training, promotion, Official Picks, and APOSTAR remain separately gated."
+}
