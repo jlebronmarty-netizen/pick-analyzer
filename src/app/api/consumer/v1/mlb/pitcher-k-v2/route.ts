@@ -18,6 +18,13 @@ function objectValue(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null
 }
 
+function sameInstant(left: unknown, right: unknown) {
+  if (typeof left !== 'string' || typeof right !== 'string') return false
+  const a = Date.parse(left)
+  const b = Date.parse(right)
+  return Number.isFinite(a) && Number.isFinite(b) && a === b
+}
+
 export async function GET(request: Request) {
   const headers = { 'Cache-Control': 'no-store' }
   const params = new URL(request.url).searchParams
@@ -75,9 +82,9 @@ export async function GET(request: Request) {
       row.contractVersion !== CONTRACT_VERSION ||
       row.builderVersion !== BUILDER_VERSION ||
       row.lineageDigest !== stored.lineage_digest ||
-      row.targetStart !== stored.target_start ||
-      row.cutoff !== stored.cutoff ||
-      row.dataAsOf !== stored.data_as_of
+      !sameInstant(row.targetStart, stored.target_start) ||
+      !sameInstant(row.cutoff, stored.cutoff) ||
+      !sameInstant(row.dataAsOf, stored.data_as_of)
     ) {
       return NextResponse.json({
         version: CONTRACT_VERSION,
