@@ -27,6 +27,7 @@ const deterministicKey = `PA14_V2_EVIDENCE_BUNDLE|823574|669358|${computedInputD
 const sourceManifest = {
   purpose: 'PA14_V2_STORED_EVIDENCE_REPLAY',
   researchOnly: true,
+  storageAccess: 'service_role_only',
   externalAcquisitionUsedOnlyForBundleCreation: true,
   storedReplayRequiresExternalFetch: false,
   pregameSnapshot: {
@@ -91,4 +92,5 @@ console.log(`PA14_V2_EVIDENCE_STORED=${JSON.stringify({
   startCount: evidence.audit.startCount,
   opponentGameCount: evidence.audit.opponentGameCount,
   researchOnly: true,
+  storageAccess: 'service_role_only',
 })}`)
