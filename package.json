@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "next build --webpack && node --loader ./scripts/local-ts-loader.mjs scripts/pa14-v2-real-row-probe.mjs",
     "start": "next start",
     "test:product-experience": "playwright test --config=playwright.config.ts",
     "lint": "eslint",
