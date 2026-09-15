@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const TIME_ZONE = 'America/Puerto_Rico'
 const RAW_TABLE = 'pick2_raw_mlb_statcast_pitches'
+const SEASON = 2026
 
 function dateInTimeZone(date: Date, timeZone = TIME_ZONE) {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date)
@@ -58,16 +59,35 @@ async function storedGamePks(date: string) {
   }
 }
 
+async function analyticsMaxDate() {
+  const { data, error } = await supabaseAdmin
+    .from('mlb_statcast_pitcher_game_logs')
+    .select('game_date')
+    .eq('season', SEASON)
+    .order('game_date', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw new Error(`STATCAST_ANALYTICS_READ_FAILED:${error.message}`)
+  return data?.game_date ? String(data.game_date) : null
+}
+
 export async function getMlbDailyHistoryReadiness(input: { date?: string | null } = {}) {
   const today = dateInTimeZone(new Date())
   const targetDate = input.date ?? addDays(today, -1)
-  const [official, stored] = await Promise.all([officialFinalGamePks(targetDate), storedGamePks(targetDate)])
+  const [official, stored, analyticsMaxGameDate] = await Promise.all([
+    officialFinalGamePks(targetDate),
+    storedGamePks(targetDate),
+    analyticsMaxDate(),
+  ])
   const expected = official.finalGamePks
   const actual = stored.gamePks
   const missingGamePks = expected.filter((gamePk) => !actual.includes(gamePk))
   const unexpectedGamePks = actual.filter((gamePk) => !expected.includes(gamePk))
   const exactCoverage = expected.length === actual.length && missingGamePks.length === 0 && unexpectedGamePks.length === 0
-  const ready = official.blocking.length === 0 && expected.length > 0 && exactCoverage
+  const noPlayDay = official.scheduledGames === 0 || official.terminalNoPlay === official.scheduledGames
+  const historyCoverageReady = official.blocking.length === 0 && exactCoverage && (expected.length > 0 || noPlayDay)
+  const analyticsReady = noPlayDay || Boolean(analyticsMaxGameDate && analyticsMaxGameDate >= targetDate)
+  const ready = historyCoverageReady && analyticsReady
 
   return {
     status: ready ? 'DAILY_HISTORY_READY' : 'DAILY_HISTORY_NOT_READY',
@@ -84,8 +104,13 @@ export async function getMlbDailyHistoryReadiness(input: { date?: string | null 
       rows: stored.rows,
       games: actual.length,
     },
+    analytics: {
+      maxGameDate: analyticsMaxGameDate,
+      ready: analyticsReady,
+    },
     missingGamePks,
     unexpectedGamePks,
     exactCoverage,
+    historyCoverageReady,
   }
 }
