@@ -1,4 +1,4 @@
-name: PA14 V5 indexed Statcast fix
+name: PA14 V5 MLB type normalization fix
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Apply indexed Statcast patch
+      - name: Apply MLB type normalization patch
         run: python scripts/pa14-v5-indexed-statcast-patch.py
       - name: Commit branch-only fix
         run: |
@@ -29,5 +29,5 @@ jobs:
           git add src/services/pa14-v2-real-evidence.service.ts
           git diff --cached --check
           git diff --cached --quiet && exit 1 || true
-          git commit -m 'fix: read PA14 Statcast evidence through indexed game lookups'
+          git commit -m 'fix: normalize MLB official pitch types for PA14 V2'
           git push origin HEAD:pa14-v5-daily-history-ingestion-20260914
