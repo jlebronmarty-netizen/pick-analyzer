@@ -252,7 +252,7 @@ async function loadPitcherStatcast(startGamePks: number[]): Promise<StatcastRow[
   const rows: StatcastRow[] = []
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await supabaseAdmin
-      .from('mlb_statcast_classified_v')
+      .from('pick2_raw_mlb_statcast_pitches')
       .select(STATCAST_FIELDS)
       .eq('game_year', SEASON)
       .eq('game_type', 'R')
@@ -272,30 +272,24 @@ async function loadPitcherStatcast(startGamePks: number[]): Promise<StatcastRow[
 }
 
 async function loadOpponentStatcast(opponentGamePks: number[]): Promise<StatcastRow[]> {
-  const rows: StatcastRow[] = []
-  for (let from = 0; ; from += PAGE_SIZE) {
+  const gameRows = await mapConcurrent([...new Set(opponentGamePks)].sort((a, b) => a - b), 12, async (gamePk) => {
     const { data, error } = await supabaseAdmin
-      .from('mlb_statcast_classified_v')
+      .from('pick2_raw_mlb_statcast_pitches')
       .select(STATCAST_FIELDS)
-      .eq('game_year', SEASON)
+      .eq('game_pk', gamePk)
       .eq('game_type', 'R')
-      .lt('game_date', TARGET_DATE)
-      .in('game_pk', opponentGamePks)
-      .order('game_pk', { ascending: true })
       .order('at_bat_number', { ascending: true })
       .order('pitch_number', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1)
-    if (error) throw new Error(`Opponent Statcast query failed: ${error.message}`)
+      .limit(PAGE_SIZE)
+    if (error) throw new Error(`Opponent Statcast query failed ${gamePk}: ${error.message}`)
     const page = (data ?? []) as unknown as StatcastRow[]
-    for (const row of page) {
-      const battingHalf =
-        (row.canonical_away_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Top') ||
-        (row.canonical_home_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Bot')
-      if (battingHalf) rows.push(row)
-    }
-    if (page.length < PAGE_SIZE) break
-  }
-  return rows
+    if (page.length >= PAGE_SIZE) throw new Error(`Opponent Statcast game ${gamePk} reached page limit ${PAGE_SIZE}`)
+    return page.filter((row) =>
+      (row.canonical_away_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Top') ||
+      (row.canonical_home_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Bot'),
+    )
+  })
+  return gameRows.flat()
 }
 
 function normalizeStatcastRow(row: StatcastRow): Pa14V2Pitch {
