@@ -626,6 +626,8 @@ export async function materializePa14V2RealBazRow() {
 
   const unfinished = unfinishedAtBatsFromRows(opponentStatcastRaw)
   const witnessEvidence = await verifyUnfinishedWitnesses(unfinished)
+  const pitcherUnfinished = unfinishedAtBatsFromRows(pitcherStatcastRaw)
+  const pitcherWitnessEvidence = await verifyUnfinishedWitnesses(pitcherUnfinished)
   const allSourceGamePks = [...new Set([...startGamePks, ...opponentGamePks])]
   const completion = await loadCompletionEvidence(allSourceGamePks)
 
@@ -640,6 +642,8 @@ export async function materializePa14V2RealBazRow() {
     if (terminalCount !== official.bf || deliveredCount !== official.pitchCount || kCount !== official.strikeouts) {
       throw new Error(`Starter reconciliation failed ${official.gamePk}: BF ${terminalCount}/${official.bf}, pitches ${deliveredCount}/${official.pitchCount}, K ${kCount}/${official.strikeouts}`)
     }
+    const unfinishedPaAtBatNumbers = pitcherUnfinished.get(official.gamePk) ?? []
+    const witnesses = pitcherWitnessEvidence.get(official.gamePk) ?? []
     const pitchDigest = canonicalDigest(pitches)
     const boxDigest = canonicalDigest(official.raw)
     const gameDigest = canonicalDigest({
@@ -660,11 +664,11 @@ export async function materializePa14V2RealBazRow() {
       authoritativeBoxScoreBF: official.bf,
       pitches,
       terminalOnlyPas: [],
-      unfinishedPaAtBatNumbers: [],
+      unfinishedPaAtBatNumbers,
       dependencies: [
         dependency('SOURCE_GAME', official.gamePk, TARGET_PITCHER_ID, SOURCE_TIMECODES, complete.completedBy, gameDigest),
         dependency('PITCHES', official.gamePk, TARGET_PITCHER_ID, SOURCE_STATCAST, complete.completedBy, pitchDigest),
-        dependency('TERMINAL', official.gamePk, TARGET_PITCHER_ID, SOURCE_STATCAST, complete.completedBy, terminalDigest(pitches, [], [])),
+        dependency('TERMINAL', official.gamePk, TARGET_PITCHER_ID, SOURCE_STATCAST, complete.completedBy, terminalDigest(pitches, [], unfinishedPaAtBatNumbers, witnesses)),
         dependency('BOX_SCORE', official.gamePk, TARGET_PITCHER_ID, SOURCE_GAMELOG, complete.completedBy, boxDigest),
       ],
     }
