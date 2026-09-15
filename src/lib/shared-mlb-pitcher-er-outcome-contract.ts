@@ -3,16 +3,18 @@ export const SHARED_MLB_PITCHER_ER_OUTCOME_VERSION = 'SHARED_MLB_PITCHER_ER_OUTC
 const CANONICAL_PREFIX = 'retrosheet:mlb:game:'
 const ALLOWED_MAPPING_METHODS = new Set(['NORMALIZED_EXACT_NAME', 'EXPLICIT_TEAM_DATE_NAME_EXCEPTION'])
 
-function object(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-}
-
 function positiveInteger(value: unknown) {
   return Number.isSafeInteger(value) && Number(value) > 0 ? Number(value) : null
 }
 
 function nonNegativeInteger(value: unknown) {
   return Number.isSafeInteger(value) && Number(value) >= 0 ? Number(value) : null
+}
+
+function parsedNonNegativeInteger(value: unknown) {
+  if (value === null || value === undefined || value === '') return null
+  const parsed = typeof value === 'number' ? value : Number(value)
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null
 }
 
 function text(value: unknown) {
@@ -84,7 +86,7 @@ export function readPitcherErOutcome(mapping: PitcherErMappingRow, raw: PitcherE
 
   if (pitcherErRawKey(raw) !== `${gameReference}|${pitcherSourceId}`) return null
   if (!Array.isArray(raw.parsed_fields)) return null
-  const observedEarnedRuns = nonNegativeInteger(Number(raw.parsed_fields[3]))
+  const observedEarnedRuns = parsedNonNegativeInteger(raw.parsed_fields[3])
   const recordId = text(raw.id)
   const sourceFilename = text(raw.source_filename)
   const sourceLine = positiveInteger(raw.source_line)
