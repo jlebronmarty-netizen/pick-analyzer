@@ -1,4 +1,4 @@
-name: PA14 V5 opponent Statcast query fix
+name: PA14 V5 indexed Statcast fix
 
 on:
   push:
@@ -20,77 +20,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Patch Statcast reads to indexed raw table and per-game opponent lookup
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          p = Path('src/services/pa14-v2-real-evidence.service.ts')
-          s = p.read_text()
-
-          assert s.count(".from('mlb_statcast_classified_v')") == 2, f"view refs={s.count(\".from('mlb_statcast_classified_v')\")}"
-          s = s.replace(".from('mlb_statcast_classified_v')", ".from('pick2_raw_mlb_statcast_pitches')")
-
-          old = '''async function loadOpponentStatcast(opponentGamePks: number[]): Promise<StatcastRow[]> {
-  const rows: StatcastRow[] = []
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const { data, error } = await supabaseAdmin
-      .from('pick2_raw_mlb_statcast_pitches')
-      .select(STATCAST_FIELDS)
-      .eq('game_year', SEASON)
-      .eq('game_type', 'R')
-      .lt('game_date', TARGET_DATE)
-      .in('game_pk', opponentGamePks)
-      .order('game_pk', { ascending: true })
-      .order('at_bat_number', { ascending: true })
-      .order('pitch_number', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1)
-    if (error) throw new Error(`Opponent Statcast query failed: ${error.message}`)
-    const page = (data ?? []) as unknown as StatcastRow[]
-    for (const row of page) {
-      const battingHalf =
-        (row.canonical_away_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Top') ||
-        (row.canonical_home_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Bot')
-      if (battingHalf) rows.push(row)
-    }
-    if (page.length < PAGE_SIZE) break
-  }
-  return rows
-}'''
-
-          new = '''async function loadOpponentStatcast(opponentGamePks: number[]): Promise<StatcastRow[]> {
-  const gameRows = await mapConcurrent([...new Set(opponentGamePks)].sort((a, b) => a - b), 12, async (gamePk) => {
-    const { data, error } = await supabaseAdmin
-      .from('pick2_raw_mlb_statcast_pitches')
-      .select(STATCAST_FIELDS)
-      .eq('game_pk', gamePk)
-      .eq('game_type', 'R')
-      .order('at_bat_number', { ascending: true })
-      .order('pitch_number', { ascending: true })
-      .limit(PAGE_SIZE)
-    if (error) throw new Error(`Opponent Statcast query failed ${gamePk}: ${error.message}`)
-    const page = (data ?? []) as unknown as StatcastRow[]
-    if (page.length >= PAGE_SIZE) throw new Error(`Opponent Statcast game ${gamePk} reached page limit ${PAGE_SIZE}`)
-    return page.filter((row) =>
-      (row.canonical_away_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Top') ||
-      (row.canonical_home_team_id === TARGET_OPPONENT_CANONICAL && row.inning_topbot === 'Bot'),
-    )
-  })
-  return gameRows.flat()
-}'''
-
-          assert s.count(old) == 1, f'opponent function count={s.count(old)}'
-          s = s.replace(old, new)
-          p.write_text(s)
-          PY
-      - name: Verify and commit branch-only fix
-        shell: bash
+      - name: Apply indexed Statcast patch
+        run: python scripts/pa14-v5-indexed-statcast-patch.py
+      - name: Commit branch-only fix
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/services/pa14-v2-real-evidence.service.ts
           git diff --cached --check
-          git diff --cached --exit-code && { echo 'Expected indexed query fix was not produced'; exit 1; } || true
+          git diff --cached --quiet && exit 1 || true
           git commit -m 'fix: read PA14 Statcast evidence through indexed game lookups'
           git push origin HEAD:pa14-v5-daily-history-ingestion-20260914
