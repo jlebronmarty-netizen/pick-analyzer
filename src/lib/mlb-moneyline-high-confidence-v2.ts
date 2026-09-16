@@ -164,17 +164,24 @@ export function normalizedComponentScore(
   featureStats: Map<string, NormalizationStat>,
   componentStat: NormalizationStat | null,
 ) {
-  if (!componentStat || !Number.isFinite(componentStat.sd) || componentStat.sd === 0) return null
-  const zValues: number[] = []
+  if (!componentStat || !Number.isFinite(componentStat.sd) || componentStat.sd === 0 || values.length === 0) return null
+  let directionalZSum = 0
+  let populated = 0
   for (const item of values) {
     if (!finite(item.value)) continue
     const stat = featureStats.get(item.featureName)
     if (!stat || !Number.isFinite(stat.sd) || stat.sd === 0) continue
-    const z = ((item.direction * item.value) - stat.mean) / stat.sd
-    if (Number.isFinite(z)) zValues.push(z)
+    const z = item.direction * ((item.value - stat.mean) / stat.sd)
+    if (Number.isFinite(z)) {
+      directionalZSum += z
+      populated += 1
+    }
   }
-  if (!zValues.length) return null
-  const raw = zValues.reduce((sum, value) => sum + value, 0) / zValues.length
+  if (!populated) return null
+  // Canonical historical component_scores divide by the declared feature_count,
+  // not the populated count. Missing features therefore contribute zero rather
+  // than changing the denominator.
+  const raw = directionalZSum / values.length
   const score = (raw - componentStat.mean) / componentStat.sd
   return Number.isFinite(score) ? score : null
 }
