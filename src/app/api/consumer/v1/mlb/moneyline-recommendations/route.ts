@@ -25,6 +25,11 @@ function safeNumber(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
 }
 
+function isFailClosedRow(row: { route_details?: unknown }) {
+  const details = row.route_details
+  return Boolean(details && typeof details === 'object' && !Array.isArray(details) && (details as Record<string, unknown>).failClosed === true)
+}
+
 const safety = {
   recommendationServingAuthorized: true,
   officialPicksWrites: false,
@@ -68,6 +73,8 @@ export async function GET(request: Request) {
           evaluatedGames: 0,
           picksCount: 0,
           actionablePicksCount: 0,
+          failClosedGames: 0,
+          coverageComplete: false,
           recommendations: [],
           safety,
         },
@@ -91,6 +98,8 @@ export async function GET(request: Request) {
           evaluatedGames: data.length,
           picksCount: 0,
           actionablePicksCount: 0,
+          failClosedGames: 0,
+          coverageComplete: false,
           recommendations: [],
           failClosedReason: 'UNFROZEN_OR_UNEXPECTED_TRACKER_STATE',
           safety,
@@ -98,7 +107,9 @@ export async function GET(request: Request) {
       }, { status: 409, headers })
     }
 
+    const frozenInputGaps = data.filter(isFailClosedRow)
     const pickRows = data.filter((row) => row.pick_status === 'PICK')
+    const failClosedPick = pickRows.some(isFailClosedRow)
     const malformedPick = pickRows.some((row) =>
       !row.recommended_team ||
       !row.recommended_side ||
@@ -108,7 +119,7 @@ export async function GET(request: Request) {
       !row.frozen_at
     )
 
-    if (malformedPick) {
+    if (failClosedPick || malformedPick) {
       return NextResponse.json({
         version: CONTRACT_VERSION,
         status: 'TRACKER_NOT_READY',
@@ -119,8 +130,10 @@ export async function GET(request: Request) {
           evaluatedGames: data.length,
           picksCount: 0,
           actionablePicksCount: 0,
+          failClosedGames: frozenInputGaps.length,
+          coverageComplete: false,
           recommendations: [],
-          failClosedReason: 'MALFORMED_FROZEN_PICK',
+          failClosedReason: failClosedPick ? 'FAIL_CLOSED_ROW_CANNOT_BE_PICK' : 'MALFORMED_FROZEN_PICK',
           safety,
         },
       }, { status: 409, headers })
@@ -153,6 +166,7 @@ export async function GET(request: Request) {
     })
 
     const actionablePicksCount = recommendations.filter((row) => row.actionable).length
+    const coverageComplete = frozenInputGaps.length === 0
 
     return NextResponse.json({
       version: CONTRACT_VERSION,
@@ -164,10 +178,16 @@ export async function GET(request: Request) {
         evaluatedGames: data.length,
         picksCount: pickRows.length,
         actionablePicksCount,
+        failClosedGames: frozenInputGaps.length,
+        coverageComplete,
         recommendations,
         note: pickRows.length === 0
-          ? 'No game met the frozen certified Moneyline selection criteria.'
-          : null,
+          ? coverageComplete
+            ? 'No game met the frozen certified Moneyline selection criteria.'
+            : 'No valid Moneyline recommendation; one or more games failed closed because decision-relevant inputs were unavailable.'
+          : coverageComplete
+            ? null
+            : 'Valid recommendations are shown; games with incomplete decision-relevant inputs remain excluded fail-closed.',
         safety,
       },
     }, { headers })

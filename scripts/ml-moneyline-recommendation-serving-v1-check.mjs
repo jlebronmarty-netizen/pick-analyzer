@@ -13,7 +13,12 @@ const required = [
   "row.data_status !== 'FROZEN'",
   "row.pick_status !== 'PICK' && row.pick_status !== 'NO_PICK'",
   "failClosedReason: 'UNFROZEN_OR_UNEXPECTED_TRACKER_STATE'",
-  "failClosedReason: 'MALFORMED_FROZEN_PICK'",
+  "function isFailClosedRow",
+  "const frozenInputGaps = data.filter(isFailClosedRow)",
+  "const failClosedPick = pickRows.some(isFailClosedRow)",
+  "failClosedPick ? 'FAIL_CLOSED_ROW_CANNOT_BE_PICK' : 'MALFORMED_FROZEN_PICK'",
+  "failClosedGames: frozenInputGaps.length",
+  "const coverageComplete = frozenInputGaps.length === 0",
   "officialPicksWrites: false",
   "apostarActive: false",
   "scope: 'MONEYLINE_ONLY'",
@@ -32,10 +37,11 @@ const forbidden = [
   '.delete(',
   'APOSTAR=true',
   'APOSTAR = true',
+  "failClosedReason: 'FROZEN_FAIL_CLOSED_INPUT_GAP'",
 ]
 
 for (const marker of forbidden) {
-  assert.ok(!source.includes(marker), `forbidden write/activation marker present: ${marker}`)
+  assert.ok(!source.includes(marker), `forbidden write/activation/global fail-closed marker present: ${marker}`)
 }
 
 assert.ok(!source.includes('0.7843'), 'historical selected-set accuracy must not be served as per-game probability')
@@ -48,7 +54,7 @@ console.log(JSON.stringify({
   modelVersion: 'pregame_high_conf_home_v2',
   sourceTable: 'mlb_ml_forward_tracker_v1',
   readOnly: true,
-  failClosed: true,
+  failClosed: 'PER_GAME_WITH_STRUCTURAL_FEED_FAIL_CLOSED',
   officialPicksWrites: false,
   apostarActive: false,
   synthesizedProbability: false,
