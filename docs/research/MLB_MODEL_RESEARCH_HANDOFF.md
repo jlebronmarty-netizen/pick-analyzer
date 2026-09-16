@@ -1,0 +1,572 @@
+# MLB Model Research — Canonical Handoff
+
+**Repository:** `jlebronmarty-netizen/pick-analyzer`  
+**Canonical Supabase project:** `ynuocvexviorgdjrfthw` (`Pick Analyzer`)  
+**Last updated:** 2026-09-16  
+**Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
+
+This file is the canonical continuity document for the MLB modeling experiment. Future chats/agents should read this file **before making changes** so the experiment is not restarted, reinterpreted, or contaminated by accidental use of test data.
+
+---
+
+## 1. Research objective
+
+Build a production-quality MLB prediction/data platform that can eventually support multiple betting markets. The current methodology began with Moneyline and is now being expanded to **Run Line / Spread first, then Game Totals (Over/Under), then player props**.
+
+The user’s stated goal is not merely to fit one model. We want to search many plausible formulas and submodels, preserve only those with evidence, and identify **high-accuracy selective plays** inside each market. Coverage can be selective if accuracy is materially better. The long-term target is broad market coverage by combining strong market-specific models rather than forcing every game into one recommendation.
+
+Core philosophy:
+
+1. Use the full 2025 regular season to develop formulas.
+2. Freeze candidate formulas before using 2026 as external evaluation.
+3. Search alternative architectures/segments when sample sizes support them.
+4. Preserve interpretable weights/components wherever practical.
+5. Separate predictive pregame information from diagnostic same-game information.
+6. Never use final score, winner, final runs, RBI, or other postgame labels as pregame inputs.
+7. New completed games should append to canonical storage so the dataset improves continuously; no need to repeatedly redownload Savant CSV files if canonical ingestion is functioning.
+
+---
+
+## 2. Critical guardrails
+
+### 2.1 Canonical project
+
+Use only this Supabase project for this research:
+
+`ynuocvexviorgdjrfthw`
+
+Do not use the unrelated Smart Shopping Supabase project.
+
+### 2.2 Moneyline experiment integrity
+
+Do not overwrite or destroy existing Moneyline research tables while developing Run Line or Totals. New markets should be new versioned research paths/tables.
+
+### 2.3 Pregame vs FULL
+
+Two branches exist:
+
+- `PREGAME` / more precisely `PREGAME_RECONSTRUCTED`: features that could plausibly have been known before the game, reconstructed historically from canonical data.
+- `FULL`: same-game process diagnostics, used only to learn which processes are associated with winning. FULL is **not deployable as pregame prediction**.
+
+Important rigor note: historical actual starters and first-nine lineups are known retrospectively. They are reasonable pregame-compatible inputs, but this is not the same as having timestamp-proven archival pregame lineup evidence for every old game. Do not oversell this as perfect historical timestamp integrity.
+
+### 2.4 2026 contamination rule
+
+Pure 2025→2026 research candidates must be fit/selected using 2025 only. Then evaluate on 2026.
+
+Some separate adaptive 2026 models already exist and are explicitly labeled adaptive; they must not be confused with pure 2025→2026 holdout models.
+
+### 2.5 Official Picks / betting activation
+
+Do not modify Official Picks or activate APOSTAR without explicit user authorization.
+
+---
+
+## 3. Current canonical cross-year data
+
+The preferred Moneyline experiment source is a cross-year reconstruction using **the same Statcast-based definitions for both 2025 and 2026**, avoiding an artificial 2025 advantage from using a different source such as Retrosheet.
+
+### 3.1 Current counts
+
+As verified on 2026-09-16:
+
+- 2025 cross-year games: **2,430**
+- 2026 cross-year games: **2,270**
+- latest 2026 Statcast game date currently present: **2026-09-15**
+- `mlb_ml_formula_search_v1` currently contains **29** registered formulas/candidates
+
+The 2026 count grows as new games are ingested.
+
+### 3.2 Cross-year game/team tables
+
+- `mlb_ml_xyear_game_v1`
+- `mlb_ml_xyear_team_game_v1`
+- `mlb_ml_xyear_team_batting_game_v1`
+- `mlb_ml_xyear_team_statcast_game_v1`
+
+### 3.3 Cross-year player/process helpers
+
+- `mlb_ml_xyear_pitcher_game_v1`
+- `mlb_ml_xyear_team_hand_game_v1`
+- `mlb_ml_xyear_pitcher_pitchtype_game_v1`
+- `mlb_ml_xyear_team_pitchtype_game_v1`
+- `mlb_ml_xyear_batter_game_v1`
+- `mlb_ml_xyear_lineup_v1`
+- `mlb_ml_xyear_errors_game_v1`
+
+### 3.4 Main feature tables
+
+- `mlb_ml_xyear_features_v1`
+- `mlb_ml_xyear_fullgame_v1`
+
+### 3.5 Normalization / scoring tables
+
+- `mlb_ml_xyear_feature_stats_v1`
+- `mlb_ml_xyear_feature_values_v1`
+- `mlb_ml_xyear_component_scores_v1`
+- `mlb_ml_xyear_game_components_v1`
+- `mlb_ml_xyear_component_stats_v1`
+- `mlb_ml_xyear_game_components_z_v1`
+
+All normalization statistics for the pure cross-year experiment were built from **2025 only**.
+
+### 3.6 Formula registry
+
+- `mlb_ml_formula_search_v1`
+
+This is the research registry for frozen/tested formulas. Preserve it and append new candidates with clear provenance.
+
+---
+
+## 4. Existing Moneyline component architecture
+
+Use `mlb_ml_component_map_v2` rather than manually rebuilding mappings.
+
+### PREGAME components (10)
+
+1. `team_strength`
+2. `recent_form`
+3. `offense`
+4. `starter`
+5. `bullpen`
+6. `lineup_matchup`
+7. `home_away`
+8. `history`
+9. `fatigue_travel`
+10. `defense_context`
+
+### FULL diagnostic components (adds 5)
+
+11. `actual_offense`
+12. `actual_contact`
+13. `actual_starter`
+14. `actual_bullpen`
+15. `actual_defense`
+
+The FULL branch deliberately excludes final runs/final score/RBI as model inputs. `actual_winner` is only the label.
+
+---
+
+## 5. Important Moneyline findings so far
+
+### 5.1 Individual PREGAME components — previously measured 2025 → 2026
+
+Approximate accuracies from the cross-year component experiment:
+
+- bullpen: **54.36% → 53.35%**
+- recent_form: **53.74% → 50.95%**
+- team_strength: **53.42% → 53.17%**
+- defense_context: **53.00% → 51.93%**
+- starter: **52.55% → 55.48%**
+- history: **52.47% → 53.97%**
+- home_away: **52.26% → 51.66%**
+- offense: **51.77% → 51.09%**
+- lineup_matchup: **51.69% → 52.06%**
+- fatigue_travel: **48.44% → 48.69%**
+
+Key interpretation: `starter` and `history` were among the more encouraging out-of-sample components. `recent_form` did not transfer well by itself.
+
+### 5.2 FULL diagnostic components — highly informative but not deployable pregame
+
+Previously observed 2025 → 2026:
+
+- `actual_offense`: about **79.8% → 79.4%**
+- `actual_bullpen`: about **70.0% → 71.0%**
+- `actual_starter`: about **69.5% → 69.1%**
+- `actual_contact`: about **65.5% → 63.0%**
+- `actual_defense`: about **48.9% → 49.3%**
+
+This strongly suggests the pregame modeling challenge is predicting future offensive, starter, bullpen and contact-game processes better. These FULL percentages are **not** pregame betting model accuracies.
+
+---
+
+## 6. Moneyline formula search already preserved in registry
+
+The registry currently contains 29 candidates. Important entries include:
+
+### Pure / 2025-developed examples
+
+- `pregame_global_stable_v1`
+  - 2025 acc ~55.88%
+  - stability-oriented
+  - `(team_strength + recent_form + home_away + defense_context)/4`
+  - home threshold `>= -0.36`
+
+- `pregame_global_subset_bias_v1`
+  - 2025 acc ~56.50%
+  - `(team_strength + recent_form + defense_context)/3`
+  - home threshold `>= -0.36`
+
+- `pregame_day_v1`
+  - day games, 2025 acc ~56.71%, n=917
+  - `(starter + lineup_matchup)/2`, threshold `-0.08`
+
+- `pregame_night_v1`
+  - night games, 2025 acc ~57.57%, n=1513
+  - `(recent_form + home_away + history + defense_context)/4`, threshold `-0.20`
+
+- starter-hand matchup formulas for L/L, L/R, R/L, R/R
+
+- season phase formulas: EARLY / MID / LATE
+
+- `pregame_dayhand_hybrid_v1`
+  - 2025 combined acc ~59.96%
+
+- `pregame_phasehand_hybrid_v1`
+  - 2025 combined acc ~60.37%
+
+- `pregame_ensemble_v1`
+  - 2025 combined acc ~60.91%
+
+- `pregame_phase_day_hand_hybrid_v1`
+  - 2025 combined acc ~61.56% (1496/2430)
+
+- `full_global_v1`
+  - FULL diagnostic only
+  - 2025 acc ~80.53%
+  - `0.70*actual_offense + 0.10*actual_starter + 0.20*actual_bullpen`, threshold `-0.14`
+
+### Adaptive 2026 research entries — keep conceptually separate
+
+- `pregame_adaptive_elo_starter_defense_v1`
+  - adaptive 2026 model, not pure 2025→2026 holdout
+
+- `pregame_champion_starter_teamprior_v2`
+  - adaptive 2026 champion-style research path
+  - full 2026 previously logged around 57.38%; final historical holdout in its own experiment 61.78%
+
+### High-confidence selective Moneyline rules
+
+These are especially important to preserve because they demonstrate the user’s desired strategy: lower coverage, higher accuracy.
+
+- `pregame_high_conf_home_v1`
+  - selective HOME-only rule
+  - full selected set previously logged **63/81 = 77.78%**
+  - historical untouched final holdout **17/20 = 85%**
+
+- `pregame_high_conf_home_v2`
+  - high-confidence HOME union
+  - full selected set previously logged **80/102 = 78.43%**
+  - historical final holdout **17/21 = 80.95%**
+  - development folds all met ~75%+ criteria
+  - no symmetric AWAY rule met the same stability standard at that time
+
+These selective rules are valuable proof-of-concept: the system does not need to predict every game if it can identify a small subset with meaningfully better reliability.
+
+---
+
+## 7. Important feature-engineering details
+
+Historical rolling features enforce `game_date < current_game_date`, meaning game 2 of a same-day doubleheader does not use game 1 as prior rolling history.
+
+Examples already reconstructed include:
+
+- prior team win pct
+- run differential/game
+- Pythagorean win pct (exponent ~1.83)
+- L5/L10 win pct and run differential
+- home/away splits
+- rest days
+- games in last 7 days
+- errors/game
+- park historical home win rate
+- road-trip game number
+- travel miles in prior 48h
+- timezone changes
+- OPS proxy
+- K%
+- hard-hit%, barrel%
+- split vs opposing starter hand
+- lineup prior performance
+- starter RA9, WHIP, K%, BB%, whiff, hard-hit
+- starter L5 metrics
+- bullpen RA9/WHIP/K%/BB%
+- bullpen L7 RA9
+- bullpen workload prior 2d
+- starter-vs-opponent history
+- head-to-head history
+- common-opponent history
+- simplified pitch-arsenal matchup
+
+NULL historical values are generally neutralized in standardized scoring (z≈0) rather than automatically interpreted as favorable/unfavorable.
+
+---
+
+## 8. Day/night, travel, venue caveat
+
+A modal team-home-venue map exists:
+
+- `mlb_ml_team_venue_map_v1`
+- venue geo source: `mlb_ml_venue_geo_2025_v3`
+
+2026 day/night was reconstructed from scheduled time converted using venue UTC offset, with a simple local-time threshold. Special-site games may inherit the club’s modal home venue and therefore should be treated cautiously for exact travel/day-night segmentation.
+
+Do not build fragile stadium-specific models from tiny samples without shrinkage/validation.
+
+---
+
+## 9. Odds / market data currently present
+
+This is now the immediate expansion path.
+
+### 9.1 Existing historical/current odds storage
+
+` sports_odds_snapshots ` currently contains a large historical odds archive across sports. For MLB specifically, as verified 2026-09-16, it contains 2026 records approximately through 2026-09-10 for:
+
+- `moneyline`: ~482,898 rows
+- `total`: ~482,120 rows
+- `run_line`: ~477,358 rows
+- legacy/alternate `spread`: ~1,464 rows
+
+The key point: **2026 already has substantial Run Line and Total market history.**
+
+Relevant tables:
+
+- `sports_odds_snapshots`
+- `odds`
+- `pick2_mlb_market_event_mappings`
+- `pick2_mlb_market_price_observations`
+- `pick2_mlb_market_value_evaluations`
+- `pick2_mlb_odds_operational_requests`
+
+### 9.2 Existing Run Line research table
+
+- `mlb_runline_market_2026_v1`
+
+Verified state on 2026-09-16:
+
+- **1,883** rows/games
+- date range **2026-03-26 through 2026-09-10**
+
+Columns:
+
+- `game_pk`
+- `game_date`
+- `home_line`
+- `away_line`
+- `home_price_avg`
+- `away_price_avg`
+- `books`
+- `last_snapshot_at`
+- `created_at`
+
+This means Run Line work is **not starting from zero**. The next chat must inspect this table before recreating any equivalent structure.
+
+### 9.3 Market modeling support tables already present
+
+- `mlb_ml_market_model_runs_v1`
+- `mlb_ml_market_model_weights_v1`
+
+Inspect existing rows before adding new market experiments.
+
+---
+
+## 10. Immediate NEXT ACTION — Backfill Run Line, then Totals
+
+This is the exact next research phase.
+
+### Step A — inventory existing coverage before spending API credits
+
+1. Inspect all existing 2025 and 2026 MLB rows in:
+   - `sports_odds_snapshots`
+   - `odds`
+   - `pick2_mlb_market_price_observations`
+2. Determine exactly how much 2025 Run Line and Totals history already exists.
+3. Inspect any existing historical Odds API importer in the repo or connected infrastructure before writing a new one.
+4. Estimate gaps by date/game/market.
+5. Only call paid historical Odds API endpoints for missing coverage.
+
+The user has subscriptions/resources including BallDontLie and The Odds API. Do not assume either contains a particular 2025 historical market until verified. Prefer canonical stored snapshots if already present.
+
+### Step B — backfill raw market snapshots, not only averaged rows
+
+For Run Line first, preserve the raw bookmaker/time snapshots if available so later research can test:
+
+- opening line
+- closing line
+- consensus line
+- book-specific line
+- line movement
+- price/vig
+
+Do not throw away raw history and retain only a final average.
+
+For game-level modeling, a canonical derived table can then select a documented snapshot policy (for example closing consensus or a fixed pregame time). The policy must be versioned.
+
+### Step C — create Run Line labels correctly
+
+Run Line outcome is not simply Moneyline winner.
+
+Typical MLB line is ±1.5, but use the actual market line stored for that game/side.
+
+For a home-side line `L_home`, the home bet covers if:
+
+`home_final_runs + L_home > away_final_runs`
+
+Push if equal, when the market/line allows it. Away side is analogous.
+
+The model target should match the actual offered side/line, and price must remain separate from the event probability.
+
+### Step D — build 2025 training + 2026 external evaluation
+
+Once 2025 Run Line odds are adequately backfilled:
+
+- construct a cross-year Run Line research table aligned to canonical game_pk/game_date
+- derive pregame features from the existing MLB feature platform rather than rebuilding everything
+- develop/search models using 2025 only
+- freeze candidates
+- evaluate on 2026
+
+Search both full-coverage and high-confidence selective rules.
+
+### Step E — Run Line candidate families
+
+At minimum test:
+
+- global formula
+- starter-weighted formula
+- offense + bullpen formula
+- team-strength + run-differential/Pythagorean formula
+- home/away bias/intercept
+- day/night segmentation
+- starter handedness combinations
+- season phase
+- favorite/underdog status (using only pregame market information)
+- line bucket (+1.5/-1.5 and any alternate lines with sufficient sample)
+- price bucket / implied probability bucket
+- confidence/margin thresholds
+- ensembles of independently stable submodels
+
+Also test whether the high-confidence Moneyline HOME logic transfers to favorite -1.5 or underdog +1.5 contexts, but treat that as a hypothesis, not an assumption.
+
+### Step F — then repeat the framework for Totals
+
+Totals target should be Over/Under relative to the actual offered total line.
+
+Key additional features to emphasize:
+
+- starter run prevention
+- bullpen run prevention/workload
+- team offense and split offense
+- park context
+- weather if historically available/reliable
+- lineup quality
+- contact quality
+- strikeout/walk profile
+- opposing pitcher arsenal matchup
+- recent scoring environment only if validated
+- total-line bucket (e.g. 7.0, 7.5, 8.0, 8.5, etc.)
+- price/vig
+
+Do not use final total runs as an input; it is only the target.
+
+---
+
+## 11. Recommended formula-search methodology for every new market
+
+The Moneyline experiment established the research discipline that should be reused.
+
+### Development set
+
+Use all available 2025 regular-season games with valid market data.
+
+### Internal 2025 validation
+
+Use chronological/monthly/expanding-window validation to avoid selecting formulas that only fit one period.
+
+Track at minimum:
+
+- raw 2025 accuracy
+- monthly/temporal accuracy
+- worst-period accuracy
+- standard deviation across periods
+- selected-game count / coverage
+
+### Candidate search
+
+Test:
+
+- equal-weight subsets
+- signed/continuous weights
+- thresholds/intercepts
+- regularized logistic/ridge models
+- direct 0/1 accuracy search when appropriate
+- segment routers
+- majority/weighted ensembles
+- high-confidence selective filters
+
+Avoid tiny-segment winners unless there is enough sample and temporal stability. Use fallback/global rules for small segments.
+
+### Freeze, then test
+
+Once architecture/weights/thresholds are selected using 2025, freeze them. Then evaluate on 2026.
+
+Report:
+
+- correct / incorrect
+- accuracy
+- sample size
+- coverage
+- lift versus a simple baseline
+- temporal stability
+- confidence-bin performance
+- for betting research, probability vs implied probability and EV only after predictive calibration is established
+
+### Important distinction
+
+A formula that covers only 4–5% of games can still be highly valuable if it is stable at >75% accuracy. The user explicitly accepts selective coverage because other markets will later add additional high-quality opportunities.
+
+---
+
+## 12. Daily ingestion vision
+
+Long-term workflow:
+
+1. MLB/Statcast/canonical game ingestion adds newly completed games and process stats daily.
+2. Odds ingestion archives pregame market snapshots daily for Moneyline, Run Line, Totals and later props.
+3. Feature pipelines append/update new game rows.
+4. Frozen production research formulas score upcoming games using only available pregame information.
+5. Completed outcomes are later joined for evaluation and retraining research.
+
+The goal is that new data accumulates automatically in canonical storage. Manual Savant downloads should become unnecessary except as a recovery/fallback source.
+
+---
+
+## 13. What NOT to do in the next chat
+
+- Do not restart the Moneyline experiment from scratch.
+- Do not rebuild all Statcast tables unnecessarily.
+- Do not recreate `mlb_runline_market_2026_v1` without first inspecting it.
+- Do not spend historical Odds API credits before measuring what is already stored.
+- Do not choose a 2025→2026 formula because it looked best on 2026.
+- Do not mix adaptive 2026 models with pure 2025-trained holdout models without explicit labels.
+- Do not use FULL same-game process values as if they were pregame inputs.
+- Do not use final score/runs/winner/RBI as features.
+- Do not allow second-game doubleheader rolling features to see same-day game 1 unless a separate live/sequential model is explicitly designed.
+- Do not touch Official Picks / APOSTAR without explicit authorization.
+
+---
+
+## 14. Suggested continuation order
+
+1. Read this entire handoff.
+2. Verify current `main` HEAD and recent changes in `pick-analyzer`.
+3. Verify Supabase state; never assume the counts in this document have not grown.
+4. Inspect 2025 coverage for Run Line and Totals in existing odds tables.
+5. Locate/reuse any existing historical odds import path if present.
+6. Backfill only the missing 2025 Run Line history.
+7. Build canonical 2025 Run Line training dataset + 2026 evaluation dataset.
+8. Run broad formula/segment/high-confidence search using the same research discipline as Moneyline.
+9. Freeze Run Line candidates and evaluate 2026.
+10. Repeat for Totals.
+11. Only after team markets are stable, expand to player props.
+
+---
+
+## 15. Continuation prompt for a new ChatGPT chat
+
+A future chat should be told explicitly to read this file and execute, not just provide a plan. The user can paste the prompt supplied in the originating chat.
+
+**Canonical handoff path:**
+
+`docs/research/MLB_MODEL_RESEARCH_HANDOFF.md`
