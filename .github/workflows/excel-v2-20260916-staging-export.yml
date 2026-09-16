@@ -1,0 +1,40 @@
+name: Excel V2 Sep16 Staging Export
+
+on:
+  push:
+    branches:
+      - excel-v2-live-odds-preview-20260915
+    paths:
+      - '.github/workflows/excel-v2-20260916-staging-export.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Download normalized Sep16 staging
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            'https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/temp-excel-v2-20260916-export?token=excel-v2-20260916-export-f8c31' \
+            --output today_props_staging.json
+          python - <<'PY'
+          import json
+          p=json.load(open('today_props_staging.json',encoding='utf-8'))
+          assert len(p['props']) == 619, len(p['props'])
+          assert len(p['players']) == 274, len(p['players'])
+          assert len(p['stats']) == 274, len(p['stats'])
+          print({'props':len(p['props']),'players':len(p['players']),'stats':len(p['stats'])})
+          PY
+      - name: Upload staging artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-v2-sep16-staging
+          path: today_props_staging.json
+          retention-days: 1
+          if-no-files-found: error
