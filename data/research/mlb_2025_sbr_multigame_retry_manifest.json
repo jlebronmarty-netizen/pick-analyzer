@@ -1,0 +1,30 @@
+{
+  "byMarket": {
+    "run_line": 8412,
+    "total": 8412
+  },
+  "byRole": {
+    "closing": 8412,
+    "opening": 8412
+  },
+  "bySportsbook": {
+    "bet365": 2768,
+    "bet_rivers_co": 2752,
+    "betmgm": 2760,
+    "caesars": 2768,
+    "draftkings": 2768,
+    "fanatics": 240,
+    "fanduel": 2768
+  },
+  "contract": "MLB_2025_SBR_MULTIGAME_RETRY_V1",
+  "gameKeyPatch": "away_vs_home + startDate",
+  "gzipBytes": 136446,
+  "gzipSha256": "0b195bb0c45ccf170edcf98f938ecaa311a1026531ff951f867652d652bd7463",
+  "oddsApiCreditsConsumed": 0,
+  "postgameFieldsCopied": 0,
+  "regularSeasonGameIdentities": 349,
+  "researchOnly": true,
+  "sanitizedRows": 16824,
+  "sanitizedSha256": "5cda5c11ad6e7860ac669d500dd4d6577ad92ff011d48bedddbcb0390a22df08",
+  "scraperSourceCommit": "48ad82bb4ae21fe7af622762aa8ed2e81d64c0b7"
+}
