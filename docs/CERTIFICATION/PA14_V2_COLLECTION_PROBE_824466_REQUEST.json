@@ -1,6 +1,7 @@
 {
   "schema": "pa14-v2-collection-probe-request/1.0.0",
   "authorized": true,
+  "attempt": 2,
   "purpose": "Collect one additional retained-pregame PA14 V2 stored-evidence bundle and certify deterministic stored replay only.",
   "canonicalGamePk": 824466,
   "pitcherMlbamId": 808967,
@@ -13,5 +14,5 @@
   "shadowOnlyRequired": true,
   "modelTrainingAllowed": false,
   "servingChangesAllowed": false,
-  "notes": "Research-only collection. Do not infer target outcome, do not use postgame source state for target starter identity, and fail closed on any cutoff, census, identity, BF, vocabulary, velocity, or replay mismatch."
+  "notes": "Research-only collection. Attempt 2 only repairs TypeScript result narrowing; evidence and admission semantics are unchanged. Do not infer target outcome, do not use postgame source state for target starter identity, and fail closed on any cutoff, census, identity, BF, vocabulary, velocity, or replay mismatch."
 }
