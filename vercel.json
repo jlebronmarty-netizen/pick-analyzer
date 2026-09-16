@@ -17,6 +17,10 @@
       "schedule": "15 14 * * *"
     },
     {
+      "path": "/api/cron/mlb-statcast-daily",
+      "schedule": "45 14 * * *"
+    },
+    {
       "path": "/api/cron/nba-current-era-shadow",
       "schedule": "*/30 * * * *"
     }
