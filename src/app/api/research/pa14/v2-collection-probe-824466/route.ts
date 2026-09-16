@@ -168,7 +168,3 @@ export async function POST() {
     }, { status: 500, headers })
   }
 }
-
-// Branch-only, temporary alias so the authenticated Vercel connector can execute this
-// idempotent research probe without weakening Deployment Protection. Never merge to main.
-export const GET = POST
