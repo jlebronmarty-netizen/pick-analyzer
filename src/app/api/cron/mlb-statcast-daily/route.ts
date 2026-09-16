@@ -1,9 +1,12 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { refreshMlbStatcastDaily } from '@/services/mlb-statcast-daily-refresh.service'
 import { refreshMlbStatcastDailyAnalytics } from '@/services/mlb-statcast-daily-analytics.service'
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
 import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-freeze-runtime.service'
+import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -11,6 +14,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 800
 
 const MAX_CATCHUP_DAYS = 14
+const PROSPECTIVE_MARKET_CAPTURE_SOURCE = 'RUNLINE_V2_TOTALS_PROSPECTIVE_DAILY_CAPTURE'
 
 function cronSecret() {
   return process.env.CRON_SECRET?.trim() ?? ''
@@ -24,6 +28,164 @@ function authorized(request: NextRequest) {
 
 function failureStatus(result: { status?: string }) {
   return result.status === 'BLOCKED_SCHEDULE_NOT_FINAL' ? 409 : result.status === 'BLOCK_CONFLICT' ? 423 : 500
+}
+
+function puertoRicoClock(now = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Puerto_Rico',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(now)
+      .map((part) => [part.type, part.value])
+  )
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+  }
+}
+
+function withinProspectiveCaptureWindow(now = new Date()) {
+  const clock = puertoRicoClock(now)
+  // This route already runs at 06:15, 08:15, 10:15 and 10:45 Puerto Rico.
+  // Try the earliest slot with a canonical MLB slate; later slots are retries
+  // only when the earlier slot could not capture. A completed/partial capture
+  // is idempotently treated as done for the operating date.
+  return clock.hour >= 6 && clock.hour <= 10
+}
+
+async function maybeCaptureProspectiveMlbMarkets(id: string) {
+  const now = new Date()
+  const clock = puertoRicoClock(now)
+  if (!withinProspectiveCaptureWindow(now)) {
+    return {
+      success: true,
+      status: 'NOT_DUE',
+      operatingDate: clock.date,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+    }
+  }
+
+  const range = puertoRicoUtcRange(clock.date)
+  const existingJobs = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .select('id,status,completed_at,metadata')
+    .eq('provider', 'the-odds-api')
+    .eq('sport_key', 'baseball_mlb')
+    .in('status', ['completed', 'partial'])
+    .gte('completed_at', range.utcStart)
+    .lt('completed_at', range.utcEndExclusive)
+    .order('completed_at', { ascending: false })
+    .limit(50)
+
+  if (existingJobs.error) {
+    return {
+      success: false,
+      status: 'CAPTURE_LEDGER_READ_FAILED',
+      operatingDate: clock.date,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+      error: existingJobs.error.message,
+    }
+  }
+
+  const alreadyCaptured = (existingJobs.data ?? []).find((row) => {
+    const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
+    return metadata.source === PROSPECTIVE_MARKET_CAPTURE_SOURCE
+  })
+
+  if (alreadyCaptured) {
+    return {
+      success: true,
+      status: 'ALREADY_CAPTURED',
+      operatingDate: clock.date,
+      completedAt: alreadyCaptured.completed_at,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+    }
+  }
+
+  const events = await supabaseAdmin
+    .from('sport_events')
+    .select('id,start_time,status')
+    .eq('sport_key', 'baseball_mlb')
+    .eq('league_key', 'mlb')
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
+    .order('start_time', { ascending: true })
+    .limit(50)
+
+  if (events.error) {
+    return {
+      success: false,
+      status: 'CAPTURE_EVENT_SCOPE_READ_FAILED',
+      operatingDate: clock.date,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+      error: events.error.message,
+    }
+  }
+
+  const eventPlans = (events.data ?? [])
+    .filter((event) => Date.parse(String(event.start_time)) > now.getTime())
+    .map((event) => ({
+      eventId: String(event.id),
+      executionEnabled: true,
+      plannedAction: 'REFRESH_MARKET',
+    }))
+
+  if (!eventPlans.length) {
+    return {
+      success: true,
+      status: 'DEFER_NO_PREGAME_EVENTS',
+      operatingDate: clock.date,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+    }
+  }
+
+  try {
+    const result = await executeTheOddsApiMlbDualReadAcquisition({
+      operatingDate: clock.date,
+      eventPlans,
+      source: PROSPECTIVE_MARKET_CAPTURE_SOURCE,
+      requestId: id,
+    })
+    return {
+      ...result,
+      researchOnly: true,
+      capturePurpose: 'ML_RUNLINE_TOTALS_PROSPECTIVE_EVIDENCE',
+      requestedEventCount: eventPlans.length,
+      officialPicksModified: false,
+      apostarActivated: false,
+    }
+  } catch (error) {
+    // Research evidence acquisition must never block the certified Statcast,
+    // Moneyline freeze, Official Picks boundary, or betting activation state.
+    return {
+      success: false,
+      status: 'CAPTURE_FAILED_NON_BLOCKING',
+      operatingDate: clock.date,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown MLB prospective market capture error'),
+    }
+  }
 }
 
 async function execute(request: NextRequest, explicitDate?: string | null) {
@@ -43,6 +205,12 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       return apiOk({ ...result, dailyHistoryReadiness: readiness }, id, { status, headers: { 'Cache-Control': 'no-store' } })
     }
 
+    // Reuse this already-scheduled authenticated route for one bounded daily
+    // multi-market evidence capture. The acquisition persists MLB moneyline,
+    // run-line and total snapshots together in one The Odds API call. It is
+    // research evidence only and cannot block the certified daily pipeline.
+    const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
+
     const catchupRuns: Array<Record<string, unknown>> = []
     let reachedCurrent = false
     let wroteHistory = false
@@ -53,7 +221,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
       if (!result.success) {
         const readiness = await getMlbDailyHistoryReadiness()
-        return apiOk({ success: false, status: result.status, catchupRuns, dailyHistoryReadiness: readiness }, id, {
+        return apiOk({ success: false, status: result.status, catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture }, id, {
           status: failureStatus(result),
           headers: { 'Cache-Control': 'no-store' },
         })
@@ -69,7 +237,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
     if (!reachedCurrent) {
       const readiness = await getMlbDailyHistoryReadiness()
-      return apiOk({ success: false, status: 'CATCHUP_LIMIT_REACHED', catchupRuns, dailyHistoryReadiness: readiness }, id, {
+      return apiOk({ success: false, status: 'CATCHUP_LIMIT_REACHED', catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture }, id, {
         status: 503,
         headers: { 'Cache-Control': 'no-store' },
       })
@@ -106,6 +274,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       analyticsRepair,
       dailyHistoryReadiness: readiness,
       moneylineRecommendationFreeze: moneylineFreeze,
+      prospectiveMarketCapture,
     }, id, {
       status: success ? 200 : 409,
       headers: { 'Cache-Control': 'no-store' },
