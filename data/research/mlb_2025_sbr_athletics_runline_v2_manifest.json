@@ -1,0 +1,33 @@
+{
+  "byRole": {
+    "closing": 2008,
+    "opening": 2008
+  },
+  "bySportsbook": {
+    "bet365": 648,
+    "bet_rivers_co": 648,
+    "betmgm": 648,
+    "caesars": 648,
+    "draftkings": 648,
+    "fanatics": 128,
+    "fanduel": 648
+  },
+  "contract": "MLB_2025_SBR_ATHLETICS_RUNLINE_V2",
+  "dates": 162,
+  "exactSnapshotTimestampsAvailable": false,
+  "gzipBytes": 33511,
+  "gzipSha256": "e3aa57fd369d9fd2fe8c8ef9d9aad50ece8d3540f20e07d1f4b0ac21afdc8456",
+  "identityRule": "fullName contains athletics -> ATH",
+  "market": "run_line",
+  "observedSourceShortNames": [
+    "ATH"
+  ],
+  "oddsApiCreditsConsumed": 0,
+  "postgameFieldsCopied": 0,
+  "regularSeasonGameIdentities": 162,
+  "researchOnly": true,
+  "sanitizedBytes": 958426,
+  "sanitizedRows": 4016,
+  "sanitizedSha256": "967bfc355a07ed26d16abb607994de511d70d79d9161d7d23f2cc78a0d0538eb",
+  "scraperSourceCommit": "48ad82bb4ae21fe7af622762aa8ed2e81d64c0b7"
+}
