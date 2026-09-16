@@ -1,0 +1,11 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "season": 2025,
+  "team": "ATH",
+  "identityPatch": "oakland athletics|athletics -> athletics",
+  "notes": "Recover Athletics Run Line and Totals from SportsBookReview at zero Odds API credits. Sanitize postgame fields before persistence."
+}
