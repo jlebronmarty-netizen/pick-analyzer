@@ -1,0 +1,79 @@
+name: MLB 2025 SBR Gap Probe
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-2025-sbr-gap-probe-request.json'
+
+permissions:
+  contents: write
+
+jobs:
+  probe-sbr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync('docs/research/runline-2025-sbr-gap-probe-request.json','utf8'))
+          const ok=r.authorized===true && r.researchOnly===true && r.expectedOddsApiCredits===0 && r.officialPicksWritesAllowed===false && r.apostarActivationAllowed===false && Array.isArray(r.probeDates) && r.probeDates.length>0 && r.probeDates.length<=4
+          if(!ok) throw new Error('INVALID_REQUEST')
+          NODE
+      - name: Clone public scraper and install requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ArnavSaraogi/mlb-odds-scraper /tmp/mlb-odds-scraper
+          python3 -m pip install --disable-pip-version-check -r /tmp/mlb-odds-scraper/requirements.txt
+      - name: Probe requested dates at low concurrency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json, subprocess, pathlib
+          req=json.load(open('docs/research/runline-2025-sbr-gap-probe-request.json'))
+          summaries=[]
+          for d in req['probeDates']:
+              out=f'/tmp/sbr_{d}.json'
+              cmd=['python3','/tmp/mlb-odds-scraper/scraper.py',d,d,'-t','pointspread','totals','-c','1','-o',out]
+              p=subprocess.run(cmd,cwd='/tmp/mlb-odds-scraper',capture_output=True,text=True,timeout=300)
+              games=0; rl_games=0; total_games=0; books=set(); rows=0
+              if pathlib.Path(out).exists():
+                  data=json.load(open(out))
+                  for items in data.values():
+                      for item in items:
+                          gv=item.get('gameView') or {}
+                          if gv.get('gameType')!='R': continue
+                          games+=1
+                          odds=item.get('odds') or {}
+                          if odds.get('pointspread'): rl_games+=1
+                          if odds.get('totals'): total_games+=1
+                          for market in ('pointspread','totals'):
+                              for q in odds.get(market) or []:
+                                  books.add(str(q.get('sportsbook') or '').lower())
+                                  rows+=1
+              summaries.append({'date':d,'returnCode':p.returncode,'regularSeasonGames':games,'runLineGames':rl_games,'totalGames':total_games,'sportsbooks':sorted(x for x in books if x),'quoteGroups':rows,'stdoutTail':p.stdout[-1200:],'stderrTail':p.stderr[-1200:]})
+          summary={'contract':'MLB_2025_SBR_GAP_PROBE_V1','researchOnly':True,'oddsApiCreditsConsumed':0,'postgameFieldsPersisted':0,'probes':summaries}
+          print(json.dumps(summary,indent=2))
+          json.dump(summary,open('/tmp/sbr-gap-probe-summary.json','w'),indent=2)
+          if not any(x['runLineGames']>0 for x in summaries): raise SystemExit('NO_RUNLINE_DATA_RETURNED')
+          PY
+      - name: Commit probe summary
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp /tmp/sbr-gap-probe-summary.json data/research/mlb_2025_sbr_gap_probe_summary.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_sbr_gap_probe_summary.json
+          git commit -m 'research: record SBR historical gap probe' || exit 0
+          git push origin HEAD:research/runline-2025-historical-backfill
