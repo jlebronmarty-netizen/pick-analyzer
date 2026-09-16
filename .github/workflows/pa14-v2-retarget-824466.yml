@@ -1,0 +1,59 @@
+name: PA14 V2 Retarget 824466
+
+on:
+  push:
+    branches:
+      - 'research/pa14-v2-collection-probe-824466'
+    paths:
+      - '.github/workflows/pa14-v2-retarget-824466.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  retarget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/pa14-v2-collection-probe-824466
+          fetch-depth: 0
+      - name: Retarget certified collector constants only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/services/pa14-v2-real-evidence.service.ts')
+          text = p.read_text()
+          replacements = {
+              'const TARGET_GAME_PK = 823574': 'const TARGET_GAME_PK = 824466',
+              'const TARGET_PITCHER_ID = 669358': 'const TARGET_PITCHER_ID = 808967',
+              'const TARGET_OPPONENT_MLB_ID = 121': 'const TARGET_OPPONENT_MLB_ID = 113',
+              "const TARGET_OPPONENT_CANONICAL = 'baseball_mlb:mlb:sportsdataio:team:18'": "const TARGET_OPPONENT_CANONICAL = 'baseball_mlb:mlb:sportsdataio:team:2'",
+              "const TARGET_EVENT_ID = 'baseball_mlb:mlb:sportsdataio:event:79543'": "const TARGET_EVENT_ID = 'baseball_mlb:mlb:sportsdataio:event:79553'",
+          }
+          for old, new in replacements.items():
+              if new in text:
+                  continue
+              if old not in text:
+                  raise SystemExit(f'MISSING_EXPECTED_CONSTANT:{old}')
+              text = text.replace(old, new, 1)
+          p.write_text(text)
+          PY
+          git diff --check
+          git diff -- src/services/pa14-v2-real-evidence.service.ts
+      - name: Commit one-off research retarget
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo 'Collector is already retargeted.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/services/pa14-v2-real-evidence.service.ts
+          git commit -m 'research(pa14): retarget stored-evidence collector to 824466'
+          git push origin HEAD:research/pa14-v2-collection-probe-824466
