@@ -98,6 +98,30 @@ export async function GET(request: Request) {
       }, { status: 409, headers })
     }
 
+    const frozenInputGaps = data.filter((row) => {
+      const details = row.route_details
+      return Boolean(details && typeof details === 'object' && !Array.isArray(details) && (details as Record<string, unknown>).failClosed === true)
+    })
+
+    if (frozenInputGaps.length > 0) {
+      return NextResponse.json({
+        version: CONTRACT_VERSION,
+        status: 'TRACKER_NOT_READY',
+        asOf: new Date().toISOString(),
+        data: {
+          targetDate,
+          modelVersion: MODEL_VERSION,
+          evaluatedGames: data.length,
+          picksCount: 0,
+          actionablePicksCount: 0,
+          recommendations: [],
+          failClosedReason: 'FROZEN_FAIL_CLOSED_INPUT_GAP',
+          failClosedGames: frozenInputGaps.length,
+          safety,
+        },
+      }, { status: 409, headers })
+    }
+
     const pickRows = data.filter((row) => row.pick_status === 'PICK')
     const malformedPick = pickRows.some((row) =>
       !row.recommended_team ||
