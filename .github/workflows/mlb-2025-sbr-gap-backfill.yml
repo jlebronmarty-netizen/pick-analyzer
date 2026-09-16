@@ -1,0 +1,168 @@
+name: MLB 2025 SBR Gap Backfill
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-2025-sbr-gap-backfill-request.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mlb-2025-sbr-gap-backfill
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate zero-credit request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync('docs/research/runline-2025-sbr-gap-backfill-request.json','utf8'))
+          const checks=[
+            [r.authorized===true,'authorized'],
+            [r.researchOnly===true,'researchOnly'],
+            [r.expectedOddsApiCredits===0,'zero credits'],
+            [r.officialPicksWritesAllowed===false,'official picks disabled'],
+            [r.apostarActivationAllowed===false,'apostar disabled'],
+            [r.startDate==='2025-03-27','start date'],
+            [r.endDate==='2025-09-28','end date'],
+          ]
+          const bad=checks.filter(([ok])=>!ok).map(([,m])=>m)
+          if(bad.length) throw new Error(`INVALID_REQUEST:${bad.join(',')}`)
+          NODE
+
+      - name: Clone public scraper and install requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ArnavSaraogi/mlb-odds-scraper /tmp/mlb-odds-scraper
+          git -C /tmp/mlb-odds-scraper rev-parse HEAD > /tmp/scraper-source-sha.txt
+          python3 -m pip install --disable-pip-version-check -r /tmp/mlb-odds-scraper/requirements.txt
+
+      - name: Scrape monthly ranges at low concurrency
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import subprocess, json, pathlib
+          ranges=[
+            ('2025-03-27','2025-03-31','mar'),
+            ('2025-04-01','2025-04-30','apr'),
+            ('2025-05-01','2025-05-31','may'),
+            ('2025-06-01','2025-06-30','jun'),
+            ('2025-07-01','2025-07-31','jul'),
+            ('2025-08-01','2025-08-31','aug'),
+            ('2025-09-01','2025-09-28','sep'),
+          ]
+          audits=[]
+          for start,end,label in ranges:
+              out=f'/tmp/sbr_{label}.json'
+              cmd=['python3','/tmp/mlb-odds-scraper/scraper.py',start,end,'-t','pointspread','totals','-c','2','-o',out]
+              p=subprocess.run(cmd,cwd='/tmp/mlb-odds-scraper',capture_output=True,text=True,timeout=600)
+              if p.returncode!=0 or not pathlib.Path(out).exists():
+                  raise RuntimeError(f'SCRAPE_FAILED_{label}: {p.stderr[-2000:]}')
+              data=json.load(open(out))
+              days=len(data); games=sum(len(v) for v in data.values())
+              audits.append({'label':label,'start':start,'end':end,'days':days,'gamesRaw':games,'stdoutTail':p.stdout[-800:],'stderrTail':p.stderr[-800:]})
+          json.dump(audits,open('/tmp/range-audit.json','w'),indent=2)
+          print(json.dumps(audits,indent=2))
+          PY
+
+      - name: Sanitize market fields only and build immutable artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json, glob, hashlib, gzip, os
+          from collections import Counter
+          output='/tmp/mlb_2025_sbr_gap_open_close.jsonl'
+          ordinal=0; games=set(); dates=set(); rows=0
+          by_market=Counter(); by_role=Counter(); by_book=Counter()
+          forbidden={'awayTeamScore','homeTeamScore','gameStatusText'}
+
+          def emit(f,p):
+              global ordinal,rows
+              if any(k in p for k in forbidden): raise RuntimeError('POSTGAME_FIELD_IN_SANITIZED_ROW')
+              ordinal+=1; p['sourceOrdinal']=ordinal
+              f.write(json.dumps(p,separators=(',',':'))+'\n')
+              rows+=1; by_market[p['market']]+=1; by_role[p['snapshotRole']]+=1; by_book[p['sportsbook']]+=1
+
+          with open(output,'w',encoding='utf-8') as f:
+              for path in sorted(glob.glob('/tmp/sbr_*.json')):
+                  data=json.load(open(path))
+                  for source_date in sorted(data):
+                      for item in data[source_date]:
+                          gv=item.get('gameView') or {}
+                          if gv.get('gameType')!='R': continue
+                          home=((gv.get('homeTeam') or {}).get('shortName') or '').strip().upper()
+                          away=((gv.get('awayTeam') or {}).get('shortName') or '').strip().upper()
+                          start=str(gv.get('startDate') or '')
+                          if not home or not away or not start: continue
+                          games.add((source_date,home,away,start)); dates.add(source_date)
+                          odds=item.get('odds') or {}
+                          for q in odds.get('pointspread') or []:
+                              book=str(q.get('sportsbook') or '').strip().lower()
+                              if not book: continue
+                              for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                                  line=q.get(key) or {}
+                                  for outcome,price,point in [('home',line.get('homeOdds'),line.get('homeSpread')),('away',line.get('awayOdds'),line.get('awaySpread'))]:
+                                      if isinstance(price,(int,float)) and isinstance(point,(int,float)):
+                                          emit(f,{'sourceDate':source_date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'run_line','snapshotRole':role,'outcome':outcome,'price':price,'line':point})
+                          for q in odds.get('totals') or []:
+                              book=str(q.get('sportsbook') or '').strip().lower()
+                              if not book: continue
+                              for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                                  line=q.get(key) or {}; total=line.get('total')
+                                  for outcome,price in [('over',line.get('overOdds')),('under',line.get('underOdds'))]:
+                                      if isinstance(price,(int,float)) and isinstance(total,(int,float)):
+                                          emit(f,{'sourceDate':source_date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'total','snapshotRole':role,'outcome':outcome,'price':price,'line':total})
+
+          raw=open(output,'rb').read(); raw_sha=hashlib.sha256(raw).hexdigest()
+          gz='/tmp/mlb_2025_sbr_gap_open_close.jsonl.gz'
+          with gzip.GzipFile(gz,'wb',mtime=0) as g: g.write(raw)
+          gz_bytes=open(gz,'rb').read(); gz_sha=hashlib.sha256(gz_bytes).hexdigest()
+          scraper_sha=open('/tmp/scraper-source-sha.txt').read().strip()
+          manifest={
+            'contract':'MLB_2025_SBR_DIRECT_GAP_SANITIZED_V1','researchOnly':True,
+            'source':'SportsBookReview via ArnavSaraogi/mlb-odds-scraper direct scrape',
+            'scraperSourceCommit':scraper_sha,
+            'sourceDateFrom':'2025-03-27','sourceDateTo':'2025-09-28',
+            'sanitizedRows':rows,'regularSeasonGameIdentities':len(games),'dates':len(dates),
+            'byMarket':dict(by_market),'byRole':dict(by_role),'bySportsbook':dict(by_book),
+            'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,
+            'sanitizedSha256':raw_sha,'gzipSha256':gz_sha,'sanitizedBytes':len(raw),'gzipBytes':len(gz_bytes),
+            'exactSnapshotTimestampsAvailable':False,
+            'leakagePolicy':'Only sportsbook market fields, team identity, game date/start, line role, line and price are retained.'
+          }
+          json.dump(manifest,open('/tmp/mlb_2025_sbr_gap_manifest.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(manifest,indent=2,sort_keys=True))
+          if by_market['run_line']==0: raise RuntimeError('NO_RUNLINE_ROWS')
+          PY
+
+      - name: Commit sanitized gap artifact and manifest safely
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp /tmp/mlb_2025_sbr_gap_open_close.jsonl.gz data/research/mlb_2025_sbr_gap_open_close.jsonl.gz
+          cp /tmp/mlb_2025_sbr_gap_manifest.json data/research/mlb_2025_sbr_gap_manifest.json
+          cp /tmp/range-audit.json data/research/mlb_2025_sbr_gap_range_audit.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_sbr_gap_open_close.jsonl.gz data/research/mlb_2025_sbr_gap_manifest.json data/research/mlb_2025_sbr_gap_range_audit.json
+          git commit -m 'research: stage zero-credit SBR gap artifact'
+          git pull --rebase origin research/runline-2025-historical-backfill
+          git push origin HEAD:research/runline-2025-historical-backfill
