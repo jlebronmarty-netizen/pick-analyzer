@@ -1,0 +1,9 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "probeDates": ["2025-03-27", "2025-08-17", "2025-09-15"],
+  "notes": "Low-concurrency SportsBookReview probe only. Do not persist source score/result fields."
+}
