@@ -1,0 +1,10 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "market": "run_line",
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "source": "SportsBookReview via patched public scraper",
+  "purpose": "Recover the 2025 Athletics Run Line games missed because source team naming changed from Oakland Athletics to Athletics."
+}
