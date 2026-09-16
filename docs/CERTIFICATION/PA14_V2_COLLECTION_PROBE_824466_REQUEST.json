@@ -1,0 +1,17 @@
+{
+  "schema": "pa14-v2-collection-probe-request/1.0.0",
+  "authorized": true,
+  "purpose": "Collect one additional retained-pregame PA14 V2 stored-evidence bundle and certify deterministic stored replay only.",
+  "canonicalGamePk": 824466,
+  "pitcherMlbamId": 808967,
+  "target": "Yoshinobu Yamamoto at Cincinnati, 2026-09-15",
+  "retainedPregameSnapshotRequired": true,
+  "paidProviderCallsAllowed": false,
+  "officialPickWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "productionEligibleAllowed": false,
+  "shadowOnlyRequired": true,
+  "modelTrainingAllowed": false,
+  "servingChangesAllowed": false,
+  "notes": "Research-only collection. Do not infer target outcome, do not use postgame source state for target starter identity, and fail closed on any cutoff, census, identity, BF, vocabulary, velocity, or replay mismatch."
+}
