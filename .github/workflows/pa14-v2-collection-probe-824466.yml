@@ -47,11 +47,12 @@ jobs:
             core.setSecret(token)
             core.setOutput('token', token)
 
-      - name: Wait for exact Vercel deployment and capture URL
+      - name: Wait for exact Vercel deployment and select protected preview host
         id: vercel
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          PREVIEW_HOST: https://pick-analyzer-git-research-pa14-v2-collect-4310df-pick-analyzer.vercel.app
         run: |
           set -euo pipefail
           for attempt in $(seq 1 72); do
@@ -62,10 +63,11 @@ jobs:
               "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
             readarray -t values < <(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');console.log(v?.state||'pending');console.log(v?.target_url||'')})")
             state="${values[0]:-pending}"
-            url="${values[1]:-}"
-            if [ "$state" = 'success' ] && [ -n "$url" ]; then
-              echo "url=$url" >> "$GITHUB_OUTPUT"
-              echo 'PASS: exact Vercel deployment is READY.'
+            dashboard_url="${values[1]:-}"
+            if [ "$state" = 'success' ] && [ -n "$dashboard_url" ]; then
+              echo "url=${PREVIEW_HOST}" >> "$GITHUB_OUTPUT"
+              echo "dashboard_url=${dashboard_url}" >> "$GITHUB_OUTPUT"
+              echo 'PASS: exact commit Vercel status is READY; protected branch alias selected for HTTP probe.'
               exit 0
             fi
             if [ "$state" = 'failure' ] || [ "$state" = 'error' ]; then
