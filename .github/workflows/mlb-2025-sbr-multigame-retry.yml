@@ -1,0 +1,119 @@
+name: MLB 2025 SBR Multigame Retry
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-2025-sbr-multigame-retry-request.json'
+
+permissions:
+  contents: write
+
+jobs:
+  retry-missing-dates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('docs/research/runline-2025-sbr-multigame-retry-request.json','utf8'))
+          const ok=r.authorized===true&&r.researchOnly===true&&r.expectedOddsApiCredits===0&&r.officialPicksWritesAllowed===false&&r.apostarActivationAllowed===false&&Array.isArray(r.dates)&&r.dates.length>0&&r.dates.length<=40
+          if(!ok)throw new Error('INVALID_REQUEST')
+          NODE
+      - name: Clone and patch source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ArnavSaraogi/mlb-odds-scraper /tmp/mlb-odds-scraper
+          git -C /tmp/mlb-odds-scraper rev-parse HEAD >/tmp/scraper-source-sha.txt
+          python3 - <<'PY'
+          p='/tmp/mlb-odds-scraper/scraper.py';s=open(p).read()
+          old='''            # Create a game identifier for matching across odds types\n            game_key = f"{away}_vs_{home}"'''
+          new='''            # Preserve doubleheaders/rescheduled same-matchup games by start timestamp.\n            start_stamp = str(game_view.get("startDate", ""))\n            game_key = f"{away}_vs_{home}_{start_stamp}"'''
+          if old not in s: raise SystemExit('GAME_KEY_PATCH_TARGET_NOT_FOUND')
+          s=s.replace(old,new)
+          old2='''    return (name\n            .lower()\n            .replace(".", "")\n            .replace("\'", "")\n            .replace("-", " ")\n            .replace("&", "and")\n            .strip())'''
+          new2='''    normalized = (name\n            .lower()\n            .replace(".", "")\n            .replace("\'", "")\n            .replace("-", " ")\n            .replace("&", "and")\n            .strip())\n    if normalized in {"oakland athletics", "athletics"}:\n        return "athletics"\n    return normalized'''
+          if old2 in s:s=s.replace(old2,new2)
+          open(p,'w').write(s)
+          PY
+          python3 -m pip install --disable-pip-version-check -r /tmp/mlb-odds-scraper/requirements.txt
+      - name: Retry exact missing dates at concurrency one
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,subprocess,pathlib
+          req=json.load(open('docs/research/runline-2025-sbr-multigame-retry-request.json'))
+          merged={};audit=[]
+          for d in req['dates']:
+              out=f'/tmp/retry_{d}.json'
+              p=subprocess.run(['python3','/tmp/mlb-odds-scraper/scraper.py',d,d,'-t','pointspread','totals','-c','1','-o',out],cwd='/tmp/mlb-odds-scraper',capture_output=True,text=True,timeout=240)
+              if p.returncode!=0 or not pathlib.Path(out).exists(): raise RuntimeError(f'RETRY_FAILED_{d}:{p.stderr[-1000:]}')
+              data=json.load(open(out));merged.update(data)
+              games=sum(len(v) for v in data.values());rl=sum(1 for v in data.values() for x in v if (x.get('odds') or {}).get('pointspread'))
+              audit.append({'date':d,'games':games,'runLineGames':rl,'stdoutTail':p.stdout[-400:],'stderrTail':p.stderr[-400:]})
+          json.dump(merged,open('/tmp/retry_merged.json','w'))
+          json.dump(audit,open('/tmp/retry_audit.json','w'),indent=2)
+          print(json.dumps(audit,indent=2))
+          PY
+      - name: Sanitize retry market rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,hashlib,gzip
+          from collections import Counter
+          data=json.load(open('/tmp/retry_merged.json'));out='/tmp/mlb_2025_sbr_multigame_retry.jsonl';ordinal=0;rows=0;games=set();by_market=Counter();by_role=Counter();by_book=Counter()
+          def emit(f,p):
+              global ordinal,rows
+              forbidden={'awayTeamScore','homeTeamScore','gameStatusText','winner','result'}
+              if any(k in p for k in forbidden):raise RuntimeError('POSTGAME_FIELD')
+              ordinal+=1;p['sourceOrdinal']=ordinal;f.write(json.dumps(p,separators=(',',':'))+'\n');rows+=1;by_market[p['market']]+=1;by_role[p['snapshotRole']]+=1;by_book[p['sportsbook']]+=1
+          with open(out,'w') as f:
+              for date in sorted(data):
+                  for item in data[date]:
+                      gv=item.get('gameView') or {}
+                      if gv.get('gameType')!='R':continue
+                      home=((gv.get('homeTeam') or {}).get('shortName') or '').strip().upper();away=((gv.get('awayTeam') or {}).get('shortName') or '').strip().upper();start=str(gv.get('startDate') or '')
+                      if home in {'OAK'}:home='ATH'
+                      if away in {'OAK'}:away='ATH'
+                      if not home or not away or not start:continue
+                      games.add((date,home,away,start));odds=item.get('odds') or {}
+                      for q in odds.get('pointspread') or []:
+                          book=str(q.get('sportsbook') or '').strip().lower()
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=q.get(key) or {}
+                              for outcome,price,point in [('home',line.get('homeOdds'),line.get('homeSpread')),('away',line.get('awayOdds'),line.get('awaySpread'))]:
+                                  if book and isinstance(price,(int,float)) and isinstance(point,(int,float)):emit(f,{'sourceDate':date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'run_line','snapshotRole':role,'outcome':outcome,'price':price,'line':point})
+                      for q in odds.get('totals') or []:
+                          book=str(q.get('sportsbook') or '').strip().lower()
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=q.get(key) or {};total=line.get('total')
+                              for outcome,price in [('over',line.get('overOdds')),('under',line.get('underOdds'))]:
+                                  if book and isinstance(price,(int,float)) and isinstance(total,(int,float)):emit(f,{'sourceDate':date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'total','snapshotRole':role,'outcome':outcome,'price':price,'line':total})
+          raw=open(out,'rb').read();raw_sha=hashlib.sha256(raw).hexdigest();gz='/tmp/mlb_2025_sbr_multigame_retry.jsonl.gz'
+          with gzip.GzipFile(gz,'wb',mtime=0) as g:g.write(raw)
+          gb=open(gz,'rb').read();manifest={'contract':'MLB_2025_SBR_MULTIGAME_RETRY_V1','researchOnly':True,'gameKeyPatch':'away_vs_home + startDate','sanitizedRows':rows,'regularSeasonGameIdentities':len(games),'byMarket':dict(by_market),'byRole':dict(by_role),'bySportsbook':dict(by_book),'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,'sanitizedSha256':raw_sha,'gzipSha256':hashlib.sha256(gb).hexdigest(),'gzipBytes':len(gb),'scraperSourceCommit':open('/tmp/scraper-source-sha.txt').read().strip()}
+          json.dump(manifest,open('/tmp/mlb_2025_sbr_multigame_retry_manifest.json','w'),indent=2,sort_keys=True);print(json.dumps(manifest,indent=2))
+          if by_market['run_line']==0:raise RuntimeError('NO_RUNLINE_ROWS')
+          PY
+      - name: Commit retry artifact safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/mlb_2025_sbr_multigame_retry.jsonl.gz data/research/mlb_2025_sbr_multigame_retry.jsonl.gz
+          cp /tmp/mlb_2025_sbr_multigame_retry_manifest.json data/research/mlb_2025_sbr_multigame_retry_manifest.json
+          cp /tmp/retry_audit.json data/research/mlb_2025_sbr_multigame_retry_audit.json
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_sbr_multigame_retry.jsonl.gz data/research/mlb_2025_sbr_multigame_retry_manifest.json data/research/mlb_2025_sbr_multigame_retry_audit.json
+          git commit -m 'research: stage doubleheader-safe SBR retry artifact'
+          git pull --rebase origin research/runline-2025-historical-backfill
+          git push origin HEAD:research/runline-2025-historical-backfill
