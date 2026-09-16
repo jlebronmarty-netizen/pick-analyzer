@@ -47,12 +47,12 @@ jobs:
             core.setSecret(token)
             core.setOutput('token', token)
 
-      - name: Wait for exact Vercel deployment and select protected preview host
+      - name: Wait for exact Vercel deployment and select immutable deployment host
         id: vercel
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          PREVIEW_HOST: https://pick-analyzer-git-research-pa14-v2-collect-4310df-pick-analyzer.vercel.app
+          PREVIEW_HOST: https://pick-analyzer-lm9z0qs1h-pick-analyzer.vercel.app
         run: |
           set -euo pipefail
           for attempt in $(seq 1 72); do
@@ -67,7 +67,7 @@ jobs:
             if [ "$state" = 'success' ] && [ -n "$dashboard_url" ]; then
               echo "url=${PREVIEW_HOST}" >> "$GITHUB_OUTPUT"
               echo "dashboard_url=${dashboard_url}" >> "$GITHUB_OUTPUT"
-              echo 'PASS: exact commit Vercel status is READY; protected branch alias selected for HTTP probe.'
+              echo 'PASS: exact commit Vercel status is READY; immutable deployment host selected for HTTP probe.'
               exit 0
             fi
             if [ "$state" = 'failure' ] || [ "$state" = 'error' ]; then
