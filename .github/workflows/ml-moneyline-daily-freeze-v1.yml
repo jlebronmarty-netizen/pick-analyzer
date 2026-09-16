@@ -1,0 +1,52 @@
+name: MLB Moneyline Daily Freeze V1
+
+on:
+  push:
+    branches:
+      - 'feat/ml-moneyline-daily-freeze-v1'
+    paths:
+      - 'src/lib/mlb-moneyline-high-confidence-v2.ts'
+      - 'src/services/mlb-moneyline-forward-freeze.service.ts'
+      - 'src/services/mlb-moneyline-forward-freeze-runtime.service.ts'
+      - 'src/app/api/cron/mlb-statcast-daily/route.ts'
+      - 'src/app/api/consumer/v1/mlb/moneyline-recommendations/route.ts'
+      - 'supabase/migrations/20260916161957_mlb_ml_forward_tracker_runtime_least_privilege_v1.sql'
+      - 'scripts/ml-moneyline-daily-freeze-v1-check.mjs'
+      - 'vercel.json'
+      - '.github/workflows/ml-moneyline-daily-freeze-v1.yml'
+  pull_request:
+    paths:
+      - 'src/lib/mlb-moneyline-high-confidence-v2.ts'
+      - 'src/services/mlb-moneyline-forward-freeze.service.ts'
+      - 'src/services/mlb-moneyline-forward-freeze-runtime.service.ts'
+      - 'src/app/api/cron/mlb-statcast-daily/route.ts'
+      - 'src/app/api/consumer/v1/mlb/moneyline-recommendations/route.ts'
+      - 'supabase/migrations/20260916161957_mlb_ml_forward_tracker_runtime_least_privilege_v1.sql'
+      - 'scripts/ml-moneyline-daily-freeze-v1-check.mjs'
+      - 'vercel.json'
+      - '.github/workflows/ml-moneyline-daily-freeze-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Daily Moneyline freeze contract checks
+        run: node --loader ./scripts/local-ts-loader.mjs scripts/ml-moneyline-daily-freeze-v1-check.mjs
+      - name: Existing Moneyline serving contract checks
+        run: node scripts/ml-moneyline-recommendation-serving-v1-check.mjs
+      - name: Production TypeScript build
+        run: npm run build
