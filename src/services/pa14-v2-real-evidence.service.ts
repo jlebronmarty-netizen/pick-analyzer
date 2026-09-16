@@ -15,12 +15,12 @@ import {
   type Pa14V2TerminalOnlyPa,
 } from '@/lib/pe-pitcher-k-v2-builder'
 
-const TARGET_GAME_PK = 823574
-const TARGET_PITCHER_ID = 669358
-const TARGET_OPPONENT_MLB_ID = 121
-const TARGET_OPPONENT_CANONICAL = 'baseball_mlb:mlb:sportsdataio:team:18'
+const TARGET_GAME_PK = 824466
+const TARGET_PITCHER_ID = 808967
+const TARGET_OPPONENT_MLB_ID = 113
+const TARGET_OPPONENT_CANONICAL = 'baseball_mlb:mlb:sportsdataio:team:2'
 const TARGET_DATE = '2026-09-15'
-const TARGET_EVENT_ID = 'baseball_mlb:mlb:sportsdataio:event:79543'
+const TARGET_EVENT_ID = 'baseball_mlb:mlb:sportsdataio:event:79553'
 const SEASON = 2026
 const PAGE_SIZE = 1000
 
