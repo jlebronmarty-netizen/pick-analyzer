@@ -63,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 <<'PY'
-          import json, os
+          import json
           from collections import Counter
 
           src='/tmp/mlb_odds_dataset.json'
@@ -183,8 +183,8 @@ jobs:
           VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs')
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
           const lines = fs.readFileSync('/tmp/mlb_2025_market_rows.jsonl','utf8').trim().split(/\n+/)
           const rows = lines.map((line) => JSON.parse(line))
           const batchSize = 750
