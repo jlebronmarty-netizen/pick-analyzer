@@ -1,0 +1,15 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "targets": [
+    {"date":"2025-03-27","away":"CHC","home":"ARI"},
+    {"date":"2025-05-19","away":"CLE","home":"MIN"},
+    {"date":"2025-06-06","away":"ARI","home":"CIN"},
+    {"date":"2025-07-01","away":"CIN","home":"BOS"},
+    {"date":"2025-07-08","away":"TEX","home":"LAA"},
+    {"date":"2025-07-31","away":"ATL","home":"CIN"}
+  ]
+}
