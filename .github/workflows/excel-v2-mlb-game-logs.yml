@@ -1,0 +1,125 @@
+name: Excel V2 MLB Batter Game Logs
+
+on:
+  push:
+    branches:
+      - excel-v2-live-odds-preview-20260915
+    paths:
+      - '.github/workflows/excel-v2-mlb-game-logs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-game-logs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch official MLB 2026 batter game logs
+        shell: bash
+        run: |
+          cat > /tmp/fetch-mlb-logs.mjs <<'NODE'
+          import fs from 'node:fs'
+
+          const targetNames = ["A.J. Ewing", "Adael Amador", "Adam Frazier", "Adley Rutschman", "Alec Bohm", "Alec Burleson", "Alejandro Kirk", "Alex Bregman", "Alex Freeland", "Ali Sanchez", "Alika Williams", "Andre Pallante", "Andres Gimenez", "Andrés Chaparro", "Angel Genao", "Anthony Volpe", "Austin Hays", "Austin Martin", "Austin Riley", "B.J. Murray Jr.", "Bailey Ober", "Ben Rice", "Blade Tidwell", "Bo Bichette", "Bobby Witt Jr.", "Brady House", "Brandon Lowe", "Brandon Nimmo", "Brayan Rocchio", "Brenton Doyle", "Brice Turang", "Bryan Reynolds", "Byron Buxton", "C.J. Abrams", "CJ Kayfus", "Cal Raleigh", "Carlos Correa", "Carlos Cortes", "Carson Kelly", "Ceddanne Rafaela", "Cedric Mullins", "Chandler Simpson", "Chris Murphy", "Christian Encarnacion-Strand", "Christopher Morel", "Colson Montgomery", "Connor Norby", "Corbin Carroll", "Corey Seager", "Cristian Pache", "Cristopher Sánchez", "Curtis Mead", "Dansby Swanson", "Daulton Varsho", "Davis Schneider", "Dillon Dingler", "Dominic Canzone", "Donovan Walton", "Drew Anderson", "Dylan Crews", "Dylan Moore", "Elly De La Cruz", "Eugenio Suarez", "Ezequiel Tovar", "Fernando Tatis Jr.", "Foster Griffin", "Francisco Alvarez", "Francisco Lindor", "Gabriel Moreno", "Gavin Lux", "George Springer", "Geraldo Perdomo", "Gleyber Torres", "Griffin Jax", "Gunnar Henderson", "Heliot Ramos", "Henry Bolte", "Hunter Brown", "Hunter Goodman", "Isaac Paredes", "Isaac Pursell", "Isaac Putz", "Ivan Herrera", "J.T. Realmuto", "Jack Perkins", "Jackson Chourio", "Jackson Holliday", "Jackson Merrill", "Jackson Rutledge", "Jackson Kent", "Jacob deGrom", "Jacob Misiorowski", "Jake Bauers", "Jake Burger", "Jake Cronenworth", "Janson Junk", "Jarren Duran", "Javier Baez", "Jazz Chisholm Jr.", "Jeff McNeil", "Jeremy Pena", "Jhonkensy Noel", "Joc Pederson", "Joe Mack", "Joey Loperfido", "Joey Wiemer", "Jonathan Aranda", "Jonathan India", "Jonah Heim", "Jorge Mateo", "Jose Altuve", "Jose Caballero", "Jose Miranda", "Jose Ramirez", "Josh Jung", "Josh Lowe", "Josh Naylor", "Josh Smith", "Juan Soto", "Junior Caminero", "Justin Crawford", "Kerry Carpenter", "Ketel Marte", "Kevin Gausman", "Kyle Manzardo", "Kyle Schwarber", "Kyle Tucker", "Kyle Freeland", "Lake Bachar", "Lawrence Butler", "Lenyn Sosa", "Leo De Vries", "Liam Hicks", "Logan Gilbert", "Logan O'Hoppe", "Lourdes Gurriel Jr.", "Luis Arraez", "Luis Garcia Jr.", "Luis Matos", "Luken Baker", "Manny Machado", "Marco Luciano", "Marcus Semien", "Martín Pérez", "Masyn Winn", "Matt Chapman", "Matt McLain", "Matt Olson", "Matt Shaw", "Matt Wallner", "Max Fried", "Michael Busch", "Michael Soroka", "Michael Wacha", "Mickey Moniak", "Mike Trout", "Mookie Betts", "Nathaniel Lowe", "Nolan Gorman", "Oneil Cruz", "Owen Caissie", "Parker Meadows", "Patrick Bailey", "Patrick Sandoval", "Paul Goldschmidt", "Pete Crow-Armstrong", "Pete Alonso", "Rafael Devers", "Randy Arozarena", "Rhett Lowder", "Rhys Hoskins", "Richie Palacios", "Riley Greene", "Ryan Johnson", "Ryan McMahon", "Sal Frelick", "Salvador Perez", "Sam Haggerty", "Sean Manaea", "Shea Langeliers", "Shane Baz", "Shohei Ohtani", "Spencer Torkelson", "Steven Kwan", "TJ Friedl", "Taylor Ward", "Teoscar Hernandez", "Triston Casas", "Tyler Soderstrom", "Vladimir Guerrero Jr.", "Victor Mesa Jr.", "Vinnie Pasquantino", "Walker Buehler", "Warming Bernabel", "Willson Contreras", "Willy Adames", "Wyatt Langford", "Xavier Edwards", "Yainer Diaz", "Yandy Diaz", "Yohandy Morales", "Yohel Pozo", "Yordan Alvarez", "Yoshinobu Yamamoto", "Zach McKinstry", "Zach Neto", "Zack Gelof", "Zach Dezenzo", "Jorge Polanco", "Colt Keith", "Trevor Story", "Jasson Dominguez", "Anthony Santander", "Daulton Jefferies", "Bryce Harper", "Trea Turner", "Nick Castellanos", "Kyle Stowers", "Otto Kemp", "Brendan Donovan", "Alec Burleson", "Nolan Arenado", "Willson Contreras", "Jordan Walker", "Nolan Jones", "Tyler Freeman", "Brenton Doyle", "Hunter Goodman", "Jordan Beck", "Ryan Ritter", "Ezequiel Tovar", "Michael Toglia", "Brenton Doyle", "Drew Romo", "Fernando Tatis Jr.", "Luis Arraez", "Manny Machado", "Jackson Merrill", "Jake Cronenworth", "Xander Bogaerts", "Gavin Sheets", "Elias Diaz", "Jose Iglesias", "J.P. Crawford", "Cal Raleigh", "Julio Rodriguez", "Randy Arozarena", "Luke Raley", "Jorge Polanco", "Mitch Garver", "Cole Young", "Victor Robles", "Zach Neto", "Mike Trout", "Taylor Ward", "Jo Adell", "Logan O'Hoppe", "Nolan Schanuel", "Jorge Soler", "Luis Rengifo", "Christian Moore", "Jake Mangum", "Xavier Edwards", "Kyle Stowers", "Agustin Ramirez", "Connor Norby", "Heriberto Hernandez", "Otto Lopez", "Graham Pauley", "Nick Fortes", "Corbin Carroll", "Ketel Marte", "Geraldo Perdomo", "Josh Naylor", "Eugenio Suarez", "Lourdes Gurriel Jr.", "Alek Thomas", "Gabriel Moreno", "Jordan Lawlar", "Dylan Crews", "C.J. Abrams", "James Wood", "Nathaniel Lowe", "Josh Bell", "Keibert Ruiz", "Brady House", "Luis Garcia Jr.", "Jacob Young", "Brandon Lowe", "Yandy Diaz", "Junior Caminero", "Christopher Morel", "Josh Lowe", "Jonathan Aranda", "Chandler Simpson", "Jose Caballero", "Danny Jansen", "Lawrence Butler", "Shea Langeliers", "Zack Gelof", "Tyler Soderstrom", "Brent Rooker", "JJ Bleday", "Jacob Wilson", "Max Schuemann", "Daz Cameron"];
+          const cutoff = '2026-09-14';
+
+          function norm(s) {
+            return String(s ?? '')
+              .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, ' ')
+              .trim()
+              .replace(/\b(jr|ii|iii|iv)\b$/,'')
+              .trim();
+          }
+
+          const rosterResp = await fetch('https://statsapi.mlb.com/api/v1/sports/1/players?season=2026');
+          if (!rosterResp.ok) throw new Error(`roster ${rosterResp.status}`);
+          const roster = (await rosterResp.json()).people ?? [];
+
+          const byNorm = new Map();
+          for (const p of roster) {
+            const names = [p.fullName, p.firstLastName, p.nameFirstLast, `${p.useName ?? p.firstName ?? ''} ${p.useLastName ?? p.lastName ?? ''}`];
+            for (const n of names) {
+              const k=norm(n);
+              if (!k) continue;
+              const current = byNorm.get(k);
+              if (!current || (!current.active && p.active)) byNorm.set(k,p);
+            }
+          }
+
+          const matched = [];
+          const unmatched = [];
+          for (const propName of targetNames) {
+            const p = byNorm.get(norm(propName));
+            if (p) matched.push({propName,id:p.id,mlbName:p.fullName,position:p.primaryPosition?.abbreviation ?? null});
+            else unmatched.push(propName);
+          }
+
+          for (const propName of [...unmatched]) {
+            const u=new URL('https://statsapi.mlb.com/api/v1/people/search');
+            u.searchParams.set('names',propName);
+            const r=await fetch(u);
+            if (!r.ok) continue;
+            const people=(await r.json()).people ?? [];
+            const best=people.find(p=>norm(p.fullName)===norm(propName)) ?? people[0];
+            if (best) {
+              matched.push({propName,id:best.id,mlbName:best.fullName,position:best.primaryPosition?.abbreviation ?? null});
+              unmatched.splice(unmatched.indexOf(propName),1);
+            }
+          }
+
+          const hitterMatches = matched.filter(x => x.position !== 'P');
+          const ids=[...new Set(hitterMatches.map(x=>x.id))];
+          const peopleById = new Map();
+
+          for (let i=0;i<ids.length;i+=20) {
+            const batch=ids.slice(i,i+20);
+            const u=new URL('https://statsapi.mlb.com/api/v1/people');
+            u.searchParams.set('personIds',batch.join(','));
+            u.searchParams.set('hydrate','stats(group=[hitting],type=[gameLog],season=2026)');
+            const r=await fetch(u);
+            if (!r.ok) throw new Error(`people batch ${r.status} ${await r.text()}`);
+            const payload=await r.json();
+            for (const p of payload.people ?? []) peopleById.set(p.id,p);
+          }
+
+          const output={};
+          for (const m of hitterMatches) {
+            const p=peopleById.get(m.id);
+            if (!p) continue;
+            const statBlock=(p.stats ?? []).find(x=>x.type?.displayName==='gameLog' && x.group?.displayName==='hitting');
+            const games=(statBlock?.splits ?? [])
+              .filter(x => x.gameType === 'R' && x.date && x.date <= cutoff)
+              .map(x => {
+                const s=x.stat ?? {};
+                const hits=Number(s.hits ?? 0);
+                const doubles=Number(s.doubles ?? 0);
+                const triples=Number(s.triples ?? 0);
+                const homeRuns=Number(s.homeRuns ?? 0);
+                const singles=Math.max(0,hits-doubles-triples-homeRuns);
+                const runs=Number(s.runs ?? 0);
+                const rbi=Number(s.rbi ?? 0);
+                return {date:x.date,gamePk:x.game?.gamePk ?? null,plateAppearances:Number(s.plateAppearances ?? 0),hits,singles,doubles,triples,homeRuns,walks:Number(s.baseOnBalls ?? 0),runs,rbi,stolenBases:Number(s.stolenBases ?? 0),totalBases:Number(s.totalBases ?? (singles+2*doubles+3*triples+4*homeRuns)),hitsRunsRbis:hits+runs+rbi};
+              })
+              .sort((a,b)=>a.date.localeCompare(b.date) || (a.gamePk??0)-(b.gamePk??0));
+            output[m.propName]={mlbamId:m.id,mlbName:m.mlbName,games};
+          }
+
+          fs.writeFileSync('mlb-batter-game-logs-through-2026-09-14.json', JSON.stringify(output));
+          fs.writeFileSync('mlb-batter-game-logs-meta.json', JSON.stringify({generatedAt:new Date().toISOString(),cutoff,requested:targetNames.length,matched:matched.length,hitters:hitterMatches.length,outputPlayers:Object.keys(output).length,unmatched}, null, 2));
+          console.log(JSON.stringify({requested:targetNames.length,matched:matched.length,hitters:hitterMatches.length,output:Object.keys(output).length,unmatched}));
+          NODE
+          node /tmp/fetch-mlb-logs.mjs
+
+      - name: Upload official MLB game-log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-batter-game-logs-through-2026-09-14
+          path: |
+            mlb-batter-game-logs-through-2026-09-14.json
+            mlb-batter-game-logs-meta.json
+          retention-days: 1
+          if-no-files-found: error
