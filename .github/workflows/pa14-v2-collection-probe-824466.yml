@@ -1,0 +1,122 @@
+name: PA14 V2 Collection Probe 824466
+
+on:
+  push:
+    branches:
+      - 'research/pa14-v2-collection-probe-824466'
+    paths:
+      - 'docs/CERTIFICATION/PA14_V2_COLLECTION_PROBE_824466_REQUEST.json'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+concurrency:
+  group: pa14-v2-collection-probe-824466
+  cancel-in-progress: true
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate bounded research request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const request = require('./docs/CERTIFICATION/PA14_V2_COLLECTION_PROBE_824466_REQUEST.json')
+          if (request.authorized !== true) throw new Error('PA14_COLLECTION_NOT_AUTHORIZED')
+          if (request.canonicalGamePk !== 824466 || request.pitcherMlbamId !== 808967) throw new Error('PA14_COLLECTION_TARGET_MISMATCH')
+          if (request.officialPickWritesAllowed !== false) throw new Error('OFFICIAL_PICK_WRITES_MUST_BE_FALSE')
+          if (request.apostarActivationAllowed !== false) throw new Error('APOSTAR_MUST_BE_FALSE')
+          if (request.paidProviderCallsAllowed !== false) throw new Error('PAID_PROVIDER_CALLS_MUST_BE_FALSE')
+          if (request.productionEligibleAllowed !== false) throw new Error('PRODUCTION_ELIGIBLE_MUST_BE_FALSE')
+          console.log('PASS: bounded PA14 collection request is research-only.')
+          NODE
+
+      - name: Mint GitHub OIDC token for protected preview
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Wait for exact Vercel deployment and capture URL
+        id: vercel
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 72); do
+            status_json="$(curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            readarray -t values < <(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');console.log(v?.state||'pending');console.log(v?.target_url||'')})")
+            state="${values[0]:-pending}"
+            url="${values[1]:-}"
+            if [ "$state" = 'success' ] && [ -n "$url" ]; then
+              echo "url=$url" >> "$GITHUB_OUTPUT"
+              echo 'PASS: exact Vercel deployment is READY.'
+              exit 0
+            fi
+            if [ "$state" = 'failure' ] || [ "$state" = 'error' ]; then
+              echo 'VERCEL_DEPLOYMENT_FAILED'
+              exit 1
+            fi
+            if [ "$attempt" = '72' ]; then
+              echo 'VERCEL_DEPLOYMENT_NOT_READY'
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Execute protected collection + stored replay
+        shell: bash
+        env:
+          TARGET_URL: ${{ steps.vercel.outputs.url }}
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          endpoint="${TARGET_URL%/}/api/research/pa14/v2-collection-probe-824466"
+          http_code="$(curl -sS --max-time 295 \
+            -o /tmp/pa14-probe.json \
+            -w '%{http_code}' \
+            -X POST \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            -H 'accept: application/json' \
+            "$endpoint")"
+          cat /tmp/pa14-probe.json
+          if [ "$http_code" != '200' ]; then
+            echo "PA14_COLLECTION_HTTP_${http_code}"
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs = require('fs')
+          const r = JSON.parse(fs.readFileSync('/tmp/pa14-probe.json','utf8'))
+          const checks = [
+            [r.status === 'PA14_V2_COLLECTION_PROBE_PASS', 'status'],
+            [r.canonicalGamePk === 824466, 'gamePk'],
+            [r.pitcherMlbamId === 808967, 'pitcher'],
+            [r.replayStatus === 'PASS', 'replay'],
+            [r.certificationCandidate === true, 'candidate'],
+            [r.productionEligible === false, 'production'],
+            [r.shadowOnly === true, 'shadow'],
+            [r.networkCallsDuringStoredReplay === 0, 'network'],
+            [r.deterministicReplay === true, 'determinism'],
+            [r.expectedMatch === true, 'expected'],
+            [r.lineageMatch === true, 'lineage'],
+            [r.temporalLeakageZero === true, 'temporal'],
+          ]
+          const failed = checks.filter(([ok]) => !ok).map(([,name]) => name)
+          if (failed.length) throw new Error(`PA14_COLLECTION_ASSERTION_FAILED:${failed.join(',')}`)
+          console.log('PA14_V2_COLLECTION_PROBE_824466=PASS')
+          NODE
