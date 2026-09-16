@@ -7,6 +7,7 @@ import { refreshMlbStatcastDailyAnalytics } from '@/services/mlb-statcast-daily-
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
 import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-freeze-runtime.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
+import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-home-p15-alt-shadow.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -55,9 +56,26 @@ function withinProspectiveCaptureWindow(now = new Date()) {
   const clock = puertoRicoClock(now)
   // This route already runs at 06:15, 08:15, 10:15 and 10:45 Puerto Rico.
   // Try the earliest slot with a canonical MLB slate; later slots are retries
-  // only when the earlier slot could not capture. A completed/partial capture
-  // is idempotently treated as done for the operating date.
+  // only when an earlier capture could not complete the research evidence.
   return clock.hour >= 6 && clock.hour <= 10
+}
+
+async function safeAlternateHomeP15Capture(operatingDate: string, id: string) {
+  try {
+    return await captureRunlineV2HomeP15AlternateShadow({ operatingDate, requestId: id })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'ALT_HOME_P15_CAPTURE_FAILED_NON_BLOCKING',
+      operatingDate,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 alternate capture error'),
+    }
+  }
 }
 
 async function maybeCaptureProspectiveMlbMarkets(id: string) {
@@ -104,14 +122,18 @@ async function maybeCaptureProspectiveMlbMarkets(id: string) {
   })
 
   if (alreadyCaptured) {
+    const alternateHomeP15Capture = await safeAlternateHomeP15Capture(clock.date, id)
     return {
-      success: true,
-      status: 'ALREADY_CAPTURED',
+      success: alternateHomeP15Capture.success !== false,
+      status: alternateHomeP15Capture.success === false
+        ? 'CORE_CAPTURED_ALT_RETRY_FAILED_NON_BLOCKING'
+        : 'CORE_ALREADY_CAPTURED_ALT_EVALUATED',
       operatingDate: clock.date,
       completedAt: alreadyCaptured.completed_at,
-      providerCallsMade: 0,
-      providerCreditsConsumed: 0,
+      providerCallsMade: Number(alternateHomeP15Capture.providerCallsMade ?? 0),
+      providerCreditsConsumed: Number(alternateHomeP15Capture.providerCreditsConsumed ?? 0),
       researchOnly: true,
+      alternateHomeP15Capture,
     }
   }
 
@@ -157,19 +179,24 @@ async function maybeCaptureProspectiveMlbMarkets(id: string) {
   }
 
   try {
-    const result = await executeTheOddsApiMlbDualReadAcquisition({
+    const coreCapture = await executeTheOddsApiMlbDualReadAcquisition({
       operatingDate: clock.date,
       eventPlans,
       source: PROSPECTIVE_MARKET_CAPTURE_SOURCE,
       requestId: id,
     })
+    const alternateHomeP15Capture = await safeAlternateHomeP15Capture(clock.date, id)
     return {
-      ...result,
+      ...coreCapture,
+      success: coreCapture.success !== false && alternateHomeP15Capture.success !== false,
       researchOnly: true,
-      capturePurpose: 'ML_RUNLINE_TOTALS_PROSPECTIVE_EVIDENCE',
+      capturePurpose: 'ML_RUNLINE_TOTALS_AND_HOME_P15_ALT_PROSPECTIVE_EVIDENCE',
       requestedEventCount: eventPlans.length,
       officialPicksModified: false,
       apostarActivated: false,
+      alternateHomeP15Capture,
+      providerCallsMade: Number(coreCapture.providerCallsMade ?? 0) + Number(alternateHomeP15Capture.providerCallsMade ?? 0),
+      providerCreditsConsumed: Number(coreCapture.providerCreditsConsumed ?? 0) + Number(alternateHomeP15Capture.providerCreditsConsumed ?? 0),
     }
   } catch (error) {
     // Research evidence acquisition must never block the certified Statcast,
@@ -206,9 +233,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     }
 
     // Reuse this already-scheduled authenticated route for one bounded daily
-    // multi-market evidence capture. The acquisition persists MLB moneyline,
-    // run-line and total snapshots together in one The Odds API call. It is
-    // research evidence only and cannot block the certified daily pipeline.
+    // multi-market evidence capture. Core ML/Run Line/Total prices are stored
+    // first; then alternate HOME +1.5 is queried only for games whose standard
+    // paired modal Run Line establishes HOME -1.5. All evidence is research-only.
     const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
 
     const catchupRuns: Array<Record<string, unknown>> = []
