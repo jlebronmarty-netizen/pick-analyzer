@@ -1,0 +1,225 @@
+name: MLB 2025 Open Odds Research Import
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-2025-open-odds-import-request.json'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+concurrency:
+  group: mlb-2025-open-odds-research-import
+  cancel-in-progress: false
+
+jobs:
+  import-open-dataset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      MLB_PREVIEW_URL: https://pick-analyzer-git-research-runline-2025-hi-849804-pick-analyzer.vercel.app
+      DATASET_URL: https://github.com/ArnavSaraogi/mlb-odds-scraper/releases/download/dataset/mlb_odds_dataset.json
+      DATASET_SHA256: 3f952fd0bfae9f4f2d17e66692cb936ce6e1a5f6b415318012090c85933b882b
+      IMPORT_CONFIRM: IMPORT_SANITIZED_MLB_2025_OPEN_CLOSE_RESEARCH_ONLY
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate explicit zero-credit research request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const request = JSON.parse(fs.readFileSync('docs/research/runline-2025-open-odds-import-request.json', 'utf8'))
+          const checks = [
+            [request.authorized === true, 'authorized must be true'],
+            [request.branch === 'research/runline-2025-historical-backfill', 'branch mismatch'],
+            [request.researchOnly === true, 'researchOnly must be true'],
+            [request.expectedOddsApiCredits === 0, 'expectedOddsApiCredits must be 0'],
+            [request.officialPicksWritesAllowed === false, 'Official Picks writes must be false'],
+            [request.apostarActivationAllowed === false, 'APOSTAR activation must be false'],
+            [Array.isArray(request.markets) && request.markets.includes('run_line') && request.markets.includes('total'), 'run_line and total required'],
+            [request.sourceRegistryId === 'sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0', 'source registry mismatch'],
+          ]
+          const failures = checks.filter(([ok]) => !ok).map(([, message]) => message)
+          if (failures.length) throw new Error(`REQUEST_INVALID: ${failures.join('; ')}`)
+          console.log('PASS: zero-credit research import request validated.')
+          NODE
+
+      - name: Download public historical odds release
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-delay 3 --connect-timeout 20 --max-time 240 "$DATASET_URL" -o /tmp/mlb_odds_dataset.json
+          echo "$DATASET_SHA256  /tmp/mlb_odds_dataset.json" | sha256sum -c -
+
+      - name: Sanitize 2025 Run Line and Totals only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json, os
+          from collections import Counter
+
+          src='/tmp/mlb_odds_dataset.json'
+          out='/tmp/mlb_2025_market_rows.jsonl'
+          summary_path='/tmp/source-audit-summary.json'
+          with open(src,'r',encoding='utf-8') as f:
+              data=json.load(f)
+
+          start='2025-03-18'
+          end='2025-08-16'
+          ordinal=0
+          games=0
+          rows=0
+          by_market=Counter()
+          by_role=Counter()
+          by_book=Counter()
+          dates=set()
+          forbidden={'awayTeamScore','homeTeamScore','gameStatusText'}
+
+          def emit(fout, payload):
+              global ordinal, rows
+              if any(k in payload for k in forbidden):
+                  raise RuntimeError('FORBIDDEN_POSTGAME_FIELD_IN_SANITIZED_PAYLOAD')
+              ordinal += 1
+              payload['sourceOrdinal']=ordinal
+              fout.write(json.dumps(payload,separators=(',',':'))+'\n')
+              rows += 1
+              by_market[payload['market']] += 1
+              by_role[payload['snapshotRole']] += 1
+              by_book[payload['sportsbook']] += 1
+
+          with open(out,'w',encoding='utf-8') as fout:
+              for source_date in sorted(data):
+                  if source_date < start or source_date > end:
+                      continue
+                  for item in data[source_date]:
+                      gv=item.get('gameView') or {}
+                      if gv.get('gameType') != 'R':
+                          continue
+                      home=((gv.get('homeTeam') or {}).get('shortName') or '').strip().upper()
+                      away=((gv.get('awayTeam') or {}).get('shortName') or '').strip().upper()
+                      start_date=str(gv.get('startDate') or '')
+                      if not home or not away or not start_date:
+                          continue
+                      games += 1
+                      dates.add(source_date)
+                      odds=item.get('odds') or {}
+
+                      for quote in odds.get('pointspread') or []:
+                          book=str(quote.get('sportsbook') or '').strip().lower()
+                          if not book:
+                              continue
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=quote.get(key) or {}
+                              pairs=[('home',line.get('homeOdds'),line.get('homeSpread')),('away',line.get('awayOdds'),line.get('awaySpread'))]
+                              for outcome,price,point in pairs:
+                                  if isinstance(price,(int,float)) and isinstance(point,(int,float)):
+                                      emit(fout,{'sourceDate':source_date,'sourceStartDate':start_date,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'run_line','snapshotRole':role,'outcome':outcome,'price':price,'line':point})
+
+                      for quote in odds.get('totals') or []:
+                          book=str(quote.get('sportsbook') or '').strip().lower()
+                          if not book:
+                              continue
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=quote.get(key) or {}
+                              total=line.get('total')
+                              for outcome,price in [('over',line.get('overOdds')),('under',line.get('underOdds'))]:
+                                  if isinstance(price,(int,float)) and isinstance(total,(int,float)):
+                                      emit(fout,{'sourceDate':source_date,'sourceStartDate':start_date,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'total','snapshotRole':role,'outcome':outcome,'price':price,'line':total})
+
+          summary={
+              'sourceDateFrom':start,
+              'sourceDateTo':end,
+              'regularSeasonGamesSeen':games,
+              'sanitizedRows':rows,
+              'dates':len(dates),
+              'byMarket':dict(by_market),
+              'byRole':dict(by_role),
+              'bySportsbook':dict(by_book),
+              'postgameFieldsCopied':0,
+              'oddsApiCreditsConsumed':0,
+          }
+          if rows == 0 or by_market['run_line'] == 0 or by_market['total'] == 0:
+              raise RuntimeError(f'NO_USABLE_MARKET_ROWS: {summary}')
+          with open(summary_path,'w',encoding='utf-8') as f:
+              json.dump(summary,f,indent=2,sort_keys=True)
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
+
+      - name: Mint GitHub OIDC token for protected preview
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Wait for matching Vercel deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 48); do
+            status_json="$(curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2022-11-28' "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            vercel_state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
+            if [ "$vercel_state" = 'success' ]; then exit 0; fi
+            if [ "$vercel_state" = 'failure' ] || [ "$vercel_state" = 'error' ]; then echo 'VERCEL_DEPLOYMENT_FAILED'; exit 1; fi
+            if [ "$attempt" = '48' ]; then echo 'VERCEL_DEPLOYMENT_NOT_READY'; exit 1; fi
+            sleep 5
+          done
+
+      - name: Import sanitized rows into historical lineage
+        shell: bash
+        env:
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const lines = fs.readFileSync('/tmp/mlb_2025_market_rows.jsonl','utf8').trim().split(/\n+/)
+          const rows = lines.map((line) => JSON.parse(line))
+          const batchSize = 750
+          const results = []
+          let mapped = 0
+          let unmapped = 0
+          for (let i=0; i<rows.length; i+=batchSize) {
+            const batch = rows.slice(i,i+batchSize)
+            const response = await fetch(`${process.env.MLB_PREVIEW_URL}/api/research/mlb/historical-market-open-close/import`, {
+              method:'POST',
+              headers:{
+                'Content-Type':'application/json',
+                'x-vercel-trusted-oidc-idp-token':process.env.VERCEL_GITHUB_OIDC_TOKEN,
+              },
+              body:JSON.stringify({confirm:process.env.IMPORT_CONFIRM,rows:batch}),
+            })
+            const payload = await response.json().catch(()=>null)
+            if (!response.ok || !payload?.ok) throw new Error(`IMPORT_BATCH_FAILED_${i}_${response.status}: ${JSON.stringify(payload)}`)
+            mapped += Number(payload.mappedRows||0)
+            unmapped += Number(payload.unmappedRows||0)
+            results.push({offset:i,inputRows:payload.inputRows,mappedRows:payload.mappedRows,unmappedRows:payload.unmappedRows,unmappedSamples:payload.unmappedSamples})
+            console.log(JSON.stringify(results.at(-1)))
+          }
+          const summary={inputRows:rows.length,mappedRows:mapped,unmappedRows:unmapped,batches:results.length,oddsApiCreditsConsumed:0,providerCallsMade:0,officialPicksWrites:0,apostarActivated:false,unmappedSamples:results.flatMap(r=>r.unmappedSamples||[]).slice(0,30)}
+          fs.writeFileSync('/tmp/import-summary.json',JSON.stringify(summary,null,2))
+          console.log(JSON.stringify(summary,null,2))
+          if (mapped === 0) throw new Error('NO_ROWS_IMPORTED')
+          NODE
+
+      - name: Upload audit summaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-2025-open-odds-research-import-audit
+          path: |
+            /tmp/source-audit-summary.json
+            /tmp/import-summary.json
+          retention-days: 7
+          if-no-files-found: error
