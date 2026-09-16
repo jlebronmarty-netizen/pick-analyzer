@@ -1,0 +1,56 @@
+name: PA14 V2 Sep16 Pregame Capture
+
+on:
+  push:
+    branches:
+      - research/pa14-v2-sep16-pregame-capture
+    paths:
+      - .github/workflows/pa14-v2-sep16-pregame-capture.yml
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Capture Sep16 SportsDataIO pregame starter evidence
+        env:
+          PICK_ANALYZER_BASE_URL: ${{ secrets.PICK_ANALYZER_BASE_URL }}
+          PICK_ANALYZER_CRON_SECRET: ${{ secrets.PICK_ANALYZER_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PICK_ANALYZER_BASE_URL:-}" ] || [ -z "${PICK_ANALYZER_CRON_SECRET:-}" ]; then
+            echo "Required repository secrets are unavailable."
+            exit 1
+          fi
+
+          curl --fail-with-body --show-error --silent \
+            --request POST \
+            --header "Authorization: Bearer ${PICK_ANALYZER_CRON_SECRET}" \
+            --header "Content-Type: application/json" \
+            --data '{"date":"2026-09-16","confirmed":true,"dryRun":false,"timeoutMs":30000}' \
+            "${PICK_ANALYZER_BASE_URL%/}/api/mlb/provider-verification/games-by-date" \
+            > /tmp/provider.json
+          cat /tmp/provider.json
+          node -e '
+            const fs=require("fs");
+            const r=JSON.parse(fs.readFileSync("/tmp/provider.json","utf8"));
+            if (r.success !== true || r.status !== "completed") process.exit(2);
+          '
+
+          curl --fail-with-body --show-error --silent \
+            --request POST \
+            --header "Authorization: Bearer ${PICK_ANALYZER_CRON_SECRET}" \
+            --header "Content-Type: application/json" \
+            --data '{"date":"2026-09-16","dryRun":false,"refreshProvider":false,"confirmed":true}' \
+            "${PICK_ANALYZER_BASE_URL%/}/api/mlb/pregame-starter-evidence" \
+            > /tmp/starter.json
+          cat /tmp/starter.json
+          node -e '
+            const fs=require("fs");
+            const r=JSON.parse(fs.readFileSync("/tmp/starter.json","utf8"));
+            if (r.success !== true) process.exit(3);
+            if (!["STARTER_EVIDENCE_PERSISTED","NO_ELIGIBLE_PREGAME_STARTERS"].includes(r.status)) process.exit(4);
+          '
