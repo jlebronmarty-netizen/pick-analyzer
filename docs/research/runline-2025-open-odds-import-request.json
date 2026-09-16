@@ -1,0 +1,13 @@
+{
+  "authorized": true,
+  "branch": "research/runline-2025-historical-backfill",
+  "researchOnly": true,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "markets": ["run_line", "total"],
+  "sourceRegistryId": "sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0",
+  "source": "SportsBookReview via ArnavSaraogi/mlb-odds-scraper public release",
+  "sourceDateRange": ["2025-03-18", "2025-08-16"],
+  "notes": "Import sanitized pregame market fields only. Do not ingest final scores, winners, game results, RBI, runs, or other postgame fields. Preserve opening/closing role and sportsbook identity."
+}
