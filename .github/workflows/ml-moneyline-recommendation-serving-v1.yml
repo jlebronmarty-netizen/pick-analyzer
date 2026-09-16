@@ -1,0 +1,38 @@
+name: MLB Moneyline Recommendation Serving V1
+
+on:
+  push:
+    branches:
+      - 'feat/ml-moneyline-recommendation-serving-v1'
+    paths:
+      - 'src/app/api/consumer/v1/mlb/moneyline-recommendations/route.ts'
+      - 'scripts/ml-moneyline-recommendation-serving-v1-check.mjs'
+      - '.github/workflows/ml-moneyline-recommendation-serving-v1.yml'
+  pull_request:
+    paths:
+      - 'src/app/api/consumer/v1/mlb/moneyline-recommendations/route.ts'
+      - 'scripts/ml-moneyline-recommendation-serving-v1-check.mjs'
+      - '.github/workflows/ml-moneyline-recommendation-serving-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Moneyline fail-closed serving contract checks
+        run: node scripts/ml-moneyline-recommendation-serving-v1-check.mjs
+      - name: Production TypeScript build
+        run: npm run build
