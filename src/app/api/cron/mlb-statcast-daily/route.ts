@@ -8,6 +8,7 @@ import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readin
 import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-freeze-runtime.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-home-p15-alt-shadow.service'
+import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -74,6 +75,23 @@ async function safeAlternateHomeP15Capture(operatingDate: string, id: string) {
       officialPicksModified: false,
       apostarActivated: false,
       error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 alternate capture error'),
+    }
+  }
+}
+
+async function safeRunlineHomeP15ForwardFreeze() {
+  try {
+    return await freezeRunlineV2HomeP15Alternate()
+  } catch (error) {
+    return {
+      success: false,
+      status: 'RUNLINE_HOME_P15_FORWARD_FREEZE_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 forward freeze error'),
     }
   }
 }
@@ -278,10 +296,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     }
 
     // Reuse this existing daily scheduler rather than creating a parallel host.
-    // The Moneyline runtime owns the 10:45 AM Puerto Rico gate, the pre-first-
-    // pitch gate, idempotent freeze and fail-closed behavior. Pass the already
-    // verified previous-day readiness result to avoid an unnecessary second
-    // MLB Official schedule request.
+    // The Moneyline runtime owns its own 10:45 AM Puerto Rico gate. The Run Line
+    // research freeze below is independent, shadow-only, and cannot promote picks.
     const moneylineFreeze = readiness.ready
       ? await runMlbMoneylineForwardFreeze({
           historyReadiness: {
@@ -289,6 +305,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
             targetDate: readiness.targetDate,
           },
         })
+      : null
+    const runlineHomeP15Freeze = readiness.ready
+      ? await safeRunlineHomeP15ForwardFreeze()
       : null
     const moneylineBlocked = Boolean(moneylineFreeze && moneylineFreeze.success === false)
     const success = readiness.ready && !moneylineBlocked
@@ -301,6 +320,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       analyticsRepair,
       dailyHistoryReadiness: readiness,
       moneylineRecommendationFreeze: moneylineFreeze,
+      runlineHomeP15ResearchFreeze: runlineHomeP15Freeze,
       prospectiveMarketCapture,
     }, id, {
       status: success ? 200 : 409,
