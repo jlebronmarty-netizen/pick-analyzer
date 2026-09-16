@@ -1,0 +1,166 @@
+name: Update Canonical MLB Run Line Handoff
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-handoff-update-request.json'
+
+permissions:
+  contents: write
+
+jobs:
+  update-handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate request
+        run: |
+          node <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('docs/research/runline-handoff-update-request.json','utf8'))
+          if(!(r.authorized===true&&r.coveredGames===2430&&r.targetGames===2430&&r.oddsApiCreditsConsumed===0&&r.officialPicksModified===false&&r.apostarActivated===false)) throw new Error('INVALID_HANDOFF_UPDATE_REQUEST')
+          NODE
+      - name: Update canonical handoff on latest main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B main origin/main
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('docs/research/MLB_MODEL_RESEARCH_HANDOFF.md')
+          text=p.read_text()
+          start='<!-- RUNLINE_2025_BACKFILL_STATE_START -->'
+          end='<!-- RUNLINE_2025_BACKFILL_STATE_END -->'
+          block=r'''<!-- RUNLINE_2025_BACKFILL_STATE_START -->
+
+---
+
+## Run Line 2025 historical market backfill — COMPLETE (2026-09-16)
+
+This section supersedes the earlier Run Line backfill instructions in this handoff. The historical market acquisition phase is complete; do **not** restart it unless a later audit finds evidence corruption.
+
+### Certified canonical coverage
+
+As certified directly in Supabase project `ynuocvexviorgdjrfthw`:
+
+- canonical 2025 Run Line target games: **2,430**
+- games with pregame-eligible Run Line evidence: **2,430 / 2,430 = 100.0000%**
+- games missing Run Line evidence: **0**
+- games with both home and away Run Line sides: **2,430 / 2,430**
+- games missing one side: **0**
+- games with 2+ sportsbook/source quotes: **2,423**
+- minimum quote-source count per game: **1**
+- average quote-source count per game: **6.88**
+- all 2,430 covered games have `postgame_known=false` on the pregame-eligible market evidence used for coverage
+- The Odds API credits consumed for this historical Run Line recovery: **0**
+
+### Canonical storage and provenance
+
+Historical market evidence is stored through the existing lineage infrastructure:
+
+- `historical_source_registry`
+- `historical_raw_records`
+
+Do not invent a parallel raw-odds table for this backfill.
+
+Primary research branch containing immutable artifacts/workflows:
+
+`research/runline-2025-historical-backfill`
+
+Source layers used, in preferred precedence order for a canonical 2025 training market row:
+
+1. **SportsBookReview public release via `ArnavSaraogi/mlb-odds-scraper`**
+   - registry id: `sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0`
+   - source asset SHA-256: `3f952fd0bfae9f4f2d17e66692cb936ce6e1a5f6b415318012090c85933b882b`
+   - sanitized SHA-256: `a39e799bed1c89fb47a1a5f3a1a39a55550aa1bdf9bc8ffe17a3742d1d5e3a5b`
+   - gzip SHA-256: `da1dae564de3688f771b5bb4c96a72bea19bdf989e4990dd0b41a64b2fdf3f99`
+   - sanitized Run Line rows: **40,604**
+   - release coverage is strongest through 2025-08-16.
+2. **Direct SportsBookReview scrape**
+   - registry id: `sportsbookreview_direct_2025_gap_919fc00c`
+   - source scraper commit: `48ad82bb4ae21fe7af622762aa8ed2e81d64c0b7`
+   - sanitized SHA-256: `919fc00c04a9cdaa677f00643b67086411d30576d2d550e7da4e9805598ef9bc`
+   - gzip SHA-256: `c1a41b7aca63e254feb6a04f4203c3fa23e310ce537306156b4a4e3e7d252736`
+   - sanitized Run Line rows: **55,132**
+3. **Doubleheader-safe / multigame retry**
+   - registry id: `sportsbookreview_multigame_retry_2025_5cda5c11`
+   - game identity patch: `away_vs_home + startDate`
+   - sanitized Run Line rows: **8,412**
+   - sanitized SHA-256: `5cda5c11ad6e7860ac669d500dd4d6577ad92ff011d48bedddbcb0390a22df08`
+   - gzip SHA-256: `0b195bb0c45ccf170edcf98f938ecaa311a1026531ff951f867652d652bd7463`
+4. **Athletics identity recovery**
+   - registry id: `sportsbookreview_athletics_runline_v2_967bfc35`
+   - fixed all **162** 2025 Athletics games missed because of the Oakland Athletics → Athletics naming transition
+   - sanitized rows: **4,016** = 2,008 opening + 2,008 closing
+   - sanitized SHA-256: `967bfc355a07ed26d16abb607994de511d70d79d9161d7d23f2cc78a0d0538eb`
+   - gzip SHA-256: `e3aa57fd369d9fd2fe8c8ef9d9aad50ece8d3540f20e07d1f4b0ac21afdc8456`
+5. **Public-web pregame fallback for the final six games**
+   - registry id: `public_web_pregame_runline_2025_final6_v1`
+   - source: `public_web_pregame_runline`
+   - 6 games / 12 sides, used only after SportsBookReview direct + retry paths returned no usable Run Line for those games
+   - every row has explicit source URL/provenance and `postgame_known=false`
+   - games: `778552`, `777861`, `777623`, `777294`, `777180`, `776928`
+   - sources include FanDuel Research, Covers opening odds (including Caesars-attributed opening odds where stated), and Sports Illustrated/FanDuel pregame odds.
+
+### Pregame / leakage policy for market rows
+
+- Final score, winner, final runs, RBI, game result, and other postgame outcomes were **not copied** from the odds sources.
+- `opening` rows are pregame/training eligible.
+- Source `closing/currentLine` rows from the SBR datasets are retained for market diagnostics but are **not automatically eligible for the pure 2025 pregame training path**, because the public source does not expose exact historical snapshot timestamps for those rows.
+- Timestamped FanDuel public snapshots in the final-six fallback were accepted only when the source itself showed an update time before first pitch.
+- Public pregame articles without an exact quote timestamp retain explicit warnings; no timestamp was fabricated.
+- Keep the final-six fallback source separately identifiable in model diagnostics so sensitivity tests can exclude it if desired. It is only 6/2,430 games (~0.25%).
+
+### Explicit identity exceptions — do not replace with fuzzy matching
+
+The following real schedule/resumption cases required explicit mappings:
+
+- TOR @ NYY originally scheduled 2025-04-26 → canonical makeup on 2025-04-27 Game 2: `game_pk 778170`.
+- ATL @ CIN Bristol Speedway Classic began 2025-08-02 and resumed 2025-08-03: canonical `game_pk 776907` remains on 2025-08-02.
+- CLE @ MIN originally scheduled 2025-05-20 → makeup on 2025-09-20 Game 1: `game_pk 777839`.
+
+Do **not** introduce a general ±1-day fuzzy date rule. Preserve explicit identity mappings only.
+
+### Current Run Line source counts in `historical_raw_records` (pregame-eligible rows)
+
+At certification time:
+
+- `sportsbookreview_direct_scrape`: 27,554 rows / 2,221 games
+- `sportsbookreview_via_arnavsaraogi_dataset`: 20,302 rows / 1,694 games
+- `sportsbookreview_multigame_retry`: 4,206 rows / 345 games
+- `sportsbookreview_athletics_runline_v2`: 2,008 rows / 162 games
+- `public_web_pregame_runline`: 12 rows / 6 games
+
+These counts intentionally overlap. Build the canonical game-level training market table with explicit source precedence; do not sum them as unique games.
+
+### NEXT ACTION — Run Line modeling starts now
+
+Historical acquisition is no longer the blocker. Next:
+
+1. Build a versioned **2025 canonical Run Line market table** with one documented pregame market policy per game/side. Prefer source opening lines using the precedence above; retain raw rows separately.
+2. Join that market table to the existing 2025 pregame feature architecture and `mlb_runline_targets_v1` to form the pure 2025 development/training dataset.
+3. Do all formula/weight/subset/threshold selection on 2025 only.
+4. Search global models plus day/night, handedness, season phase, home/away context, favorite/underdog, line buckets, price buckets, ensembles, and selective high-confidence rules.
+5. Freeze candidate formulas before opening the 2026 holdout.
+6. Evaluate frozen candidates on the existing 2026 Run Line market/evaluation data. Keep adaptive 2026 research clearly separate.
+7. Specifically search for selective rules capable of maintaining **>75% accuracy** even at low coverage.
+8. After Run Line is complete, repeat the same discipline for **Game Totals**. Note that the public SBR acquisition already captured substantial 2025 Totals rows alongside Run Line, so inventory those artifacts before any new paid acquisition.
+
+Official Picks remains untouched. `APOSTAR` remains disabled.
+
+<!-- RUNLINE_2025_BACKFILL_STATE_END -->'''
+          if start in text and end in text:
+              a=text.index(start); b=text.index(end)+len(end)
+              text=text[:a]+block+text[b:]
+          else:
+              text=text.rstrip()+"\n\n"+block+"\n"
+          p.write_text(text)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/research/MLB_MODEL_RESEARCH_HANDOFF.md
+          git commit -m 'docs: certify 100 percent 2025 Run Line coverage'
+          git push origin HEAD:main
