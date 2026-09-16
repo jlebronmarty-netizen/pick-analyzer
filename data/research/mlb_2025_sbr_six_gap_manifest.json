@@ -1,0 +1,48 @@
+{
+  "byRole": {},
+  "bySportsbook": {},
+  "contract": "MLB_2025_SBR_SIX_GAP_RUNLINE_V1",
+  "foundTargets": 0,
+  "gzipBytes": 55,
+  "gzipSha256": "7c571e12a824ae5860d61dec7a207643b2d42bbab97cc18a715331c1beb69224",
+  "missingTargets": [
+    {
+      "away": "CHC",
+      "date": "2025-03-27",
+      "home": "ARI"
+    },
+    {
+      "away": "CLE",
+      "date": "2025-05-19",
+      "home": "MIN"
+    },
+    {
+      "away": "ARI",
+      "date": "2025-06-06",
+      "home": "CIN"
+    },
+    {
+      "away": "CIN",
+      "date": "2025-07-01",
+      "home": "BOS"
+    },
+    {
+      "away": "TEX",
+      "date": "2025-07-08",
+      "home": "LAA"
+    },
+    {
+      "away": "ATL",
+      "date": "2025-07-31",
+      "home": "CIN"
+    }
+  ],
+  "oddsApiCreditsConsumed": 0,
+  "postgameFieldsCopied": 0,
+  "researchOnly": true,
+  "sanitizedBytes": 0,
+  "sanitizedRows": 0,
+  "sanitizedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scraperSourceCommit": "48ad82bb4ae21fe7af622762aa8ed2e81d64c0b7",
+  "targets": 6
+}

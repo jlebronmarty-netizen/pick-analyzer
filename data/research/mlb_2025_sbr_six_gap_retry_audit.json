@@ -1,0 +1,44 @@
+[
+  {
+    "date": "2025-03-27",
+    "attempt": 1,
+    "returnCode": 0,
+    "games": 14,
+    "stdoutTail": "Starting async scraper (max 1 concurrent requests)\nOdds types: pointspread\nFetching MLB schedule...\nFound 1 dates to scrape for odds types: pointspread\nScraping 1 date/odds-type combinations with 1 concurrent requests...\nScraped 14 games from 1 dates\nRuntime: 1.09 seconds\nSaved to /tmp/six_2025-03-27.json\n"
+  },
+  {
+    "date": "2025-05-19",
+    "attempt": 1,
+    "returnCode": 0,
+    "games": 11,
+    "stdoutTail": "Starting async scraper (max 1 concurrent requests)\nOdds types: pointspread\nFetching MLB schedule...\nFound 1 dates to scrape for odds types: pointspread\nScraping 1 date/odds-type combinations with 1 concurrent requests...\nScraped 11 games from 1 dates\nRuntime: 0.91 seconds\nSaved to /tmp/six_2025-05-19.json\n"
+  },
+  {
+    "date": "2025-06-06",
+    "attempt": 1,
+    "returnCode": 0,
+    "games": 14,
+    "stdoutTail": "Starting async scraper (max 1 concurrent requests)\nOdds types: pointspread\nFetching MLB schedule...\nFound 1 dates to scrape for odds types: pointspread\nScraping 1 date/odds-type combinations with 1 concurrent requests...\nScraped 14 games from 1 dates\nRuntime: 0.90 seconds\nSaved to /tmp/six_2025-06-06.json\n"
+  },
+  {
+    "date": "2025-07-01",
+    "attempt": 1,
+    "returnCode": 0,
+    "games": 11,
+    "stdoutTail": "Starting async scraper (max 1 concurrent requests)\nOdds types: pointspread\nFetching MLB schedule...\nFound 1 dates to scrape for odds types: pointspread\nScraping 1 date/odds-type combinations with 1 concurrent requests...\nScraped 11 games from 1 dates\nRuntime: 0.90 seconds\nSaved to /tmp/six_2025-07-01.json\n"
+  },
+  {
+    "date": "2025-07-08",
+    "attempt": 1,
+    "returnCode": 0,
+    "games": 15,
+    "stdoutTail": "Starting async scraper (max 1 concurrent requests)\nOdds types: pointspread\nFetching MLB schedule...\nFound 1 dates to scrape for odds types: pointspread\nScraping 1 date/odds-type combinations with 1 concurrent requests...\nScraped 15 games from 1 dates\nRuntime: 0.86 seconds\nSaved to /tmp/six_2025-07-08.json\n"
+  },
+  {
+    "date": "2025-07-31",
+    "attempt": 1,
+    "returnCode": 0,
+    "games": 3,
+    "stdoutTail": "Starting async scraper (max 1 concurrent requests)\nOdds types: pointspread\nFetching MLB schedule...\nFound 1 dates to scrape for odds types: pointspread\nScraping 1 date/odds-type combinations with 1 concurrent requests...\nScraped 3 games from 1 dates\nRuntime: 0.76 seconds\nSaved to /tmp/six_2025-07-31.json\n"
+  }
+]
