@@ -3,7 +3,7 @@ import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { refreshMlbStatcastDaily } from '@/services/mlb-statcast-daily-refresh.service'
 import { refreshMlbStatcastDailyAnalytics } from '@/services/mlb-statcast-daily-analytics.service'
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
-import { freezeMlbMoneylineForwardTracker } from '@/services/mlb-moneyline-forward-freeze.service'
+import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-freeze-runtime.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -82,12 +82,18 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       readiness = await getMlbDailyHistoryReadiness()
     }
 
-    // Reuse the existing daily scheduler. The Moneyline service owns its 10:45 AM
-    // Puerto Rico time gate, strict prior-date history gate, pre-first-pitch gate,
-    // idempotent freeze and fail-closed behavior. We intentionally let it perform
-    // its own readiness readback so provider accounting remains self-contained.
+    // Reuse this existing daily scheduler rather than creating a parallel host.
+    // The Moneyline runtime owns the 10:45 AM Puerto Rico gate, the pre-first-
+    // pitch gate, idempotent freeze and fail-closed behavior. Pass the already
+    // verified previous-day readiness result to avoid an unnecessary second
+    // MLB Official schedule request.
     const moneylineFreeze = readiness.ready
-      ? await freezeMlbMoneylineForwardTracker()
+      ? await runMlbMoneylineForwardFreeze({
+          historyReadiness: {
+            ready: readiness.ready,
+            targetDate: readiness.targetDate,
+          },
+        })
       : null
     const moneylineBlocked = Boolean(moneylineFreeze && moneylineFreeze.success === false)
     const success = readiness.ready && !moneylineBlocked
