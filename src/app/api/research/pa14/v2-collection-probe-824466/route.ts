@@ -134,6 +134,8 @@ export async function POST() {
       throw new Error(`PA14_COLLECTION_REPLAY_FAILED:${JSON.stringify({ networkCalls, deterministicReplay, expectedMatch, lineageMatch, temporalLeakageZero, status: first?.status })}`)
     }
 
+    if (!first || first.status !== 'ELIGIBLE') throw new Error('PA14_COLLECTION_REPLAY_STATUS_NARROWING_FAILED')
+
     return NextResponse.json({
       status: 'PA14_V2_COLLECTION_PROBE_PASS',
       bundleId: stored.id,
