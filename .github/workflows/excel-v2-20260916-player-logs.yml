@@ -1,0 +1,61 @@
+name: Excel V2 Sep16 Player Logs
+
+on:
+  push:
+    branches:
+      - excel-v2-live-odds-preview-20260915
+    paths:
+      - '.github/workflows/excel-v2-20260916-player-logs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  logs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch MLB official game logs for today's prop players
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            'https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/temp-excel-v2-20260916-export?token=excel-v2-20260916-export-f8c31' \
+            --output staging.json
+          cat > /tmp/logs.mjs <<'NODE'
+          import fs from 'node:fs'
+          const staging=JSON.parse(fs.readFileSync('staging.json','utf8'))
+          const cutoff='2026-09-15'
+          function norm(s){return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\b(jr|ii|iii|iv)\b$/,'').trim()}
+          const rosterResp=await fetch('https://statsapi.mlb.com/api/v1/sports/1/players?season=2026')
+          if(!rosterResp.ok) throw new Error('roster '+rosterResp.status)
+          const roster=(await rosterResp.json()).people??[]
+          const map=new Map()
+          for(const p of roster){for(const n of [p.fullName,p.firstLastName,p.nameFirstLast,`${p.useName??p.firstName??''} ${p.useLastName??p.lastName??''}`]){const k=norm(n);if(k&&!map.has(k))map.set(k,p)}}
+          const matched=[]; const unresolved=[]
+          for(const x of staging.players){let p=map.get(norm(x.full_name)); if(!p){const u=new URL('https://statsapi.mlb.com/api/v1/people/search');u.searchParams.set('names',x.full_name);const r=await fetch(u);if(r.ok){const a=(await r.json()).people??[];p=a.find(y=>norm(y.fullName)===norm(x.full_name))??a[0]}}
+            if(p) matched.push({bdl_id:x.player_id,prop_name:x.full_name,mlbam_id:p.id,mlb_name:p.fullName,position:p.primaryPosition?.abbreviation??x.position}); else unresolved.push(x.full_name)
+          }
+          const ids=[...new Set(matched.map(x=>x.mlbam_id))]
+          const people=new Map()
+          for(let i=0;i<ids.length;i+=15){const batch=ids.slice(i,i+15); const u=new URL('https://statsapi.mlb.com/api/v1/people');u.searchParams.set('personIds',batch.join(','));u.searchParams.set('hydrate','stats(group=[hitting,pitching],type=[gameLog],season=2026)');const r=await fetch(u); if(!r.ok) throw new Error(`batch ${r.status} ${await r.text()}`); for(const p of (await r.json()).people??[]) people.set(p.id,p)}
+          const out={}
+          for(const m of matched){const p=people.get(m.mlbam_id); if(!p)continue; const entry={bdl_id:m.bdl_id,mlbam_id:m.mlbam_id,mlb_name:m.mlb_name,position:m.position,hitting:[],pitching:[]}; for(const block of p.stats??[]){const group=block.group?.displayName; if(!['hitting','pitching'].includes(group))continue; for(const sp of block.splits??[]){if(sp.gameType!=='R'||!sp.date||sp.date>cutoff)continue; const s=sp.stat??{}; if(group==='hitting'){const hits=Number(s.hits??0),d=Number(s.doubles??0),t=Number(s.triples??0),hr=Number(s.homeRuns??0);entry.hitting.push({date:sp.date,gamePk:sp.game?.gamePk??null,pa:Number(s.plateAppearances??0),hits,runs:Number(s.runs??0),rbi:Number(s.rbi??0),tb:Number(s.totalBases??0),walks:Number(s.baseOnBalls??0),hr,stolenBases:Number(s.stolenBases??0),hrbi:hits+Number(s.runs??0)+Number(s.rbi??0)})} else {entry.pitching.push({date:sp.date,gamePk:sp.game?.gamePk??null,ip:String(s.inningsPitched??'0.0'),strikeouts:Number(s.strikeOuts??0),walks:Number(s.baseOnBalls??0),hits:Number(s.hits??0),earnedRuns:Number(s.earnedRuns??0),pitches:Number(s.numberOfPitches??0)})}}
+            }
+            entry.hitting.sort((a,b)=>a.date.localeCompare(b.date)||(a.gamePk??0)-(b.gamePk??0)); entry.pitching.sort((a,b)=>a.date.localeCompare(b.date)||(a.gamePk??0)-(b.gamePk??0)); out[String(m.bdl_id)]=entry
+          }
+          fs.writeFileSync('mlb-player-logs-sep16.json',JSON.stringify({cutoff,matched:matched.length,unresolved,players:out}))
+          fs.writeFileSync('mlb-player-logs-meta.json',JSON.stringify({cutoff,requested:staging.players.length,matched:matched.length,output:Object.keys(out).length,unresolved},null,2))
+          console.log(JSON.stringify({requested:staging.players.length,matched:matched.length,output:Object.keys(out).length,unresolved}))
+          NODE
+          node /tmp/logs.mjs
+      - name: Upload player logs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-v2-sep16-player-logs
+          path: |
+            mlb-player-logs-sep16.json
+            mlb-player-logs-meta.json
+          retention-days: 1
+          if-no-files-found: error
