@@ -1,0 +1,65 @@
+[
+  {
+    "label": "mar",
+    "start": "2025-03-27",
+    "end": "2025-03-31",
+    "days": 5,
+    "gamesRaw": 65,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: totals, pointspread\nFetching MLB schedule...\nFound 5 dates to scrape for odds types: totals, pointspread\nScraping 10 date/odds-type combinations with 2 concurrent requests...\nRequest failed with status 502 for https://www.sportsbookreview.com/betting-odds/mlb-baseball/pointspread/full-game/?date=2025-03-27\nRequest failed with status 502 for https://www.sportsbookreview.com/betting-odds/mlb-baseball/pointspread/full-game/?date=2025-03-27\nRequest failed with status 502 for https://www.sportsbookreview.com/betting-odds/mlb-baseball/pointspread/full-game/?date=2025-03-27\nFailed to fetch pointspread odds for 2025-03-27\nScraped 65 games from 5 dates\nRuntime: 12.72 seconds\nSaved to /tmp/sbr_mar.json\n",
+    "stderrTail": "\nScraping:   0%|          | 0/10 [00:00<?, ?requests/s]\nScraping:  40%|\u2588\u2588\u2588\u2588      | 4/10 [00:05<00:07,  1.32s/requests]\nScraping:  40%|\u2588\u2588\u2588\u2588      | 4/10 [00:05<00:07,  1.32s/requests, with_games=3, chunk_success=3]\nScraping:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:10<00:02,  1.24s/requests, with_games=3, chunk_success=3]\nScraping:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 8/10 [00:10<00:02,  1.24s/requests, with_games=7, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:12<00:00,  1.24s/requests, with_games=7, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:12<00:00,  1.24s/requests, with_games=9, chunk_success=2]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 10/10 [00:12<00:00,  1.25s/requests, with_games=9, chunk_success=2]\n"
+  },
+  {
+    "label": "apr",
+    "start": "2025-04-01",
+    "end": "2025-04-30",
+    "days": 30,
+    "gamesRaw": 385,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: totals, pointspread\nFetching MLB schedule...\nFound 30 dates to scrape for odds types: totals, pointspread\nScraping 60 date/odds-type combinations with 2 concurrent requests...\nScraped 385 games from 30 dates\nRuntime: 58.84 seconds\nSaved to /tmp/sbr_apr.json\n",
+    "stderrTail": "with_games=44, chunk_success=4]\nScraping:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 48/60 [00:47<00:13,  1.16s/requests, with_games=48, chunk_success=4]\nScraping:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 52/60 [00:50<00:08,  1.05s/requests, with_games=48, chunk_success=4]\nScraping:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 52/60 [00:50<00:08,  1.05s/requests, with_games=52, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 56/60 [00:54<00:04,  1.02s/requests, with_games=52, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 56/60 [00:54<00:04,  1.02s/requests, with_games=56, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 60/60 [00:58<00:00,  1.03s/requests, with_games=56, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 60/60 [00:58<00:00,  1.03s/requests, with_games=60, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 60/60 [00:58<00:00,  1.02requests/s, with_games=60, chunk_success=4]\n"
+  },
+  {
+    "label": "may",
+    "start": "2025-05-01",
+    "end": "2025-05-31",
+    "days": 31,
+    "gamesRaw": 404,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: pointspread, totals\nFetching MLB schedule...\nFound 31 dates to scrape for odds types: pointspread, totals\nScraping 62 date/odds-type combinations with 2 concurrent requests...\nScraped 404 games from 31 dates\nRuntime: 52.01 seconds\nSaved to /tmp/sbr_may.json\n",
+    "stderrTail": "with_games=48, chunk_success=4]\nScraping:  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 52/62 [00:42<00:08,  1.19requests/s, with_games=52, chunk_success=4]\nScraping:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 56/62 [00:45<00:04,  1.23requests/s, with_games=52, chunk_success=4]\nScraping:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 56/62 [00:45<00:04,  1.23requests/s, with_games=56, chunk_success=4]\nScraping:  97%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 60/62 [00:48<00:01,  1.22requests/s, with_games=56, chunk_success=4]\nScraping:  97%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 60/62 [00:48<00:01,  1.22requests/s, with_games=60, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 62/62 [00:51<00:00,  1.04requests/s, with_games=60, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 62/62 [00:51<00:00,  1.04requests/s, with_games=62, chunk_success=2]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 62/62 [00:51<00:00,  1.20requests/s, with_games=62, chunk_success=2]\n"
+  },
+  {
+    "label": "jun",
+    "start": "2025-06-01",
+    "end": "2025-06-30",
+    "days": 30,
+    "gamesRaw": 393,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: totals, pointspread\nFetching MLB schedule...\nFound 30 dates to scrape for odds types: totals, pointspread\nScraping 60 date/odds-type combinations with 2 concurrent requests...\nScraped 393 games from 30 dates\nRuntime: 47.15 seconds\nSaved to /tmp/sbr_jun.json\n",
+    "stderrTail": "with_games=44, chunk_success=4]\nScraping:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 48/60 [00:36<00:10,  1.16requests/s, with_games=48, chunk_success=4]\nScraping:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 52/60 [00:39<00:06,  1.22requests/s, with_games=48, chunk_success=4]\nScraping:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 52/60 [00:39<00:06,  1.22requests/s, with_games=52, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 56/60 [00:43<00:03,  1.22requests/s, with_games=52, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 56/60 [00:43<00:03,  1.22requests/s, with_games=56, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 60/60 [00:46<00:00,  1.18requests/s, with_games=56, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 60/60 [00:46<00:00,  1.18requests/s, with_games=60, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 60/60 [00:46<00:00,  1.28requests/s, with_games=60, chunk_success=4]\n"
+  },
+  {
+    "label": "jul",
+    "start": "2025-07-01",
+    "end": "2025-07-31",
+    "days": 28,
+    "gamesRaw": 361,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: pointspread, totals\nFetching MLB schedule...\nFound 28 dates to scrape for odds types: pointspread, totals\nScraping 56 date/odds-type combinations with 2 concurrent requests...\nScraped 361 games from 28 dates\nRuntime: 44.49 seconds\nSaved to /tmp/sbr_jul.json\n",
+    "stderrTail": "with_games=38, chunk_success=4]\nScraping:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 44/56 [00:34<00:09,  1.30requests/s, with_games=42, chunk_success=4]\nScraping:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 48/56 [00:38<00:06,  1.20requests/s, with_games=42, chunk_success=4]\nScraping:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 48/56 [00:38<00:06,  1.20requests/s, with_games=46, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 52/56 [00:41<00:03,  1.24requests/s, with_games=46, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 52/56 [00:41<00:03,  1.24requests/s, with_games=50, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 56/56 [00:44<00:00,  1.28requests/s, with_games=50, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 56/56 [00:44<00:00,  1.28requests/s, with_games=54, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 56/56 [00:44<00:00,  1.27requests/s, with_games=54, chunk_success=4]\n"
+  },
+  {
+    "label": "aug",
+    "start": "2025-08-01",
+    "end": "2025-08-31",
+    "days": 31,
+    "gamesRaw": 419,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: pointspread, totals\nFetching MLB schedule...\nFound 31 dates to scrape for odds types: pointspread, totals\nScraping 62 date/odds-type combinations with 2 concurrent requests...\nScraped 419 games from 31 dates\nRuntime: 53.24 seconds\nSaved to /tmp/sbr_aug.json\n",
+    "stderrTail": "with_games=48, chunk_success=4]\nScraping:  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 52/62 [00:42<00:10,  1.02s/requests, with_games=52, chunk_success=4]\nScraping:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 56/62 [00:47<00:06,  1.08s/requests, with_games=52, chunk_success=4]\nScraping:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 56/62 [00:47<00:06,  1.08s/requests, with_games=56, chunk_success=4]\nScraping:  97%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 60/62 [00:50<00:02,  1.01s/requests, with_games=56, chunk_success=4]\nScraping:  97%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 60/62 [00:50<00:02,  1.01s/requests, with_games=60, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 62/62 [00:52<00:00,  1.05s/requests, with_games=60, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 62/62 [00:52<00:00,  1.05s/requests, with_games=62, chunk_success=2]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 62/62 [00:52<00:00,  1.17requests/s, with_games=62, chunk_success=2]\n"
+  },
+  {
+    "label": "sep",
+    "start": "2025-09-01",
+    "end": "2025-09-28",
+    "days": 28,
+    "gamesRaw": 372,
+    "stdoutTail": "Starting async scraper (max 2 concurrent requests)\nOdds types: totals, pointspread\nFetching MLB schedule...\nFound 28 dates to scrape for odds types: totals, pointspread\nScraping 56 date/odds-type combinations with 2 concurrent requests...\nScraped 372 games from 28 dates\nRuntime: 51.23 seconds\nSaved to /tmp/sbr_sep.json\n",
+    "stderrTail": "with_games=40, chunk_success=4]\nScraping:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 44/56 [00:40<00:12,  1.01s/requests, with_games=44, chunk_success=4]\nScraping:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 48/56 [00:43<00:07,  1.07requests/s, with_games=44, chunk_success=4]\nScraping:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 48/56 [00:43<00:07,  1.07requests/s, with_games=48, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 52/56 [00:47<00:03,  1.10requests/s, with_games=48, chunk_success=4]\nScraping:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 52/56 [00:47<00:03,  1.10requests/s, with_games=52, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 56/56 [00:50<00:00,  1.08requests/s, with_games=52, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 56/56 [00:50<00:00,  1.08requests/s, with_games=56, chunk_success=4]\nScraping: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 56/56 [00:50<00:00,  1.10requests/s, with_games=56, chunk_success=4]\n"
+  }
+]

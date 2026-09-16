@@ -1,0 +1,36 @@
+{
+  "byMarket": {
+    "run_line": 55132,
+    "total": 55424
+  },
+  "byRole": {
+    "closing": 55278,
+    "opening": 55278
+  },
+  "bySportsbook": {
+    "bet365": 17816,
+    "bet_rivers_co": 17792,
+    "betmgm": 17792,
+    "caesars": 17812,
+    "draftkings": 17816,
+    "fanatics": 3712,
+    "fanduel": 17816
+  },
+  "contract": "MLB_2025_SBR_DIRECT_GAP_SANITIZED_V1",
+  "dates": 182,
+  "exactSnapshotTimestampsAvailable": false,
+  "gzipBytes": 893828,
+  "gzipSha256": "c1a41b7aca63e254feb6a04f4203c3fa23e310ce537306156b4a4e3e7d252736",
+  "leakagePolicy": "Only sportsbook market fields, team identity, game date/start, line role, line and price are retained.",
+  "oddsApiCreditsConsumed": 0,
+  "postgameFieldsCopied": 0,
+  "regularSeasonGameIdentities": 2237,
+  "researchOnly": true,
+  "sanitizedBytes": 26315305,
+  "sanitizedRows": 110556,
+  "sanitizedSha256": "919fc00c04a9cdaa677f00643b67086411d30576d2d550e7da4e9805598ef9bc",
+  "scraperSourceCommit": "48ad82bb4ae21fe7af622762aa8ed2e81d64c0b7",
+  "source": "SportsBookReview via ArnavSaraogi/mlb-odds-scraper direct scrape",
+  "sourceDateFrom": "2025-03-27",
+  "sourceDateTo": "2025-09-28"
+}
