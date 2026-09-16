@@ -9,5 +9,6 @@
   "sourceRegistryId": "sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0",
   "source": "SportsBookReview via ArnavSaraogi/mlb-odds-scraper public release",
   "sourceDateRange": ["2025-03-18", "2025-08-16"],
+  "triggerNonce": "retry-after-node-esm-fix",
   "notes": "Import sanitized pregame market fields only. Do not ingest final scores, winners, game results, RBI, runs, or other postgame fields. Preserve opening/closing role and sportsbook identity."
 }
