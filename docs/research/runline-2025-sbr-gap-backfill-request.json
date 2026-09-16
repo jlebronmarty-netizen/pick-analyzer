@@ -1,0 +1,12 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "startDate": "2025-03-27",
+  "endDate": "2025-09-28",
+  "markets": ["run_line", "total"],
+  "concurrency": 2,
+  "notes": "Use SportsBookReview public pages through the validated public scraper. Sanitize before persistence; never retain final score, winner, result, RBI, runs, or other postgame outcome fields."
+}
