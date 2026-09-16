@@ -107,8 +107,19 @@ assert.ok(cronRoute.includes('historyReadiness: {'))
 assert.ok(cronRoute.includes('targetDate: readiness.targetDate'))
 assert.ok(!cronRoute.includes("from '@/services/mlb-moneyline-forward-freeze.service'"), 'cron must use accounting wrapper')
 
-assert.ok(consumer.includes("failClosedReason: 'FROZEN_FAIL_CLOSED_INPUT_GAP'"))
-assert.ok(consumer.includes('(details as Record<string, unknown>).failClosed === true'))
+for (const marker of [
+  'function isFailClosedRow',
+  'const frozenInputGaps = data.filter(isFailClosedRow)',
+  'const failClosedPick = pickRows.some(isFailClosedRow)',
+  "'FAIL_CLOSED_ROW_CANNOT_BE_PICK'",
+  'failClosedGames: frozenInputGaps.length',
+  'const coverageComplete = frozenInputGaps.length === 0',
+  'coverageComplete,',
+  'games with incomplete decision-relevant inputs remain excluded fail-closed',
+]) {
+  assert.ok(consumer.includes(marker), `per-game fail-closed serving invariant missing: ${marker}`)
+}
+assert.ok(!consumer.includes("failClosedReason: 'FROZEN_FAIL_CLOSED_INPUT_GAP'"), 'one incomplete game must not suppress independent valid picks')
 
 const vercel = JSON.parse(vercelText)
 assert.ok(Array.isArray(vercel.crons))
@@ -144,5 +155,5 @@ console.log(JSON.stringify({
   officialPicksWrites: false,
   apostarActive: false,
   sportsbookCalls: 0,
-  failClosed: true,
+  failClosed: 'PER_GAME_WITH_STRUCTURAL_FEED_FAIL_CLOSED',
 }, null, 2))
