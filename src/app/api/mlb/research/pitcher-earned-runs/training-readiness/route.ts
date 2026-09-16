@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return apiError({
       id,
-      code: 'PA12_ER_TRAINING_READINESS_UNAVAILABLE',
+      code: 'INTERNAL_ERROR',
       message: errorMessage(error, 'PA-12 Pitcher ER training readiness unavailable'),
     })
   }
