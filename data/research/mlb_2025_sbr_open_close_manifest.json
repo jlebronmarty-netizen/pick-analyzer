@@ -1,0 +1,35 @@
+{
+  "contract": "MLB_2025_SBR_OPEN_CLOSE_SANITIZED_V1",
+  "researchOnly": true,
+  "sourceRegistryId": "sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0",
+  "sourceAssetSha256": "3f952fd0bfae9f4f2d17e66692cb936ce6e1a5f6b415318012090c85933b882b",
+  "sanitizedSha256": "a39e799bed1c89fb47a1a5f3a1a39a55550aa1bdf9bc8ffe17a3742d1d5e3a5b",
+  "gzipSha256": "da1dae564de3688f771b5bb4c96a72bea19bdf989e4990dd0b41a64b2fdf3f99",
+  "sanitizedBytes": 19320633,
+  "gzipBytes": 656321,
+  "byMarket": {
+    "run_line": 40604,
+    "total": 40608
+  },
+  "byRole": {
+    "closing": 40606,
+    "opening": 40606
+  },
+  "bySportsbook": {
+    "bet365": 13544,
+    "bet_rivers_ny": 13520,
+    "betmgm": 13520,
+    "caesars": 13540,
+    "draftkings": 13544,
+    "fanduel": 13544
+  },
+  "dates": 141,
+  "oddsApiCreditsConsumed": 0,
+  "postgameFieldsCopied": 0,
+  "regularSeasonGamesSeen": 1697,
+  "sanitizedRows": 81212,
+  "sourceDateFrom": "2025-03-18",
+  "sourceDateTo": "2025-08-16",
+  "exactSnapshotTimestampsAvailable": false,
+  "leakagePolicy": "No final score, winner, result, RBI, runs, or other postgame outcome fields copied."
+}
