@@ -16,79 +16,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Export live MLB props CSV
-        env:
-          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      - name: Download staged MLB props CSV
         shell: bash
         run: |
-          cat > /tmp/export-props.mjs <<'NODE'
-          import fs from 'node:fs'
-
-          const key = process.env.THE_ODDS_API_KEY?.trim()
-          if (!key) throw new Error('THE_ODDS_API_KEY missing')
-          const events = [
-            '4ee5706290157d66372729e7e70830e8',
-            'e5ea1bb04bd365a0c15838cfb75266f9',
-            '2f2faff81101f84158c3cfbd630bcb30',
-            'baa7f738229bf9855e24037a2a30a2cb',
-            '015394004322ca670004015ae5bd94a3',
-            '1ddb6d18eafe93f1947471922f1938ea',
-            'a1a608b633419833caf64ad8739781f3',
-            'f367b112dcb4fea1a4ff67e49ee1f0cd',
-            '256d7de8ceb3804256d260a74263d82c',
-            '15c9ca42142414287f11247c92905d9f',
-            '6279de5e7b4d4681d15f7d6ea90d4e66',
-            '8cac5435079f2d8d51adb91e7950bb26',
-            '54f473e11bd354c898e74efd34f3f78d',
-            'cce625b7dac12280fdb88a6f44058c93',
-            'e9344aee4810e4127e69c73c13c781d7',
-          ]
-          const markets = [
-            'pitcher_strikeouts','pitcher_outs','batter_hits','batter_total_bases',
-            'batter_hits_runs_rbis','batter_home_runs','batter_walks','batter_stolen_bases'
-          ].join(',')
-          const q = v => `"${String(v ?? '').replaceAll('"','""')}"`
-          const rows = [['event_id','commence_time','away_team','home_team','book_key','book','market','last_update','player','side','line','odds']]
-          let remaining = null
-          for (const eventId of events) {
-            const u = new URL(`https://api.the-odds-api.com/v4/sports/baseball_mlb/events/${eventId}/odds`)
-            u.searchParams.set('apiKey', key)
-            u.searchParams.set('regions','us')
-            u.searchParams.set('bookmakers','fanduel,williamhill_us')
-            u.searchParams.set('markets',markets)
-            u.searchParams.set('oddsFormat','american')
-            u.searchParams.set('dateFormat','iso')
-            const r = await fetch(u)
-            remaining = r.headers.get('x-requests-remaining') ?? remaining
-            if (!r.ok) {
-              console.error('event failed', eventId, r.status, await r.text())
-              continue
-            }
-            const event = await r.json()
-            for (const book of event.bookmakers ?? []) {
-              for (const market of book.markets ?? []) {
-                for (const outcome of market.outcomes ?? []) {
-                  rows.push([
-                    event.id,event.commence_time,event.away_team,event.home_team,
-                    book.key,book.title,market.key,market.last_update,
-                    outcome.description ?? '',outcome.name,outcome.point ?? '',outcome.price ?? ''
-                  ])
-                }
-              }
-            }
-          }
-          fs.writeFileSync('mlb-props-2026-09-15.csv', rows.map(r => r.map(q).join(',')).join('\n'))
-          fs.writeFileSync('mlb-props-meta.json', JSON.stringify({generatedAt:new Date().toISOString(), rows:rows.length-1, remaining}, null, 2))
-          console.log(JSON.stringify({rows:rows.length-1, remaining}))
-          NODE
-          node /tmp/export-props.mjs
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            'https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/temp-excel-v2-all-props-export?token=excelv2-props-export-20260915-93d7c4' \
+            --output mlb-all-props-2026-09-15.csv
+          python - <<'PY'
+          import csv, json
+          p='mlb-all-props-2026-09-15.csv'
+          with open(p, newline='', encoding='utf-8') as f:
+              rows=sum(1 for _ in csv.reader(f))-1
+          if rows != 10965:
+              raise SystemExit(f'expected 10965 rows, got {rows}')
+          with open('mlb-props-meta.json','w',encoding='utf-8') as f:
+              json.dump({'rows': rows, 'source':'supabase_staging_20260915'}, f, indent=2)
+          print(json.dumps({'rows': rows}))
+          PY
 
       - name: Upload props artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mlb-props-2026-09-15
+          name: mlb-all-props-2026-09-15
           path: |
-            mlb-props-2026-09-15.csv
+            mlb-all-props-2026-09-15.csv
             mlb-props-meta.json
           if-no-files-found: error
           retention-days: 1
