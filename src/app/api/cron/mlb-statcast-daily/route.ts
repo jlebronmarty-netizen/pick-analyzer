@@ -9,6 +9,7 @@ import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-f
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-home-p15-alt-shadow.service'
 import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
+import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-settlement.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -92,6 +93,25 @@ async function safeRunlineHomeP15ForwardFreeze() {
       apostarActivated: false,
       writes: 0,
       error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 forward freeze error'),
+    }
+  }
+}
+
+async function safeRunlineHomeP15Settlement(targetDate: string) {
+  try {
+    return await settleRunlineV2HomeP15Alternate(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'RUNLINE_HOME_P15_SETTLEMENT_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      roiCertified: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 settlement error'),
     }
   }
 }
@@ -295,6 +315,12 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       readiness = await getMlbDailyHistoryReadiness()
     }
 
+    // Previous-day outcomes are read only after daily history/analytics are ready.
+    // This is a separate research settlement stage and cannot affect today's freeze.
+    const runlineHomeP15Settlement = readiness.ready && typeof readiness.targetDate === 'string'
+      ? await safeRunlineHomeP15Settlement(readiness.targetDate)
+      : null
+
     // Reuse this existing daily scheduler rather than creating a parallel host.
     // The Moneyline runtime owns its own 10:45 AM Puerto Rico gate. The Run Line
     // research freeze below is independent, shadow-only, and cannot promote picks.
@@ -321,6 +347,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       dailyHistoryReadiness: readiness,
       moneylineRecommendationFreeze: moneylineFreeze,
       runlineHomeP15ResearchFreeze: runlineHomeP15Freeze,
+      runlineHomeP15ResearchSettlement: runlineHomeP15Settlement,
       prospectiveMarketCapture,
     }, id, {
       status: success ? 200 : 409,
