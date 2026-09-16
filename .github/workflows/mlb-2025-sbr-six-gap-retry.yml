@@ -1,0 +1,105 @@
+name: MLB 2025 SBR Six Gap Retry
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-2025-sbr-six-gap-request.json'
+
+permissions:
+  contents: write
+
+jobs:
+  six-gap-retry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate request
+        run: |
+          node <<'NODE'
+          const fs=require('fs'); const r=JSON.parse(fs.readFileSync('docs/research/runline-2025-sbr-six-gap-request.json','utf8'))
+          if(!(r.authorized===true&&r.researchOnly===true&&r.expectedOddsApiCredits===0&&r.officialPicksWritesAllowed===false&&r.apostarActivationAllowed===false&&r.targets?.length===6)) throw new Error('INVALID_REQUEST')
+          NODE
+      - name: Clone scraper
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ArnavSaraogi/mlb-odds-scraper /tmp/mlb-odds-scraper
+          git -C /tmp/mlb-odds-scraper rev-parse HEAD > /tmp/scraper-source-sha.txt
+          python3 -m pip install --disable-pip-version-check -r /tmp/mlb-odds-scraper/requirements.txt
+      - name: Retry six exact dates
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,subprocess,time
+          req=json.load(open('docs/research/runline-2025-sbr-six-gap-request.json'))
+          audit=[]
+          for target in req['targets']:
+              d=target['date']; out=f'/tmp/six_{d}.json'; success=False
+              for attempt in range(1,4):
+                  p=subprocess.run(['python3','/tmp/mlb-odds-scraper/scraper.py',d,d,'-t','pointspread','-c','1','-o',out],cwd='/tmp/mlb-odds-scraper',capture_output=True,text=True,timeout=180)
+                  try: data=json.load(open(out))
+                  except: data={}
+                  games=sum(len(v) for v in data.values())
+                  audit.append({'date':d,'attempt':attempt,'returnCode':p.returncode,'games':games,'stdoutTail':p.stdout[-500:]})
+                  if games>0: success=True; break
+                  time.sleep(attempt*2)
+          json.dump(audit,open('/tmp/six-gap-retry-audit.json','w'),indent=2)
+          PY
+      - name: Sanitize exact target Run Lines
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,hashlib,gzip,os
+          from collections import Counter
+          req=json.load(open('docs/research/runline-2025-sbr-six-gap-request.json'))
+          aliases={'AZ':'ARI','OAK':'ATH','CWS':'CHW','WAS':'WSH','KCR':'KC','SFG':'SF','SDP':'SD','TBR':'TB'}
+          targets={(x['date'],x['away'],x['home']) for x in req['targets']}
+          found=set(); rows=0; ordinal=0; books=Counter(); roles=Counter(); out='/tmp/mlb_2025_sbr_six_gap_runline.jsonl'
+          def norm(x):
+              x=str(x or '').strip().upper(); return aliases.get(x,x)
+          with open(out,'w') as f:
+              for t in req['targets']:
+                  d=t['date']; path=f'/tmp/six_{d}.json'
+                  if not os.path.exists(path): continue
+                  data=json.load(open(path))
+                  for item in data.get(d,[]):
+                      gv=item.get('gameView') or {}
+                      if gv.get('gameType')!='R': continue
+                      away=norm((gv.get('awayTeam') or {}).get('shortName')); home=norm((gv.get('homeTeam') or {}).get('shortName'))
+                      if (d,away,home) not in targets: continue
+                      start=str(gv.get('startDate') or '')
+                      emitted=False
+                      for q in (item.get('odds') or {}).get('pointspread') or []:
+                          book=str(q.get('sportsbook') or '').strip().lower()
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=q.get(key) or {}
+                              for outcome,price,point in [('home',line.get('homeOdds'),line.get('homeSpread')),('away',line.get('awayOdds'),line.get('awaySpread'))]:
+                                  if book and isinstance(price,(int,float)) and isinstance(point,(int,float)):
+                                      ordinal+=1; rows+=1; emitted=True; books[book]+=1; roles[role]+=1
+                                      payload={'sourceOrdinal':ordinal,'sourceDate':d,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'run_line','snapshotRole':role,'outcome':outcome,'price':price,'line':point}
+                                      f.write(json.dumps(payload,separators=(',',':'))+'\n')
+                      if emitted: found.add((d,away,home))
+          raw=open(out,'rb').read(); raw_sha=hashlib.sha256(raw).hexdigest(); gz='/tmp/mlb_2025_sbr_six_gap_runline.jsonl.gz'
+          with gzip.GzipFile(gz,'wb',mtime=0) as g:g.write(raw)
+          gb=open(gz,'rb').read(); gz_sha=hashlib.sha256(gb).hexdigest()
+          missing=sorted([{'date':d,'away':a,'home':h} for d,a,h in targets-found],key=lambda x:x['date'])
+          manifest={'contract':'MLB_2025_SBR_SIX_GAP_RUNLINE_V1','researchOnly':True,'targets':len(targets),'foundTargets':len(found),'missingTargets':missing,'sanitizedRows':rows,'byRole':dict(roles),'bySportsbook':dict(books),'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,'sanitizedSha256':raw_sha,'gzipSha256':gz_sha,'sanitizedBytes':len(raw),'gzipBytes':len(gb),'scraperSourceCommit':open('/tmp/scraper-source-sha.txt').read().strip()}
+          json.dump(manifest,open('/tmp/mlb_2025_sbr_six_gap_manifest.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(manifest,indent=2,sort_keys=True))
+          PY
+      - name: Commit retry evidence safely
+        run: |
+          set -euo pipefail
+          cp /tmp/mlb_2025_sbr_six_gap_runline.jsonl.gz data/research/mlb_2025_sbr_six_gap_runline.jsonl.gz
+          cp /tmp/mlb_2025_sbr_six_gap_manifest.json data/research/mlb_2025_sbr_six_gap_manifest.json
+          cp /tmp/six-gap-retry-audit.json data/research/mlb_2025_sbr_six_gap_retry_audit.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_sbr_six_gap_*
+          git commit -m 'research: stage exact six-game Run Line recovery'
+          git pull --rebase origin research/runline-2025-historical-backfill
+          git push origin HEAD:research/runline-2025-historical-backfill
