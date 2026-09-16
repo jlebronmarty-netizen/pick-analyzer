@@ -1,0 +1,108 @@
+name: MLB 2025 SBR Athletics Backfill
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/runline-2025-sbr-athletics-request.json'
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-stage-athletics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('docs/research/runline-2025-sbr-athletics-request.json','utf8'))
+          if(!(r.authorized===true&&r.researchOnly===true&&r.expectedOddsApiCredits===0&&r.officialPicksWritesAllowed===false&&r.apostarActivationAllowed===false)) throw new Error('INVALID_REQUEST')
+          NODE
+      - name: Clone and patch scraper identity normalization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ArnavSaraogi/mlb-odds-scraper /tmp/mlb-odds-scraper
+          git -C /tmp/mlb-odds-scraper rev-parse HEAD > /tmp/scraper-source-sha.txt
+          python3 - <<'PY'
+          p='/tmp/mlb-odds-scraper/scraper.py'
+          s=open(p).read()
+          old='''    return (name\n            .lower()\n            .replace(".", "")\n            .replace("\'", "")\n            .replace("-", " ")\n            .replace("&", "and")\n            .strip())'''
+          new='''    normalized = (name\n            .lower()\n            .replace(".", "")\n            .replace("\'", "")\n            .replace("-", " ")\n            .replace("&", "and")\n            .strip())\n    if normalized in {"oakland athletics", "athletics"}:\n        return "athletics"\n    return normalized'''
+          if old not in s: raise SystemExit('NORMALIZE_PATCH_TARGET_NOT_FOUND')
+          open(p,'w').write(s.replace(old,new))
+          PY
+          python3 -m pip install --disable-pip-version-check -r /tmp/mlb-odds-scraper/requirements.txt
+      - name: Scrape season with patched identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 /tmp/mlb-odds-scraper/scraper.py 2025-03-27 2025-09-28 -t pointspread totals -c 2 -o /tmp/sbr_ath_fixed.json
+      - name: Sanitize Athletics market fields only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,hashlib,gzip
+          from collections import Counter
+          data=json.load(open('/tmp/sbr_ath_fixed.json'))
+          out='/tmp/mlb_2025_sbr_athletics_open_close.jsonl'
+          ordinal=0; rows=0; games=set(); by_market=Counter(); by_role=Counter(); by_book=Counter(); dates=set()
+          ath_alias={'ATH','OAK'}
+          def emit(f,p):
+              global ordinal,rows
+              forbidden={'awayTeamScore','homeTeamScore','gameStatusText','winner','result'}
+              if any(k in p for k in forbidden): raise RuntimeError('POSTGAME_FIELD_IN_SANITIZED_ROW')
+              ordinal+=1;p['sourceOrdinal']=ordinal;f.write(json.dumps(p,separators=(',',':'))+'\n');rows+=1;by_market[p['market']]+=1;by_role[p['snapshotRole']]+=1;by_book[p['sportsbook']]+=1
+          with open(out,'w') as f:
+              for date in sorted(data):
+                  for item in data[date]:
+                      gv=item.get('gameView') or {}
+                      if gv.get('gameType')!='R': continue
+                      home=((gv.get('homeTeam') or {}).get('shortName') or '').strip().upper()
+                      away=((gv.get('awayTeam') or {}).get('shortName') or '').strip().upper()
+                      if home not in ath_alias and away not in ath_alias: continue
+                      start=str(gv.get('startDate') or '')
+                      if not home or not away or not start: continue
+                      home='ATH' if home in ath_alias else home; away='ATH' if away in ath_alias else away
+                      games.add((date,home,away,start));dates.add(date);odds=item.get('odds') or {}
+                      for q in odds.get('pointspread') or []:
+                          book=str(q.get('sportsbook') or '').strip().lower()
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=q.get(key) or {}
+                              for outcome,price,point in [('home',line.get('homeOdds'),line.get('homeSpread')),('away',line.get('awayOdds'),line.get('awaySpread'))]:
+                                  if book and isinstance(price,(int,float)) and isinstance(point,(int,float)): emit(f,{'sourceDate':date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'run_line','snapshotRole':role,'outcome':outcome,'price':price,'line':point})
+                      for q in odds.get('totals') or []:
+                          book=str(q.get('sportsbook') or '').strip().lower()
+                          for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                              line=q.get(key) or {};total=line.get('total')
+                              for outcome,price in [('over',line.get('overOdds')),('under',line.get('underOdds'))]:
+                                  if book and isinstance(price,(int,float)) and isinstance(total,(int,float)): emit(f,{'sourceDate':date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'total','snapshotRole':role,'outcome':outcome,'price':price,'line':total})
+          raw=open(out,'rb').read();raw_sha=hashlib.sha256(raw).hexdigest();gz='/tmp/mlb_2025_sbr_athletics_open_close.jsonl.gz'
+          with gzip.GzipFile(gz,'wb',mtime=0) as g:g.write(raw)
+          gb=open(gz,'rb').read();gz_sha=hashlib.sha256(gb).hexdigest()
+          manifest={'contract':'MLB_2025_SBR_ATHLETICS_IDENTITY_FIXED_V1','researchOnly':True,'identityPatch':'oakland athletics|athletics -> athletics for MLB schedule matching','scraperSourceCommit':open('/tmp/scraper-source-sha.txt').read().strip(),'sanitizedRows':rows,'regularSeasonGameIdentities':len(games),'dates':len(dates),'byMarket':dict(by_market),'byRole':dict(by_role),'bySportsbook':dict(by_book),'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,'sanitizedSha256':raw_sha,'gzipSha256':gz_sha,'sanitizedBytes':len(raw),'gzipBytes':len(gb),'exactSnapshotTimestampsAvailable':False}
+          json.dump(manifest,open('/tmp/mlb_2025_sbr_athletics_manifest.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(manifest,indent=2,sort_keys=True))
+          if len(games)<150 or by_market['run_line']==0: raise RuntimeError('ATHLETICS_COVERAGE_INSUFFICIENT')
+          PY
+      - name: Commit artifact safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/mlb_2025_sbr_athletics_open_close.jsonl.gz data/research/mlb_2025_sbr_athletics_open_close.jsonl.gz
+          cp /tmp/mlb_2025_sbr_athletics_manifest.json data/research/mlb_2025_sbr_athletics_manifest.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_sbr_athletics_open_close.jsonl.gz data/research/mlb_2025_sbr_athletics_manifest.json
+          git commit -m 'research: stage identity-corrected Athletics odds artifact'
+          git pull --rebase origin research/runline-2025-historical-backfill
+          git push origin HEAD:research/runline-2025-historical-backfill
