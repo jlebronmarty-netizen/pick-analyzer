@@ -1,0 +1,54 @@
+name: Excel V2 MLB Pitcher Game Logs
+
+on:
+  push:
+    branches:
+      - excel-v2-live-odds-preview-20260915
+    paths:
+      - '.github/workflows/excel-v2-mlb-pitcher-game-logs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-pitcher-logs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch official MLB 2026 pitcher game logs
+        shell: bash
+        run: |
+          cat > /tmp/fetch-pitcher-logs.mjs <<'NODE'
+          import fs from 'node:fs'
+          const targetNames = ["Andre Pallante","Bailey Ober","Blade Tidwell","Cristopher Sanchez","Drew Anderson","Foster Griffin","Griffin Jax","Hunter Brown","Jack Perkins","Jackson Kent","Jacob Misiorowski","Jacob deGrom","Janson Junk","Kevin Gausman","Kyle Freeland","Lake Bachar","Logan Gilbert","Martin Perez","Max Fried","Michael Soroka","Michael Wacha","Patrick Sandoval","Rhett Lowder","Ryan Johnson","Sean Manaea","Shane Baz","Walker Buehler","Yoshinobu Yamamoto"];
+          const cutoff='2026-09-14';
+          const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\b(jr|ii|iii|iv)\b$/,'').trim();
+          const rosterResp=await fetch('https://statsapi.mlb.com/api/v1/sports/1/players?season=2026');
+          if(!rosterResp.ok) throw new Error(`roster ${rosterResp.status}`);
+          const roster=(await rosterResp.json()).people??[];
+          const byNorm=new Map();
+          for(const p of roster){for(const n of [p.fullName,p.firstLastName,p.nameFirstLast,`${p.useName??p.firstName??''} ${p.useLastName??p.lastName??''}`]){const k=norm(n);if(k&&!byNorm.has(k))byNorm.set(k,p)}}
+          const matched=[]; const unmatched=[];
+          for(const propName of targetNames){let p=byNorm.get(norm(propName));if(!p){const u=new URL('https://statsapi.mlb.com/api/v1/people/search');u.searchParams.set('names',propName);const r=await fetch(u);if(r.ok){const people=(await r.json()).people??[];p=people.find(x=>norm(x.fullName)===norm(propName))??people[0]}}if(p)matched.push({propName,id:p.id,mlbName:p.fullName});else unmatched.push(propName)}
+          const ids=[...new Set(matched.map(x=>x.id))];
+          const u=new URL('https://statsapi.mlb.com/api/v1/people');u.searchParams.set('personIds',ids.join(','));u.searchParams.set('hydrate','stats(group=[pitching],type=[gameLog],season=2026)');
+          const r=await fetch(u);if(!r.ok)throw new Error(`people ${r.status} ${await r.text()}`);const people=(await r.json()).people??[];const byId=new Map(people.map(p=>[p.id,p]));
+          function ipToOuts(ip){const [a,b='0']=String(ip??'0.0').split('.');return Number(a)*3+Number(b)}
+          const output={};
+          for(const m of matched){const p=byId.get(m.id);if(!p)continue;const block=(p.stats??[]).find(x=>x.type?.displayName==='gameLog'&&x.group?.displayName==='pitching');const games=(block?.splits??[]).filter(x=>x.gameType==='R'&&x.date&&x.date<=cutoff).map(x=>{const s=x.stat??{};return{date:x.date,gamePk:x.game?.gamePk??null,gamesStarted:Number(s.gamesStarted??0),outs:ipToOuts(s.inningsPitched),strikeouts:Number(s.strikeOuts??0),pitches:Number(s.numberOfPitches??0),battersFaced:Number(s.battersFaced??0)}}).filter(x=>x.gamesStarted>0).sort((a,b)=>a.date.localeCompare(b.date)||(a.gamePk??0)-(b.gamePk??0));output[m.propName]={mlbamId:m.id,mlbName:m.mlbName,games}}
+          fs.writeFileSync('mlb-pitcher-game-logs-through-2026-09-14.json',JSON.stringify(output));
+          fs.writeFileSync('mlb-pitcher-game-logs-meta.json',JSON.stringify({generatedAt:new Date().toISOString(),cutoff,requested:targetNames.length,matched:matched.length,outputPlayers:Object.keys(output).length,unmatched},null,2));
+          console.log(JSON.stringify({requested:targetNames.length,matched:matched.length,output:Object.keys(output).length,unmatched}));
+          NODE
+          node /tmp/fetch-pitcher-logs.mjs
+
+      - name: Upload official pitcher logs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-pitcher-game-logs-through-2026-09-14
+          path: |
+            mlb-pitcher-game-logs-through-2026-09-14.json
+            mlb-pitcher-game-logs-meta.json
+          retention-days: 1
+          if-no-files-found: error
