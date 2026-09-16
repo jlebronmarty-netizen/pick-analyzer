@@ -1,0 +1,52 @@
+name: Excel V2 MLB Batter Game Logs Missing
+
+on:
+  push:
+    branches:
+      - excel-v2-live-odds-preview-20260915
+    paths:
+      - '.github/workflows/excel-v2-mlb-game-logs-missing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-game-logs-missing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch official MLB 2026 batter game logs for missing props
+        shell: bash
+        run: |
+          cat > /tmp/fetch-mlb-logs.mjs <<'NODE'
+          import fs from 'node:fs'
+          const targetNames = ["B.J. Murray Jr.", "Brett Bateman", "Brett Baty", "Brett Sullivan", "Brewer Hicklen", "Brock Rodden", "Brooks Lee", "Bryan De La Cruz", "Bryan Torres", "Bryce Eldridge", "Bryson Stott", "CJ Abrams", "Caleb Durbin", "Cam Smith", "Carlos Jorge", "Carson Benge", "Carter Jensen", "Chase Meidroth", "Christian Koss", "Christian Walker", "Christian Yelich", "Coby Mayo", "Cody Bellinger", "Cole Carrigg", "Colton Cowser", "David Hamilton", "Denzer Guzman", "Derek Hill", "Drake Baldwin", "Drew Cavanaugh", "Drew Gilbert", "Eduardo Valencia", "Emmanuel Rodriguez", "Ernie Clement", "Esteury Ruiz", "Ezequiel Duran", "Freddie Freeman", "Garrett Mitchell", "George Lombard Jr.", "Grant McCray", "Griffin Conine", "Hao-Yu Lee", "Harry Ford", "Hector Rodriguez", "Hunter Feduccia", "Isaac Collins", "Jac Caglianone", "Jake McCarthy", "Jake Rogers", "Jakob Marsee", "Jared Young", "Javier Sanoja", "Jeremiah Jackson", "Joey Ortiz", "John Peck", "John Rave", "Jonah Cox", "Jorbit Vivas", "Jose Fermin", "Jose Siri", "Josue De Paula", "Juan Brito", "Jung Hoo Lee", "Justin Foscue", "Kaelen Culpepper", "Kazuma Okamoto", "Kevin McGonigle", "Kody Clemens", "Konnor Griffin", "Kyle Isbel", "Kyle Karros", "LaMonte Wade Jr.", "Lars Nootbaar", "Lazaro Montes", "Leody Taveras", "Leonardo Bernal", "Luis Campusano", "Luis Lara", "Luisangel Acuna", "Luke Keaschall", "Maikel Garcia", "Mauricio Dubon", "Max Clark", "Max Muncy", "Michael Harris II", "Michael Massey", "Mickey Gasper", "Miguel Vargas", "Mike Yastrzemski", "Moises Ballesteros", "Munetaka Murakami", "Nathan Church", "Nathan Lukes", "Nick Gonzales", "Nick Sogard", "Nico Hoerner", "Osleivis Basabe", "Ozzie Albies", "Pavin Smith", "Pedro Ramirez", "Petey Halpin", "Rafael Flores", "Randal Grichuk", "Rece Hinds", "Roman Anthony", "Ronald Acuna Jr.", "Royce Lewis", "Ryan O'Hearn", "Sal Stewart", "Sam Antonacci", "Samad Taylor", "Seiya Suzuki", "Spencer Horwitz", "Spencer Jones", "TJ Rumfield", "Thomas Saggese", "Tim Tawa", "Tommy Edman", "Travis Bazzana", "Tristan Peters", "Turner Hill", "Ty France", "Tyrone Taylor", "Vaughn Grissom", "Victor Caratini", "Wade Meckler", "Will Banfield", "William Contreras", "Wilyer Abreu"];
+          const cutoff='2026-09-14';
+          const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\b(jr|ii|iii|iv)\b$/,'').trim();
+          const rosterResp=await fetch('https://statsapi.mlb.com/api/v1/sports/1/players?season=2026');
+          if(!rosterResp.ok) throw new Error(`roster ${rosterResp.status}`);
+          const roster=(await rosterResp.json()).people??[];
+          const byNorm=new Map();
+          for(const p of roster){for(const n of [p.fullName,p.firstLastName,p.nameFirstLast,`${p.useName??p.firstName??''} ${p.useLastName??p.lastName??''}`]){const k=norm(n);if(k&&!byNorm.has(k))byNorm.set(k,p)}}
+          const matched=[]; const unmatched=[];
+          for(const propName of targetNames){let p=byNorm.get(norm(propName)); if(!p){const u=new URL('https://statsapi.mlb.com/api/v1/people/search');u.searchParams.set('names',propName);const r=await fetch(u);if(r.ok){const people=(await r.json()).people??[];p=people.find(x=>norm(x.fullName)===norm(propName))??people[0]}} if(p)matched.push({propName,id:p.id,mlbName:p.fullName}); else unmatched.push(propName)}
+          const ids=[...new Set(matched.map(x=>x.id))]; const peopleById=new Map();
+          for(let i=0;i<ids.length;i+=20){const u=new URL('https://statsapi.mlb.com/api/v1/people');u.searchParams.set('personIds',ids.slice(i,i+20).join(','));u.searchParams.set('hydrate','stats(group=[hitting],type=[gameLog],season=2026)');const r=await fetch(u);if(!r.ok)throw new Error(`batch ${r.status} ${await r.text()}`);for(const p of (await r.json()).people??[])peopleById.set(p.id,p)}
+          const output={};
+          for(const m of matched){const p=peopleById.get(m.id);if(!p)continue;const block=(p.stats??[]).find(x=>x.type?.displayName==='gameLog'&&x.group?.displayName==='hitting');const games=(block?.splits??[]).filter(x=>x.gameType==='R'&&x.date&&x.date<=cutoff).map(x=>{const s=x.stat??{};const hits=Number(s.hits??0),doubles=Number(s.doubles??0),triples=Number(s.triples??0),homeRuns=Number(s.homeRuns??0),singles=Math.max(0,hits-doubles-triples-homeRuns),runs=Number(s.runs??0),rbi=Number(s.rbi??0);return{date:x.date,gamePk:x.game?.gamePk??null,plateAppearances:Number(s.plateAppearances??0),hits,singles,doubles,triples,homeRuns,walks:Number(s.baseOnBalls??0),runs,rbi,stolenBases:Number(s.stolenBases??0),totalBases:Number(s.totalBases??(singles+2*doubles+3*triples+4*homeRuns)),hitsRunsRbis:hits+runs+rbi}}).sort((a,b)=>a.date.localeCompare(b.date)||(a.gamePk??0)-(b.gamePk??0));output[m.propName]={mlbamId:m.id,mlbName:m.mlbName,games}}
+          fs.writeFileSync('mlb-batter-game-logs-missing-through-2026-09-14.json',JSON.stringify(output));
+          fs.writeFileSync('mlb-batter-game-logs-missing-meta.json',JSON.stringify({generatedAt:new Date().toISOString(),cutoff,requested:targetNames.length,matched:matched.length,outputPlayers:Object.keys(output).length,unmatched},null,2));
+          console.log(JSON.stringify({requested:targetNames.length,matched:matched.length,output:Object.keys(output).length,unmatched}));
+          NODE
+          node /tmp/fetch-mlb-logs.mjs
+
+      - name: Upload missing MLB game-log artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-batter-game-logs-missing-through-2026-09-14
+          path: |
+            mlb-batter-game-logs-missing-through-2026-09-14.json
+            mlb-batter-game-logs-missing-meta.json
+          retention-days: 1
+          if-no-files-found: error
