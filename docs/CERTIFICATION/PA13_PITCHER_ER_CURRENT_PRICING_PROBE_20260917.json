@@ -1,0 +1,136 @@
+{
+  "contractCandidate": "PA13_PITCHER_ER_CURRENT_PROVIDER_PROBE/1.0.0",
+  "status": "AVAILABLE",
+  "observedAtBuild": "2026-09-17T23:05:43Z",
+  "provider": "the-odds-api",
+  "sportKey": "baseball_mlb",
+  "market": "pitcher_earned_runs",
+  "providerEventId": "b9c3b50472005c67c30de323cd8a5396",
+  "httpStatus": 200,
+  "commenceTime": "2026-09-17T23:17:00Z",
+  "homeTeam": "Houston Astros",
+  "awayTeam": "Kansas City Royals",
+  "bookmakerCount": 4,
+  "quoteCount": 12,
+  "playerCount": 2,
+  "lines": [
+    0.5,
+    2.5
+  ],
+  "books": [
+    "betmgm",
+    "bovada",
+    "draftkings",
+    "fanatics"
+  ],
+  "quotes": [
+    {
+      "sportsbook": "fanatics",
+      "player": "Seth Lugo",
+      "selection": "Over",
+      "line": 2.5,
+      "price": -140,
+      "marketLastUpdate": "2026-09-17T23:04:55Z"
+    },
+    {
+      "sportsbook": "fanatics",
+      "player": "Seth Lugo",
+      "selection": "Under",
+      "line": 2.5,
+      "price": 100,
+      "marketLastUpdate": "2026-09-17T23:04:55Z"
+    },
+    {
+      "sportsbook": "bovada",
+      "player": "Miguel Ullola",
+      "selection": "Over",
+      "line": 0.5,
+      "price": 160,
+      "marketLastUpdate": "2026-09-17T23:05:07Z"
+    },
+    {
+      "sportsbook": "bovada",
+      "player": "Miguel Ullola",
+      "selection": "Under",
+      "line": 0.5,
+      "price": -230,
+      "marketLastUpdate": "2026-09-17T23:05:07Z"
+    },
+    {
+      "sportsbook": "bovada",
+      "player": "Seth Lugo",
+      "selection": "Over",
+      "line": 2.5,
+      "price": -150,
+      "marketLastUpdate": "2026-09-17T23:05:07Z"
+    },
+    {
+      "sportsbook": "bovada",
+      "player": "Seth Lugo",
+      "selection": "Under",
+      "line": 2.5,
+      "price": 110,
+      "marketLastUpdate": "2026-09-17T23:05:07Z"
+    },
+    {
+      "sportsbook": "betmgm",
+      "player": "Miguel Ullola",
+      "selection": "Over",
+      "line": 0.5,
+      "price": 160,
+      "marketLastUpdate": "2026-09-17T23:05:37Z"
+    },
+    {
+      "sportsbook": "betmgm",
+      "player": "Miguel Ullola",
+      "selection": "Under",
+      "line": 0.5,
+      "price": -225,
+      "marketLastUpdate": "2026-09-17T23:05:37Z"
+    },
+    {
+      "sportsbook": "betmgm",
+      "player": "Seth Lugo",
+      "selection": "Over",
+      "line": 2.5,
+      "price": -140,
+      "marketLastUpdate": "2026-09-17T23:05:37Z"
+    },
+    {
+      "sportsbook": "betmgm",
+      "player": "Seth Lugo",
+      "selection": "Under",
+      "line": 2.5,
+      "price": 100,
+      "marketLastUpdate": "2026-09-17T23:05:37Z"
+    },
+    {
+      "sportsbook": "draftkings",
+      "player": "Seth Lugo",
+      "selection": "Over",
+      "line": 2.5,
+      "price": -131,
+      "marketLastUpdate": "2026-09-17T23:05:23Z"
+    },
+    {
+      "sportsbook": "draftkings",
+      "player": "Seth Lugo",
+      "selection": "Under",
+      "line": 2.5,
+      "price": -101,
+      "marketLastUpdate": "2026-09-17T23:05:23Z"
+    }
+  ],
+  "requestsLast": 1,
+  "requestsRemaining": 5591,
+  "researchOnly": true,
+  "historicalPricingCertified": false,
+  "currentPricingAvailable": true,
+  "roiCertified": false,
+  "clvCertified": false,
+  "evCertified": false,
+  "supabaseWrites": 0,
+  "officialPicksModified": false,
+  "apostarActivated": false,
+  "apiKeyExposed": false
+}
