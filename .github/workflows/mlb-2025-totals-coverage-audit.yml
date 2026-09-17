@@ -1,0 +1,245 @@
+name: MLB 2025 Totals Coverage Audit
+
+on:
+  push:
+    branches:
+      - research/totals-2025-historical-backfill
+    paths:
+      - 'docs/research/totals-2025-coverage-audit-request.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mlb-2025-totals-coverage-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate research-only request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync('docs/research/totals-2025-coverage-audit-request.json','utf8'))
+          const checks=[
+            [r.authorized===true,'authorized'],
+            [r.researchOnly===true,'researchOnly'],
+            [r.market==='total','market'],
+            [r.expectedOddsApiCredits===0,'zero credits'],
+            [r.officialPicksWritesAllowed===false,'official picks disabled'],
+            [r.apostarActivationAllowed===false,'apostar disabled'],
+            [r.copyPostgameFields===false,'postgame disabled'],
+          ]
+          const bad=checks.filter(([ok])=>!ok).map(([,m])=>m)
+          if(bad.length) throw new Error(`INVALID_REQUEST:${bad.join(',')}`)
+          NODE
+
+      - name: Clone public scraper and patch Athletics identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ArnavSaraogi/mlb-odds-scraper /tmp/mlb-odds-scraper
+          git -C /tmp/mlb-odds-scraper rev-parse HEAD > /tmp/scraper-source-sha.txt
+          python3 - <<'PY'
+          p='/tmp/mlb-odds-scraper/scraper.py'
+          s=open(p).read()
+          old='''    return (name\n            .lower()\n            .replace(".", "")\n            .replace("'", "")\n            .replace("-", " ")\n            .replace("&", "and")\n            .strip())'''
+          new='''    normalized = (name\n            .lower()\n            .replace(".", "")\n            .replace("'", "")\n            .replace("-", " ")\n            .replace("&", "and")\n            .strip())\n    if "athletic" in normalized:\n        return "athletics"\n    return normalized'''
+          if old not in s: raise SystemExit('NORMALIZE_PATCH_TARGET_NOT_FOUND')
+          open(p,'w').write(s.replace(old,new))
+          PY
+          python3 -m pip install --disable-pip-version-check -r /tmp/mlb-odds-scraper/requirements.txt
+
+      - name: Scrape Athletics Totals only with patched identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 /tmp/mlb-odds-scraper/scraper.py 2025-03-27 2025-09-28 -t totals -c 2 -o /tmp/sbr_ath_totals.json
+
+      - name: Build canonical Totals coverage audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json,gzip,hashlib,urllib.request,datetime,collections,os
+
+          BASE_FILES=[
+            ('sportsbookreview_via_arnavsaraogi_dataset','data/research/mlb_2025_sbr_open_close.jsonl.gz'),
+            ('sportsbookreview_direct_scrape','data/research/mlb_2025_sbr_gap_open_close.jsonl.gz'),
+            ('sportsbookreview_multigame_retry','data/research/mlb_2025_sbr_multigame_retry.jsonl.gz'),
+          ]
+          FORBIDDEN={'awayTeamScore','homeTeamScore','gameStatusText','winner','result','runs','rbi'}
+          ALIAS={'ARI':'AZ','OAK':'ATH'}
+          def nt(x):
+            x=str(x or '').strip().upper()
+            return ALIAS.get(x,x)
+          def ts(x):
+            try: return datetime.datetime.fromisoformat(str(x).replace('Z','+00:00')).timestamp()
+            except: return None
+          def row_key(r): return (str(r.get('sourceDate') or '')[:10],nt(r.get('awayTeam')),nt(r.get('homeTeam')),str(r.get('sourceStartDate') or ''))
+
+          rows=[]
+          counts=collections.Counter(); books=collections.Counter(); roles=collections.Counter(); source_games=collections.defaultdict(set)
+          for source,path in BASE_FILES:
+            with gzip.open(path,'rt',encoding='utf-8') as f:
+              for line in f:
+                r=json.loads(line)
+                if any(k in r for k in FORBIDDEN): raise RuntimeError('POSTGAME_FIELD_IN_SOURCE_ARTIFACT')
+                if r.get('market')!='total': continue
+                r['sourceLayer']=source
+                r['awayTeam']=nt(r.get('awayTeam')); r['homeTeam']=nt(r.get('homeTeam'))
+                rows.append(r); counts[source]+=1; books[str(r.get('sportsbook'))]+=1; roles[str(r.get('snapshotRole'))]+=1; source_games[source].add(row_key(r))
+
+          # Sanitize patched Athletics Totals only.
+          ath_out='/tmp/mlb_2025_sbr_athletics_totals_v1.jsonl'
+          ath_rows=0; ath_games=set(); ath_books=collections.Counter(); ath_roles=collections.Counter()
+          data=json.load(open('/tmp/sbr_ath_totals.json'))
+          with open(ath_out,'w',encoding='utf-8') as f:
+            ordinal=0
+            for date in sorted(data):
+              for item in data[date]:
+                gv=item.get('gameView') or {}
+                if gv.get('gameType')!='R': continue
+                ht=gv.get('homeTeam') or {}; at=gv.get('awayTeam') or {}
+                def is_ath(t): return 'athletic' in str(t.get('fullName') or '').lower()
+                if not is_ath(ht) and not is_ath(at): continue
+                home='ATH' if is_ath(ht) else nt(ht.get('shortName'))
+                away='ATH' if is_ath(at) else nt(at.get('shortName'))
+                start=str(gv.get('startDate') or '')
+                if not home or not away or not start: continue
+                for q in (item.get('odds') or {}).get('totals') or []:
+                  book=str(q.get('sportsbook') or '').strip().lower()
+                  if not book: continue
+                  for role,key in [('opening','openingLine'),('closing','currentLine')]:
+                    ln=q.get(key) or {}; total=ln.get('total')
+                    for outcome,price in [('over',ln.get('overOdds')),('under',ln.get('underOdds'))]:
+                      if isinstance(price,(int,float)) and isinstance(total,(int,float)):
+                        ordinal+=1
+                        r={'sourceDate':date,'sourceStartDate':start,'homeTeam':home,'awayTeam':away,'sportsbook':book,'market':'total','snapshotRole':role,'outcome':outcome,'price':price,'line':total,'sourceOrdinal':ordinal}
+                        f.write(json.dumps(r,separators=(',',':'))+'\n')
+                        rr={**r,'sourceLayer':'sportsbookreview_athletics_totals_v1'}
+                        rows.append(rr); ath_rows+=1; ath_games.add(row_key(rr)); ath_books[book]+=1; ath_roles[role]+=1
+          raw=open(ath_out,'rb').read(); ath_raw_sha=hashlib.sha256(raw).hexdigest()
+          ath_gz='/tmp/mlb_2025_sbr_athletics_totals_v1.jsonl.gz'
+          with gzip.GzipFile(ath_gz,'wb',mtime=0) as g:g.write(raw)
+          ath_gz_bytes=open(ath_gz,'rb').read()
+          source_games['sportsbookreview_athletics_totals_v1'] |= ath_games
+          counts['sportsbookreview_athletics_totals_v1']=ath_rows
+          books.update(ath_books); roles.update(ath_roles)
+
+          # Official MLB schedule identity only. Scores/outcomes are not requested or copied.
+          url='https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2025-03-27&endDate=2025-09-28&gameType=R&hydrate=team'
+          with urllib.request.urlopen(url,timeout=60) as resp: schedule=json.load(resp)
+          canon=[]
+          for d in schedule.get('dates') or []:
+            date=d.get('date')
+            for g in d.get('games') or []:
+              home=(g.get('teams') or {}).get('home',{}).get('team',{})
+              away=(g.get('teams') or {}).get('away',{}).get('team',{})
+              habbr=nt(home.get('abbreviation')); aabbr=nt(away.get('abbreviation'))
+              if not habbr or not aabbr: continue
+              canon.append({'gamePk':int(g['gamePk']),'gameDate':date,'away':aabbr,'home':habbr,'start':g.get('gameDate')})
+          by_pair=collections.defaultdict(list)
+          for g in canon: by_pair[(g['gameDate'],g['away'],g['home'])].append(g)
+
+          # One unique market identity per date/teams/start, then map to gamePk.
+          identities={row_key(r):r for r in rows}
+          mapped={}; unmapped=[]; ambiguous=[]
+          for k,r in identities.items():
+            date,away,home,start=k
+            cands=by_pair.get((date,away,home),[])
+            if len(cands)==1:
+              mapped[k]=cands[0]['gamePk']; continue
+            if len(cands)>1:
+              st=ts(start)
+              ranked=[]
+              for c in cands:
+                ct=ts(c['start']); diff=abs(ct-st) if st is not None and ct is not None else 10**20
+                ranked.append((diff,c))
+              ranked.sort(key=lambda x:x[0])
+              if len(ranked)==1 or ranked[0][0] < ranked[1][0]:
+                mapped[k]=ranked[0][1]['gamePk']
+              else:
+                ambiguous.append({'identity':k,'candidateGamePks':[x[1]['gamePk'] for x in ranked]})
+            else:
+              unmapped.append({'date':date,'away':away,'home':home,'sourceStartDate':start})
+
+          mapped_games=set(mapped.values()); canonical_games=set(g['gamePk'] for g in canon)
+          missing=[g for g in canon if g['gamePk'] not in mapped_games]
+          extra=sorted(mapped_games-canonical_games)
+
+          # Verify paired O/U opening availability for each mapped game.
+          per_game=collections.defaultdict(lambda:collections.defaultdict(lambda:{'over':False,'under':False}))
+          identity_to_pk=mapped
+          for r in rows:
+            if r.get('snapshotRole')!='opening': continue
+            pk=identity_to_pk.get(row_key(r))
+            if not pk: continue
+            book=str(r.get('sportsbook') or '')
+            oc=str(r.get('outcome') or '').lower()
+            if oc in ('over','under'): per_game[pk][book][oc]=True
+          paired_games={pk for pk,bb in per_game.items() if any(v['over'] and v['under'] for v in bb.values())}
+
+          six=[
+            ('2025-03-27','CHC','AZ'),('2025-05-19','CLE','MIN'),('2025-06-06','AZ','CIN'),
+            ('2025-07-01','CIN','BOS'),('2025-07-08','TEX','LAA'),('2025-07-31','ATL','CIN')]
+          six_status=[]
+          for date,away,home in six:
+            pks=[g['gamePk'] for g in canon if (g['gameDate'],g['away'],g['home'])==(date,away,home)]
+            found=[r for r in rows if str(r.get('sourceDate') or '')[:10]==date and nt(r.get('awayTeam'))==away and nt(r.get('homeTeam'))==home]
+            six_status.append({'date':date,'away':away,'home':home,'canonicalGamePks':pks,'totalRows':len(found),'openingRows':sum(1 for r in found if r.get('snapshotRole')=='opening'),'sources':sorted(set(r.get('sourceLayer') for r in found)),'mapped':any(pk in mapped_games for pk in pks)})
+
+          audit={
+            'contract':'MLB_TOTALS_2025_COVERAGE_AUDIT_V1','researchOnly':True,'market':'total',
+            'canonicalSource':'MLB Stats API schedule identity only','canonicalRegularSeasonGames':len(canonical_games),
+            'mappedTotalGames':len(mapped_games),'pairedOpeningTotalGames':len(paired_games),
+            'coveragePct':round(100*len(mapped_games)/len(canonical_games),8) if canonical_games else None,
+            'pairedOpeningCoveragePct':round(100*len(paired_games)/len(canonical_games),8) if canonical_games else None,
+            'missingGames':missing,'missingCount':len(missing),'unmappedIdentities':unmapped,'unmappedIdentityCount':len(unmapped),
+            'ambiguousMappings':ambiguous,'ambiguousCount':len(ambiguous),'extraMappedGamePks':extra,
+            'rowsBySource':dict(counts),'uniqueIdentitiesBySource':{k:len(v) for k,v in source_games.items()},
+            'rowsByRole':dict(roles),'rowsBySportsbook':dict(books),'sixRunLineGapTotalsStatus':six_status,
+            'athleticsTotalsArtifact':{
+              'contract':'MLB_2025_SBR_ATHLETICS_TOTALS_V1','rows':ath_rows,'gameIdentities':len(ath_games),
+              'scraperSourceCommit':open('/tmp/scraper-source-sha.txt').read().strip(),'sanitizedSha256':ath_raw_sha,
+              'gzipSha256':hashlib.sha256(ath_gz_bytes).hexdigest(),'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,
+            },
+            'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,
+            'notes':['Opening/closing are source semantic roles; exact historical snapshot timestamps are not claimed.','No score or target-game outcome is used in this coverage audit.']
+          }
+          os.makedirs('data/research',exist_ok=True)
+          json.dump(audit,open('/tmp/mlb_2025_totals_coverage_audit.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(audit,indent=2,sort_keys=True))
+          if len(canonical_games)!=2430: raise RuntimeError(f'CANONICAL_GAME_COUNT_UNEXPECTED:{len(canonical_games)}')
+          if len(mapped_games)<2400: raise RuntimeError(f'TOTALS_COVERAGE_INSUFFICIENT:{len(mapped_games)}')
+          PY
+
+      - name: Commit research artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp /tmp/mlb_2025_totals_coverage_audit.json data/research/mlb_2025_totals_coverage_audit.json
+          cp /tmp/mlb_2025_sbr_athletics_totals_v1.jsonl.gz data/research/mlb_2025_sbr_athletics_totals_v1.jsonl.gz
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_totals_coverage_audit.json data/research/mlb_2025_sbr_athletics_totals_v1.jsonl.gz
+          git commit -m 'research(totals): audit 2025 historical market coverage'
+          git pull --rebase origin research/totals-2025-historical-backfill
+          git push origin HEAD:research/totals-2025-historical-backfill
+
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-2025-totals-coverage-audit
+          path: data/research/mlb_2025_totals_coverage_audit.json
+          retention-days: 14
+          if-no-files-found: error
