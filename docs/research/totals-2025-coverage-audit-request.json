@@ -7,5 +7,5 @@
   "apostarActivationAllowed": false,
   "copyPostgameFields": false,
   "purpose": "Certify 2025 MLB pregame Totals market coverage before target/model construction.",
-  "retryReason": "Rerun after replacing the failed legacy Athletics game-odds endpoint path with the patched ArnavSaraogi scraper route already proven by Run Line Athletics V2."
+  "retryReason": "Rerun after fixing SBR-to-MLB team aliases and including the Mar 18-19 Tokyo regular-season games in the canonical 2,430-game schedule."
 }
