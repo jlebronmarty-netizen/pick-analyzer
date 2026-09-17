@@ -15,6 +15,8 @@ const { auditHistoricalPa14V2Target } = await import('../../src/services/pa14-v2
 
 const targets = [
   { canonicalGamePk: 778105, expectedPitcherIds: [650633, 694738], targetPitcherId: 650633 },
+  { canonicalGamePk: 777291, expectedPitcherIds: [657277, 669194], targetPitcherId: 657277 },
+  { canonicalGamePk: 776136, expectedPitcherIds: [676664, 694297], targetPitcherId: 676664 },
 ]
 
 for (const target of targets) {
