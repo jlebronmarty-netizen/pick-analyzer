@@ -1,0 +1,557 @@
+{
+  "contract": "MLB_TOTALS_2025_DIAGNOSTIC_V1",
+  "oddsApiCreditsConsumed": 0,
+  "researchOnly": true,
+  "stages": [
+    {
+      "ok": true,
+      "result": {
+        "data/research/mlb_2025_sbr_gap_open_close.jsonl.gz": true,
+        "data/research/mlb_2025_sbr_multigame_retry.jsonl.gz": true,
+        "data/research/mlb_2025_sbr_open_close.jsonl.gz": true
+      },
+      "stage": "files_exist"
+    },
+    {
+      "ok": true,
+      "result": {
+        "data/research/mlb_2025_sbr_gap_open_close.jsonl.gz": {
+          "rows": 110556,
+          "sample": {
+            "awayTeam": "TEX",
+            "homeTeam": "CIN",
+            "line": 1.5,
+            "market": "run_line",
+            "outcome": "home",
+            "price": -150,
+            "snapshotRole": "opening",
+            "sourceDate": "2025-04-01",
+            "sourceStartDate": "2025-04-01T22:40:00+00:00"
+          },
+          "totalRows": 55424
+        },
+        "data/research/mlb_2025_sbr_multigame_retry.jsonl.gz": {
+          "rows": 16824,
+          "sample": {
+            "awayTeam": "MIL",
+            "homeTeam": "NYY",
+            "line": -1.5,
+            "market": "run_line",
+            "outcome": "home",
+            "price": 145,
+            "snapshotRole": "opening",
+            "sourceDate": "2025-03-27",
+            "sourceStartDate": "2025-03-27T19:05:00+00:00"
+          },
+          "totalRows": 8412
+        },
+        "data/research/mlb_2025_sbr_open_close.jsonl.gz": {
+          "rows": 81212,
+          "sample": {
+            "awayTeam": "LAD",
+            "homeTeam": "CHC",
+            "line": 1.5,
+            "market": "run_line",
+            "outcome": "home",
+            "price": -120,
+            "snapshotRole": "opening",
+            "sourceDate": "2025-03-18",
+            "sourceStartDate": "2025-03-18T10:10:00+00:00"
+          },
+          "totalRows": 40608
+        }
+      },
+      "stage": "scan_gzip_sources"
+    },
+    {
+      "ok": true,
+      "result": {
+        "dates": 182,
+        "games": 2462,
+        "sample": [
+          {
+            "awayTeam": {
+              "abbreviation": "MIL",
+              "active": true,
+              "allStarStatus": "N",
+              "clubName": "Brewers",
+              "division": {
+                "id": 205,
+                "link": "/api/v1/divisions/205",
+                "name": "National League Central"
+              },
+              "fileCode": "mil",
+              "firstYearOfPlay": "1968",
+              "franchiseName": "Milwaukee",
+              "id": 158,
+              "league": {
+                "id": 104,
+                "link": "/api/v1/league/104",
+                "name": "National League"
+              },
+              "link": "/api/v1/teams/158",
+              "locationName": "Milwaukee",
+              "name": "Milwaukee Brewers",
+              "season": 2025,
+              "shortName": "Milwaukee",
+              "sport": {
+                "id": 1,
+                "link": "/api/v1/sports/1",
+                "name": "Major League Baseball"
+              },
+              "springLeague": {
+                "abbreviation": "CL",
+                "id": 114,
+                "link": "/api/v1/league/114",
+                "name": "Cactus League"
+              },
+              "springVenue": {
+                "id": 2518,
+                "link": "/api/v1/venues/2518"
+              },
+              "teamCode": "mil",
+              "teamName": "Brewers",
+              "venue": {
+                "id": 32,
+                "link": "/api/v1/venues/32",
+                "name": "American Family Field"
+              }
+            },
+            "gameDate": "2025-03-27T19:05:00Z",
+            "gamePk": 778557,
+            "homeTeam": {
+              "abbreviation": "NYY",
+              "active": true,
+              "allStarStatus": "N",
+              "clubName": "Yankees",
+              "division": {
+                "id": 201,
+                "link": "/api/v1/divisions/201",
+                "name": "American League East"
+              },
+              "fileCode": "nyy",
+              "firstYearOfPlay": "1903",
+              "franchiseName": "New York",
+              "id": 147,
+              "league": {
+                "id": 103,
+                "link": "/api/v1/league/103",
+                "name": "American League"
+              },
+              "link": "/api/v1/teams/147",
+              "locationName": "Bronx",
+              "name": "New York Yankees",
+              "season": 2025,
+              "shortName": "NY Yankees",
+              "sport": {
+                "id": 1,
+                "link": "/api/v1/sports/1",
+                "name": "Major League Baseball"
+              },
+              "springLeague": {
+                "abbreviation": "GL",
+                "id": 115,
+                "link": "/api/v1/league/115",
+                "name": "Grapefruit League"
+              },
+              "springVenue": {
+                "id": 2523,
+                "link": "/api/v1/venues/2523"
+              },
+              "teamCode": "nya",
+              "teamName": "Yankees",
+              "venue": {
+                "id": 3313,
+                "link": "/api/v1/venues/3313",
+                "name": "Yankee Stadium"
+              }
+            }
+          },
+          {
+            "awayTeam": {
+              "abbreviation": "BAL",
+              "active": true,
+              "allStarStatus": "N",
+              "clubName": "Orioles",
+              "division": {
+                "id": 201,
+                "link": "/api/v1/divisions/201",
+                "name": "American League East"
+              },
+              "fileCode": "bal",
+              "firstYearOfPlay": "1901",
+              "franchiseName": "Baltimore",
+              "id": 110,
+              "league": {
+                "id": 103,
+                "link": "/api/v1/league/103",
+                "name": "American League"
+              },
+              "link": "/api/v1/teams/110",
+              "locationName": "Baltimore",
+              "name": "Baltimore Orioles",
+              "season": 2025,
+              "shortName": "Baltimore",
+              "sport": {
+                "id": 1,
+                "link": "/api/v1/sports/1",
+                "name": "Major League Baseball"
+              },
+              "springLeague": {
+                "abbreviation": "GL",
+                "id": 115,
+                "link": "/api/v1/league/115",
+                "name": "Grapefruit League"
+              },
+              "springVenue": {
+                "id": 2508,
+                "link": "/api/v1/venues/2508"
+              },
+              "teamCode": "bal",
+              "teamName": "Orioles",
+              "venue": {
+                "id": 2,
+                "link": "/api/v1/venues/2",
+                "name": "Oriole Park at Camden Yards"
+              }
+            },
+            "gameDate": "2025-03-27T19:07:00Z",
+            "gamePk": 778556,
+            "homeTeam": {
+              "abbreviation": "TOR",
+              "active": true,
+              "allStarStatus": "N",
+              "clubName": "Blue Jays",
+              "division": {
+                "id": 201,
+                "link": "/api/v1/divisions/201",
+                "name": "American League East"
+              },
+              "fileCode": "tor",
+              "firstYearOfPlay": "1977",
+              "franchiseName": "Toronto",
+              "id": 141,
+              "league": {
+                "id": 103,
+                "link": "/api/v1/league/103",
+                "name": "American League"
+              },
+              "link": "/api/v1/teams/141",
+              "locationName": "Toronto",
+              "name": "Toronto Blue Jays",
+              "season": 2025,
+              "shortName": "Toronto",
+              "sport": {
+                "id": 1,
+                "link": "/api/v1/sports/1",
+                "name": "Major League Baseball"
+              },
+              "springLeague": {
+                "abbreviation": "GL",
+                "id": 115,
+                "link": "/api/v1/league/115",
+                "name": "Grapefruit League"
+              },
+              "springVenue": {
+                "id": 2536,
+                "link": "/api/v1/venues/2536"
+              },
+              "teamCode": "tor",
+              "teamName": "Blue Jays",
+              "venue": {
+                "id": 14,
+                "link": "/api/v1/venues/14",
+                "name": "Rogers Centre"
+              }
+            }
+          },
+          {
+            "awayTeam": {
+              "abbreviation": "BOS",
+              "active": true,
+              "allStarStatus": "N",
+              "clubName": "Red Sox",
+              "division": {
+                "id": 201,
+                "link": "/api/v1/divisions/201",
+                "name": "American League East"
+              },
+              "fileCode": "bos",
+              "firstYearOfPlay": "1901",
+              "franchiseName": "Boston",
+              "id": 111,
+              "league": {
+                "id": 103,
+                "link": "/api/v1/league/103",
+                "name": "American League"
+              },
+              "link": "/api/v1/teams/111",
+              "locationName": "Boston",
+              "name": "Boston Red Sox",
+              "season": 2025,
+              "shortName": "Boston",
+              "sport": {
+                "id": 1,
+                "link": "/api/v1/sports/1",
+                "name": "Major League Baseball"
+              },
+              "springLeague": {
+                "abbreviation": "GL",
+                "id": 115,
+                "link": "/api/v1/league/115",
+                "name": "Grapefruit League"
+              },
+              "springVenue": {
+                "id": 4309,
+                "link": "/api/v1/venues/4309"
+              },
+              "teamCode": "bos",
+              "teamName": "Red Sox",
+              "venue": {
+                "id": 3,
+                "link": "/api/v1/venues/3",
+                "name": "Fenway Park"
+              }
+            },
+            "gameDate": "2025-03-27T20:05:00Z",
+            "gamePk": 778553,
+            "homeTeam": {
+              "abbreviation": "TEX",
+              "active": true,
+              "allStarStatus": "N",
+              "clubName": "Rangers",
+              "division": {
+                "id": 200,
+                "link": "/api/v1/divisions/200",
+                "name": "American League West"
+              },
+              "fileCode": "tex",
+              "firstYearOfPlay": "1961",
+              "franchiseName": "Texas",
+              "id": 140,
+              "league": {
+                "id": 103,
+                "link": "/api/v1/league/103",
+                "name": "American League"
+              },
+              "link": "/api/v1/teams/140",
+              "locationName": "Arlington",
+              "name": "Texas Rangers",
+              "season": 2025,
+              "shortName": "Texas",
+              "sport": {
+                "id": 1,
+                "link": "/api/v1/sports/1",
+                "name": "Major League Baseball"
+              },
+              "springLeague": {
+                "abbreviation": "CL",
+                "id": 114,
+                "link": "/api/v1/league/114",
+                "name": "Cactus League"
+              },
+              "springVenue": {
+                "id": 2603,
+                "link": "/api/v1/venues/2603"
+              },
+              "teamCode": "tex",
+              "teamName": "Rangers",
+              "venue": {
+                "id": 5325,
+                "link": "/api/v1/venues/5325",
+                "name": "Globe Life Field"
+              }
+            }
+          }
+        ]
+      },
+      "stage": "mlb_schedule"
+    },
+    {
+      "ok": true,
+      "result": {
+        "108": {
+          "abbreviation": "LAA",
+          "fileCode": "ana",
+          "name": "Los Angeles Angels",
+          "teamCode": "ana"
+        },
+        "109": {
+          "abbreviation": "AZ",
+          "fileCode": "ari",
+          "name": "Arizona Diamondbacks",
+          "teamCode": "ari"
+        },
+        "110": {
+          "abbreviation": "BAL",
+          "fileCode": "bal",
+          "name": "Baltimore Orioles",
+          "teamCode": "bal"
+        },
+        "111": {
+          "abbreviation": "BOS",
+          "fileCode": "bos",
+          "name": "Boston Red Sox",
+          "teamCode": "bos"
+        },
+        "112": {
+          "abbreviation": "CHC",
+          "fileCode": "chc",
+          "name": "Chicago Cubs",
+          "teamCode": "chn"
+        },
+        "113": {
+          "abbreviation": "CIN",
+          "fileCode": "cin",
+          "name": "Cincinnati Reds",
+          "teamCode": "cin"
+        },
+        "114": {
+          "abbreviation": "CLE",
+          "fileCode": "cle",
+          "name": "Cleveland Guardians",
+          "teamCode": "cle"
+        },
+        "115": {
+          "abbreviation": "COL",
+          "fileCode": "col",
+          "name": "Colorado Rockies",
+          "teamCode": "col"
+        },
+        "116": {
+          "abbreviation": "DET",
+          "fileCode": "det",
+          "name": "Detroit Tigers",
+          "teamCode": "det"
+        },
+        "117": {
+          "abbreviation": "HOU",
+          "fileCode": "hou",
+          "name": "Houston Astros",
+          "teamCode": "hou"
+        },
+        "118": {
+          "abbreviation": "KC",
+          "fileCode": "kc",
+          "name": "Kansas City Royals",
+          "teamCode": "kca"
+        },
+        "119": {
+          "abbreviation": "LAD",
+          "fileCode": "la",
+          "name": "Los Angeles Dodgers",
+          "teamCode": "lan"
+        },
+        "120": {
+          "abbreviation": "WSH",
+          "fileCode": "was",
+          "name": "Washington Nationals",
+          "teamCode": "was"
+        },
+        "121": {
+          "abbreviation": "NYM",
+          "fileCode": "nym",
+          "name": "New York Mets",
+          "teamCode": "nyn"
+        },
+        "133": {
+          "abbreviation": "ATH",
+          "fileCode": "ath",
+          "name": "Athletics",
+          "teamCode": "ath"
+        },
+        "134": {
+          "abbreviation": "PIT",
+          "fileCode": "pit",
+          "name": "Pittsburgh Pirates",
+          "teamCode": "pit"
+        },
+        "135": {
+          "abbreviation": "SD",
+          "fileCode": "sd",
+          "name": "San Diego Padres",
+          "teamCode": "sdn"
+        },
+        "136": {
+          "abbreviation": "SEA",
+          "fileCode": "sea",
+          "name": "Seattle Mariners",
+          "teamCode": "sea"
+        },
+        "137": {
+          "abbreviation": "SF",
+          "fileCode": "sf",
+          "name": "San Francisco Giants",
+          "teamCode": "sfn"
+        },
+        "138": {
+          "abbreviation": "STL",
+          "fileCode": "stl",
+          "name": "St. Louis Cardinals",
+          "teamCode": "sln"
+        },
+        "139": {
+          "abbreviation": "TB",
+          "fileCode": "tb",
+          "name": "Tampa Bay Rays",
+          "teamCode": "tba"
+        },
+        "140": {
+          "abbreviation": "TEX",
+          "fileCode": "tex",
+          "name": "Texas Rangers",
+          "teamCode": "tex"
+        },
+        "141": {
+          "abbreviation": "TOR",
+          "fileCode": "tor",
+          "name": "Toronto Blue Jays",
+          "teamCode": "tor"
+        },
+        "142": {
+          "abbreviation": "MIN",
+          "fileCode": "min",
+          "name": "Minnesota Twins",
+          "teamCode": "min"
+        },
+        "143": {
+          "abbreviation": "PHI",
+          "fileCode": "phi",
+          "name": "Philadelphia Phillies",
+          "teamCode": "phi"
+        },
+        "144": {
+          "abbreviation": "ATL",
+          "fileCode": "atl",
+          "name": "Atlanta Braves",
+          "teamCode": "atl"
+        },
+        "145": {
+          "abbreviation": "CWS",
+          "fileCode": "cws",
+          "name": "Chicago White Sox",
+          "teamCode": "cha"
+        },
+        "146": {
+          "abbreviation": "MIA",
+          "fileCode": "mia",
+          "name": "Miami Marlins",
+          "teamCode": "mia"
+        },
+        "147": {
+          "abbreviation": "NYY",
+          "fileCode": "nyy",
+          "name": "New York Yankees",
+          "teamCode": "nya"
+        },
+        "158": {
+          "abbreviation": "MIL",
+          "fileCode": "mil",
+          "name": "Milwaukee Brewers",
+          "teamCode": "mil"
+        }
+      },
+      "stage": "mlb_team_metadata"
+    }
+  ]
+}
