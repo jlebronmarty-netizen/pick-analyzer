@@ -116,6 +116,24 @@ async function safeRunlineHomeP15Settlement(targetDate: string) {
   }
 }
 
+async function safeMoneylineForwardFreeze(historyReadiness: { ready: boolean; targetDate: string }) {
+  try {
+    return await runMlbMoneylineForwardFreeze({ historyReadiness })
+  } catch (error) {
+    // Moneyline remains fail-closed. Convert an exception into an explicit blocked
+    // result so independent shadow-only research stages can still record their
+    // own evidence without changing Moneyline recommendation eligibility.
+    return {
+      success: false,
+      status: 'MONEYLINE_FORWARD_FREEZE_FAILED_FAIL_CLOSED',
+      writes: 0,
+      officialPickWrites: 0,
+      apostarActive: false,
+      error: errorMessage(error, 'Unknown Moneyline forward freeze error'),
+    }
+  }
+}
+
 async function maybeCaptureProspectiveMlbMarkets(id: string) {
   const now = new Date()
   const clock = puertoRicoClock(now)
@@ -321,19 +339,22 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       ? await safeRunlineHomeP15Settlement(readiness.targetDate)
       : null
 
-    // Reuse this existing daily scheduler rather than creating a parallel host.
-    // The Moneyline runtime owns its own 10:45 AM Puerto Rico gate. The Run Line
-    // research freeze below is independent, shadow-only, and cannot promote picks.
-    const moneylineFreeze = readiness.ready
-      ? await runMlbMoneylineForwardFreeze({
-          historyReadiness: {
-            ready: readiness.ready,
-            targetDate: readiness.targetDate,
-          },
-        })
-      : null
+    // Run Line is an independent shadow-only research stage. Execute its safe
+    // freeze before Moneyline so a Moneyline runtime exception cannot erase a
+    // valid prospective Run Line observation. This does not change Moneyline's
+    // fail-closed recommendation gate or any production eligibility.
     const runlineHomeP15Freeze = readiness.ready
       ? await safeRunlineHomeP15ForwardFreeze()
+      : null
+
+    // Moneyline keeps its existing authorized gate and remains fail-closed.
+    // Exceptions are represented as blocked results rather than aborting the
+    // entire cron after independent research evidence has already been captured.
+    const moneylineFreeze = readiness.ready
+      ? await safeMoneylineForwardFreeze({
+          ready: readiness.ready,
+          targetDate: readiness.targetDate,
+        })
       : null
     const moneylineBlocked = Boolean(moneylineFreeze && moneylineFreeze.success === false)
     const success = readiness.ready && !moneylineBlocked
