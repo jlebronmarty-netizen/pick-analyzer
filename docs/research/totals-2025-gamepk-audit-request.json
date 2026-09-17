@@ -1,0 +1,10 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "market": "total",
+  "season": 2025,
+  "purpose": "Audit existing SBR Totals artifacts against canonical 2025 MLB game_pk coverage and derive opening/closing game-level market evidence without paid Odds API calls."
+}
