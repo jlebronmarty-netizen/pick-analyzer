@@ -78,14 +78,19 @@ jobs:
             ('sportsbookreview_multigame_retry','data/research/mlb_2025_sbr_multigame_retry.jsonl.gz'),
           ]
           FORBIDDEN={'awayTeamScore','homeTeamScore','gameStatusText','winner','result','runs','rbi'}
-          ALIAS={'ARI':'AZ','OAK':'ATH'}
+          ALIAS={
+            'ARI':'AZ','OAK':'ATH',
+            'CHW':'CWS','WAS':'WSH','WSN':'WSH',
+            'SFG':'SF','SDP':'SD','KCR':'KC','TBR':'TB'
+          }
           def nt(x):
             x=str(x or '').strip().upper()
             return ALIAS.get(x,x)
           def ts(x):
             try: return datetime.datetime.fromisoformat(str(x).replace('Z','+00:00')).timestamp()
             except: return None
-          def row_key(r): return (str(r.get('sourceDate') or '')[:10],nt(r.get('awayTeam')),nt(r.get('homeTeam')),str(r.get('sourceStartDate') or ''))
+          def row_key(r):
+            return (str(r.get('sourceDate') or '')[:10],nt(r.get('awayTeam')),nt(r.get('homeTeam')),str(r.get('sourceStartDate') or ''))
 
           rows=[]
           counts=collections.Counter(); books=collections.Counter(); roles=collections.Counter(); source_games=collections.defaultdict(set)
@@ -99,7 +104,6 @@ jobs:
                 r['awayTeam']=nt(r.get('awayTeam')); r['homeTeam']=nt(r.get('homeTeam'))
                 rows.append(r); counts[source]+=1; books[str(r.get('sportsbook'))]+=1; roles[str(r.get('snapshotRole'))]+=1; source_games[source].add(row_key(r))
 
-          # Sanitize patched Athletics Totals only.
           ath_out='/tmp/mlb_2025_sbr_athletics_totals_v1.jsonl'
           ath_rows=0; ath_games=set(); ath_books=collections.Counter(); ath_roles=collections.Counter()
           data=json.load(open('/tmp/sbr_ath_totals.json'))
@@ -136,8 +140,8 @@ jobs:
           counts['sportsbookreview_athletics_totals_v1']=ath_rows
           books.update(ath_books); roles.update(ath_roles)
 
-          # Official MLB schedule identity only. Scores/outcomes are not requested or copied.
-          url='https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2025-03-27&endDate=2025-09-28&gameType=R&hydrate=team'
+          # Full canonical regular season, including the two Tokyo games on Mar 18-19.
+          url='https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2025-03-18&endDate=2025-09-28&gameType=R&hydrate=team'
           with urllib.request.urlopen(url,timeout=60) as resp: schedule=json.load(resp)
           canon=[]
           for d in schedule.get('dates') or []:
@@ -151,7 +155,6 @@ jobs:
           by_pair=collections.defaultdict(list)
           for g in canon: by_pair[(g['gameDate'],g['away'],g['home'])].append(g)
 
-          # One unique market identity per date/teams/start, then map to gamePk.
           identities={row_key(r):r for r in rows}
           mapped={}; unmapped=[]; ambiguous=[]
           for k,r in identities.items():
@@ -160,16 +163,13 @@ jobs:
             if len(cands)==1:
               mapped[k]=cands[0]['gamePk']; continue
             if len(cands)>1:
-              st=ts(start)
-              ranked=[]
+              st=ts(start); ranked=[]
               for c in cands:
                 ct=ts(c['start']); diff=abs(ct-st) if st is not None and ct is not None else 10**20
                 ranked.append((diff,c))
               ranked.sort(key=lambda x:x[0])
-              if len(ranked)==1 or ranked[0][0] < ranked[1][0]:
-                mapped[k]=ranked[0][1]['gamePk']
-              else:
-                ambiguous.append({'identity':k,'candidateGamePks':[x[1]['gamePk'] for x in ranked]})
+              if len(ranked)==1 or ranked[0][0] < ranked[1][0]: mapped[k]=ranked[0][1]['gamePk']
+              else: ambiguous.append({'identity':k,'candidateGamePks':[x[1]['gamePk'] for x in ranked]})
             else:
               unmapped.append({'date':date,'away':away,'home':home,'sourceStartDate':start})
 
@@ -177,50 +177,46 @@ jobs:
           missing=[g for g in canon if g['gamePk'] not in mapped_games]
           extra=sorted(mapped_games-canonical_games)
 
-          # Verify paired O/U opening availability for each mapped game.
-          per_game=collections.defaultdict(lambda:collections.defaultdict(lambda:{'over':False,'under':False}))
-          identity_to_pk=mapped
+          per_game=collections.defaultdict(lambda:collections.defaultdict(lambda:{'over':False,'under':False,'closingOver':False,'closingUnder':False}))
           for r in rows:
-            if r.get('snapshotRole')!='opening': continue
-            pk=identity_to_pk.get(row_key(r))
+            pk=mapped.get(row_key(r))
             if not pk: continue
             book=str(r.get('sportsbook') or '')
-            oc=str(r.get('outcome') or '').lower()
-            if oc in ('over','under'): per_game[pk][book][oc]=True
-          paired_games={pk for pk,bb in per_game.items() if any(v['over'] and v['under'] for v in bb.values())}
-
-          six=[
-            ('2025-03-27','CHC','AZ'),('2025-05-19','CLE','MIN'),('2025-06-06','AZ','CIN'),
-            ('2025-07-01','CIN','BOS'),('2025-07-08','TEX','LAA'),('2025-07-31','ATL','CIN')]
-          six_status=[]
-          for date,away,home in six:
-            pks=[g['gamePk'] for g in canon if (g['gameDate'],g['away'],g['home'])==(date,away,home)]
-            found=[r for r in rows if str(r.get('sourceDate') or '')[:10]==date and nt(r.get('awayTeam'))==away and nt(r.get('homeTeam'))==home]
-            six_status.append({'date':date,'away':away,'home':home,'canonicalGamePks':pks,'totalRows':len(found),'openingRows':sum(1 for r in found if r.get('snapshotRole')=='opening'),'sources':sorted(set(r.get('sourceLayer') for r in found)),'mapped':any(pk in mapped_games for pk in pks)})
+            oc=str(r.get('outcome') or '').lower(); role=str(r.get('snapshotRole') or '').lower()
+            if oc not in ('over','under'): continue
+            if role=='opening': per_game[pk][book][oc]=True
+            if role=='closing': per_game[pk][book]['closing'+oc.title()]=True
+          paired_opening={pk for pk,bb in per_game.items() if any(v['over'] and v['under'] for v in bb.values())}
+          paired_closing={pk for pk,bb in per_game.items() if any(v['closingOver'] and v['closingUnder'] for v in bb.values())}
+          paired_both=paired_opening & paired_closing
 
           audit={
             'contract':'MLB_TOTALS_2025_COVERAGE_AUDIT_V1','researchOnly':True,'market':'total',
             'canonicalSource':'MLB Stats API schedule identity only','canonicalRegularSeasonGames':len(canonical_games),
-            'mappedTotalGames':len(mapped_games),'pairedOpeningTotalGames':len(paired_games),
+            'mappedTotalGames':len(mapped_games),'pairedOpeningTotalGames':len(paired_opening),'pairedClosingTotalGames':len(paired_closing),'pairedOpeningAndClosingTotalGames':len(paired_both),
             'coveragePct':round(100*len(mapped_games)/len(canonical_games),8) if canonical_games else None,
-            'pairedOpeningCoveragePct':round(100*len(paired_games)/len(canonical_games),8) if canonical_games else None,
+            'pairedOpeningCoveragePct':round(100*len(paired_opening)/len(canonical_games),8) if canonical_games else None,
+            'pairedClosingCoveragePct':round(100*len(paired_closing)/len(canonical_games),8) if canonical_games else None,
+            'pairedOpeningAndClosingCoveragePct':round(100*len(paired_both)/len(canonical_games),8) if canonical_games else None,
             'missingGames':missing,'missingCount':len(missing),'unmappedIdentities':unmapped,'unmappedIdentityCount':len(unmapped),
             'ambiguousMappings':ambiguous,'ambiguousCount':len(ambiguous),'extraMappedGamePks':extra,
             'rowsBySource':dict(counts),'uniqueIdentitiesBySource':{k:len(v) for k,v in source_games.items()},
-            'rowsByRole':dict(roles),'rowsBySportsbook':dict(books),'sixRunLineGapTotalsStatus':six_status,
+            'rowsByRole':dict(roles),'rowsBySportsbook':dict(books),
             'athleticsTotalsArtifact':{
               'contract':'MLB_2025_SBR_ATHLETICS_TOTALS_V1','rows':ath_rows,'gameIdentities':len(ath_games),
               'scraperSourceCommit':open('/tmp/scraper-source-sha.txt').read().strip(),'sanitizedSha256':ath_raw_sha,
               'gzipSha256':hashlib.sha256(ath_gz_bytes).hexdigest(),'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,
             },
+            'teamAliasNormalization':ALIAS,
             'postgameFieldsCopied':0,'oddsApiCreditsConsumed':0,
             'notes':['Opening/closing are source semantic roles; exact historical snapshot timestamps are not claimed.','No score or target-game outcome is used in this coverage audit.']
           }
           os.makedirs('data/research',exist_ok=True)
           json.dump(audit,open('/tmp/mlb_2025_totals_coverage_audit.json','w'),indent=2,sort_keys=True)
-          print(json.dumps(audit,indent=2,sort_keys=True))
+          print(json.dumps({k:v for k,v in audit.items() if k not in ('missingGames','unmappedIdentities','ambiguousMappings')},indent=2,sort_keys=True))
+          print('MISSING_GAME_PKS', [g['gamePk'] for g in missing])
           if len(canonical_games)!=2430: raise RuntimeError(f'CANONICAL_GAME_COUNT_UNEXPECTED:{len(canonical_games)}')
-          if len(mapped_games)<2400: raise RuntimeError(f'TOTALS_COVERAGE_INSUFFICIENT:{len(mapped_games)}')
+          if len(paired_both)<2300: raise RuntimeError(f'TOTALS_PAIRED_OPEN_CLOSE_COVERAGE_INSUFFICIENT:{len(paired_both)}')
           PY
 
       - name: Commit research artifacts
@@ -232,7 +228,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/research/mlb_2025_totals_coverage_audit.json data/research/mlb_2025_sbr_athletics_totals_v1.jsonl.gz
-          git commit -m 'research(totals): audit 2025 historical market coverage'
+          git commit -m 'research(totals): certify 2025 historical market coverage'
           git pull --rebase origin research/totals-2025-historical-backfill
           git push origin HEAD:research/totals-2025-historical-backfill
 
