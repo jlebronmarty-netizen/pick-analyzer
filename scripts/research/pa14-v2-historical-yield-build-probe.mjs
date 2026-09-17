@@ -19,6 +19,28 @@ const targets = [
   { canonicalGamePk: 776136, expectedPitcherIds: [676664, 694297], targetPitcherId: 676664 },
 ]
 
+const velocityDiagnosticResponse = await fetch('https://statsapi.mlb.com/api/v1.1/game/778303/feed/live', {
+  cache: 'no-store',
+  signal: AbortSignal.timeout(15000),
+})
+if (velocityDiagnosticResponse.ok) {
+  const velocityDiagnosticFeed = await velocityDiagnosticResponse.json()
+  const velocityDiagnosticPlay = velocityDiagnosticFeed?.liveData?.plays?.allPlays?.[72] ?? null
+  console.log('PA14_V2_VELOCITY_DIAGNOSTIC=' + JSON.stringify({
+    gamePk: 778303,
+    atBatNumber: 73,
+    result: velocityDiagnosticPlay?.result ?? null,
+    pitches: (velocityDiagnosticPlay?.playEvents ?? [])
+      .filter((event) => event?.isPitch === true)
+      .map((event) => ({
+        pitchNumber: event?.pitchNumber ?? null,
+        description: event?.details?.description ?? null,
+        code: event?.details?.code ?? null,
+        startSpeed: event?.pitchData?.startSpeed ?? null,
+      })),
+  }))
+}
+
 for (const target of targets) {
   try {
     const evidence = await auditHistoricalPa14V2Target(target)
