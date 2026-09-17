@@ -23,7 +23,7 @@ Status: `RESEARCH_ONLY / SHADOW_ONLY`
 Two branches are intentionally preserved for every market:
 
 1. `PREGAME`: deployable-in-principle predictors using only information available before the game.
-2. `FULL_DIAGNOSTIC`: same-game process oracle used only to discover which baseball processes explain the market outcome. It is never deployable as pregame prediction.
+2. `FULL_DIAGNOSTIC`: same-game process oracle used only to discover which processes explain the market outcome. It is never deployable as pregame prediction.
 
 The FULL oracle is a teacher for PREGAME, not an input to it.
 
@@ -256,22 +256,148 @@ The core gap is no longer mysterious:
 - same-game offense and bullpen behavior explain a large portion of Totals outcomes;
 - PREGAME currently predicts those processes only weakly;
 - the existing pregame aggregate bullpen component has almost zero correlation with actual bullpen vulnerability;
-- promising primitive proxies include starter K% (inverse), starter hard-hit allowed, lineup/offense hard-hit, lineup OPS, park runs environment, temperature, starter RA9 and WHIP;
+- promising primitive proxies include starter K% (inverse), starter hard-hit allowed, lineup/offense hard-hit, lineup OPS, park runs environment, starter RA9 and WHIP;
 - proxy searches so far have not produced a stable >75% deployable pregame rule.
 
-Therefore the next Totals research should focus on predicting the future process components themselves, especially `actual_offense_score` and `actual_bullpen_vulnerability_score`, rather than endlessly retuning direct OVER/UNDER weights.
+## Superseding PREGAME research update — V3 through V10
+
+The earlier next-path checklist has now been executed and superseded by the experiments below. September 2025 was consumed as a holdout by earlier V8 research and must not be reused to tune later architectures.
+
+### V5–V9 summary
+
+- V5 manual nonlinear rules produced apparent development signals but failed September holdout.
+- V7 pair/triple/scorecard searches did not produce a validation-gate candidate with adequate sample stability.
+- V8 matchup-cross architecture produced two Jul-Aug candidates above 81% and they were frozen before opening September:
+  - `totals_v8_cross_core_plus_l1_close_disagreement_q05_v1`: Jul-Aug 26/32 = 81.25%, Sep 7/14 = 50.00%.
+  - `totals_v8_cross_core_plus_l10_close_disagreement_q05_v1`: Jul-Aug 30/37 = 81.08%, Sep 12/19 = 63.16%.
+- Both V8 candidates are `REJECTED_SEP_HOLDOUT` and must not be rescued or retuned on September.
+- V9 CART-like SQL trees also failed validation transfer.
+
+### V10 — side-specific run projection experiment
+
+Registry entry:
+
+- `totals_v10_side_runs_ridge_family_v1`
+- state: `REJECTED_VALIDATION_GATE`
+
+V10 architecture:
+
+1. predict HOME runs and AWAY runs separately;
+2. use only pregame side-specific matchup features;
+3. sum the two projected run counts;
+4. compare projected total to the real closing total;
+5. final HOME/AWAY runs are training/evaluation targets only, never features.
+
+Coverage and feature integrity:
+
+- market-covered 2025 games: 2,425
+- side rows: 4,850
+- lineup coverage: about 99.4%
+- bullpen coverage: about 99.4%
+- starter coverage: about 92.4%
+- historical weather coverage on the xyear feature surface: 0%; weather was excluded rather than fabricated/imputed
+- features per side: 46
+- normalization learned only on Apr-Jun 2025
+
+Research tables:
+
+- `mlb_totals_v10_side_base_2025_v1`
+- `mlb_totals_v10_feature_stats_2025_v1`
+- `mlb_totals_v10_side_matrix_2025_v1`
+- `mlb_totals_v10_ridge_runs_v1`
+- `mlb_totals_v10_ridge_weights_v1`
+- `mlb_totals_v10_count_runs_v1`
+- `mlb_totals_v10_count_weights_v1`
+
+Protocol:
+
+- fit: 2025-04-01 through 2025-06-30
+- selection/validation: 2025-07-01 through 2025-08-31
+- frozen gate: accuracy >=75%, worst month >=70%, n>=30, minimum monthly n>=10
+- September was not used to rescue/tune V10
+- 2026 was not opened because no V10 candidate passed the 2025 validation gate
+
+Raw-run ridge full-coverage best:
+
+- HOME model: `totals_v10_home_l1`
+- AWAY model: `totals_v10_away_l100`
+- 406/743 = 54.64%
+
+Best raw selective two-month accuracy:
+
+- HOME `totals_v10_home_l1`
+- AWAY `totals_v10_away_l10`
+- OVER when projected-total edge >=1.75
+- 22/28 = 78.57%
+- failed gate because the minimum monthly sample was only 1
+
+Best stable deployable daily policy:
+
+- HOME `totals_v10_home_l10`
+- AWAY `totals_v10_away_l0p1`
+- choose daily Top-1 UNDER by projected edge
+- 72/102 = 70.59%
+- worst month = 70.00%
+- minimum monthly n = 21
+- stable sample, but below 75% accuracy gate
+
+Count-target variants were also tested:
+
+- `LOG1P(runs)`
+- `SQRT(runs)`
+- lambdas 0.01, 0.1, 1, 10, 100 for both HOME and AWAY
+
+Best two-month count-transform near-candidate:
+
+- HOME `totals_v10_home_sqrt_l0p1`
+- AWAY `totals_v10_away_sqrt_l100`
+- OVER edge >=0.5
+- 26/34 = 76.47%
+- worst month = 75.00%
+- failed gate because minimum monthly n = 1
+
+Affine train-only calibration and Top-K daily variants were also tested. None satisfied the complete frozen gate.
+
+Final V10 decision:
+
+`REJECTED_VALIDATION_GATE`
+
+Do not open 2026 for this V10 family. Do not rescue the near-candidates by changing thresholds after seeing validation.
+
+## V6 temporary infrastructure cleanup
+
+The failed V6 nonlinear runtime experiment left no open research capability:
+
+- temporary V6 SQL RPCs were dropped; remaining temp V6 functions = 0
+- `mlb-totals-v6-train-temp` now requires JWT and returns 410 Gone
+- `mlb-totals-v6-trigger-temp` now requires JWT and returns 410 Gone
+- `mlb-totals-v6-export-temp` now requires JWT and returns 410 Gone
+
+No raw research dataset was committed or exposed.
+
+## Security / database closeout
+
+All seven V10 research tables have RLS enabled.
+
+For both `anon` and `authenticated`:
+
+- SELECT = false
+- INSERT = false
+
+Supabase security/performance advisors were checked after V10. Remaining lints are global/pre-existing schema findings; no V10-specific privilege opening or production-surface change was introduced. Research tables intentionally use RLS with no public policy.
 
 ## Current decision gate
 
 No Totals PREGAME candidate is certified for production or APOSTAR.
 
-The FULL oracle is validated as a diagnostic target but must remain `FULL_DIAGNOSTIC` only.
+The FULL oracle remains the only Totals architecture currently above the 75% target across a large sample, but it is `FULL_DIAGNOSTIC` and therefore non-deployable.
 
-Next autonomous research path:
+Current frozen conclusions:
 
-1. build process-specific PREGAME proxy models for actual offense/contact/starter/bullpen;
-2. fit/select on 2025 development only;
-3. use untouched temporal holdouts;
-4. combine predicted process proxies using the frozen FULL oracle architecture only after each proxy demonstrates genuine out-of-sample signal;
-5. do not open 2026 for model selection; use it only after a proxy/candidate is frozen;
-6. keep all work research-only until an explicit production gate.
+1. `totals_full_oracle_v1` remains a valid diagnostic teacher: 77.94% full 2025 and 75.15% external 2026.
+2. Direct PREGAME V1–V10 families have not produced a candidate that survives the complete accuracy + temporal stability + sample-size gate.
+3. V10 side-specific run projection is closed as `REJECTED_VALIDATION_GATE`.
+4. 2026 remains unopened for V10 and therefore uncontaminated by V10 model selection.
+5. No Official Picks writes, no APOSTAR activation, no production promotion and no historical Odds API credit spend occurred in the Totals closeout.
+
+Next research should be a genuinely new PREGAME information/architecture path rather than further threshold tuning of V1–V10. Highest-priority missing/weak inputs are timestamp-proven historical lineup quality, reliable weather, handedness/splits and better pregame bullpen-availability/exposure modeling. Preserve the frozen FULL oracle as the diagnostic target.
