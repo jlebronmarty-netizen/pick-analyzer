@@ -1,0 +1,111 @@
+{
+  "ambiguousCount": 0,
+  "ambiguousMappings": [],
+  "athleticsTotalsArtifact": {
+    "contract": "MLB_2025_SBR_ATHLETICS_TOTALS_V1",
+    "gameIdentities": 162,
+    "gzipSha256": "4176de0faa65189b20db20a5f55adff8e9353d8353bf183f34d3699ecd1d8ec9",
+    "oddsApiCreditsConsumed": 0,
+    "postgameFieldsCopied": 0,
+    "rows": 4016,
+    "sanitizedSha256": "4e58244aadf6be3fdbf1464c0263e2055a61e20c2c73ddced8d1d7f328f56ba7",
+    "scraperSourceCommit": "48ad82bb4ae21fe7af622762aa8ed2e81d64c0b7"
+  },
+  "canonicalRegularSeasonGames": 2430,
+  "canonicalSource": "MLB Stats API schedule identity only",
+  "contract": "MLB_TOTALS_2025_COVERAGE_AUDIT_V1",
+  "coveragePct": 99.79423868,
+  "extraMappedGamePks": [],
+  "mappedTotalGames": 2425,
+  "market": "total",
+  "missingCount": 5,
+  "missingGames": [
+    {
+      "away": "CHC",
+      "gameDate": "2025-03-27",
+      "gamePk": 778552,
+      "home": "AZ",
+      "start": "2025-03-28T02:10:00Z"
+    },
+    {
+      "away": "STL",
+      "gameDate": "2025-04-06",
+      "gamePk": 778432,
+      "home": "BOS",
+      "start": "2025-04-06T23:10:00Z"
+    },
+    {
+      "away": "AZ",
+      "gameDate": "2025-06-07",
+      "gamePk": 777612,
+      "home": "CIN",
+      "start": "2025-06-07T20:10:00Z"
+    },
+    {
+      "away": "TEX",
+      "gameDate": "2025-07-08",
+      "gamePk": 777180,
+      "home": "LAA",
+      "start": "2025-07-09T01:38:00Z"
+    },
+    {
+      "away": "ATL",
+      "gameDate": "2025-07-31",
+      "gamePk": 776928,
+      "home": "CIN",
+      "start": "2025-07-31T23:10:00Z"
+    }
+  ],
+  "notes": [
+    "Opening/closing are source semantic roles; exact historical snapshot timestamps are not claimed.",
+    "No score or target-game outcome is used in this coverage audit."
+  ],
+  "oddsApiCreditsConsumed": 0,
+  "pairedClosingCoveragePct": 99.79423868,
+  "pairedClosingTotalGames": 2425,
+  "pairedOpeningAndClosingCoveragePct": 99.79423868,
+  "pairedOpeningAndClosingTotalGames": 2425,
+  "pairedOpeningCoveragePct": 99.79423868,
+  "pairedOpeningTotalGames": 2425,
+  "postgameFieldsCopied": 0,
+  "researchOnly": true,
+  "rowsByRole": {
+    "closing": 54230,
+    "opening": 54230
+  },
+  "rowsBySource": {
+    "sportsbookreview_athletics_totals_v1": 4016,
+    "sportsbookreview_direct_scrape": 55424,
+    "sportsbookreview_multigame_retry": 8412,
+    "sportsbookreview_via_arnavsaraogi_dataset": 40608
+  },
+  "rowsBySportsbook": {
+    "bet365": 17736,
+    "bet_rivers_co": 10944,
+    "bet_rivers_ny": 6760,
+    "betmgm": 17708,
+    "caesars": 17736,
+    "draftkings": 17736,
+    "fanatics": 2104,
+    "fanduel": 17736
+  },
+  "teamAliasNormalization": {
+    "ARI": "AZ",
+    "CHW": "CWS",
+    "KCR": "KC",
+    "OAK": "ATH",
+    "SDP": "SD",
+    "SFG": "SF",
+    "TBR": "TB",
+    "WAS": "WSH",
+    "WSN": "WSH"
+  },
+  "uniqueIdentitiesBySource": {
+    "sportsbookreview_athletics_totals_v1": 162,
+    "sportsbookreview_direct_scrape": 2234,
+    "sportsbookreview_multigame_retry": 346,
+    "sportsbookreview_via_arnavsaraogi_dataset": 1694
+  },
+  "unmappedIdentities": [],
+  "unmappedIdentityCount": 0
+}
