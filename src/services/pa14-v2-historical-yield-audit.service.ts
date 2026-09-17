@@ -62,7 +62,14 @@ const COMPLETED_EVENTS = new Set([
   'walk',
 ])
 
-const RUNNER_WITNESS_EVENT = /(?:caught_stealing|pickoff)/
+const RUNNER_WITNESS_EVENT = /(?:caught_stealing|pickoff|other_out)/
+
+function isRunnerOutWitness(play: JsonObject) {
+  const eventType = String(play?.result?.eventType ?? '')
+  if (!RUNNER_WITNESS_EVENT.test(eventType)) return false
+  const runners = Array.isArray(play?.runners) ? play.runners : []
+  return runners.some((runner: JsonObject) => runner?.movement?.isOut === true)
+}
 
 const OFFICIAL_TYPE_BY_DESCRIPTION = new Map<string, 'S' | 'B' | 'X'>([
   ['called_strike', 'S'],
@@ -468,7 +475,7 @@ async function verifyUnfinishedWitnesses(unfinished: Map<number, number[]>) {
       const play = plays[atBat - 1]
       if (!play || Number(play.atBatIndex) + 1 !== atBat) throw new Error(`Unfinished witness identity mismatch ${gamePk}/${atBat}`)
       const eventType = String(play?.result?.eventType ?? '')
-      if (!RUNNER_WITNESS_EVENT.test(eventType)) throw new Error(`Uncertified unfinished witness ${gamePk}/${atBat}: ${eventType}`)
+      if (!isRunnerOutWitness(play)) throw new Error(`Uncertified unfinished witness ${gamePk}/${atBat}: ${eventType}`)
       selected.push({
         gamePk,
         atBatNumber: atBat,
@@ -521,7 +528,7 @@ function normalizeOfficialGame(feed: FetchedJson, gamePk: number) {
         })
         continue
       }
-      if (RUNNER_WITNESS_EVENT.test(resultEvent)) {
+      if (isRunnerOutWitness(play)) {
         unfinished.push(atBatNumber)
         continue
       }
@@ -548,7 +555,7 @@ function normalizeOfficialGame(feed: FetchedJson, gamePk: number) {
       })
     }
     if (!COMPLETED_EVENTS.has(resultEvent)) {
-      if (!RUNNER_WITNESS_EVENT.test(resultEvent)) throw new Error(`SOURCE_INCOMPLETE: unsupported nonterminal result ${gamePk}/${atBatNumber}/${resultEvent}`)
+      if (!isRunnerOutWitness(play)) throw new Error(`SOURCE_INCOMPLETE: unsupported nonterminal result ${gamePk}/${atBatNumber}/${resultEvent}`)
       unfinished.push(atBatNumber)
     }
   }
