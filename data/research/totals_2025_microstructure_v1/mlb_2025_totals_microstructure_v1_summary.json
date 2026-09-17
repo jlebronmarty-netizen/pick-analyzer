@@ -1,0 +1,23 @@
+{
+  "apostar_activation": false,
+  "contract": "MLB_TOTALS_MICROSTRUCTURE_2025_V1",
+  "feature_count": 37,
+  "games": 2425,
+  "odds_api_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "postgame_fields_used": 0,
+  "research_only": true,
+  "source_rows": 108460,
+  "sql_parts": [
+    "mlb_2025_totals_microstructure_v1_part_01.sql",
+    "mlb_2025_totals_microstructure_v1_part_02.sql",
+    "mlb_2025_totals_microstructure_v1_part_03.sql",
+    "mlb_2025_totals_microstructure_v1_part_04.sql",
+    "mlb_2025_totals_microstructure_v1_part_05.sql",
+    "mlb_2025_totals_microstructure_v1_part_06.sql",
+    "mlb_2025_totals_microstructure_v1_part_07.sql",
+    "mlb_2025_totals_microstructure_v1_part_08.sql",
+    "mlb_2025_totals_microstructure_v1_part_09.sql",
+    "mlb_2025_totals_microstructure_v1_part_10.sql"
+  ]
+}
