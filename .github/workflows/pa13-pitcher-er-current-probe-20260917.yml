@@ -1,0 +1,21 @@
+name: PA13 Pitcher ER Current Provider Probe 20260917
+
+on:
+  push:
+    branches:
+      - research/pa13-pitcher-er-current-probe-20260917
+
+permissions:
+  contents: read
+
+jobs:
+  pa13-current-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      PA13_PROVIDER_EVENT_ID: b9c3b50472005c67c30de323cd8a5396
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute one bounded current Pitcher ER market probe
+        run: node scripts/research/pa13-pitcher-er-current-probe.mjs
