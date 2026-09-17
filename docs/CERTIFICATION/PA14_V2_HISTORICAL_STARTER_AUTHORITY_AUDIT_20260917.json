@@ -1,0 +1,66 @@
+{
+  "schema": "PA14_V2_HISTORICAL_STARTER_AUTHORITY_AUDIT/1.0.0",
+  "scope": "TEMPORAL_AUTHORITY_AUDIT_ONLY_NOT_V2_ROW_CERTIFICATION",
+  "startedAt": "2026-09-17T23:01:03.813Z",
+  "completedAt": "2026-09-17T23:01:06.811Z",
+  "sampleGames": 4,
+  "samplePitchers": 8,
+  "foundGames": 4,
+  "foundPitchers": 8,
+  "artifact": {
+    "workflowRunId": 35284838912,
+    "artifactId": 10523003295,
+    "artifactSha256": "8cd3fa52bb9a71b55428ec41d3b8c62c8cb8da954f9d4ead4218cff18c6e2af3"
+  },
+  "rules": {
+    "maxPrestartSnapshotsCheckedPerGame": 20,
+    "exactExpectedMlbamIdsRequired": true,
+    "requestedTimeStrictlyBeforeTargetStart": true,
+    "returnedMetadataTimeStrictlyBeforeTargetStart": true,
+    "postgameActualStarterNotUsedAsTemporalAuthority": true,
+    "providerCreditsConsumed": 0,
+    "supabaseWrites": 0,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "productionEligible": false
+  },
+  "games": [
+    {
+      "canonicalGamePk": 777677,
+      "targetStart": "2025-06-01T18:10:00.000Z",
+      "snapshotTime": "2025-06-01T17:49:34.000Z",
+      "expectedPitcherIds": [663460, 672456],
+      "probableAway": {"mlbamId": 672456, "fullName": "Keider Montero"},
+      "probableHome": {"mlbamId": 663460, "fullName": "Kris Bubic"},
+      "snapshotDigest": "cd95662ccf6b396635f56e5091374467fbd807def2a112acc85bc754497d1d02"
+    },
+    {
+      "canonicalGamePk": 777678,
+      "targetStart": "2025-06-01T17:05:00.000Z",
+      "snapshotTime": "2025-06-01T16:52:28.000Z",
+      "expectedPitcherIds": [594798, 607200],
+      "probableAway": {"mlbamId": 607200, "fullName": "Erick Fedde"},
+      "probableHome": {"mlbamId": 594798, "fullName": "Jacob deGrom"},
+      "snapshotDigest": "fa4ccb1f233341dce76bf574ac29b731fb6cec0fd255a965b7b6d93a1a0e8472"
+    },
+    {
+      "canonicalGamePk": 777679,
+      "targetStart": "2025-06-01T20:10:00.000Z",
+      "snapshotTime": "2025-06-01T19:53:54.000Z",
+      "expectedPitcherIds": [669203, 680730],
+      "probableAway": {"mlbamId": 680730, "fullName": "Mitchell Parker"},
+      "probableHome": {"mlbamId": 669203, "fullName": "Corbin Burnes"},
+      "snapshotDigest": "b59067589eb5e39c09b54358cad167afb91011b15acf2d646f48ebefff85cea7"
+    },
+    {
+      "canonicalGamePk": 777680,
+      "targetStart": "2025-06-01T20:10:00.000Z",
+      "snapshotTime": "2025-06-01T19:44:49.000Z",
+      "expectedPitcherIds": [622491, 663978],
+      "probableAway": {"mlbamId": 663978, "fullName": "Chris Paddack"},
+      "probableHome": {"mlbamId": 622491, "fullName": "Luis Castillo"},
+      "snapshotDigest": "1339fb87a46aa1336bdb0602c6877019c79dd753691171d4893737440ee80a9a"
+    }
+  ],
+  "disposition": "TEMPORAL_SEAM_RECOVERABLE_IN_SAMPLE_FULL_V2_CERTIFICATION_STILL_GATED"
+}
