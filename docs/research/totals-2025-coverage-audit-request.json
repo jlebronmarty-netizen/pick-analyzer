@@ -1,0 +1,10 @@
+{
+  "authorized": true,
+  "researchOnly": true,
+  "market": "total",
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "copyPostgameFields": false,
+  "purpose": "Certify 2025 MLB pregame Totals market coverage before target/model construction."
+}
