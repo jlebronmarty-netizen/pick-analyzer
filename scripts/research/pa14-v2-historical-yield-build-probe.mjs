@@ -42,11 +42,42 @@ for (const target of targets) {
       },
     }))
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    const unfinished = message.match(/Uncertified unfinished witness (\d+)\/(\d+):/)
+    let unfinishedWitnessDiagnostic = null
+    if (unfinished) {
+      const gamePk = Number(unfinished[1])
+      const atBatNumber = Number(unfinished[2])
+      const response = await fetch(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(15000),
+      })
+      if (response.ok) {
+        const payload = await response.json()
+        const play = payload?.liveData?.plays?.allPlays?.[atBatNumber - 1] ?? null
+        unfinishedWitnessDiagnostic = play ? {
+          gamePk,
+          atBatNumber,
+          result: play.result ?? null,
+          matchup: {
+            batter: play.matchup?.batter ?? null,
+            pitcher: play.matchup?.pitcher ?? null,
+          },
+          runners: play.runners ?? null,
+          playEvents: (play.playEvents ?? []).map((event) => ({
+            details: event.details ?? null,
+            isPitch: event.isPitch ?? null,
+            count: event.count ?? null,
+          })),
+        } : { gamePk, atBatNumber, play: null }
+      }
+    }
     console.log('PA14_V2_HISTORICAL_YIELD_PROBE_RESULT=' + JSON.stringify({
       status: 'REJECTED',
       canonicalGamePk: target.canonicalGamePk,
       pitcherMlbamId: target.targetPitcherId,
-      error: error instanceof Error ? error.message : String(error),
+      error: message,
+      unfinishedWitnessDiagnostic,
       certificationCandidate: false,
       productionEligible: false,
       researchOnly: true,
