@@ -10,6 +10,7 @@ import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api
 import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-home-p15-alt-shadow.service'
 import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
 import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-settlement.service'
+import { capturePa13PitcherErForward } from '@/services/pa13-pitcher-er-forward-capture.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -76,6 +77,30 @@ async function safeAlternateHomeP15Capture(operatingDate: string, id: string) {
       officialPicksModified: false,
       apostarActivated: false,
       error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 alternate capture error'),
+    }
+  }
+}
+
+async function safePa13PitcherErForwardCapture(operatingDate: string, id: string) {
+  try {
+    return await capturePa13PitcherErForward({ operatingDate, requestId: id })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'PA13_PITCHER_ER_FORWARD_CAPTURE_FAILED_NON_BLOCKING',
+      targetDate: operatingDate,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+      shadowOnly: true,
+      productionEligible: false,
+      historicalPricingCertified: false,
+      roiCertified: false,
+      clvCertified: false,
+      evCertified: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown PA-13 Pitcher ER forward capture error'),
     }
   }
 }
@@ -179,17 +204,24 @@ async function maybeCaptureProspectiveMlbMarkets(id: string) {
 
   if (alreadyCaptured) {
     const alternateHomeP15Capture = await safeAlternateHomeP15Capture(clock.date, id)
+    const pitcherErCapture = await safePa13PitcherErForwardCapture(clock.date, id)
+    const supplementaryFailed = alternateHomeP15Capture.success === false || pitcherErCapture.success === false
     return {
-      success: alternateHomeP15Capture.success !== false,
-      status: alternateHomeP15Capture.success === false
-        ? 'CORE_CAPTURED_ALT_RETRY_FAILED_NON_BLOCKING'
-        : 'CORE_ALREADY_CAPTURED_ALT_EVALUATED',
+      success: !supplementaryFailed,
+      status: supplementaryFailed
+        ? 'CORE_CAPTURED_SUPPLEMENTARY_RETRY_FAILED_NON_BLOCKING'
+        : 'CORE_ALREADY_CAPTURED_SUPPLEMENTARY_EVALUATED',
       operatingDate: clock.date,
       completedAt: alreadyCaptured.completed_at,
-      providerCallsMade: Number(alternateHomeP15Capture.providerCallsMade ?? 0),
-      providerCreditsConsumed: Number(alternateHomeP15Capture.providerCreditsConsumed ?? 0),
+      providerCallsMade:
+        Number(alternateHomeP15Capture.providerCallsMade ?? 0) +
+        Number(pitcherErCapture.providerCallsMade ?? 0),
+      providerCreditsConsumed:
+        Number(alternateHomeP15Capture.providerCreditsConsumed ?? 0) +
+        Number(pitcherErCapture.providerCreditsConsumed ?? 0),
       researchOnly: true,
       alternateHomeP15Capture,
+      pitcherErCapture,
     }
   }
 
@@ -242,17 +274,28 @@ async function maybeCaptureProspectiveMlbMarkets(id: string) {
       requestId: id,
     })
     const alternateHomeP15Capture = await safeAlternateHomeP15Capture(clock.date, id)
+    const pitcherErCapture = await safePa13PitcherErForwardCapture(clock.date, id)
     return {
       ...coreCapture,
-      success: coreCapture.success !== false && alternateHomeP15Capture.success !== false,
+      success:
+        coreCapture.success !== false &&
+        alternateHomeP15Capture.success !== false &&
+        pitcherErCapture.success !== false,
       researchOnly: true,
-      capturePurpose: 'ML_RUNLINE_TOTALS_AND_HOME_P15_ALT_PROSPECTIVE_EVIDENCE',
+      capturePurpose: 'ML_RUNLINE_TOTALS_HOME_P15_ALT_AND_PA13_PITCHER_ER_PROSPECTIVE_EVIDENCE',
       requestedEventCount: eventPlans.length,
       officialPicksModified: false,
       apostarActivated: false,
       alternateHomeP15Capture,
-      providerCallsMade: Number(coreCapture.providerCallsMade ?? 0) + Number(alternateHomeP15Capture.providerCallsMade ?? 0),
-      providerCreditsConsumed: Number(coreCapture.providerCreditsConsumed ?? 0) + Number(alternateHomeP15Capture.providerCreditsConsumed ?? 0),
+      pitcherErCapture,
+      providerCallsMade:
+        Number(coreCapture.providerCallsMade ?? 0) +
+        Number(alternateHomeP15Capture.providerCallsMade ?? 0) +
+        Number(pitcherErCapture.providerCallsMade ?? 0),
+      providerCreditsConsumed:
+        Number(coreCapture.providerCreditsConsumed ?? 0) +
+        Number(alternateHomeP15Capture.providerCreditsConsumed ?? 0) +
+        Number(pitcherErCapture.providerCreditsConsumed ?? 0),
     }
   } catch (error) {
     // Research evidence acquisition must never block the certified Statcast,
