@@ -1,0 +1,64 @@
+{
+  "schema": "PA14_V2_HISTORICAL_STARTER_AUTHORITY_AUDIT/1.1.0",
+  "scope": "TEMPORAL_AUTHORITY_AUDIT_ONLY_NOT_V2_ROW_CERTIFICATION",
+  "scaledRun": {
+    "workflowRunId": 35285006546,
+    "artifactId": 10523378403,
+    "artifactSha256": "6b8e1933109c99fac377d18731bd0cb53e3765e7c1527269cfc25e203a13242c"
+  },
+  "samplePolicy": "4 deterministic games/month Apr-Sep 2025; retrospective layer had exactly 2 pitcher ids; both min prior starts >= 5",
+  "sampleGames": 24,
+  "samplePitchers": 48,
+  "foundGames": 23,
+  "foundPitchers": 46,
+  "gameMatchRate": 0.9583333333333334,
+  "pitcherMatchRate": 0.9583333333333334,
+  "mismatch": {
+    "canonicalGamePk": 776928,
+    "targetStart": "2025-07-31T23:10:00Z",
+    "retrospectiveExpectedPitcherIds": [
+      628452,
+      671096
+    ],
+    "archivedPregameSnapshots": [
+      {
+        "time": "2025-07-31T22:46:58Z",
+        "awayProbable": {
+          "mlbamId": 471911,
+          "fullName": "Carlos Carrasco"
+        },
+        "homeProbable": {
+          "mlbamId": 671096,
+          "fullName": "Andrew Abbott"
+        },
+        "snapshotDigest": "4c1a54f56663048910075c407cc3674e73e526ba850106ecfa7d9409fc16770e"
+      },
+      {
+        "time": "2025-07-31T19:04:14Z",
+        "awayProbable": {
+          "mlbamId": 471911,
+          "fullName": "Carlos Carrasco"
+        },
+        "homeProbable": {
+          "mlbamId": 671096,
+          "fullName": "Andrew Abbott"
+        },
+        "snapshotDigest": "9f8c85183e617672125387171937cd192f82548044a372103c1cc6c1694a3134"
+      }
+    ],
+    "disposition": "FAIL_CLOSED_TARGET_STARTER_IDENTITY_MISMATCH"
+  },
+  "rules": {
+    "exactExpectedMlbamIdsRequired": true,
+    "requestedTimeStrictlyBeforeTargetStart": true,
+    "returnedMetadataTimeStrictlyBeforeTargetStart": true,
+    "postgameActualStarterNotUsedAsTemporalAuthority": true,
+    "providerCreditsConsumed": 0,
+    "supabaseWrites": 0,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "productionEligible": false
+  },
+  "disposition": "TEMPORAL_SEAM_HIGH_YIELD_IN_SAMPLE_FULL_V2_CERTIFICATION_STILL_GATED",
+  "nextGate": "FULL_FROZEN_BUILDER_HISTORICAL_YIELD_AUDIT"
+}

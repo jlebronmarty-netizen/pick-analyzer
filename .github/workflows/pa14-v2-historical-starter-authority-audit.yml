@@ -1,0 +1,28 @@
+name: PA14 V2 Historical Starter Authority Audit
+
+on:
+  push:
+    branches:
+      - research/pa14-v2-historical-starter-authority-audit-20260917
+    paths:
+      - 'scripts/research/pa14-v2-historical-starter-authority-audit.mjs'
+      - '.github/workflows/pa14-v2-historical-starter-authority-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit archived pregame starter authority
+        run: node scripts/research/pa14-v2-historical-starter-authority-audit.mjs
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pa14-v2-historical-starter-authority-audit
+          path: tmp/pa14-v2-historical-starter-authority-audit/result.json
+          if-no-files-found: error
