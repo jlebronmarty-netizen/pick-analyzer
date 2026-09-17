@@ -1,0 +1,165 @@
+name: Excel V2 Sep17 Daily Export
+
+on:
+  push:
+    branches:
+      - excel-v2-live-odds-preview-20260915
+    paths:
+      - '.github/workflows/excel-v2-20260917-daily.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Fetch MLB / odds / props / game logs
+        shell: bash
+        env:
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+          BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY }}
+        run: |
+          cat > /tmp/export-daily.mjs <<'NODE'
+          import fs from 'node:fs'
+
+          const TARGET='2026-09-17'
+          const CUTOFF='2026-09-16'
+          const BDL='https://api.balldontlie.io/mlb/v1'
+          const MLB='https://statsapi.mlb.com/api/v1'
+
+          const sleep=(ms)=>new Promise(r=>setTimeout(r,ms))
+          const norm=(s)=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\b(jr|ii|iii|iv)\b$/,'').trim()
+
+          async function fetchJson(url, options={}, label=url) {
+            let last=''
+            for (let attempt=1; attempt<=4; attempt++) {
+              const r=await fetch(url,options)
+              if (r.ok) return await r.json()
+              last=`${r.status} ${await r.text()}`
+              if (r.status<500 && r.status!==429) break
+              await sleep(350*attempt)
+            }
+            throw new Error(`${label}: ${last}`)
+          }
+          const bdlHeaders={Authorization: process.env.BALLDONTLIE_API_KEY}
+
+          // MLB today + full 2026 history through yesterday.
+          const mlbToday=await fetchJson(`${MLB}/schedule?sportId=1&date=${TARGET}&hydrate=probablePitcher,linescore`,{},'mlbToday')
+          const mlbHistory=await fetchJson(`${MLB}/schedule?sportId=1&startDate=2026-03-25&endDate=${CUTOFF}&gameType=R&hydrate=probablePitcher,linescore`,{},'mlbHistory')
+
+          // Current core odds, only the two requested books.
+          const oddsUrl=new URL('https://api.the-odds-api.com/v4/sports/baseball_mlb/odds')
+          oddsUrl.searchParams.set('apiKey',process.env.THE_ODDS_API_KEY)
+          oddsUrl.searchParams.set('regions','us')
+          oddsUrl.searchParams.set('markets','h2h,spreads,totals')
+          oddsUrl.searchParams.set('bookmakers','fanduel,williamhill_us')
+          oddsUrl.searchParams.set('oddsFormat','american')
+          oddsUrl.searchParams.set('dateFormat','iso')
+          const oddsCore=await fetchJson(oddsUrl,{},'theOddsCore')
+
+          // BALLDONTLIE games and all live player props for today.
+          const bg=await fetchJson(`${BDL}/games?dates[]=${TARGET}&per_page=100`,{headers:bdlHeaders},'bdlGames')
+          const bdlGames=bg.data??[]
+          const props=[]
+          for (const g of bdlGames) {
+            const u=new URL(`${BDL}/odds/player_props`)
+            u.searchParams.set('game_id',String(g.id))
+            u.searchParams.append('vendors[]','fanduel')
+            u.searchParams.append('vendors[]','caesars')
+            const payload=await fetchJson(u,{headers:bdlHeaders},`props:${g.id}`)
+            for (const p of payload.data??[]) props.push({...p,_game:g})
+          }
+
+          // Resolve BDL player ids to names/teams.
+          const playerIds=[...new Set(props.map(p=>p.player_id).filter(Boolean))]
+          const bdlPlayers=[]
+          for (let i=0;i<playerIds.length;i+=80) {
+            const u=new URL(`${BDL}/players`)
+            u.searchParams.set('per_page','100')
+            for (const id of playerIds.slice(i,i+80)) u.searchParams.append('player_ids[]',String(id))
+            const payload=await fetchJson(u,{headers:bdlHeaders},'bdlPlayers')
+            bdlPlayers.push(...(payload.data??[]))
+          }
+          const bdlById=new Map(bdlPlayers.map(p=>[p.id,p]))
+
+          // MLB player roster for name crosswalk.
+          const roster=await fetchJson(`${MLB}/sports/1/players?season=2026`,{},'mlbRoster')
+          const mlbPeople=roster.people??[]
+          const byName=new Map()
+          for (const p of mlbPeople) {
+            for (const n of [p.fullName,p.firstLastName,p.nameFirstLast,`${p.useName??p.firstName??''} ${p.useLastName??p.lastName??''}`]) {
+              const k=norm(n); if (!k) continue
+              const cur=byName.get(k)
+              if (!cur || (!cur.active && p.active)) byName.set(k,p)
+            }
+          }
+
+          const mappings=[]
+          const allMlbIds=new Set()
+          for (const id of playerIds) {
+            const bp=bdlById.get(id)
+            let mp=bp ? byName.get(norm(bp.full_name)) : null
+            if (!mp && bp) {
+              try {
+                const q=new URL(`${MLB}/people/search`); q.searchParams.set('names',bp.full_name)
+                const sr=await fetchJson(q,{},`search:${bp.full_name}`)
+                const arr=sr.people??[]
+                mp=arr.find(x=>norm(x.fullName)===norm(bp.full_name))??arr[0]??null
+              } catch {}
+            }
+            if (mp) allMlbIds.add(mp.id)
+            mappings.push({bdl_player_id:id,bdl_name:bp?.full_name??null,bdl_team:bp?.team?.display_name??null,mlbam_id:mp?.id??null,mlb_name:mp?.fullName??null})
+          }
+
+          // Add today's probable starters to game-log fetches.
+          const starterIds=[]
+          for (const d of mlbToday.dates??[]) for (const g of d.games??[]) {
+            for (const side of ['away','home']) {
+              const id=g.teams?.[side]?.probablePitcher?.id
+              if (id) { starterIds.push(id); allMlbIds.add(id) }
+            }
+          }
+
+          async function hydrateGroup(group) {
+            const out={}
+            const ids=[...allMlbIds]
+            for (let i=0;i<ids.length;i+=20) {
+              const batch=ids.slice(i,i+20)
+              const u=new URL(`${MLB}/people`)
+              u.searchParams.set('personIds',batch.join(','))
+              u.searchParams.set('hydrate',`stats(group=[${group}],type=[gameLog],season=2026)`)
+              const payload=await fetchJson(u,{},`${group}Logs`)
+              for (const p of payload.people??[]) {
+                const block=(p.stats??[]).find(x=>x.type?.displayName==='gameLog' && x.group?.displayName===group)
+                out[p.id]={id:p.id,name:p.fullName,position:p.primaryPosition?.abbreviation??null,splits:(block?.splits??[]).filter(x=>x.gameType==='R' && x.date<=CUTOFF)}
+              }
+            }
+            return out
+          }
+          const hittingLogs=await hydrateGroup('hitting')
+          const pitchingLogs=await hydrateGroup('pitching')
+
+          const result={
+            date:TARGET,cutoff:CUTOFF,generated_at:new Date().toISOString(),
+            mlb_today:mlbToday,mlb_history:mlbHistory,odds_core:oddsCore,
+            bdl_games:bdlGames,props,bdl_players:bdlPlayers,mappings,
+            hitting_logs:hittingLogs,pitching_logs:pitchingLogs,
+          }
+          fs.writeFileSync('excel-v2-daily-2026-09-17.json',JSON.stringify(result))
+          fs.writeFileSync('excel-v2-daily-2026-09-17-meta.json',JSON.stringify({generated_at:result.generated_at,mlb_games:(mlbToday.dates??[]).flatMap(d=>d.games??[]).length,bdl_games:bdlGames.length,props:props.length,bdl_players:bdlPlayers.length,mapped:mappings.filter(x=>x.mlbam_id).length,unmapped:mappings.filter(x=>!x.mlbam_id).map(x=>x.bdl_name)},null,2))
+          console.log(JSON.stringify({games:(mlbToday.dates??[]).flatMap(d=>d.games??[]).length,props:props.length,players:bdlPlayers.length,mapped:mappings.filter(x=>x.mlbam_id).length,unmapped:mappings.filter(x=>!x.mlbam_id).length}))
+          NODE
+          node /tmp/export-daily.mjs
+
+      - name: Upload Sep17 daily artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-v2-daily-2026-09-17
+          path: |
+            excel-v2-daily-2026-09-17.json
+            excel-v2-daily-2026-09-17-meta.json
+          retention-days: 1
+          if-no-files-found: error
