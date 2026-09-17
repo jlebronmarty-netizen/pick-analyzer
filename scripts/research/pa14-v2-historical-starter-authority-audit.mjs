@@ -4,10 +4,30 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const SAMPLE = [
-  { gamePk: 777677, expectedPitcherIds: [663460, 672456] },
-  { gamePk: 777678, expectedPitcherIds: [594798, 607200] },
-  { gamePk: 777679, expectedPitcherIds: [669203, 680730] },
-  { gamePk: 777680, expectedPitcherIds: [622491, 663978] },
+  { gamePk: 778105, expectedPitcherIds: [650633, 694738] },
+  { gamePk: 778106, expectedPitcherIds: [543135, 622663] },
+  { gamePk: 778112, expectedPitcherIds: [571510, 669387] },
+  { gamePk: 778115, expectedPitcherIds: [471911, 700249] },
+  { gamePk: 777691, expectedPitcherIds: [656302, 663559] },
+  { gamePk: 777694, expectedPitcherIds: [608379, 669373] },
+  { gamePk: 777695, expectedPitcherIds: [641927, 682243] },
+  { gamePk: 777696, expectedPitcherIds: [647336, 694297] },
+  { gamePk: 777291, expectedPitcherIds: [657277, 669194] },
+  { gamePk: 777296, expectedPitcherIds: [656876, 682052] },
+  { gamePk: 777297, expectedPitcherIds: [608379, 669923] },
+  { gamePk: 777299, expectedPitcherIds: [571760, 607200] },
+  { gamePk: 776929, expectedPitcherIds: [642547, 684007] },
+  { gamePk: 776923, expectedPitcherIds: [669923, 677958] },
+  { gamePk: 776927, expectedPitcherIds: [573186, 686752] },
+  { gamePk: 776928, expectedPitcherIds: [628452, 671096] },
+  { gamePk: 776507, expectedPitcherIds: [434378, 608372] },
+  { gamePk: 776508, expectedPitcherIds: [594798, 669372] },
+  { gamePk: 776509, expectedPitcherIds: [694297, 808967] },
+  { gamePk: 776510, expectedPitcherIds: [667755, 686613] },
+  { gamePk: 776136, expectedPitcherIds: [676664, 694297] },
+  { gamePk: 776137, expectedPitcherIds: [657277, 685326] },
+  { gamePk: 776138, expectedPitcherIds: [666142, 669620] },
+  { gamePk: 776139, expectedPitcherIds: [477132, 682243] },
 ]
 
 const MLB_BASE = 'https://statsapi.mlb.com'
