@@ -108,7 +108,8 @@ export async function GET() {
       )
     }
 
-    rows.push(...((data ?? []) as Record<string, unknown>[]))
+    const pageRows = (data ?? []) as unknown as Record<string, unknown>[]
+    rows.push(...pageRows)
     if (!data || data.length < PAGE_SIZE) break
   }
 
