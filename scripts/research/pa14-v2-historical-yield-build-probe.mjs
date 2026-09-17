@@ -14,32 +14,19 @@ if (
 const { auditHistoricalPa14V2Target } = await import('../../src/services/pa14-v2-historical-yield-audit.service.ts')
 
 const targets = [
-  { canonicalGamePk: 778105, expectedPitcherIds: [650633, 694738], targetPitcherId: 650633 },
-  { canonicalGamePk: 777291, expectedPitcherIds: [657277, 669194], targetPitcherId: 657277 },
-  { canonicalGamePk: 776136, expectedPitcherIds: [676664, 694297], targetPitcherId: 676664 },
+  { canonicalGamePk: 778198, expectedPitcherIds: [642547, 657277], targetPitcherId: 642547 },
+  { canonicalGamePk: 778198, expectedPitcherIds: [642547, 657277], targetPitcherId: 657277 },
+  { canonicalGamePk: 778094, expectedPitcherIds: [694477, 680732], targetPitcherId: 680732 },
+  { canonicalGamePk: 778095, expectedPitcherIds: [656557, 621244], targetPitcherId: 621244 },
+  { canonicalGamePk: 777677, expectedPitcherIds: [672456, 663460], targetPitcherId: 672456 },
+  { canonicalGamePk: 777677, expectedPitcherIds: [672456, 663460], targetPitcherId: 663460 },
+  { canonicalGamePk: 777281, expectedPitcherIds: [547179, 676106], targetPitcherId: 676106 },
+  { canonicalGamePk: 777285, expectedPitcherIds: [676467, 801403], targetPitcherId: 676467 },
+  { canonicalGamePk: 776906, expectedPitcherIds: [669461, 601713], targetPitcherId: 669461 },
+  { canonicalGamePk: 776917, expectedPitcherIds: [500779, 680730], targetPitcherId: 680730 },
+  { canonicalGamePk: 776497, expectedPitcherIds: [806960, 543243], targetPitcherId: 543243 },
+  { canonicalGamePk: 776500, expectedPitcherIds: [592836, 694819], targetPitcherId: 592836 },
 ]
-
-const velocityDiagnosticResponse = await fetch('https://statsapi.mlb.com/api/v1.1/game/778303/feed/live', {
-  cache: 'no-store',
-  signal: AbortSignal.timeout(15000),
-})
-if (velocityDiagnosticResponse.ok) {
-  const velocityDiagnosticFeed = await velocityDiagnosticResponse.json()
-  const velocityDiagnosticPlay = velocityDiagnosticFeed?.liveData?.plays?.allPlays?.[72] ?? null
-  console.log('PA14_V2_VELOCITY_DIAGNOSTIC=' + JSON.stringify({
-    gamePk: 778303,
-    atBatNumber: 73,
-    result: velocityDiagnosticPlay?.result ?? null,
-    pitches: (velocityDiagnosticPlay?.playEvents ?? [])
-      .filter((event) => event?.isPitch === true)
-      .map((event) => ({
-        pitchNumber: event?.pitchNumber ?? null,
-        description: event?.details?.description ?? null,
-        code: event?.details?.code ?? null,
-        startSpeed: event?.pitchData?.startSpeed ?? null,
-      })),
-  }))
-}
 
 for (const target of targets) {
   try {
