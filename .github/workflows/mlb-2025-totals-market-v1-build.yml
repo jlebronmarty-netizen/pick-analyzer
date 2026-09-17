@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/mlb-2025-totals-market-v1-build.yml'
       - 'scripts/research/build_mlb_totals_2025_market_v1.py'
+      - 'scripts/research/build_mlb_totals_2025_market_v1_sanitized.py'
       - 'data/research/mlb_2025_sbr_open_close.jsonl.gz'
       - 'data/research/mlb_2025_sbr_gap_open_close.jsonl.gz'
       - 'data/research/mlb_2025_sbr_multigame_retry.jsonl.gz'
@@ -32,8 +33,8 @@ jobs:
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "research/totals-2025-historical-backfill"
 
-      - name: Build compact Totals V1 market layer
-        run: python3 scripts/research/build_mlb_totals_2025_market_v1.py
+      - name: Build sanitized compact Totals V1 market layer
+        run: python3 scripts/research/build_mlb_totals_2025_market_v1_sanitized.py
 
       - name: Validate generated research artifacts
         shell: bash
@@ -42,6 +43,18 @@ jobs:
           test -d data/research/totals_2025_market_v1
           find data/research/totals_2025_market_v1 -maxdepth 1 -type f -print | sort
           ! grep -R -E 'Official Picks|APOSTAR' data/research/totals_2025_market_v1
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('data/research/totals_2025_market_v1/mlb_2025_totals_market_v1_build_summary.json')
+          s = json.loads(p.read_text())
+          assert s['research_only'] is True
+          assert s['official_picks_writes'] == 0
+          assert s['apostar_activation'] is False
+          assert s['odds_api_credits_consumed'] == 0
+          assert s['invalid_consensus_price_rows'] == 0
+          assert s['compact_market_games'] >= 2425
+          PY
 
       - name: Commit generated artifacts
         shell: bash
@@ -54,5 +67,5 @@ jobs:
             echo "No generated changes to commit"
             exit 0
           fi
-          git commit -m "research(totals): build 2025 compact market artifacts"
+          git commit -m "research(totals): rebuild compact market with price sanitation"
           git push origin HEAD:research/totals-2025-historical-backfill
