@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "node --loader ./scripts/local-ts-loader.mjs scripts/research/pa14-v2-historical-yield-build-probe.mjs && next build --webpack",
     "start": "next start",
     "test:product-experience": "playwright test --config=playwright.config.ts",
     "lint": "eslint",
