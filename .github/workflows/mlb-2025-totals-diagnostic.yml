@@ -1,0 +1,69 @@
+name: MLB 2025 Totals Coverage Diagnostic
+on:
+  push:
+    branches: [research/totals-2025-historical-backfill]
+    paths: ['docs/research/totals-2025-diagnostic-request.json']
+permissions:
+  contents: write
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Diagnose source and matching stages
+        shell: bash
+        run: |
+          set +e
+          python3 - <<'PY'
+          import os,json,gzip,urllib.request,traceback,collections,datetime
+          out={'contract':'MLB_TOTALS_2025_DIAGNOSTIC_V1','researchOnly':True,'oddsApiCreditsConsumed':0,'stages':[]}
+          def stage(name,fn):
+            try:
+              v=fn(); out['stages'].append({'stage':name,'ok':True,'result':v}); return v
+            except Exception as e:
+              out['stages'].append({'stage':name,'ok':False,'type':type(e).__name__,'message':str(e),'traceback':traceback.format_exc()[-4000:]}); return None
+          paths=['data/research/mlb_2025_sbr_open_close.jsonl.gz','data/research/mlb_2025_sbr_gap_open_close.jsonl.gz','data/research/mlb_2025_sbr_multigame_retry.jsonl.gz']
+          stage('files_exist',lambda:{p:os.path.exists(p) for p in paths})
+          def scan():
+            z={}
+            for p in paths:
+              n=t=0; sample=None
+              with gzip.open(p,'rt',encoding='utf-8') as f:
+                for line in f:
+                  n+=1; r=json.loads(line)
+                  if sample is None: sample={k:r.get(k) for k in ('sourceDate','sourceStartDate','awayTeam','homeTeam','market','snapshotRole','outcome','line','price')}
+                  if r.get('market')=='total': t+=1
+              z[p]={'rows':n,'totalRows':t,'sample':sample}
+            return z
+          stage('scan_gzip_sources',scan)
+          def sched():
+            u='https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2025-03-27&endDate=2025-09-28&gameType=R&hydrate=team'
+            with urllib.request.urlopen(u,timeout=60) as r:d=json.load(r)
+            games=[g for day in d.get('dates',[]) for g in day.get('games',[])]
+            sample=[]
+            for g in games[:3]:
+              sample.append({'gamePk':g.get('gamePk'),'gameDate':g.get('gameDate'),'homeTeam':((g.get('teams') or {}).get('home') or {}).get('team'),'awayTeam':((g.get('teams') or {}).get('away') or {}).get('team')})
+            return {'dates':len(d.get('dates',[])),'games':len(games),'sample':sample}
+          stage('mlb_schedule',sched)
+          def names():
+            u='https://statsapi.mlb.com/api/v1/teams?sportId=1&season=2025'
+            with urllib.request.urlopen(u,timeout=60) as r:d=json.load(r)
+            return {str(t.get('id')):{'name':t.get('name'),'abbreviation':t.get('abbreviation'),'teamCode':t.get('teamCode'),'fileCode':t.get('fileCode')} for t in d.get('teams',[])}
+          stage('mlb_team_metadata',names)
+          os.makedirs('data/research',exist_ok=True)
+          with open('data/research/mlb_2025_totals_diagnostic.json','w') as f:json.dump(out,f,indent=2,sort_keys=True)
+          PY
+      - name: Commit diagnostic regardless of stage failures
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          test -f data/research/mlb_2025_totals_diagnostic.json
+          git add data/research/mlb_2025_totals_diagnostic.json
+          git commit -m 'research(totals): record 2025 coverage diagnostic' || exit 0
+          git pull --rebase origin research/totals-2025-historical-backfill
+          git push origin HEAD:research/totals-2025-historical-backfill
