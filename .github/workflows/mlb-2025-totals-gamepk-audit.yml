@@ -1,0 +1,272 @@
+name: MLB 2025 Totals GamePk Audit
+
+on:
+  push:
+    branches:
+      - research/runline-2025-historical-backfill
+    paths:
+      - 'docs/research/totals-2025-gamepk-audit-request.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mlb-2025-totals-gamepk-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate zero-credit research request
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json
+          r=json.load(open('docs/research/totals-2025-gamepk-audit-request.json'))
+          checks=[
+            (r.get('authorized') is True,'authorized'),
+            (r.get('researchOnly') is True,'researchOnly'),
+            (r.get('expectedOddsApiCredits') == 0,'expectedOddsApiCredits'),
+            (r.get('officialPicksWritesAllowed') is False,'officialPicksWritesAllowed'),
+            (r.get('apostarActivationAllowed') is False,'apostarActivationAllowed'),
+            (r.get('market') == 'total','market'),
+            (r.get('season') == 2025,'season'),
+          ]
+          bad=[name for ok,name in checks if not ok]
+          if bad: raise SystemExit('INVALID_REQUEST:'+','.join(bad))
+          print('PASS: research-only, zero-credit Totals audit request.')
+          PY
+
+      - name: Audit SBR Totals coverage and derive canonical opening/closing market rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import collections, datetime as dt, gzip, json, math, os, statistics, urllib.request
+
+          artifacts=[
+            ('sportsbookreview_via_arnavsaraogi_dataset','sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0',1,'data/research/mlb_2025_sbr_open_close.jsonl.gz'),
+            ('sportsbookreview_direct_scrape','sportsbookreview_direct_2025_gap_919fc00c',2,'data/research/mlb_2025_sbr_gap_open_close.jsonl.gz'),
+            ('sportsbookreview_multigame_retry','sportsbookreview_multigame_retry_2025_5cda5c11',3,'data/research/mlb_2025_sbr_multigame_retry.jsonl.gz'),
+          ]
+          for _,_,_,p in artifacts:
+            if not os.path.exists(p): raise SystemExit(f'MISSING_ARTIFACT:{p}')
+
+          aliases={'AZ':'ARI','OAK':'ATH','CWS':'CHW','WAS':'WSH','KCR':'KC','SFG':'SF','SDP':'SD','TBR':'TB','WSN':'WSH'}
+          def norm(x):
+            x=str(x or '').strip().upper()
+            return aliases.get(x,x)
+
+          def get_json(url):
+            req=urllib.request.Request(url,headers={'User-Agent':'pick-analyzer-research/1.0'})
+            with urllib.request.urlopen(req,timeout=90) as r:
+              return json.load(r)
+
+          teams=get_json('https://statsapi.mlb.com/api/v1/teams?sportId=1&season=2025').get('teams',[])
+          team_abbr={int(t['id']):norm(t.get('abbreviation')) for t in teams if t.get('id') and t.get('abbreviation')}
+          sched=get_json('https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=R&startDate=2025-03-18&endDate=2025-09-28')
+          games=[]
+          for d in sched.get('dates',[]):
+            for g in d.get('games',[]):
+              home_id=((g.get('teams') or {}).get('home') or {}).get('team',{}).get('id')
+              away_id=((g.get('teams') or {}).get('away') or {}).get('team',{}).get('id')
+              if not home_id or not away_id: continue
+              games.append({
+                'game_pk':int(g['gamePk']),
+                'game_date':str(g.get('officialDate') or d.get('date')),
+                'home_team':team_abbr.get(int(home_id),str(home_id)),
+                'away_team':team_abbr.get(int(away_id),str(away_id)),
+                'game_datetime':str(g.get('gameDate') or ''),
+              })
+          # Deduplicate defensively by game_pk.
+          by_pk={g['game_pk']:g for g in games}
+          games=list(by_pk.values())
+          games.sort(key=lambda x:(x['game_date'],x['game_datetime'],x['game_pk']))
+
+          exact=collections.defaultdict(list)
+          matchup=collections.defaultdict(list)
+          for g in games:
+            exact[(g['game_date'],g['away_team'],g['home_team'],g['game_datetime'])].append(g)
+            matchup[(g['game_date'],g['away_team'],g['home_team'])].append(g)
+
+          def parse_ts(s):
+            if not s: return None
+            try: return dt.datetime.fromisoformat(str(s).replace('Z','+00:00'))
+            except Exception: return None
+
+          identities={}
+          rows=[]
+          raw_counts=collections.Counter()
+          for source,registry,precedence,path in artifacts:
+            with gzip.open(path,'rt',encoding='utf-8') as f:
+              for line in f:
+                r=json.loads(line)
+                if r.get('market')!='total': continue
+                r['homeTeam']=norm(r.get('homeTeam')); r['awayTeam']=norm(r.get('awayTeam'))
+                r['_source']=source; r['_registry']=registry; r['_precedence']=precedence
+                raw_counts[(source,r.get('snapshotRole'))]+=1
+                ident=(str(r.get('sourceDate')),r['awayTeam'],r['homeTeam'],str(r.get('sourceStartDate') or ''))
+                identities.setdefault(ident,{'date':ident[0],'away':ident[1],'home':ident[2],'start':ident[3]})
+                rows.append(r)
+
+          unmapped=[]; ambiguous=[]; mapped_identity={}
+          for ident,obj in identities.items():
+            date,away,home,start=ident
+            candidates=matchup.get((date,away,home),[])
+            if not candidates:
+              # Source date can occasionally differ around special-site/time-zone games.
+              st=parse_ts(start)
+              near=[]
+              if st:
+                for delta in (-1,1):
+                  d=(dt.date.fromisoformat(date)+dt.timedelta(days=delta)).isoformat()
+                  near.extend(matchup.get((d,away,home),[]))
+              candidates=near
+            if len(candidates)==1:
+              mapped_identity[ident]=candidates[0]['game_pk']; continue
+            st=parse_ts(start)
+            if candidates and st:
+              scored=[]
+              for c in candidates:
+                ct=parse_ts(c['game_datetime'])
+                if ct: scored.append((abs((ct-st).total_seconds()),c))
+              scored.sort(key=lambda x:x[0])
+              if scored and (len(scored)==1 or scored[0][0] < scored[1][0]) and scored[0][0] <= 18*3600:
+                mapped_identity[ident]=scored[0][1]['game_pk']; continue
+            payload={'identity':obj,'candidateGamePks':[c['game_pk'] for c in candidates]}
+            (ambiguous if candidates else unmapped).append(payload)
+
+          mapped_rows=[]
+          for r in rows:
+            ident=(str(r.get('sourceDate')),r['awayTeam'],r['homeTeam'],str(r.get('sourceStartDate') or ''))
+            pk=mapped_identity.get(ident)
+            if pk:
+              x=dict(r);x['game_pk']=pk;mapped_rows.append(x)
+
+          # For each source/game/role/book require an OVER+UNDER pair at the same total.
+          pair_map=collections.defaultdict(lambda:collections.defaultdict(dict))
+          for r in mapped_rows:
+            key=(r['_source'],r['_registry'],r['_precedence'],r['game_pk'],r.get('snapshotRole'),str(r.get('sportsbook') or ''))
+            line=float(r['line']); outcome=str(r.get('outcome') or '').lower()
+            if outcome not in {'over','under'}: continue
+            pair_map[key][line][outcome]=float(r['price'])
+
+          paired=collections.defaultdict(list)
+          for key,line_map in pair_map.items():
+            source,registry,precedence,pk,role,book=key
+            for total_line,sides in line_map.items():
+              if 'over' in sides and 'under' in sides:
+                paired[(source,registry,precedence,pk,role)].append({'sportsbook':book,'line':total_line,'over_price':sides['over'],'under_price':sides['under']})
+
+          def choose_modal(quotes):
+            if not quotes:return None
+            counts=collections.Counter(q['line'] for q in quotes)
+            maxn=max(counts.values())
+            modes=sorted([line for line,n in counts.items() if n==maxn])
+            # Tie-break by closeness to the median across books, then lower line for deterministic output.
+            med=statistics.median([q['line'] for q in quotes])
+            chosen=sorted(modes,key=lambda x:(abs(x-med),x))[0]
+            qs=[q for q in quotes if q['line']==chosen]
+            return {
+              'line':chosen,
+              'over_price_avg':sum(q['over_price'] for q in qs)/len(qs),
+              'under_price_avg':sum(q['under_price'] for q in qs)/len(qs),
+              'books':len(qs),
+              'quote_rows':len(qs)*2,
+              'sportsbooks':sorted(q['sportsbook'] for q in qs),
+            }
+
+          # Source precedence independently for opening/closing, then combine by game.
+          derived={}
+          source_coverage=collections.Counter()
+          for g in games:
+            pk=g['game_pk']; rec={**g}
+            any_role=False
+            for role in ('opening','closing'):
+              selected=None
+              for source,registry,precedence,_ in artifacts:
+                q=choose_modal(paired.get((source,registry,precedence,pk,role),[]))
+                if q:
+                  selected={'source':source,'source_registry_id':registry,'source_precedence':precedence,**q}
+                  break
+              rec[role]=selected
+              if selected:
+                any_role=True; source_coverage[(role,selected['source'])]+=1
+            if any_role: derived[pk]=rec
+
+          covered_open={pk for pk,r in derived.items() if r.get('opening')}
+          covered_close={pk for pk,r in derived.items() if r.get('closing')}
+          covered_both=covered_open & covered_close
+          all_pks=set(by_pk)
+          missing_open=sorted(all_pks-covered_open)
+          missing_close=sorted(all_pks-covered_close)
+
+          # Write one line per game; missing roles are explicit nulls.
+          os.makedirs('data/research',exist_ok=True)
+          jsonl_path='data/research/mlb_2025_totals_market_gamepk_v1.jsonl'
+          with open(jsonl_path,'w',encoding='utf-8') as f:
+            for g in games:
+              rec=derived.get(g['game_pk'],{**g,'opening':None,'closing':None})
+              f.write(json.dumps(rec,separators=(',',':'))+'\n')
+
+          def game_desc(pk):
+            g=by_pk[pk]
+            return {'game_pk':pk,'game_date':g['game_date'],'away_team':g['away_team'],'home_team':g['home_team'],'game_datetime':g['game_datetime']}
+
+          line_buckets=collections.Counter()
+          for pk in covered_open:
+            line_buckets[str(derived[pk]['opening']['line'])]+=1
+
+          audit={
+            'contract':'MLB_TOTALS_2025_GAMEPK_COVERAGE_AUDIT_V1',
+            'researchOnly':True,
+            'oddsApiCreditsConsumed':0,
+            'canonicalScheduleGames':len(games),
+            'canonicalScheduleExpected':2430,
+            'sourceArtifacts':[{'source':a[0],'sourceRegistryId':a[1],'precedence':a[2],'path':a[3]} for a in artifacts],
+            'totalRawRows':len(rows),
+            'mappedRawRows':len(mapped_rows),
+            'sourceIdentityCount':len(identities),
+            'mappedIdentityCount':len(mapped_identity),
+            'unmappedIdentities':unmapped,
+            'ambiguousIdentities':ambiguous,
+            'openingCoveredGames':len(covered_open),
+            'closingCoveredGames':len(covered_close),
+            'openingAndClosingCoveredGames':len(covered_both),
+            'openingCoveragePct':round(100*len(covered_open)/len(games),6) if games else 0,
+            'closingCoveragePct':round(100*len(covered_close)/len(games),6) if games else 0,
+            'missingOpeningGames':[game_desc(pk) for pk in missing_open],
+            'missingClosingGames':[game_desc(pk) for pk in missing_close],
+            'sourceCoverage':{f'{role}:{source}':n for (role,source),n in sorted(source_coverage.items())},
+            'openingLineBuckets':dict(sorted(line_buckets.items(),key=lambda x:float(x[0]))),
+            'marketPolicy':'SOURCE_PRECEDENCE_THEN_PAIRED_SPORTSBOOK_MODAL_TOTAL; opening and closing preserved separately; tie-break modal by distance to cross-book median then lower line',
+            'leakagePolicy':'Only pregame market identity/line/price fields are read from SBR artifacts. No final runs or game outcomes are present in the source artifacts used by this audit.',
+          }
+          audit_path='data/research/mlb_2025_totals_gamepk_audit_v1.json'
+          with open(audit_path,'w',encoding='utf-8') as f: json.dump(audit,f,indent=2,sort_keys=True)
+          print(json.dumps({k:audit[k] for k in ['canonicalScheduleGames','totalRawRows','mappedRawRows','sourceIdentityCount','mappedIdentityCount','openingCoveredGames','closingCoveredGames','openingAndClosingCoveredGames','openingCoveragePct','closingCoveragePct']},indent=2))
+          if len(games)!=2430:
+            raise SystemExit(f'CANONICAL_SCHEDULE_COUNT_MISMATCH:{len(games)}')
+          PY
+
+      - name: Commit Totals audit evidence safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/research/mlb_2025_totals_gamepk_audit_v1.json data/research/mlb_2025_totals_market_gamepk_v1.jsonl
+          if git diff --cached --quiet; then
+            echo 'Totals audit artifacts already current.'
+            exit 0
+          fi
+          git commit -m 'research(totals): audit 2025 SBR coverage by game_pk'
+          git pull --rebase origin research/runline-2025-historical-backfill
+          git push origin HEAD:research/runline-2025-historical-backfill
