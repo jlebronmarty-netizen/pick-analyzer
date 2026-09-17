@@ -1,0 +1,2474 @@
+{
+  "ambiguousIdentities": [
+    {
+      "candidateGamePks": [
+        778185,
+        778156,
+        778170
+      ],
+      "identity": {
+        "away": "TOR",
+        "date": "2025-04-26",
+        "home": "NYY",
+        "start": "2025-04-26T21:25:00+00:00"
+      }
+    },
+    {
+      "candidateGamePks": [
+        777861,
+        777829
+      ],
+      "identity": {
+        "away": "CLE",
+        "date": "2025-05-20",
+        "home": "MIN",
+        "start": "2025-05-20T22:10:00+00:00"
+      }
+    }
+  ],
+  "canonicalScheduleExpected": 2430,
+  "canonicalScheduleGames": 2430,
+  "closingCoveragePct": 93.004115,
+  "closingCoveredGames": 2260,
+  "contract": "MLB_TOTALS_2025_GAMEPK_COVERAGE_AUDIT_V1",
+  "leakagePolicy": "Only pregame market identity/line/price fields are read from SBR artifacts. No final runs or game outcomes are present in the source artifacts used by this audit.",
+  "mappedIdentityCount": 2265,
+  "mappedRawRows": 104372,
+  "marketPolicy": "SOURCE_PRECEDENCE_THEN_PAIRED_SPORTSBOOK_MODAL_TOTAL; opening and closing preserved separately; tie-break modal by distance to cross-book median then lower line",
+  "missingClosingGames": [
+    {
+      "away_team": "KC",
+      "game_date": "2025-09-28",
+      "game_datetime": "2025-09-28T19:05:00Z",
+      "game_pk": 776138,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "KC",
+      "game_date": "2025-09-27",
+      "game_datetime": "2025-09-28T02:05:00Z",
+      "game_pk": 776154,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "KC",
+      "game_date": "2025-09-26",
+      "game_datetime": "2025-09-27T02:05:00Z",
+      "game_pk": 776172,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-09-25",
+      "game_datetime": "2025-09-25T19:35:00Z",
+      "game_pk": 776182,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-09-24",
+      "game_datetime": "2025-09-25T02:05:00Z",
+      "game_pk": 776195,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-09-23",
+      "game_datetime": "2025-09-24T02:05:00Z",
+      "game_pk": 776208,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-21",
+      "game_datetime": "2025-09-21T17:35:00Z",
+      "game_pk": 776234,
+      "home_team": "PIT"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-20",
+      "game_datetime": "2025-09-20T22:40:00Z",
+      "game_pk": 776249,
+      "home_team": "PIT"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-19",
+      "game_datetime": "2025-09-19T22:40:00Z",
+      "game_pk": 776266,
+      "home_team": "PIT"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-18",
+      "game_datetime": "2025-09-18T17:35:00Z",
+      "game_pk": 776281,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-17",
+      "game_datetime": "2025-09-17T22:45:00Z",
+      "game_pk": 776299,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-16",
+      "game_datetime": "2025-09-16T22:45:00Z",
+      "game_pk": 776310,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-09-14",
+      "game_datetime": "2025-09-14T20:05:00Z",
+      "game_pk": 776327,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-09-13",
+      "game_datetime": "2025-09-14T02:05:00Z",
+      "game_pk": 776340,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-09-12",
+      "game_datetime": "2025-09-13T02:05:00Z",
+      "game_pk": 776358,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BOS",
+      "game_date": "2025-09-10",
+      "game_datetime": "2025-09-10T19:35:00Z",
+      "game_pk": 776379,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BOS",
+      "game_date": "2025-09-09",
+      "game_datetime": "2025-09-10T02:05:00Z",
+      "game_pk": 776396,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BOS",
+      "game_date": "2025-09-08",
+      "game_datetime": "2025-09-09T02:05:00Z",
+      "game_pk": 776410,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-07",
+      "game_datetime": "2025-09-07T20:07:00Z",
+      "game_pk": 776414,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-06",
+      "game_datetime": "2025-09-07T01:38:00Z",
+      "game_pk": 776430,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-05",
+      "game_datetime": "2025-09-06T01:38:00Z",
+      "game_pk": 776444,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-03",
+      "game_datetime": "2025-09-03T23:45:00Z",
+      "game_pk": 776470,
+      "home_team": "STL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-02",
+      "game_datetime": "2025-09-02T23:45:00Z",
+      "game_pk": 776483,
+      "home_team": "STL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-01",
+      "game_datetime": "2025-09-01T18:15:00Z",
+      "game_pk": 776497,
+      "home_team": "STL"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-08-31",
+      "game_datetime": "2025-08-31T20:05:00Z",
+      "game_pk": 776508,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-08-30",
+      "game_datetime": "2025-08-31T02:05:00Z",
+      "game_pk": 776524,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-08-29",
+      "game_datetime": "2025-08-30T02:05:00Z",
+      "game_pk": 776538,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "DET",
+      "game_date": "2025-08-27",
+      "game_datetime": "2025-08-28T02:05:00Z",
+      "game_pk": 776559,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "DET",
+      "game_date": "2025-08-26",
+      "game_datetime": "2025-08-27T02:05:00Z",
+      "game_pk": 776573,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "DET",
+      "game_date": "2025-08-25",
+      "game_datetime": "2025-08-26T02:05:00Z",
+      "game_pk": 776590,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-24",
+      "game_datetime": "2025-08-24T20:10:00Z",
+      "game_pk": 776602,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-23",
+      "game_datetime": "2025-08-24T01:40:00Z",
+      "game_pk": 776620,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-22",
+      "game_datetime": "2025-08-23T02:10:00Z",
+      "game_pk": 776638,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-21",
+      "game_datetime": "2025-08-21T17:10:00Z",
+      "game_pk": 776653,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-20",
+      "game_datetime": "2025-08-20T23:40:00Z",
+      "game_pk": 776665,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-19",
+      "game_datetime": "2025-08-19T23:40:00Z",
+      "game_pk": 776674,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-08-17",
+      "game_datetime": "2025-08-17T20:05:00Z",
+      "game_pk": 776699,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-08-16",
+      "game_datetime": "2025-08-17T02:05:00Z",
+      "game_pk": 776718,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-08-15",
+      "game_datetime": "2025-08-16T02:05:00Z",
+      "game_pk": 776734,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TB",
+      "game_date": "2025-08-13",
+      "game_datetime": "2025-08-14T02:05:00Z",
+      "game_pk": 776751,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TB",
+      "game_date": "2025-08-12",
+      "game_datetime": "2025-08-13T02:05:00Z",
+      "game_pk": 776762,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TB",
+      "game_date": "2025-08-11",
+      "game_datetime": "2025-08-12T02:05:00Z",
+      "game_pk": 776787,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-10",
+      "game_datetime": "2025-08-10T17:35:00Z",
+      "game_pk": 776804,
+      "home_team": "BAL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-09",
+      "game_datetime": "2025-08-09T23:05:00Z",
+      "game_pk": 776811,
+      "home_team": "BAL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-08",
+      "game_datetime": "2025-08-08T23:05:00Z",
+      "game_pk": 776831,
+      "home_team": "BAL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-07",
+      "game_datetime": "2025-08-07T16:05:00Z",
+      "game_pk": 776837,
+      "home_team": "WSH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-06",
+      "game_datetime": "2025-08-06T22:45:00Z",
+      "game_pk": 776850,
+      "home_team": "WSH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-05",
+      "game_datetime": "2025-08-05T22:45:00Z",
+      "game_pk": 776865,
+      "home_team": "WSH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-08-03",
+      "game_datetime": "2025-08-03T20:05:00Z",
+      "game_pk": 776881,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-08-02",
+      "game_datetime": "2025-08-03T02:05:00Z",
+      "game_pk": 776899,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-08-01",
+      "game_datetime": "2025-08-02T02:05:00Z",
+      "game_pk": 776914,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-31",
+      "game_datetime": "2025-07-31T23:10:00Z",
+      "game_pk": 776928,
+      "home_team": "CIN"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-07-30",
+      "game_datetime": "2025-07-31T02:05:00Z",
+      "game_pk": 776930,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-07-29",
+      "game_datetime": "2025-07-30T02:05:00Z",
+      "game_pk": 776944,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-07-28",
+      "game_datetime": "2025-07-29T02:05:00Z",
+      "game_pk": 776957,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-27",
+      "game_datetime": "2025-07-27T18:10:00Z",
+      "game_pk": 776976,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-26",
+      "game_datetime": "2025-07-26T23:10:00Z",
+      "game_pk": 776991,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-25",
+      "game_datetime": "2025-07-26T00:10:00Z",
+      "game_pk": 777007,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-24",
+      "game_datetime": "2025-07-25T00:10:00Z",
+      "game_pk": 777025,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-23",
+      "game_datetime": "2025-07-24T00:05:00Z",
+      "game_pk": 777033,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-22",
+      "game_datetime": "2025-07-23T00:05:00Z",
+      "game_pk": 777043,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-21",
+      "game_datetime": "2025-07-22T00:05:00Z",
+      "game_pk": 777057,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-20",
+      "game_datetime": "2025-07-20T17:40:00Z",
+      "game_pk": 777084,
+      "home_team": "CLE"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-19",
+      "game_datetime": "2025-07-19T23:10:00Z",
+      "game_pk": 777104,
+      "home_team": "CLE"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-18",
+      "game_datetime": "2025-07-18T23:10:00Z",
+      "game_pk": 777105,
+      "home_team": "CLE"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-07-13",
+      "game_datetime": "2025-07-13T20:05:00Z",
+      "game_pk": 777116,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-07-12",
+      "game_datetime": "2025-07-13T02:05:00Z",
+      "game_pk": 777132,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-07-11",
+      "game_datetime": "2025-07-12T02:05:00Z",
+      "game_pk": 777152,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-10",
+      "game_datetime": "2025-07-11T01:05:00Z",
+      "game_pk": 777156,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-09",
+      "game_datetime": "2025-07-10T02:05:00Z",
+      "game_pk": 777176,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-07-08",
+      "game_datetime": "2025-07-09T01:38:00Z",
+      "game_pk": 777180,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-08",
+      "game_datetime": "2025-07-09T02:05:00Z",
+      "game_pk": 777189,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SF",
+      "game_date": "2025-07-06",
+      "game_datetime": "2025-07-07T02:05:00Z",
+      "game_pk": 777210,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SF",
+      "game_date": "2025-07-05",
+      "game_datetime": "2025-07-06T02:05:00Z",
+      "game_pk": 777227,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SF",
+      "game_date": "2025-07-04",
+      "game_datetime": "2025-07-05T02:05:00Z",
+      "game_pk": 777244,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-02",
+      "game_datetime": "2025-07-02T16:10:00Z",
+      "game_pk": 777271,
+      "home_team": "TB"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-01",
+      "game_datetime": "2025-07-01T23:05:00Z",
+      "game_pk": 777286,
+      "home_team": "TB"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-07-01",
+      "game_datetime": "2025-07-02T18:30:00Z",
+      "game_pk": 777294,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-30",
+      "game_datetime": "2025-06-30T23:35:00Z",
+      "game_pk": 777296,
+      "home_team": "TB"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-29",
+      "game_datetime": "2025-06-29T17:35:00Z",
+      "game_pk": 777307,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-28",
+      "game_datetime": "2025-06-28T17:05:00Z",
+      "game_pk": 777326,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-27",
+      "game_datetime": "2025-06-27T23:05:00Z",
+      "game_pk": 777337,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-26",
+      "game_datetime": "2025-06-26T17:10:00Z",
+      "game_pk": 777351,
+      "home_team": "DET"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-25",
+      "game_datetime": "2025-06-25T22:40:00Z",
+      "game_pk": 777371,
+      "home_team": "DET"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-24",
+      "game_datetime": "2025-06-24T22:40:00Z",
+      "game_pk": 777386,
+      "home_team": "DET"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-06-22",
+      "game_datetime": "2025-06-22T20:05:00Z",
+      "game_pk": 777400,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-06-21",
+      "game_datetime": "2025-06-22T02:05:00Z",
+      "game_pk": 777411,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-06-20",
+      "game_datetime": "2025-06-21T02:05:00Z",
+      "game_pk": 777429,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-19",
+      "game_datetime": "2025-06-20T02:05:00Z",
+      "game_pk": 777441,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-18",
+      "game_datetime": "2025-06-19T02:05:00Z",
+      "game_pk": 777456,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-17",
+      "game_datetime": "2025-06-18T02:05:00Z",
+      "game_pk": 777469,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-16",
+      "game_datetime": "2025-06-17T02:05:00Z",
+      "game_pk": 777485,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-15",
+      "game_datetime": "2025-06-15T18:10:00Z",
+      "game_pk": 777496,
+      "home_team": "KC"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-14",
+      "game_datetime": "2025-06-14T20:10:00Z",
+      "game_pk": 777511,
+      "home_team": "KC"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-13",
+      "game_datetime": "2025-06-14T00:10:00Z",
+      "game_pk": 777529,
+      "home_team": "KC"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-11",
+      "game_datetime": "2025-06-11T20:07:00Z",
+      "game_pk": 777542,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-10",
+      "game_datetime": "2025-06-11T01:38:00Z",
+      "game_pk": 777564,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-09",
+      "game_datetime": "2025-06-10T01:38:00Z",
+      "game_pk": 777576,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "BAL",
+      "game_date": "2025-06-08",
+      "game_datetime": "2025-06-08T20:05:00Z",
+      "game_pk": 777588,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BAL",
+      "game_date": "2025-06-07",
+      "game_datetime": "2025-06-08T02:05:00Z",
+      "game_pk": 777599,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BAL",
+      "game_date": "2025-06-06",
+      "game_datetime": "2025-06-07T02:05:00Z",
+      "game_pk": 777613,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-06-06",
+      "game_datetime": "2025-06-07T18:10:00Z",
+      "game_pk": 777623,
+      "home_team": "CIN"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-05",
+      "game_datetime": "2025-06-05T19:35:00Z",
+      "game_pk": 777636,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-04",
+      "game_datetime": "2025-06-05T02:05:00Z",
+      "game_pk": 777643,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-03",
+      "game_datetime": "2025-06-04T02:05:00Z",
+      "game_pk": 777658,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-02",
+      "game_datetime": "2025-06-03T02:05:00Z",
+      "game_pk": 777669,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-01",
+      "game_datetime": "2025-06-01T17:37:00Z",
+      "game_pk": 777685,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-31",
+      "game_datetime": "2025-05-31T19:07:00Z",
+      "game_pk": 777701,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-30",
+      "game_datetime": "2025-05-30T23:07:00Z",
+      "game_pk": 777716,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-29",
+      "game_datetime": "2025-05-29T23:07:00Z",
+      "game_pk": 777727,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-28",
+      "game_datetime": "2025-05-28T18:10:00Z",
+      "game_pk": 777734,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-27",
+      "game_datetime": "2025-05-28T00:10:00Z",
+      "game_pk": 777752,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "PHI",
+      "game_date": "2025-05-25",
+      "game_datetime": "2025-05-25T20:05:00Z",
+      "game_pk": 777765,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "PHI",
+      "game_date": "2025-05-24",
+      "game_datetime": "2025-05-25T02:05:00Z",
+      "game_pk": 777784,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "PHI",
+      "game_date": "2025-05-23",
+      "game_datetime": "2025-05-24T02:05:00Z",
+      "game_pk": 777804,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-22",
+      "game_datetime": "2025-05-22T19:35:00Z",
+      "game_pk": 777812,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-21",
+      "game_datetime": "2025-05-22T02:05:00Z",
+      "game_pk": 777828,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-20",
+      "game_datetime": "2025-05-21T02:05:00Z",
+      "game_pk": 777843,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-19",
+      "game_datetime": "2025-05-20T02:05:00Z",
+      "game_pk": 777853,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-05-19",
+      "game_datetime": "2025-05-21T17:10:00Z",
+      "game_pk": 777861,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-18",
+      "game_datetime": "2025-05-18T20:05:00Z",
+      "game_pk": 777867,
+      "home_team": "SF"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-17",
+      "game_datetime": "2025-05-18T01:05:00Z",
+      "game_pk": 777879,
+      "home_team": "SF"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-16",
+      "game_datetime": "2025-05-17T02:15:00Z",
+      "game_pk": 777891,
+      "home_team": "SF"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-14",
+      "game_datetime": "2025-05-15T02:10:00Z",
+      "game_pk": 777917,
+      "home_team": "LAD"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-13",
+      "game_datetime": "2025-05-14T02:10:00Z",
+      "game_pk": 777937,
+      "home_team": "LAD"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-15",
+      "game_datetime": "2025-05-16T02:10:00Z",
+      "game_pk": 777946,
+      "home_team": "LAD"
+    },
+    {
+      "away_team": "NYY",
+      "game_date": "2025-05-11",
+      "game_datetime": "2025-05-11T20:05:00Z",
+      "game_pk": 777957,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYY",
+      "game_date": "2025-05-10",
+      "game_datetime": "2025-05-10T20:05:00Z",
+      "game_pk": 777972,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYY",
+      "game_date": "2025-05-09",
+      "game_datetime": "2025-05-10T02:05:00Z",
+      "game_pk": 777994,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-05-07",
+      "game_datetime": "2025-05-07T19:35:00Z",
+      "game_pk": 778010,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-05-06",
+      "game_datetime": "2025-05-07T02:05:00Z",
+      "game_pk": 778024,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-05-05",
+      "game_datetime": "2025-05-06T02:05:00Z",
+      "game_pk": 778038,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-04",
+      "game_datetime": "2025-05-04T17:40:00Z",
+      "game_pk": 778061,
+      "home_team": "MIA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-03",
+      "game_datetime": "2025-05-03T20:10:00Z",
+      "game_pk": 778075,
+      "home_team": "MIA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-02",
+      "game_datetime": "2025-05-02T23:10:00Z",
+      "game_pk": 778091,
+      "home_team": "MIA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-01",
+      "game_datetime": "2025-05-01T18:35:00Z",
+      "game_pk": 778096,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-30",
+      "game_datetime": "2025-05-01T00:05:00Z",
+      "game_pk": 778106,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-29",
+      "game_datetime": "2025-04-30T00:05:00Z",
+      "game_pk": 778122,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-28",
+      "game_datetime": "2025-04-29T00:05:00Z",
+      "game_pk": 778143,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "CHW",
+      "game_date": "2025-04-27",
+      "game_datetime": "2025-04-27T20:05:00Z",
+      "game_pk": 778149,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CHW",
+      "game_date": "2025-04-26",
+      "game_datetime": "2025-04-26T20:05:00Z",
+      "game_pk": 778165,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-04-27",
+      "game_datetime": "2025-04-27T17:40:00Z",
+      "game_pk": 778170,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "CHW",
+      "game_date": "2025-04-25",
+      "game_datetime": "2025-04-26T02:05:00Z",
+      "game_pk": 778178,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-04-24",
+      "game_datetime": "2025-04-25T02:05:00Z",
+      "game_pk": 778192,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-04-23",
+      "game_datetime": "2025-04-24T02:05:00Z",
+      "game_pk": 778197,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-04-22",
+      "game_datetime": "2025-04-23T02:05:00Z",
+      "game_pk": 778213,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-20",
+      "game_datetime": "2025-04-20T18:10:00Z",
+      "game_pk": 778239,
+      "home_team": "MIL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-19",
+      "game_datetime": "2025-04-19T23:10:00Z",
+      "game_pk": 778253,
+      "home_team": "MIL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-18",
+      "game_datetime": "2025-04-19T00:10:00Z",
+      "game_pk": 778261,
+      "home_team": "MIL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-17",
+      "game_datetime": "2025-04-17T18:10:00Z",
+      "game_pk": 778283,
+      "home_team": "CHW"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-16",
+      "game_datetime": "2025-04-16T23:40:00Z",
+      "game_pk": 778294,
+      "home_team": "CHW"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-15",
+      "game_datetime": "2025-04-15T23:40:00Z",
+      "game_pk": 778309,
+      "home_team": "CHW"
+    },
+    {
+      "away_team": "NYM",
+      "game_date": "2025-04-13",
+      "game_datetime": "2025-04-13T20:05:00Z",
+      "game_pk": 778333,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYM",
+      "game_date": "2025-04-12",
+      "game_datetime": "2025-04-12T20:05:00Z",
+      "game_pk": 778346,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYM",
+      "game_date": "2025-04-11",
+      "game_datetime": "2025-04-12T02:05:00Z",
+      "game_pk": 778358,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SD",
+      "game_date": "2025-04-09",
+      "game_datetime": "2025-04-09T19:35:00Z",
+      "game_pk": 778381,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SD",
+      "game_date": "2025-04-08",
+      "game_datetime": "2025-04-09T02:05:00Z",
+      "game_pk": 778395,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SD",
+      "game_date": "2025-04-07",
+      "game_datetime": "2025-04-08T02:05:00Z",
+      "game_pk": 778414,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-06",
+      "game_datetime": "2025-04-06T19:10:00Z",
+      "game_pk": 778423,
+      "home_team": "COL"
+    },
+    {
+      "away_team": "STL",
+      "game_date": "2025-04-06",
+      "game_datetime": "2025-04-06T23:10:00Z",
+      "game_pk": 778432,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-05",
+      "game_datetime": "2025-04-06T00:10:00Z",
+      "game_pk": 778442,
+      "home_team": "COL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-04",
+      "game_datetime": "2025-04-04T20:10:00Z",
+      "game_pk": 778456,
+      "home_team": "COL"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-04-02",
+      "game_datetime": "2025-04-02T19:35:00Z",
+      "game_pk": 778471,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-04-01",
+      "game_datetime": "2025-04-02T02:05:00Z",
+      "game_pk": 778494,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-03-31",
+      "game_datetime": "2025-04-01T02:05:00Z",
+      "game_pk": 778501,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-30",
+      "game_datetime": "2025-03-30T20:10:00Z",
+      "game_pk": 778513,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-29",
+      "game_datetime": "2025-03-30T01:40:00Z",
+      "game_pk": 778521,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-28",
+      "game_datetime": "2025-03-29T01:40:00Z",
+      "game_pk": 778541,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-27",
+      "game_datetime": "2025-03-28T02:10:00Z",
+      "game_pk": 778547,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-03-27",
+      "game_datetime": "2025-03-28T02:10:00Z",
+      "game_pk": 778552,
+      "home_team": "ARI"
+    }
+  ],
+  "missingOpeningGames": [
+    {
+      "away_team": "KC",
+      "game_date": "2025-09-28",
+      "game_datetime": "2025-09-28T19:05:00Z",
+      "game_pk": 776138,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "KC",
+      "game_date": "2025-09-27",
+      "game_datetime": "2025-09-28T02:05:00Z",
+      "game_pk": 776154,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "KC",
+      "game_date": "2025-09-26",
+      "game_datetime": "2025-09-27T02:05:00Z",
+      "game_pk": 776172,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-09-25",
+      "game_datetime": "2025-09-25T19:35:00Z",
+      "game_pk": 776182,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-09-24",
+      "game_datetime": "2025-09-25T02:05:00Z",
+      "game_pk": 776195,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-09-23",
+      "game_datetime": "2025-09-24T02:05:00Z",
+      "game_pk": 776208,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-21",
+      "game_datetime": "2025-09-21T17:35:00Z",
+      "game_pk": 776234,
+      "home_team": "PIT"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-20",
+      "game_datetime": "2025-09-20T22:40:00Z",
+      "game_pk": 776249,
+      "home_team": "PIT"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-19",
+      "game_datetime": "2025-09-19T22:40:00Z",
+      "game_pk": 776266,
+      "home_team": "PIT"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-18",
+      "game_datetime": "2025-09-18T17:35:00Z",
+      "game_pk": 776281,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-17",
+      "game_datetime": "2025-09-17T22:45:00Z",
+      "game_pk": 776299,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-16",
+      "game_datetime": "2025-09-16T22:45:00Z",
+      "game_pk": 776310,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-09-14",
+      "game_datetime": "2025-09-14T20:05:00Z",
+      "game_pk": 776327,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-09-13",
+      "game_datetime": "2025-09-14T02:05:00Z",
+      "game_pk": 776340,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-09-12",
+      "game_datetime": "2025-09-13T02:05:00Z",
+      "game_pk": 776358,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BOS",
+      "game_date": "2025-09-10",
+      "game_datetime": "2025-09-10T19:35:00Z",
+      "game_pk": 776379,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BOS",
+      "game_date": "2025-09-09",
+      "game_datetime": "2025-09-10T02:05:00Z",
+      "game_pk": 776396,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BOS",
+      "game_date": "2025-09-08",
+      "game_datetime": "2025-09-09T02:05:00Z",
+      "game_pk": 776410,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-07",
+      "game_datetime": "2025-09-07T20:07:00Z",
+      "game_pk": 776414,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-06",
+      "game_datetime": "2025-09-07T01:38:00Z",
+      "game_pk": 776430,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-05",
+      "game_datetime": "2025-09-06T01:38:00Z",
+      "game_pk": 776444,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-03",
+      "game_datetime": "2025-09-03T23:45:00Z",
+      "game_pk": 776470,
+      "home_team": "STL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-02",
+      "game_datetime": "2025-09-02T23:45:00Z",
+      "game_pk": 776483,
+      "home_team": "STL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-09-01",
+      "game_datetime": "2025-09-01T18:15:00Z",
+      "game_pk": 776497,
+      "home_team": "STL"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-08-31",
+      "game_datetime": "2025-08-31T20:05:00Z",
+      "game_pk": 776508,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-08-30",
+      "game_datetime": "2025-08-31T02:05:00Z",
+      "game_pk": 776524,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-08-29",
+      "game_datetime": "2025-08-30T02:05:00Z",
+      "game_pk": 776538,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "DET",
+      "game_date": "2025-08-27",
+      "game_datetime": "2025-08-28T02:05:00Z",
+      "game_pk": 776559,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "DET",
+      "game_date": "2025-08-26",
+      "game_datetime": "2025-08-27T02:05:00Z",
+      "game_pk": 776573,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "DET",
+      "game_date": "2025-08-25",
+      "game_datetime": "2025-08-26T02:05:00Z",
+      "game_pk": 776590,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-24",
+      "game_datetime": "2025-08-24T20:10:00Z",
+      "game_pk": 776602,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-23",
+      "game_datetime": "2025-08-24T01:40:00Z",
+      "game_pk": 776620,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-22",
+      "game_datetime": "2025-08-23T02:10:00Z",
+      "game_pk": 776638,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-21",
+      "game_datetime": "2025-08-21T17:10:00Z",
+      "game_pk": 776653,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-20",
+      "game_datetime": "2025-08-20T23:40:00Z",
+      "game_pk": 776665,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-19",
+      "game_datetime": "2025-08-19T23:40:00Z",
+      "game_pk": 776674,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-08-17",
+      "game_datetime": "2025-08-17T20:05:00Z",
+      "game_pk": 776699,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-08-16",
+      "game_datetime": "2025-08-17T02:05:00Z",
+      "game_pk": 776718,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-08-15",
+      "game_datetime": "2025-08-16T02:05:00Z",
+      "game_pk": 776734,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TB",
+      "game_date": "2025-08-13",
+      "game_datetime": "2025-08-14T02:05:00Z",
+      "game_pk": 776751,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TB",
+      "game_date": "2025-08-12",
+      "game_datetime": "2025-08-13T02:05:00Z",
+      "game_pk": 776762,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TB",
+      "game_date": "2025-08-11",
+      "game_datetime": "2025-08-12T02:05:00Z",
+      "game_pk": 776787,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-10",
+      "game_datetime": "2025-08-10T17:35:00Z",
+      "game_pk": 776804,
+      "home_team": "BAL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-09",
+      "game_datetime": "2025-08-09T23:05:00Z",
+      "game_pk": 776811,
+      "home_team": "BAL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-08",
+      "game_datetime": "2025-08-08T23:05:00Z",
+      "game_pk": 776831,
+      "home_team": "BAL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-07",
+      "game_datetime": "2025-08-07T16:05:00Z",
+      "game_pk": 776837,
+      "home_team": "WSH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-06",
+      "game_datetime": "2025-08-06T22:45:00Z",
+      "game_pk": 776850,
+      "home_team": "WSH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-08-05",
+      "game_datetime": "2025-08-05T22:45:00Z",
+      "game_pk": 776865,
+      "home_team": "WSH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-08-03",
+      "game_datetime": "2025-08-03T20:05:00Z",
+      "game_pk": 776881,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-08-02",
+      "game_datetime": "2025-08-03T02:05:00Z",
+      "game_pk": 776899,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-08-01",
+      "game_datetime": "2025-08-02T02:05:00Z",
+      "game_pk": 776914,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-31",
+      "game_datetime": "2025-07-31T23:10:00Z",
+      "game_pk": 776928,
+      "home_team": "CIN"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-07-30",
+      "game_datetime": "2025-07-31T02:05:00Z",
+      "game_pk": 776930,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-07-29",
+      "game_datetime": "2025-07-30T02:05:00Z",
+      "game_pk": 776944,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-07-28",
+      "game_datetime": "2025-07-29T02:05:00Z",
+      "game_pk": 776957,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-27",
+      "game_datetime": "2025-07-27T18:10:00Z",
+      "game_pk": 776976,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-26",
+      "game_datetime": "2025-07-26T23:10:00Z",
+      "game_pk": 776991,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-25",
+      "game_datetime": "2025-07-26T00:10:00Z",
+      "game_pk": 777007,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-24",
+      "game_datetime": "2025-07-25T00:10:00Z",
+      "game_pk": 777025,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-23",
+      "game_datetime": "2025-07-24T00:05:00Z",
+      "game_pk": 777033,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-22",
+      "game_datetime": "2025-07-23T00:05:00Z",
+      "game_pk": 777043,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-21",
+      "game_datetime": "2025-07-22T00:05:00Z",
+      "game_pk": 777057,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-20",
+      "game_datetime": "2025-07-20T17:40:00Z",
+      "game_pk": 777084,
+      "home_team": "CLE"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-19",
+      "game_datetime": "2025-07-19T23:10:00Z",
+      "game_pk": 777104,
+      "home_team": "CLE"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-18",
+      "game_datetime": "2025-07-18T23:10:00Z",
+      "game_pk": 777105,
+      "home_team": "CLE"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-07-13",
+      "game_datetime": "2025-07-13T20:05:00Z",
+      "game_pk": 777116,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-07-12",
+      "game_datetime": "2025-07-13T02:05:00Z",
+      "game_pk": 777132,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-07-11",
+      "game_datetime": "2025-07-12T02:05:00Z",
+      "game_pk": 777152,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-10",
+      "game_datetime": "2025-07-11T01:05:00Z",
+      "game_pk": 777156,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-09",
+      "game_datetime": "2025-07-10T02:05:00Z",
+      "game_pk": 777176,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-07-08",
+      "game_datetime": "2025-07-09T01:38:00Z",
+      "game_pk": 777180,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATL",
+      "game_date": "2025-07-08",
+      "game_datetime": "2025-07-09T02:05:00Z",
+      "game_pk": 777189,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SF",
+      "game_date": "2025-07-06",
+      "game_datetime": "2025-07-07T02:05:00Z",
+      "game_pk": 777210,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SF",
+      "game_date": "2025-07-05",
+      "game_datetime": "2025-07-06T02:05:00Z",
+      "game_pk": 777227,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SF",
+      "game_date": "2025-07-04",
+      "game_datetime": "2025-07-05T02:05:00Z",
+      "game_pk": 777244,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-02",
+      "game_datetime": "2025-07-02T16:10:00Z",
+      "game_pk": 777271,
+      "home_team": "TB"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-07-01",
+      "game_datetime": "2025-07-01T23:05:00Z",
+      "game_pk": 777286,
+      "home_team": "TB"
+    },
+    {
+      "away_team": "CIN",
+      "game_date": "2025-07-01",
+      "game_datetime": "2025-07-02T18:30:00Z",
+      "game_pk": 777294,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-30",
+      "game_datetime": "2025-06-30T23:35:00Z",
+      "game_pk": 777296,
+      "home_team": "TB"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-29",
+      "game_datetime": "2025-06-29T17:35:00Z",
+      "game_pk": 777307,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-28",
+      "game_datetime": "2025-06-28T17:05:00Z",
+      "game_pk": 777326,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-27",
+      "game_datetime": "2025-06-27T23:05:00Z",
+      "game_pk": 777337,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-26",
+      "game_datetime": "2025-06-26T17:10:00Z",
+      "game_pk": 777351,
+      "home_team": "DET"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-25",
+      "game_datetime": "2025-06-25T22:40:00Z",
+      "game_pk": 777371,
+      "home_team": "DET"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-24",
+      "game_datetime": "2025-06-24T22:40:00Z",
+      "game_pk": 777386,
+      "home_team": "DET"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-06-22",
+      "game_datetime": "2025-06-22T20:05:00Z",
+      "game_pk": 777400,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-06-21",
+      "game_datetime": "2025-06-22T02:05:00Z",
+      "game_pk": 777411,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-06-20",
+      "game_datetime": "2025-06-21T02:05:00Z",
+      "game_pk": 777429,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-19",
+      "game_datetime": "2025-06-20T02:05:00Z",
+      "game_pk": 777441,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-18",
+      "game_datetime": "2025-06-19T02:05:00Z",
+      "game_pk": 777456,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-17",
+      "game_datetime": "2025-06-18T02:05:00Z",
+      "game_pk": 777469,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "HOU",
+      "game_date": "2025-06-16",
+      "game_datetime": "2025-06-17T02:05:00Z",
+      "game_pk": 777485,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-15",
+      "game_datetime": "2025-06-15T18:10:00Z",
+      "game_pk": 777496,
+      "home_team": "KC"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-14",
+      "game_datetime": "2025-06-14T20:10:00Z",
+      "game_pk": 777511,
+      "home_team": "KC"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-13",
+      "game_datetime": "2025-06-14T00:10:00Z",
+      "game_pk": 777529,
+      "home_team": "KC"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-11",
+      "game_datetime": "2025-06-11T20:07:00Z",
+      "game_pk": 777542,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-10",
+      "game_datetime": "2025-06-11T01:38:00Z",
+      "game_pk": 777564,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-09",
+      "game_datetime": "2025-06-10T01:38:00Z",
+      "game_pk": 777576,
+      "home_team": "LAA"
+    },
+    {
+      "away_team": "BAL",
+      "game_date": "2025-06-08",
+      "game_datetime": "2025-06-08T20:05:00Z",
+      "game_pk": 777588,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BAL",
+      "game_date": "2025-06-07",
+      "game_datetime": "2025-06-08T02:05:00Z",
+      "game_pk": 777599,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "BAL",
+      "game_date": "2025-06-06",
+      "game_datetime": "2025-06-07T02:05:00Z",
+      "game_pk": 777613,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ARI",
+      "game_date": "2025-06-06",
+      "game_datetime": "2025-06-07T18:10:00Z",
+      "game_pk": 777623,
+      "home_team": "CIN"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-05",
+      "game_datetime": "2025-06-05T19:35:00Z",
+      "game_pk": 777636,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-04",
+      "game_datetime": "2025-06-05T02:05:00Z",
+      "game_pk": 777643,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-03",
+      "game_datetime": "2025-06-04T02:05:00Z",
+      "game_pk": 777658,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "MIN",
+      "game_date": "2025-06-02",
+      "game_datetime": "2025-06-03T02:05:00Z",
+      "game_pk": 777669,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-06-01",
+      "game_datetime": "2025-06-01T17:37:00Z",
+      "game_pk": 777685,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-31",
+      "game_datetime": "2025-05-31T19:07:00Z",
+      "game_pk": 777701,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-30",
+      "game_datetime": "2025-05-30T23:07:00Z",
+      "game_pk": 777716,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-29",
+      "game_datetime": "2025-05-29T23:07:00Z",
+      "game_pk": 777727,
+      "home_team": "TOR"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-28",
+      "game_datetime": "2025-05-28T18:10:00Z",
+      "game_pk": 777734,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-27",
+      "game_datetime": "2025-05-28T00:10:00Z",
+      "game_pk": 777752,
+      "home_team": "HOU"
+    },
+    {
+      "away_team": "PHI",
+      "game_date": "2025-05-25",
+      "game_datetime": "2025-05-25T20:05:00Z",
+      "game_pk": 777765,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "PHI",
+      "game_date": "2025-05-24",
+      "game_datetime": "2025-05-25T02:05:00Z",
+      "game_pk": 777784,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "PHI",
+      "game_date": "2025-05-23",
+      "game_datetime": "2025-05-24T02:05:00Z",
+      "game_pk": 777804,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-22",
+      "game_datetime": "2025-05-22T19:35:00Z",
+      "game_pk": 777812,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-21",
+      "game_datetime": "2025-05-22T02:05:00Z",
+      "game_pk": 777828,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-20",
+      "game_datetime": "2025-05-21T02:05:00Z",
+      "game_pk": 777843,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "LAA",
+      "game_date": "2025-05-19",
+      "game_datetime": "2025-05-20T02:05:00Z",
+      "game_pk": 777853,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CLE",
+      "game_date": "2025-05-19",
+      "game_datetime": "2025-05-21T17:10:00Z",
+      "game_pk": 777861,
+      "home_team": "MIN"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-18",
+      "game_datetime": "2025-05-18T20:05:00Z",
+      "game_pk": 777867,
+      "home_team": "SF"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-17",
+      "game_datetime": "2025-05-18T01:05:00Z",
+      "game_pk": 777879,
+      "home_team": "SF"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-16",
+      "game_datetime": "2025-05-17T02:15:00Z",
+      "game_pk": 777891,
+      "home_team": "SF"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-14",
+      "game_datetime": "2025-05-15T02:10:00Z",
+      "game_pk": 777917,
+      "home_team": "LAD"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-13",
+      "game_datetime": "2025-05-14T02:10:00Z",
+      "game_pk": 777937,
+      "home_team": "LAD"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-15",
+      "game_datetime": "2025-05-16T02:10:00Z",
+      "game_pk": 777946,
+      "home_team": "LAD"
+    },
+    {
+      "away_team": "NYY",
+      "game_date": "2025-05-11",
+      "game_datetime": "2025-05-11T20:05:00Z",
+      "game_pk": 777957,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYY",
+      "game_date": "2025-05-10",
+      "game_datetime": "2025-05-10T20:05:00Z",
+      "game_pk": 777972,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYY",
+      "game_date": "2025-05-09",
+      "game_datetime": "2025-05-10T02:05:00Z",
+      "game_pk": 777994,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-05-07",
+      "game_datetime": "2025-05-07T19:35:00Z",
+      "game_pk": 778010,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-05-06",
+      "game_datetime": "2025-05-07T02:05:00Z",
+      "game_pk": 778024,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SEA",
+      "game_date": "2025-05-05",
+      "game_datetime": "2025-05-06T02:05:00Z",
+      "game_pk": 778038,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-04",
+      "game_datetime": "2025-05-04T17:40:00Z",
+      "game_pk": 778061,
+      "home_team": "MIA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-03",
+      "game_datetime": "2025-05-03T20:10:00Z",
+      "game_pk": 778075,
+      "home_team": "MIA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-02",
+      "game_datetime": "2025-05-02T23:10:00Z",
+      "game_pk": 778091,
+      "home_team": "MIA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-05-01",
+      "game_datetime": "2025-05-01T18:35:00Z",
+      "game_pk": 778096,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-30",
+      "game_datetime": "2025-05-01T00:05:00Z",
+      "game_pk": 778106,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-29",
+      "game_datetime": "2025-04-30T00:05:00Z",
+      "game_pk": 778122,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-28",
+      "game_datetime": "2025-04-29T00:05:00Z",
+      "game_pk": 778143,
+      "home_team": "TEX"
+    },
+    {
+      "away_team": "CHW",
+      "game_date": "2025-04-27",
+      "game_datetime": "2025-04-27T20:05:00Z",
+      "game_pk": 778149,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CHW",
+      "game_date": "2025-04-26",
+      "game_datetime": "2025-04-26T20:05:00Z",
+      "game_pk": 778165,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TOR",
+      "game_date": "2025-04-27",
+      "game_datetime": "2025-04-27T17:40:00Z",
+      "game_pk": 778170,
+      "home_team": "NYY"
+    },
+    {
+      "away_team": "CHW",
+      "game_date": "2025-04-25",
+      "game_datetime": "2025-04-26T02:05:00Z",
+      "game_pk": 778178,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-04-24",
+      "game_datetime": "2025-04-25T02:05:00Z",
+      "game_pk": 778192,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-04-23",
+      "game_datetime": "2025-04-24T02:05:00Z",
+      "game_pk": 778197,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "TEX",
+      "game_date": "2025-04-22",
+      "game_datetime": "2025-04-23T02:05:00Z",
+      "game_pk": 778213,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-20",
+      "game_datetime": "2025-04-20T18:10:00Z",
+      "game_pk": 778239,
+      "home_team": "MIL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-19",
+      "game_datetime": "2025-04-19T23:10:00Z",
+      "game_pk": 778253,
+      "home_team": "MIL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-18",
+      "game_datetime": "2025-04-19T00:10:00Z",
+      "game_pk": 778261,
+      "home_team": "MIL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-17",
+      "game_datetime": "2025-04-17T18:10:00Z",
+      "game_pk": 778283,
+      "home_team": "CHW"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-16",
+      "game_datetime": "2025-04-16T23:40:00Z",
+      "game_pk": 778294,
+      "home_team": "CHW"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-15",
+      "game_datetime": "2025-04-15T23:40:00Z",
+      "game_pk": 778309,
+      "home_team": "CHW"
+    },
+    {
+      "away_team": "NYM",
+      "game_date": "2025-04-13",
+      "game_datetime": "2025-04-13T20:05:00Z",
+      "game_pk": 778333,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYM",
+      "game_date": "2025-04-12",
+      "game_datetime": "2025-04-12T20:05:00Z",
+      "game_pk": 778346,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "NYM",
+      "game_date": "2025-04-11",
+      "game_datetime": "2025-04-12T02:05:00Z",
+      "game_pk": 778358,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SD",
+      "game_date": "2025-04-09",
+      "game_datetime": "2025-04-09T19:35:00Z",
+      "game_pk": 778381,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SD",
+      "game_date": "2025-04-08",
+      "game_datetime": "2025-04-09T02:05:00Z",
+      "game_pk": 778395,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "SD",
+      "game_date": "2025-04-07",
+      "game_datetime": "2025-04-08T02:05:00Z",
+      "game_pk": 778414,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-06",
+      "game_datetime": "2025-04-06T19:10:00Z",
+      "game_pk": 778423,
+      "home_team": "COL"
+    },
+    {
+      "away_team": "STL",
+      "game_date": "2025-04-06",
+      "game_datetime": "2025-04-06T23:10:00Z",
+      "game_pk": 778432,
+      "home_team": "BOS"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-05",
+      "game_datetime": "2025-04-06T00:10:00Z",
+      "game_pk": 778442,
+      "home_team": "COL"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-04-04",
+      "game_datetime": "2025-04-04T20:10:00Z",
+      "game_pk": 778456,
+      "home_team": "COL"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-04-02",
+      "game_datetime": "2025-04-02T19:35:00Z",
+      "game_pk": 778471,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-04-01",
+      "game_datetime": "2025-04-02T02:05:00Z",
+      "game_pk": 778494,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-03-31",
+      "game_datetime": "2025-04-01T02:05:00Z",
+      "game_pk": 778501,
+      "home_team": "ATH"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-30",
+      "game_datetime": "2025-03-30T20:10:00Z",
+      "game_pk": 778513,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-29",
+      "game_datetime": "2025-03-30T01:40:00Z",
+      "game_pk": 778521,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-28",
+      "game_datetime": "2025-03-29T01:40:00Z",
+      "game_pk": 778541,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "ATH",
+      "game_date": "2025-03-27",
+      "game_datetime": "2025-03-28T02:10:00Z",
+      "game_pk": 778547,
+      "home_team": "SEA"
+    },
+    {
+      "away_team": "CHC",
+      "game_date": "2025-03-27",
+      "game_datetime": "2025-03-28T02:10:00Z",
+      "game_pk": 778552,
+      "home_team": "ARI"
+    }
+  ],
+  "oddsApiCreditsConsumed": 0,
+  "openingAndClosingCoveredGames": 2260,
+  "openingCoveragePct": 93.004115,
+  "openingCoveredGames": 2260,
+  "openingLineBuckets": {
+    "10.0": 20,
+    "10.5": 20,
+    "11.0": 14,
+    "11.5": 26,
+    "12.0": 9,
+    "12.5": 2,
+    "6.0": 1,
+    "6.5": 11,
+    "7.0": 102,
+    "7.5": 316,
+    "8.0": 480,
+    "8.5": 683,
+    "9.0": 417,
+    "9.5": 159
+  },
+  "researchOnly": true,
+  "sourceArtifacts": [
+    {
+      "path": "data/research/mlb_2025_sbr_open_close.jsonl.gz",
+      "precedence": 1,
+      "source": "sportsbookreview_via_arnavsaraogi_dataset",
+      "sourceRegistryId": "sportsbookreview_arnavsaraogi_mlb_odds_2025_3f952fd0"
+    },
+    {
+      "path": "data/research/mlb_2025_sbr_gap_open_close.jsonl.gz",
+      "precedence": 2,
+      "source": "sportsbookreview_direct_scrape",
+      "sourceRegistryId": "sportsbookreview_direct_2025_gap_919fc00c"
+    },
+    {
+      "path": "data/research/mlb_2025_sbr_multigame_retry.jsonl.gz",
+      "precedence": 3,
+      "source": "sportsbookreview_multigame_retry",
+      "sourceRegistryId": "sportsbookreview_multigame_retry_2025_5cda5c11"
+    }
+  ],
+  "sourceCoverage": {
+    "closing:sportsbookreview_direct_scrape": 540,
+    "closing:sportsbookreview_multigame_retry": 26,
+    "closing:sportsbookreview_via_arnavsaraogi_dataset": 1694,
+    "opening:sportsbookreview_direct_scrape": 540,
+    "opening:sportsbookreview_multigame_retry": 26,
+    "opening:sportsbookreview_via_arnavsaraogi_dataset": 1694
+  },
+  "sourceIdentityCount": 2267,
+  "totalRawRows": 104444,
+  "unmappedIdentities": []
+}
