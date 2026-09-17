@@ -1,5 +1,9 @@
 {
   "ambiguous_identity_count": 0,
+  "american_price_contract": {
+    "max_abs_inclusive": 10000.0,
+    "min_abs_inclusive": 100.0
+  },
   "apostar_activation": false,
   "canonical_regular_season_games": 2430,
   "closing_line_distribution": {
@@ -26,11 +30,14 @@
     "9.5": 181
   },
   "compact_market_games": 2425,
-  "consensus_method": "sportsbook_mode_line_median_price_at_consensus",
+  "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
   "contract": "MLB_TOTALS_MARKET_2025_V1_BUILD",
   "coverage_pct": 99.79423868,
+  "fabricated_price_quotes": 0,
+  "invalid_consensus_price_rows": 0,
   "mapped_game_pks": 2425,
   "market": "total",
+  "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
   "odds_api_credits_consumed": 0,
   "official_picks_writes": 0,
   "opening_line_distribution": {
@@ -50,8 +57,13 @@
     "9.5": 201
   },
   "postgame_fields_copied": 0,
+  "price_aggregation_rule": "actual_offered_quote_nearest_median_implied_probability",
+  "rejected_invalid_price_rows": 0,
+  "rejected_invalid_price_rows_by_source": {},
+  "rejected_invalid_price_values_top20": [],
   "research_only": true,
-  "source_market_rows": 108460,
+  "source_market_rows_after_price_sanitation": 108460,
+  "source_market_rows_before_price_sanitation": 108460,
   "sql_parts": [
     "mlb_2025_totals_market_v1_part_01.sql",
     "mlb_2025_totals_market_v1_part_02.sql",
