@@ -1,0 +1,71 @@
+name: MLB 2025 Totals Microstructure V17
+
+on:
+  push:
+    branches:
+      - research/totals-2025-historical-backfill
+    paths:
+      - '.github/workflows/mlb-2025-totals-microstructure-v17.yml'
+      - 'scripts/research/build_mlb_totals_2025_microstructure_v1.py'
+      - 'scripts/research/build_mlb_totals_2025_market_v1.py'
+      - 'data/research/mlb_2025_sbr_open_close.jsonl.gz'
+      - 'data/research/mlb_2025_sbr_gap_open_close.jsonl.gz'
+      - 'data/research/mlb_2025_sbr_multigame_retry.jsonl.gz'
+      - 'data/research/mlb_2025_sbr_athletics_totals_v1.jsonl.gz'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/totals-2025-historical-backfill
+          fetch-depth: 0
+
+      - name: Guard research-only branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "research/totals-2025-historical-backfill"
+
+      - name: Build V17 sportsbook microstructure
+        run: python3 scripts/research/build_mlb_totals_2025_microstructure_v1.py
+
+      - name: Validate V17 artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('data/research/totals_2025_microstructure_v1/mlb_2025_totals_microstructure_v1_summary.json')
+          s=json.loads(p.read_text())
+          assert s['research_only'] is True
+          assert s['games'] >= 2425
+          assert s['feature_count'] >= 30
+          assert s['odds_api_credits_consumed'] == 0
+          assert s['official_picks_writes'] == 0
+          assert s['apostar_activation'] is False
+          assert s['postgame_fields_used'] == 0
+          assert len(s['sql_parts']) >= 9
+          PY
+          ! grep -R -E 'Official Picks|APOSTAR' data/research/totals_2025_microstructure_v1/*.sql
+
+      - name: Commit V17 generated artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/research/totals_2025_microstructure_v1
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit"
+            exit 0
+          fi
+          git commit -m "research(totals): build V17 sportsbook microstructure"
+          git push origin HEAD:research/totals-2025-historical-backfill
