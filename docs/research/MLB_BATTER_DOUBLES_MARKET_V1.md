@@ -36,3 +36,29 @@ Monthly:
 State before external: `TARGET_MET_75_PLUS_EXTERNAL_PENDING`.
 
 Incremental signal is modest; keep baseline/lift visible. Historical prop pricing is not certified; no ROI/EV/CLV claim.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+- eligible rows: 40,648
+- selected: 20,282
+- correct: 17,632
+- accuracy: **86.93%**
+- selected coverage: **49.90%**
+- worst selected month: **85.87%**
+- unconditional UNDER 0.5 baseline: **85.65%**
+- lift vs baseline: **+1.28 percentage points**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 2,386/2,770 = 86.14%
+- May: 3,366/3,920 = 85.87%
+- Jun: 3,170/3,675 = 86.26%
+- Jul: 3,148/3,586 = 87.79%
+- Aug: 3,601/4,118 = 87.45%
+- Sep-to-date: 1,961/2,213 = 88.61%
+
+State: `TARGET_MET_75_PLUS`.
+
+Incremental signal is positive but modest. Historical prop prices are not certified; ROI/EV/CLV remain unclaimed.
