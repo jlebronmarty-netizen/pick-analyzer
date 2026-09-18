@@ -6,6 +6,33 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 unified market protocol addendum — authoritative
+
+The user has explicitly authorized a unified cross-market research workflow:
+
+- use **2025 as the development season**;
+- use chronological / expanding-window validation inside 2025 where the required PREGAME feature surface is available;
+- freeze the chosen formula/model before external evaluation;
+- use **2026 as a one-shot external evaluation only when that market's 2026 data remains uncontaminated by model selection**;
+- if no defensible model reaches the >=75% target, preserve the best stable model found, mark that market `REVISIT_AFTER_FIRST_PASS`, and continue to the next market;
+- after all target markets receive a first pass, revisit the below-target markets with new information or materially different architectures rather than threshold rescue.
+
+Canonical cross-market tracker:
+
+`docs/research/MLB_MARKET_MODEL_TRACKER.md`
+
+The tracker must distinguish:
+
+- pure 2025→2026 one-shot external tests;
+- adaptive 2026 evidence;
+- historical 2026 evidence seen before freeze;
+- prospective forward evidence;
+- FULL/diagnostic-only results.
+
+Never relabel adaptive or already-seen 2026 evidence as an untouched external holdout.
+
+For Totals specifically, the old repeated-June V26–V35 stop gate is superseded by this user-authorized protocol reset. The next valid Totals path is to extend the same PREGAME feature surface through September 2025, evaluate candidates with rolling/expanding 2025 folds, freeze the best stable candidate even if it remains below 75%, and only then open 2026 once.
+
 ## 2026-09-18 continuity addendum — authoritative newer state
 
 The sections below preserve older research history, but the following states supersede any earlier continuation pointer when they conflict.
