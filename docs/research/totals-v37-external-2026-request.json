@@ -1,0 +1,33 @@
+{
+  "contract": "MLB_TOTALS_V37_EXTERNAL_2026_REQUEST/1.0.0",
+  "authorized": true,
+  "researchOnly": true,
+  "branch": "research/totals-2025-historical-backfill",
+  "freezeContract": "MLB_TOTALS_V37_FROZEN_CANDIDATE/1.0.0",
+  "freezeGithubSha": "2d7b5c3f3756c264a59b53cf5a3310ac7d9e1d82",
+  "featureHashSha256": "1bcdbe1e570096e53e11484cf3d99beeaa4c56bf375d4043cbfc1c6938f9e44c",
+  "frozenCandidate": {
+    "architecture": "catboost_classifier",
+    "specIndex": 3,
+    "params": {
+      "depth": 6,
+      "iterations": 400,
+      "learning_rate": 0.05,
+      "l2_leaf_reg": 5,
+      "random_strength": 1
+    },
+    "mode": "under_only",
+    "threshold": 0.65
+  },
+  "trainingSeason": 2025,
+  "externalSeason": 2026,
+  "externalRowsExpected": 1576,
+  "retuningAllowed": false,
+  "thresholdChangesAllowed": false,
+  "featureChangesAllowed": false,
+  "expectedOddsApiCredits": 0,
+  "providerCallsAllowed": false,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "productionPromotionAllowed": false
+}
