@@ -1,0 +1,74 @@
+{
+  "contract": "MLB_PITCHER_BB_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "pitcher_bb_under_2p5_p85_v1",
+  "freeze_commit_sha": "8d96909d90645d5f54378362c2f71d3e6dcaedf7",
+  "model_version": "MLB_PITCHER_BB_V1",
+  "rule": {
+    "line": 2.5,
+    "direction": "UNDER",
+    "required_under_probability": 0.85,
+    "minimum_calibration_bin_n": 20
+  },
+  "selected_using_2025_only": true,
+  "validation_class": "HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE",
+  "historical_context": "Underlying point/Brier model had 2026 diagnostics before this market-rule freeze; exact line/direction/threshold were selected from 2025 only.",
+  "development_2025": {
+    "n": 122,
+    "correct": 111,
+    "accuracy": 0.909836065573771,
+    "worst_month_accuracy": 0.823529411764706,
+    "baseline_under_accuracy": 0.75832645196807,
+    "lift_vs_baseline": 0.1515096136057
+  },
+  "external_2026": {
+    "eligible_rows": 3468,
+    "selected_n": 137,
+    "selected_correct": 125,
+    "selected_accuracy": 0.912408759124088,
+    "selected_coverage": 0.0395040369088812,
+    "baseline_under_accuracy": 0.745674740484429,
+    "lift_vs_baseline": 0.166734018639659,
+    "worst_month_accuracy": 0.866666666666667,
+    "months": {
+      "2026-04": {
+        "n": 15,
+        "correct": 14,
+        "accuracy": 0.933333333333333
+      },
+      "2026-05": {
+        "n": 32,
+        "correct": 30,
+        "accuracy": 0.9375
+      },
+      "2026-06": {
+        "n": 29,
+        "correct": 26,
+        "accuracy": 0.896551724137931
+      },
+      "2026-07": {
+        "n": 28,
+        "correct": 26,
+        "accuracy": 0.928571428571429
+      },
+      "2026-08": {
+        "n": 30,
+        "correct": 26,
+        "accuracy": 0.866666666666667
+      },
+      "2026-09": {
+        "n": 3,
+        "correct": 3,
+        "accuracy": 1
+      }
+    }
+  },
+  "target_75_met": true,
+  "market_value_status": "ACCURACY_ONLY_NO_CERTIFIED_HISTORICAL_PROP_PRICES",
+  "roi_ev_clv_certified": false,
+  "retuned_after_external": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
