@@ -1,0 +1,20 @@
+{
+  "contract": "MLB_TOTALS_V31_EXTRA_TREES_REQUEST/1.0.0",
+  "authorized": true,
+  "branch": "research/totals-2025-historical-backfill",
+  "researchOnly": true,
+  "market": "total",
+  "season": 2025,
+  "informationDelta": "V28 individual-handedness surface plus pitch-type/repertoire matchup features",
+  "trainPeriod": "2025-04-01/2025-05-31",
+  "internalValidationPeriod": "2025-06-01/2025-06-30",
+  "pregatePeriod": "2025-07-01/2025-08-31",
+  "openPregateOnlyAfterInternalGate": true,
+  "use2026ForSelection": false,
+  "open2026ExternalTest": false,
+  "expectedOddsApiCredits": 0,
+  "providerCallsAllowed": false,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "productionPromotionAllowed": false
+}
