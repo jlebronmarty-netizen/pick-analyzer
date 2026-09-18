@@ -30,7 +30,7 @@ TABLE = "mlb_totals_v26_full_ml_dataset_2025_v1"
 REGISTRY = "mlb_totals_formula_search_v1"
 CANDIDATE_NAME = "totals_v26_full_surface_extra_trees_v1"
 TARGET = "close_over_label"
-SUPABASE_URL = "https://ynuocvexviorgdjrfthw.supabase.co"
+EDGE_URL = "https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/mlb-totals-v26-github-export-temp"
 OUT = Path("artifacts/research/mlb_totals_v26_extra_trees_result.json")
 
 TRAIN_START = pd.Timestamp("2025-04-01")
@@ -82,49 +82,37 @@ def write_result(result: dict[str, Any]) -> None:
     OUT.write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
 
 
-def headers(key: str) -> dict[str, str]:
-    return {
-        "apikey": key,
-        "Authorization": f"Bearer {key}",
-        "Accept": "application/json",
-    }
-
-
-def fetch_period(key: str, start: str, end: str) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    offset = 0
-    while True:
-        params = {
-            "select": "*",
-            "game_date": [f"gte.{start}", f"lt.{end}"],
-            "order": "game_date.asc,game_pk.asc",
-            "limit": "1000",
-            "offset": str(offset),
-        }
-        # requests cannot encode duplicate keys from a plain dict, so use tuples.
-        qp = [
-            ("select", "*"),
-            ("game_date", f"gte.{start}"),
-            ("game_date", f"lt.{end}"),
-            ("order", "game_date.asc,game_pk.asc"),
-            ("limit", "1000"),
-            ("offset", str(offset)),
-        ]
-        r = requests.get(
-            f"{SUPABASE_URL}/rest/v1/{TABLE}",
-            headers=headers(key),
-            params=qp,
-            timeout=90,
-        )
-        r.raise_for_status()
-        page = r.json()
-        if not isinstance(page, list):
-            raise RuntimeError("V26_REST_NON_LIST_RESPONSE")
-        rows.extend(page)
-        if len(page) < 1000:
-            break
-        offset += 1000
-    return rows
+def fetch_range(anon_key: str, oidc_token: str, range_name: str) -> list[dict[str, Any]]:
+    r = requests.post(
+        EDGE_URL,
+        headers={
+            "apikey": anon_key,
+            "Authorization": f"Bearer {anon_key}",
+            "x-github-oidc-token": oidc_token,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        json={"range": range_name},
+        timeout=120,
+    )
+    r.raise_for_status()
+    payload = r.json()
+    checks = [
+        (payload.get("contract") == "MLB_TOTALS_V26_GITHUB_EXPORT/1.0.0", "contract"),
+        (payload.get("researchOnly") is True, "researchOnly"),
+        (payload.get("sourceTable") == f"public.{TABLE}", "sourceTable"),
+        (payload.get("range") == range_name, "range"),
+        (payload.get("officialPicksWrites") == 0, "Official Picks"),
+        (payload.get("apostarActivation") is False, "APOSTAR"),
+        (payload.get("productionPromotion") is False, "production"),
+        (payload.get("oddsApiHistoricalCreditsConsumed") == 0, "Odds API credits"),
+        (payload.get("external2026Included") is False, "2026"),
+        (isinstance(payload.get("rows"), list), "rows"),
+    ]
+    bad = [name for ok, name in checks if not ok]
+    if bad:
+        raise RuntimeError("V26_EDGE_CONTRACT_INVALID:" + ",".join(bad))
+    return payload["rows"]
 
 
 def numeric_frame(df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
@@ -279,72 +267,17 @@ def evaluate_pregate(
     }
 
 
-def upsert_registry(key: str, result: dict[str, Any]) -> None:
-    selected = result.get("selected_candidate_before_pregate")
-    development = {
-        "train_period": "2025-04-01/2025-05-31",
-        "internal_validation_period": "2025-06-01/2025-06-30",
-        "train_rows": result.get("train_rows"),
-        "june_rows": result.get("june_rows"),
-        "feature_count": result.get("feature_count"),
-        "specs_tried": result.get("specs_tried"),
-        "internal_gate_candidate_count": result.get("internal_gate_candidate_count"),
-        "selected_candidate_before_pregate": selected,
-        "spec_summaries": result.get("spec_summaries"),
-        "jul_aug_status": result.get("jul_aug_status"),
-        "external_2026_status": "NOT_OPENED",
-        "odds_api_historical_credits_consumed": 0,
-    }
-    formula = {
-        "family": "sklearn_extra_trees",
-        "seed": SEED,
-        "spec_grid": model_specs(),
-        "threshold_modes": MODES,
-        "thresholds": THRESHOLDS,
-        "selected": selected,
-        "forbidden_feature_check": "PASS",
-        "external_2026_queried": False,
-    }
-    payload = {
-        "candidate_name": CANDIDATE_NAME,
-        "branch_type": "PREGAME",
-        "market": "total",
-        "target_line_role": "closing",
-        "formula_spec": formula,
-        "development_metrics": development,
-        "holdout_metrics": result.get("pregate_metrics"),
-        "full_2025_metrics": None,
-        "status": result["status"],
-        "selected_using": "Apr-May train; June internal selection; Jul-Aug opened once only after June gate; 2026 unopened",
-        "research_only": True,
-        "official_picks_writes": False,
-        "apostar_activation": False,
-        "external_2026_metrics": None,
-    }
-    r = requests.post(
-        f"{SUPABASE_URL}/rest/v1/{REGISTRY}",
-        headers={
-            **headers(key),
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates,return=minimal",
-        },
-        params={"on_conflict": "candidate_name"},
-        data=json.dumps(payload),
-        timeout=60,
-    )
-    r.raise_for_status()
-
-
 def main() -> None:
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-    if not key:
-        result = base_result("BLOCKED_MISSING_GITHUB_SUPABASE_SERVICE_ROLE_KEY")
-        result["blocker"] = "GitHub Actions secret SUPABASE_SERVICE_ROLE_KEY is not configured."
+    anon_key = os.environ.get("SUPABASE_ANON_KEY", "").strip()
+    oidc_token = os.environ.get("GITHUB_OIDC_TOKEN", "").strip()
+    if not anon_key or not oidc_token:
+        result = base_result("BLOCKED_MISSING_OIDC_EXPORT_AUTH")
+        result["blocker"] = "GitHub OIDC or Supabase anon gateway key is unavailable."
         write_result(result)
         print(json.dumps({"status": result["status"]}, indent=2))
         return
 
-    apr_jun = fetch_period(key, "2025-04-01", "2025-07-01")
+    apr_jun = fetch_range(anon_key, oidc_token, "apr_jun")
     if len(apr_jun) != 1150:
         raise RuntimeError(f"V26_APR_JUN_COUNT_MISMATCH:{len(apr_jun)}")
 
@@ -454,7 +387,7 @@ def main() -> None:
 
     if selected is not None:
         # First and only read of Jul-Aug for this frozen V26 family.
-        jul_aug = fetch_period(key, "2025-07-01", "2025-09-01")
+        jul_aug = fetch_range(anon_key, oidc_token, "jul_aug")
         if len(jul_aug) != 741:
             raise RuntimeError(f"V26_JULAUG_COUNT_MISMATCH:{len(jul_aug)}")
         pregate = pd.DataFrame(jul_aug)
@@ -478,7 +411,6 @@ def main() -> None:
         )
 
     write_result(result)
-    upsert_registry(key, result)
     print(json.dumps({
         "status": result["status"],
         "feature_count": result["feature_count"],
