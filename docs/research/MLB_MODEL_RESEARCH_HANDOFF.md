@@ -6,6 +6,37 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Walks first-pass closeout — authoritative
+
+Frozen rule: `batter_walks_under_0p5_proj_0p20_v1`.
+
+- strict-prior-date batter history only;
+- line = 0.5 batter walks;
+- direction = UNDER;
+- select when projected walks <= 0.20.
+
+2025 rolling:
+
+- 1,253/1,489 = **84.15%**;
+- worst month = **81.49%**;
+- baseline UNDER 0.5 = **73.92%**;
+- lift = **+10.23 pts**.
+
+2026 one-shot external:
+
+- 2,590/3,106 = **83.39%**;
+- coverage = **8.74%**;
+- worst month = **79.13%**;
+- baseline = **72.66%**;
+- lift = **+10.73 pts**;
+- retuned after external = **NO**.
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+State: `TARGET_MET_75_PLUS`.
+
+Historical sportsbook prices are not certified; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Batter Strikeouts first-pass closeout — authoritative
 
 Frozen rule: `batter_k_under_1p5_proj_0p5_v1`.
