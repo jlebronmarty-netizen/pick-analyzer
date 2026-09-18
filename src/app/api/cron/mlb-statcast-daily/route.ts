@@ -11,6 +11,8 @@ import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-h
 import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
 import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-settlement.service'
 import { capturePa13PitcherErForward } from '@/services/pa13-pitcher-er-forward-capture.service'
+import { freezePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-freeze.service'
+import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-settlement.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -53,6 +55,12 @@ function puertoRicoClock(now = new Date()) {
     hour: Number(parts.hour),
     minute: Number(parts.minute),
   }
+}
+
+function addDays(date: string, days: number) {
+  const value = new Date(`${date}T00:00:00Z`)
+  value.setUTCDate(value.getUTCDate() + days)
+  return value.toISOString().slice(0, 10)
 }
 
 function withinProspectiveCaptureWindow(now = new Date()) {
@@ -101,6 +109,50 @@ async function safePa13PitcherErForwardCapture(operatingDate: string, id: string
       officialPicksModified: false,
       apostarActivated: false,
       error: errorMessage(error, 'Unknown PA-13 Pitcher ER forward capture error'),
+    }
+  }
+}
+
+async function safePa12ErForwardShadowFreeze() {
+  try {
+    return await freezePa12ErForwardShadowV2()
+  } catch (error) {
+    return {
+      success: false,
+      status: 'PA12_ER_FORWARD_SHADOW_V2_FREEZE_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      shadowOnly: true,
+      productionEligible: false,
+      probabilityLayerAuthorized: false,
+      marketRecommendationAuthorized: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown PA-12 Pitcher ER forward shadow V2 freeze error'),
+    }
+  }
+}
+
+async function safePa12ErForwardShadowSettlement(targetDate: string) {
+  try {
+    return await settlePa12ErForwardShadowV2(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'PA12_ER_FORWARD_SHADOW_V2_SETTLEMENT_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      shadowOnly: true,
+      productionEligible: false,
+      probabilityLayerAuthorized: false,
+      marketRecommendationAuthorized: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      roiCertified: false,
+      clvCertified: false,
+      evCertified: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown PA-12 Pitcher ER forward shadow V2 settlement error'),
     }
   }
 }
@@ -337,6 +389,13 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // paired modal Run Line establishes HOME -1.5. All evidence is research-only.
     const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
 
+    // Independent research-only Pitcher ER V2 freeze/settlement run before
+    // Statcast catch-up. This preserves fixed-clock evidence even if a separate
+    // ingestion/readiness stage fails later in the request.
+    const operatingClock = puertoRicoClock()
+    const pa12ErForwardShadowFreeze = await safePa12ErForwardShadowFreeze()
+    const pa12ErForwardShadowSettlement = await safePa12ErForwardShadowSettlement(addDays(operatingClock.date, -1))
+
     const catchupRuns: Array<Record<string, unknown>> = []
     let reachedCurrent = false
     let wroteHistory = false
@@ -347,7 +406,15 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
       if (!result.success) {
         const readiness = await getMlbDailyHistoryReadiness()
-        return apiOk({ success: false, status: result.status, catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture }, id, {
+        return apiOk({
+          success: false,
+          status: result.status,
+          catchupRuns,
+          dailyHistoryReadiness: readiness,
+          prospectiveMarketCapture,
+          pa12ErForwardShadowFreeze,
+          pa12ErForwardShadowSettlement,
+        }, id, {
           status: failureStatus(result),
           headers: { 'Cache-Control': 'no-store' },
         })
@@ -363,7 +430,15 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
     if (!reachedCurrent) {
       const readiness = await getMlbDailyHistoryReadiness()
-      return apiOk({ success: false, status: 'CATCHUP_LIMIT_REACHED', catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture }, id, {
+      return apiOk({
+        success: false,
+        status: 'CATCHUP_LIMIT_REACHED',
+        catchupRuns,
+        dailyHistoryReadiness: readiness,
+        prospectiveMarketCapture,
+        pa12ErForwardShadowFreeze,
+        pa12ErForwardShadowSettlement,
+      }, id, {
         status: 503,
         headers: { 'Cache-Control': 'no-store' },
       })
@@ -413,6 +488,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       runlineHomeP15ResearchFreeze: runlineHomeP15Freeze,
       runlineHomeP15ResearchSettlement: runlineHomeP15Settlement,
       prospectiveMarketCapture,
+      pa12ErForwardShadowFreeze,
+      pa12ErForwardShadowSettlement,
     }, id, {
       status: success ? 200 : 409,
       headers: { 'Cache-Control': 'no-store' },
