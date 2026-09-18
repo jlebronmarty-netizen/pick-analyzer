@@ -42,7 +42,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | PA-12 forward point-shadow V2 | `PROSPECTIVE_FORWARD` | Point-model math frozen from sealed prior research | Sep 18 pilot: 23 eligible point forecasts; settlement/accumulation in progress | prospective sample still small | N/A — point forecast, not market accuracy yet | Not market-certified | Accumulate fixed-clock forecasts + PA-13 real prices. Do not infer ROI/EV yet. |
 | **Pitcher Strikeouts** | `PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0` data path | evidence/corpus gate | 38 replay-PASS stored rows after closeout | training not authorized | corpus too small / temporally uneven | **NO MODEL YET** | `BLOCKED_CORPUS_TOO_SMALL` | Accumulate materially new evidence; do not brute-force or mutate V2.0.0. |
-| **Pitcher Walks** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate after game markets / currently prioritized props. |
+| **Pitcher Walks** | `pitcher_bb_under_2p5_p85_v1` — UNDER 2.5 BB when calibrated UNDER probability >=85% | `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 111/122 = **90.98%**; worst month **82.35%**; baseline 75.83% | 2026 historical frozen-rule result: 125/137 = **91.24%**; worst month **86.67%**; baseline 74.57% | 2025 n=122; 2026 n=137; 2026 selected coverage **3.95%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY`; historical pricing not certified | Preserve frozen rule. Next gate is real pregame 2.5 pricing / forward market evidence; do not claim ROI/EV/CLV yet. |
 | **Pitcher Outs** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **Batter Hits** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **Batter Total Bases** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
@@ -66,6 +66,39 @@ Canonical unified candidate: `totals_v37_xyear_under_catboost_v1`.
 - state: `REVISIT_AFTER_FIRST_PASS`.
 
 Do not rescue V37 using its 2026 result. Preserve V10/V36/V37 lineage and return to Totals only after the first pass across the remaining markets.
+
+## First-pass closeout — Pitcher Walks
+
+Frozen market rule: `pitcher_bb_under_2p5_p85_v1`.
+
+- underlying point model: `MLB_PITCHER_BB_V1` unchanged;
+- target: pitcher walks / bases on balls only, excluding HBP;
+- line: 2.5;
+- direction: UNDER;
+- select only when calibrated UNDER probability >=85%;
+- calibration minimum bin n = 20.
+
+2025 expanding rolling evidence:
+
+- 111/122 = **90.98%**;
+- worst month = **82.35%**;
+- baseline UNDER 2.5 = **75.83%**;
+- lift = **+15.15 percentage points**.
+
+Frozen-rule 2026 historical evidence:
+
+- 125/137 = **91.24%**;
+- selected coverage = **3.95%** of eligible rows;
+- worst month = **86.67%**;
+- baseline UNDER 2.5 = **74.57%**;
+- lift = **+16.67 percentage points**;
+- retuned after external rule result: **NO**.
+
+Validation caveat: the underlying point/Brier model had 2026 diagnostics before the exact market-rule freeze, so this is not labeled a pristine untouched-season holdout. The exact line/direction/threshold was selected using 2025 only.
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Historical sportsbook prices for these exact prop opportunities are not certified, so ROI/EV/CLV remain unclaimed.
 
 ## Unified 2025 rolling-development protocol
 

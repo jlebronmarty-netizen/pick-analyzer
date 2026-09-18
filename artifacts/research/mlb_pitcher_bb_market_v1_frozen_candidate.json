@@ -1,0 +1,68 @@
+{
+  "contract": "MLB_PITCHER_BB_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "PITCHER_WALKS",
+  "model_version": "MLB_PITCHER_BB_V1",
+  "point_model": {
+    "intercept": 1.02751690958322,
+    "coefficient_expected_bf_x_pitcher_bb_rate": 0.395408983049705
+  },
+  "probability_model": {
+    "method": "expanding-prior empirical calibration by 0.25 BB projection bin",
+    "minimum_calibration_bin_n": 20
+  },
+  "rule": {
+    "line": 2.5,
+    "direction": "UNDER",
+    "required_under_probability": 0.85,
+    "equivalent_max_over_probability": 0.15
+  },
+  "selection_protocol": "2025 expanding monthly rolling validation May-Sep; no 2026 used to select line/direction/threshold",
+  "development_2025": {
+    "n": 122,
+    "correct": 111,
+    "accuracy": 0.909836065573771,
+    "min_month_n": 17,
+    "worst_month_accuracy": 0.823529411764706,
+    "monthly_accuracy_sd": 0.0443377760144786,
+    "baseline_under_accuracy": 0.75832645196807,
+    "lift_vs_baseline": 0.1515096136057,
+    "months": {
+      "2025-05": {
+        "n": 17,
+        "correct": 14,
+        "accuracy": 0.823529411764706
+      },
+      "2025-06": {
+        "n": 32,
+        "correct": 29,
+        "accuracy": 0.90625
+      },
+      "2025-07": {
+        "n": 36,
+        "correct": 34,
+        "accuracy": 0.944444444444444
+      },
+      "2025-08": {
+        "n": 18,
+        "correct": 17,
+        "accuracy": 0.944444444444444
+      },
+      "2025-09": {
+        "n": 19,
+        "correct": 17,
+        "accuracy": 0.894736842105263
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_rule_accuracy_opened": false,
+  "external_2026_note": "2026 point/Brier diagnostics existed before this market-rule freeze, so any later rule-accuracy result is historical external evidence, not a pristine untouched-season holdout.",
+  "historical_odds_available": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
