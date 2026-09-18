@@ -1,0 +1,74 @@
+{
+  "schema": "PA13_PITCHER_ER_FORWARD_PRICING_CERT/1.0.0",
+  "date": "2026-09-18",
+  "sourceContract": "PA13_PITCHER_ER_FORWARD_CAPTURE/1.0.0",
+  "provider": "the-odds-api",
+  "market": "pitcher_earned_runs",
+  "firstProspectiveCapture": {
+    "jobId": "9d4c35f4-c0e3-4eac-9b44-3a44a8220fb0",
+    "status": "partial",
+    "targetDate": "2026-09-18",
+    "rows": 180,
+    "games": 14,
+    "pitchers": 26,
+    "books": 4,
+    "distinctPitcherLines": 31,
+    "pitcherBookLineGroups": 90,
+    "completeOverUnderPairs": 90,
+    "incompletePairs": 0,
+    "duplicateIdGroups": 0,
+    "timingViolations": 0,
+    "minimumLead": "08:25:00",
+    "maximumLead": "11:56:06",
+    "providerCallsMade": 15,
+    "providerCreditsConsumed": 15,
+    "requestsRemainingAfter": 5565,
+    "excludedCalls": [
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79584",
+        "canonicalGamePk": 823572,
+        "providerEventId": "49deafc3a88bf69634e0f3510d62b0ee",
+        "reason": "PROVIDER_EVENT_IDENTITY_MISMATCH",
+        "rowsPersisted": 0
+      }
+    ]
+  },
+  "books": {
+    "betmgm": {
+      "rows": 52,
+      "events": 14
+    },
+    "bovada": {
+      "rows": 52,
+      "events": 14
+    },
+    "draftkings": {
+      "rows": 48,
+      "events": 13
+    },
+    "fanatics": {
+      "rows": 28,
+      "events": 14
+    }
+  },
+  "certification": {
+    "forwardCurrentPricingSourceReady": true,
+    "historicalPricingCertified": false,
+    "roiCertified": false,
+    "clvCertified": false,
+    "evCertified": false,
+    "productionEligible": false,
+    "researchOnly": true,
+    "shadowOnly": true
+  },
+  "nextValidUse": [
+    "retain prospective quotes with exact game/pitcher/line/book/timestamp identity",
+    "after outcomes exist, evaluate forward research joins only",
+    "do not infer historical ROI/CLV/EV from this forward corpus"
+  ],
+  "boundaries": {
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "historicalOddsApiCreditsSpent": 0
+  }
+}
