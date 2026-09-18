@@ -30,3 +30,30 @@ Monthly:
 State before external: `TARGET_MET_75_PLUS_EXTERNAL_PENDING`.
 
 Historical prop pricing is not certified; no ROI/EV/CLV claim. Official Picks unchanged. APOSTAR disabled.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+- 2026 source: already-stored SportsDataIO game-level starter stats
+- source window: 2026-03-26 through 2026-07-19
+- null provider player identities excluded fail-closed
+- eligible rows after minimum-prior-start gate: 1,754
+- selected: 118
+- correct: 83
+- accuracy: **70.34%**
+- selected coverage: **6.73%**
+- worst selected month: **64.44%**
+- unconditional NO baseline: **67.45%**
+- lift vs baseline: **+2.89 percentage points**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 12/17 = 70.59%
+- May: 29/45 = 64.44%
+- Jun: 31/41 = 75.61%
+- Jul-to-source-end: 11/15 = 73.33%
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+The 2025 rule exceeded 75%, but the frozen 2026 one-shot did not. Do not change the 10% threshold using 2026. Revisit later with materially better pregame features.
