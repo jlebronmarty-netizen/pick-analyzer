@@ -1,0 +1,96 @@
+{
+  "contract": "MLB_PITCHER_OUTS_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "pitcher_outs_under_18p5_p90_v1",
+  "freeze_commit_sha": "66c8018ddd68af71a537ba89a9439168ddb19801",
+  "validation_class": "HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE",
+  "model_version": "MLB_PITCHER_OUTS_RESEARCH_V1",
+  "selected_hyperparameters": {
+    "alpha": 0.2,
+    "beta": 0.7,
+    "fit": {
+      "intercept": 7.2635858445929635,
+      "slope": 0.547385023095297
+    }
+  },
+  "probability_method": "empirical TRAIN residual distribution",
+  "rule": {
+    "line": 18.5,
+    "direction": "UNDER",
+    "minimum_under_probability": 0.9,
+    "equivalent_max_over_probability": 0.1
+  },
+  "development_2025": {
+    "n": 126,
+    "correct": 123,
+    "accuracy": 0.976190476190476,
+    "worst_split_accuracy": 0.955223880597015,
+    "baseline_under_accuracy": 0.839357429718876,
+    "lift_vs_baseline": 0.136833046471601,
+    "splits": {
+      "VALIDATION": {
+        "n": 59,
+        "correct": 59,
+        "accuracy": 1
+      },
+      "TEST": {
+        "n": 67,
+        "correct": 64,
+        "accuracy": 0.955223880597015
+      }
+    }
+  },
+  "external_2026": {
+    "service_lineage_checksum": {
+      "sportsdata_starters": 3005,
+      "matched_statcast": 2464,
+      "strikeouts_reconciled": 2464,
+      "strict_prior_feature_rows": 2391,
+      "scored_rows": 2391
+    },
+    "point_metrics_checksum": {
+      "mae": 2.77139689108858,
+      "rmse": 3.62186087402146,
+      "bias": -0.00228217146960511,
+      "average_prediction": 15.8475714462635,
+      "average_actual": 15.8498536177332
+    },
+    "selected_n": 226,
+    "selected_correct": 215,
+    "selected_accuracy": 0.951327433628319,
+    "selected_coverage": 0.0945211208699289,
+    "baseline_under_accuracy": 0.82392304475115,
+    "lift_vs_baseline": 0.127404388877168,
+    "worst_month_accuracy": 0.892307692307692,
+    "months": {
+      "2026-04": {
+        "n": 65,
+        "correct": 58,
+        "accuracy": 0.892307692307692
+      },
+      "2026-05": {
+        "n": 66,
+        "correct": 65,
+        "accuracy": 0.984848484848485
+      },
+      "2026-06": {
+        "n": 67,
+        "correct": 65,
+        "accuracy": 0.970149253731343
+      },
+      "2026-07": {
+        "n": 28,
+        "correct": 27,
+        "accuracy": 0.964285714285714
+      }
+    }
+  },
+  "target_75_met": true,
+  "retuned_after_external": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
