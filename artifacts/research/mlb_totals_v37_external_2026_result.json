@@ -1,0 +1,108 @@
+{
+  "apostar_activation": false,
+  "candidate": {
+    "accuracy": 0.5532359081419624,
+    "architecture": "catboost_classifier",
+    "correct": 265,
+    "coverage_vs_nonpush_oof": 0.2538420773714891,
+    "min_month_n": 57,
+    "mode": "under_only",
+    "monthly_accuracy_sd": 0.03692062092020197,
+    "months": {
+      "2025-05": {
+        "accuracy": 0.5416666666666666,
+        "correct": 65,
+        "n": 120
+      },
+      "2025-06": {
+        "accuracy": 0.5537190082644629,
+        "correct": 67,
+        "n": 121
+      },
+      "2025-07": {
+        "accuracy": 0.5465116279069767,
+        "correct": 47,
+        "n": 86
+      },
+      "2025-08": {
+        "accuracy": 0.5263157894736842,
+        "correct": 50,
+        "n": 95
+      },
+      "2025-09": {
+        "accuracy": 0.631578947368421,
+        "correct": 36,
+        "n": 57
+      }
+    },
+    "n": 479,
+    "params": {
+      "depth": 6,
+      "iterations": 400,
+      "l2_leaf_reg": 5.0,
+      "learning_rate": 0.05,
+      "random_strength": 1.0
+    },
+    "spec_index": 3,
+    "stable": true,
+    "target_met_75_plus": false,
+    "threshold": 0.65,
+    "worst_month_accuracy": 0.5263157894736842
+  },
+  "candidate_freeze_contract": "MLB_TOTALS_V37_FROZEN_CANDIDATE/1.0.0",
+  "candidate_freeze_sha": "2d7b5c3f3756c264a59b53cf5a3310ac7d9e1d82",
+  "contract": "MLB_TOTALS_V37_EXTERNAL_2026_RESULT/1.0.0",
+  "external_2026_opened_once": true,
+  "external_nonpush_rows": 1513,
+  "external_rows": 1576,
+  "external_season": 2026,
+  "feature_hash_sha256": "1bcdbe1e570096e53e11484cf3d99beeaa4c56bf375d4043cbfc1c6938f9e44c",
+  "full_zero_threshold_accuracy": 0.48909451421017847,
+  "github_sha_at_external_run": "6ca11127e882b0c8bc88cac8d5df222b691c8dd3",
+  "monthly": {
+    "2026-03": {
+      "accuracy": 0.8,
+      "correct": 4,
+      "n": 5
+    },
+    "2026-04": {
+      "accuracy": 0.41379310344827586,
+      "correct": 24,
+      "n": 58
+    },
+    "2026-05": {
+      "accuracy": 0.4393939393939394,
+      "correct": 29,
+      "n": 66
+    },
+    "2026-06": {
+      "accuracy": 0.4666666666666667,
+      "correct": 35,
+      "n": 75
+    },
+    "2026-07": {
+      "accuracy": 0.5441176470588235,
+      "correct": 37,
+      "n": 68
+    },
+    "2026-08": {
+      "accuracy": 0.3684210526315789,
+      "correct": 14,
+      "n": 38
+    }
+  },
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "regression_diagnostics": null,
+  "research_only": true,
+  "retuning_after_external": false,
+  "selected_accuracy": 0.4612903225806452,
+  "selected_correct": 143,
+  "selected_coverage_vs_nonpush": 0.2048909451421018,
+  "selected_n": 310,
+  "selected_using_2025_only": true,
+  "status": "REVISIT_AFTER_FIRST_PASS",
+  "target_75_met_external": false,
+  "worst_month_accuracy": 0.3684210526315789
+}
