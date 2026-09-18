@@ -1,0 +1,75 @@
+{
+  "contract": "MLB_BATTER_SINGLES_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "batter_singles_under_1p5_proj_0p50_v1",
+  "freeze_commit_sha": "becf5aca9b05f1500c4e67ed12138b525ceaa33e",
+  "validation_class": "UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT",
+  "rule": {
+    "line": 1.5,
+    "direction": "UNDER",
+    "maximum_projected_singles": 0.5
+  },
+  "external_refit_2025": {
+    "n": 42601,
+    "intercept": 0.260944252887134,
+    "slope": 0.515544560255828
+  },
+  "development_2025": {
+    "n": 8328,
+    "correct": 7822,
+    "accuracy": 0.93924111431316,
+    "worst_month_accuracy": 0.930954228083786,
+    "baseline_under_accuracy": 0.899602543720191,
+    "lift_vs_baseline": 0.0396385705929696
+  },
+  "external_2026": {
+    "eligible_rows": 40648,
+    "selected_n": 13634,
+    "selected_correct": 12690,
+    "selected_accuracy": 0.930761331964207,
+    "selected_coverage": 0.335416256642393,
+    "baseline_under_accuracy": 0.902971855933871,
+    "lift_vs_baseline": 0.0277894760303359,
+    "worst_month_accuracy": 0.911596463858554,
+    "months": {
+      "2026-04": {
+        "n": 1923,
+        "correct": 1753,
+        "accuracy": 0.911596463858554
+      },
+      "2026-05": {
+        "n": 2745,
+        "correct": 2563,
+        "accuracy": 0.933697632058288
+      },
+      "2026-06": {
+        "n": 2466,
+        "correct": 2301,
+        "accuracy": 0.9330900243309
+      },
+      "2026-07": {
+        "n": 2385,
+        "correct": 2223,
+        "accuracy": 0.932075471698113
+      },
+      "2026-08": {
+        "n": 2663,
+        "correct": 2493,
+        "accuracy": 0.936162223056703
+      },
+      "2026-09": {
+        "n": 1452,
+        "correct": 1357,
+        "accuracy": 0.934573002754821
+      }
+    }
+  },
+  "target_75_met": true,
+  "retuned_after_external": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
