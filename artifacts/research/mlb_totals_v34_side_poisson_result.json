@@ -1,0 +1,421 @@
+{
+  "2026_opened_for_external_test": false,
+  "2026_used_for_selection": false,
+  "apostar_activation": false,
+  "candidate_name": "totals_v34_side_poisson_catboost_v1",
+  "catboost_version": "1.2.10",
+  "categorical_features": [
+    "cat_home_team",
+    "cat_away_team",
+    "cat_venue"
+  ],
+  "contract": "MLB_TOTALS_V34_SIDE_POISSON_RESEARCH/1.0.0",
+  "edge_thresholds_runs": [
+    0.5,
+    1.0,
+    1.5,
+    2.0
+  ],
+  "feature_count": 299,
+  "internal_gate": {
+    "accuracy_min": 0.7,
+    "half_n_min": 10,
+    "n_min": 30,
+    "worst_half_accuracy_min": 0.65
+  },
+  "internal_gate_candidate_count": 0,
+  "jul_aug_opened": false,
+  "jul_aug_status": "NOT_OPENED",
+  "june_rows": 381,
+  "model_family": "catboost_side_poisson",
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "prediction_rule": "predicted_home_mean + predicted_away_mean compared with closing total",
+  "production_promotion": false,
+  "research_only": true,
+  "seed": 20260917,
+  "selected_candidate_before_pregate": null,
+  "source_table": "public.mlb_totals_v34_side_poisson_dataset_2025_v1",
+  "spec_summaries": [
+    {
+      "best_candidate": {
+        "accuracy": 0.5833333333333334,
+        "correct": 35,
+        "edge_threshold": 1.0,
+        "first_half": {
+          "accuracy": 0.59375,
+          "correct": 19,
+          "n": 32
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5223097112860893,
+        "min_half_n": 28,
+        "mode": "two_sided",
+        "n": 60,
+        "params": {
+          "depth": 4,
+          "iterations": 200,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.03,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.5714285714285714,
+          "correct": 16,
+          "n": 28
+        },
+        "spec_index": 0,
+        "total_runs_mae": 3.7360090675195226,
+        "total_runs_rmse": 4.714571340971161,
+        "worst_half_accuracy": 0.5714285714285714
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5223097112860893,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 4,
+        "iterations": 200,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.03,
+        "random_strength": 1.0
+      },
+      "spec_index": 0,
+      "total_runs_mae": 3.7360090675195226,
+      "total_runs_rmse": 4.714571340971161
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.5531914893617021,
+        "correct": 26,
+        "edge_threshold": 1.0,
+        "first_half": {
+          "accuracy": 0.5,
+          "correct": 9,
+          "n": 18
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5144356955380578,
+        "min_half_n": 18,
+        "mode": "over_only",
+        "n": 47,
+        "params": {
+          "depth": 4,
+          "iterations": 200,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.06,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.5862068965517241,
+          "correct": 17,
+          "n": 29
+        },
+        "spec_index": 1,
+        "total_runs_mae": 3.768477409096056,
+        "total_runs_rmse": 4.8532022723930295,
+        "worst_half_accuracy": 0.5
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5144356955380578,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 4,
+        "iterations": 200,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.06,
+        "random_strength": 1.0
+      },
+      "spec_index": 1,
+      "total_runs_mae": 3.768477409096056,
+      "total_runs_rmse": 4.8532022723930295
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.6046511627906976,
+        "correct": 26,
+        "edge_threshold": 1.0,
+        "first_half": {
+          "accuracy": 0.5882352941176471,
+          "correct": 10,
+          "n": 17
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5196850393700787,
+        "min_half_n": 17,
+        "mode": "over_only",
+        "n": 43,
+        "params": {
+          "depth": 4,
+          "iterations": 400,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.03,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.6153846153846154,
+          "correct": 16,
+          "n": 26
+        },
+        "spec_index": 2,
+        "total_runs_mae": 3.72999900461267,
+        "total_runs_rmse": 4.7662481379286445,
+        "worst_half_accuracy": 0.5882352941176471
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5196850393700787,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 4,
+        "iterations": 400,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.03,
+        "random_strength": 1.0
+      },
+      "spec_index": 2,
+      "total_runs_mae": 3.72999900461267,
+      "total_runs_rmse": 4.7662481379286445
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.5492957746478874,
+        "correct": 117,
+        "edge_threshold": 1.0,
+        "first_half": {
+          "accuracy": 0.5675675675675675,
+          "correct": 63,
+          "n": 111
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5301837270341208,
+        "min_half_n": 102,
+        "mode": "two_sided",
+        "n": 213,
+        "params": {
+          "depth": 4,
+          "iterations": 400,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.06,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.5294117647058824,
+          "correct": 54,
+          "n": 102
+        },
+        "spec_index": 3,
+        "total_runs_mae": 3.7994956105312907,
+        "total_runs_rmse": 5.042071230317476,
+        "worst_half_accuracy": 0.5294117647058824
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5301837270341208,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 4,
+        "iterations": 400,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.06,
+        "random_strength": 1.0
+      },
+      "spec_index": 3,
+      "total_runs_mae": 3.7994956105312907,
+      "total_runs_rmse": 5.042071230317476
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.5576923076923077,
+        "correct": 29,
+        "edge_threshold": 0.5,
+        "first_half": {
+          "accuracy": 0.5806451612903226,
+          "correct": 18,
+          "n": 31
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5328083989501312,
+        "min_half_n": 21,
+        "mode": "over_only",
+        "n": 52,
+        "params": {
+          "depth": 6,
+          "iterations": 200,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.03,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.5238095238095238,
+          "correct": 11,
+          "n": 21
+        },
+        "spec_index": 4,
+        "total_runs_mae": 3.7328447098765802,
+        "total_runs_rmse": 4.823136893045038,
+        "worst_half_accuracy": 0.5238095238095238
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5328083989501312,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 6,
+        "iterations": 200,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.03,
+        "random_strength": 1.0
+      },
+      "spec_index": 4,
+      "total_runs_mae": 3.7328447098765802,
+      "total_runs_rmse": 4.823136893045038
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.5645161290322581,
+        "correct": 175,
+        "edge_threshold": 0.5,
+        "first_half": {
+          "accuracy": 0.56875,
+          "correct": 91,
+          "n": 160
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5406824146981627,
+        "min_half_n": 150,
+        "mode": "two_sided",
+        "n": 310,
+        "params": {
+          "depth": 6,
+          "iterations": 200,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.06,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.56,
+          "correct": 84,
+          "n": 150
+        },
+        "spec_index": 5,
+        "total_runs_mae": 3.7891716527816706,
+        "total_runs_rmse": 5.068032395436639,
+        "worst_half_accuracy": 0.56
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5406824146981627,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 6,
+        "iterations": 200,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.06,
+        "random_strength": 1.0
+      },
+      "spec_index": 5,
+      "total_runs_mae": 3.7891716527816706,
+      "total_runs_rmse": 5.068032395436639
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.5801886792452831,
+        "correct": 123,
+        "edge_threshold": 1.0,
+        "first_half": {
+          "accuracy": 0.5981308411214953,
+          "correct": 64,
+          "n": 107
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5511811023622047,
+        "min_half_n": 105,
+        "mode": "two_sided",
+        "n": 212,
+        "params": {
+          "depth": 6,
+          "iterations": 400,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.03,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.5619047619047619,
+          "correct": 59,
+          "n": 105
+        },
+        "spec_index": 6,
+        "total_runs_mae": 3.7395242948045824,
+        "total_runs_rmse": 4.978049735047931,
+        "worst_half_accuracy": 0.5619047619047619
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5511811023622047,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 6,
+        "iterations": 400,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.03,
+        "random_strength": 1.0
+      },
+      "spec_index": 6,
+      "total_runs_mae": 3.7395242948045824,
+      "total_runs_rmse": 4.978049735047931
+    },
+    {
+      "best_candidate": {
+        "accuracy": 0.5601659751037344,
+        "correct": 135,
+        "edge_threshold": 2.0,
+        "first_half": {
+          "accuracy": 0.5725806451612904,
+          "correct": 71,
+          "n": 124
+        },
+        "full_internal_accuracy_at_zero_edge": 0.5354330708661418,
+        "min_half_n": 117,
+        "mode": "two_sided",
+        "n": 241,
+        "params": {
+          "depth": 6,
+          "iterations": 400,
+          "l2_leaf_reg": 5.0,
+          "learning_rate": 0.06,
+          "random_strength": 1.0
+        },
+        "passes_internal_gate": false,
+        "second_half": {
+          "accuracy": 0.5470085470085471,
+          "correct": 64,
+          "n": 117
+        },
+        "spec_index": 7,
+        "total_runs_mae": 4.040048188657525,
+        "total_runs_rmse": 5.505021791004671,
+        "worst_half_accuracy": 0.5470085470085471
+      },
+      "best_gate_candidate": null,
+      "full_internal_accuracy_at_zero_edge": 0.5354330708661418,
+      "gate_pass_count": 0,
+      "params": {
+        "depth": 6,
+        "iterations": 400,
+        "l2_leaf_reg": 5.0,
+        "learning_rate": 0.06,
+        "random_strength": 1.0
+      },
+      "spec_index": 7,
+      "total_runs_mae": 4.040048188657525,
+      "total_runs_rmse": 5.505021791004671
+    }
+  ],
+  "specs_tried": 8,
+  "status": "REJECTED_INTERNAL_JUNE_GATE",
+  "target_only_fields": [
+    "y_home_runs",
+    "y_away_runs"
+  ],
+  "threshold_modes": [
+    "two_sided",
+    "over_only",
+    "under_only"
+  ],
+  "train_rows": 769
+}
