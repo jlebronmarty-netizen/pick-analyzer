@@ -6,6 +6,37 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Pitcher Record a Win first-pass closeout — authoritative
+
+Frozen rule: `pitcher_record_win_no_prior_rate_0p10_v1`.
+
+- market key = `pitcher_record_a_win`;
+- selection = NO;
+- maximum prior starter win rate = 10%;
+- minimum prior starts = 5;
+- same-date prior starts excluded.
+
+2025 evidence:
+
+- 147/185 = **79.46%**;
+- worst month = **75.00%**;
+- baseline NO = **68.74%**;
+- lift = **+10.72 pts**.
+
+2026 one-shot evidence from already-stored SportsDataIO starter game rows through 2026-07-19:
+
+- 83/118 = **70.34%**;
+- coverage after prior-start gate = **6.73%**;
+- worst month = **64.44%**;
+- baseline NO = **67.45%**;
+- lift = **+2.89 pts**;
+- null provider player IDs excluded fail-closed;
+- retuned after external = **NO**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version by changing the 10% threshold after seeing 2026.
+
 ## 2026-09-18 Batter Triples first-pass closeout — authoritative
 
 Frozen rule: `batter_triples_under_0p5_proj_0p015_v1`.
