@@ -21,5 +21,5 @@
       "schedule": "*/30 * * * *"
     }
   ],
-  "buildCommand": "node -e \"const ok=Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL&&process.env.SUPABASE_SERVICE_ROLE_KEY); process.exit(ok?0:17)\" && npm run build"
+  "buildCommand": "node -e \"const {createClient}=require('@supabase/supabase-js'); const s=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false}}); s.from('mlb_totals_v26_full_ml_dataset_2025_v1').select('game_pk').limit(1).then(({data,error})=>{if(error)throw error;if(!data||!data.length)throw new Error('V26_EMPTY')}).catch(e=>{console.error(e.message);process.exit(19)})\" && npm run build"
 }
