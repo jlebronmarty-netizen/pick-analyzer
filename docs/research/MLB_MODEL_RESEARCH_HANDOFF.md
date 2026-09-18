@@ -6,6 +6,43 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Hits first-pass closeout — authoritative
+
+Frozen market rule:
+
+`batter_hits_under_1p5_edge_0p75_v1`
+
+Rule:
+
+- strict-prior-date batter history only;
+- line = 1.5 hits;
+- direction = UNDER;
+- select when projected hits <= 0.75;
+- same-day game 1 is not prior input for game 2.
+
+2025 expanding rolling:
+
+- 6,123/7,011 = **87.33%**;
+- worst month = **85.19%**;
+- baseline UNDER 1.5 = **79.55%**;
+- lift = **+7.78 percentage points**.
+
+Frozen-rule 2026 historical evidence:
+
+- 8,496/9,833 = **86.40%**;
+- selected coverage = **27.65%**;
+- worst month = **83.73%**;
+- baseline UNDER 1.5 = **80.23%**;
+- lift = **+6.18 percentage points**.
+
+State:
+
+`TARGET_MET_75_PLUS_EVENT_ACCURACY`
+
+Lineage label: `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` because aggregate 2026 point/Brier diagnostics had already been read before the exact market-rule freeze. The exact line/direction/edge was selected from 2025 strict rolling only and was not retuned afterward.
+
+Historical sportsbook prices are not certified; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Pitcher Walks first-pass closeout — authoritative
 
 Frozen market rule:

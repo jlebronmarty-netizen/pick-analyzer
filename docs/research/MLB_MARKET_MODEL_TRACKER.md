@@ -44,7 +44,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Pitcher Strikeouts** | `PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0` data path | evidence/corpus gate | 38 replay-PASS stored rows after closeout | training not authorized | corpus too small / temporally uneven | **NO MODEL YET** | `BLOCKED_CORPUS_TOO_SMALL` | Accumulate materially new evidence; do not brute-force or mutate V2.0.0. |
 | **Pitcher Walks** | `pitcher_bb_under_2p5_p85_v1` — UNDER 2.5 BB when calibrated UNDER probability >=85% | `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 111/122 = **90.98%**; worst month **82.35%**; baseline 75.83% | 2026 historical frozen-rule result: 125/137 = **91.24%**; worst month **86.67%**; baseline 74.57% | 2025 n=122; 2026 n=137; 2026 selected coverage **3.95%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY`; historical pricing not certified | Preserve frozen rule. Next gate is real pregame 2.5 pricing / forward market evidence; do not claim ROI/EV/CLV yet. |
 | **Pitcher Outs** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
-| **Batter Hits** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
+| **Batter Hits** | `batter_hits_under_1p5_edge_0p75_v1` — UNDER 1.5 when projected hits <=0.75 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 6,123/7,011 = **87.33%**; worst month **85.19%**; baseline 79.55% | 2026 frozen-rule: 8,496/9,833 = **86.40%**; worst month **83.73%**; baseline 80.23% | 2026 coverage **27.65%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Total Bases** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **NRFI / YRFI** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 
@@ -99,6 +99,36 @@ Validation caveat: the underlying point/Brier model had 2026 diagnostics before 
 State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
 
 Historical sportsbook prices for these exact prop opportunities are not certified, so ROI/EV/CLV remain unclaimed.
+
+## First-pass closeout — Batter Hits
+
+Frozen market rule: `batter_hits_under_1p5_edge_0p75_v1`.
+
+- strict-prior-date rolling projection;
+- line = 1.5 hits;
+- direction = UNDER;
+- select when projected hits <=0.75;
+- same-day doubleheader game 1 is excluded from game 2 prior history.
+
+2025 expanding rolling:
+
+- 6,123/7,011 = **87.33%**;
+- worst month = **85.19%**;
+- baseline UNDER 1.5 = **79.55%**;
+- lift = **+7.78 percentage points**.
+
+2026 frozen-rule historical evidence:
+
+- 8,496/9,833 = **86.40%**;
+- coverage = **27.65%**;
+- worst month = **83.73%**;
+- baseline UNDER 1.5 = **80.23%**;
+- lift = **+6.18 percentage points**;
+- retuned after external result: **NO**.
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Historical prop prices are not certified; do not claim ROI/EV/CLV.
 
 ## Unified 2025 rolling-development protocol
 
