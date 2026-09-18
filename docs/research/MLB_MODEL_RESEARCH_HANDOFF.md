@@ -6,6 +6,37 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Home Runs first-pass closeout — authoritative
+
+Frozen rule: `batter_hr_under_0p5_proj_0p10_v1`.
+
+- strict-prior-date batter history only;
+- line = 0.5 HR;
+- direction = UNDER;
+- select when projected HR <= 0.10.
+
+2025 rolling:
+
+- 11,176/12,016 = **93.01%**;
+- worst month = **92.31%**;
+- baseline UNDER 0.5 = **88.75%**;
+- lift = **+4.26 pts**.
+
+2026 one-shot external:
+
+- 12,448/13,507 = **92.16%**;
+- coverage = **37.99%**;
+- worst month = **90.77%**;
+- baseline = **89.00%**;
+- lift = **+3.16 pts**;
+- retuned after external = **NO**.
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+State: `TARGET_MET_75_PLUS`.
+
+Historical sportsbook prices are not certified; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Pitcher Earned Runs first-pass closeout — authoritative
 
 Frozen market rule:
