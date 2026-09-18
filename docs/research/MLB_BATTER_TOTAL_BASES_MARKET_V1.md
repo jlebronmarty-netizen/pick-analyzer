@@ -38,3 +38,21 @@ The exact line, direction and 1.5-edge threshold were selected from strict 2025 
 Historical prop pricing is not certified; no ROI/EV/CLV claim.
 
 Official Picks unchanged. APOSTAR disabled. No production promotion. Historical Odds API credits: 0.
+
+## 2026 frozen-rule result
+
+- eligible strict-prior rows: 35,558
+- selected: 2,336
+- correct: 2,021
+- accuracy: **86.52%**
+- selected coverage: **6.57%**
+- worst selected month: **83.33%**
+- unconditional UNDER 2.5 baseline: **80.74%**
+- lift vs baseline: **+5.78 percentage points**
+- retuned after external result: **NO**
+
+Monthly: Apr 429/512 = 83.79%; May 511/583 = 87.65%; Jun 387/454 = 85.24%; Jul 286/332 = 86.14%; Aug 378/419 = 90.21%; Sep-to-date 30/36 = 83.33%.
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Historical sportsbook pricing is not certified; ROI/EV/CLV remain unclaimed.
