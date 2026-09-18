@@ -21,6 +21,10 @@
       "schedule": "45 14 * * *"
     },
     {
+      "path": "/api/cron/mlb-runline-v2-forward",
+      "schedule": "46 14 * * *"
+    },
+    {
       "path": "/api/cron/nba-current-era-shadow",
       "schedule": "*/30 * * * *"
     }
