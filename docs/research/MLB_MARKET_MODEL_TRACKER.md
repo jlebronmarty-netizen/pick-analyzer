@@ -46,7 +46,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Pitcher Outs** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **Batter Hits** | `batter_hits_under_1p5_edge_0p75_v1` — UNDER 1.5 when projected hits <=0.75 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 6,123/7,011 = **87.33%**; worst month **85.19%**; baseline 79.55% | 2026 frozen-rule: 8,496/9,833 = **86.40%**; worst month **83.73%**; baseline 80.23% | 2026 coverage **27.65%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Total Bases** | `batter_total_bases_under_2p5_edge_1p5_v1` — UNDER 2.5 when projected TB <=1.0 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 1,081/1,187 = **91.07%**; worst month **90.19%**; baseline 80.41% | 2026 frozen-rule: 2,021/2,336 = **86.52%**; worst month **83.33%**; baseline 80.74% | 2026 coverage **6.57%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
-| **NRFI / YRFI** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
+| **NRFI / YRFI** | `nrfi_p52_fallback_v1` — NRFI when calibrated p>=52% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025: 190/340 = **55.88%**; worst month **39.13%**; baseline 49.51% | 2026: 162/301 = **53.82%**; worst month **48.24%**; baseline 50.37% | 2026 coverage **18.35%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; do not threshold-rescue from 2026. Revisit with materially better first-inning features/architecture. |
 
 ## First-pass closeouts
 
@@ -141,6 +141,18 @@ Frozen rule: `batter_total_bases_under_2p5_edge_1p5_v1`.
 State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
 
 Historical prop prices are not certified; no ROI/EV/CLV claim.
+
+## First-pass closeout — NRFI / YRFI
+
+Frozen fallback: `nrfi_p52_fallback_v1`.
+
+2025: **190/340 = 55.88%**, baseline NRFI **49.51%**, lift **+6.37 pts**, but worst month only **39.13%**.
+
+2026 frozen-rule evidence: **162/301 = 53.82%**, coverage **18.35%**, baseline **50.37%**, lift **+3.46 pts**, worst month **48.24%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not retune this candidate using 2026. Revisit later with new first-inning information or a materially different model.
 
 ## Unified 2025 rolling-development protocol
 
