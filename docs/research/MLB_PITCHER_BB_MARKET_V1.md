@@ -45,3 +45,33 @@ No post-2026 retuning of this frozen rule is allowed.
 - No production promotion.
 - No historical Odds API credit spend.
 - No ROI/EV/CLV claim without certified real market prices.
+
+## 2026 historical external rule result
+
+Validation label: `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE`.
+
+The underlying point/Brier model had already been inspected on 2026 before this market-rule freeze. The exact 2.5 line, UNDER direction, and 85% probability threshold were nevertheless selected from 2025 only and were not changed after the 2026 rule result was read.
+
+Frozen rule result:
+
+- eligible 2026 rows with a certified 2025 calibration bin: 3,468
+- selected: 137
+- correct: 125
+- accuracy: **91.24%**
+- selected coverage: **3.95%**
+- worst month with selections: **86.67%**
+- unconditional 2026 UNDER 2.5 baseline: **74.57%**
+- lift vs baseline: **+16.67 percentage points**
+
+Monthly:
+
+- Apr: 14/15 = 93.33%
+- May: 30/32 = 93.75%
+- Jun: 26/29 = 89.66%
+- Jul: 26/28 = 92.86%
+- Aug: 26/30 = 86.67%
+- Sep-to-date: 3/3 = 100.00%
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+This does **not** certify ROI, EV, CLV, or real betting-market value because historical sportsbook prices for the exact selected prop opportunities are not certified.
