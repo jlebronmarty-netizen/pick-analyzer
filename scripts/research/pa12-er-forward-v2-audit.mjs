@@ -30,6 +30,19 @@ const paritySample=[
 
 function n(v){const x=Number(v);return Number.isFinite(x)?x:null}
 function dateOnly(v){return typeof v==='string'?v.slice(0,10):''}
+async function mapConcurrent(values,limit,fn){
+  const output=new Array(values.length)
+  let next=0
+  async function worker(){
+    for(;;){
+      const index=next++
+      if(index>=values.length)return
+      output[index]=await fn(values[index],index)
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(limit,values.length)},()=>worker()))
+  return output
+}
 
 async function mlbGameLog(pitcherId,season){
   const url=new URL(`https://statsapi.mlb.com/api/v1/people/${pitcherId}/stats`)
@@ -59,21 +72,20 @@ async function cachedLog(pitcherId,season){
 }
 
 // 1) Independent source parity against frozen Retrosheet sample.
-const parity=[]
-for(const [gamePk,pitcherId,retrosheetEr] of paritySample){
+const parity=await mapConcurrent(paritySample,8,async ([gamePk,pitcherId,retrosheetEr])=>{
   try{
     const log=await cachedLog(pitcherId,2025)
     const row=log.find(x=>x.gamePk===gamePk)
-    parity.push({
+    return {
       gamePk,pitcherId,retrosheetEr,
       mlbOfficialEr:row?.earnedRuns??null,
       gamesStarted:row?.gamesStarted??null,
       exactMatch:Boolean(row&&row.earnedRuns===retrosheetEr&&row.gamesStarted>0),
-    })
+    }
   }catch(error){
-    parity.push({gamePk,pitcherId,retrosheetEr,mlbOfficialEr:null,gamesStarted:null,exactMatch:false,error:error instanceof Error?error.message:String(error)})
+    return {gamePk,pitcherId,retrosheetEr,mlbOfficialEr:null,gamesStarted:null,exactMatch:false,error:error instanceof Error?error.message:String(error)}
   }
-}
+})
 
 // 2) Exact forward target population comes only from certified PA13 pregame rows.
 const {data:quoteRows,error:quoteError}=await supabaseAdmin
@@ -97,6 +109,7 @@ for(const row of quoteRows??[]){
 }
 const targets=[...targetMap.values()].sort((a,b)=>a.gamePk-b.gamePk||a.pitcherId-b.pitcherId)
 const ids=[...new Set(targets.map(x=>x.pitcherId))]
+await mapConcurrent(ids,8,async pitcherId=>cachedLog(pitcherId,2026))
 
 const {data:kRows,error:kError}=await supabaseAdmin
  .from('mlb_ml_xyear_pitcher_game_v1')
