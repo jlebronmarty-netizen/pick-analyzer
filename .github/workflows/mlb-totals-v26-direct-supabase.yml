@@ -1,0 +1,123 @@
+name: MLB Totals V26 Direct Supabase ExtraTrees
+
+on:
+  push:
+    branches:
+      - research/totals-2025-historical-backfill
+    paths:
+      - '.github/workflows/mlb-totals-v26-direct-supabase.yml'
+      - 'docs/research/totals-v26-direct-supabase-request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mlb-totals-v26-direct-supabase
+  cancel-in-progress: false
+
+env:
+  REQUEST_PATH: docs/research/totals-v26-direct-supabase-request.json
+  OUTPUT_PATH: artifacts/research/mlb_totals_v26_extra_trees_result.json
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/totals-2025-historical-backfill
+          fetch-depth: 0
+
+      - name: Validate bounded research request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync(process.env.REQUEST_PATH,'utf8'))
+          const checks=[
+            [r.contract==='MLB_TOTALS_V26_DIRECT_SUPABASE_REQUEST/1.0.0','contract'],
+            [r.authorized===true,'authorized'],
+            [r.branch==='research/totals-2025-historical-backfill','branch'],
+            [r.researchOnly===true,'researchOnly'],
+            [r.market==='total','market'],
+            [r.season===2025,'season'],
+            [r.openPregateOnlyAfterInternalGate===true,'pregate gate'],
+            [r.use2026ForSelection===false,'2026 selection'],
+            [r.open2026ExternalTest===false,'2026 external'],
+            [r.expectedOddsApiCredits===0,'Odds API credits'],
+            [r.providerCallsAllowed===false,'provider calls'],
+            [r.officialPicksWritesAllowed===false,'Official Picks'],
+            [r.apostarActivationAllowed===false,'APOSTAR'],
+            [r.productionPromotionAllowed===false,'production promotion'],
+          ]
+          const bad=checks.filter(([ok])=>!ok).map(([,m])=>m)
+          if(bad.length) throw new Error('V26_REQUEST_INVALID:'+bad.join(','))
+          console.log('PASS: V26 research boundaries validated.')
+          NODE
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install bounded ML dependencies
+        run: python -m pip install --disable-pip-version-check --no-cache-dir 'numpy>=2.0,<3' 'pandas>=2.2,<3' 'scikit-learn>=1.5,<2' 'requests>=2.32,<3'
+
+      - name: Evaluate V26 from canonical Supabase
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/research/train_mlb_totals_v26_direct_supabase.py
+
+      - name: Validate result boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync(process.env.OUTPUT_PATH,'utf8'))
+          const checks=[
+            [r.contract==='MLB_TOTALS_V26_EXTRA_TREES_RESEARCH/1.0.0','contract'],
+            [r.research_only===true,'research only'],
+            [r.official_picks_writes===0,'Official Picks writes'],
+            [r.apostar_activation===false,'APOSTAR'],
+            [r.production_promotion===false,'production promotion'],
+            [r.odds_api_historical_credits_consumed===0,'Odds API credits'],
+            [r['2026_used_for_selection']===false,'2026 selection'],
+            [r['2026_opened_for_external_test']===false,'2026 external'],
+          ]
+          const bad=checks.filter(([ok])=>!ok).map(([,m])=>m)
+          if(bad.length) throw new Error('V26_RESULT_BOUNDARY_VIOLATION:'+bad.join(','))
+          console.log(JSON.stringify({
+            status:r.status,
+            featureCount:r.feature_count,
+            specsTried:r.specs_tried,
+            internalGateCandidates:r.internal_gate_candidate_count,
+            julAugOpened:r.jul_aug_opened,
+            pregate:r.pregate_metrics ?? null,
+          },null,2))
+          NODE
+
+      - name: Commit V26 result only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$OUTPUT_PATH"
+          if git diff --cached --quiet; then
+            echo 'No V26 result changes to commit.'
+            exit 0
+          fi
+          git commit -m 'research(totals): record V26 ExtraTrees result'
+          git pull --rebase origin research/totals-2025-historical-backfill
+          git push origin HEAD:research/totals-2025-historical-backfill
+
+      - name: Upload V26 result artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-totals-v26-extra-trees-result
+          path: artifacts/research/mlb_totals_v26_extra_trees_result.json
+          retention-days: 14
+          if-no-files-found: error
