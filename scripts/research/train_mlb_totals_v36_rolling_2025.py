@@ -254,11 +254,15 @@ def summarize_candidate(records: list[dict[str, Any]], architecture: str, spec_i
 
 
 def rank_key(c: dict[str, Any]) -> tuple[Any, ...]:
+    # When no candidate reaches the 75% target, prefer the most temporally
+    # robust stable rule rather than a marginal pooled-accuracy winner that
+    # collapses in one validation month. 2026 remains unopened.
     return (
         1 if c["target_met_75_plus"] else 0,
         1 if c["stable"] else 0,
-        c["accuracy"],
         c["worst_month_accuracy"],
+        c["accuracy"],
+        -c["monthly_accuracy_sd"],
         c["n"],
     )
 
