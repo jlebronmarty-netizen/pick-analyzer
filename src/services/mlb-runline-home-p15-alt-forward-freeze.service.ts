@@ -15,6 +15,8 @@ const TIME_ZONE = 'America/Puerto_Rico'
 const SEASON = 2026
 const FREEZE_HOUR = 10
 const FREEZE_MINUTE = 45
+const FREEZE_WINDOW_END_HOUR = 11
+const FREEZE_WINDOW_END_MINUTE = 0
 const PAGE_SIZE = 1000
 const SCORE_THRESHOLD = 2.065112
 const JOB_TYPE = 'runline_v2_home_p15_alt_forward_freeze_v1'
@@ -422,10 +424,25 @@ export async function freezeRunlineV2HomeP15Alternate({
 
   if (date < '2026-09-17') return { ...base, status: 'NOT_IN_PROSPECTIVE_WINDOW' }
   if (date !== today) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
-  if (minuteOfDay(now) < FREEZE_HOUR * 60 + FREEZE_MINUTE) return { ...base, status: 'NOT_IN_FREEZE_WINDOW' }
+  const clockMinute = minuteOfDay(now)
+  const freezeStart = FREEZE_HOUR * 60 + FREEZE_MINUTE
+  const freezeEnd = FREEZE_WINDOW_END_HOUR * 60 + FREEZE_WINDOW_END_MINUTE
+  if (clockMinute < freezeStart) return { ...base, status: 'NOT_IN_FREEZE_WINDOW' }
 
   const prior = await existingFreeze(date)
   if (prior) return { ...base, status: 'REUSE_NO_OP', freezeJobId: prior.id, frozenAt: prior.completed_at }
+
+  // Prospective evidence is defined at the fixed 10:45 Puerto Rico freeze.
+  // Never create a new observation later in the day merely because first pitch
+  // has not occurred yet; probable-starter/source state may have changed.
+  if (clockMinute >= freezeEnd) {
+    return {
+      ...base,
+      success: false,
+      status: 'BLOCK_FREEZE_WINDOW_MISSED',
+      freezeWindow: '10:45-10:59 America/Puerto_Rico',
+    }
+  }
 
   const slate = await officialSlate(date)
   if (!slate.length) return { ...base, status: 'NO_SCHEDULED_GAMES' }
