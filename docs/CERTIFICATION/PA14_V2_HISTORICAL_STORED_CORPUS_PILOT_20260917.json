@@ -1,0 +1,53 @@
+{
+  "schema": "PA14_V2_HISTORICAL_STORED_CORPUS_PILOT/1.0.0",
+  "date": "2026-09-17",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "batchExecution": {
+    "branch": "research/pa14-v2-historical-storage-pilot-20260917",
+    "commit": "93a1bef47d842e91700bd411398d7bd37fda03c6",
+    "vercelDeploymentId": "dpl_BaJ3VpLRCJpqsnwhNdb6uvLzRoMd",
+    "targetRows": 18,
+    "passRows": 18,
+    "failures": 0,
+    "allStoredReplayNetworkCallsZero": true
+  },
+  "canonicalReadback": {
+    "totalContractBuilderRows": 19,
+    "uniqueIdentities": 19,
+    "replayPass": 19,
+    "certificationCandidates": 19,
+    "productionEligible": 0,
+    "shadowOnly": 19,
+    "historical2025Rows": 18,
+    "forward2026Rows": 1,
+    "historicalMonthly": {
+      "2025-04": 8,
+      "2025-05": 5,
+      "2025-06": 1,
+      "2025-07": 1,
+      "2025-08": 3,
+      "2025-09": 0
+    }
+  },
+  "productionConsumerReadback": {
+    "gamePk": 778177,
+    "pitcherMlbamId": 668678,
+    "httpStatus": 200,
+    "status": "AVAILABLE",
+    "replayStatus": "PASS",
+    "certificationCandidate": true,
+    "researchOnly": true,
+    "productionEligible": false,
+    "shadowOnly": true
+  },
+  "disposition": "STORED_CORPUS_EXPANDED_BUT_TEMPORALLY_INADEQUATE",
+  "pePitcherKV2TrainingAuthorized": false,
+  "boundaries": {
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "sportsbookCalls": 0,
+    "historicalOddsApiCredits": 0,
+    "productionPromotion": false
+  }
+}
