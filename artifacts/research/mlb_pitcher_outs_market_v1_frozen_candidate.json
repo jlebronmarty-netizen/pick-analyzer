@@ -1,0 +1,53 @@
+{
+  "contract": "MLB_PITCHER_OUTS_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "PITCHER_RECORDED_OUTS",
+  "model_version": "MLB_PITCHER_OUTS_RESEARCH_V1",
+  "selected_hyperparameters": {
+    "alpha": 0.2,
+    "beta": 0.7,
+    "fit": {
+      "intercept": 7.2635858445929635,
+      "slope": 0.547385023095297
+    }
+  },
+  "probability_method": "empirical TRAIN residual distribution",
+  "rule": {
+    "line": 18.5,
+    "direction": "UNDER",
+    "minimum_under_probability": 0.9,
+    "equivalent_max_over_probability": 0.1
+  },
+  "development_2025": {
+    "validation_test_n": 126,
+    "correct": 123,
+    "accuracy": 0.976190476190476,
+    "min_split_n": 59,
+    "worst_split_accuracy": 0.955223880597015,
+    "baseline_under_accuracy": 0.839357429718876,
+    "lift_vs_baseline": 0.136833046471601,
+    "splits": {
+      "VALIDATION": {
+        "n": 59,
+        "correct": 59,
+        "accuracy": 1
+      },
+      "TEST": {
+        "n": 67,
+        "correct": 64,
+        "accuracy": 0.955223880597015
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_rule_accuracy_opened": false,
+  "external_validation_label": "HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE",
+  "external_note": "Aggregate 2026 point/Brier diagnostics existed before exact market-rule freeze. Exact line/direction/confidence selected from 2025 only.",
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
