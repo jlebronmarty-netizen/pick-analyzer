@@ -16,5 +16,5 @@
   "officialPicksWritesAllowed": false,
   "apostarActivationAllowed": false,
   "productionPromotionAllowed": false,
-  "retryReason": "surface_oidc_exporter_error"
+  "retryReason": "temporary_service_role_select_granted_v26_only"
 }
