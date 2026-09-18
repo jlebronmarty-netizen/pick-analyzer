@@ -2,7 +2,7 @@
   "2026_opened_for_external_test": false,
   "2026_used_for_selection": false,
   "apostar_activation": false,
-  "blocker": "GitHub Actions secret SUPABASE_SERVICE_ROLE_KEY is not configured.",
+  "blocker": "GitHub OIDC or Supabase anon gateway key is unavailable.",
   "candidate_name": "totals_v26_full_surface_extra_trees_v1",
   "contract": "MLB_TOTALS_V26_EXTRA_TREES_RESEARCH/1.0.0",
   "jul_aug_opened": false,
@@ -11,5 +11,5 @@
   "production_promotion": false,
   "research_only": true,
   "source_table": "public.mlb_totals_v26_full_ml_dataset_2025_v1",
-  "status": "BLOCKED_MISSING_GITHUB_SUPABASE_SERVICE_ROLE_KEY"
+  "status": "BLOCKED_MISSING_OIDC_EXPORT_AUTH"
 }
