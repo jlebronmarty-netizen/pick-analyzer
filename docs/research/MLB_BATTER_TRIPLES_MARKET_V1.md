@@ -30,3 +30,29 @@ State before external: `TARGET_MET_75_PLUS_EXTERNAL_PENDING_LOW_INCREMENTAL_SIGN
 This market is explicitly **baseline-dominated**. High accuracy must not be interpreted as strong incremental model value or betting profitability.
 
 Historical prop pricing is not certified; no ROI/EV/CLV claim.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+- eligible rows: 40,648
+- selected: 30,045
+- correct: 29,689
+- accuracy: **98.82%**
+- selected coverage: **73.92%**
+- worst selected month: **98.61%**
+- unconditional UNDER 0.5 baseline: **98.63%**
+- lift vs baseline: **+0.18 percentage points**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 4,300/4,349 = 98.87%
+- May: 5,547/5,619 = 98.72%
+- Jun: 5,391/5,467 = 98.61%
+- Jul: 5,191/5,252 = 98.84%
+- Aug: 5,978/6,037 = 99.02%
+- Sep-to-date: 3,282/3,321 = 98.83%
+
+State: `TARGET_MET_75_PLUS_LOW_INCREMENTAL_SIGNAL`.
+
+This result remains baseline-dominated. Do not interpret 98%+ event accuracy as strong betting edge. Historical prop prices are not certified; ROI/EV/CLV remain unclaimed.
