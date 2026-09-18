@@ -48,6 +48,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Batter Total Bases** | `batter_total_bases_under_2p5_edge_1p5_v1` — UNDER 2.5 when projected TB <=1.0 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 1,081/1,187 = **91.07%**; worst month **90.19%**; baseline 80.41% | 2026 frozen-rule: 2,021/2,336 = **86.52%**; worst month **83.33%**; baseline 80.74% | 2026 coverage **6.57%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Home Runs** | `batter_hr_under_0p5_proj_0p10_v1` — UNDER 0.5 when projected HR <=0.10 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 11,176/12,016 = **93.01%**; worst month **92.31%**; baseline 88.75% | 2026 one-shot: 12,448/13,507 = **92.16%**; worst month **90.77%**; baseline 89.00% | 2026 coverage **37.99%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Strikeouts** | `batter_k_under_1p5_proj_0p5_v1` — UNDER 1.5 when projected K <=0.5 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 564/592 = **95.27%**; worst month **92.86%**; baseline 80.11% | 2026 one-shot: 1,000/1,074 = **93.11%**; worst month **91.30%**; baseline 80.38% | 2026 coverage **3.02%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified. |
+| **Batter Walks** | `batter_walks_under_0p5_proj_0p20_v1` — UNDER 0.5 when projected BB <=0.20 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 1,253/1,489 = **84.15%**; worst month **81.49%**; baseline 73.92% | 2026 one-shot: 2,590/3,106 = **83.39%**; worst month **79.13%**; baseline 72.66% | 2026 coverage **8.74%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified. |
 | **NRFI / YRFI** | `nrfi_p52_fallback_v1` — NRFI when calibrated p>=52% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025: 190/340 = **55.88%**; worst month **39.13%**; baseline 49.51% | 2026: 162/301 = **53.82%**; worst month **48.24%**; baseline 50.37% | 2026 coverage **18.35%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; do not threshold-rescue from 2026. Revisit with materially better first-inning features/architecture. |
 
 ## First-pass closeouts
@@ -207,6 +208,18 @@ Frozen rule: `batter_k_under_1p5_proj_0p5_v1`.
 2025 rolling: **564/592 = 95.27%**, worst month **92.86%**, baseline UNDER 1.5 **80.11%**, lift **+15.16 pts**.
 
 2026 one-shot external: **1,000/1,074 = 93.11%**, coverage **3.02%**, worst month **91.30%**, baseline **80.38%**, lift **+12.73 pts**, no retuning.
+
+State: `TARGET_MET_75_PLUS`.
+
+Historical prop prices are not certified; no ROI/EV/CLV claim.
+
+## First-pass closeout — Batter Walks
+
+Frozen rule: `batter_walks_under_0p5_proj_0p20_v1`.
+
+2025 rolling: **1,253/1,489 = 84.15%**, worst month **81.49%**, baseline UNDER 0.5 **73.92%**, lift **+10.23 pts**.
+
+2026 one-shot external: **2,590/3,106 = 83.39%**, coverage **8.74%**, worst month **79.13%**, baseline **72.66%**, lift **+10.73 pts**, no retuning.
 
 State: `TARGET_MET_75_PLUS`.
 

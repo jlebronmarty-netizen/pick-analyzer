@@ -1,0 +1,64 @@
+{
+  "contract": "MLB_BATTER_WALKS_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "BATTER_WALKS",
+  "model_family": "strict-date rolling linear batter-walk projection",
+  "external_refit_2025": {
+    "n": 40886,
+    "intercept": 0.117815177785939,
+    "slope": 0.593708345578887
+  },
+  "rule": {
+    "line": 0.5,
+    "direction": "UNDER",
+    "maximum_projected_walks": 0.2,
+    "minimum_negative_edge": 0.3
+  },
+  "development_protocol": "2025 expanding monthly rolling May-Sep; strict source_game_date < target_game_date; same-day doubleheader game 1 excluded from game 2 prior history",
+  "development_2025": {
+    "n": 1489,
+    "correct": 1253,
+    "accuracy": 0.84150436534587,
+    "min_month_n": 131,
+    "worst_month_accuracy": 0.814925373134328,
+    "monthly_accuracy_sd": 0.0188039494396358,
+    "baseline_under_accuracy": 0.739225912709305,
+    "lift_vs_baseline": 0.102278452636564,
+    "months": {
+      "2025-05": {
+        "n": 131,
+        "correct": 108,
+        "accuracy": 0.824427480916031
+      },
+      "2025-06": {
+        "n": 280,
+        "correct": 234,
+        "accuracy": 0.835714285714286
+      },
+      "2025-07": {
+        "n": 177,
+        "correct": 153,
+        "accuracy": 0.864406779661017
+      },
+      "2025-08": {
+        "n": 335,
+        "correct": 273,
+        "accuracy": 0.814925373134328
+      },
+      "2025-09": {
+        "n": 566,
+        "correct": 485,
+        "accuracy": 0.856890459363958
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_opened": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
