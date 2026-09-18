@@ -1,0 +1,107 @@
+{
+  "schema": "PA14_V2_CORPUS_GATE_CLOSEOUT/1.0.0",
+  "date": "2026-09-18",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "samples": [
+    {
+      "name": "balanced_sample_1",
+      "rows": 72,
+      "eligible": 20,
+      "yield": 0.2777777777777778,
+      "monthly": {
+        "Apr": 8,
+        "May": 5,
+        "Jun": 2,
+        "Jul": 1,
+        "Aug": 3,
+        "Sep": 1
+      }
+    },
+    {
+      "name": "balanced_sample_2_independent",
+      "rows": 72,
+      "eligible": 14,
+      "yield": 0.19444444444444445,
+      "monthly": {
+        "Apr": 5,
+        "May": 4,
+        "Jun": 3,
+        "Jul": 2,
+        "Aug": 0,
+        "Sep": 0
+      }
+    },
+    {
+      "name": "september_directed_gate",
+      "rows": 40,
+      "eligible": 3,
+      "yield": 0.075,
+      "dominantBlockers": {
+        "INCOMPLETE_PA": 26,
+        "MISSING_VELOCITY": 13
+      }
+    }
+  ],
+  "combined": {
+    "balancedRows": 144,
+    "balancedEligible": 34,
+    "balancedYield": 0.2361111111111111,
+    "septemberDirectedRows": 40,
+    "septemberDirectedEligible": 3,
+    "septemberDirectedYield": 0.075
+  },
+  "disposition": "HISTORICAL_PATH_CERTIFIED_BUT_CORPUS_TOO_SMALL_AND_TEMPORALLY_UNEVEN_FOR_TRAINING",
+  "pePitcherKV2TrainingAuthorized": false,
+  "pePitcherKV2ModelStatus": "NOT_STARTED",
+  "reopenCondition": [
+    "materially larger replay-PASS contract-valid corpus with stronger late-season representation",
+    "or separately versioned future contract approved through a new research gate; V2.0.0 remains frozen"
+  ],
+  "boundaries": {
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "productionPromotion": false,
+    "historicalOddsApiCredits": 0
+  },
+  "currentStoredCensusFinal": {
+    "totalRows": 38,
+    "uniqueIdentities": 38,
+    "replayPass": 38,
+    "certificationCandidates": 38,
+    "productionEligible": 0,
+    "shadowOnly": 38,
+    "rows2025": 37,
+    "rows2026": 1,
+    "historicalMonthly": {
+      "Apr": 13,
+      "May": 9,
+      "Jun": 5,
+      "Jul": 3,
+      "Aug": 3,
+      "Sep": 4
+    },
+    "minTargetStart": "2025-04-26T01:40:00Z",
+    "maxTargetStart": "2026-09-15T23:10:00Z"
+  },
+  "materializationBatches": [
+    {
+      "label": "type_repair_gains",
+      "targetRows": 2,
+      "passRows": 2,
+      "networkCallsDuringReplay": 0
+    },
+    {
+      "label": "independent_balanced_sample_2",
+      "targetRows": 14,
+      "passRows": 14,
+      "networkCallsDuringReplay": 0
+    },
+    {
+      "label": "september_directed_gate",
+      "targetRows": 3,
+      "passRows": 3,
+      "networkCallsDuringReplay": 0
+    }
+  ]
+}
