@@ -6,6 +6,44 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Pitcher Walks first-pass closeout — authoritative
+
+Frozen market rule:
+
+`pitcher_bb_under_2p5_p85_v1`
+
+Rule:
+
+- underlying point model remains `MLB_PITCHER_BB_V1`;
+- target is true BB only; HBP excluded;
+- line = 2.5;
+- direction = UNDER;
+- select only when calibrated UNDER probability >= 85%;
+- minimum calibration-bin sample = 20.
+
+2025 expanding rolling evidence:
+
+- 111/122 = **90.98%**;
+- worst month = **82.35%**;
+- baseline UNDER 2.5 = **75.83%**;
+- lift = **+15.15 percentage points**.
+
+Frozen-rule 2026 historical evidence:
+
+- 125/137 = **91.24%**;
+- worst month = **86.67%**;
+- selected coverage = **3.95%**;
+- baseline UNDER 2.5 = **74.57%**;
+- lift = **+16.67 percentage points**.
+
+State:
+
+`TARGET_MET_75_PLUS_EVENT_ACCURACY`
+
+Important lineage caveat: the underlying point/Brier model had 2026 diagnostics before this exact market-rule freeze, so this evidence is labeled `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE`, not a pristine untouched-season external holdout. The exact line/direction/threshold was selected from 2025 only and was not retuned after reading rule accuracy in 2026.
+
+Historical sportsbook pricing for the exact selected prop opportunities is not certified. Do not claim ROI, EV or CLV from this accuracy result.
+
 ## 2026-09-18 unified market protocol addendum — authoritative
 
 The user has explicitly authorized a unified cross-market research workflow:
