@@ -1,0 +1,30 @@
+{
+  "contract": "MLB_TOTALS_V35_CLOSE_MARGIN_REQUEST/1.0.0",
+  "authorized": true,
+  "branch": "research/totals-2025-historical-backfill",
+  "researchOnly": true,
+  "market": "total",
+  "season": 2025,
+  "architectureDelta": "Direct CatBoost RMSE regression of final total minus pregame closing total; target isolated from features",
+  "targetOnlyFields": [
+    "y_close_margin"
+  ],
+  "catboostVersion": "1.2.10",
+  "edgeThresholdsRuns": [
+    0.5,
+    1,
+    1.5,
+    2
+  ],
+  "trainPeriod": "2025-04-01/2025-05-31",
+  "internalValidationPeriod": "2025-06-01/2025-06-30",
+  "pregatePeriod": "2025-07-01/2025-08-31",
+  "openPregateOnlyAfterInternalGate": true,
+  "use2026ForSelection": false,
+  "open2026ExternalTest": false,
+  "expectedOddsApiCredits": 0,
+  "providerCallsAllowed": false,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "productionPromotionAllowed": false
+}
