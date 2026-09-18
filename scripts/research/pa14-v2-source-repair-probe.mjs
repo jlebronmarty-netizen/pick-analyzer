@@ -47,6 +47,9 @@ function findOfficialPitch(feed, atBatNumber, pitchNumber) {
   const description = OFFICIAL_DESC.get(rawDescription) ?? null
   const requiredType = description ? REQUIRED.get(description) ?? null : null
   return {
+    playResultEventType: play?.result?.eventType ?? null,
+    playResultDescription: play?.result?.description ?? null,
+    matchupPitcherId: play?.matchup?.pitcher?.id ?? null,
     rawDescription,
     description,
     requiredType,
