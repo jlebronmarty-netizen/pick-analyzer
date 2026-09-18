@@ -38,3 +38,29 @@ Monthly:
 State before external: `TARGET_MET_75_PLUS_EXTERNAL_PENDING`.
 
 Historical prop pricing is not certified in our snapshot table; no ROI/EV/CLV claim. Official Picks unchanged. APOSTAR disabled.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+- eligible starter rows: 2,568
+- selected: 1,226
+- correct: 968
+- accuracy: **78.96%**
+- selected coverage: **47.74%**
+- worst selected month: **75.69%**
+- unconditional UNDER 6.5 baseline: **75.47%**
+- lift vs baseline: **+3.49 percentage points**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 6/6 = 100.00%
+- May: 193/255 = 75.69%
+- Jun: 213/273 = 78.02%
+- Jul: 252/311 = 81.03%
+- Aug: 279/349 = 79.94%
+- Sep-to-date: 25/32 = 78.13%
+
+State: `TARGET_MET_75_PLUS`.
+
+Historical sportsbook prices are not certified in our current snapshots; ROI/EV/CLV remain unclaimed.
