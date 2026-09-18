@@ -688,3 +688,45 @@ A V36+ continuation requires an explicit protocol-reset authorization. A clean r
 
 Do not open Jul-Aug 2025 or 2026 merely to rescue V26–V35.
 
+## 2026-09-18 protocol reset — USER AUTHORIZED / supersedes V35 stop gate
+
+The prior `BLOCKED_VALIDATION_PROTOCOL_EXHAUSTED` state is superseded by explicit user authorization.
+
+New Totals protocol:
+
+- 2025 is the full development season.
+- Candidate selection uses chronological / expanding-window rolling validation inside 2025.
+- Default validation months: May, June, July, August, September.
+- Each fold trains only on games strictly earlier than the validation month.
+- The best stable PREGAME candidate is frozen after 2025 development.
+- If no candidate reaches 75%+, preserve the best defensible stable candidate and mark Totals `REVISIT_AFTER_FIRST_PASS` rather than searching indefinitely.
+- 2026 remains unopened for V26–V35 PREGAME selection and will be opened once only after the V36 candidate is frozen.
+- No FULL/same-game value may enter a PREGAME feature set.
+- Final outcomes are permitted only as training/evaluation targets.
+- No Official Picks writes.
+- APOSTAR remains disabled.
+- No production promotion.
+- No historical Odds API credit spend unless a separately documented gap requires it.
+
+Canonical cross-market tracker:
+
+`docs/research/MLB_MARKET_MODEL_TRACKER.md`
+
+### V36 source decision
+
+The canonical full-season source `public.mlb_totals_model_2025_v1` already covers 2,425 market games from 2025-03-18 through 2025-09-28.
+
+This avoids unnecessary reconstruction of the V33–V35 Apr-Aug experimental surface and avoids acquiring 2024 data.
+
+Observed monthly rows / non-push labels:
+
+- Mar: 66 / 63
+- Apr: 390 / 371
+- May: 411 / 399
+- Jun: 396 / 382
+- Jul: 367 / 342
+- Aug: 421 / 401
+- Sep: 374 / 363
+
+V36 will use this full-season PREGAME source for rolling 2025 model selection and will keep 2026 closed until a candidate freeze artifact exists.
+
