@@ -82,12 +82,10 @@ def write_result(result: dict[str, Any]) -> None:
     OUT.write_text(json.dumps(result, indent=2, sort_keys=True), encoding="utf-8")
 
 
-def fetch_range(anon_key: str, oidc_token: str, range_name: str) -> list[dict[str, Any]]:
+def fetch_range(oidc_token: str, range_name: str) -> list[dict[str, Any]]:
     r = requests.post(
         EDGE_URL,
         headers={
-            "apikey": anon_key,
-            "Authorization": f"Bearer {anon_key}",
             "x-github-oidc-token": oidc_token,
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -268,16 +266,15 @@ def evaluate_pregate(
 
 
 def main() -> None:
-    anon_key = os.environ.get("SUPABASE_ANON_KEY", "").strip()
     oidc_token = os.environ.get("GITHUB_OIDC_TOKEN", "").strip()
-    if not anon_key or not oidc_token:
+    if not oidc_token:
         result = base_result("BLOCKED_MISSING_OIDC_EXPORT_AUTH")
-        result["blocker"] = "GitHub OIDC or Supabase anon gateway key is unavailable."
+        result["blocker"] = "GitHub OIDC token is unavailable."
         write_result(result)
         print(json.dumps({"status": result["status"]}, indent=2))
         return
 
-    apr_jun = fetch_range(anon_key, oidc_token, "apr_jun")
+    apr_jun = fetch_range(oidc_token, "apr_jun")
     if len(apr_jun) != 1150:
         raise RuntimeError(f"V26_APR_JUN_COUNT_MISMATCH:{len(apr_jun)}")
 
@@ -387,7 +384,7 @@ def main() -> None:
 
     if selected is not None:
         # First and only read of Jul-Aug for this frozen V26 family.
-        jul_aug = fetch_range(anon_key, oidc_token, "jul_aug")
+        jul_aug = fetch_range(oidc_token, "jul_aug")
         if len(jul_aug) != 741:
             raise RuntimeError(f"V26_JULAUG_COUNT_MISMATCH:{len(jul_aug)}")
         pregate = pd.DataFrame(jul_aug)
