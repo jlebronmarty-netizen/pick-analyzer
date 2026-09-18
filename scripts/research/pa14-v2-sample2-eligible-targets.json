@@ -1,0 +1,114 @@
+[
+  {
+    "canonicalGamePk": 778147,
+    "expectedPitcherIds": [
+      680885,
+      694297
+    ],
+    "targetPitcherId": 694297
+  },
+  {
+    "canonicalGamePk": 778155,
+    "expectedPitcherIds": [
+      665152,
+      669373
+    ],
+    "targetPitcherId": 665152
+  },
+  {
+    "canonicalGamePk": 778126,
+    "expectedPitcherIds": [
+      601713,
+      657277
+    ],
+    "targetPitcherId": 601713
+  },
+  {
+    "canonicalGamePk": 778126,
+    "expectedPitcherIds": [
+      601713,
+      657277
+    ],
+    "targetPitcherId": 657277
+  },
+  {
+    "canonicalGamePk": 778128,
+    "expectedPitcherIds": [
+      547179,
+      671737
+    ],
+    "targetPitcherId": 671737
+  },
+  {
+    "canonicalGamePk": 778031,
+    "expectedPitcherIds": [
+      669713,
+      694477
+    ],
+    "targetPitcherId": 669713
+  },
+  {
+    "canonicalGamePk": 777736,
+    "expectedPitcherIds": [
+      642547,
+      678394
+    ],
+    "targetPitcherId": 642547
+  },
+  {
+    "canonicalGamePk": 777736,
+    "expectedPitcherIds": [
+      642547,
+      678394
+    ],
+    "targetPitcherId": 678394
+  },
+  {
+    "canonicalGamePk": 777718,
+    "expectedPitcherIds": [
+      607536,
+      656849
+    ],
+    "targetPitcherId": 656849
+  },
+  {
+    "canonicalGamePk": 777626,
+    "expectedPitcherIds": [
+      669373,
+      676962
+    ],
+    "targetPitcherId": 676962
+  },
+  {
+    "canonicalGamePk": 777535,
+    "expectedPitcherIds": [
+      608566,
+      693821
+    ],
+    "targetPitcherId": 693821
+  },
+  {
+    "canonicalGamePk": 777417,
+    "expectedPitcherIds": [
+      678394,
+      694738
+    ],
+    "targetPitcherId": 694738
+  },
+  {
+    "canonicalGamePk": 777104,
+    "expectedPitcherIds": [
+      622663,
+      671106
+    ],
+    "targetPitcherId": 671106
+  },
+  {
+    "canonicalGamePk": 776991,
+    "expectedPitcherIds": [
+      682052,
+      686613
+    ],
+    "targetPitcherId": 686613
+  }
+]
