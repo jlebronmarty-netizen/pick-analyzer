@@ -1,0 +1,18 @@
+[
+  {
+    "canonicalGamePk": 777692,
+    "expectedPitcherIds": [
+      676979,
+      693821
+    ],
+    "targetPitcherId": 693821
+  },
+  {
+    "canonicalGamePk": 776410,
+    "expectedPitcherIds": [
+      676979,
+      806960
+    ],
+    "targetPitcherId": 676979
+  }
+]
