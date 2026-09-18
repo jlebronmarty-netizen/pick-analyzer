@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Doubles first-pass closeout — authoritative
+
+Frozen rule: `batter_doubles_under_0p5_proj_0p16_v1`.
+
+2025 rolling: 12,507/14,454 = **86.53%**; worst month **84.94%**; baseline UNDER 0.5 **85.07%**; lift **+1.46 pts**.
+
+2026 one-shot external: 17,632/20,282 = **86.93%**; coverage **49.90%**; worst month **85.87%**; baseline **85.65%**; lift **+1.28 pts**; no retuning.
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+State: `TARGET_MET_75_PLUS`.
+
+Incremental signal is positive but modest. Historical sportsbook prices are not certified; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Batter Singles first-pass closeout — authoritative
 
 Frozen rule: `batter_singles_under_1p5_proj_0p50_v1`.
