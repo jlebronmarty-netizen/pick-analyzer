@@ -1,0 +1,60 @@
+{
+  "contract": "MLB_PITCHER_ER_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "PITCHER_EARNED_RUNS",
+  "model_version": "MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2",
+  "model": {
+    "base_feature": "prior_er_all",
+    "base_fit": {
+      "intercept": 1.90273530551357,
+      "slope": 0.227085168912444
+    },
+    "second_stage_feature": "pitcher_k_rate",
+    "residual_fit": {
+      "intercept": 0.653408289475203,
+      "slope": -3.0156054216154
+    }
+  },
+  "rule": {
+    "line": 1.5,
+    "direction": "OVER",
+    "minimum_over_probability": 0.7
+  },
+  "probability_method": "empirical TRAIN residual distribution",
+  "development_2025": {
+    "validation_test_n": 91,
+    "correct": 73,
+    "accuracy": 0.802197802197802,
+    "min_split_n": 32,
+    "worst_split_accuracy": 0.796610169491525,
+    "baseline_over_accuracy": 0.647016011644833,
+    "lift_vs_baseline": 0.15518179055297,
+    "splits": {
+      "VALIDATION": {
+        "n": 59,
+        "correct": 47,
+        "accuracy": 0.796610169491525
+      },
+      "TEST": {
+        "n": 32,
+        "correct": 26,
+        "accuracy": 0.8125
+      }
+    },
+    "r2_test_checksum": {
+      "mae": 1.53264877098586,
+      "rmse": 1.89392266393888
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_status": "PENDING_CANONICAL_OUTCOME_CONTRACT",
+  "external_2026_opened": false,
+  "external_note": "Canonical exact ER outcome contract is certified for 2025 only. Do not substitute Runs Allowed or uncertified 2026 provider fields.",
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}

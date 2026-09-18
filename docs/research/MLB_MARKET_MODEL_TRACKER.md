@@ -40,7 +40,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Run Line / Spread** | `rl_v2_home_p15_alt_favorite_tsh_q92_v1` — HOME +1.5 alternate when primary HOME -1.5 | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective forward | 2025: 92/107 = **85.98%** | Historical 2026 through Sep 10: 49/62 = **79.03%**; sealed prospective score still accumulating | 2025 coverage **4.40%**; 107 dev selections | **YES**, historical evidence | External one-shot field remains NULL because 2026 was seen pre-freeze | Continue fixed-clock prospective freezes. Never retro-freeze Sep 17/18. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
-| **Pitcher Earned Runs** | PA-12 forward point-shadow V2 | `PROSPECTIVE_FORWARD` | Point-model math frozen from sealed prior research | Sep 18 pilot: 23 eligible point forecasts; settlement/accumulation in progress | prospective sample still small | N/A — point forecast, not market accuracy yet | Not market-certified | Accumulate fixed-clock forecasts + PA-13 real prices. Do not infer ROI/EV yet. |
+| **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` over frozen R2 | 2025 official Retrosheet ER + external 2026 outcome pending | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | **NOT OPENED** — no canonical exact 2026 ER outcome contract yet | 2025 n=91 | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` | Preserve rule. Continue PA-13 forward price capture and exact outcome-contract work; do not substitute Runs Allowed. |
 | **Pitcher Strikeouts** | `PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0` data path | evidence/corpus gate | 38 replay-PASS stored rows after closeout | training not authorized | corpus too small / temporally uneven | **NO MODEL YET** | `BLOCKED_CORPUS_TOO_SMALL` | Accumulate materially new evidence; do not brute-force or mutate V2.0.0. |
 | **Pitcher Walks** | `pitcher_bb_under_2p5_p85_v1` — UNDER 2.5 BB when calibrated UNDER probability >=85% | `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 111/122 = **90.98%**; worst month **82.35%**; baseline 75.83% | 2026 historical frozen-rule result: 125/137 = **91.24%**; worst month **86.67%**; baseline 74.57% | 2025 n=122; 2026 n=137; 2026 selected coverage **3.95%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY`; historical pricing not certified | Preserve frozen rule. Next gate is real pregame 2.5 pricing / forward market evidence; do not claim ROI/EV/CLV yet. |
 | **Pitcher Outs** | `pitcher_outs_under_18p5_p90_v1` — UNDER 18.5 when empirical UNDER probability >=90% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 VALIDATION+TEST: 123/126 = **97.62%**; worst split **95.52%**; baseline 83.94% | 2026 frozen-rule: 215/226 = **95.13%**; worst month **89.23%**; baseline 82.39% | 2026 coverage **9.45%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
@@ -165,6 +165,26 @@ Frozen rule: `pitcher_outs_under_18p5_p90_v1`.
 State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
 
 Historical prop prices are not certified; no ROI/EV/CLV claim.
+
+## First-pass closeout — Pitcher Earned Runs
+
+Frozen rule: `pitcher_er_over_1p5_p70_v1`.
+
+Underlying model: `MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2`.
+
+2025 VALIDATION+TEST:
+
+- 73/91 = **80.22%**;
+- worst split = **79.66%**;
+- baseline OVER 1.5 = **64.70%**;
+- lift = **+15.52 percentage points**;
+- TEST model checksum MAE = **1.53265**, RMSE = **1.89392**.
+
+2026 external event accuracy remains unopened because the canonical exact ER outcome contract is currently certified for 2025 only.
+
+State: `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME`.
+
+Do not substitute Runs Allowed or uncertified 2026 provider fields. PA-13 forward price capture remains separate and prospective.
 
 ## Unified 2025 rolling-development protocol
 
