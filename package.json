@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "PA14_V2_HISTORICAL_STORE_CONFIRM=RESEARCH_ONLY node --loader ./scripts/local-ts-loader.mjs scripts/research/pa14-v2-historical-store-replay.mjs --targets=scripts/research/pa14-v2-september-gate-eligible-targets.json && next build --webpack",
     "start": "next start",
     "test:product-experience": "playwright test --config=playwright.config.ts",
     "lint": "eslint",
