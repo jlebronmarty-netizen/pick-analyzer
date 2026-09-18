@@ -1,0 +1,70 @@
+{
+  "contract": "MLB_NRFI_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "NRFI_YRFI",
+  "model_version": "MLB_NRFI_RESEARCH_V1",
+  "model_candidate": {
+    "id": 39,
+    "wOff": 0,
+    "wDef": 1,
+    "wStarter": 0,
+    "betaRecent": 0,
+    "gammaLeague": 0.5
+  },
+  "calibration": {
+    "a": 0,
+    "b": 0.75
+  },
+  "rule": {
+    "direction": "NRFI",
+    "minimum_calibrated_nrfi_probability": 0.52
+  },
+  "development_note": "Chosen as the more defensible stable first-pass fallback; threshold 0.54 had slightly higher pooled accuracy but severe September collapse.",
+  "development_2025": {
+    "n": 340,
+    "correct": 190,
+    "accuracy": 0.558823529411765,
+    "min_month_n": 46,
+    "worst_month_accuracy": 0.391304347826087,
+    "baseline_nrfi_accuracy": 0.495127892813642,
+    "lift_vs_baseline": 0.063695636598123,
+    "months": {
+      "2025-05": {
+        "n": 71,
+        "correct": 47,
+        "accuracy": 0.661971830985915
+      },
+      "2025-06": {
+        "n": 76,
+        "correct": 42,
+        "accuracy": 0.552631578947368
+      },
+      "2025-07": {
+        "n": 71,
+        "correct": 39,
+        "accuracy": 0.549295774647887
+      },
+      "2025-08": {
+        "n": 76,
+        "correct": 44,
+        "accuracy": 0.578947368421053
+      },
+      "2025-09": {
+        "n": 46,
+        "correct": 18,
+        "accuracy": 0.391304347826087
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "closeout_state": "REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING",
+  "external_2026_rule_accuracy_opened": false,
+  "external_validation_label": "HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE",
+  "historical_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
