@@ -103,7 +103,7 @@ jobs:
           VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
-          http_code="$(curl -sS             --connect-timeout 10             --max-time 180             -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}"             -o "$DATASET_PATH"             -w '%{http_code}'             "${TOTALS_V24_PREVIEW_URL}/api/research/mlb/totals-v24-dataset")"
+          http_code="$(curl -sSL             --connect-timeout 10             --max-time 180             -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}"             -o "$DATASET_PATH"             -w '%{http_code}'             "${TOTALS_V24_PREVIEW_URL}/api/research/mlb/totals-v24-dataset")"
           if [ "$http_code" != '200' ]; then
             echo "TOTALS_V24_DATASET_HTTP_${http_code}"
             cat "$DATASET_PATH" || true
