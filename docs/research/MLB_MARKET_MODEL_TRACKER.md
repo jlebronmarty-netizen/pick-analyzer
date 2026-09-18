@@ -52,6 +52,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Batter Walks** | `batter_walks_under_0p5_proj_0p20_v1` — UNDER 0.5 when projected BB <=0.20 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 1,253/1,489 = **84.15%**; worst month **81.49%**; baseline 73.92% | 2026 one-shot: 2,590/3,106 = **83.39%**; worst month **79.13%**; baseline 72.66% | 2026 coverage **8.74%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified. |
 | **Batter Singles** | `batter_singles_under_1p5_proj_0p50_v1` — UNDER 1.5 when projected singles <=0.50 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 7,822/8,328 = **93.92%**; worst month **93.10%**; baseline 89.96% | 2026 one-shot: 12,690/13,634 = **93.08%**; worst month **91.16%**; baseline 90.30% | 2026 coverage **33.54%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified. |
 | **Batter Doubles** | `batter_doubles_under_0p5_proj_0p16_v1` — UNDER 0.5 when projected doubles <=0.16 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 12,507/14,454 = **86.53%**; worst month **84.94%**; baseline 85.07% | 2026 one-shot: 17,632/20,282 = **86.93%**; worst month **85.87%**; baseline 85.65% | 2026 coverage **49.90%** | **YES**, modest lift | `TARGET_MET_75_PLUS` | Preserve frozen rule; signal lift is modest and pricing remains uncertified. |
+| **Batter Triples** | `batter_triples_under_0p5_proj_0p015_v1` — UNDER 0.5 when projected triples <=0.015 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 27,562/27,832 = **99.03%**; worst month **98.90%**; baseline 98.74% | 2026 one-shot: 29,689/30,045 = **98.82%**; worst month **98.61%**; baseline 98.63% | 2026 coverage **73.92%** | **YES**, baseline-dominated | `TARGET_MET_75_PLUS_LOW_INCREMENTAL_SIGNAL` | Preserve only as accuracy reference; incremental lift is tiny and pricing is uncertified. |
 | **NRFI / YRFI** | `nrfi_p52_fallback_v1` — NRFI when calibrated p>=52% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025: 190/340 = **55.88%**; worst month **39.13%**; baseline 49.51% | 2026: 162/301 = **53.82%**; worst month **48.24%**; baseline 50.37% | 2026 coverage **18.35%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; do not threshold-rescue from 2026. Revisit with materially better first-inning features/architecture. |
 
 ## First-pass closeouts
@@ -263,6 +264,18 @@ Frozen rule: `batter_doubles_under_0p5_proj_0p16_v1`.
 State: `TARGET_MET_75_PLUS`.
 
 Incremental signal is positive but modest. Historical prop prices are not certified; no ROI/EV/CLV claim.
+
+## First-pass closeout — Batter Triples
+
+Frozen rule: `batter_triples_under_0p5_proj_0p015_v1`.
+
+2025 rolling: **27,562/27,832 = 99.03%**, worst month **98.90%**, baseline UNDER 0.5 **98.74%**, lift **+0.29 pts**.
+
+2026 one-shot external: **29,689/30,045 = 98.82%**, coverage **73.92%**, worst month **98.61%**, baseline **98.63%**, lift **+0.18 pts**, no retuning.
+
+State: `TARGET_MET_75_PLUS_LOW_INCREMENTAL_SIGNAL`.
+
+The market is baseline-dominated. High raw accuracy must not be interpreted as strong model or betting value.
 
 ## Unified 2025 rolling-development protocol
 
