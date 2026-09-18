@@ -45,3 +45,28 @@ The exact line, direction, and 0.75 edge threshold were selected using strict 20
 - APOSTAR disabled.
 - No production promotion.
 - Historical Odds API credits consumed: 0.
+
+## 2026 frozen-rule result
+
+- eligible strict-prior rows: 35,558
+- selected: 9,833
+- correct: 8,496
+- accuracy: **86.40%**
+- selected coverage: **27.65%**
+- worst selected month: **83.73%**
+- unconditional UNDER 1.5 baseline: **80.23%**
+- lift vs baseline: **+6.18 percentage points**
+- retuned after external result: **NO**
+
+Monthly:
+
+- Apr: 1,256/1,500 = 83.73%
+- May: 1,858/2,127 = 87.35%
+- Jun: 1,750/2,035 = 86.00%
+- Jul: 1,627/1,871 = 86.96%
+- Aug: 1,835/2,106 = 87.13%
+- Sep-to-date: 170/194 = 87.63%
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Historical sportsbook prices for these exact batter-hit prop opportunities are not certified; ROI/EV/CLV remain unclaimed.
