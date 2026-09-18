@@ -93,7 +93,8 @@ def fetch_range(oidc_token: str, range_name: str) -> list[dict[str, Any]]:
         json={"range": range_name},
         timeout=120,
     )
-    r.raise_for_status()
+    if not r.ok:
+        raise RuntimeError(f"V26_EDGE_HTTP_{r.status_code}:{r.text[:1000]}")
     payload = r.json()
     checks = [
         (payload.get("contract") == "MLB_TOTALS_V26_GITHUB_EXPORT/1.0.0", "contract"),
