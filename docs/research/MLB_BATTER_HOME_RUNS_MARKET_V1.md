@@ -1,0 +1,40 @@
+# MLB Batter Home Runs — Unified Market Rule V1
+
+Status: RESEARCH-ONLY / SHADOW-ONLY
+
+Frozen candidate: `batter_hr_under_0p5_proj_0p10_v1`
+
+## Frozen rule
+
+- line = **0.5 HR**
+- direction = **UNDER**
+- select when projected HR <= **0.10**
+- strict prior-date batter history only
+- same-day game 1 is not prior input for game 2
+
+Final all-2025 refit reserved for external scoring:
+
+- n = 40,886
+- intercept = 0.0562641814171271
+- slope = 0.536870614141035
+
+## 2025 expanding rolling evidence
+
+- 11,176 / 12,016 = **93.01%**
+- worst month = **92.31%**
+- baseline UNDER 0.5 = **88.75%**
+- lift = **+4.26 percentage points**
+
+Monthly:
+
+- May: 2,493/2,673 = 93.27%
+- Jun: 2,421/2,610 = 92.76%
+- Jul: 2,050/2,199 = 93.22%
+- Aug: 2,196/2,379 = 92.31%
+- Sep: 2,016/2,155 = 93.55%
+
+State before external check: `TARGET_MET_75_PLUS_EXTERNAL_PENDING`.
+
+Historical prop prices are not certified; accuracy does not imply ROI/EV/CLV.
+
+Official Picks unchanged. APOSTAR disabled. Historical Odds API credits: 0.
