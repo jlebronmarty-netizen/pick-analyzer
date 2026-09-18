@@ -38,7 +38,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 |---|---|---|---:|---:|---:|---|---|---|
 | **Moneyline** | `pregame_high_conf_home_v2` | `LEGACY_ADAPTIVE_2026` | Development folds: 63/81 = **77.78%** | Untouched adaptive holdout: 17/21 = **80.95%**; full selected 2026 set: 80/102 = **78.43%** | 102 selected games in recorded 2026 set | **YES**, adaptive evidence | Not a pristine 2025→2026 one-shot test | Preserve as current selective ML reference. Do not relabel adaptive evidence as pure external validation. |
 | **Run Line / Spread** | `rl_v2_home_p15_alt_favorite_tsh_q92_v1` — HOME +1.5 alternate when primary HOME -1.5 | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective forward | 2025: 92/107 = **85.98%** | Historical 2026 through Sep 10: 49/62 = **79.03%**; sealed prospective score still accumulating | 2025 coverage **4.40%**; 107 dev selections | **YES**, historical evidence | External one-shot field remains NULL because 2026 was seen pre-freeze | Continue fixed-clock prospective freezes. Never retro-freeze Sep 17/18. |
-| **Game Totals O/U** | Current best stable PREGAME reference: `totals_v10_side_runs_ridge_family_v1` Top-1 UNDER policy | prior 2025 validation; V26–V35 old June-gate families rejected | Best stable policy: 72/102 = **70.59%**; worst month **70.00%** | **NOT OPENED** for current PREGAME V26–V35 path | n=102 for best stable prior policy | **NO** | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` reset authorized; implementation in progress | Extend advanced 2025 feature surface through September; run rolling CV; freeze best formula even if <75%; open 2026 once only after freeze. |
+| **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | PA-12 forward point-shadow V2 | `PROSPECTIVE_FORWARD` | Point-model math frozen from sealed prior research | Sep 18 pilot: 23 eligible point forecasts; settlement/accumulation in progress | prospective sample still small | N/A — point forecast, not market accuracy yet | Not market-certified | Accumulate fixed-clock forecasts + PA-13 real prices. Do not infer ROI/EV yet. |
 | **Pitcher Strikeouts** | `PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0` data path | evidence/corpus gate | 38 replay-PASS stored rows after closeout | training not authorized | corpus too small / temporally uneven | **NO MODEL YET** | `BLOCKED_CORPUS_TOO_SMALL` | Accumulate materially new evidence; do not brute-force or mutate V2.0.0. |
@@ -47,6 +47,25 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Batter Hits** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **Batter Total Bases** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **NRFI / YRFI** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
+
+## First-pass closeouts
+
+### Game Totals O/U — CLOSED FOR FIRST PASS
+
+Canonical unified candidate: `totals_v37_xyear_under_catboost_v1`.
+
+- 2025 chronological development: **265/479 = 55.32%**.
+- 2025 worst month: **52.63%**.
+- 2025 coverage: **25.38%** of rolling non-push OOF rows.
+- frozen before opening 2026: **YES**.
+- exact cross-year feature parity: **YES** — 128 shared feature/meta columns, 0 name mismatches, 0 type mismatches.
+- 2026 one-shot external: **143/310 = 46.13%**.
+- 2026 coverage: **20.49%** of 1,513 non-push games.
+- retuned after external result: **NO**.
+- target >=75%: **NOT MET**.
+- state: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue V37 using its 2026 result. Preserve V10/V36/V37 lineage and return to Totals only after the first pass across the remaining markets.
 
 ## Unified 2025 rolling-development protocol
 
