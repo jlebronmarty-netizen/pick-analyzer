@@ -13,18 +13,17 @@ on:
 
 permissions:
   contents: write
-  statuses: read
-  id-token: write
 
 concurrency:
   group: mlb-totals-v24-real-ml
   cancel-in-progress: false
 
 env:
-  TOTALS_V24_PREVIEW_URL: https://pick-analyzer-git-research-totals-2025-his-e0b747-pick-analyzer.vercel.app
   REQUEST_PATH: docs/research/totals-v24-ml-request.json
   DATASET_PATH: /tmp/mlb_totals_v24_dataset.json
   OUTPUT_PATH: artifacts/research/mlb_totals_v24_real_ml_result.json
+  VERCEL_ORG_ID: team_5NEeiCoWmTBO4kAkgKZwoQmN
+  VERCEL_PROJECT_ID: prj_hmkAkzUTe3b7M7yedvshGl5L9rP7
 
 jobs:
   train:
@@ -64,51 +63,104 @@ jobs:
           console.log('PASS: V24 bounded research request validated.')
           NODE
 
-      - name: Mint GitHub OIDC token for protected preview
-        id: oidc
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token = await core.getIDToken()
-            core.setSecret(token)
-            core.setOutput('token', token)
-
-      - name: Wait for matching Vercel deployment
+      - name: Pull protected preview env and export V24 dataset from Supabase
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 60); do
-            status_json="$(curl -fsSL               -H "Authorization: Bearer ${GH_TOKEN}"               -H 'Accept: application/vnd.github+json'               -H 'X-GitHub-Api-Version: 2022-11-28'               "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
-            vercel_state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
-            if [ "$vercel_state" = 'success' ]; then
-              echo 'PASS: matching Vercel preview deployment is READY.'
-              exit 0
-            fi
-            if [ "$vercel_state" = 'failure' ] || [ "$vercel_state" = 'error' ]; then
-              echo 'VERCEL_PREVIEW_DEPLOYMENT_FAILED'
-              exit 1
-            fi
-            if [ "$attempt" = '60' ]; then
-              echo 'VERCEL_PREVIEW_DEPLOYMENT_NOT_READY'
-              exit 1
-            fi
-            sleep 5
-          done
-
-      - name: Fetch protected V24 dataset
-        shell: bash
-        env:
-          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
-        run: |
-          set -euo pipefail
-          http_code="$(curl -sSL             --connect-timeout 10             --max-time 180             -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}"             -o "$DATASET_PATH"             -w '%{http_code}'             "${TOTALS_V24_PREVIEW_URL}/api/research/mlb/totals-v24-dataset")"
-          if [ "$http_code" != '200' ]; then
-            echo "TOTALS_V24_DATASET_HTTP_${http_code}"
-            cat "$DATASET_PATH" || true
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo 'MISSING_VERCEL_TOKEN'
             exit 1
           fi
+
+          ENV_FILE="/tmp/v24-preview.env"
+          trap 'rm -f "$ENV_FILE"' EXIT
+
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
+          npx --yes vercel@59.16.0 env pull "$ENV_FILE" \
+            --environment=preview \
+            --git-branch=research/totals-2025-historical-backfill \
+            --token="$VERCEL_TOKEN"
+
+          set -a
+          source "$ENV_FILE"
+          set +a
+
+          if [ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" ] || [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo 'MISSING_PREVIEW_SUPABASE_ENV'
+            exit 1
+          fi
+
+          node <<'NODE'
+          const fs = require('fs')
+
+          const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+          const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+          const outputPath = process.env.DATASET_PATH
+          const table = 'mlb_totals_v24_ml_dataset_2025_v1'
+          const pageSize = 1000
+          const rows = []
+
+          async function main() {
+            for (let offset = 0; ; offset += pageSize) {
+              const params = new URLSearchParams({
+                select: '*',
+                game_date: 'gte.2025-04-01',
+                order: 'game_date.asc,game_pk.asc',
+                limit: String(pageSize),
+                offset: String(offset),
+              })
+              const endpoint = baseUrl.replace(/\/$/, '') + '/rest/v1/' + table + '?' + params.toString()
+              const response = await fetch(endpoint, {
+                headers: {
+                  apikey: serviceKey,
+                  Authorization: 'Bearer ' + serviceKey,
+                  'Accept-Profile': 'public',
+                },
+              })
+              if (!response.ok) {
+                const detail = await response.text()
+                throw new Error('SUPABASE_V24_EXPORT_HTTP_' + response.status + ':' + detail.slice(0, 500))
+              }
+              const page = await response.json()
+              const bounded = page.filter(
+                (row) => String(row.game_date) < '2025-09-01' &&
+                         (row.close_over_label === 0 || row.close_over_label === 1),
+              )
+              rows.push(...bounded)
+              if (page.length < pageSize) break
+            }
+
+            const payload = {
+              contract: 'MLB_TOTALS_V24_ML_DATASET/1.0.0',
+              researchOnly: true,
+              branch: 'research/totals-2025-historical-backfill',
+              sourceTable: table,
+              period: { from: '2025-04-01', to: '2025-08-31' },
+              target: 'close_over_label',
+              forbiddenFeatureFields: [
+                'total_runs','home_runs','away_runs','actual_winner','y_margin',
+                'actual_offense_score','actual_contact_score',
+                'actual_starter_vulnerability_score','actual_bullpen_vulnerability_score',
+              ],
+              officialPicksWrites: 0,
+              apostarActivation: false,
+              rowCount: rows.length,
+              rows,
+            }
+            fs.writeFileSync(outputPath, JSON.stringify(payload))
+            console.log(JSON.stringify({ rowCount: rows.length, sourceTable: table }, null, 2))
+          }
+
+          main().catch((error) => {
+            console.error(error.message)
+            process.exit(1)
+          })
+          NODE
+
           node <<'NODE'
           const fs = require('fs')
           const payload = JSON.parse(fs.readFileSync(process.env.DATASET_PATH, 'utf8'))
@@ -136,7 +188,7 @@ jobs:
           }
           const failures = checks.filter(([ok]) => !ok).map(([, msg]) => msg)
           if (failures.length) throw new Error('TOTALS_V24_DATASET_INVALID: ' + failures.join('; '))
-          console.log(JSON.stringify({ rowCount: payload.rowCount }, null, 2))
+          console.log('PASS: protected V24 dataset exported and validated.')
           NODE
 
       - uses: actions/setup-python@v5
@@ -148,7 +200,9 @@ jobs:
 
       - name: Train V24 real ML candidates
         run: |
-          python scripts/research/train_mlb_totals_v24_ml.py             --input "$DATASET_PATH"             --output "$OUTPUT_PATH"
+          python scripts/research/train_mlb_totals_v24_ml.py \
+            --input "$DATASET_PATH" \
+            --output "$OUTPUT_PATH"
 
       - name: Validate V24 result boundary
         shell: bash
