@@ -1,0 +1,147 @@
+name: MLB Totals V36 Rolling 2025
+
+on:
+  push:
+    branches:
+      - research/totals-2025-historical-backfill
+    paths:
+      - '.github/workflows/mlb-totals-v36-rolling-2025.yml'
+      - 'docs/research/totals-v36-rolling-2025-request.json'
+      - 'scripts/research/train_mlb_totals_v36_rolling_2025.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: mlb-totals-v36-rolling-2025
+  cancel-in-progress: false
+
+env:
+  REQUEST_PATH: docs/research/totals-v36-rolling-2025-request.json
+  RESULT_PATH: artifacts/research/mlb_totals_v36_rolling_2025_result.json
+  FREEZE_PATH: artifacts/research/mlb_totals_v36_frozen_candidate.json
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/totals-2025-historical-backfill
+          fetch-depth: 0
+
+      - name: Validate bounded V36 request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync(process.env.REQUEST_PATH,'utf8'))
+          const checks=[
+            [r.contract==='MLB_TOTALS_V36_ROLLING_2025_REQUEST/1.0.0','contract'],
+            [r.authorized===true,'authorized'],
+            [r.researchOnly===true,'researchOnly'],
+            [r.branch==='research/totals-2025-historical-backfill','branch'],
+            [r.market==='MLB_GAME_TOTAL','market'],
+            [r.developmentSeason===2025,'development season'],
+            [r.externalSeason===2026,'external season'],
+            [r.freezeBestStableEvenIfBelowTarget===true,'freeze below target'],
+            [r.openExternal2026InThisRun===false,'2026 closed'],
+            [r.useExternal2026ForSelection===false,'2026 selection'],
+            [r.expectedOddsApiCredits===0,'Odds API credits'],
+            [r.providerCallsAllowed===false,'provider calls'],
+            [r.officialPicksWritesAllowed===false,'Official Picks'],
+            [r.apostarActivationAllowed===false,'APOSTAR'],
+            [r.productionPromotionAllowed===false,'production'],
+          ]
+          const bad=checks.filter(([ok])=>!ok).map(([,m])=>m)
+          if(bad.length) throw new Error('V36_REQUEST_INVALID:'+bad.join(','))
+          console.log('PASS: V36 rolling 2025 request boundaries validated.')
+          NODE
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned V36 dependencies
+        run: python -m pip install --disable-pip-version-check --no-cache-dir 'catboost==1.2.10' 'numpy>=2.0,<3' 'pandas>=2.2,<3' 'scikit-learn>=1.5,<2' 'requests>=2.32,<3'
+
+      - name: Mint GitHub OIDC token for V36 exporter
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken('supabase-v36')
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Evaluate V36 rolling 2025 and freeze candidate
+        env:
+          GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: python scripts/research/train_mlb_totals_v36_rolling_2025.py
+
+      - name: Validate V36 result and freeze boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync(process.env.RESULT_PATH,'utf8'))
+          const f=JSON.parse(fs.readFileSync(process.env.FREEZE_PATH,'utf8'))
+          const checks=[
+            [r.contract==='MLB_TOTALS_V36_ROLLING_2025_RESULT/1.0.0','result contract'],
+            [r.research_only===true,'research only'],
+            [r.selected_using_2025_only===true,'2025 only'],
+            [r.external_2026_opened===false,'2026 closed'],
+            [r.external_2026_used_for_selection===false,'2026 selection'],
+            [r.official_picks_writes===0,'Official Picks writes'],
+            [r.apostar_activation===false,'APOSTAR'],
+            [r.production_promotion===false,'production'],
+            [r.odds_api_historical_credits_consumed===0,'Odds API credits'],
+            [f.contract==='MLB_TOTALS_V36_FROZEN_CANDIDATE/1.0.0','freeze contract'],
+            [f.frozen===true,'frozen'],
+            [f.selected_using_2025_only===true,'freeze 2025 only'],
+            [f.external_2026_opened===false,'freeze 2026 closed'],
+            [f.official_picks_writes===0,'freeze Official Picks'],
+            [f.apostar_activation===false,'freeze APOSTAR'],
+            [f.production_promotion===false,'freeze production'],
+          ]
+          const bad=checks.filter(([ok])=>!ok).map(([,m])=>m)
+          if(bad.length) throw new Error('V36_RESULT_BOUNDARY_VIOLATION:'+bad.join(','))
+          console.log(JSON.stringify({
+            state:r.market_closeout_state,
+            targetMet:r.target_met_75_plus,
+            selected:r.selected_candidate,
+            oofNonpush:r.oof_nonpush_rows,
+            featureCount:r.feature_count,
+            featureHash:r.feature_hash_sha256,
+          },null,2))
+          NODE
+
+      - name: Commit V36 result and freeze only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$RESULT_PATH" "$FREEZE_PATH"
+          if git diff --cached --quiet; then
+            echo 'No V36 artifact changes to commit.'
+            exit 0
+          fi
+          git commit -m 'research(totals): freeze V36 rolling 2025 candidate'
+          git pull --rebase origin research/totals-2025-historical-backfill
+          git push origin HEAD:research/totals-2025-historical-backfill
+
+      - name: Upload V36 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-totals-v36-rolling-2025
+          path: |
+            artifacts/research/mlb_totals_v36_rolling_2025_result.json
+            artifacts/research/mlb_totals_v36_frozen_candidate.json
+          retention-days: 14
+          if-no-files-found: error
