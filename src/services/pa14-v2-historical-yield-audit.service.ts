@@ -32,6 +32,7 @@ const PAGE_SIZE = 1000
 
 let SOURCE_STATCAST = 'PICK2_MLB_STATCAST_CLASSIFIED_V/2025_V1'
 const SOURCE_GUMBO = 'MLB_STATSAPI_GUMBO/1.1'
+const SOURCE_GUMBO_TYPE_REPAIR = 'MLB_STATSAPI_GUMBO_TYPE_REPAIR/1.1'
 const SOURCE_TIMECODES = 'MLB_STATSAPI_GUMBO_TIMESTAMPS/1.1'
 let SOURCE_GAMELOG = 'MLB_STATSAPI_GAMELOG/2025'
 const SOURCE_SCHEDULE = 'MLB_STATSAPI_SCHEDULE/1'
@@ -161,6 +162,23 @@ type FetchedJson = {
   raw: string
   json: any
   sha256: string
+}
+
+type StatcastTypeRepair = {
+  gamePk: number
+  atBatNumber: number
+  pitchNumber: number
+  pitcherMlbamId: number
+  rawDescription: string
+  rawType: string
+  rawEvent: string | null
+  officialDescription: string
+  officialType: 'S' | 'B' | 'X'
+  officialResultEvent: string
+  releaseSpeed: string
+  officialStartSpeed: string
+  feedSha256: string
+  playDigest: string
 }
 
 function sha256Text(value: string) {
@@ -419,6 +437,99 @@ async function loadOpponentStatcast(opponentGamePks: number[]): Promise<Statcast
   return gameRows.flat()
 }
 
+async function repairStatcastTypeConflicts(rows: StatcastRow[]) {
+  const paPitchers = new Map<string, Set<number>>()
+  for (const row of rows) {
+    const gamePk = asPositiveInteger(row.game_pk, 'repair gamePk')
+    const atBatNumber = asPositiveInteger(row.at_bat_number, 'repair atBatNumber')
+    const pitcherId = asPositiveInteger(row.mlbam_pitcher_id, 'repair pitcher')
+    const key = `${gamePk}:${atBatNumber}`
+    const pitchers = paPitchers.get(key) ?? new Set<number>()
+    pitchers.add(pitcherId)
+    paPitchers.set(key, pitchers)
+  }
+
+  const candidates = rows.filter((row) => {
+    if (!row.description || !row.type) return false
+    const expected = OFFICIAL_TYPE_BY_DESCRIPTION.get(row.description)
+    return Boolean(expected && expected !== row.type)
+  })
+  if (!candidates.length) {
+    return { rows, repairs: [] as StatcastTypeRepair[], repairsByGame: new Map<number, StatcastTypeRepair[]>() }
+  }
+
+  const gamePks = [...new Set(candidates.map((row) => asPositiveInteger(row.game_pk, 'repair candidate gamePk')))].sort((a, b) => a - b)
+  const feeds = await mapConcurrent(gamePks, 6, async (gamePk) => ({
+    gamePk,
+    feed: await fetchJsonWithDigest(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`),
+  }))
+  const feedByGame = new Map(feeds.map((entry) => [entry.gamePk, entry.feed]))
+  const replacements = new Map<string, StatcastRow>()
+  const repairs: StatcastTypeRepair[] = []
+
+  for (const row of candidates) {
+    const gamePk = asPositiveInteger(row.game_pk, 'repair row gamePk')
+    const atBatNumber = asPositiveInteger(row.at_bat_number, 'repair row atBatNumber')
+    const pitchNumber = asPositiveInteger(row.pitch_number, 'repair row pitchNumber')
+    const pitcherId = asPositiveInteger(row.mlbam_pitcher_id, 'repair row pitcher')
+    const paKey = `${gamePk}:${atBatNumber}`
+    if ((paPitchers.get(paKey)?.size ?? 0) !== 1) continue
+
+    const feed = feedByGame.get(gamePk)
+    const play = feed?.json?.liveData?.plays?.allPlays?.[atBatNumber - 1]
+    if (!feed || !play || Number(play?.atBatIndex) + 1 !== atBatNumber) continue
+    if (Number(play?.matchup?.pitcher?.id) !== pitcherId) continue
+
+    const pitchEvent = (Array.isArray(play?.playEvents) ? play.playEvents : [])
+      .find((event: JsonObject) => event?.isPitch === true && Number(event?.pitchNumber) === pitchNumber)
+    if (!pitchEvent) continue
+
+    const officialDescription = OFFICIAL_DESCRIPTION_MAP.get(String(pitchEvent?.details?.description ?? ''))
+    const officialType = officialDescription ? OFFICIAL_TYPE_BY_DESCRIPTION.get(officialDescription) : null
+    const rawExpectedType = row.description ? OFFICIAL_TYPE_BY_DESCRIPTION.get(row.description) : null
+    if (!officialDescription || !officialType || !rawExpectedType || officialType !== rawExpectedType) continue
+
+    const rawSpeed = Number(row.release_speed)
+    const officialSpeed = Number(pitchEvent?.pitchData?.startSpeed)
+    if (!Number.isFinite(rawSpeed) || !Number.isFinite(officialSpeed) || Math.abs(rawSpeed - officialSpeed) > 0.051) continue
+
+    const rawEvent = row.events === 'truncated_pa' || row.events === '' ? null : row.events
+    const officialResultEvent = String(play?.result?.eventType ?? '')
+    if (rawEvent && officialResultEvent !== rawEvent) continue
+
+    const key = `${gamePk}:${atBatNumber}:${pitchNumber}:${pitcherId}`
+    replacements.set(key, { ...row, description: officialDescription, type: officialType })
+    repairs.push({
+      gamePk,
+      atBatNumber,
+      pitchNumber,
+      pitcherMlbamId: pitcherId,
+      rawDescription: String(row.description),
+      rawType: String(row.type),
+      rawEvent,
+      officialDescription,
+      officialType,
+      officialResultEvent,
+      releaseSpeed: String(row.release_speed),
+      officialStartSpeed: String(pitchEvent.pitchData.startSpeed),
+      feedSha256: feed.sha256,
+      playDigest: sha256Text(JSON.stringify(play)),
+    })
+  }
+
+  const repairedRows = rows.map((row) => {
+    const key = `${asPositiveInteger(row.game_pk, 'repair map gamePk')}:${asPositiveInteger(row.at_bat_number, 'repair map atBat')}:${asPositiveInteger(row.pitch_number, 'repair map pitch')}:${asPositiveInteger(row.mlbam_pitcher_id, 'repair map pitcher')}`
+    return replacements.get(key) ?? row
+  })
+  const repairsByGame = new Map<number, StatcastTypeRepair[]>()
+  for (const repair of repairs) {
+    const group = repairsByGame.get(repair.gamePk) ?? []
+    group.push(repair)
+    repairsByGame.set(repair.gamePk, group)
+  }
+  return { rows: repairedRows, repairs, repairsByGame }
+}
+
 function normalizeStatcastRow(row: StatcastRow): Pa14V2Pitch {
   const event = row.events === 'truncated_pa' || row.events === '' ? null : row.events
   return {
@@ -674,18 +785,23 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
 
   const startGamePks = logs.starts.map((row) => row.gamePk)
   const opponentGamePks = logs.opponentGames.map((row) => row.gamePk)
-  const [pitcherStatcastRaw, opponentStatcastRaw, schedules] = await Promise.all([
+  const [pitcherStatcastRawOriginal, opponentStatcastRawOriginal, schedules] = await Promise.all([
     loadPitcherStatcast(startGamePks),
     loadOpponentStatcast(opponentGamePks),
     loadSchedules(startGamePks),
   ])
-
+  const [pitcherRepair, opponentRepair] = await Promise.all([
+    repairStatcastTypeConflicts(pitcherStatcastRawOriginal),
+    repairStatcastTypeConflicts(opponentStatcastRawOriginal),
+  ])
+  const pitcherStatcastRaw = pitcherRepair.rows
+  const opponentStatcastRaw = opponentRepair.rows
   const pitcherStatcast = pitcherStatcastRaw.map(normalizeStatcastRow)
   const opponentStatcast = opponentStatcastRaw.map(normalizeStatcastRow)
   const pitcherByGame = groupByGame(pitcherStatcast)
   const opponentByGame = groupByGame(opponentStatcast)
   const opponentRawByGame = new Map<number, StatcastRow[]>()
-  for (const row of opponentStatcastRaw) {
+  for (const row of opponentStatcastRawOriginal) {
     const gamePk = asPositiveInteger(row.game_pk, 'opponent raw gamePk')
     const group = opponentRawByGame.get(gamePk) ?? []
     group.push(row)
@@ -721,7 +837,9 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
     }
     const unfinishedPaAtBatNumbers = pitcherUnfinished.get(official.gamePk) ?? []
     const witnesses = pitcherWitnessEvidence.get(official.gamePk) ?? []
-    const pitchDigest = canonicalDigest(pitches)
+    const typeRepairs = pitcherRepair.repairsByGame.get(official.gamePk) ?? []
+    const pitchSource = typeRepairs.length ? `${SOURCE_STATCAST}+${SOURCE_GUMBO_TYPE_REPAIR}` : SOURCE_STATCAST
+    const pitchDigest = typeRepairs.length ? canonicalDigest({ pitches, typeRepairs }) : canonicalDigest(pitches)
     const boxDigest = canonicalDigest(official.raw)
     const gameDigest = canonicalDigest({
       gamePk: official.gamePk,
@@ -744,8 +862,17 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
       unfinishedPaAtBatNumbers,
       dependencies: [
         dependency('SOURCE_GAME', official.gamePk, TARGET_PITCHER_ID, SOURCE_TIMECODES, complete.completedBy, gameDigest),
-        dependency('PITCHES', official.gamePk, TARGET_PITCHER_ID, SOURCE_STATCAST, complete.completedBy, pitchDigest),
-        dependency('TERMINAL', official.gamePk, TARGET_PITCHER_ID, SOURCE_STATCAST, complete.completedBy, terminalDigest(pitches, [], unfinishedPaAtBatNumbers, witnesses)),
+        dependency('PITCHES', official.gamePk, TARGET_PITCHER_ID, pitchSource, complete.completedBy, pitchDigest),
+        dependency(
+          'TERMINAL',
+          official.gamePk,
+          TARGET_PITCHER_ID,
+          pitchSource,
+          complete.completedBy,
+          typeRepairs.length
+            ? canonicalDigest({ terminalDigest: terminalDigest(pitches, [], unfinishedPaAtBatNumbers, witnesses), typeRepairs })
+            : terminalDigest(pitches, [], unfinishedPaAtBatNumbers, witnesses),
+        ),
         dependency('BOX_SCORE', official.gamePk, TARGET_PITCHER_ID, SOURCE_GAMELOG, complete.completedBy, boxDigest),
       ],
     }
@@ -767,10 +894,13 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
     if (terminalCount !== official.plateAppearances || kCount !== official.strikeouts) {
       throw new Error(`Opponent reconciliation failed ${official.gamePk}: PA ${terminalCount}/${official.plateAppearances}, K ${kCount}/${official.strikeouts}`)
     }
-    const pitchSource = statcastPitches ? SOURCE_STATCAST : SOURCE_GUMBO
-    const pitchDigest = canonicalDigest(pitches)
+    const typeRepairs = opponentRepair.repairsByGame.get(official.gamePk) ?? []
+    const pitchSource = statcastPitches
+      ? (typeRepairs.length ? `${SOURCE_STATCAST}+${SOURCE_GUMBO_TYPE_REPAIR}` : SOURCE_STATCAST)
+      : SOURCE_GUMBO
+    const pitchDigest = typeRepairs.length ? canonicalDigest({ pitches, typeRepairs }) : canonicalDigest(pitches)
     const rawSourceDigest = statcastPitches
-      ? canonicalDigest(opponentRawByGame.get(official.gamePk) ?? [])
+      ? canonicalDigest({ rawRows: opponentRawByGame.get(official.gamePk) ?? [], typeRepairs })
       : String(officialEvidence?.normalized.rawEvidenceDigest ?? '')
     const boxDigest = canonicalDigest(official.raw)
     const gameDigest = canonicalDigest({
@@ -792,7 +922,16 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
       dependencies: [
         dependency('SOURCE_GAME', official.gamePk, null, SOURCE_TIMECODES, complete.completedBy, gameDigest),
         dependency('PITCHES', official.gamePk, null, pitchSource, complete.completedBy, pitchDigest),
-        dependency('TERMINAL', official.gamePk, null, pitchSource, complete.completedBy, terminalDigest(pitches, terminalOnlyPas, unfinishedPaAtBatNumbers, witnesses)),
+        dependency(
+          'TERMINAL',
+          official.gamePk,
+          null,
+          pitchSource,
+          complete.completedBy,
+          typeRepairs.length
+            ? canonicalDigest({ terminalDigest: terminalDigest(pitches, terminalOnlyPas, unfinishedPaAtBatNumbers, witnesses), typeRepairs })
+            : terminalDigest(pitches, terminalOnlyPas, unfinishedPaAtBatNumbers, witnesses),
+        ),
         dependency('BOX_SCORE', official.gamePk, null, SOURCE_GAMELOG, complete.completedBy, boxDigest),
       ],
     }
@@ -809,6 +948,8 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
     scheduleSha256: schedules.schedule.sha256,
     missingOpponentGamePks: missingOpponentGames.map((row) => row.gamePk),
     completion: [...completion.values()].sort((a, b) => a.gamePk - b.gamePk),
+    officialTypeRepairs: [...pitcherRepair.repairs, ...opponentRepair.repairs]
+      .sort((a, b) => a.gamePk - b.gamePk || a.atBatNumber - b.atBatNumber || a.pitchNumber - b.pitchNumber),
   })
 
   const input: Pa14V2BuildInput = {
@@ -897,6 +1038,10 @@ export async function auditHistoricalPa14V2Target(config: Pa14HistoricalAuditTar
       opponentGameLogSha256: logs.opponent.sha256,
       scheduleSha256: schedules.schedule.sha256,
       censusDigest,
+      officialTypeRepairs: {
+        pitcher: pitcherRepair.repairs,
+        opponent: opponentRepair.repairs,
+      },
       archivedTarget: {
         targetSide: archived.targetSide,
         opponentAbbr: archived.opponentAbbr,
