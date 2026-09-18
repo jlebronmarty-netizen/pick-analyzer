@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Singles first-pass closeout — authoritative
+
+Frozen rule: `batter_singles_under_1p5_proj_0p50_v1`.
+
+2025 rolling: 7,822/8,328 = **93.92%**; worst month **93.10%**; baseline UNDER 1.5 **89.96%**; lift **+3.96 pts**.
+
+2026 one-shot external: 12,690/13,634 = **93.08%**; coverage **33.54%**; worst month **91.16%**; baseline **90.30%**; lift **+2.78 pts**; no retuning.
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+State: `TARGET_MET_75_PLUS`.
+
+Historical sportsbook prices are not certified; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Pitcher Hits Allowed first-pass closeout — authoritative
 
 Frozen rule: `pitcher_hits_allowed_under_6p5_proj_5p0_v1`.
