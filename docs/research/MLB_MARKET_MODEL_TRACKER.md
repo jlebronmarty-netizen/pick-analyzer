@@ -43,7 +43,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Pitcher Earned Runs** | PA-12 forward point-shadow V2 | `PROSPECTIVE_FORWARD` | Point-model math frozen from sealed prior research | Sep 18 pilot: 23 eligible point forecasts; settlement/accumulation in progress | prospective sample still small | N/A — point forecast, not market accuracy yet | Not market-certified | Accumulate fixed-clock forecasts + PA-13 real prices. Do not infer ROI/EV yet. |
 | **Pitcher Strikeouts** | `PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0` data path | evidence/corpus gate | 38 replay-PASS stored rows after closeout | training not authorized | corpus too small / temporally uneven | **NO MODEL YET** | `BLOCKED_CORPUS_TOO_SMALL` | Accumulate materially new evidence; do not brute-force or mutate V2.0.0. |
 | **Pitcher Walks** | `pitcher_bb_under_2p5_p85_v1` — UNDER 2.5 BB when calibrated UNDER probability >=85% | `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 111/122 = **90.98%**; worst month **82.35%**; baseline 75.83% | 2026 historical frozen-rule result: 125/137 = **91.24%**; worst month **86.67%**; baseline 74.57% | 2025 n=122; 2026 n=137; 2026 selected coverage **3.95%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY`; historical pricing not certified | Preserve frozen rule. Next gate is real pregame 2.5 pricing / forward market evidence; do not claim ROI/EV/CLV yet. |
-| **Pitcher Outs** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
+| **Pitcher Outs** | `pitcher_outs_under_18p5_p90_v1` — UNDER 18.5 when empirical UNDER probability >=90% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 VALIDATION+TEST: 123/126 = **97.62%**; worst split **95.52%**; baseline 83.94% | 2026 frozen-rule: 215/226 = **95.13%**; worst month **89.23%**; baseline 82.39% | 2026 coverage **9.45%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Hits** | `batter_hits_under_1p5_edge_0p75_v1` — UNDER 1.5 when projected hits <=0.75 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 6,123/7,011 = **87.33%**; worst month **85.19%**; baseline 79.55% | 2026 frozen-rule: 8,496/9,833 = **86.40%**; worst month **83.73%**; baseline 80.23% | 2026 coverage **27.65%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Total Bases** | `batter_total_bases_under_2p5_edge_1p5_v1` — UNDER 2.5 when projected TB <=1.0 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 1,081/1,187 = **91.07%**; worst month **90.19%**; baseline 80.41% | 2026 frozen-rule: 2,021/2,336 = **86.52%**; worst month **83.33%**; baseline 80.74% | 2026 coverage **6.57%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **NRFI / YRFI** | `nrfi_p52_fallback_v1` — NRFI when calibrated p>=52% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025: 190/340 = **55.88%**; worst month **39.13%**; baseline 49.51% | 2026: 162/301 = **53.82%**; worst month **48.24%**; baseline 50.37% | 2026 coverage **18.35%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; do not threshold-rescue from 2026. Revisit with materially better first-inning features/architecture. |
@@ -153,6 +153,18 @@ Frozen fallback: `nrfi_p52_fallback_v1`.
 State: `REVISIT_AFTER_FIRST_PASS`.
 
 Do not retune this candidate using 2026. Revisit later with new first-inning information or a materially different model.
+
+## First-pass closeout — Pitcher Outs
+
+Frozen rule: `pitcher_outs_under_18p5_p90_v1`.
+
+2025 VALIDATION+TEST: **123/126 = 97.62%**, worst split **95.52%**, baseline UNDER 18.5 **83.94%**, lift **+13.68 pts**.
+
+2026 frozen-rule historical evidence: **215/226 = 95.13%**, coverage **9.45%**, worst month **89.23%**, baseline **82.39%**, lift **+12.74 pts**, no retuning.
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Historical prop prices are not certified; no ROI/EV/CLV claim.
 
 ## Unified 2025 rolling-development protocol
 
