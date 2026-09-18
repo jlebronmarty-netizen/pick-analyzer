@@ -1,0 +1,59 @@
+{
+  "contract": "MLB_PITCHER_RECORD_WIN_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "PITCHER_RECORD_A_WIN",
+  "odds_api_market_key": "pitcher_record_a_win",
+  "model_family": "strict-prior starter win-rate threshold",
+  "rule": {
+    "selection": "NO",
+    "maximum_prior_starter_win_rate": 0.1,
+    "minimum_prior_starts": 5
+  },
+  "development_protocol": "2025 monthly evaluation May-Sep; prior starts strictly earlier than target date; same-day earlier start excluded",
+  "development_2025": {
+    "n": 185,
+    "correct": 147,
+    "accuracy": 0.794594594594595,
+    "min_month_n": 29,
+    "worst_month_accuracy": 0.75,
+    "monthly_accuracy_sd": 0.0403109382572939,
+    "baseline_no_accuracy": 0.687439143135346,
+    "lift_vs_baseline": 0.107155451459249,
+    "months": {
+      "2025-05": {
+        "n": 40,
+        "correct": 30,
+        "accuracy": 0.75
+      },
+      "2025-06": {
+        "n": 34,
+        "correct": 26,
+        "accuracy": 0.764705882352941
+      },
+      "2025-07": {
+        "n": 29,
+        "correct": 24,
+        "accuracy": 0.827586206896552
+      },
+      "2025-08": {
+        "n": 53,
+        "correct": 45,
+        "accuracy": 0.849056603773585
+      },
+      "2025-09": {
+        "n": 29,
+        "correct": 22,
+        "accuracy": 0.758620689655172
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_opened": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}

@@ -45,6 +45,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Pitcher Walks** | `pitcher_bb_under_2p5_p85_v1` — UNDER 2.5 BB when calibrated UNDER probability >=85% | `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 111/122 = **90.98%**; worst month **82.35%**; baseline 75.83% | 2026 historical frozen-rule result: 125/137 = **91.24%**; worst month **86.67%**; baseline 74.57% | 2025 n=122; 2026 n=137; 2026 selected coverage **3.95%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY`; historical pricing not certified | Preserve frozen rule. Next gate is real pregame 2.5 pricing / forward market evidence; do not claim ROI/EV/CLV yet. |
 | **Pitcher Outs** | `pitcher_outs_under_18p5_p90_v1` — UNDER 18.5 when empirical UNDER probability >=90% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 VALIDATION+TEST: 123/126 = **97.62%**; worst split **95.52%**; baseline 83.94% | 2026 frozen-rule: 215/226 = **95.13%**; worst month **89.23%**; baseline 82.39% | 2026 coverage **9.45%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Pitcher Hits Allowed** | `pitcher_hits_allowed_under_6p5_proj_5p0_v1` — UNDER 6.5 when projected hits <=5.0 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 634/761 = **83.31%**; worst month **77.78%**; baseline 75.17% | 2026 one-shot: 968/1,226 = **78.96%**; worst month **75.69%**; baseline 75.47% | 2026 coverage **47.74%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical price coverage not yet certified. |
+| **Pitcher Record a Win** | `pitcher_record_win_no_prior_rate_0p10_v1` — NO when prior starter win rate <=10% | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025: 147/185 = **79.46%**; worst month **75.00%**; baseline NO 68.74% | 2026 one-shot: 83/118 = **70.34%**; worst month **64.44%**; baseline NO 67.45% | 2026 coverage **6.73%** after prior-start gate | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen 10% rule; do not threshold-rescue from 2026. Revisit with better team/game context. |
 | **Batter Hits** | `batter_hits_under_1p5_edge_0p75_v1` — UNDER 1.5 when projected hits <=0.75 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 6,123/7,011 = **87.33%**; worst month **85.19%**; baseline 79.55% | 2026 frozen-rule: 8,496/9,833 = **86.40%**; worst month **83.73%**; baseline 80.23% | 2026 coverage **27.65%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Total Bases** | `batter_total_bases_under_2p5_edge_1p5_v1` — UNDER 2.5 when projected TB <=1.0 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 1,081/1,187 = **91.07%**; worst month **90.19%**; baseline 80.41% | 2026 frozen-rule: 2,021/2,336 = **86.52%**; worst month **83.33%**; baseline 80.74% | 2026 coverage **6.57%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **Batter Home Runs** | `batter_hr_under_0p5_proj_0p10_v1` — UNDER 0.5 when projected HR <=0.10 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 11,176/12,016 = **93.01%**; worst month **92.31%**; baseline 88.75% | 2026 one-shot: 12,448/13,507 = **92.16%**; worst month **90.77%**; baseline 89.00% | 2026 coverage **37.99%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
@@ -276,6 +277,18 @@ Frozen rule: `batter_triples_under_0p5_proj_0p015_v1`.
 State: `TARGET_MET_75_PLUS_LOW_INCREMENTAL_SIGNAL`.
 
 The market is baseline-dominated. High raw accuracy must not be interpreted as strong model or betting value.
+
+## First-pass closeout — Pitcher Record a Win
+
+Frozen rule: `pitcher_record_win_no_prior_rate_0p10_v1`.
+
+2025: **147/185 = 79.46%**, worst month **75.00%**, baseline NO **68.74%**, lift **+10.72 pts**.
+
+2026 one-shot external: **83/118 = 70.34%**, coverage **6.73%**, worst month **64.44%**, baseline NO **67.45%**, lift **+2.89 pts**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+The frozen 2025 rule failed the external 75% target. Do not change the threshold using 2026.
 
 ## Unified 2025 rolling-development protocol
 
