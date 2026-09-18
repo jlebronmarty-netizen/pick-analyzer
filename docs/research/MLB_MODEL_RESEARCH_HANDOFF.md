@@ -6,6 +6,21 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 NRFI / YRFI first-pass closeout — authoritative
+
+Frozen fallback: `nrfi_p52_fallback_v1`.
+
+- direction: NRFI;
+- select when calibrated P(NRFI) >= 52%.
+
+2025 evidence: 190/340 = **55.88%**; baseline **49.51%**; lift **+6.37 pts**; worst month **39.13%**.
+
+2026 frozen-rule evidence: 162/301 = **53.82%**; coverage **18.35%**; baseline **50.37%**; lift **+3.46 pts**; worst month **48.24%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this candidate using 2026 threshold changes. Revisit after the first pass with materially better first-inning inputs/architecture.
+
 ## 2026-09-18 Batter Total Bases first-pass closeout — authoritative
 
 Frozen rule: `batter_total_bases_under_2p5_edge_1p5_v1`.
