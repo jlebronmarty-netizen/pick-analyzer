@@ -1,0 +1,113 @@
+{
+  "schema": "PA14_V2_MLB_OFFICIAL_TYPE_REPAIR/1.0.0",
+  "date": "2026-09-17",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "repairPolicy": {
+    "sourceOnly": true,
+    "frozenContractChanged": false,
+    "frozenBuilderChanged": false,
+    "requirements": [
+      "single pitcher identity across raw PA",
+      "exact gamePk + atBatNumber + pitchNumber",
+      "MLB Official matchup pitcher equals raw pitcher MLBAM",
+      "official normalized pitch type equals type required by raw description family",
+      "raw and MLB Official release speed both finite and within 0.051 mph",
+      "if raw terminal event exists, MLB Official play result event must match"
+    ],
+    "repairSourceVersion": "MLB_STATSAPI_GUMBO_TYPE_REPAIR/1.1"
+  },
+  "validation": {
+    "focusedRepair": {
+      "targetGamePk": 776410,
+      "pitcherMlbamId": 676979,
+      "sourceGamePk": 777605,
+      "atBatNumber": 49,
+      "pitchNumber": 6,
+      "raw": {
+        "description": "hit_into_play",
+        "type": "S",
+        "event": "catcher_interf",
+        "releaseSpeed": "95.5"
+      },
+      "official": {
+        "description": "hit_into_play_no_out",
+        "type": "X",
+        "event": "catcher_interf",
+        "releaseSpeed": "95.5",
+        "pitcherMlbamId": 676979
+      },
+      "result": "ELIGIBLE",
+      "replayMatch": true
+    },
+    "structuralControl": {
+      "targetGamePk": 776184,
+      "pitcherMlbamId": 607074,
+      "result": "BLOCKED",
+      "reasons": [
+        "INCOMPLETE_PA"
+      ],
+      "note": "mid-PA pitching-change blockers remain fail-closed"
+    },
+    "same72RowSample": {
+      "previousEligible": 18,
+      "repairedEligible": 20,
+      "rows": 72,
+      "yield": 0.2777777777777778,
+      "netGain": 2,
+      "lostPriorEligible": 0,
+      "newEligible": [
+        {
+          "gamePk": 777692,
+          "pitcherMlbamId": 693821,
+          "month": "2025-06"
+        },
+        {
+          "gamePk": 776410,
+          "pitcherMlbamId": 676979,
+          "month": "2025-09"
+        }
+      ],
+      "monthly": {
+        "2025-04": {
+          "rows": 12,
+          "eligible": 8
+        },
+        "2025-05": {
+          "rows": 12,
+          "eligible": 5
+        },
+        "2025-06": {
+          "rows": 12,
+          "eligible": 2
+        },
+        "2025-07": {
+          "rows": 12,
+          "eligible": 1
+        },
+        "2025-08": {
+          "rows": 12,
+          "eligible": 3
+        },
+        "2025-09": {
+          "rows": 12,
+          "eligible": 1
+        }
+      }
+    }
+  },
+  "nonRepairableObserved": {
+    "missingVelocity": "MLB Official also returned null startSpeed in inspected examples; remains blocked",
+    "midPaPitcherChanges": "multiple MLBAM pitchers within one PA remain INCOMPLETE_PA",
+    "unfinishedPa": "requires frozen runner-third-out witness semantics; otherwise remains blocked"
+  },
+  "disposition": "SOURCE_REPAIR_VALIDATED_TRAINING_STILL_BLOCKED",
+  "pePitcherKV2TrainingAuthorized": false,
+  "boundaries": {
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "productionPromotion": false,
+    "sportsbookCalls": 0,
+    "historicalOddsApiCredits": 0
+  }
+}
