@@ -15,5 +15,6 @@
   "providerCallsAllowed": false,
   "officialPicksWritesAllowed": false,
   "apostarActivationAllowed": false,
-  "productionPromotionAllowed": false
+  "productionPromotionAllowed": false,
+  "retryReason": "surface_oidc_exporter_error"
 }
