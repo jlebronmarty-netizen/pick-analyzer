@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Triples first-pass closeout — authoritative
+
+Frozen rule: `batter_triples_under_0p5_proj_0p015_v1`.
+
+2025 rolling: 27,562/27,832 = **99.03%**; worst month **98.90%**; baseline UNDER 0.5 **98.74%**; lift **+0.29 pts**.
+
+2026 one-shot external: 29,689/30,045 = **98.82%**; coverage **73.92%**; worst month **98.61%**; baseline **98.63%**; lift **+0.18 pts**; no retuning.
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+State: `TARGET_MET_75_PLUS_LOW_INCREMENTAL_SIGNAL`.
+
+This market is baseline-dominated; do not infer model value or profitability from raw accuracy.
+
 ## 2026-09-18 Batter Doubles first-pass closeout — authoritative
 
 Frozen rule: `batter_doubles_under_0p5_proj_0p16_v1`.

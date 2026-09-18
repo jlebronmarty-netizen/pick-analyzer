@@ -1,0 +1,64 @@
+{
+  "contract": "MLB_BATTER_TRIPLES_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "BATTER_TRIPLES",
+  "model_family": "strict-date rolling linear triples projection",
+  "external_refit_2025": {
+    "n": 42601,
+    "intercept": 0.00876081897272024,
+    "slope": 0.294769143425622
+  },
+  "rule": {
+    "line": 0.5,
+    "direction": "UNDER",
+    "maximum_projected_triples": 0.015
+  },
+  "development_protocol": "2025 expanding monthly rolling May-Sep; strict prior-date only; same-day doubleheader game 1 excluded from game 2 prior history",
+  "development_2025": {
+    "n": 27832,
+    "correct": 27562,
+    "accuracy": 0.990298936475999,
+    "min_month_n": 5249,
+    "worst_month_accuracy": 0.989049740163326,
+    "monthly_accuracy_sd": 0.000841586990753932,
+    "baseline_under_accuracy": 0.987440381558029,
+    "lift_vs_baseline": 0.00285855491797027,
+    "months": {
+      "2025-05": {
+        "n": 5388,
+        "correct": 5329,
+        "accuracy": 0.989049740163326
+      },
+      "2025-06": {
+        "n": 5592,
+        "correct": 5535,
+        "accuracy": 0.98980686695279
+      },
+      "2025-07": {
+        "n": 5249,
+        "correct": 5197,
+        "accuracy": 0.990093351114498
+      },
+      "2025-08": {
+        "n": 5910,
+        "correct": 5859,
+        "accuracy": 0.991370558375634
+      },
+      "2025-09": {
+        "n": 5693,
+        "correct": 5642,
+        "accuracy": 0.991041630072018
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "incremental_signal": "LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED",
+  "external_2026_opened": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
