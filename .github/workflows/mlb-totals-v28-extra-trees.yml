@@ -5,7 +5,7 @@ on:
     branches:
       - research/totals-2025-historical-backfill
     paths:
-      - '.github/workflows/mlb-totals-v28-direct-supabase.yml'
+      - '.github/workflows/mlb-totals-v28-extra-trees.yml'
       - 'docs/research/totals-v28-extra-trees-request.json'
   workflow_dispatch:
 
@@ -14,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: mlb-totals-v28-direct-supabase
+  group: mlb-totals-v28-extra-trees
   cancel-in-progress: false
 
 env:
