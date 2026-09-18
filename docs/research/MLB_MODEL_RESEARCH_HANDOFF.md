@@ -6,6 +6,49 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Pitcher Earned Runs first-pass closeout — authoritative
+
+Frozen market rule:
+
+`pitcher_er_over_1p5_p70_v1`
+
+Underlying research model:
+
+`MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2`
+
+Frozen R2 coefficients reproduced from official 2025 Retrosheet `data,er` outcomes and strict-prior PREGAME features:
+
+- base intercept = 1.90273530551357;
+- base slope on prior ER all-history = 0.227085168912444;
+- residual intercept = 0.653408289475203;
+- residual slope on pregame pitcher K-rate = -3.0156054216154.
+
+TEST checksum:
+
+- MAE = **1.53264877098586**;
+- RMSE = **1.89392266393888**.
+
+Frozen rule:
+
+- line = 1.5 ER;
+- direction = OVER;
+- select when empirical P(OVER 1.5 ER) >= 70%.
+
+2025 VALIDATION + TEST:
+
+- 73/91 = **80.22%**;
+- worst split = **79.66%**;
+- baseline OVER 1.5 = **64.70%**;
+- lift = **+15.52 percentage points**.
+
+State:
+
+`TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME`
+
+External 2026 event accuracy remains unopened because the canonical exact Pitcher ER outcome contract currently certifies 2025 only. Do not substitute Runs Allowed or uncertified provider ER fields.
+
+PA-13 forward pregame pricing capture remains separate and prospective. Historical prices are not certified; do not claim ROI/EV/CLV.
+
 ## 2026-09-18 Pitcher Outs first-pass closeout — authoritative
 
 Frozen rule: `pitcher_outs_under_18p5_p90_v1`.
