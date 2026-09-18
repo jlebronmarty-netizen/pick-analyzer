@@ -337,6 +337,13 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // paired modal Run Line establishes HOME -1.5. All evidence is research-only.
     const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
 
+    // Freeze independent Run Line research evidence at its own fixed clock gate
+    // before any Statcast catch-up/readiness work. A transient downstream
+    // ingestion/readiness failure must not erase an otherwise valid prospective
+    // observation. The freeze service itself remains fail-closed outside its
+    // narrow 10:45-10:59 Puerto Rico window.
+    const runlineHomeP15Freeze = await safeRunlineHomeP15ForwardFreeze()
+
     const catchupRuns: Array<Record<string, unknown>> = []
     let reachedCurrent = false
     let wroteHistory = false
@@ -347,7 +354,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
       if (!result.success) {
         const readiness = await getMlbDailyHistoryReadiness()
-        return apiOk({ success: false, status: result.status, catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture }, id, {
+        return apiOk({ success: false, status: result.status, catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture, runlineHomeP15ResearchFreeze: runlineHomeP15Freeze }, id, {
           status: failureStatus(result),
           headers: { 'Cache-Control': 'no-store' },
         })
@@ -363,7 +370,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
     if (!reachedCurrent) {
       const readiness = await getMlbDailyHistoryReadiness()
-      return apiOk({ success: false, status: 'CATCHUP_LIMIT_REACHED', catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture }, id, {
+      return apiOk({ success: false, status: 'CATCHUP_LIMIT_REACHED', catchupRuns, dailyHistoryReadiness: readiness, prospectiveMarketCapture, runlineHomeP15ResearchFreeze: runlineHomeP15Freeze }, id, {
         status: 503,
         headers: { 'Cache-Control': 'no-store' },
       })
@@ -382,14 +389,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       ? await safeRunlineHomeP15Settlement(readiness.targetDate)
       : null
 
-    // Run Line is an independent shadow-only research stage. Execute its safe
-    // freeze before Moneyline so a Moneyline runtime exception cannot erase a
-    // valid prospective Run Line observation. This does not change Moneyline's
-    // fail-closed recommendation gate or any production eligibility.
-    const runlineHomeP15Freeze = readiness.ready
-      ? await safeRunlineHomeP15ForwardFreeze()
-      : null
-
+    // Run Line freeze already executed at its independent fixed-clock gate
+    // before Statcast catch-up. Settlement still waits for previous-day outcome
+    // readiness, and Moneyline keeps its existing authorized fail-closed gate.
     // Moneyline keeps its existing authorized gate and remains fail-closed.
     // Exceptions are represented as blocked results rather than aborting the
     // entire cron after independent research evidence has already been captured.
