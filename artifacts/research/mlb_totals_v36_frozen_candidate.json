@@ -1,0 +1,77 @@
+{
+  "apostar_activation": false,
+  "candidate": {
+    "accuracy": 0.6166666666666667,
+    "architecture": "catboost_total_runs_regression",
+    "correct": 74,
+    "coverage_vs_nonpush_oof": 0.06359300476947535,
+    "min_month_n": 11,
+    "mode": "under_only",
+    "monthly_accuracy_sd": 0.15848542673610586,
+    "months": {
+      "2025-05": {
+        "accuracy": 0.631578947368421,
+        "correct": 36,
+        "n": 57
+      },
+      "2025-06": {
+        "accuracy": 0.55,
+        "correct": 11,
+        "n": 20
+      },
+      "2025-07": {
+        "accuracy": 0.7272727272727273,
+        "correct": 8,
+        "n": 11
+      },
+      "2025-08": {
+        "accuracy": 0.3888888888888889,
+        "correct": 7,
+        "n": 18
+      },
+      "2025-09": {
+        "accuracy": 0.8571428571428571,
+        "correct": 12,
+        "n": 14
+      }
+    },
+    "n": 120,
+    "params": {
+      "depth": 4,
+      "iterations": 400,
+      "l2_leaf_reg": 5.0,
+      "learning_rate": 0.05,
+      "random_strength": 1.0
+    },
+    "spec_index": 1,
+    "stable": true,
+    "target_met_75_plus": false,
+    "threshold": 1.0,
+    "worst_month_accuracy": 0.3888888888888889
+  },
+  "categorical_features": [
+    "home_team",
+    "away_team",
+    "day_night",
+    "pregame_integrity_tier",
+    "wind_direction",
+    "precip",
+    "sky",
+    "roof_status"
+  ],
+  "contract": "MLB_TOTALS_V36_FROZEN_CANDIDATE/1.0.0",
+  "external_2026_opened": false,
+  "feature_count": 72,
+  "feature_hash_sha256": "fe56e727ee68a160cb05456ba93d1050ebca7446663de02bc9197d560ceda36c",
+  "frozen": true,
+  "github_sha_at_freeze": "e434ca24b0078257e96a3c34e985c257fffca345",
+  "market": "MLB_GAME_TOTAL",
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "research_only": true,
+  "retrain_policy_for_external": "deterministically refit frozen architecture/spec on all eligible 2025 rows, then score 2026 once",
+  "seed": 20260918,
+  "selected_using_2025_only": true,
+  "source_table_2025": "public.mlb_totals_model_2025_v1",
+  "target_role": "closing_total"
+}
