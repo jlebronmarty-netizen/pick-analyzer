@@ -730,3 +730,187 @@ Observed monthly rows / non-push labels:
 
 V36 will use this full-season PREGAME source for rolling 2025 model selection and will keep 2026 closed until a candidate freeze artifact exists.
 
+## 2026-09-18 unified first-pass closeout — V36 / V37
+
+The user-authorized cross-market protocol is now active:
+
+- 2025 = development season.
+- chronological expanding-window validation inside 2025.
+- freeze before external evaluation.
+- 2026 = one-shot external evaluation only after freeze.
+- if no stable candidate reaches 75%+, preserve the best defensible candidate, mark the market `REVISIT_AFTER_FIRST_PASS`, and move on.
+
+### V36 — full-season legacy Totals surface
+
+Source:
+
+- `public.mlb_totals_model_2025_v1`
+- 2,425 games
+- 2025-03-18 through 2025-09-28
+- 72 PREGAME model features
+
+Rolling folds:
+
+- validate May after training through April
+- validate June after training through May
+- validate July after training through June
+- validate August after training through July
+- validate September after training through August
+
+Stability-first frozen V36 candidate:
+
+- architecture: CatBoost close-margin regression
+- depth = 4
+- iterations = 400
+- learning rate = 0.05
+- UNDER-only when predicted closing-margin <= -1.0 run
+- OOF: 76/124 = **61.29%**
+- coverage: **6.57%**
+- worst month: **56.90%**
+- monthly SD: **4.73 percentage points**
+- target 75%: **NOT MET**
+
+V36 was **not** opened on 2026 because a semantic parity audit showed that several fields in `mlb_totals_model_2025_v1` could not be reconstructed exactly from the canonical 2026 cross-year feature surface. The external test was intentionally withheld rather than approximating feature semantics.
+
+Registry status:
+
+`REVISIT_AFTER_FIRST_PASS_INTERNAL_ONLY_NO_CROSSYEAR_SEMANTIC_PARITY`
+
+### V37 — exact cross-year parity surface
+
+To obtain a legitimate 2025→2026 test, two research tables were created from the same canonical cross-year definitions:
+
+- `public.mlb_totals_v37_xyear_pregame_2025_v1`
+- `public.mlb_totals_v37_xyear_pregame_2026_v1`
+
+Coverage:
+
+- 2025 market rows = 2,425
+- 2025 non-push rows = 2,321
+- 2026 PREGAME market rows = 1,576
+- 2026 market date range = 2026-03-26 through 2026-08-13
+
+Parity checks before opening 2026 outcomes:
+
+- shared feature/meta columns = 128 vs 128
+- columns only in 2025 = 0
+- columns only in 2026 = 0
+- shared-column type mismatches = 0
+- 2026 outcome labels were absent from the PREGAME parity table
+
+V37 2025 rolling search used:
+
+- CatBoost classifier
+- CatBoost closing-margin regression
+- CatBoost total-runs regression
+
+Selection policy:
+
+1. target-met candidates first;
+2. otherwise stable candidates ranked by worst-month accuracy;
+3. then pooled accuracy;
+4. then lower monthly volatility / larger sample.
+
+#### Frozen V37 candidate
+
+Contract:
+
+`MLB_TOTALS_V37_FROZEN_CANDIDATE/1.0.0`
+
+Freeze GitHub SHA:
+
+`2d7b5c3f3756c264a59b53cf5a3310ac7d9e1d82`
+
+Feature hash:
+
+`1bcdbe1e570096e53e11484cf3d99beeaa4c56bf375d4043cbfc1c6938f9e44c`
+
+Formula/model:
+
+- CatBoost classifier
+- depth = 6
+- iterations = 400
+- learning rate = 0.05
+- l2_leaf_reg = 5
+- random_strength = 1
+- mode = UNDER-only
+- select UNDER when predicted OVER probability <= 0.35 (equivalent confidence threshold 0.65)
+
+2025 OOF development:
+
+- selected = 479
+- correct = 265
+- accuracy = **55.32%**
+- coverage = **25.38%**
+- worst month = **52.63%**
+- monthly SD = **3.69 percentage points**
+
+Monthly:
+
+- May: 65/120 = 54.17%
+- June: 67/121 = 55.37%
+- July: 47/86 = 54.65%
+- August: 50/95 = 52.63%
+- September: 36/57 = 63.16%
+
+Target >=75%: **NOT MET**
+
+### V37 one-shot external 2026
+
+Only after the V37 freeze was persisted, 2026 outcomes were joined to the already-frozen PREGAME surface.
+
+External rows:
+
+- total rows = 1,576
+- non-push = 1,513
+- pushes = 63
+
+Frozen selected policy result:
+
+- selected = 310
+- correct = 143
+- accuracy = **46.13%**
+- coverage vs non-push = **20.49%**
+- worst selected month = **36.84%**
+- zero-threshold full-model accuracy = **48.91%**
+
+Selected monthly accuracy:
+
+- March: 4/5 = 80.00% (very small n)
+- April: 24/58 = 41.38%
+- May: 29/66 = 43.94%
+- June: 35/75 = 46.67%
+- July: 37/68 = 54.41%
+- August: 14/38 = 36.84%
+
+There was **no retuning after the external result**.
+
+Final V37 registry status:
+
+`REVISIT_AFTER_FIRST_PASS`
+
+### Totals first-pass decision
+
+Totals PREGAME did not reach the >=75% target under the unified protocol.
+
+Canonical first-pass conclusion:
+
+1. Preserve V10 as an older historical reference (70.59% on its prior Jul-Aug stable policy), but do not treat it as comparable to the unified 2025→2026 protocol.
+2. Preserve V36 as the best temporally stable candidate on the legacy full-2025 Totals surface (61.29%), but it is internal-only because exact 2026 feature parity was unavailable.
+3. Preserve V37 as the canonical cross-year tested candidate:
+   - 2025 rolling = **55.32%**
+   - 2026 one-shot external = **46.13%**
+4. Mark Totals `REVISIT_AFTER_FIRST_PASS`.
+5. Do not rescue V37 using the now-opened 2026 result.
+6. Later improvement work must use a materially new information surface or architecture and a newly defined validation protocol.
+
+Boundaries preserved:
+
+- Official Picks writes = 0
+- APOSTAR = false
+- production promotion = false
+- historical Odds API credits consumed = 0
+- V36 / V37 temporary exporters closed to JWT-protected `410 GONE`
+- temporary service-role SELECT grants revoked
+- anon/authenticated SELECT remained closed on V37 research tables
+
