@@ -6,6 +6,49 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Pitcher Outs first-pass closeout — authoritative
+
+Frozen rule: `pitcher_outs_under_18p5_p90_v1`.
+
+Rule:
+
+- underlying model: `MLB_PITCHER_OUTS_RESEARCH_V1`;
+- alpha = 0.2;
+- beta = 0.7;
+- fit intercept = 7.2635858445929635;
+- fit slope = 0.547385023095297;
+- line = 18.5 recorded outs;
+- direction = UNDER;
+- select when empirical UNDER probability >= 90% (equivalently P(OVER) <= 10%);
+- probability source = 2025 TRAIN residual distribution.
+
+2025 VALIDATION + TEST:
+
+- 123/126 = **97.62%**;
+- worst split = **95.52%**;
+- baseline UNDER 18.5 = **83.94%**;
+- lift = **+13.68 percentage points**.
+
+2026 frozen-rule historical evidence:
+
+- canonical lineage reproduced exactly: 3,005 SportsDataIO starters -> 2,464 Statcast matches -> 2,391 strict-prior scored rows;
+- exact frozen-rule selections = 226;
+- correct = 215;
+- accuracy = **95.13%**;
+- coverage = **9.45%**;
+- worst selected month = **89.23%**;
+- baseline UNDER 18.5 = **82.39%**;
+- lift = **+12.74 percentage points**;
+- retuned after external result = **NO**.
+
+State:
+
+`TARGET_MET_75_PLUS_EVENT_ACCURACY`
+
+Lineage label: `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` because aggregate 2026 point/Brier diagnostics existed before the exact market-rule freeze. The exact line/direction/confidence rule was selected from 2025 only and was not changed after reading the exact 2026 rule result.
+
+Historical sportsbook prices for the exact selected opportunities are not certified. Do not claim ROI, EV or CLV from this accuracy result.
+
 ## 2026-09-18 NRFI / YRFI first-pass closeout — authoritative
 
 Frozen fallback: `nrfi_p52_fallback_v1`.

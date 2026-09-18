@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 
 type RawRow = Record<string, unknown>
 type Fit = { intercept: number; slope: number }
-type Scored = { actual: number; predicted: number }
+type Scored = { actual: number; predicted: number; date?: string }
 type Metrics = {
   n: number
   mae: number | null
@@ -317,7 +317,7 @@ function fitRows(rows: HistoricalRow[], alpha: number, beta: number) {
 function scoreRows<T extends HistoricalRow | HoldoutRow>(rows: T[], fit: Fit, alpha: number, beta: number): Scored[] {
   return rows.flatMap((row) => {
     const raw = rawScore(row, alpha, beta)
-    return raw === null ? [] : [{ actual: row.actual, predicted: fit.intercept + fit.slope * raw }]
+    return raw === null ? [] : [{ actual: row.actual, predicted: fit.intercept + fit.slope * raw, date: row.date }]
   })
 }
 
@@ -453,6 +453,62 @@ function empiricalProbabilityMetrics(rows: Scored[], trainResiduals: number[]) {
   })
 }
 
+function frozenMarketRuleMetrics(rows: Scored[], trainResiduals: number[]) {
+  const line = 18.5
+  const maxOverProbability = 0.10
+  const sorted = [...trainResiduals].sort((a, b) => a - b)
+  function probabilityResidualAbove(threshold: number) {
+    let low = 0
+    let high = sorted.length
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2)
+      if (sorted[mid] <= threshold) low = mid + 1
+      else high = mid
+    }
+    return sorted.length ? (sorted.length - low) / sorted.length : 0
+  }
+
+  const eligible = rows.map((row) => ({
+    ...row,
+    probabilityOver: probabilityResidualAbove(line - row.predicted),
+    actualUnder: row.actual < line ? 1 : 0,
+  }))
+  const selected = eligible.filter((row) => row.probabilityOver <= maxOverProbability)
+  const correct = selected.reduce((sum, row) => sum + row.actualUnder, 0)
+  const baselineUnderAccuracy = mean(eligible.map((row) => row.actualUnder))
+  const selectedAccuracy = selected.length ? correct / selected.length : null
+
+  const monthBuckets = new Map<string, typeof selected>()
+  for (const row of selected) {
+    const month = row.date?.slice(0, 7) ?? 'UNKNOWN'
+    const bucket = monthBuckets.get(month) ?? []
+    bucket.push(row)
+    monthBuckets.set(month, bucket)
+  }
+  const months = [...monthBuckets.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, bucket]) => {
+      const monthCorrect = bucket.reduce((sum, row) => sum + row.actualUnder, 0)
+      return { month, n: bucket.length, correct: monthCorrect, accuracy: bucket.length ? monthCorrect / bucket.length : null }
+    })
+
+  return {
+    line,
+    direction: 'UNDER' as const,
+    minimumUnderProbability: 0.90,
+    equivalentMaximumOverProbability: maxOverProbability,
+    eligibleRows: eligible.length,
+    selectedN: selected.length,
+    selectedCorrect: correct,
+    selectedAccuracy,
+    selectedCoverage: eligible.length ? selected.length / eligible.length : null,
+    baselineUnderAccuracy,
+    liftVsBaseline: selectedAccuracy !== null && baselineUnderAccuracy !== null ? selectedAccuracy - baselineUnderAccuracy : null,
+    worstMonthAccuracy: months.length ? Math.min(...months.map((row) => row.accuracy ?? 0)) : null,
+    months,
+  }
+}
+
 function monthlyMetrics(rows: HoldoutRow[], fit: Fit, alpha: number, beta: number) {
   const buckets = new Map<string, HoldoutRow[]>()
   for (const row of rows) {
@@ -529,6 +585,19 @@ export async function runMlbPitcherOutsBacktest() {
       },
       probability: empiricalProbabilityMetrics(holdoutScored, trainResiduals),
       monthly: monthlyMetrics(holdout.rows, fit, alpha, beta),
+    },
+    frozenMarketRuleV1: {
+      contract: 'MLB_PITCHER_OUTS_MARKET_V1_FROZEN_RULE_RUNTIME/1.0.0',
+      candidate: 'pitcher_outs_under_18p5_p90_v1',
+      frozen: true,
+      researchOnly: true,
+      validation: frozenMarketRuleMetrics(validationScored, trainResiduals),
+      fixed2025Test: frozenMarketRuleMetrics(testScored, trainResiduals),
+      external2026: frozenMarketRuleMetrics(holdoutScored, trainResiduals),
+      officialPickWrites: 0,
+      apostarActivation: false,
+      productionPromotion: false,
+      historicalPropPricesCertified: false,
     },
     nextGate: 'FORWARD_SHADOW_VS_FROZEN_REAL_PROP_LINES',
     note: 'Research-only pitcher outs model. It may not create Official Picks or activate betting without a separate authorized gate.',
