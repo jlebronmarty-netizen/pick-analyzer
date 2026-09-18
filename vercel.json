@@ -20,5 +20,6 @@
       "path": "/api/cron/nba-current-era-shadow",
       "schedule": "*/30 * * * *"
     }
-  ]
+  ],
+  "buildCommand": "node scripts/research/run_mlb_totals_v26_internal_eval.mjs && npm run build"
 }
