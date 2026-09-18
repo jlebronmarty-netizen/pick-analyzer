@@ -99,8 +99,8 @@ for (const target of targets) {
     const checks=gameIssues.map((issue)=>{
       const official=findOfficialPitch(feed,issue.atBatNumber,issue.pitchNumber)
       const exactDescriptionMatch=Boolean(official && official.description===issue.raw.description)
-      const velocityRepairable=issue.kind==='MISSING_VELOCITY' && exactDescriptionMatch && Number.isFinite(Number(official?.startSpeed))
-      const typeRepairable=issue.kind==='STRIKE_TYPE_CONFLICT' && exactDescriptionMatch && official?.requiredType===issue.expectedType
+      const velocityRepairable=issue.kind==='MISSING_VELOCITY' && exactDescriptionMatch && typeof official?.startSpeed === 'number' && Number.isFinite(official.startSpeed)
+      const typeRepairable=issue.kind==='STRIKE_TYPE_CONFLICT' && Boolean(official) && official?.requiredType===issue.expectedType && official?.isInPlay===true
       return {...issue,official,exactDescriptionMatch,velocityRepairable,typeRepairable}
     })
     gameResults.push({
