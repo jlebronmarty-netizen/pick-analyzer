@@ -43,6 +43,11 @@ function n(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function positiveInteger(value: unknown) {
+  const parsed = n(value)
+  return parsed !== null && Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null
+}
+
 function mean(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null
 }
@@ -156,15 +161,20 @@ export async function settlePa12ErForwardShadowV2(targetDate: string) {
   if (!freeze) return { ...base, status: 'WAITING_FOR_FREEZE' }
 
   const freezeMetadata = asRecord(freeze.metadata)
-  const predictions = asPredictions(freezeMetadata)
-    .filter((row) => row.eligible === true && Number.isSafeInteger(n(row.gamePk)) && Number.isSafeInteger(n(row.pitcherMlbamId ?? row.pitcherId)) && n(row.predictedEr) !== null)
-    .map((row) => ({
-      gamePk: Number(row.gamePk),
-      pitcherMlbamId: Number(row.pitcherMlbamId ?? row.pitcherId),
+  const predictions = asPredictions(freezeMetadata).flatMap((row) => {
+    if (row.eligible !== true) return []
+    const gamePk = positiveInteger(row.gamePk)
+    const pitcherMlbamId = positiveInteger(row.pitcherMlbamId ?? row.pitcherId)
+    const predictedEr = n(row.predictedEr)
+    if (gamePk === null || pitcherMlbamId === null || predictedEr === null) return []
+    return [{
+      gamePk,
+      pitcherMlbamId,
       pitcherName: row.pitcherName ?? null,
-      predictedEr: Number(row.predictedEr),
+      predictedEr,
       targetStart: row.targetStart ?? null,
-    }))
+    }]
+  })
 
   if (!predictions.length) {
     return { ...base, status: 'WAITING_FOR_ELIGIBLE_POINT_PREDICTIONS' }
@@ -228,7 +238,7 @@ export async function settlePa12ErForwardShadowV2(targetDate: string) {
     records_fetched: predictions.length,
     records_inserted: results.length,
     records_updated: 0,
-    records_skipped: noPlayGames.size,
+    records_skipped: predictions.filter((row) => noPlayGames.has(row.gamePk)).length,
     error_count: 0,
     metadata: {
       checkpoint: SETTLEMENT_JOB_TYPE,
