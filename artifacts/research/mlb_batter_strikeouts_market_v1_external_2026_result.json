@@ -1,0 +1,75 @@
+{
+  "contract": "MLB_BATTER_STRIKEOUTS_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "batter_k_under_1p5_proj_0p5_v1",
+  "freeze_commit_sha": "1848441b88e15a7fd9dff262a921d3201c193ed9",
+  "validation_class": "UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT",
+  "rule": {
+    "line": 1.5,
+    "direction": "UNDER",
+    "maximum_projected_strikeouts": 0.5
+  },
+  "external_refit_2025": {
+    "n": 40886,
+    "intercept": 0.243436273584974,
+    "slope": 0.713440597820141
+  },
+  "development_2025": {
+    "n": 592,
+    "correct": 564,
+    "accuracy": 0.952702702702703,
+    "worst_month_accuracy": 0.928571428571429,
+    "baseline_under_accuracy": 0.801070546253088,
+    "lift_vs_baseline": 0.151632156449615
+  },
+  "external_2026": {
+    "eligible_rows": 35558,
+    "selected_n": 1074,
+    "selected_correct": 1000,
+    "selected_accuracy": 0.931098696461825,
+    "selected_coverage": 0.0302041734630744,
+    "baseline_under_accuracy": 0.803757241689634,
+    "lift_vs_baseline": 0.127341454772191,
+    "worst_month_accuracy": 0.91304347826087,
+    "months": {
+      "2026-04": {
+        "n": 184,
+        "correct": 168,
+        "accuracy": 0.91304347826087
+      },
+      "2026-05": {
+        "n": 276,
+        "correct": 262,
+        "accuracy": 0.949275362318841
+      },
+      "2026-06": {
+        "n": 192,
+        "correct": 180,
+        "accuracy": 0.9375
+      },
+      "2026-07": {
+        "n": 235,
+        "correct": 215,
+        "accuracy": 0.914893617021277
+      },
+      "2026-08": {
+        "n": 176,
+        "correct": 164,
+        "accuracy": 0.931818181818182
+      },
+      "2026-09": {
+        "n": 11,
+        "correct": 11,
+        "accuracy": 1
+      }
+    }
+  },
+  "target_75_met": true,
+  "retuned_after_external": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
