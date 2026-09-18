@@ -1,0 +1,161 @@
+{
+  "schema": "PA14_V2_HISTORICAL_FULL_BUILDER_YIELD_AUDIT/1.0.0",
+  "date": "2026-09-17",
+  "contractVersion": "PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0",
+  "builderVersion": "697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3",
+  "execution": {
+    "experimentalBranch": "research/pa14-v2-historical-yield-execution-20260917",
+    "correctedAuditCommit": "5b2140256d85a01001ef42f00ad74f9229009d95",
+    "vercelDeploymentId": "dpl_Ex6fUNZpAkdwwpvKZ1VU8RQa2mHk",
+    "vercelState": "READY"
+  },
+  "candidateUniverse": {
+    "gamesWithExactlyTwoRetrospectiveStartersAndBothAtLeastFivePriorStarts": 1404,
+    "starterTargetRows": 2808,
+    "firstCandidateDate": "2025-04-23",
+    "lastCandidateDate": "2025-09-28",
+    "interpretation": "candidate census only; not contract-valid row count"
+  },
+  "temporalAuthorityAudit": {
+    "games": 24,
+    "expectedPitchers": 48,
+    "exactCompletePregameStarterMatchGames": 23,
+    "exactCompletePregameStarterMatchRate": 0.9583333333333334,
+    "expectedPitcherIdentitiesRecovered": 46,
+    "expectedPitcherIdentityRate": 0.9583333333333334,
+    "knownFailClosedGamePk": 776928
+  },
+  "correctedFullBuilderSample": {
+    "sampling": "36 fresh deterministic games across Apr-Sep 2025; both retrospective starters audited; each target required >=5 prior starts in retrospective candidate ledger; archived MLB pregame snapshot remained temporal authority",
+    "rows": 72,
+    "eligible": 18,
+    "yield": 0.25,
+    "monthly": {
+      "2025-04": {
+        "rows": 12,
+        "eligible": 8
+      },
+      "2025-05": {
+        "rows": 12,
+        "eligible": 5
+      },
+      "2025-06": {
+        "rows": 12,
+        "eligible": 1
+      },
+      "2025-07": {
+        "rows": 12,
+        "eligible": 1
+      },
+      "2025-08": {
+        "rows": 12,
+        "eligible": 3
+      },
+      "2025-09": {
+        "rows": 12,
+        "eligible": 0
+      }
+    },
+    "blockerOccurrences": {
+      "INCOMPLETE_PA": 40,
+      "MISSING_VELOCITY": 12,
+      "STRIKE_TYPE_CONFLICT": 13,
+      "UNCERTIFIED_UNFINISHED_WITNESS": 10
+    },
+    "note": "blocker counts are overlapping occurrences; one rejected target may contain multiple blockers",
+    "eligibleIdentities": [
+      [
+        778177,
+        668678
+      ],
+      [
+        778161,
+        622608
+      ],
+      [
+        778161,
+        668881
+      ],
+      [
+        778156,
+        592332
+      ],
+      [
+        778139,
+        641927
+      ],
+      [
+        778139,
+        668909
+      ],
+      [
+        778140,
+        608372
+      ],
+      [
+        778130,
+        593958
+      ],
+      [
+        778096,
+        641816
+      ],
+      [
+        777891,
+        657277
+      ],
+      [
+        777891,
+        676664
+      ],
+      [
+        777811,
+        571510
+      ],
+      [
+        777700,
+        673540
+      ],
+      [
+        777673,
+        676974
+      ],
+      [
+        777072,
+        657746
+      ],
+      [
+        776893,
+        605135
+      ],
+      [
+        776872,
+        641778
+      ],
+      [
+        776809,
+        593958
+      ]
+    ]
+  },
+  "auditCorrections": {
+    "canonicalTeamAliases": [
+      "AZ->ARI",
+      "CWS->CHW"
+    ],
+    "unfinishedPaWitness": "contract-aligned: authoritative runner movement isOut=true and outNumber=3; enclosing result eventType is not used as a whitelist",
+    "semanticRelaxation": false
+  },
+  "disposition": "HISTORICAL_PATH_VIABLE_SAMPLE_TEMPORALLY_INADEQUATE_FOR_MODEL_TRAINING",
+  "pePitcherKV2TrainingAuthorized": false,
+  "modelStatus": "NOT_STARTED",
+  "boundaries": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "supabaseWrites": 0,
+    "sportsbookCalls": 0,
+    "historicalOddsApiCredits": 0,
+    "officialPicksModified": false,
+    "apostarActivated": false
+  }
+}
