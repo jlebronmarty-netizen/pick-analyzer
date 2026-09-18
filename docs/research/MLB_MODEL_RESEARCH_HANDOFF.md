@@ -6,6 +6,38 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Pitcher Hits Allowed first-pass closeout — authoritative
+
+Frozen rule: `pitcher_hits_allowed_under_6p5_proj_5p0_v1`.
+
+- official Odds API market key: `pitcher_hits_allowed`;
+- previous starts only;
+- line = 6.5 hits allowed;
+- direction = UNDER;
+- select when projected hits allowed <= 5.0.
+
+2025 rolling:
+
+- 634/761 = **83.31%**;
+- worst month = **77.78%**;
+- baseline UNDER 6.5 = **75.17%**;
+- lift = **+8.14 pts**.
+
+2026 one-shot external:
+
+- 968/1,226 = **78.96%**;
+- coverage = **47.74%**;
+- worst month = **75.69%**;
+- baseline = **75.47%**;
+- lift = **+3.49 pts**;
+- retuned after external = **NO**.
+
+Validation class: `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT`.
+
+State: `TARGET_MET_75_PLUS`.
+
+Historical prop price coverage is not yet certified in the current snapshot corpus; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Batter Walks first-pass closeout — authoritative
 
 Frozen rule: `batter_walks_under_0p5_proj_0p20_v1`.
