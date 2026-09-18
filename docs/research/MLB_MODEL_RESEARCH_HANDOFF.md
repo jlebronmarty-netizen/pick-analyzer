@@ -2,8 +2,157 @@
 
 **Repository:** `jlebronmarty-netizen/pick-analyzer`  
 **Canonical Supabase project:** `ynuocvexviorgdjrfthw` (`Pick Analyzer`)  
-**Last updated:** 2026-09-16  
+**Last updated:** 2026-09-18  
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
+
+
+## 2026-09-18 continuity addendum — authoritative newer state
+
+The sections below preserve older research history, but the following states supersede any earlier continuation pointer when they conflict.
+
+### Pitcher Strikeouts / PA-14 V2
+
+- V1 remains terminal: `HISTORICAL_ARTIFACT_INCOMPLETE`.
+- frozen V2 input contract: `PE_PITCHER_K_V2_INPUT_CONTRACT/2.0.0`.
+- frozen builder hash: `697ead7e1d596aa3aeee50fbeafe45424735af5ca32f58c5786a4965064a0fc3`.
+- canonical stored corpus after historical closeout: **38** replay-PASS rows:
+  - 37 historical 2025;
+  - 1 source-certification 2026;
+  - Apr 13 / May 9 / Jun 5 / Jul 3 / Aug 3 / Sep 4.
+- two independent balanced audits: 20/72 and 14/72 ELIGIBLE;
+- directed September audit: 3/40 ELIGIBLE;
+- disposition: `HISTORICAL_PATH_CERTIFIED_BUT_CORPUS_TOO_SMALL_AND_TEMPORALLY_UNEVEN_FOR_TRAINING`;
+- `PE_PITCHER_K_V2_TRAINING_AUTHORIZED = NO`;
+- `PE_PITCHER_K_V2_MODEL_STATUS = NOT_STARTED`.
+
+Pick Analyzer PR #46 merged at:
+
+`daebdd2651f0092bbae32161b619079a195bbf77`
+
+Do not continue brute-force historical sampling as if it were guaranteed to solve sufficiency. Accumulate materially new forward evidence or explicitly gate a separately versioned future contract. Do not mutate V2.0.0.
+
+### Run Line V2 prospective candidate
+
+Frozen candidate:
+
+`rl_v2_home_p15_alt_favorite_tsh_q92_v1`
+
+Rules remain unchanged:
+
+- standard market condition: HOME -1.5 favorite;
+- target alternate market: HOME +1.5;
+- score: `(team_strength + starter + history) / sqrt(3)`;
+- threshold: `2.065112`;
+- research/shadow only.
+
+Prospective chronology:
+
+- Sep17: alternate market evidence captured, but no valid fixed-clock freeze; date cannot count as scored prospective evidence.
+- Sep18: core pregame market capture and HOME +1.5 alternates were captured, but the original 10:45 daily route returned 500 before a valid freeze. Sep18 also cannot count as a scored prospective date.
+- an independent Run Line forward cron was subsequently added at 10:46 PR.
+- PR #48 hardened new freeze writes to **10:45–10:59 America/Puerto_Rico** and prohibits late reconstruction.
+
+PR #48 merge:
+
+`034429aa70b54bda5bff725a510a942103555bf1`
+
+The next valid scored prospective date is the first future date with a real fixed-clock freeze and later exact settlement. Never retro-freeze Sep17 or Sep18.
+
+### PA-13 Pitcher Earned Runs forward pricing
+
+Historical pricing remains absent.
+
+First certified forward capture on 2026-09-18:
+
+- 180 quote rows;
+- 14 canonical games;
+- 26 exact MLBAM pitchers;
+- 4 sportsbooks;
+- 31 distinct pitcher/line combinations;
+- 90 pitcher-book-line groups;
+- 90/90 complete Over/Under pairs;
+- 0 timing violations;
+- one provider event excluded fail-closed for `PROVIDER_EVENT_IDENTITY_MISMATCH`.
+
+Contract:
+
+`PA13_PITCHER_ER_FORWARD_CAPTURE/1.0.0`
+
+Current gates:
+
+- `PA13_FORWARD_CURRENT_PRICING_SOURCE_READY = YES`;
+- `PA13_HISTORICAL_PRICING_CERTIFIED = NO`;
+- `PA13_ROI_CERTIFIED = NO`;
+- `PA13_CLV_CERTIFIED = NO`;
+- `PA13_EV_CERTIFIED = NO`.
+
+PR #49 merge:
+
+`3a830d45953af2d411ce2149ac8ea05731fb3a90`
+
+### PA-12 Pitcher Earned Runs forward point-shadow V2
+
+The sealed PA-12 V1 research result remains **not promoted** and is not reopened.
+
+A separately versioned forward point-shadow path is now certified:
+
+`MLB_PITCHER_ER_PA12_FORWARD_SHADOW_V2`
+
+Frozen math is inherited unchanged from the validation-selected V1 candidate:
+
+- base intercept: `1.90273530551357`;
+- base slope on exact prior ER starts: `0.227085168912444`;
+- K residual intercept: `0.653408289475204`;
+- K-rate residual slope: `-3.0156054216154`;
+- minimum prior exact starts: 3.
+
+Source validation:
+
+- MLB Official game-log `earnedRuns` vs certified Retrosheet ER: **24/24 exact**;
+- K-rate semantic parity: **6/6 exact**, using K/BF over all strict-prior pitcher appearances.
+
+First Sep18 prospective pilot:
+
+- target pitchers: 26;
+- eligible point forecasts: 23;
+- blocked for <3 prior starts: 3;
+- ledger: `415b36ba-6137-4803-ba27-8eca5965f54e`;
+- all forecasts pregame;
+- settlement pending exact final outcomes.
+
+PR #50 merge:
+
+`14f53864118d8b512abc2997949a94042dc43b61`
+
+PR #51 then merged the research-only runtime:
+
+`5a63d4cbda08a4100c48aed03533ae10f4565228`
+
+Runtime behavior:
+
+1. existing MLB daily cron is reused; no new scheduler;
+2. new point freezes only at **10:45–10:59 PR**;
+3. freeze executes after PA-13 target capture but before Statcast catch-up;
+4. previous-day settlement uses exact MLB Official game-log ER;
+5. persisted metrics are forecast-only MAE/RMSE/bias/correlation;
+6. late-window no-write probe passed with zero retroactive Sep18 freeze rows.
+
+Current gates:
+
+- `PA12_ER_FORWARD_V2_POINT_SHADOW_READY = YES`;
+- probability layer authorized: **NO**;
+- market recommendation authorized: **NO**;
+- production eligible: **NO**;
+- retuning authorized: **NO**.
+
+### Immediate continuation pointer after 2026-09-18
+
+1. Let the existing daily jobs collect the next valid Run Line fixed-clock prospective freeze.
+2. Let PA-12 ER V2 settle the Sep18 23-point-forecast pilot only after exact final outcomes exist; do not retune from one day.
+3. Accumulate multiple fixed-clock PA-12 ER shadow days before any probability calibration proposal.
+4. Preserve PA-13 forward prices for future exact model/quote research joins; historical economics remain absent.
+5. Keep Pitcher K V2 training closed until materially new evidence changes corpus sufficiency.
+6. Do not modify Official Picks or activate APOSTAR.
 
 This file is the canonical continuity document for the MLB modeling experiment. Future chats/agents should read this file **before making changes** so the experiment is not restarted, reinterpreted, or contaminated by accidental use of test data.
 
