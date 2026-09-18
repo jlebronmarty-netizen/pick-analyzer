@@ -1,0 +1,31 @@
+{
+  "contract": "MLB_TOTALS_V36_ROLLING_2025_REQUEST/1.0.0",
+  "authorized": true,
+  "researchOnly": true,
+  "branch": "research/totals-2025-historical-backfill",
+  "market": "MLB_GAME_TOTAL",
+  "developmentSeason": 2025,
+  "developmentProtocol": "expanding chronological folds; validate May-Sep 2025",
+  "architectures": [
+    "catboost_classifier",
+    "catboost_close_margin_regression",
+    "catboost_total_runs_regression"
+  ],
+  "stableGate": {
+    "nMin": 50,
+    "monthNMin": 8
+  },
+  "targetGate": {
+    "accuracyMin": 0.75,
+    "worstMonthAccuracyMin": 0.65
+  },
+  "freezeBestStableEvenIfBelowTarget": true,
+  "externalSeason": 2026,
+  "openExternal2026InThisRun": false,
+  "useExternal2026ForSelection": false,
+  "expectedOddsApiCredits": 0,
+  "providerCallsAllowed": false,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "productionPromotionAllowed": false
+}
