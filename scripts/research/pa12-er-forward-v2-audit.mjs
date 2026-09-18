@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto'
 
 const EXPECTED_BRANCH='research/pa12-er-forward-shadow-v2-audit-20260918'
 if(process.env.VERCEL!=='1'||process.env.VERCEL_ENV!=='preview'||process.env.VERCEL_GIT_COMMIT_REF!==EXPECTED_BRANCH){
@@ -164,8 +165,8 @@ for(const target of targets){
 
 const parityExact=parity.filter(x=>x.exactMatch).length
 const eligible=predictions.filter(x=>x.eligible)
-console.log('PA12_ER_FORWARD_V2_AUDIT='+JSON.stringify({
-  status:'COMPLETE',
+const result={
+  status:parityExact===parity.length?'COMPLETE':'PARTIAL_SOURCE_PARITY',
   model:MODEL,
   sourceParity:{
     sampleRows:parity.length,
@@ -187,8 +188,46 @@ console.log('PA12_ER_FORWARD_V2_AUDIT='+JSON.stringify({
     sportsbookInputToModel:false,
     officialPicksModified:false,
     apostarActivated:false,
-    supabaseWrites:0,
+    supabaseWrites:1,
+    supabaseWriteScope:'SPORTS_SYNC_JOBS_RESEARCH_LEDGER_ONLY',
     oddsApiCalls:0,
     modelRetuned:false,
   }
-}))
+}
+
+function deterministicUuid(value){
+  const hex=createHash('sha256').update(value).digest('hex').slice(0,32).split('')
+  hex[12]='4'
+  hex[16]=((parseInt(hex[16],16)&0x3)|0x8).toString(16)
+  const s=hex.join('')
+  return `${s.slice(0,8)}-${s.slice(8,12)}-${s.slice(12,16)}-${s.slice(16,20)}-${s.slice(20)}`
+}
+const ledgerId=deterministicUuid(`PA12_ER_FORWARD_SHADOW_V2|${TARGET_DATE}`)
+const now=new Date().toISOString()
+const write=await supabaseAdmin.from('sports_sync_jobs').upsert({
+  id:ledgerId,
+  job_type:'pa12_er_forward_shadow_v2_audit_v1',
+  sport_key:'baseball_mlb',
+  league_key:'mlb',
+  provider:'mlb-official',
+  season:'2026',
+  started_at:now,
+  completed_at:now,
+  status:result.status==='COMPLETE'?'completed':'partial',
+  records_fetched:predictions.length,
+  records_inserted:eligible.length,
+  records_updated:0,
+  records_skipped:predictions.length-eligible.length,
+  error_count:parity.length-parityExact,
+  metadata:{
+    checkpoint:'pa12_er_forward_shadow_v2_audit_v1',
+    targetDate:TARGET_DATE,
+    result,
+    prospectivePointPredictionLedger:true,
+    predictionTimestamp:now,
+    evaluationStatus:'AWAITING_FINAL_OUTCOMES',
+  },
+  updated_at:now,
+},{onConflict:'id'})
+if(write.error) throw new Error(`PA12_ER_V2_AUDIT_LEDGER_WRITE_FAILED:${write.error.message}`)
+console.log('PA12_ER_FORWARD_V2_AUDIT='+JSON.stringify({...result,ledgerId,predictionTimestamp:now}))
