@@ -45,15 +45,15 @@ Forty additional September starter-targets were audited after the same frozen re
 
 This does not mean September is impossible, but it establishes materially weaker late-season yield under the frozen V2 contract.
 
-## Canonical stored census before September-gate materialization
+## Canonical stored census — final
 
-- total rows: **35**
-- unique identities: **35**
-- replay PASS: **35**
-- certification candidates: **35**
+- total rows: **38**
+- unique identities: **38**
+- replay PASS: **38**
+- certification candidates: **38**
 - production eligible: **0**
-- shadow only: **35**
-- historical 2025: **34**
+- shadow only: **38**
+- historical 2025: **37**
 - forward/source-certification 2026: **1**
 
 2025 stored distribution:
@@ -63,9 +63,9 @@ This does not mean September is impossible, but it establishes materially weaker
 - Jun 5
 - Jul 3
 - Aug 3
-- Sep 1
+- Sep 4
 
-The three newly eligible September-gate rows may increase this census after their independent store/replay batch completes, but that does not change the training decision.
+All three September-gate ELIGIBLE rows were subsequently stored and replayed successfully with zero network calls during replay. Across the final three materialization batches, **19 / 19** requested rows passed stored replay and all remained shadow-only / production-ineligible.
 
 ## Decision
 
