@@ -260,7 +260,7 @@ async function resolveArchivedTarget(config: Pa14HistoricalAuditTarget) {
       opponentAbbr = String(teamSource.json?.teams?.[0]?.abbreviation ?? '').trim()
     }
     if (!opponentAbbr) throw new Error(`OPPONENT_ABBREVIATION_MISSING:${opponentMlbId}`)
-    const canonicalOpponentAbbr = opponentAbbr === 'AZ' ? 'ARI' : opponentAbbr
+    const canonicalOpponentAbbr = opponentAbbr === 'AZ' ? 'ARI' : opponentAbbr === 'CWS' ? 'CHW' : opponentAbbr
 
     const { data: canonicalRows, error: canonicalError } = await supabaseAdmin
       .from('sports_teams')
