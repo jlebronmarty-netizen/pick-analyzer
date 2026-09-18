@@ -62,13 +62,15 @@ const COMPLETED_EVENTS = new Set([
   'walk',
 ])
 
-const RUNNER_WITNESS_EVENT = /(?:caught_stealing|pickoff|other_out)/
-
 function isRunnerOutWitness(play: JsonObject) {
-  const eventType = String(play?.result?.eventType ?? '')
-  if (!RUNNER_WITNESS_EVENT.test(eventType)) return false
+  // Frozen V2 contract: an unfinished batter PA may be witnessed by a runner
+  // making the third out. The enclosing result eventType can be wild_pitch,
+  // stolen_base, pickoff, etc.; the authoritative condition is the runner
+  // movement itself ending the half-inning with outNumber=3.
   const runners = Array.isArray(play?.runners) ? play.runners : []
-  return runners.some((runner: JsonObject) => runner?.movement?.isOut === true)
+  return runners.some((runner: JsonObject) =>
+    runner?.movement?.isOut === true && Number(runner?.movement?.outNumber) === 3
+  )
 }
 
 const OFFICIAL_TYPE_BY_DESCRIPTION = new Map<string, 'S' | 'B' | 'X'>([
