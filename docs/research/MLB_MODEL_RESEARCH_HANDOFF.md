@@ -6,6 +6,49 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 standard MLB prop coverage integrity audit — authoritative
+
+Canonical audit:
+
+`docs/research/MLB_MARKET_COVERAGE_INTEGRITY_AUDIT_20260918.md`
+
+The standard MLB prop inventory now explicitly tracks markets that cannot yet receive a valid first-pass model because the outcome or settlement contract is incomplete.
+
+Blocked states:
+
+- `batter_runs_scored` → `BLOCKED_LABEL_ATTRIBUTION`
+  - Retrosheet parser reproduces all 21,596 2025 runs at game/season level;
+  - 1,409 explicit advances to home lack a certified scorer identity;
+  - do not model player Runs until attribution is complete.
+- `batter_rbis` → `BLOCKED_LABEL_SEMANTICS`
+  - current batter-appearance `rbi` is parser play-runs, not an official RBI scoring contract.
+- `batter_hits_runs_rbis` → `BLOCKED_DEPENDENCY_LABELS`
+  - Hits are exact, but Runs and RBI remain blocked.
+- `batter_stolen_bases` → `BLOCKED_LABEL_ATTRIBUTION`
+  - current `SB` flag identifies an SB event during the PA, not the certified runner.
+- `batter_first_home_run` → `BLOCKED_SETTLEMENT_SEMANTICS`
+  - raw Statcast identifies the first HR hitter when a HR occurs;
+  - no-HR sportsbook settlement is not certified;
+  - never condition evaluation on postgame HR occurrence.
+- `batter_fantasy_score` → `DFS_ONLY_DEFERRED`
+  - no canonical DFS scoring-system contract is frozen.
+
+Identity audit:
+
+- Retrosheet 2025 lineup IDs: 661 player IDs;
+- 643 map uniquely to MLBAM through canonical game/team/batting-order crosswalk;
+- 18 are ambiguous and remain fail-closed;
+- 0 are wholly unmapped in that lineup crosswalk.
+
+Do not introduce fuzzy identity matching merely to unblock these markets.
+
+Alternate `*_alternate` markets reuse the same base outcome family and should be handled later by line-specific / price-aware calibration, not by inventing separate outcome targets.
+
+Historical Odds API credits consumed by this audit: 0.
+Official Picks writes: 0.
+APOSTAR: disabled.
+Production promotion: none.
+
 ## 2026-09-18 Pitcher Record a Win first-pass closeout — authoritative
 
 Frozen rule: `pitcher_record_win_no_prior_rate_0p10_v1`.
