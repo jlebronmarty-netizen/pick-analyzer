@@ -6,6 +6,25 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 Batter Total Bases first-pass closeout — authoritative
+
+Frozen rule: `batter_total_bases_under_2p5_edge_1p5_v1`.
+
+- strict-prior-date history;
+- line = 2.5 total bases;
+- direction = UNDER;
+- select when projected total bases <= 1.0.
+
+2025 rolling: 1,081/1,187 = **91.07%**; worst month **90.19%**; baseline UNDER 2.5 **80.41%**; lift **+10.66 pts**.
+
+2026 frozen-rule historical evidence: 2,021/2,336 = **86.52%**; coverage **6.57%**; worst month **83.33%**; baseline **80.74%**; lift **+5.78 pts**.
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Lineage label: `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE`. Exact line/direction/edge came from strict 2025 rolling and was not retuned after the 2026 rule result.
+
+Historical pricing is not certified; no ROI/EV/CLV claim.
+
 ## 2026-09-18 Batter Hits first-pass closeout — authoritative
 
 Frozen market rule:

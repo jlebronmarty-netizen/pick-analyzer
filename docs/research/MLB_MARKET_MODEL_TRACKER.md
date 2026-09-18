@@ -45,7 +45,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Pitcher Walks** | `pitcher_bb_under_2p5_p85_v1` — UNDER 2.5 BB when calibrated UNDER probability >=85% | `HISTORICAL_2026_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 111/122 = **90.98%**; worst month **82.35%**; baseline 75.83% | 2026 historical frozen-rule result: 125/137 = **91.24%**; worst month **86.67%**; baseline 74.57% | 2025 n=122; 2026 n=137; 2026 selected coverage **3.95%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY`; historical pricing not certified | Preserve frozen rule. Next gate is real pregame 2.5 pricing / forward market evidence; do not claim ROI/EV/CLV yet. |
 | **Pitcher Outs** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 | **Batter Hits** | `batter_hits_under_1p5_edge_0p75_v1` — UNDER 1.5 when projected hits <=0.75 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 6,123/7,011 = **87.33%**; worst month **85.19%**; baseline 79.55% | 2026 frozen-rule: 8,496/9,833 = **86.40%**; worst month **83.73%**; baseline 80.23% | 2026 coverage **27.65%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
-| **Batter Total Bases** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
+| **Batter Total Bases** | `batter_total_bases_under_2p5_edge_1p5_v1` — UNDER 2.5 when projected TB <=1.0 | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025 rolling: 1,081/1,187 = **91.07%**; worst month **90.19%**; baseline 80.41% | 2026 frozen-rule: 2,021/2,336 = **86.52%**; worst month **83.33%**; baseline 80.74% | 2026 coverage **6.57%** | **YES**, event accuracy | `TARGET_MET_75_PLUS_EVENT_ACCURACY` | Preserve frozen rule; historical prices not certified, so ROI/EV/CLV remain pending. |
 | **NRFI / YRFI** | — | `NOT_YET_UNIFIED` | — | — | — | TBD | Pending first-pass review | Evaluate under unified protocol when reached. |
 
 ## First-pass closeouts
@@ -129,6 +129,18 @@ Frozen market rule: `batter_hits_under_1p5_edge_0p75_v1`.
 State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
 
 Historical prop prices are not certified; do not claim ROI/EV/CLV.
+
+## First-pass closeout — Batter Total Bases
+
+Frozen rule: `batter_total_bases_under_2p5_edge_1p5_v1`.
+
+2025 expanding rolling: **1,081/1,187 = 91.07%**, worst month **90.19%**, baseline UNDER 2.5 **80.41%**, lift **+10.66 pts**.
+
+2026 frozen-rule historical evidence: **2,021/2,336 = 86.52%**, coverage **6.57%**, worst month **83.33%**, baseline **80.74%**, lift **+5.78 pts**, no retuning.
+
+State: `TARGET_MET_75_PLUS_EVENT_ACCURACY`.
+
+Historical prop prices are not certified; no ROI/EV/CLV claim.
 
 ## Unified 2025 rolling-development protocol
 

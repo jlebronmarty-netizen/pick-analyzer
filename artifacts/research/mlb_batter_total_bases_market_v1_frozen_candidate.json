@@ -1,0 +1,61 @@
+{
+  "contract": "MLB_BATTER_TOTAL_BASES_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "BATTER_TOTAL_BASES",
+  "model_family": "strict-date rolling linear total-bases projection",
+  "rule": {
+    "line": 2.5,
+    "direction": "UNDER",
+    "minimum_negative_edge": 1.5,
+    "equivalent_max_predicted_total_bases": 1
+  },
+  "development_protocol": "2025 expanding monthly rolling May-Sep; each fold fit uses only target dates strictly before validation month; no same-day doubleheader prior leakage",
+  "development_2025": {
+    "n": 1187,
+    "correct": 1081,
+    "accuracy": 0.910699241786015,
+    "min_month_n": 56,
+    "worst_month_accuracy": 0.901869158878505,
+    "monthly_accuracy_sd": 0.0123762571680181,
+    "baseline_under_accuracy": 0.80406258578095,
+    "lift_vs_baseline": 0.106636656005065,
+    "months": {
+      "2025-05": {
+        "n": 56,
+        "correct": 52,
+        "accuracy": 0.928571428571429
+      },
+      "2025-06": {
+        "n": 214,
+        "correct": 193,
+        "accuracy": 0.901869158878505
+      },
+      "2025-07": {
+        "n": 280,
+        "correct": 260,
+        "accuracy": 0.928571428571429
+      },
+      "2025-08": {
+        "n": 309,
+        "correct": 279,
+        "accuracy": 0.902912621359223
+      },
+      "2025-09": {
+        "n": 328,
+        "correct": 297,
+        "accuracy": 0.905487804878049
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_rule_accuracy_opened": false,
+  "external_validation_label": "HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE",
+  "external_note": "Existing deployed Total Bases point/Brier report exposed aggregate 2026 diagnostics before this exact rule freeze; exact line/direction/edge selected from strict 2025 rolling only.",
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
