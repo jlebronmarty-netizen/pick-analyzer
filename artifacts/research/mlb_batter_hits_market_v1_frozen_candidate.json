@@ -1,0 +1,62 @@
+{
+  "contract": "MLB_BATTER_HITS_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "BATTER_HITS",
+  "model_family": "strict-date rolling linear hit projection",
+  "lineage_note": "Architecture inherits alpha=0 concept from MLB_BATTER_HITS_RESEARCH_V1 but all market-rule development metrics below use strict source_game_date < target_game_date and fold-specific 2025 fits.",
+  "rule": {
+    "line": 1.5,
+    "direction": "UNDER",
+    "minimum_negative_edge": 0.75,
+    "equivalent_max_predicted_hits": 0.75
+  },
+  "development_protocol": "2025 expanding monthly rolling May-Sep; each fold linear fit uses only target dates strictly before validation month; no same-day doubleheader prior leakage",
+  "development_2025": {
+    "n": 7011,
+    "correct": 6123,
+    "accuracy": 0.87334189131365,
+    "min_month_n": 1095,
+    "worst_month_accuracy": 0.851949768671514,
+    "monthly_accuracy_sd": 0.0138678678009524,
+    "baseline_under_accuracy": 0.79552566566017,
+    "lift_vs_baseline": 0.0778162256534798,
+    "months": {
+      "2025-05": {
+        "n": 1095,
+        "correct": 967,
+        "accuracy": 0.88310502283105
+      },
+      "2025-06": {
+        "n": 1279,
+        "correct": 1102,
+        "accuracy": 0.861610633307271
+      },
+      "2025-07": {
+        "n": 1304,
+        "correct": 1153,
+        "accuracy": 0.88420245398773
+      },
+      "2025-08": {
+        "n": 1513,
+        "correct": 1289,
+        "accuracy": 0.851949768671514
+      },
+      "2025-09": {
+        "n": 1820,
+        "correct": 1612,
+        "accuracy": 0.885714285714286
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "external_2026_rule_accuracy_opened": false,
+  "external_validation_label": "HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE",
+  "external_note": "Existing deployed Batter Hits point/Brier report contained 2026 diagnostics before this exact market-rule freeze. Exact line/direction/edge were selected from strict 2025 rolling only.",
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
