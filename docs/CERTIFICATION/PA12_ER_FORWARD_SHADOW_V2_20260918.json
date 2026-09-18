@@ -1,0 +1,76 @@
+{
+  "schema": "PA12_ER_FORWARD_SHADOW_V2_CERT/1.0.0",
+  "date": "2026-09-18",
+  "modelVersion": "MLB_PITCHER_ER_PA12_FORWARD_SHADOW_V2",
+  "inheritedFrozenMathFrom": "MLB_PITCHER_ER_PA12_RESEARCH_V1",
+  "coefficients": {
+    "baseIntercept": 1.90273530551357,
+    "baseSlope": 0.227085168912444,
+    "kResidualIntercept": 0.653408289475204,
+    "kResidualSlope": -3.0156054216154,
+    "minimumPriorStarts": 3
+  },
+  "featureSemantics": {
+    "priorErAll": "mean exact MLB Official earnedRuns over prior starts in current season, strict source game date < target date",
+    "pitcherKRate": "sum strikeouts / sum batters faced over all prior pitcher appearances in current season, strict source game date < target date",
+    "sportsbookValuesUsedAsModelInputs": false,
+    "PA13QuoteRole": "target-scope identity only"
+  },
+  "sourceCertification": {
+    "erSource": "MLB_STATSAPI_GAMELOG",
+    "retrosheetParitySample": 24,
+    "retrosheetExactMatches": 24,
+    "retrosheetMismatches": 0,
+    "kRateSemanticSample": 6,
+    "kRateExactMatchesUsingAllPriorAppearances": 6
+  },
+  "firstProspectivePilot": {
+    "ledgerId": "415b36ba-6137-4803-ba27-8eca5965f54e",
+    "targetDate": "2026-09-18",
+    "predictionTimestamp": "2026-09-18T18:07:51.740Z",
+    "targetRows": 26,
+    "eligibleRows": 23,
+    "blockedRows": 3,
+    "evaluationStatus": "AWAITING_FINAL_OUTCOMES",
+    "blocked": [
+      {
+        "pitcherMlbamId": 702885,
+        "pitcherName": "Cesar Perdomo",
+        "reason": "SHORT_ER_START_HISTORY",
+        "priorStarts": 2
+      },
+      {
+        "pitcherMlbamId": 682982,
+        "pitcherName": "Daniel Espino",
+        "reason": "SHORT_ER_START_HISTORY",
+        "priorStarts": 1
+      },
+      {
+        "pitcherMlbamId": 808825,
+        "pitcherName": "Andrew Sears",
+        "reason": "SHORT_ER_START_HISTORY",
+        "priorStarts": 2
+      }
+    ],
+    "earliestTargetStart": "2026-09-18T22:40:00Z",
+    "minimumPregameLeadSeconds": 16328.26
+  },
+  "gates": {
+    "sourceReady": true,
+    "pointShadowForecastReady": true,
+    "probabilityLayerAuthorized": false,
+    "marketRecommendationAuthorized": false,
+    "productionEligible": false,
+    "historicalPricingCertified": false,
+    "roiCertified": false,
+    "clvCertified": false,
+    "evCertified": false
+  },
+  "nextValidStep": "settle only after exact final ER outcomes exist; accumulate repeated fixed-clock shadow days before any probability/recommendation work",
+  "boundaries": {
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "modelRetuned": false,
+    "oddsApiCallsForModel": 0
+  }
+}
