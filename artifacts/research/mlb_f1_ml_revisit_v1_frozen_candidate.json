@@ -1,0 +1,82 @@
+{
+  "actual_max_game_date_used": "2026-09-14",
+  "apostar_activation": false,
+  "architecture_family": "pregame_catboost_classifier_margin_f1_moneyline_v1",
+  "candidate": {
+    "accuracy": 0.7391304347826086,
+    "architecture": "catboost_classifier_margin_agreement",
+    "correct": 51,
+    "coverage_vs_oof_all": 0.035430224150397684,
+    "coverage_vs_oof_nonpush": 0.03522205206738132,
+    "legacy_absolute_advantage": null,
+    "lift_vs_unconditional_majority": 0.18374503406795828,
+    "min_month_n": 2,
+    "mode": "symmetric",
+    "monthly": {
+      "2025-05": {
+        "accuracy": 0.631578947368421,
+        "correct": 12,
+        "n": 19,
+        "pushes": 11
+      },
+      "2025-06": {
+        "accuracy": 0.8571428571428571,
+        "correct": 12,
+        "n": 14,
+        "pushes": 20
+      },
+      "2025-07": {
+        "accuracy": 0.7,
+        "correct": 21,
+        "n": 30,
+        "pushes": 37
+      },
+      "2025-08": {
+        "accuracy": 1.0,
+        "correct": 2,
+        "n": 2,
+        "pushes": 1
+      },
+      "2025-09": {
+        "accuracy": 1.0,
+        "correct": 2,
+        "n": 2,
+        "pushes": 7
+      },
+      "2026-09": {
+        "accuracy": 1.0,
+        "correct": 2,
+        "n": 2,
+        "pushes": 0
+      }
+    },
+    "monthly_accuracy_sd": 0.15080166345691026,
+    "months_with_selections": 6,
+    "n": 69,
+    "predicted_margin_threshold": 0.5,
+    "probability_threshold": 0.625,
+    "pushes": 78,
+    "sample_gate_met": true,
+    "sample_stability_gate_met": false,
+    "selected_total": 147,
+    "target_met_75_plus": false,
+    "unconditional_majority_baseline": 0.5553854007146504,
+    "worst_month_accuracy": 0.631578947368421
+  },
+  "categorical_features": [],
+  "contract": "MLB_F1_ML_REVISIT_V1_FROZEN_CANDIDATE/1.0.0",
+  "forward_eligible": false,
+  "forward_min_game_date": "2026-09-20",
+  "forward_outcomes_opened": false,
+  "frozen": false,
+  "github_sha_at_freeze": null,
+  "historical_max_allowed_game_date": "2026-09-18",
+  "numeric_features": [],
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "reason": "75% F1 revisit gate not met; no forward candidate activated.",
+  "research_only": true,
+  "specs": []
+}
