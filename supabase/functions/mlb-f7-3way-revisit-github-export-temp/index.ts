@@ -5,7 +5,10 @@ import { createRemoteJWKSet, jwtVerify } from "npm:jose@6.1.0";
 const CONTRACT="MLB_F7_3WAY_REVISIT_GITHUB_EXPORT/1.0.0";
 const AUDIENCE="supabase-f7-3way-revisit";
 const REPOSITORY="jlebronmarty-netizen/pick-analyzer";
-const ALLOWED_REF="refs/heads/research/f7-3way-revisit-20260919-clean";
+const ALLOWED_REFS=new Set([
+  "refs/heads/research/f7-3way-revisit-20260919-clean",
+  "refs/heads/research/f7-ml-revisit-20260919"
+]);
 const JWKS=createRemoteJWKSet(new URL("https://token.actions.githubusercontent.com/.well-known/jwks"));
 
 function json(body: unknown,status=200){
@@ -18,7 +21,7 @@ Deno.serve(async(req:Request)=>{
   if(!token) return json({error:"OIDC_REQUIRED"},401);
   try{
     const {payload}=await jwtVerify(token,JWKS,{issuer:"https://token.actions.githubusercontent.com",audience:AUDIENCE});
-    if(payload.repository!==REPOSITORY||payload.ref!==ALLOWED_REF) return json({error:"OIDC_SCOPE_REJECTED"},403);
+    if(payload.repository!==REPOSITORY||!ALLOWED_REFS.has(String(payload.ref||""))) return json({error:"OIDC_SCOPE_REJECTED"},403);
   }catch{return json({error:"OIDC_INVALID"},401);}
 
   const body=await req.json().catch(()=>({}));
