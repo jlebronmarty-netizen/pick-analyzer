@@ -7,6 +7,37 @@ Target benchmark: **>= 75% predictive accuracy on a sufficiently stable selectiv
 Official Picks: unchanged  
 APOSTAR: disabled
 
+## 2026-09-19 First 5 Innings Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Development surface:
+
+- 2,423 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,147 rolling OOF games / 3,500 non-push;
+- 386 pushes in 2025 and 347 in 2026;
+- actual max target date 2026-09-14.
+
+Closest candidate:
+
+`f5_ml_revisit_winpct_sign_p075_fallback_v1`
+
+- model confidence >=0.75 for the selected side;
+- classifier side agrees with prior win-percentage advantage sign;
+- 43/64 = **67.19%**;
+- worst month **64.10%**;
+- 6 months;
+- non-push coverage **1.83%**;
+- unconditional majority baseline **53.34%**;
+- lift **+13.84 pts**.
+
+Original F5 composite benchmark on unified OOF: **94/149 = 63.09%**, worst month **40.00%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F5_ML_REVISIT_V1.md`.
+
 ## 2026-09-19 First 1 Inning Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
