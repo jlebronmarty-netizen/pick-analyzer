@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 1 Inning 3-Way Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1`.
+
+Rule predicts DRAW when absolute starter RA9 advantage <=0.50, absolute offense OPS advantage <=0.05 and absolute prior win% advantage <=0.20.
+
+2025: 125/221 = **56.56%**, baseline DRAW **52.33%**, lift **+4.23 pts**, worst month **45.61%**.
+
+2026 one-shot: 159/285 = **55.79%**, baseline DRAW **53.05%**, lift **+2.74 pts**, coverage **14.50%**, worst month **48.78%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not retune from 2026.
+
 ## 2026-09-19 First 1 Inning Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f1_ml_sp1p0_win0p20_v1`.
