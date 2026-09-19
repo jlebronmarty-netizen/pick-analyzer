@@ -47,6 +47,8 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 5 Innings Totals** | `f5_total_over_ref4p5_proj5p0_v1` — OVER reference 4.5 when projected F5 total >=5.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 371/679 = **54.64%**; worst month **48.57%** | 2026: 719/1,373 = **52.37%**; worst month **49.32%**; baseline OVER ref4.5 50.14% | 2026 coverage **63.04%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 4.5 is research reference only; obtain certified historical F5 lines before price-aware revisit. |
 | **First 5 Innings 3-Way ML** | `f5_3way_sp1p0_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 53/84 = **63.10%**; worst month **45.45%**; draw-only best 23.21% | 2026: 22/48 = **45.83%**; worst month **39.29%**; 9 selected outcomes were DRAW | 2026 coverage **2.44%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. Draw model also failed to approach target. |
 | **First 3 Innings Moneyline** | `f3_ml_winpct_extreme_q95_v1` — side from extreme prior win% advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 55/77 = **71.43%**; worst month **66.67%**; 22 pushes | 2026: 36/80 = **45.00%**; 25 pushes | 2026 coverage **4.69%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; no 2026 threshold rescue. |
+| **First 3 Innings 3-Way ML** | `f3_3way_sp1p5_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 44/73 = **60.27%**; worst month **28.57%**; draw-only best 33.33% | 2026: 20/41 = **48.78%**; 7 selected outcomes were DRAW | 2026 coverage **2.09%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
+| **First 1 Inning Moneyline** | `f1_ml_sp1p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 51/74 = **68.92%**; 60 pushes; worst month **50.00%** | 2026: 24/40 = **60.00%**; 39 pushes | 2026 coverage **4.02%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve stable fallback; q95 76.36% candidate rejected pre-external for insufficient monthly n. |
 | **First 7 Innings Moneyline** | `f7_ml_run_diff_extreme_q95_v1` — side from extreme prior run-diff advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 69/91 = **75.82%**; worst month **66.67%**; 8 pushes | 2026: 35/79 = **44.30%**; 12 pushes | 2026 coverage **4.06%** | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen q95 cutoff; failed external validation, no 2026 rescue. |
 | **First 7 Innings 3-Way ML** | `f7_3way_sp2p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 62/89 = **69.66%**; worst month **50.00%**; draw-only best 16.80% | 2026: 33/59 = **55.93%**; 5 selected outcomes were DRAW | 2026 coverage **3.00%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
@@ -403,6 +405,30 @@ Frozen fallback: `f7_3way_sp2p0_win0p20_v1`.
 Pre-freeze DRAW-only search: best stable **21/125 = 16.80%**, baseline draw rate **11.33%**.
 
 2026 one-shot: **33/59 = 55.93%**, coverage **3.00%**, 5 selected DRAW outcomes, worst month **41.18%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+## First-pass closeout — First 3 Innings 3-Way Moneyline
+
+Frozen fallback: `f3_3way_sp1p5_ops0p05_win0p20_v1`.
+
+2025 side rule: **44/73 = 60.27%**, worst month **28.57%**.
+
+Pre-freeze DRAW-only search: best stable **38/114 = 33.33%**, baseline draw rate **25.00%**.
+
+2026 one-shot: **20/41 = 48.78%**, coverage **2.09%**, 7 selected DRAW outcomes, worst month **44.44%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+## First-pass closeout — First 1 Inning Moneyline
+
+Frozen fallback: `f1_ml_sp1p0_win0p20_v1`.
+
+2025: **51/74 = 68.92%**, 60 pushes, worst month **50.00%**.
+
+A separate q95 prior-win% candidate reached **42/55 = 76.36%**, but minimum monthly n was only 3, so it failed the predeclared stability gate and was rejected before 2026.
+
+2026 one-shot: **24/40 = 60.00%**, 39 pushes, coverage **4.02%**, worst month **50.00%**, no retuning.
 
 State: `REVISIT_AFTER_FIRST_PASS`.
 
