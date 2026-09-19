@@ -1,0 +1,111 @@
+{
+  "actual_max_game_date_used": "2026-09-14",
+  "apostar_activation": false,
+  "architecture_family": "pregame_catboost_classifier_margin_f7_moneyline_v1",
+  "candidate": {
+    "accuracy": 0.5823575331772053,
+    "architecture": "catboost_probability",
+    "correct": 746,
+    "coverage_vs_oof_all": 0.3503138580395944,
+    "coverage_vs_oof_nonpush": 0.34734273318872017,
+    "legacy_absolute_advantage": null,
+    "lift_vs_unconditional_majority": 0.054971416040545895,
+    "min_month_n": 39,
+    "mode": "home_only",
+    "monthly": {
+      "2025-05": {
+        "accuracy": 0.5403225806451613,
+        "correct": 134,
+        "n": 248,
+        "pushes": 35
+      },
+      "2025-06": {
+        "accuracy": 0.592,
+        "correct": 74,
+        "n": 125,
+        "pushes": 15
+      },
+      "2025-07": {
+        "accuracy": 0.5770750988142292,
+        "correct": 146,
+        "n": 253,
+        "pushes": 32
+      },
+      "2025-08": {
+        "accuracy": 0.6052631578947368,
+        "correct": 69,
+        "n": 114,
+        "pushes": 21
+      },
+      "2025-09": {
+        "accuracy": 0.6779661016949152,
+        "correct": 40,
+        "n": 59,
+        "pushes": 6
+      },
+      "2026-04": {
+        "accuracy": 0.5845070422535211,
+        "correct": 83,
+        "n": 142,
+        "pushes": 21
+      },
+      "2026-05": {
+        "accuracy": 0.5416666666666666,
+        "correct": 52,
+        "n": 96,
+        "pushes": 9
+      },
+      "2026-06": {
+        "accuracy": 0.5522388059701493,
+        "correct": 37,
+        "n": 67,
+        "pushes": 10
+      },
+      "2026-07": {
+        "accuracy": 0.6176470588235294,
+        "correct": 42,
+        "n": 68,
+        "pushes": 13
+      },
+      "2026-08": {
+        "accuracy": 0.6571428571428571,
+        "correct": 46,
+        "n": 70,
+        "pushes": 2
+      },
+      "2026-09": {
+        "accuracy": 0.5897435897435898,
+        "correct": 23,
+        "n": 39,
+        "pushes": 6
+      }
+    },
+    "monthly_accuracy_sd": 0.042088510459481504,
+    "months_with_selections": 11,
+    "n": 1281,
+    "probability_threshold": 0.58,
+    "pushes": 170,
+    "sample_gate_met": true,
+    "sample_stability_gate_met": false,
+    "selected_total": 1451,
+    "target_met_75_plus": false,
+    "unconditional_majority_baseline": 0.5273861171366594,
+    "worst_month_accuracy": 0.5403225806451613
+  },
+  "categorical_features": [],
+  "contract": "MLB_F7_ML_REVISIT_V1_FROZEN_CANDIDATE/1.0.0",
+  "forward_eligible": false,
+  "forward_min_game_date": "2026-09-20",
+  "forward_outcomes_opened": false,
+  "frozen": false,
+  "github_sha_at_freeze": null,
+  "historical_max_allowed_game_date": "2026-09-18",
+  "numeric_features": [],
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "reason": "75% F7 revisit gate not met; no forward candidate activated.",
+  "research_only": true,
+  "specs": []
+}
