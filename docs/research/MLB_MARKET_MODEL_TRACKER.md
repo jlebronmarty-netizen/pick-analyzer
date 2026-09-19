@@ -7,6 +7,40 @@ Target benchmark: **>= 75% predictive accuracy on a sufficiently stable selectiv
 Official Picks: unchanged  
 APOSTAR: disabled
 
+## 2026-09-19 First 3 Innings Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Development surface:
+
+- 2,425 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,148 rolling OOF / 3,114 non-push;
+- 601 pushes in 2025 and 561 in 2026;
+- actual max target date used: 2026-09-14.
+
+Preserved fallback:
+
+`f3_ml_revisit_classifier_margin_p058_m075_fallback_v1`
+
+- classifier confidence >=0.58 on the predicted side;
+- predicted absolute F3 margin >=0.75;
+- classifier and margin side agree;
+- 202/320 = **63.13%**;
+- worst month **52.94%**;
+- 11 months;
+- non-push coverage **10.28%**;
+- unconditional majority baseline **55.11%**;
+- lift **+8.02 pts**.
+
+Highest pooled sample-eligible candidate: **49/72 = 68.06%**, but worst month **0.00%** and min monthly n=1.
+
+Original q95 benchmark on unified OOF: **78/124 = 62.90%**, worst month **0.00%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F3_ML_REVISIT_V1.md`.
+
 ## 2026-09-19 First 7 Innings Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
