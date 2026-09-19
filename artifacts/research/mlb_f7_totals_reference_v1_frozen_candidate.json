@@ -1,0 +1,81 @@
+{
+  "contract": "MLB_F7_TOTALS_REFERENCE_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "FIRST_7_INNINGS_TOTALS",
+  "pricing_status": "NO_HISTORICAL_F7_LINE_CORPUS",
+  "reference_line": 6.5,
+  "reference_line_role": "RESEARCH_REFERENCE_ONLY_NOT_CERTIFIED_HISTORICAL_MARKET_LINE",
+  "target_contract": {
+    "source": "Statcast score after inning 7",
+    "innings": 7,
+    "2025_dual_source_certification": {
+      "mapped_games": 2430,
+      "exact_matches": 2418,
+      "mismatches_excluded": 12,
+      "exact_match_rate": 0.9950617283950617
+    }
+  },
+  "model": {
+    "family": "prior-team-F7-form linear regression",
+    "recency_weight_l5": 0.25,
+    "history_weight_all": 0.75,
+    "minimum_prior_games_per_team": 5,
+    "same_day_games_excluded": true,
+    "final_2025_fit": {
+      "n": 2338,
+      "intercept": 3.53517782634352,
+      "slope": 0.504004641847965,
+      "mae": 3.15000355795273
+    }
+  },
+  "rule": {
+    "direction": "OVER",
+    "reference_line": 6.5,
+    "minimum_projection": 7,
+    "minimum_edge": 0.5
+  },
+  "development_2025": {
+    "n": 642,
+    "correct": 355,
+    "accuracy": 0.5529595015576324,
+    "min_month_n": 42,
+    "worst_month_accuracy": 0.5178571428571429,
+    "monthly_accuracy_sd": 0.0300988080824334,
+    "months": {
+      "2025-05": {
+        "n": 42,
+        "correct": 24,
+        "accuracy": 0.5714285714285714
+      },
+      "2025-06": {
+        "n": 56,
+        "correct": 29,
+        "accuracy": 0.5178571428571429
+      },
+      "2025-07": {
+        "n": 96,
+        "correct": 56,
+        "accuracy": 0.5833333333333334
+      },
+      "2025-08": {
+        "n": 211,
+        "correct": 123,
+        "accuracy": 0.5829383886255924
+      },
+      "2025-09": {
+        "n": 237,
+        "correct": 123,
+        "accuracy": 0.5189873417721519
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "closeout_state_before_external": "REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING",
+  "external_2026_opened": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}

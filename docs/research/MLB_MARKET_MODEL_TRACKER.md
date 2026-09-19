@@ -54,6 +54,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 1 Inning NRFI** | `f1_nrfi_both_starters_scoreless_0p80_v1` — NRFI if both starters prior F1 scoreless rate >=80% | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 58/108 = **53.70%**; baseline 50.96%; worst month **36.84%** | 2026: 68/130 = **52.31%**; baseline 51.57%; worst month **25.00%** on n=4 | 2026 coverage **14.57%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Offense filter was redundant; preserve simple starter-only rule, no 2026 rescue. |
 | **First 7 Innings Moneyline** | `f7_ml_run_diff_extreme_q95_v1` — side from extreme prior run-diff advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 69/91 = **75.82%**; worst month **66.67%**; 8 pushes | 2026: 35/79 = **44.30%**; 12 pushes | 2026 coverage **4.06%** | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen q95 cutoff; failed external validation, no 2026 rescue. |
 | **First 7 Innings 3-Way ML** | `f7_3way_sp2p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 62/89 = **69.66%**; worst month **50.00%**; draw-only best 16.80% | 2026: 33/59 = **55.93%**; 5 selected outcomes were DRAW | 2026 coverage **3.00%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
+| **First 7 Innings Totals** | `f7_total_over_ref6p5_proj7p0_v1` — OVER reference 6.5 when projected F7 total >=7.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 355/642 = **55.30%**; worst month **51.79%** | 2026: 569/1,084 = **52.49%**; baseline OVER ref6.5 50.64%; worst month **43.33%** | 2026 coverage **49.77%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 6.5 is research reference only; no historical F7 line corpus. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` over frozen R2 | 2025 official Retrosheet ER + external 2026 outcome pending | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | **NOT OPENED** — no canonical exact 2026 ER outcome contract yet | 2025 n=91 | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` | Preserve rule. Continue PA-13 forward price capture and exact outcome-contract work; do not substitute Runs Allowed. |
@@ -470,6 +471,18 @@ Pricing caveat: 2.5 is a research reference line only; no historical F3 total-li
 2025: **368/715 = 51.47%**, worst month **49.12%**.
 
 2026 one-shot: **410/841 = 48.75%**, baseline OVER reference 2.5 **48.94%**, coverage **38.61%**, worst month **45.22%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+## First-pass closeout — First 7 Innings Totals
+
+Frozen fallback: `f7_total_over_ref6p5_proj7p0_v1`.
+
+Pricing caveat: 6.5 is a research reference line only; no historical F7 total-line corpus is stored.
+
+2025: **355/642 = 55.30%**, worst month **51.79%**.
+
+2026 one-shot: **569/1,084 = 52.49%**, baseline OVER reference 6.5 **50.64%**, coverage **49.77%**, worst month **43.33%**, no retuning.
 
 State: `REVISIT_AFTER_FIRST_PASS`.
 

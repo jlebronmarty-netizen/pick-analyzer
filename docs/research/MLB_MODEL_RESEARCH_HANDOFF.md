@@ -6,6 +6,24 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 7 Innings Totals first-pass closeout — authoritative
+
+Frozen fallback: `f7_total_over_ref6p5_proj7p0_v1`.
+
+No historical F7 total-line corpus exists in the current snapshots; 6.5 is a balanced research reference only.
+
+Model uses strict-prior F7 team scored/allowed form, 25% last-5 and 75% all-history, minimum 5 prior games per team.
+
+2025 final fit: intercept 3.53517782634352, slope 0.504004641847965, MAE 3.15000.
+
+2025: 355/642 = **55.30%**, worst month **51.79%**.
+
+2026 one-shot: 569/1,084 = **52.49%**, reference baseline **50.64%**, coverage **49.77%**, worst month **43.33%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not interpret this reference-line result as historical sportsbook performance.
+
 ## 2026-09-19 First 3 Innings Totals first-pass closeout — authoritative
 
 Frozen fallback: `f3_total_over_ref2p5_proj3p0_v1`.
