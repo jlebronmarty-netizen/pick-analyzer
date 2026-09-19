@@ -1,0 +1,30 @@
+name: MLB Pitcher Win JSON Parity
+
+on:
+  push:
+    branches: [research/pitcher-win-forward-compatible-20260919]
+    paths:
+      - '.github/workflows/mlb-pitcher-win-json-parity.yml'
+      - 'src/lib/catboost-numeric-json.js'
+      - 'scripts/validate_mlb_pitcher_win_numeric_json_parity.mjs'
+      - 'python_models/pitcher_win_forward_numeric_model_0.json'
+      - 'python_models/pitcher_win_forward_numeric_model_1.json'
+      - 'artifacts/research/mlb_pitcher_win_forward_numeric_v1_golden.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/pitcher-win-forward-compatible-20260919
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate frozen JSON inference parity
+        run: node scripts/validate_mlb_pitcher_win_numeric_json_parity.mjs
