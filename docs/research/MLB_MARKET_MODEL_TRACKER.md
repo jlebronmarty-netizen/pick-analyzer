@@ -30,7 +30,12 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 - `HISTORICAL_2026_SEEN_BEFORE_FREEZE`: 2026 historical results were inspected before final freeze; useful evidence, but not a pristine one-shot external test.
 - `PROSPECTIVE_FORWARD`: fixed pregame formula evaluated only on future observations captured after freeze.
 - `DIAGNOSTIC_ONLY`: same-game/FULL information; never deployable as a pregame betting model.
-- `NOT_YET_UNIFIED`: market has not yet completed the unified protocol.
+- `NOT_YET_UNIFIED`
+- `BLOCKED_LABEL_ATTRIBUTION`
+- `BLOCKED_LABEL_SEMANTICS`
+- `BLOCKED_DEPENDENCY_LABELS`
+- `BLOCKED_SETTLEMENT_SEMANTICS`
+- `DFS_ONLY_DEFERRED`: market has not yet completed the unified protocol.
 
 ## Current market scoreboard
 
@@ -54,6 +59,12 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Batter Singles** | `batter_singles_under_1p5_proj_0p50_v1` — UNDER 1.5 when projected singles <=0.50 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 7,822/8,328 = **93.92%**; worst month **93.10%**; baseline 89.96% | 2026 one-shot: 12,690/13,634 = **93.08%**; worst month **91.16%**; baseline 90.30% | 2026 coverage **33.54%** | **YES** | `TARGET_MET_75_PLUS` | Preserve frozen rule; historical prices not certified. |
 | **Batter Doubles** | `batter_doubles_under_0p5_proj_0p16_v1` — UNDER 0.5 when projected doubles <=0.16 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 12,507/14,454 = **86.53%**; worst month **84.94%**; baseline 85.07% | 2026 one-shot: 17,632/20,282 = **86.93%**; worst month **85.87%**; baseline 85.65% | 2026 coverage **49.90%** | **YES**, modest lift | `TARGET_MET_75_PLUS` | Preserve frozen rule; signal lift is modest and pricing remains uncertified. |
 | **Batter Triples** | `batter_triples_under_0p5_proj_0p015_v1` — UNDER 0.5 when projected triples <=0.015 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling: 27,562/27,832 = **99.03%**; worst month **98.90%**; baseline 98.74% | 2026 one-shot: 29,689/30,045 = **98.82%**; worst month **98.61%**; baseline 98.63% | 2026 coverage **73.92%** | **YES**, baseline-dominated | `TARGET_MET_75_PLUS_LOW_INCREMENTAL_SIGNAL` | Preserve only as accuracy reference; incremental lift is tiny and pricing is uncertified. |
+| **Batter Runs Scored** | — | label-integrity gate | — | — | — | **NO MODEL** | `BLOCKED_LABEL_ATTRIBUTION` | 2025 total runs reconcile, but 1,409 scorer identities are missing. Recover exact runner identity or certify another per-player game outcome source. |
+| **Batter RBIs** | — | label-semantics gate | — | — | — | **NO MODEL** | `BLOCKED_LABEL_SEMANTICS` | Current Retrosheet batter-appearance `rbi` equals parser play-runs, not an official RBI contract. Build/certify RBI semantics first. |
+| **Batter Hits + Runs + RBIs** | — | dependency gate | Hits exact; Runs/RBI not certified | — | — | **NO MODEL** | `BLOCKED_DEPENDENCY_LABELS` | Unblock only after exact Runs and RBI outcome contracts exist. |
+| **Batter Stolen Bases** | — | label-integrity gate | — | — | — | **NO MODEL** | `BLOCKED_LABEL_ATTRIBUTION` | Current `SB` flag identifies an SB event during the PA, not the runner. Require exact stolen-base runner identity. |
+| **Batter First Home Run** | — | settlement gate | Raw Statcast can identify first HR hitter when a HR occurs | — | 2,132 2025 games with >=1 HR | **NO MODEL** | `BLOCKED_SETTLEMENT_SEMANTICS` | Certify sportsbook settlement for games with no HR; never condition model evaluation on postgame HR occurrence. |
+| **Batter Fantasy Score** | — | DFS scoring-contract gate | — | — | — | **DEFERRED** | `DFS_ONLY_DEFERRED` | Freeze a DFS scoring-system contract before modeling; different DFS scoring systems are not assumed interchangeable. |
 | **NRFI / YRFI** | `nrfi_p52_fallback_v1` — NRFI when calibrated p>=52% | `HISTORICAL_2026_MODEL_DIAGNOSTICS_SEEN_BEFORE_MARKET_RULE_FREEZE` | 2025: 190/340 = **55.88%**; worst month **39.13%**; baseline 49.51% | 2026: 162/301 = **53.82%**; worst month **48.24%**; baseline 50.37% | 2026 coverage **18.35%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; do not threshold-rescue from 2026. Revisit with materially better first-inning features/architecture. |
 
 ## First-pass closeouts
@@ -289,6 +300,25 @@ Frozen rule: `pitcher_record_win_no_prior_rate_0p10_v1`.
 State: `REVISIT_AFTER_FIRST_PASS`.
 
 The frozen 2025 rule failed the external 75% target. Do not change the threshold using 2026.
+
+## First-pass blocked market closeouts — outcome/settlement integrity
+
+Canonical audit:
+
+`docs/research/MLB_MARKET_COVERAGE_INTEGRITY_AUDIT_20260918.md`
+
+Blocked families:
+
+- `batter_runs_scored` → `BLOCKED_LABEL_ATTRIBUTION`;
+- `batter_rbis` → `BLOCKED_LABEL_SEMANTICS`;
+- `batter_hits_runs_rbis` → `BLOCKED_DEPENDENCY_LABELS`;
+- `batter_stolen_bases` → `BLOCKED_LABEL_ATTRIBUTION`;
+- `batter_first_home_run` → `BLOCKED_SETTLEMENT_SEMANTICS`;
+- `batter_fantasy_score` → `DFS_ONLY_DEFERRED`.
+
+Do not use fuzzy identity, postgame conditioning, Runs Allowed substitutions, or approximate RBI/SB semantics merely to obtain a model score.
+
+Alternate `*_alternate` markets reuse their base outcome family and belong in a later line-specific / price-aware calibration layer rather than a new outcome model.
 
 ## Unified 2025 rolling-development protocol
 
