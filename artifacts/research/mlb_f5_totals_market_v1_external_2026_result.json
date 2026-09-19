@@ -1,0 +1,69 @@
+{
+  "contract": "MLB_F5_TOTALS_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "f5_total_over_ref4p5_proj5p0_v1",
+  "freeze_commit_sha": "6c924622fbdbc74563dac044a96b961fdf02e235",
+  "validation_class": "UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE",
+  "pricing_status": "NO_HISTORICAL_F5_LINE_CORPUS",
+  "reference_line": 4.5,
+  "development_2025": {
+    "n": 679,
+    "correct": 371,
+    "accuracy": 0.5463917525773195,
+    "worst_month_accuracy": 0.4857142857142857
+  },
+  "external_2026": {
+    "eligible_rows": 2178,
+    "selected_n": 1373,
+    "selected_correct": 719,
+    "selected_accuracy": 0.5236707938820102,
+    "selection_coverage": 0.630394857667585,
+    "reference_over_4p5_baseline": 0.50137741046832,
+    "worst_month_accuracy": 0.493150684931507,
+    "source_window": {
+      "from": "2026-04-01",
+      "to": "2026-09-14"
+    },
+    "months": {
+      "2026-04": {
+        "n": 181,
+        "correct": 102,
+        "accuracy": 0.56353591160221
+      },
+      "2026-05": {
+        "n": 219,
+        "correct": 108,
+        "accuracy": 0.4931506849315068
+      },
+      "2026-06": {
+        "n": 257,
+        "correct": 137,
+        "accuracy": 0.5330739299610895
+      },
+      "2026-07": {
+        "n": 282,
+        "correct": 149,
+        "accuracy": 0.5283687943262412
+      },
+      "2026-08": {
+        "n": 293,
+        "correct": 153,
+        "accuracy": 0.5221843003412969
+      },
+      "2026-09": {
+        "n": 141,
+        "correct": 70,
+        "accuracy": 0.49645390070921985
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "target_75_met_2026": false,
+  "closeout_state": "REVISIT_AFTER_FIRST_PASS",
+  "retuned_after_external": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
