@@ -641,8 +641,8 @@ export async function freezePitcherWinForwardNumeric(input: PitcherWinForwardFre
         decisions,
       })
       const pWin = (
-        applyNumericCatBoostProbability(model0 as NumericCatBoostModel, built.values) +
-        applyNumericCatBoostProbability(model1 as NumericCatBoostModel, built.values)
+        applyNumericCatBoostProbability(model0 as unknown as NumericCatBoostModel, built.values) +
+        applyNumericCatBoostProbability(model1 as unknown as NumericCatBoostModel, built.values)
       ) / 2
       if (!Number.isFinite(pWin) || pWin < 0 || pWin > 1) {
         blockers.push({ gamePk: game.gamePk, side, pitcherId: pitcher.id, reason: 'MODEL_PROBABILITY_INVALID' })
