@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 import json
+import urllib.parse
 import urllib.request
 
 GAME_PKS=[776135,776136,822924]
+FIELDS="liveData,decisions,winner,id,fullName,loser,save"
 out=[]
 for game_pk in GAME_PKS:
-    url=f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live"
+    query=urllib.parse.urlencode({"fields":FIELDS})
+    url=f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live?{query}"
     req=urllib.request.Request(url,headers={"User-Agent":"pick-analyzer-research/1.0"})
     with urllib.request.urlopen(req,timeout=30) as resp:
         payload=json.load(resp)
@@ -21,4 +24,4 @@ for game_pk in GAME_PKS:
         "loser_id":int(loser["id"]),
         "loser_name":loser.get("fullName"),
     })
-print(json.dumps({"contract":"MLB_PITCHER_DECISIONS_PROBE/1.0.0","rows":out},indent=2))
+print(json.dumps({"contract":"MLB_PITCHER_DECISIONS_PROBE/1.0.0","fields":FIELDS,"rows":out},indent=2))
