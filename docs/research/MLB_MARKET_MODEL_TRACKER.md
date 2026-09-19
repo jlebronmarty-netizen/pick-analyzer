@@ -43,6 +43,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 |---|---|---|---:|---:|---:|---|---|---|
 | **Moneyline** | `pregame_high_conf_home_v2` | `LEGACY_ADAPTIVE_2026` | Development folds: 63/81 = **77.78%** | Untouched adaptive holdout: 17/21 = **80.95%**; full selected 2026 set: 80/102 = **78.43%** | 102 selected games in recorded 2026 set | **YES**, adaptive evidence | Not a pristine 2025→2026 one-shot test | Preserve as current selective ML reference. Do not relabel adaptive evidence as pure external validation. |
 | **Run Line / Spread** | `rl_v2_home_p15_alt_favorite_tsh_q92_v1` — HOME +1.5 alternate when primary HOME -1.5 | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective forward | 2025: 92/107 = **85.98%** | Historical 2026 through Sep 10: 49/62 = **79.03%**; sealed prospective score still accumulating | 2025 coverage **4.40%**; 107 dev selections | **YES**, historical evidence | External one-shot field remains NULL because 2026 was seen pre-freeze | Continue fixed-clock prospective freezes. Never retro-freeze Sep 17/18. |
+| **First 5 Innings Moneyline** | `f5_ml_sp0p5_ops0p08_win0p05_v1` — symmetric side rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025 certified: 60/88 = **68.18%**; worst month **64.71%**; 15 pushes | 2026 one-shot: 34/61 = **55.74%**; worst month **40.00%**; 9 pushes | 2026 selection coverage **3.56%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; do not threshold-rescue from 2026. Revisit with materially different architecture/F5 pricing. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` over frozen R2 | 2025 official Retrosheet ER + external 2026 outcome pending | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | **NOT OPENED** — no canonical exact 2026 ER outcome contract yet | 2025 n=91 | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` | Preserve rule. Continue PA-13 forward price capture and exact outcome-contract work; do not substitute Runs Allowed. |
@@ -319,6 +320,24 @@ Blocked families:
 Do not use fuzzy identity, postgame conditioning, Runs Allowed substitutions, or approximate RBI/SB semantics merely to obtain a model score.
 
 Alternate `*_alternate` markets reuse their base outcome family and belong in a later line-specific / price-aware calibration layer rather than a new outcome model.
+
+## First-pass closeout — First 5 Innings Moneyline
+
+Frozen fallback: `f5_ml_sp0p5_ops0p08_win0p05_v1`.
+
+Target certification:
+
+- Statcast F5 score vs Retrosheet 2025: 2,423/2,430 exact matches (**99.71%**);
+- 7 one-run disagreements excluded fail-closed from 2025 development;
+- F5 ties treated as pushes.
+
+2025 development: **60/88 = 68.18%**, 15 pushes, worst month **64.71%**.
+
+2026 one-shot external: **34/61 = 55.74%**, 9 pushes, selection coverage **3.56%**, worst month **40.00%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+No F5 historical pricing exists in the current snapshot corpus. Do not claim ROI/EV/CLV.
 
 ## Unified 2025 rolling-development protocol
 
