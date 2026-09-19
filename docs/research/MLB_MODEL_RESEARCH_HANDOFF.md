@@ -6,6 +6,26 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 1 Inning Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f1_ml_sp1p0_win0p20_v1`.
+
+Target certification:
+
+- 2,428/2,430 2025 mapped games have exact Statcast/Retrosheet inning-1 score agreement;
+- 2 one-run mismatches excluded fail-closed;
+- ties are pushes.
+
+2025 stable candidate: 51/74 = **68.92%**, 60 pushes, worst month **50.00%**.
+
+A separate q95 prior-win%-advantage candidate produced 42/55 = **76.36%**, but minimum monthly n was only 3. It failed the frozen stability gate and was rejected before external validation.
+
+2026 one-shot on the frozen stable rule: 24/40 = **60.00%**, 39 pushes, coverage **4.02%**, worst month **50.00%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not promote or retune from 2026.
+
 ## 2026-09-18 First 3 Innings 3-Way Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f3_3way_sp1p5_ops0p05_win0p20_v1`.
