@@ -6,6 +6,24 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 First 5 Innings Totals first-pass closeout — authoritative
+
+Frozen fallback: `f5_total_over_ref4p5_proj5p0_v1`.
+
+- no historical F5 sportsbook lines exist in the current corpus;
+- 4.5 is a research reference line only;
+- model uses strict-prior-date team F5 scored/allowed history with minimum 5 prior games per team;
+- final 2025 fit: intercept 2.14443614450973, slope 0.591475378488326;
+- select OVER reference 4.5 when projection >=5.0.
+
+2025: 371/679 = **54.64%**, worst month **48.57%**.
+
+2026 one-shot: 719/1,373 = **52.37%**, coverage **63.04%**, reference-line baseline **50.14%**, worst month **49.32%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version with 2026. No ROI/EV/CLV claim without certified F5 lines/prices.
+
 ## 2026-09-18 First 5 Innings Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f5_ml_sp0p5_ops0p08_win0p05_v1`.
