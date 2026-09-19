@@ -6,6 +6,43 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 Pitcher Record a Win second-pass revisit V1 — authoritative
+
+Frozen champion:
+
+`pitcher_record_win_revisit_catboost_no_p0225_v1`
+
+- architecture: side-normalized CatBoost classifier ensemble;
+- direction: **NO**;
+- select when predicted starter-win probability <= **0.225**;
+- rolling historical development: 2025 + 2026 through available 2026-09-17 data;
+- OOF: **1,126/1,386 = 81.24%**;
+- coverage: **16.54%** of rolling OOF;
+- 11 selected months;
+- minimum monthly n **82**;
+- worst month **76.47%**;
+- unconditional NO baseline **70.92%**;
+- lift **+10.32 pts**.
+
+Exact outcomes:
+
+- 2025 Retrosheet pitcher decisions;
+- 2026 official MLB StatsAPI `schedule?hydrate=decisions`;
+- 2,294/2,294 2026 games resolved in 7 schedule requests;
+- exact MLBAM starter identity, no fuzzy matching.
+
+A stricter 0.175 candidate reached **325/380 = 85.53%**, worst month **76.19%**, but was retained as an alternative because coverage/sample are materially lower than the 0.225 champion.
+
+State:
+
+`TARGET_MET_75_PLUS_PROSPECTIVE_FORWARD_PENDING`
+
+The candidate is frozen before the forward window. 2026-09-19 remains quarantined and 2026-09-20+ outcomes remain unopened. Do not retune from prospective outcomes.
+
+Canonical detail:
+
+`docs/research/MLB_PITCHER_RECORD_WIN_REVISIT_V1.md`
+
 ## 2026-09-19 Game Totals second-pass revisit V1 — authoritative
 
 Protocol: `MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0`.
