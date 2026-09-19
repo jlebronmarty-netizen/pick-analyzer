@@ -357,6 +357,33 @@ function h2hWinPct(team: string, opponent: string, targetDate: string, rows: Tea
   )
 }
 
+async function decisionWinners(startDate: string, endDate: string) {
+  if (endDate < startDate) return new Map<number, number>()
+  const url = new URL('https://statsapi.mlb.com/api/v1/schedule')
+  url.searchParams.set('sportId', '1')
+  url.searchParams.set('startDate', startDate)
+  url.searchParams.set('endDate', endDate)
+  url.searchParams.set('gameTypes', 'R')
+  url.searchParams.set('hydrate', 'decisions')
+  url.searchParams.set('fields', 'dates,date,games,gamePk,decisions,winner,id,fullName,loser')
+
+  const response = await fetch(url.toString(), { cache: 'no-store', signal: AbortSignal.timeout(20_000) })
+  if (!response.ok) throw new Error(`PITCHER_WIN_FORWARD_DECISIONS_HTTP_${response.status}`)
+  const payload = await response.json() as any
+  const winners = new Map<number, number>()
+
+  for (const entry of payload?.dates ?? []) {
+    for (const game of entry?.games ?? []) {
+      const gamePk = Number(game?.gamePk)
+      const winnerId = Number(game?.decisions?.winner?.id)
+      if (Number.isSafeInteger(gamePk) && Number.isSafeInteger(winnerId) && winnerId > 0) {
+        winners.set(gamePk, winnerId)
+      }
+    }
+  }
+  return winners
+}
+
 async function pitcherPriorCounts(targetDate: string, pitcherIds: number[]) {
   if (!pitcherIds.length) return new Map<number, { starts: number; wins: number }>()
 
