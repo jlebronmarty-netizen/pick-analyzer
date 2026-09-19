@@ -1,4 +1,4 @@
-import { sha256 } from '../../../../../../scripts/mlb-data-02r-r2f-stage-contracts.mjs'
+import { sha256 } from '../../../../../scripts/mlb-data-02r-r2f-stage-contracts.mjs'
 
 export const dynamic='force-dynamic'
 export const runtime='nodejs'
