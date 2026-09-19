@@ -1,0 +1,71 @@
+{
+  "contract": "MLB_F1_3WAY_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1",
+  "freeze_commit_sha": "9557e214af6faa6fefe30112c7b72b58a8d0575b",
+  "validation_class": "UNIFIED_2025_TO_2026_ONE_SHOT",
+  "development_2025": {
+    "n": 221,
+    "correct": 125,
+    "accuracy": 0.5656108597285068,
+    "baseline_draw_rate": 0.523281596452328,
+    "lift_vs_baseline": 0.04232926327617881,
+    "worst_month_accuracy": 0.45614035087719296
+  },
+  "external_2026": {
+    "eligible_rows": 1966,
+    "baseline_draw_rate": 0.530518819938962,
+    "selected_n": 285,
+    "selected_correct": 159,
+    "selected_accuracy": 0.5578947368421052,
+    "selection_coverage": 0.14496439471007122,
+    "lift_vs_baseline": 0.027375916903143227,
+    "worst_month_accuracy": 0.4878048780487805,
+    "source_window": {
+      "from": "2026-03-31",
+      "to": "2026-09-14"
+    },
+    "months": {
+      "2026-04": {
+        "n": 18,
+        "correct": 12,
+        "accuracy": 0.6666666666666666
+      },
+      "2026-05": {
+        "n": 41,
+        "correct": 20,
+        "accuracy": 0.4878048780487805
+      },
+      "2026-06": {
+        "n": 46,
+        "correct": 28,
+        "accuracy": 0.6086956521739131
+      },
+      "2026-07": {
+        "n": 70,
+        "correct": 39,
+        "accuracy": 0.5571428571428572
+      },
+      "2026-08": {
+        "n": 74,
+        "correct": 40,
+        "accuracy": 0.5405405405405406
+      },
+      "2026-09": {
+        "n": 36,
+        "correct": 20,
+        "accuracy": 0.5555555555555556
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "target_75_met_2026": false,
+  "closeout_state": "REVISIT_AFTER_FIRST_PASS",
+  "retuned_after_external": false,
+  "historical_period_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
