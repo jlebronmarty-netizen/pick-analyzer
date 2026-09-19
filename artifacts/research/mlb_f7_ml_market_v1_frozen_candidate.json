@@ -1,0 +1,74 @@
+{
+  "contract": "MLB_F7_ML_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "FIRST_7_INNINGS_MONEYLINE",
+  "odds_api_market_key": "h2h_1st_7_innings",
+  "target_contract": {
+    "source": "Statcast score after inning 7",
+    "innings": 7,
+    "2025_dual_source_certification": {
+      "mapped_games": 2430,
+      "exact_matches": 2418,
+      "mismatches_excluded": 12,
+      "exact_match_rate": 0.9950617283950617
+    },
+    "tie_handling": "PUSH_EXCLUDED_FROM_ACCURACY"
+  },
+  "rule": {
+    "feature": "home_run_diff_pg - away_run_diff_pg",
+    "minimum_absolute_advantage": 2.82541420162881,
+    "prediction": "sign(feature): positive HOME, negative AWAY",
+    "selection_source": "95th percentile of absolute 2025 development advantage"
+  },
+  "development_2025": {
+    "n": 91,
+    "correct": 69,
+    "accuracy": 0.7582417582417582,
+    "pushes": 8,
+    "min_month_n": 8,
+    "worst_month_accuracy": 0.6666666666666666,
+    "monthly_accuracy_sd": 0.0407891588209499,
+    "months": {
+      "2025-05": {
+        "n": 43,
+        "correct": 33,
+        "accuracy": 0.7674418604651163,
+        "pushes": 5
+      },
+      "2025-06": {
+        "n": 18,
+        "correct": 14,
+        "accuracy": 0.7777777777777778,
+        "pushes": 1
+      },
+      "2025-07": {
+        "n": 8,
+        "correct": 6,
+        "accuracy": 0.75,
+        "pushes": 1
+      },
+      "2025-08": {
+        "n": 9,
+        "correct": 6,
+        "accuracy": 0.6666666666666666,
+        "pushes": 1
+      },
+      "2025-09": {
+        "n": 13,
+        "correct": 10,
+        "accuracy": 0.7692307692307693,
+        "pushes": 0
+      }
+    }
+  },
+  "target_75_met_2025": true,
+  "closeout_state_before_external": "TARGET_MET_75_PLUS_EXTERNAL_PENDING",
+  "external_2026_opened": false,
+  "historical_period_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
