@@ -1,0 +1,140 @@
+{
+  "actual_max_game_date_used": "2026-09-17",
+  "apostar_activation": false,
+  "candidate": {
+    "accuracy": 0.8707482993197279,
+    "architecture": "deployable_core_catboost",
+    "correct": 128,
+    "coverage_vs_oof": 0.017541766109785202,
+    "direction": "NO",
+    "lift_vs_unconditional_no_baseline": 0.16155975516698318,
+    "min_month_n": 1,
+    "minimum_prior_starts": null,
+    "monthly": {
+      "2025-05": {
+        "accuracy": 0.863013698630137,
+        "correct": 63,
+        "n": 73
+      },
+      "2025-06": {
+        "accuracy": 0.75,
+        "correct": 15,
+        "n": 20
+      },
+      "2025-07": {
+        "accuracy": 1.0,
+        "correct": 10,
+        "n": 10
+      },
+      "2025-08": {
+        "accuracy": 0.7777777777777778,
+        "correct": 7,
+        "n": 9
+      },
+      "2026-05": {
+        "accuracy": 1.0,
+        "correct": 1,
+        "n": 1
+      },
+      "2026-07": {
+        "accuracy": 0.875,
+        "correct": 7,
+        "n": 8
+      },
+      "2026-08": {
+        "accuracy": 1.0,
+        "correct": 8,
+        "n": 8
+      },
+      "2026-09": {
+        "accuracy": 0.9444444444444444,
+        "correct": 17,
+        "n": 18
+      }
+    },
+    "monthly_accuracy_sd": 0.09446789797099987,
+    "months_with_selections": 8,
+    "n": 147,
+    "prior_win_rate_cap": null,
+    "probability_threshold": 0.15,
+    "sample_gate_met": true,
+    "sample_stability_gate_met": true,
+    "target_met_75_plus": true,
+    "unconditional_no_baseline": 0.7091885441527447,
+    "worst_month_accuracy": 0.75
+  },
+  "categorical_features": [],
+  "contract": "MLB_PITCHER_WIN_FORWARD_NUMERIC_V1_FROZEN_CANDIDATE/1.0.0",
+  "feature_contract": "DEPLOYABLE_EXACT_PARITY_NUMERIC_V1",
+  "forward_eligible": true,
+  "forward_min_game_date": "2026-09-20",
+  "forward_outcomes_opened": false,
+  "frozen": true,
+  "github_sha_at_freeze": "7dd63095141a34d87df4252b660f98f34408c5a1",
+  "historical_max_allowed_game_date": "2026-09-18",
+  "model_files": [
+    {
+      "path": "python_models/pitcher_win_forward_numeric_model_0.py",
+      "sha256": "207dc5a1223f2e50200422b465667cedee0902e5ad6407842f0d3afa4dbfa8d0",
+      "spec_index": 0
+    },
+    {
+      "path": "python_models/pitcher_win_forward_numeric_model_1.py",
+      "sha256": "446e0ca5a28f2cb147d1e27d1c1aa092629ab5593bbbf73712b68c55fee4fb29",
+      "spec_index": 1
+    }
+  ],
+  "numeric_features": [
+    "starter_is_home",
+    "game_number",
+    "doubleheader_flag",
+    "own_games_prior",
+    "opp_games_prior",
+    "own_win_pct",
+    "opp_win_pct",
+    "own_run_diff_pg",
+    "opp_run_diff_pg",
+    "own_pyth_win_pct",
+    "opp_pyth_win_pct",
+    "own_l5_games",
+    "opp_l5_games",
+    "own_l5_win_pct",
+    "opp_l5_win_pct",
+    "own_l5_run_diff_pg",
+    "opp_l5_run_diff_pg",
+    "own_l10_games",
+    "opp_l10_games",
+    "own_l10_win_pct",
+    "opp_l10_win_pct",
+    "own_l10_run_diff_pg",
+    "opp_l10_run_diff_pg",
+    "own_rest_days",
+    "opp_rest_days",
+    "side_h2h_win_pct",
+    "prior_starts",
+    "prior_wins",
+    "prior_win_rate"
+  ],
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "reason": "Deployable exact-parity core cleared frozen historical gate.",
+  "research_only": true,
+  "specs": [
+    {
+      "depth": 3,
+      "iterations": 300,
+      "l2_leaf_reg": 8.0,
+      "learning_rate": 0.035,
+      "random_strength": 1.0
+    },
+    {
+      "depth": 5,
+      "iterations": 300,
+      "l2_leaf_reg": 8.0,
+      "learning_rate": 0.035,
+      "random_strength": 1.0
+    }
+  ]
+}
