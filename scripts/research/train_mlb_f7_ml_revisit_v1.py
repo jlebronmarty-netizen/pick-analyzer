@@ -95,9 +95,13 @@ def fetch_rows(token:str)->list[dict[str,Any]]:
         raise RuntimeError(f"F7_EXPORT_COUNT:{len(rows)}:{expected}")
     return rows
 
-def build_frame(rows:list[dict[str,Any]])->pd.DataFrame:
+def build_frame(rows:list[dict[str,Any]])->tuple[pd.DataFrame,int]:
     flat=[]
+    missing_target_rows=0
     for r in rows:
+        if r.get("home_f7") is None or r.get("away_f7") is None:
+            missing_target_rows+=1
+            continue
         p=dict(r.get("payload") or {})
         if "actual_winner" in p or any(k.startswith(BLOCK_PREFIXES) for k in p):
             raise RuntimeError("F7_POSTGAME_KEY_IN_PAYLOAD")
@@ -124,7 +128,7 @@ def build_frame(rows:list[dict[str,Any]])->pd.DataFrame:
     cutoff=pd.to_datetime(df.get("feature_cutoff_date"),errors="coerce")
     if cutoff.notna().any() and (cutoff>=df["_game_date"]).any():
         raise RuntimeError("F7_STRICT_PRIOR_BREACH")
-    return df.sort_values(["_game_date","_game_pk"]).reset_index(drop=True)
+    return df.sort_values(["_game_date","_game_pk"]).reset_index(drop=True),missing_target_rows
 
 def choose_features(df:pd.DataFrame)->tuple[pd.DataFrame,list[str],list[str],list[str]]:
     meta={c for c in df.columns if c.startswith("_")}
@@ -213,7 +217,8 @@ def rank_key(c:dict[str,Any])->tuple:
 def main():
     token=os.environ.get("GITHUB_OIDC_TOKEN","").strip()
     if not token: raise RuntimeError("F7_REVISIT_OIDC_MISSING")
-    df=build_frame(fetch_rows(token))
+    raw_rows=fetch_rows(token)
+    df,missing_target_rows=build_frame(raw_rows)
     x,nums,cats,dropped=choose_features(df)
 
     oof_rows=[];fold_meta=[]
@@ -302,7 +307,9 @@ def main():
       "development_class":"HISTORICAL_SEEN_DEVELOPMENT",
       "historical_max_allowed_game_date":"2026-09-18",
       "actual_max_game_date_used":str(df["_game_date"].max().date()),
+      "raw_source_rows":len(raw_rows),
       "source_rows":len(df),
+      "missing_target_rows_excluded_fail_closed":missing_target_rows,
       "source_rows_by_season":{str(k):int(v) for k,v in df.groupby("_season").size().items()},
       "pushes_by_season":{str(k):int(v) for k,v in df.groupby("_season")["_y_home"].apply(lambda s:s.isna().sum()).items()},
       "oof_rows":len(oof),"oof_nonpush_rows":int(oof.truth.notna().sum()),
