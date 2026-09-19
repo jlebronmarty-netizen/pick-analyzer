@@ -1,0 +1,93 @@
+{
+  "contract": "MLB_F1_ML_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "FIRST_1_INNING_MONEYLINE",
+  "target_contract": {
+    "source": "Statcast score after inning 1",
+    "innings": 1,
+    "2025_dual_source_certification": {
+      "mapped_games": 2430,
+      "exact_matches": 2428,
+      "mismatches_excluded": 2,
+      "exact_match_rate": 0.9991769547325103
+    },
+    "tie_handling": "PUSH_EXCLUDED_FROM_ACCURACY"
+  },
+  "rule": {
+    "symmetric": true,
+    "home_if": {
+      "starter_ra9_adv_min": 1,
+      "offense_ops_adv_min": 0,
+      "win_pct_adv_min": 0.2
+    },
+    "away_if": {
+      "starter_ra9_adv_max": -1,
+      "offense_ops_adv_max": 0,
+      "win_pct_adv_max": -0.2
+    },
+    "starter_ra9_adv_definition": "away_sp_ra9 - home_sp_ra9",
+    "offense_ops_adv_definition": "home_off_ops_proxy - away_off_ops_proxy",
+    "win_pct_adv_definition": "home_win_pct - away_win_pct"
+  },
+  "rejected_unstable_candidate": {
+    "name": "win_pct_extreme_q95",
+    "cutoff": 0.267999190778826,
+    "n": 55,
+    "correct": 42,
+    "accuracy": 0.7636363636363637,
+    "pushes": 44,
+    "min_month_n": 3,
+    "reason": "failed predeclared monthly sample stability gate"
+  },
+  "development_2025": {
+    "n": 74,
+    "correct": 51,
+    "accuracy": 0.6891891891891891,
+    "pushes": 60,
+    "min_month_n": 8,
+    "worst_month_accuracy": 0.5,
+    "monthly_accuracy_sd": 0.132940575493679,
+    "months": {
+      "2025-05": {
+        "n": 36,
+        "correct": 23,
+        "accuracy": 0.6388888888888888,
+        "pushes": 17
+      },
+      "2025-06": {
+        "n": 11,
+        "correct": 8,
+        "accuracy": 0.7272727272727273,
+        "pushes": 13
+      },
+      "2025-07": {
+        "n": 8,
+        "correct": 4,
+        "accuracy": 0.5,
+        "pushes": 10
+      },
+      "2025-08": {
+        "n": 11,
+        "correct": 9,
+        "accuracy": 0.8181818181818182,
+        "pushes": 10
+      },
+      "2025-09": {
+        "n": 8,
+        "correct": 7,
+        "accuracy": 0.875,
+        "pushes": 10
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "closeout_state_before_external": "REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING",
+  "external_2026_opened": false,
+  "historical_period_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
