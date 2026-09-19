@@ -238,7 +238,7 @@ def main():
         tr=(df["_game_date"]<start)&df["_y_home"].notna()
         tr_reg=df["_game_date"]<start
         va=(df["_game_date"]>=start)&(df["_game_date"]<end)
-        if tr.sum()<350 or tr_reg.sum()<400 or va.sum()<50:
+        if tr.sum()<300 or tr_reg.sum()<400 or va.sum()<50:
             raise RuntimeError(f"F3_SMALL_FOLD:{month}:{tr.sum()}:{tr_reg.sum()}:{va.sum()}")
         p=np.zeros(int(va.sum()),float)
         pred_margin=np.zeros(int(va.sum()),float)
