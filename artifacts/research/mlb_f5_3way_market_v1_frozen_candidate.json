@@ -1,0 +1,91 @@
+{
+  "contract": "MLB_F5_3WAY_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "FIRST_5_INNINGS_3_WAY_MONEYLINE",
+  "odds_api_market_key": "h2h_3_way_1st_5_innings",
+  "target_contract": {
+    "source": "Statcast F5 score",
+    "innings": 5,
+    "2025_dual_source_certification": {
+      "mapped_games": 2430,
+      "exact_matches": 2423,
+      "mismatches_excluded": 7,
+      "exact_match_rate": 0.997119341563786
+    },
+    "outcomes": [
+      "HOME",
+      "AWAY",
+      "DRAW"
+    ]
+  },
+  "rule": {
+    "predicted_outcomes": [
+      "HOME",
+      "AWAY"
+    ],
+    "draw_prediction": false,
+    "home_if": {
+      "starter_ra9_adv_min": 1,
+      "offense_ops_adv_min": 0.05,
+      "win_pct_adv_min": 0.2
+    },
+    "away_if": {
+      "starter_ra9_adv_max": -1,
+      "offense_ops_adv_max": -0.05,
+      "win_pct_adv_max": -0.2
+    },
+    "starter_ra9_adv_definition": "away_sp_ra9 - home_sp_ra9",
+    "offense_ops_adv_definition": "home_off_ops_proxy - away_off_ops_proxy",
+    "win_pct_adv_definition": "home_win_pct - away_win_pct"
+  },
+  "draw_only_search_2025": {
+    "best_stable_accuracy": 0.23214285714285715,
+    "baseline_draw_rate": 0.15973377703827,
+    "target_75_met": false
+  },
+  "development_2025": {
+    "n": 84,
+    "correct": 53,
+    "accuracy": 0.6309523809523809,
+    "min_month_n": 7,
+    "worst_month_accuracy": 0.45454545454545453,
+    "monthly_accuracy_sd": 0.106797728731927,
+    "months": {
+      "2025-05": {
+        "n": 39,
+        "correct": 27,
+        "accuracy": 0.6923076923076923
+      },
+      "2025-06": {
+        "n": 12,
+        "correct": 6,
+        "accuracy": 0.5
+      },
+      "2025-07": {
+        "n": 11,
+        "correct": 5,
+        "accuracy": 0.45454545454545453
+      },
+      "2025-08": {
+        "n": 15,
+        "correct": 10,
+        "accuracy": 0.6666666666666666
+      },
+      "2025-09": {
+        "n": 7,
+        "correct": 5,
+        "accuracy": 0.7142857142857143
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "closeout_state_before_external": "REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING",
+  "external_2026_opened": false,
+  "historical_f5_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
