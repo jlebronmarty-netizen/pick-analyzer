@@ -13,7 +13,9 @@ import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15
 import { capturePa13PitcherErForward } from '@/services/pa13-pitcher-er-forward-capture.service'
 import { freezePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-freeze.service'
 import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-settlement.service'
-import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'\nimport { captureMlbApprovedPropMarkets } from '@/services/mlb-approved-prop-market-capture.service'\nimport { evaluateMlbApprovedPropsDaily } from '@/services/mlb-approved-prop-daily-evaluation.service'
+import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'
+import { captureMlbApprovedPropMarkets } from '@/services/mlb-approved-prop-market-capture.service'
+import { evaluateMlbApprovedPropsDaily } from '@/services/mlb-approved-prop-daily-evaluation.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -481,7 +483,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // multi-market evidence capture. Core ML/Run Line/Total prices are stored
     // first; then alternate HOME +1.5 is queried only for games whose standard
     // paired modal Run Line establishes HOME -1.5. All evidence is research-only.
-    const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)\n    const approvedPropMarketCapture = await safeApprovedPropMarketCapture(id)
+    const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
+    const approvedPropMarketCapture = await safeApprovedPropMarketCapture(id)
 
     // Independent research-only Pitcher ER V2 freeze/settlement run before
     // Statcast catch-up. This preserves fixed-clock evidence even if a separate
@@ -506,6 +509,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
           catchupRuns,
           dailyHistoryReadiness: readiness,
           prospectiveMarketCapture,
+          approvedPropMarketCapture,
           pa12ErForwardShadowFreeze,
           pa12ErForwardShadowSettlement,
         }, id, {
@@ -530,6 +534,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
         catchupRuns,
         dailyHistoryReadiness: readiness,
         prospectiveMarketCapture,
+        approvedPropMarketCapture,
         pa12ErForwardShadowFreeze,
         pa12ErForwardShadowSettlement,
       }, id, {
@@ -571,6 +576,10 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
         })
       : null
 
+    const approvedPropDailyFreeze = readiness.ready
+      ? await safeApprovedPropDailyEvaluation(operatingClock.date)
+      : null
+
     // Moneyline keeps its existing authorized gate and remains fail-closed.
     // Exceptions are represented as blocked results rather than aborting the
     // entire cron after independent research evidence has already been captured.
@@ -596,7 +605,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       pitcherWinForwardHistorySync,
       pitcherWinForwardResearchFreeze: pitcherWinForwardFreeze,
       pitcherWinForwardResearchSettlement: pitcherWinForwardSettlement,
+      approvedPropDailyFreeze,
       prospectiveMarketCapture,
+      approvedPropMarketCapture,
       pa12ErForwardShadowFreeze,
       pa12ErForwardShadowSettlement,
     }, id, {
