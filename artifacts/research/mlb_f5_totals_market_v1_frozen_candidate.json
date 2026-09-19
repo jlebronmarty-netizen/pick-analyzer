@@ -1,0 +1,80 @@
+{
+  "contract": "MLB_F5_TOTALS_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "FIRST_5_INNINGS_TOTALS",
+  "pricing_status": "NO_HISTORICAL_F5_LINE_CORPUS",
+  "reference_line": 4.5,
+  "reference_line_role": "RESEARCH_REFERENCE_ONLY_NOT_CERTIFIED_HISTORICAL_MARKET_LINE",
+  "target_contract": {
+    "source": "Statcast F5 score",
+    "innings": 5,
+    "2025_dual_source_certification": {
+      "mapped_games": 2430,
+      "exact_matches": 2423,
+      "mismatches_excluded": 7,
+      "exact_match_rate": 0.997119341563786
+    }
+  },
+  "model": {
+    "family": "prior-team-F5-form linear regression",
+    "prior_feature": "expected total = avg(home prior F5 scored, away prior F5 allowed) + avg(away prior F5 scored, home prior F5 allowed)",
+    "prior_window": "all prior dates within season, minimum 5 prior games per team",
+    "same_day_games_excluded": true,
+    "final_2025_fit": {
+      "n": 2343,
+      "intercept": 2.14443614450973,
+      "slope": 0.591475378488326,
+      "mae": 2.61452632098546
+    }
+  },
+  "rule": {
+    "direction": "OVER",
+    "reference_line": 4.5,
+    "minimum_projection": 5,
+    "minimum_edge": 0.5
+  },
+  "development_2025": {
+    "n": 679,
+    "correct": 371,
+    "accuracy": 0.5463917525773195,
+    "min_month_n": 35,
+    "worst_month_accuracy": 0.4857142857142857,
+    "monthly_accuracy_sd": 0.046064484810877,
+    "months": {
+      "2025-05": {
+        "n": 35,
+        "correct": 17,
+        "accuracy": 0.4857142857142857
+      },
+      "2025-06": {
+        "n": 41,
+        "correct": 20,
+        "accuracy": 0.4878048780487805
+      },
+      "2025-07": {
+        "n": 121,
+        "correct": 74,
+        "accuracy": 0.6115702479338843
+      },
+      "2025-08": {
+        "n": 196,
+        "correct": 104,
+        "accuracy": 0.5306122448979592
+      },
+      "2025-09": {
+        "n": 286,
+        "correct": 156,
+        "accuracy": 0.5454545454545454
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "closeout_state_before_external": "REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING",
+  "external_2026_opened": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
