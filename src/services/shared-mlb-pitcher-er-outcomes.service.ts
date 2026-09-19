@@ -71,9 +71,10 @@ export async function readSharedPitcherErOutcomePage(cursor: number, limit: numb
     return raw ? readPitcherErOutcome(mapping, raw) : null
   })
   if (projected.some((row) => row === null)) throw new Error('PA12_ER_CERTIFIED_SOURCE_DRIFT')
+  const certified = projected.filter((row): row is NonNullable<typeof row> => row !== null)
 
   return {
-    data: projected,
+    data: certified,
     nextCursor: mappings.length === limit ? cursor + mappings.length : null,
   }
 }
