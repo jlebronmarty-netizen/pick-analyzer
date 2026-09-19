@@ -495,7 +495,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       headers: { 'Cache-Control': 'no-store' },
     })
   } catch (error) {
-    return apiError({ id, code: 'INTERNAL_ERROR', message: errorMessage(error, 'Unknown MLB Statcast daily refresh error') })
+    const message = errorMessage(error, 'Unknown MLB Statcast daily refresh error')
+    console.error('[mlb-statcast-daily] execution failed', { requestId: id, message })
+    return apiError({ id, code: 'INTERNAL_ERROR', message })
   }
 }
 
