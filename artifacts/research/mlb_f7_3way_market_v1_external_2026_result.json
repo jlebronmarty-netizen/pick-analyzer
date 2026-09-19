@@ -1,0 +1,72 @@
+{
+  "contract": "MLB_F7_3WAY_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "f7_3way_sp2p0_win0p20_v1",
+  "freeze_commit_sha": "44d7115a35730d1e4ed636669e0104b532886ab5",
+  "validation_class": "UNIFIED_2025_TO_2026_ONE_SHOT",
+  "development_2025": {
+    "n": 89,
+    "correct": 62,
+    "accuracy": 0.6966292134831461,
+    "worst_month_accuracy": 0.5,
+    "draw_only_best_n": 125,
+    "draw_only_best_correct": 21,
+    "draw_only_best_accuracy": 0.168,
+    "baseline_draw_rate": 0.113333333333333
+  },
+  "external_2026": {
+    "eligible_rows": 1966,
+    "selected_n": 59,
+    "selected_correct": 33,
+    "selected_accuracy": 0.559322033898305,
+    "selection_coverage": 0.030010172939979655,
+    "selected_draw_outcomes": 5,
+    "worst_month_accuracy": 0.4117647058823529,
+    "source_window": {
+      "from": "2026-03-31",
+      "to": "2026-09-14"
+    },
+    "months": {
+      "2026-04": {
+        "n": 34,
+        "correct": 14,
+        "accuracy": 0.4117647058823529,
+        "selected_draw_outcomes": 3
+      },
+      "2026-05": {
+        "n": 15,
+        "correct": 10,
+        "accuracy": 0.6666666666666666,
+        "selected_draw_outcomes": 2
+      },
+      "2026-06": {
+        "n": 3,
+        "correct": 2,
+        "accuracy": 0.6666666666666666,
+        "selected_draw_outcomes": 0
+      },
+      "2026-07": {
+        "n": 5,
+        "correct": 5,
+        "accuracy": 1,
+        "selected_draw_outcomes": 0
+      },
+      "2026-08": {
+        "n": 2,
+        "correct": 2,
+        "accuracy": 1,
+        "selected_draw_outcomes": 0
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "target_75_met_2026": false,
+  "closeout_state": "REVISIT_AFTER_FIRST_PASS",
+  "retuned_after_external": false,
+  "historical_period_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}

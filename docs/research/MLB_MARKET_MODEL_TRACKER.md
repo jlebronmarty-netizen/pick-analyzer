@@ -48,6 +48,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 5 Innings 3-Way ML** | `f5_3way_sp1p0_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 53/84 = **63.10%**; worst month **45.45%**; draw-only best 23.21% | 2026: 22/48 = **45.83%**; worst month **39.29%**; 9 selected outcomes were DRAW | 2026 coverage **2.44%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. Draw model also failed to approach target. |
 | **First 3 Innings Moneyline** | `f3_ml_winpct_extreme_q95_v1` — side from extreme prior win% advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 55/77 = **71.43%**; worst month **66.67%**; 22 pushes | 2026: 36/80 = **45.00%**; 25 pushes | 2026 coverage **4.69%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; no 2026 threshold rescue. |
 | **First 7 Innings Moneyline** | `f7_ml_run_diff_extreme_q95_v1` — side from extreme prior run-diff advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 69/91 = **75.82%**; worst month **66.67%**; 8 pushes | 2026: 35/79 = **44.30%**; 12 pushes | 2026 coverage **4.06%** | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen q95 cutoff; failed external validation, no 2026 rescue. |
+| **First 7 Innings 3-Way ML** | `f7_3way_sp2p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 62/89 = **69.66%**; worst month **50.00%**; draw-only best 16.80% | 2026: 33/59 = **55.93%**; 5 selected outcomes were DRAW | 2026 coverage **3.00%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` over frozen R2 | 2025 official Retrosheet ER + external 2026 outcome pending | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | **NOT OPENED** — no canonical exact 2026 ER outcome contract yet | 2025 n=91 | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` | Preserve rule. Continue PA-13 forward price capture and exact outcome-contract work; do not substitute Runs Allowed. |
@@ -392,6 +393,18 @@ Frozen candidate: `f7_ml_run_diff_extreme_q95_v1`.
 State: `REVISIT_AFTER_FIRST_PASS`.
 
 The 2025 75%+ candidate failed external validation. Do not modify the q95 cutoff using 2026.
+
+## First-pass closeout — First 7 Innings 3-Way Moneyline
+
+Frozen fallback: `f7_3way_sp2p0_win0p20_v1`.
+
+2025 side rule: **62/89 = 69.66%**, worst month **50.00%**.
+
+Pre-freeze DRAW-only search: best stable **21/125 = 16.80%**, baseline draw rate **11.33%**.
+
+2026 one-shot: **33/59 = 55.93%**, coverage **3.00%**, 5 selected DRAW outcomes, worst month **41.18%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
 
 ## Unified 2025 rolling-development protocol
 
