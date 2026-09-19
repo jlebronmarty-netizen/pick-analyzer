@@ -106,6 +106,8 @@ def build_frame(rows:list[dict[str,Any]])->tuple[pd.DataFrame,int]:
         p=dict(r.get("payload") or {})
         if "actual_winner" in p or any(k.startswith(BLOCK_PREFIXES) for k in p):
             raise RuntimeError("F7_POSTGAME_KEY_IN_PAYLOAD")
+        if r.get("home_f7") is None or r.get("away_f7") is None:
+            raise RuntimeError(f"F7_MISSING_SCORE_FAIL_CLOSED:{r.get('season')}:{r.get('game_pk')}")
         d=p
         d["_season"]=int(r["season"])
         d["_game_pk"]=int(r["game_pk"])
