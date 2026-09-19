@@ -1,0 +1,57 @@
+{
+  "contract": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "purpose": "Second-pass improvement for markets that failed or remained below the 75% first-pass target.",
+  "data_boundaries": {
+    "historical_development": {
+      "seasons": [
+        2025,
+        2026
+      ],
+      "max_game_date": "2026-09-18",
+      "note": "2026 through this cutoff is no longer untouched external evidence and may be used only as HISTORICAL_SEEN_DEVELOPMENT."
+    },
+    "quarantine_dates": [
+      "2026-09-19"
+    ],
+    "prospective_validation": {
+      "min_game_date": "2026-09-20",
+      "source": "future pregame freezes + eventual outcomes only",
+      "tuning_allowed": false
+    }
+  },
+  "candidate_development_gate": {
+    "target_accuracy": 0.75,
+    "minimum_selected_n": 60,
+    "minimum_months_with_selections": 5,
+    "minimum_worst_month_accuracy": 0.65,
+    "postgame_features_allowed": false,
+    "same_day_prior_leakage_allowed": false,
+    "historical_odds_credit_spend_allowed": false
+  },
+  "prospective_gate": {
+    "target_accuracy": 0.75,
+    "provisional_minimum_n": 20,
+    "strong_minimum_n": 40,
+    "result_if_n_below_provisional": "INSUFFICIENT_FORWARD_SAMPLE",
+    "retuning_before_window_close_allowed": false
+  },
+  "methodology": {
+    "freeze_before_forward_games": true,
+    "candidate_thresholds_frozen_before_forward": true,
+    "feature_set_frozen_before_forward": true,
+    "architecture_frozen_before_forward": true,
+    "historical_2026_label": "HISTORICAL_SEEN_DEVELOPMENT",
+    "forward_label": "PROSPECTIVE_FORWARD_POST_2026_09_20"
+  },
+  "first_revisit_market": "GAME_TOTALS_OU",
+  "market_order_policy": "Prioritize failed markets with strongest evidence that better pregame information may close the gap; document best formula and move on if 75% is not achieved.",
+  "boundaries": {
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "roi_ev_clv_certified": false,
+    "odds_api_historical_credits_consumed": 0
+  }
+}

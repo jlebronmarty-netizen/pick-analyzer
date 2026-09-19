@@ -6,6 +6,48 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 second-pass MLB market revisit protocol — authoritative
+
+Frozen contract:
+
+`MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0`
+
+Historical development boundary:
+
+- 2025 eligible evidence;
+- 2026 eligible evidence only through 2026-09-18;
+- label all reused 2026 as `HISTORICAL_SEEN_DEVELOPMENT`.
+
+Quarantine:
+
+- 2026-09-19.
+
+New clean forward validation:
+
+- begins 2026-09-20;
+- label `PROSPECTIVE_FORWARD_POST_2026_09_20`;
+- no feature, architecture, threshold or side rule may be changed from forward outcomes during the window.
+
+Development gate:
+
+- >=75% accuracy;
+- n>=60;
+- >=5 calendar months represented;
+- worst selected month >=65%.
+
+Forward interpretation:
+
+- n<20 -> `INSUFFICIENT_FORWARD_SAMPLE`;
+- n>=20 -> provisional;
+- n>=40 -> stronger evidence;
+- target remains >=75%.
+
+First revisit market: `GAME_TOTALS_OU`.
+
+Reason: deployable PREGAME Totals failed, while the separate FULL diagnostic oracle exceeded 75%, suggesting a meaningful pregame representation gap.
+
+Official Picks unchanged. APOSTAR disabled. Historical Odds API credits remain 0.
+
 ## 2026-09-19 full-game additional-market coverage gate — authoritative
 
 Internal MLB snapshots contain zero rows for `alternate_spreads`, `alternate_totals`, and `h2h_3_way`.
