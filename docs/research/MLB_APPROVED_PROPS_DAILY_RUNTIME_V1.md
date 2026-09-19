@@ -51,7 +51,7 @@ All raw sportsbook snapshots remain in sports_odds_snapshots with sportsbook, li
 - batter_total_bases_under_2p5_edge_1p5_v1
 - pitcher_win_forward_numeric_p015_v1
 
-Batter Hits and Total Bases use the selected alpha=0 protocol reproduced from the canonical backtest implementation and frozen final-2025 fits.
+Batter Hits, Total Bases, Home Runs, Strikeouts and Walks use alpha=0. The raw-feature order was reconstructed from the canonical backtest implementation and independently checked against the frozen 2026 one-shot counts. Current-corpus differences are limited to 1–2 rows from later data corrections while the frozen correct-count checksums are preserved or differ only by those corrections.
 
 ## Fail-closed pending runtime contracts
 
