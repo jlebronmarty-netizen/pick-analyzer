@@ -1,0 +1,76 @@
+{
+  "contract": "MLB_F1_3WAY_MARKET_V1_FROZEN_CANDIDATE/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "FIRST_1_INNING_3_WAY_MONEYLINE",
+  "target_contract": {
+    "source": "Statcast score after inning 1",
+    "innings": 1,
+    "2025_dual_source_certification": {
+      "mapped_games": 2430,
+      "exact_matches": 2428,
+      "mismatches_excluded": 2,
+      "exact_match_rate": 0.9991769547325103
+    },
+    "outcomes": [
+      "HOME",
+      "AWAY",
+      "DRAW"
+    ]
+  },
+  "rule": {
+    "predicted_outcome": "DRAW",
+    "maximum_abs_starter_ra9_adv": 0.5,
+    "maximum_abs_offense_ops_adv": 0.05,
+    "maximum_abs_win_pct_adv": 0.2,
+    "starter_ra9_adv_definition": "away_sp_ra9 - home_sp_ra9",
+    "offense_ops_adv_definition": "home_off_ops_proxy - away_off_ops_proxy",
+    "win_pct_adv_definition": "home_win_pct - away_win_pct"
+  },
+  "development_2025": {
+    "n": 221,
+    "correct": 125,
+    "accuracy": 0.5656108597285068,
+    "baseline_draw_rate": 0.523281596452328,
+    "lift_vs_baseline": 0.04232926327617881,
+    "min_month_n": 34,
+    "worst_month_accuracy": 0.45614035087719296,
+    "monthly_accuracy_sd": 0.0865248299914702,
+    "months": {
+      "2025-05": {
+        "n": 39,
+        "correct": 23,
+        "accuracy": 0.5897435897435898
+      },
+      "2025-06": {
+        "n": 34,
+        "correct": 21,
+        "accuracy": 0.6176470588235294
+      },
+      "2025-07": {
+        "n": 39,
+        "correct": 19,
+        "accuracy": 0.48717948717948717
+      },
+      "2025-08": {
+        "n": 52,
+        "correct": 36,
+        "accuracy": 0.6923076923076923
+      },
+      "2025-09": {
+        "n": 57,
+        "correct": 26,
+        "accuracy": 0.45614035087719296
+      }
+    }
+  },
+  "target_75_met_2025": false,
+  "closeout_state_before_external": "REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING",
+  "external_2026_opened": false,
+  "historical_period_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
