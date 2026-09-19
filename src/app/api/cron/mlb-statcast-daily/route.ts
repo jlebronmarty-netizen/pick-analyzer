@@ -13,6 +13,7 @@ import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15
 import { capturePa13PitcherErForward } from '@/services/pa13-pitcher-er-forward-capture.service'
 import { freezePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-freeze.service'
 import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-settlement.service'
+import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric } from '@/services/mlb-pitcher-win-forward-numeric.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -189,6 +190,43 @@ async function safeRunlineHomeP15Settlement(targetDate: string) {
       roiCertified: false,
       writes: 0,
       error: errorMessage(error, 'Unknown Run Line V2 HOME +1.5 settlement error'),
+    }
+  }
+}
+
+async function safePitcherWinForwardFreeze(historyReadiness: { ready: boolean; targetDate: string }) {
+  try {
+    return await freezePitcherWinForwardNumeric({ historyReadiness })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'PITCHER_WIN_FORWARD_FREEZE_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      oddsApiCalls: 0,
+      writes: 0,
+      error: errorMessage(error, 'Unknown Pitcher Win forward freeze error'),
+    }
+  }
+}
+
+async function safePitcherWinForwardSettlement(targetDate: string) {
+  try {
+    return await settlePitcherWinForwardNumeric(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'PITCHER_WIN_FORWARD_SETTLEMENT_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      oddsApiCalls: 0,
+      writes: 0,
+      error: errorMessage(error, 'Unknown Pitcher Win forward settlement error'),
     }
   }
 }
@@ -456,6 +494,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     const runlineHomeP15Settlement = readiness.ready && typeof readiness.targetDate === 'string'
       ? await safeRunlineHomeP15Settlement(readiness.targetDate)
       : null
+    const pitcherWinForwardSettlement = readiness.ready && typeof readiness.targetDate === 'string'
+      ? await safePitcherWinForwardSettlement(readiness.targetDate)
+      : null
 
     // Run Line is an independent shadow-only research stage. Execute its safe
     // freeze before Moneyline so a Moneyline runtime exception cannot erase a
@@ -463,6 +504,12 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // fail-closed recommendation gate or any production eligibility.
     const runlineHomeP15Freeze = readiness.ready
       ? await safeRunlineHomeP15ForwardFreeze()
+      : null
+    const pitcherWinForwardFreeze = readiness.ready
+      ? await safePitcherWinForwardFreeze({
+          ready: readiness.ready,
+          targetDate: readiness.targetDate,
+        })
       : null
 
     // Moneyline keeps its existing authorized gate and remains fail-closed.
@@ -487,6 +534,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       moneylineRecommendationFreeze: moneylineFreeze,
       runlineHomeP15ResearchFreeze: runlineHomeP15Freeze,
       runlineHomeP15ResearchSettlement: runlineHomeP15Settlement,
+      pitcherWinForwardResearchFreeze: pitcherWinForwardFreeze,
+      pitcherWinForwardResearchSettlement: pitcherWinForwardSettlement,
       prospectiveMarketCapture,
       pa12ErForwardShadowFreeze,
       pa12ErForwardShadowSettlement,
