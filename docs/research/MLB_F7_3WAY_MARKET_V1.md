@@ -47,3 +47,27 @@ Monthly:
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No historical F7 3-way pricing is certified in the current corpus.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT`.
+
+- eligible feature rows: 1,966
+- selected: 59
+- correct: 33
+- accuracy: **55.93%**
+- selection coverage: **3.00%**
+- selected outcomes that were DRAW: 5
+- worst selected month: **41.18%**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 14/34 = 41.18%, 3 draw outcomes
+- May: 10/15 = 66.67%, 2 draw outcomes
+- Jun: 2/3 = 66.67%
+- Jul: 5/5 = 100.00%
+- Aug: 2/2 = 100.00%
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version with 2026-driven thresholds or postgame draw filters.
