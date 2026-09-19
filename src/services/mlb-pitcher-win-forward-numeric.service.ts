@@ -102,13 +102,7 @@ type TeamGame = {
 type HistoricalDecision = {
   game_date: string
   starter_mlbam_id: number
-  y_win: number
-}
-
-type RecentStarter = {
-  game_pk: number
-  game_date: string
-  pitcher_mlbam_id: number
+  y_win: number | null
 }
 
 type FeatureSummary = {
