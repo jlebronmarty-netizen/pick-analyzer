@@ -1,0 +1,70 @@
+{
+  "contract": "MLB_PITCHER_WALKS_MARKET_V1_EXTERNAL_2026_RESULT/1.0.0",
+  "research_only": true,
+  "frozen_candidate": "pitcher_walks_under_2p5_proj_1p5_v1",
+  "freeze_commit_sha": "bd5a9225f4c81f8b07f83563e97e56d45a206399",
+  "validation_class": "UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT",
+  "development_2025": {
+    "n": 539,
+    "correct": 449,
+    "accuracy": 0.8330241187384044,
+    "worst_month_accuracy": 0.7935483870967742,
+    "baseline_under_accuracy": 0.760426770126091,
+    "lift_vs_baseline": 0.07259734861231348
+  },
+  "external_2026": {
+    "eligible_rows": 2568,
+    "selected_n": 463,
+    "selected_correct": 396,
+    "selected_accuracy": 0.8552915766738661,
+    "selection_coverage": 0.18029595015576325,
+    "baseline_under_accuracy": 0.752336448598131,
+    "lift_vs_baseline": 0.10295512807573515,
+    "worst_month_accuracy": 0.7435897435897436,
+    "min_month_n": 2,
+    "source_window": {
+      "from": "2026-04-27",
+      "to": "2026-09-03"
+    },
+    "months": {
+      "2026-04": {
+        "n": 2,
+        "correct": 2,
+        "accuracy": 1
+      },
+      "2026-05": {
+        "n": 78,
+        "correct": 58,
+        "accuracy": 0.7435897435897436
+      },
+      "2026-06": {
+        "n": 99,
+        "correct": 86,
+        "accuracy": 0.8686868686868687
+      },
+      "2026-07": {
+        "n": 118,
+        "correct": 106,
+        "accuracy": 0.8983050847457628
+      },
+      "2026-08": {
+        "n": 155,
+        "correct": 133,
+        "accuracy": 0.8580645161290322
+      },
+      "2026-09": {
+        "n": 11,
+        "correct": 11,
+        "accuracy": 1
+      }
+    }
+  },
+  "target_75_met": true,
+  "retuned_after_external": false,
+  "historical_prop_prices_certified": false,
+  "roi_ev_clv_certified": false,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "odds_api_historical_credits_consumed": 0
+}
