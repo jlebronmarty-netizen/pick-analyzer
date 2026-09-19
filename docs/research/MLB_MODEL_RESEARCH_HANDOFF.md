@@ -6,6 +6,42 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 1 Inning Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Development surface:
+
+- 2,428 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,149 rolling OOF / 1,959 non-push;
+- 1,280 pushes in 2025 and 1,202 in 2026;
+- actual max target date used: 2026-09-14.
+
+Closest second-pass candidate:
+
+`f1_ml_revisit_classifier_margin_p0625_m050_fallback_v1`
+
+- classifier confidence >=0.625 on the selected side;
+- predicted absolute F1 margin >=0.50;
+- classifier and margin side agree;
+- **51/69 = 73.91%**;
+- worst month **63.16%**;
+- 6 months;
+- non-push coverage **3.52%**;
+- unconditional majority baseline **55.54%**;
+- lift **+18.37 pts**.
+
+The candidate misses both the 75% target and the 65% worst-month stability floor.
+
+Original rejected q95 benchmark on unified OOF: **61/88 = 69.32%**, worst month **0.00%**.
+
+Original stable composite benchmark: **75/114 = 65.79%**, worst month **50.00%**.
+
+No candidate is frozen for forward. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F1_ML_REVISIT_V1.md`.
+
 ## 2026-09-19 First 3 Innings Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
