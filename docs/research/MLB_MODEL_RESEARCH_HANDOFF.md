@@ -6,6 +6,41 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 MLB second-pass revisit closeout — authoritative
+
+State:
+
+`SECOND_PASS_COMPLETE_EXCEPT_HISTORICAL_LINE_BLOCKERS`
+
+The bounded second-pass revisit is complete for currently researchable line-free / supported targets.
+
+Only one market cleared the frozen >=75% development gate:
+
+- **Pitcher Record a Win** — `pitcher_record_win_revisit_catboost_no_p0225_v1`: **1,126/1,386 = 81.24%**, worst month **76.47%**, 11 months, coverage **16.54%**, `forward_eligible=true`.
+
+All other completed second-pass markets are below target:
+
+- Game Totals: **53.48%**;
+- F7 ML: **58.24%**;
+- F5 ML: **67.19%**;
+- F3 ML: **63.13%**;
+- F1 ML: **73.91%**, but worst month **63.16%** <65% floor;
+- F7 3-Way: **56.59%**;
+- F5 3-Way: **49.61%**;
+- F3 3-Way: **52.88%**;
+- F1 3-Way: **54.37%**;
+- F1 NRFI/YRFI: **54.07%**.
+
+Period totals and other line-dependent markets remain `BLOCKED_HISTORICAL_LINE_COVERAGE` until exact historical sportsbook points exist. Full-game MLB 3-way remains `BLOCKED_SETTLEMENT_SEMANTICS`.
+
+The clean prospective forward window begins 2026-09-20. No below-target candidate may be retuned from prospective outcomes.
+
+Canonical closeout:
+
+`docs/research/MLB_SECOND_PASS_REVISIT_CLOSEOUT_20260919.md`
+
+The first-pass summary table below is retained as historical evidence; where a second-pass closeout exists, the authoritative second-pass state above supersedes the older `REVISIT_AFTER_FIRST_PASS` row.
+
 ## 2026-09-19 First 3 Innings 3-Way Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
