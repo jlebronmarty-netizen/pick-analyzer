@@ -14,10 +14,18 @@ The canonical `public.sports_odds_snapshots` corpus was queried for the exact su
 
 Result: **0 stored rows** for every listed market.
 
-### Team totals
+### Full-game additional line-dependent markets
 
+- `alternate_spreads`
+- `alternate_totals`
 - `team_totals`
 - `alternate_team_totals`
+
+### Full-game 3-way
+
+- `h2h_3_way`
+
+No internal snapshots are stored for this key. The generic market definition includes a draw outcome, but the MLB settlement window for a full-game draw is not frozen in the project contract. Do not assume regulation/9-inning settlement.
 
 ### 1st inning
 
@@ -99,6 +107,16 @@ Therefore:
 - sportsbook market accuracy, ROI, EV and CLV are not certified;
 - standard and alternate period totals remain blocked for price/line-aware evaluation until exact historical points are available.
 
+### Full-game alternate spreads / alternate totals
+
+State:
+
+`BLOCKED_HISTORICAL_LINE_COVERAGE`
+
+The base full-game score target is available, but alternate spread/total outcomes depend on the exact historical point. No internal snapshots exist for `alternate_spreads` or `alternate_totals`.
+
+Do not derive alternate points from the standard Run Line / Total or from current odds.
+
 ### Team totals
 
 State:
@@ -113,6 +131,16 @@ This applies to both:
 
 - `team_totals`;
 - `alternate_team_totals`.
+
+### Full-game 3-way moneyline
+
+State:
+
+`BLOCKED_SETTLEMENT_SEMANTICS`
+
+The generic `h2h_3_way` market includes a draw outcome, but the project has no stored MLB examples and no frozen settlement contract defining the full-game draw window. MLB standard moneyline includes extra innings and normally has no draw, so the 3-way target must not be inferred from ordinary final winner data.
+
+Unblock only after a real MLB `h2h_3_way` market sample or bookmaker settlement contract is captured and the regulation window is frozen.
 
 ## Relationship to existing period research
 
