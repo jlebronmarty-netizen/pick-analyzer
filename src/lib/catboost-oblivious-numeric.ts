@@ -2,7 +2,7 @@ export type NumericCatBoostSplit = {
   border: number
   float_feature_index: number
   split_index?: number
-  split_type: 'FloatFeature'
+  split_type: string
 }
 
 export type NumericCatBoostTree = {
@@ -21,7 +21,7 @@ export type NumericCatBoostModel = {
     }>
   }
   oblivious_trees: NumericCatBoostTree[]
-  scale_and_bias: [number, number[]]
+  scale_and_bias: Array<number | number[]>
 }
 
 export function applyNumericCatBoostRaw(model: NumericCatBoostModel, features: readonly number[]) {
@@ -44,8 +44,10 @@ export function applyNumericCatBoostRaw(model: NumericCatBoostModel, features: r
     if (!Number.isFinite(leaf)) throw new Error('CATBOOST_LEAF_NOT_FINITE')
     sum += leaf
   }
-  const scale = Number(model.scale_and_bias?.[0] ?? 1)
-  const bias = Number(model.scale_and_bias?.[1]?.[0] ?? 0)
+  const scaleEntry = model.scale_and_bias?.[0]
+  const biasEntry = model.scale_and_bias?.[1]
+  const scale = typeof scaleEntry === 'number' ? scaleEntry : 1
+  const bias = Array.isArray(biasEntry) ? Number(biasEntry[0] ?? 0) : Number(biasEntry ?? 0)
   const raw = scale * sum + bias
   if (!Number.isFinite(raw)) throw new Error('CATBOOST_RAW_NOT_FINITE')
   return raw
