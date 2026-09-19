@@ -363,86 +363,97 @@ function h2hWinPct(team: string, opponent: string, targetDate: string, rows: Tea
   )
 }
 
-async function loadHistoricalDecisions(pitcherIds: number[]) {
-  if (!pitcherIds.length) return [] as HistoricalDecision[]
-  return readPaged<HistoricalDecision>(
-    'mlb_pitcher_win_revisit_base_v1',
+async function pitcherPriorCounts(targetDate: string, pitcherIds: number[]) {
+  if (!pitcherIds.length) return new Map<number, { starts: number; wins: number }>()
+
+  const rows = await readPaged<HistoricalDecision>(
+    'mlb_pitcher_win_forward_starter_history_v1',
     'game_date,starter_mlbam_id,y_win',
     (query) => query
       .eq('season', SEASON)
-      .lte('game_date', '2026-09-17')
+      .lt('game_date', targetDate)
       .in('starter_mlbam_id', pitcherIds)
       .order('game_date', { ascending: true }),
   )
-}
 
-async function loadRecentStarters(targetDate: string, pitcherIds: number[]) {
-  if (!pitcherIds.length || targetDate <= RECENT_START_DATE) return [] as RecentStarter[]
-  return readPaged<RecentStarter>(
-    'mlb_pitcher_win_forward_recent_starter_v1',
-    'game_pk,game_date,pitcher_mlbam_id',
-    (query) => query
-      .gte('game_date', RECENT_START_DATE)
-      .lt('game_date', targetDate)
-      .in('pitcher_mlbam_id', pitcherIds)
-      .order('game_date', { ascending: true })
-      .order('game_pk', { ascending: true }),
-  )
-}
-
-async function decisionWinners(startDate: string, endDate: string) {
-  if (endDate < startDate) return new Map<number, number>()
-  const url = new URL('https://statsapi.mlb.com/api/v1/schedule')
-  url.searchParams.set('sportId', '1')
-  url.searchParams.set('startDate', startDate)
-  url.searchParams.set('endDate', endDate)
-  url.searchParams.set('gameTypes', 'R')
-  url.searchParams.set('hydrate', 'decisions')
-  url.searchParams.set('fields', 'dates,date,games,gamePk,decisions,winner,id,fullName,loser')
-
-  const response = await fetch(url.toString(), { cache: 'no-store', signal: AbortSignal.timeout(20_000) })
-  if (!response.ok) throw new Error(`PITCHER_WIN_FORWARD_DECISIONS_HTTP_${response.status}`)
-  const payload = await response.json() as any
-  const winners = new Map<number, number>()
-
-  for (const entry of payload?.dates ?? []) {
-    for (const game of entry?.games ?? []) {
-      const gamePk = Number(game?.gamePk)
-      const winnerId = Number(game?.decisions?.winner?.id)
-      if (Number.isSafeInteger(gamePk) && Number.isSafeInteger(winnerId) && winnerId > 0) {
-        winners.set(gamePk, winnerId)
-      }
-    }
+  const unresolved = rows.filter((row) => row.y_win === null || row.y_win === undefined)
+  if (unresolved.length) {
+    throw new Error(`PITCHER_WIN_FORWARD_PRIOR_DECISIONS_UNRESOLVED:${unresolved.length}`)
   }
-  return winners
-}
-
-async function pitcherPriorCounts(targetDate: string, pitcherIds: number[]) {
-  const [historical, recentStarters] = await Promise.all([
-    loadHistoricalDecisions(pitcherIds),
-    loadRecentStarters(targetDate, pitcherIds),
-  ])
-  const recentWinners = await decisionWinners(RECENT_START_DATE, addDays(targetDate, -1))
 
   const counts = new Map<number, { starts: number; wins: number }>()
-  const touch = (pitcherId: number, win: boolean) => {
+  for (const row of rows) {
+    const pitcherId = Number(row.starter_mlbam_id)
     const prior = counts.get(pitcherId) ?? { starts: 0, wins: 0 }
     prior.starts += 1
-    if (win) prior.wins += 1
+    if (Number(row.y_win) === 1) prior.wins += 1
     counts.set(pitcherId, prior)
   }
-
-  for (const row of historical) touch(Number(row.starter_mlbam_id), Number(row.y_win) === 1)
-
-  const unresolved = recentStarters.filter((row) => !recentWinners.has(Number(row.game_pk)))
-  if (unresolved.length) {
-    throw new Error(`PITCHER_WIN_FORWARD_RECENT_DECISIONS_UNRESOLVED:${unresolved.length}`)
-  }
-  for (const row of recentStarters) {
-    touch(Number(row.pitcher_mlbam_id), recentWinners.get(Number(row.game_pk)) === Number(row.pitcher_mlbam_id))
-  }
-
   return counts
+}
+
+export async function syncPitcherWinForwardHistory(targetDate: string) {
+  const starterSync = await supabaseAdmin.rpc('sync_mlb_pitcher_win_forward_starter_history_v1', {
+    p_target_date: targetDate,
+  })
+  if (starterSync.error) {
+    throw new Error(`PITCHER_WIN_FORWARD_STARTER_SYNC:${starterSync.error.message}`)
+  }
+
+  const winners = await decisionWinners(targetDate, targetDate)
+  const { data: rows, error } = await supabaseAdmin
+    .from('mlb_pitcher_win_forward_starter_history_v1')
+    .select('game_pk,starter_side,starter_mlbam_id,y_win')
+    .eq('season', SEASON)
+    .eq('game_date', targetDate)
+  if (error) throw new Error(`PITCHER_WIN_FORWARD_SYNC_READ:${error.message}`)
+
+  const unresolvedGames = [...new Set((rows ?? [])
+    .filter((row) => !winners.has(Number(row.game_pk)))
+    .map((row) => Number(row.game_pk)))]
+  if (unresolvedGames.length) {
+    return {
+      success: false,
+      status: 'WAITING_FOR_FINAL_DECISIONS',
+      targetDate,
+      starterRows: rows?.length ?? 0,
+      unresolvedGamePks: unresolvedGames,
+      labeledStarterRows: 0,
+      researchOnly: true,
+      officialPicksModified: false,
+      apostarActivated: false,
+    }
+  }
+
+  let labeled = 0
+  for (const row of rows ?? []) {
+    const winnerId = winners.get(Number(row.game_pk))!
+    const yWin = Number(row.starter_mlbam_id) === winnerId ? 1 : 0
+    const update = await supabaseAdmin
+      .from('mlb_pitcher_win_forward_starter_history_v1')
+      .update({
+        y_win: yWin,
+        outcome_source: 'MLB_OFFICIAL_DECISIONS_FORWARD_SYNC_V1',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('season', SEASON)
+      .eq('game_pk', row.game_pk)
+      .eq('starter_side', row.starter_side)
+    if (update.error) throw new Error(`PITCHER_WIN_FORWARD_SYNC_UPDATE:${update.error.message}`)
+    labeled += 1
+  }
+
+  return {
+    success: true,
+    status: 'HISTORY_SYNCED',
+    targetDate,
+    resolvedGames: winners.size,
+    starterRows: rows?.length ?? 0,
+    labeledStarterRows: labeled,
+    researchOnly: true,
+    officialPicksModified: false,
+    apostarActivated: false,
+  }
 }
 
 function featureVector({
@@ -611,7 +622,7 @@ export async function freezePitcherWinForwardNumeric(input: PitcherWinForwardFre
         featureVector: built.values.map((value) => Number.isFinite(value) ? value : null),
         featureCutoffDateExclusive: targetDate,
         historySource: 'mlb_pitcher_win_forward_team_game_v1',
-        decisionHistory: 'mlb_pitcher_win_revisit_base_v1 + MLB Official decisions from 2026-09-18 onward',
+        decisionHistory: 'mlb_pitcher_win_forward_starter_history_v1 + MLB Official decisions postgame',
         sameDayHistoryAllowed: false,
         quarantine20260919UsedForTuning: false,
         prospectiveContextMayUseStrictlyPriorGames: true,
