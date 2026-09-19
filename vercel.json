@@ -30,7 +30,7 @@
     },
     {
       "path": "/api/cron/mlb-statcast-sep18-repair",
-      "schedule": "10 15 19 9 *"
+      "schedule": "20 15 19 9 *"
     }
   ]
 }
