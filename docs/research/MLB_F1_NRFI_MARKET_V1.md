@@ -50,3 +50,21 @@ Monthly:
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No historical First 1 pricing is certified in the current corpus.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT`.
+
+- eligible starter-qualified rows: 892
+- baseline NRFI: **51.57%**
+- selected: 130
+- correct: 68
+- accuracy: **52.31%**
+- selection coverage: **14.57%**
+- lift vs baseline: **+0.74 percentage points**
+- worst selected month: **25.00%** on n=4 in September
+- retuned after external result: **NO**
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version with 2026-driven starter scoreless thresholds.
