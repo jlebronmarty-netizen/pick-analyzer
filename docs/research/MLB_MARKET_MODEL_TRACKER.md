@@ -57,6 +57,7 @@ Prospective protocol:
 - existing `/api/cron/mlb-statcast-daily` scheduler reused;
 - previous-day history readiness required;
 - freeze must precede first pitch;
+- previous-day team/starter history is synced only after certified daily history readiness;
 - settlement occurs only after final MLB Official pitcher decisions;
 - prospective results cannot change features, threshold, models, or selection direction.
 
