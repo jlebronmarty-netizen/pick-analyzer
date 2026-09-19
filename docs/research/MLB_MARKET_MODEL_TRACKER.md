@@ -63,8 +63,8 @@ Prospective protocol:
 Storage:
 
 - `public.mlb_pitcher_win_forward_tracker_v1`;
-- `public.mlb_pitcher_win_forward_team_game_v1`;
-- `public.mlb_pitcher_win_forward_recent_starter_v1`.
+- `public.mlb_pitcher_win_forward_team_history_v1`;
+- `public.mlb_pitcher_win_forward_starter_history_v1`.
 
 Boundaries remain unchanged:
 
