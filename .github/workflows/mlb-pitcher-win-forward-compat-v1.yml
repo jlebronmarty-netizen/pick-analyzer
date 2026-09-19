@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: mlb-pitcher-win-forward-compat-v1
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   REQUEST_PATH: docs/research/pitcher-win-forward-compatible-v1-request.json
