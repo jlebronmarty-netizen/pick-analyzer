@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import requests
-from catboost import CatBoostClassifier
+from catboost import CatBoostClassifier, CatBoostRegressor
 
 SEED=20260919
 EDGE_URL="https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/mlb-f7-ml-revisit-github-export-temp"
@@ -48,6 +48,7 @@ SPECS=[
 ]
 
 PROB_THRESHOLDS=[0.58,0.60,0.625,0.65,0.675,0.70,0.725,0.75,0.775,0.80,0.825,0.85,0.875,0.90]
+MARGIN_THRESHOLDS=[0.50,0.75,1.00,1.25,1.50,2.00,2.50,3.00]
 
 BLOCK_EXACT={
  "canonical_game_id","source_game_id","feature_cutoff_date","feature_version",
@@ -166,6 +167,14 @@ def model(params:dict[str,Any],offset:int)->CatBoostClassifier:
       **params
     )
 
+def reg_model(params:dict[str,Any],offset:int)->CatBoostRegressor:
+    return CatBoostRegressor(
+      random_seed=SEED+100+offset,
+      loss_function="RMSE",eval_metric="RMSE",
+      verbose=False,allow_writing_files=False,thread_count=-1,
+      **params
+    )
+
 def summarize(oof:pd.DataFrame,mask:np.ndarray,pred:np.ndarray|int,config:dict[str,Any])->dict[str,Any]|None:
     selected=oof.loc[mask].copy()
     if selected.empty:return None
@@ -186,7 +195,8 @@ def summarize(oof:pd.DataFrame,mask:np.ndarray,pred:np.ndarray|int,config:dict[s
     all_nonpush=oof[oof.truth.notna()]
     home_rate=float(all_nonpush.truth.astype(int).mean())
     majority=max(home_rate,1-home_rate)
-    gate=n>=MIN_N and months>=MIN_MONTHS and worst>=MIN_WORST
+    sample_gate=n>=MIN_N and months>=MIN_MONTHS
+    stability_gate=sample_gate and worst>=MIN_WORST
     return {
       **config,
       "selected_total":int(len(selected)),
@@ -200,8 +210,9 @@ def summarize(oof:pd.DataFrame,mask:np.ndarray,pred:np.ndarray|int,config:dict[s
       "monthly":monthly,
       "unconditional_majority_baseline":majority,
       "lift_vs_unconditional_majority":acc-majority,
-      "sample_stability_gate_met":gate,
-      "target_met_75_plus":bool(gate and acc>=TARGET_ACC)
+      "sample_gate_met":sample_gate,
+      "sample_stability_gate_met":stability_gate,
+      "target_met_75_plus":bool(stability_gate and acc>=TARGET_ACC)
     }
 
 def rank_key(c:dict[str,Any])->tuple:
@@ -225,15 +236,21 @@ def main():
     for month,start_s,end_s in FOLDS:
         start=pd.Timestamp(start_s);end=pd.Timestamp(end_s)
         tr=(df["_game_date"]<start)&df["_y_home"].notna()
+        tr_reg=df["_game_date"]<start
         va=(df["_game_date"]>=start)&(df["_game_date"]<end)
-        if tr.sum()<350 or va.sum()<50:
-            raise RuntimeError(f"F7_SMALL_FOLD:{month}:{tr.sum()}:{va.sum()}")
+        if tr.sum()<350 or tr_reg.sum()<400 or va.sum()<50:
+            raise RuntimeError(f"F7_SMALL_FOLD:{month}:{tr.sum()}:{tr_reg.sum()}:{va.sum()}")
         p=np.zeros(int(va.sum()),float)
+        pred_margin=np.zeros(int(va.sum()),float)
         xv=x.loc[va]
         for si,params in enumerate(SPECS):
             m=model(params,si)
             m.fit(x.loc[tr],df.loc[tr,"_y_home"].astype(int).to_numpy(),cat_features=cats)
             p+=np.asarray(m.predict_proba(xv)[:,1],float)/len(SPECS)
+            rm=reg_model(params,si)
+            y_margin=(df.loc[tr_reg,"_home_f7"]-df.loc[tr_reg,"_away_f7"]).astype(float).to_numpy()
+            rm.fit(x.loc[tr_reg],y_margin,cat_features=cats)
+            pred_margin+=np.asarray(rm.predict(xv),float)/len(SPECS)
         v=df.loc[va].reset_index(drop=True)
         for i in range(len(v)):
             oof_rows.append({
@@ -241,11 +258,12 @@ def main():
               "game_pk":int(v.loc[i,"_game_pk"]),"game_date":str(v.loc[i,"_game_date"].date()),
               "truth":None if pd.isna(v.loc[i,"_y_home"]) else int(v.loc[i,"_y_home"]),
               "p_home":float(p[i]),
+              "pred_margin":float(pred_margin[i]),
               "home_run_diff_pg":None if pd.isna(v.loc[i].get("home_run_diff_pg")) else float(v.loc[i].get("home_run_diff_pg")),
               "away_run_diff_pg":None if pd.isna(v.loc[i].get("away_run_diff_pg")) else float(v.loc[i].get("away_run_diff_pg")),
             })
         fold_meta.append({
-          "month":month,"train_nonpush_n":int(tr.sum()),"validation_all_n":int(va.sum()),
+          "month":month,"train_nonpush_n":int(tr.sum()),"train_margin_n":int(tr_reg.sum()),"validation_all_n":int(va.sum()),
           "validation_nonpush_n":int(df.loc[va,"_y_home"].notna().sum()),
           "validation_pushes":int(df.loc[va,"_y_home"].isna().sum()),
           "train_end":str(df.loc[tr,"_game_date"].max().date())
@@ -253,6 +271,7 @@ def main():
 
     oof=pd.DataFrame(oof_rows)
     p=oof.p_home.to_numpy(float)
+    pm=oof.pred_margin.to_numpy(float)
     candidates=[]
 
     # Original first-pass rule benchmark on unified OOF.
@@ -294,12 +313,36 @@ def main():
         })
         if s:candidates.append(s)
 
-    stable=[c for c in candidates if c["sample_stability_gate_met"]]
-    if not stable:raise RuntimeError("F7_NO_STABLE_CANDIDATE")
-    stable.sort(key=rank_key,reverse=True)
-    selected=stable[0]
+    # F7 run-margin regression: a materially different architecture from the first pass.
+    for mt in MARGIN_THRESHOLDS:
+        mask=np.isfinite(pm)&(np.abs(pm)>=mt)
+        pred=(pm>0).astype(int)
+        s=summarize(oof,mask,pred,{
+          "architecture":"catboost_f7_margin_regression",
+          "mode":"symmetric","probability_threshold":None,
+          "predicted_margin_threshold":mt,
+          "legacy_absolute_advantage":None
+        })
+        if s:candidates.append(s)
+
+        for t in PROB_THRESHOLDS:
+            confident=(p>=t)|(p<=1.0-t)
+            clf_pred=(p>=0.5).astype(int)
+            agree=clf_pred==pred
+            s=summarize(oof,mask&confident&agree,pred,{
+              "architecture":"catboost_classifier_margin_agreement",
+              "mode":"symmetric","probability_threshold":t,
+              "predicted_margin_threshold":mt,
+              "legacy_absolute_advantage":None
+            })
+            if s:candidates.append(s)
+
+    sample_eligible=[c for c in candidates if c["sample_gate_met"]]
+    if not sample_eligible:raise RuntimeError("F7_NO_SAMPLE_ELIGIBLE_CANDIDATE")
+    sample_eligible.sort(key=rank_key,reverse=True)
+    selected=sample_eligible[0]
     target=bool(selected["target_met_75_plus"])
-    high_acc=sorted(stable,key=lambda c:(c["accuracy"],c["worst_month_accuracy"],c["n"]),reverse=True)[:20]
+    high_acc=sorted(sample_eligible,key=lambda c:(c["accuracy"],c["worst_month_accuracy"],c["n"]),reverse=True)[:20]
 
     result={
       "contract":"MLB_F7_ML_REVISIT_V1_RESULT/1.0.0",
@@ -314,7 +357,7 @@ def main():
       "pushes_by_season":{str(k):int(v) for k,v in df.groupby("_season")["_y_home"].apply(lambda s:s.isna().sum()).items()},
       "oof_rows":len(oof),"oof_nonpush_rows":int(oof.truth.notna().sum()),
       "folds":fold_meta,
-      "architecture_family":"pregame_catboost_f7_moneyline_v1",
+      "architecture_family":"pregame_catboost_classifier_margin_f7_moneyline_v1",
       "numeric_feature_count":len(nums),"categorical_feature_count":len(cats),
       "numeric_features":nums,"categorical_features":cats,"dropped_fields":dropped,
       "specs":SPECS,
