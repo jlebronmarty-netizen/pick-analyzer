@@ -45,3 +45,21 @@ No tested stable F3 ML candidate reached 75%.
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No historical F3 pricing is certified in the current corpus.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT`.
+
+- eligible rows: 2,240
+- selected including pushes: 105
+- non-push selections: 80
+- correct: 36
+- accuracy: **45.00%**
+- pushes: 25
+- selection coverage: **4.69%**
+- worst selected month: **0.00%** on n=2 in June
+- retuned after external result: **NO**
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version using 2026 thresholds.
