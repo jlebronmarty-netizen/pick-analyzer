@@ -286,6 +286,9 @@ def summarize(oof:pd.DataFrame,mask:np.ndarray,pred:int|np.ndarray,config:dict[s
     n=len(z);correct=int(z.correct.sum());acc=correct/n
     months=len(monthly);worst=min(v["accuracy"] for v in monthly.values())
     truth_rate=float(z.truth.mean());majority=max(truth_rate,1-truth_rate)
+    all_yes_rate=float(oof.truth.mean())
+    direction=config.get("direction")
+    direction_baseline=(1.0-all_yes_rate) if direction=="NO" else all_yes_rate
     gate=n>=MIN_N and months>=MIN_MONTHS and worst>=MIN_WORST
     return {
       **config,
@@ -298,7 +301,8 @@ def summarize(oof:pd.DataFrame,mask:np.ndarray,pred:int|np.ndarray,config:dict[s
       "monthly":monthly,
       "selected_yes_rate":truth_rate,
       "selected_majority_baseline":majority,
-      "lift_vs_selected_majority":acc-majority,
+      "unconditional_direction_baseline":direction_baseline,
+      "lift_vs_unconditional_direction_baseline":acc-direction_baseline,
       "sample_stability_gate_met":gate,
       "target_met_75_plus":bool(gate and acc>=TARGET_ACC)
     }
@@ -309,7 +313,7 @@ def rank_key(c:dict[str,Any])->tuple:
       1 if c["sample_stability_gate_met"] else 0,
       c["worst_month_accuracy"],
       c["accuracy"],
-      c["lift_vs_selected_majority"],
+      c["lift_vs_unconditional_direction_baseline"],
       c["n"]
     )
 
