@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 full-game additional-market coverage gate — authoritative
+
+Internal MLB snapshots contain zero rows for `alternate_spreads`, `alternate_totals`, and `h2h_3_way`.
+
+- alternate spread -> `BLOCKED_HISTORICAL_LINE_COVERAGE`;
+- alternate total -> `BLOCKED_HISTORICAL_LINE_COVERAGE`;
+- full-game 3-way ML -> `BLOCKED_SETTLEMENT_SEMANTICS`.
+
+The alternate markets reuse the existing full-game score/total outcome families but require exact historical points.
+
+For full-game `h2h_3_way`, the generic market includes DRAW, but no MLB settlement contract is frozen. Do not infer a 9-inning draw target from standard Moneyline results that include extra innings.
+
+Historical Odds API credits remain zero.
+
 ## 2026-09-19 period / team-total historical line coverage gate — authoritative
 
 Canonical audit:
