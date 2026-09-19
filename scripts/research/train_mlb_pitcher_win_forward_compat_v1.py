@@ -64,7 +64,6 @@ NUMERIC_BASE=[
  "own_l10_win_pct","opp_l10_win_pct",
  "own_l10_run_diff_pg","opp_l10_run_diff_pg",
  "own_rest_days","opp_rest_days",
- "own_sp_starts_prior","opp_sp_starts_prior",
  "side_h2h_win_pct",
  "prior_starts","prior_wins","prior_win_rate"
 ]
@@ -222,7 +221,7 @@ def side_features(row:pd.Series)->dict[str,Any]:
       "games_prior","win_pct","run_diff_pg","pyth_win_pct",
       "l5_games","l5_win_pct","l5_run_diff_pg",
       "l10_games","l10_win_pct","l10_run_diff_pg",
-      "rest_days","sp_starts_prior"
+      "rest_days"
     ]
     for suffix in suffixes:
         out["own_"+suffix]=value(p,own+suffix)
