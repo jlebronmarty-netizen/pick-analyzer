@@ -16,7 +16,8 @@
     "head_to_head",
     "starter_prior_start_count",
     "starter_prior_win_decisions",
-    "side_and_schedule_context",\n    "starter_prior_official_decision_ledger"
+    "side_and_schedule_context",
+    "starter_prior_official_decision_ledger"
   ],
   "excludedForParity": [
     "starter_ra9_whip_k_bb_whiff_hard_hit",
