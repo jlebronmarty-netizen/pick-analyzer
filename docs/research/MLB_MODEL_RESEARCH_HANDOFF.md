@@ -6,6 +6,41 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 7 Innings 3-Way Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Target is explicit HOME / AWAY / DRAW from the certified F7 score surface.
+
+Development surface:
+
+- 2,418 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,673 total source rows;
+- 4,142 rolling OOF rows;
+- class counts: HOME 2,221 / AWAY 1,945 / DRAW 507.
+
+Gate-selected fallback:
+
+`f7_3way_revisit_side_margin_p055_m150_fallback_v1`
+
+- HOME/AWAY side only;
+- multiclass confidence >=0.55;
+- predicted absolute F7 margin >=1.50;
+- classifier and margin side agree;
+- 103/178 = **57.87%**;
+- worst month **47.06%**;
+- 10 months;
+- coverage **4.30%**;
+- majority-class baseline **46.96%**;
+- lift **+10.91 pts**.
+
+Highest pooled sample-eligible result was the original two-sided benchmark at **96/149 = 64.43%**, but worst month was only **41.18%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F7_3WAY_REVISIT_V1.md`.
+
 ## 2026-09-19 First 5 Innings Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
