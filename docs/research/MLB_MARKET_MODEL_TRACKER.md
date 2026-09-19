@@ -530,6 +530,41 @@ Reference-line studies for F3/F5/F7 totals remain diagnostic only. F1 under/over
 
 Do not infer a sportsbook point from a modal, current, fixed, or alternate line.
 
+## Second-pass revisit phase — forward-validation protocol
+
+Frozen contract:
+
+`MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0`
+
+Canonical files:
+
+- `contracts/MLB_MARKET_REVISIT_FORWARD_PROTOCOL_V1.json`
+- `docs/research/MLB_MARKET_REVISIT_FORWARD_PROTOCOL_V1.md`
+
+Boundaries:
+
+- historical development may use 2025 plus 2026 through **2026-09-18**;
+- historical 2026 is labeled `HISTORICAL_SEEN_DEVELOPMENT`, never untouched external;
+- **2026-09-19** is quarantined;
+- new clean validation begins **2026-09-20** and is labeled `PROSPECTIVE_FORWARD_POST_2026_09_20`;
+- no forward game may influence feature/model/threshold selection.
+
+Development candidate gate:
+
+- accuracy >=75%;
+- selected n >=60;
+- selections across at least 5 calendar months;
+- worst selected month >=65%.
+
+Prospective gate:
+
+- n <20 => `INSUFFICIENT_FORWARD_SAMPLE`;
+- n >=20 => provisional;
+- n >=40 => stronger forward evidence;
+- target accuracy remains >=75%.
+
+First revisit market: **Game Totals O/U**.
+
 ## Unified 2025 rolling-development protocol
 
 For a market with suitable 2025 PREGAME data, the default chronological development design is:
