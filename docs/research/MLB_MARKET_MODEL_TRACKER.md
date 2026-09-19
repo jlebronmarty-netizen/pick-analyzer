@@ -7,6 +7,39 @@ Target benchmark: **>= 75% predictive accuracy on a sufficiently stable selectiv
 Official Picks: unchanged  
 APOSTAR: disabled
 
+## 2026-09-19 First 7 Innings Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+The revisit used the certified F7 target and a materially different CatBoost classifier + F7-margin regression architecture.
+
+Development surface:
+
+- 2,418 certified 2025 games;
+- 2,255 usable 2026 games;
+- 39 recent 2026 rows with null F7 scores excluded fail-closed;
+- 4,142 rolling OOF games / 3,688 non-push.
+
+Gate-selected fallback:
+
+`f7_ml_revisit_home_p058_fallback_v1`
+
+- HOME only when model p(HOME F7 win) >= 0.58;
+- 746/1,281 = **58.24%**;
+- worst month **54.03%**;
+- 11 months;
+- non-push coverage **34.73%**;
+- unconditional majority baseline **52.74%**;
+- lift **+5.50 pts**.
+
+Highest pooled sample-eligible formula: classifier + F7-margin agreement, **120/181 = 66.30%**, but worst month **41.67%** and min monthly n=1.
+
+Original q95 benchmark on unified OOF: **95/144 = 65.97%**, worst month **44.44%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F7_ML_REVISIT_V1.md`.
+
 ## 2026-09-19 Pitcher Record a Win second-pass revisit V1 — authoritative
 
 Frozen champion:
@@ -138,7 +171,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 1 Inning Moneyline** | `f1_ml_sp1p0_win0p20_v1` — selective HOME/AWAY rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 51/74 = **68.92%**; worst month **50.00%**; 60 pushes | 2026: 24/40 = **60.00%**; 39 pushes | 2026 coverage **4.02%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Rejected unstable 76.36% q95 candidate before external; preserve stable fallback, no 2026 rescue. |
 | **First 1 Inning 3-Way ML** | `f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1` — selective DRAW rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 125/221 = **56.56%**; baseline DRAW 52.33%; worst month **45.61%** | 2026: 159/285 = **55.79%**; baseline DRAW 53.05%; worst month **48.78%** | 2026 coverage **14.50%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Modest lift only; preserve frozen DRAW rule, no 2026 rescue. |
 | **First 1 Inning NRFI** | `f1_nrfi_both_starters_scoreless_0p80_v1` — NRFI if both starters prior F1 scoreless rate >=80% | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 58/108 = **53.70%**; baseline 50.96%; worst month **36.84%** | 2026: 68/130 = **52.31%**; baseline 51.57%; worst month **25.00%** on n=4 | 2026 coverage **14.57%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Offense filter was redundant; preserve simple starter-only rule, no 2026 rescue. |
-| **First 7 Innings Moneyline** | `f7_ml_run_diff_extreme_q95_v1` — side from extreme prior run-diff advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 69/91 = **75.82%**; worst month **66.67%**; 8 pushes | 2026: 35/79 = **44.30%**; 12 pushes | 2026 coverage **4.06%** | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen q95 cutoff; failed external validation, no 2026 rescue. |
+| **First 7 Innings Moneyline** | `f7_ml_revisit_home_p058_fallback_v1` — HOME-only p>=0.58 fallback; highest pooled revisit 66.30% unstable | `HISTORICAL_SEEN_DEVELOPMENT` | Revisit unified rolling: 746/1,281 = **58.24%** gate-selected fallback; highest pooled **120/181 = 66.30%** | 2025+2026 rolling through usable 2026-09-14 targets; old q95 benchmark 95/144 = 65.97% | fallback non-push coverage **34.73%**; 39 null recent F7 targets excluded | **NO** | `REVISIT_SECOND_PASS_BELOW_75` | No forward candidate. Preserve results; move on. |
 | **First 7 Innings 3-Way ML** | `f7_3way_sp2p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 62/89 = **69.66%**; worst month **50.00%**; draw-only best 16.80% | 2026: 33/59 = **55.93%**; 5 selected outcomes were DRAW | 2026 coverage **3.00%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
 | **First 7 Innings Totals** | `f7_total_over_ref6p5_proj7p0_v1` — OVER reference 6.5 when projected F7 total >=7.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 355/642 = **55.30%**; worst month **51.79%** | 2026: 569/1,084 = **52.49%**; baseline OVER ref6.5 50.64%; worst month **43.33%** | 2026 coverage **49.77%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 6.5 is research reference only; no historical F7 line corpus. |
 | **First 1 Inning Spread** | — | historical line gate | outcome target certified; historical handicap point absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact historical `spreads_1st_1_innings` points before backtest; do not assume ±0.5. |

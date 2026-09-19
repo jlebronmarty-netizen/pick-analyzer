@@ -6,6 +6,39 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 7 Innings Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+The revisit used the certified F7 target and a materially different CatBoost classifier + F7-margin regression architecture.
+
+Development surface:
+
+- 2,418 certified 2025 games;
+- 2,255 usable 2026 games;
+- 39 recent 2026 rows with null F7 scores excluded fail-closed;
+- 4,142 rolling OOF games / 3,688 non-push.
+
+Gate-selected fallback:
+
+`f7_ml_revisit_home_p058_fallback_v1`
+
+- HOME only when model p(HOME F7 win) >= 0.58;
+- 746/1,281 = **58.24%**;
+- worst month **54.03%**;
+- 11 months;
+- non-push coverage **34.73%**;
+- unconditional majority baseline **52.74%**;
+- lift **+5.50 pts**.
+
+Highest pooled sample-eligible formula: classifier + F7-margin agreement, **120/181 = 66.30%**, but worst month **41.67%** and min monthly n=1.
+
+Original q95 benchmark on unified OOF: **95/144 = 65.97%**, worst month **44.44%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F7_ML_REVISIT_V1.md`.
+
 ## 2026-09-19 Pitcher Record a Win second-pass revisit V1 — authoritative
 
 Frozen champion:
