@@ -6,6 +6,47 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 full-game additional-market coverage gate — authoritative
+
+Internal MLB snapshots contain zero rows for `alternate_spreads`, `alternate_totals`, and `h2h_3_way`.
+
+- alternate spread -> `BLOCKED_HISTORICAL_LINE_COVERAGE`;
+- alternate total -> `BLOCKED_HISTORICAL_LINE_COVERAGE`;
+- full-game 3-way ML -> `BLOCKED_SETTLEMENT_SEMANTICS`.
+
+The alternate markets reuse the existing full-game score/total outcome families but require exact historical points.
+
+For full-game `h2h_3_way`, the generic market includes DRAW, but no MLB settlement contract is frozen. Do not infer a 9-inning draw target from standard Moneyline results that include extra innings.
+
+Historical Odds API credits remain zero.
+
+## 2026-09-19 period / team-total historical line coverage gate — authoritative
+
+Canonical audit:
+
+`docs/research/MLB_PERIOD_LINE_COVERAGE_AUDIT_20260919.md`
+
+The internal MLB odds snapshot corpus contains zero rows for all checked period spread/total market keys and for `team_totals` / `alternate_team_totals`.
+
+State:
+
+`BLOCKED_HISTORICAL_LINE_COVERAGE`
+
+Applies to:
+
+- spreads for 1 / 3 / 5 / 7 innings;
+- alternate spreads for 1 / 3 / 5 / 7 innings;
+- period totals and alternate period totals for price/point-aware validation;
+- full-game team totals and alternate team totals.
+
+Reference-line studies for F3/F5/F7 totals are diagnostic event-accuracy studies only and are not historical sportsbook-line backtests.
+
+F1 NRFI/YRFI represents the 0.5-run event family, but historical line/price certification is still absent.
+
+Do not invent ±0.5/±1.5 spreads or fixed team-total/period-total points.
+
+Per project rules, historical Odds API credits remain at zero unless the user explicitly authorizes spend after local coverage is exhausted.
+
 ## 2026-09-19 First 7 Innings Totals first-pass closeout — authoritative
 
 Frozen fallback: `f7_total_over_ref6p5_proj7p0_v1`.

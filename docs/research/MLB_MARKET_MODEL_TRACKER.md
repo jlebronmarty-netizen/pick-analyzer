@@ -36,12 +36,16 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 - `BLOCKED_DEPENDENCY_LABELS`
 - `BLOCKED_SETTLEMENT_SEMANTICS`
 - `DFS_ONLY_DEFERRED`: market has not yet completed the unified protocol.
+- `BLOCKED_HISTORICAL_LINE_COVERAGE`: outcome may be reconstructable, but the historical sportsbook point/line is absent.
 
 ## Current market scoreboard
 
 | Market | Current best / frozen model | Validation class | Development / historical result | 2026 external / forward result | Coverage / sample | >=75% evidence? | Unified protocol status | Next action |
 |---|---|---|---:|---:|---:|---|---|---|
 | **Moneyline** | `pregame_high_conf_home_v2` | `LEGACY_ADAPTIVE_2026` | Development folds: 63/81 = **77.78%** | Untouched adaptive holdout: 17/21 = **80.95%**; full selected 2026 set: 80/102 = **78.43%** | 102 selected games in recorded 2026 set | **YES**, adaptive evidence | Not a pristine 2025→2026 one-shot test | Preserve as current selective ML reference. Do not relabel adaptive evidence as pure external validation. |
+| **Full-Game Alternate Spread** | base Run Line outcome exists | historical line gate | base score target available; alternate handicap point absent | — | 0 internal snapshots | **NO MARKET CERTIFICATION** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Reuse base score model only after exact `alternate_spreads` points exist. |
+| **Full-Game Alternate Total** | base Game Total outcome exists | historical line gate | base total target available; alternate total point absent | — | 0 internal snapshots | **NO MARKET CERTIFICATION** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Reuse base total model only after exact `alternate_totals` points exist. |
+| **Full-Game 3-Way ML** | — | settlement gate | generic market includes DRAW; MLB regulation/draw settlement window not frozen | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_SETTLEMENT_SEMANTICS` | Capture a real MLB `h2h_3_way` sample or bookmaker settlement contract before defining the target. |
 | **Run Line / Spread** | `rl_v2_home_p15_alt_favorite_tsh_q92_v1` — HOME +1.5 alternate when primary HOME -1.5 | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective forward | 2025: 92/107 = **85.98%** | Historical 2026 through Sep 10: 49/62 = **79.03%**; sealed prospective score still accumulating | 2025 coverage **4.40%**; 107 dev selections | **YES**, historical evidence | External one-shot field remains NULL because 2026 was seen pre-freeze | Continue fixed-clock prospective freezes. Never retro-freeze Sep 17/18. |
 | **First 5 Innings Moneyline** | `f5_ml_sp0p5_ops0p08_win0p05_v1` — symmetric side rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025 certified: 60/88 = **68.18%**; worst month **64.71%**; 15 pushes | 2026 one-shot: 34/61 = **55.74%**; worst month **40.00%**; 9 pushes | 2026 selection coverage **3.56%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; do not threshold-rescue from 2026. Revisit with materially different architecture/F5 pricing. |
 | **First 5 Innings Totals** | `f5_total_over_ref4p5_proj5p0_v1` — OVER reference 4.5 when projected F5 total >=5.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 371/679 = **54.64%**; worst month **48.57%** | 2026: 719/1,373 = **52.37%**; worst month **49.32%**; baseline OVER ref4.5 50.14% | 2026 coverage **63.04%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 4.5 is research reference only; obtain certified historical F5 lines before price-aware revisit. |
@@ -55,6 +59,13 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 7 Innings Moneyline** | `f7_ml_run_diff_extreme_q95_v1` — side from extreme prior run-diff advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 69/91 = **75.82%**; worst month **66.67%**; 8 pushes | 2026: 35/79 = **44.30%**; 12 pushes | 2026 coverage **4.06%** | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen q95 cutoff; failed external validation, no 2026 rescue. |
 | **First 7 Innings 3-Way ML** | `f7_3way_sp2p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 62/89 = **69.66%**; worst month **50.00%**; draw-only best 16.80% | 2026: 33/59 = **55.93%**; 5 selected outcomes were DRAW | 2026 coverage **3.00%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
 | **First 7 Innings Totals** | `f7_total_over_ref6p5_proj7p0_v1` — OVER reference 6.5 when projected F7 total >=7.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 355/642 = **55.30%**; worst month **51.79%** | 2026: 569/1,084 = **52.49%**; baseline OVER ref6.5 50.64%; worst month **43.33%** | 2026 coverage **49.77%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 6.5 is research reference only; no historical F7 line corpus. |
+| **First 1 Inning Spread** | — | historical line gate | outcome target certified; historical handicap point absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact historical `spreads_1st_1_innings` points before backtest; do not assume ±0.5. |
+| **First 3 Innings Spread** | — | historical line gate | outcome target certified; historical handicap point absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact historical `spreads_1st_3_innings` points before backtest. |
+| **First 5 Innings Spread** | — | historical line gate | outcome target certified; historical handicap point absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact historical `spreads_1st_5_innings` points before backtest. |
+| **First 7 Innings Spread** | — | historical line gate | outcome target certified; historical handicap point absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact historical `spreads_1st_7_innings` points before backtest. |
+| **Period Alternate Spreads (1/3/5/7 innings)** | — | historical line gate | base period score targets certified | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Alternate spread points are a line-specific layer over the base period outcome; do not invent handicaps. |
+| **Period Alternate Totals (1/3/5/7 innings)** | base period total research only | historical line gate | F1 NRFI/F3/F5/F7 reference studies exist, but exact alternate points are absent | — | 0 internal snapshots | **NO MARKET CERTIFICATION** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Reuse base period score model only after exact historical alternate total points exist. |
+| **Team Totals / Alternate Team Totals** | — | historical line gate | full-game team scores are reconstructable, but historical team-total points are absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact team-specific historical points; do not substitute fixed 3.5/4.5/5.5 lines. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` over frozen R2 | 2025 official Retrosheet ER + external 2026 outcome pending | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | **NOT OPENED** — no canonical exact 2026 ER outcome contract yet | 2025 n=91 | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` | Preserve rule. Continue PA-13 forward price capture and exact outcome-contract work; do not substitute Runs Allowed. |
@@ -485,6 +496,39 @@ Pricing caveat: 6.5 is a research reference line only; no historical F7 total-li
 2026 one-shot: **569/1,084 = 52.49%**, baseline OVER reference 6.5 **50.64%**, coverage **49.77%**, worst month **43.33%**, no retuning.
 
 State: `REVISIT_AFTER_FIRST_PASS`.
+
+## Full-game additional-market coverage gate
+
+Internal MLB snapshots also contain **0 rows** for:
+
+- `alternate_spreads`;
+- `alternate_totals`;
+- `h2h_3_way`.
+
+`alternate_spreads` and `alternate_totals` are `BLOCKED_HISTORICAL_LINE_COVERAGE`; they reuse the base score outcome but require the exact historical point.
+
+`h2h_3_way` is `BLOCKED_SETTLEMENT_SEMANTICS`: the generic market includes a DRAW outcome, but the MLB regulation/draw settlement window is not frozen and cannot be inferred from standard Moneyline final results.
+
+## Period / team-total historical line coverage gate
+
+Canonical audit:
+
+`docs/research/MLB_PERIOD_LINE_COVERAGE_AUDIT_20260919.md`
+
+Internal `sports_odds_snapshots` contains **0 rows** for the exact supported market keys covering:
+
+- period spreads for 1 / 3 / 5 / 7 innings;
+- alternate period spreads;
+- period totals for 1 / 3 / 5 / 7 innings;
+- alternate period totals;
+- `team_totals`;
+- `alternate_team_totals`.
+
+Therefore these line-dependent markets are `BLOCKED_HISTORICAL_LINE_COVERAGE` for actual sportsbook backtesting.
+
+Reference-line studies for F3/F5/F7 totals remain diagnostic only. F1 under/over 0.5 is represented by NRFI/YRFI event research, but historical line/price certification is still absent.
+
+Do not infer a sportsbook point from a modal, current, fixed, or alternate line.
 
 ## Unified 2025 rolling-development protocol
 
