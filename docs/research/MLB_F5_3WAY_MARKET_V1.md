@@ -47,3 +47,26 @@ No stable F5 3-way candidate reached 75%.
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No historical F5 3-way pricing is certified in the current corpus.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT`.
+
+- eligible feature rows: 1,966
+- selected: 48
+- correct: 22
+- accuracy: **45.83%**
+- selection coverage: **2.44%**
+- selected outcomes that were DRAW: 9
+- worst selected month: **39.29%**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 11/28 = 39.29%, 7 draw outcomes
+- May: 8/15 = 53.33%, 1 draw outcome
+- Jun: 1/2 = 50.00%
+- Jul: 2/3 = 66.67%, 1 draw outcome
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version with 2026-driven thresholds or postgame draw filters.
