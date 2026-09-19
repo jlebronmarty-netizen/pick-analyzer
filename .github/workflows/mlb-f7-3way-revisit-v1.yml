@@ -4,6 +4,7 @@ on:
   push:
     branches: [research/f7-3way-revisit-20260919-clean]
     paths:
+      - '.github/workflows/mlb-f7-ml-revisit-v1.yml'
       - '.github/workflows/mlb-f7-3way-revisit-v1.yml'
       - 'docs/research/f7-3way-revisit-v1-request.json'
       - 'scripts/research/train_mlb_f7_3way_revisit_v1.py'
@@ -46,9 +47,10 @@ jobs:
             [r.researchOnly===true,'research'],
             [r.historicalDevelopmentMaxGameDate==='2026-09-18','cutoff'],
             [r.developmentClass==='HISTORICAL_SEEN_DEVELOPMENT','class'],
-            [r.openForwardOutcomesInThisRun===false,'forward'],
-            [r.useForwardForSelection===false,'selection'],
-            [r.oddsApiCallsAllowed===false,'odds'],
+            [r.tieHandling==='DRAW_EXPLICIT_CLASS','draw class'],
+            [r.openForwardOutcomesInThisRun===false,'forward closed'],
+            [r.useForwardForSelection===false,'forward selection'],
+            [r.oddsApiCallsAllowed===false,'odds calls'],
             [r.historicalOddsCreditSpendAllowed===false,'credits'],
             [r.expectedOddsApiCredits===0,'expected credits'],
             [r.officialPicksWritesAllowed===false,'official'],
@@ -57,6 +59,7 @@ jobs:
           ];
           const bad=checks.filter(([ok])=>!ok).map(([,n])=>n);
           if(bad.length) throw new Error('F7_3WAY_REQUEST_INVALID:'+bad.join(','));
+          console.log('PASS F7 3-way revisit request');
           NODE
 
       - uses: actions/setup-python@v5
@@ -101,12 +104,18 @@ jobs:
             [r.official_picks_writes===0,'official'],
             [r.apostar_activation===false,'apostar'],
             [r.production_promotion===false,'production'],
-            [f.forward_outcomes_opened===false,'freeze forward']
+            [f.forward_outcomes_opened===false,'freeze forward'],
+            [f.odds_api_historical_credits_consumed===0,'freeze credits']
           ];
           const bad=checks.filter(([ok])=>!ok).map(([,n])=>n);
           if(bad.length) throw new Error('F7_3WAY_BOUNDARY:'+bad.join(','));
           if(f.frozen && !r.target_met_75_plus) throw new Error('F7_3WAY_FREEZE_WITHOUT_GATE');
-          console.log(JSON.stringify({state:r.market_closeout_state,selected:r.selected_candidate},null,2));
+          console.log(JSON.stringify({
+            state:r.market_closeout_state,
+            selected:r.selected_candidate,
+            source_rows:r.source_rows,
+            oof:r.oof_rows
+          },null,2));
           NODE
 
       - name: Commit research artifacts
@@ -117,7 +126,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add "$RESULT_PATH" "$FREEZE_PATH"
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'research(f7-3way): record revisit V1 result'
+          git commit -m 'research(f5-ml): record revisit V1 result'
           git pull --rebase origin research/f7-3way-revisit-20260919-clean
           git push origin HEAD:research/f7-3way-revisit-20260919-clean
 
