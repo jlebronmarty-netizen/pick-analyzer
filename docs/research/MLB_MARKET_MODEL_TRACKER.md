@@ -45,6 +45,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Run Line / Spread** | `rl_v2_home_p15_alt_favorite_tsh_q92_v1` — HOME +1.5 alternate when primary HOME -1.5 | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective forward | 2025: 92/107 = **85.98%** | Historical 2026 through Sep 10: 49/62 = **79.03%**; sealed prospective score still accumulating | 2025 coverage **4.40%**; 107 dev selections | **YES**, historical evidence | External one-shot field remains NULL because 2026 was seen pre-freeze | Continue fixed-clock prospective freezes. Never retro-freeze Sep 17/18. |
 | **First 5 Innings Moneyline** | `f5_ml_sp0p5_ops0p08_win0p05_v1` — symmetric side rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025 certified: 60/88 = **68.18%**; worst month **64.71%**; 15 pushes | 2026 one-shot: 34/61 = **55.74%**; worst month **40.00%**; 9 pushes | 2026 selection coverage **3.56%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; do not threshold-rescue from 2026. Revisit with materially different architecture/F5 pricing. |
 | **First 5 Innings Totals** | `f5_total_over_ref4p5_proj5p0_v1` — OVER reference 4.5 when projected F5 total >=5.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 371/679 = **54.64%**; worst month **48.57%** | 2026: 719/1,373 = **52.37%**; worst month **49.32%**; baseline OVER ref4.5 50.14% | 2026 coverage **63.04%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 4.5 is research reference only; obtain certified historical F5 lines before price-aware revisit. |
+| **First 5 Innings 3-Way ML** | `f5_3way_sp1p0_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 53/84 = **63.10%**; worst month **45.45%**; draw-only best 23.21% | 2026: 22/48 = **45.83%**; worst month **39.29%**; 9 selected outcomes were DRAW | 2026 coverage **2.44%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. Draw model also failed to approach target. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` over frozen R2 | 2025 official Retrosheet ER + external 2026 outcome pending | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | **NOT OPENED** — no canonical exact 2026 ER outcome contract yet | 2025 n=91 | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` | Preserve rule. Continue PA-13 forward price capture and exact outcome-contract work; do not substitute Runs Allowed. |
@@ -353,6 +354,20 @@ Pricing caveat: no historical F5 total line corpus is currently stored. The 4.5 
 State: `REVISIT_AFTER_FIRST_PASS`.
 
 Revisit only with a materially different model and/or certified F5 historical lines.
+
+## First-pass closeout — First 5 Innings 3-Way Moneyline
+
+Frozen fallback: `f5_3way_sp1p0_ops0p05_win0p20_v1`.
+
+2025 side rule: **53/84 = 63.10%**, worst month **45.45%**.
+
+A separate pre-freeze DRAW-only search reached only **13/56 = 23.21%**, versus a 15.97% draw base rate.
+
+2026 one-shot: **22/48 = 45.83%**, coverage **2.44%**, worst month **39.29%**. Nine selected games finished DRAW and correctly count as losses for a HOME/AWAY prediction.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+No retuning after external evaluation.
 
 ## Unified 2025 rolling-development protocol
 
