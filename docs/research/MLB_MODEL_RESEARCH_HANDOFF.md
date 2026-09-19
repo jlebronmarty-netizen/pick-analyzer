@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 First 3 Innings 3-Way Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f3_3way_sp1p5_ops0p05_win0p20_v1`.
+
+2025 side rule: 44/73 = **60.27%**, worst month **28.57%**.
+
+Pre-freeze DRAW-only search: best stable 38/114 = **33.33%**, baseline draw rate **25.00%**.
+
+2026 one-shot: 20/41 = **48.78%**, coverage **2.09%**, 7 selected games finished DRAW, worst month **44.44%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not retune from 2026 or filter away external DRAW outcomes.
+
 ## 2026-09-18 First 7 Innings 3-Way Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f7_3way_sp2p0_win0p20_v1`.
