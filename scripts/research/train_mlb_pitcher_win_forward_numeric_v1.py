@@ -23,6 +23,7 @@ FORWARD_MIN_DATE=pd.Timestamp("2026-09-20")
 OUT=Path("artifacts/research/mlb_pitcher_win_forward_numeric_v1_result.json")
 FREEZE=Path("artifacts/research/mlb_pitcher_win_forward_numeric_v1_frozen_candidate.json")
 DECISIONS=Path("artifacts/research/mlb_pitcher_win_forward_numeric_2026_decisions_v1.json")
+GOLDEN=Path("artifacts/research/mlb_pitcher_win_forward_numeric_v1_golden.json")
 MODEL_DIR=Path("python_models")
 
 TARGET_ACC=0.75
@@ -363,19 +364,52 @@ def main():
     high=sorted(sample,key=lambda c:(c["accuracy"],c["worst_month_accuracy"],c["n"]),reverse=True)[:25]
 
     model_files=[]
+    final_models=[]
     if target:
         MODEL_DIR.mkdir(parents=True,exist_ok=True)
         pool=Pool(x,label=df["y_win"].to_numpy(int),cat_features=CATEGORICAL)
         for si,params in enumerate(SPECS):
             final_model=model(params,si)
             final_model.fit(pool)
-            model_path=MODEL_DIR/f"pitcher_win_forward_numeric_model_{si}.py"
-            final_model.save_model(str(model_path),format="python",pool=pool)
+            final_models.append(final_model)
+            py_path=MODEL_DIR/f"pitcher_win_forward_numeric_model_{si}.py"
+            json_path=MODEL_DIR/f"pitcher_win_forward_numeric_model_{si}.json"
+            final_model.save_model(str(py_path),format="python",pool=pool)
+            final_model.save_model(str(json_path),format="json",pool=pool)
             model_files.append({
-              "path":str(model_path),
-              "sha256":hashlib.sha256(model_path.read_bytes()).hexdigest(),
+              "python_path":str(py_path),
+              "python_sha256":hashlib.sha256(py_path.read_bytes()).hexdigest(),
+              "json_path":str(json_path),
+              "json_sha256":hashlib.sha256(json_path.read_bytes()).hexdigest(),
               "spec_index":si
             })
+
+        golden_rows=[]
+        sample_count=min(96,len(df))
+        sample_idx=np.linspace(0,len(df)-1,num=sample_count,dtype=int)
+        for ridx in sample_idx:
+            one=x.iloc[[int(ridx)]]
+            per_model=[float(m.predict_proba(one)[0,1]) for m in final_models]
+            features=[]
+            for name in NUMERIC_BASE:
+                val=one.iloc[0][name]
+                features.append(None if pd.isna(val) else float(val))
+            golden_rows.append({
+              "row_index":int(ridx),
+              "game_pk":int(df.iloc[int(ridx)]["game_pk"]),
+              "game_date":str(df.iloc[int(ridx)]["game_date"].date()),
+              "starter_side":str(df.iloc[int(ridx)]["starter_side"]),
+              "features":features,
+              "per_model_p_win":per_model,
+              "ensemble_p_win":float(sum(per_model)/len(per_model))
+            })
+        GOLDEN.parent.mkdir(parents=True,exist_ok=True)
+        GOLDEN.write_text(json.dumps({
+          "contract":"MLB_PITCHER_WIN_FORWARD_NUMERIC_GOLDEN/1.0.0",
+          "feature_names":NUMERIC_BASE,
+          "threshold":selected["probability_threshold"],
+          "rows":golden_rows
+        },indent=2,sort_keys=True)+"\n")
 
     result={
       "contract":"MLB_PITCHER_WIN_FORWARD_NUMERIC_V1_RESULT/1.0.0",
