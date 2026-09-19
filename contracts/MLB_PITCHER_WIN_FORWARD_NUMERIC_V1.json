@@ -85,10 +85,12 @@
     "previous_day_history_ready_required": true,
     "same_day_prior_history_allowed": false,
     "team_history_view": "public.mlb_pitcher_win_forward_team_game_v1",
-    "recent_actual_starter_view": "public.mlb_pitcher_win_forward_recent_starter_v1",
     "tracker_table": "public.mlb_pitcher_win_forward_tracker_v1",
     "cron": "/api/cron/mlb-statcast-daily",
-    "settlement_source": "MLB Official schedule hydrate=decisions"
+    "settlement_source": "MLB Official schedule hydrate=decisions",
+    "starter_history_table": "public.mlb_pitcher_win_forward_starter_history_v1",
+    "starter_history_sync_rpc": "public.sync_mlb_pitcher_win_forward_starter_history_v1(date)",
+    "decision_history_source": "MLB Official schedule hydrate=decisions, postgame only"
   },
   "boundaries": {
     "official_picks_writes": 0,
