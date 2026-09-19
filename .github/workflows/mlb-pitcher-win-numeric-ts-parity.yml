@@ -1,0 +1,34 @@
+name: MLB Pitcher Win Numeric TS Parity
+
+on:
+  push:
+    branches: [research/pitcher-win-forward-compatible-20260919]
+    paths:
+      - '.github/workflows/mlb-pitcher-win-numeric-ts-parity.yml'
+      - 'src/lib/catboost-oblivious-numeric.ts'
+      - 'scripts/research/generate_pitcher_win_numeric_ts_parity_fixture.py'
+      - 'scripts/research/validate_pitcher_win_numeric_ts_parity.mjs'
+      - 'python_models/pitcher_win_forward_numeric_model_0.py'
+      - 'python_models/pitcher_win_forward_numeric_model_1.py'
+      - 'python_models/pitcher_win_forward_numeric_model_0.json'
+      - 'python_models/pitcher_win_forward_numeric_model_1.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/pitcher-win-forward-compatible-20260919
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate Python frozen-model fixture
+        run: python scripts/research/generate_pitcher_win_numeric_ts_parity_fixture.py
+      - name: Validate JSON evaluator parity
+        run: node scripts/research/validate_pitcher_win_numeric_ts_parity.mjs
