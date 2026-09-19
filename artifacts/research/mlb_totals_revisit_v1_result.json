@@ -1,0 +1,2792 @@
+{
+  "actual_max_game_date_used": "2026-09-10",
+  "apostar_activation": false,
+  "architecture_family": "rolling_catboost_classifier_total_regression_ensemble_v1",
+  "categorical_features": [
+    "away_sp_hand",
+    "away_sp_primary_pitch",
+    "away_sp_secondary_pitch",
+    "away_team",
+    "day_night",
+    "home_sp_hand",
+    "home_sp_primary_pitch",
+    "home_sp_secondary_pitch",
+    "home_team",
+    "precip",
+    "pregame_integrity_tier",
+    "roof_status",
+    "sky",
+    "venue",
+    "wind_direction"
+  ],
+  "contract": "MLB_TOTALS_REVISIT_V1_RESULT/1.0.0",
+  "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+  "dropped_non_numeric_sparse_fields": [
+    "adv_arsenal_matchup",
+    "adv_bullpen_fatigue_2d",
+    "adv_bullpen_k_pct",
+    "adv_bullpen_ra9",
+    "adv_bullpen_whip",
+    "adv_common_opponents",
+    "adv_l10_win_pct",
+    "adv_l5_win_pct",
+    "adv_lineup_k_pct",
+    "adv_lineup_ops_proxy",
+    "adv_off_avg",
+    "adv_off_k_pct",
+    "adv_off_ops_proxy",
+    "adv_pyth_win_pct",
+    "adv_rest_days",
+    "adv_run_diff_pg",
+    "adv_sc_off_barrel_pct",
+    "adv_sc_off_hard_hit_pct",
+    "adv_sp_hard_hit_pct",
+    "adv_sp_k_pct",
+    "adv_sp_ra9",
+    "adv_sp_whiff_rate",
+    "adv_sp_whip",
+    "adv_venue_win_pct",
+    "adv_win_pct",
+    "away_away_games_prior",
+    "away_bullpen_apps_prior",
+    "away_bullpen_avg_pitches_per_app",
+    "away_bullpen_innings_prior",
+    "away_bullpen_k_minus_bb_pct",
+    "away_bullpen_l7_bb_pct",
+    "away_bullpen_l7_k_pct",
+    "away_bullpen_l7_whip",
+    "away_bullpen_pitches_last_1d",
+    "away_bullpen_pitches_last_3d",
+    "away_bullpen_prior_apps",
+    "away_bullpen_relievers_used_yesterday",
+    "away_common_games",
+    "away_defense_drs",
+    "away_defense_oaa",
+    "away_extra_innings_prev_game",
+    "away_games_last_14d",
+    "away_h2h_wins_prior",
+    "away_l10_runs_allowed_pg",
+    "away_l10_runs_scored_pg",
+    "away_l5_runs_allowed_pg",
+    "away_l5_runs_scored_pg",
+    "away_lineup_avg",
+    "away_lineup_avg_exit_velocity",
+    "away_lineup_bb_pct",
+    "away_lineup_prior_pa",
+    "away_lineup_starters_count",
+    "away_losses_prior",
+    "away_ml_close",
+    "away_ml_move_cents",
+    "away_ml_open",
+    "away_ml_pregame",
+    "away_off_ab",
+    "away_off_avg",
+    "away_off_bb_pct",
+    "away_off_doubles",
+    "away_off_hits",
+    "away_off_hr",
+    "away_off_iso",
+    "away_off_l5_avg",
+    "away_off_l5_barrel_pct",
+    "away_off_l5_bb_pct",
+    "away_off_l5_hard_hit_pct",
+    "away_off_l5_hr_per_pa",
+    "away_off_l5_k_pct",
+    "away_off_l5_ops_proxy",
+    "away_off_obp_proxy",
+    "away_off_pa",
+    "away_off_rbi",
+    "away_off_runs",
+    "away_off_singles",
+    "away_off_slg",
+    "away_off_strikeouts",
+    "away_off_triples",
+    "away_off_walks",
+    "away_prev_bullpen_ra9",
+    "away_prev_game_innings",
+    "away_prev_ops_proxy",
+    "away_prev_run_diff_pg",
+    "away_prev_team_ra9",
+    "away_prev_win_pct",
+    "away_runs_allowed_pg",
+    "away_runs_scored_pg",
+    "away_sc_off_avg_exit_velocity",
+    "away_sc_off_chase_rate",
+    "away_sc_off_contact_rate",
+    "away_sc_off_pitches_seen",
+    "away_sc_off_whiff_rate",
+    "away_sp_avg_ev_allowed",
+    "away_sp_avg_ip_per_start",
+    "away_sp_avg_pitches_per_start",
+    "away_sp_avg_release_speed",
+    "away_sp_barrel_pct",
+    "away_sp_bb9",
+    "away_sp_chase_rate",
+    "away_sp_csw_rate",
+    "away_sp_first_pitch_strike_rate",
+    "away_sp_hr_per_pa",
+    "away_sp_innings_prior",
+    "away_sp_k9",
+    "away_sp_l5_avg_ip",
+    "away_sp_l5_avg_pitches",
+    "away_sp_l5_barrel_pct",
+    "away_sp_l5_bb_pct",
+    "away_sp_l5_chase_rate",
+    "away_sp_l5_csw_rate",
+    "away_sp_l5_hard_hit_pct",
+    "away_sp_l5_k_pct",
+    "away_sp_l5_whiff_rate",
+    "away_sp_primary_usage_pct",
+    "away_sp_primary_velocity",
+    "away_sp_primary_whiff_rate",
+    "away_sp_prior_starts",
+    "away_sp_secondary_usage_pct",
+    "away_sp_vs_opp_avg_exit_velocity",
+    "away_sp_vs_opp_barrel_pct",
+    "away_sp_vs_opp_games",
+    "away_sp_vs_opp_hard_hit_pct",
+    "away_sp_vs_opp_pa",
+    "away_streak_signed",
+    "away_vs_sp_hand_avg_exit_velocity",
+    "away_vs_sp_hand_barrel_pct",
+    "away_vs_sp_hand_bb_rate",
+    "away_vs_sp_hand_hit_rate",
+    "away_vs_sp_hand_hr_rate",
+    "away_vs_sp_hand_pa",
+    "away_wins_prior",
+    "common_opponents_count",
+    "h2h_away_runs_pg_prior",
+    "h2h_games_prior",
+    "h2h_home_runs_pg_prior",
+    "home_bullpen_apps_prior",
+    "home_bullpen_avg_pitches_per_app",
+    "home_bullpen_innings_prior",
+    "home_bullpen_k_minus_bb_pct",
+    "home_bullpen_l7_bb_pct",
+    "home_bullpen_l7_k_pct",
+    "home_bullpen_l7_whip",
+    "home_bullpen_pitches_last_1d",
+    "home_bullpen_pitches_last_3d",
+    "home_bullpen_prior_apps",
+    "home_bullpen_relievers_used_yesterday",
+    "home_common_games",
+    "home_defense_drs",
+    "home_defense_oaa",
+    "home_extra_innings_prev_game",
+    "home_games_last_14d",
+    "home_h2h_wins_prior",
+    "home_home_games_prior",
+    "home_l10_runs_allowed_pg",
+    "home_l10_runs_scored_pg",
+    "home_l5_runs_allowed_pg",
+    "home_l5_runs_scored_pg",
+    "home_lineup_avg",
+    "home_lineup_avg_exit_velocity",
+    "home_lineup_bb_pct",
+    "home_lineup_prior_pa",
+    "home_lineup_starters_count",
+    "home_losses_prior",
+    "home_ml_close",
+    "home_ml_move_cents",
+    "home_ml_open",
+    "home_ml_pregame",
+    "home_off_ab",
+    "home_off_avg",
+    "home_off_bb_pct",
+    "home_off_doubles",
+    "home_off_hits",
+    "home_off_hr",
+    "home_off_iso",
+    "home_off_l5_avg",
+    "home_off_l5_barrel_pct",
+    "home_off_l5_bb_pct",
+    "home_off_l5_hard_hit_pct",
+    "home_off_l5_hr_per_pa",
+    "home_off_l5_k_pct",
+    "home_off_l5_ops_proxy",
+    "home_off_obp_proxy",
+    "home_off_pa",
+    "home_off_rbi",
+    "home_off_runs",
+    "home_off_singles",
+    "home_off_slg",
+    "home_off_strikeouts",
+    "home_off_triples",
+    "home_off_walks",
+    "home_prev_bullpen_ra9",
+    "home_prev_game_innings",
+    "home_prev_ops_proxy",
+    "home_prev_run_diff_pg",
+    "home_prev_team_ra9",
+    "home_prev_win_pct",
+    "home_runs_allowed_pg",
+    "home_runs_scored_pg",
+    "home_sc_off_avg_exit_velocity",
+    "home_sc_off_chase_rate",
+    "home_sc_off_contact_rate",
+    "home_sc_off_pitches_seen",
+    "home_sc_off_whiff_rate",
+    "home_sp_avg_ev_allowed",
+    "home_sp_avg_ip_per_start",
+    "home_sp_avg_pitches_per_start",
+    "home_sp_avg_release_speed",
+    "home_sp_barrel_pct",
+    "home_sp_bb9",
+    "home_sp_chase_rate",
+    "home_sp_csw_rate",
+    "home_sp_first_pitch_strike_rate",
+    "home_sp_hr_per_pa",
+    "home_sp_innings_prior",
+    "home_sp_k9",
+    "home_sp_l5_avg_ip",
+    "home_sp_l5_avg_pitches",
+    "home_sp_l5_barrel_pct",
+    "home_sp_l5_bb_pct",
+    "home_sp_l5_chase_rate",
+    "home_sp_l5_csw_rate",
+    "home_sp_l5_hard_hit_pct",
+    "home_sp_l5_k_pct",
+    "home_sp_l5_whiff_rate",
+    "home_sp_primary_usage_pct",
+    "home_sp_primary_velocity",
+    "home_sp_primary_whiff_rate",
+    "home_sp_prior_starts",
+    "home_sp_secondary_usage_pct",
+    "home_sp_vs_opp_avg_exit_velocity",
+    "home_sp_vs_opp_barrel_pct",
+    "home_sp_vs_opp_games",
+    "home_sp_vs_opp_hard_hit_pct",
+    "home_sp_vs_opp_pa",
+    "home_streak_signed",
+    "home_vs_sp_hand_avg_exit_velocity",
+    "home_vs_sp_hand_barrel_pct",
+    "home_vs_sp_hand_bb_rate",
+    "home_vs_sp_hand_hit_rate",
+    "home_vs_sp_hand_hr_rate",
+    "home_vs_sp_hand_pa",
+    "home_wins_prior",
+    "no_vig_away_prob_close",
+    "no_vig_away_prob_open",
+    "no_vig_home_prob_close",
+    "no_vig_home_prob_open",
+    "park_games_prior",
+    "park_runs_pg_prior",
+    "temperature_f",
+    "wind_mph"
+  ],
+  "feature_count_categorical": 15,
+  "feature_count_numeric": 113,
+  "folds": [
+    {
+      "month": "2025-05",
+      "train_classifier_n": 434,
+      "train_end": "2025-04-30",
+      "train_regression_n": 456,
+      "validation_end_exclusive": "2025-06-01",
+      "validation_nonpush_n": 399,
+      "validation_start": "2025-05-01"
+    },
+    {
+      "month": "2025-06",
+      "train_classifier_n": 833,
+      "train_end": "2025-05-31",
+      "train_regression_n": 867,
+      "validation_end_exclusive": "2025-07-01",
+      "validation_nonpush_n": 382,
+      "validation_start": "2025-06-01"
+    },
+    {
+      "month": "2025-07",
+      "train_classifier_n": 1215,
+      "train_end": "2025-06-30",
+      "train_regression_n": 1263,
+      "validation_end_exclusive": "2025-08-01",
+      "validation_nonpush_n": 342,
+      "validation_start": "2025-07-01"
+    },
+    {
+      "month": "2025-08",
+      "train_classifier_n": 1557,
+      "train_end": "2025-07-31",
+      "train_regression_n": 1630,
+      "validation_end_exclusive": "2025-09-01",
+      "validation_nonpush_n": 401,
+      "validation_start": "2025-08-01"
+    },
+    {
+      "month": "2025-09",
+      "train_classifier_n": 1958,
+      "train_end": "2025-08-31",
+      "train_regression_n": 2051,
+      "validation_end_exclusive": "2025-10-01",
+      "validation_nonpush_n": 363,
+      "validation_start": "2025-09-01"
+    },
+    {
+      "month": "2026-04",
+      "train_classifier_n": 2385,
+      "train_end": "2026-03-31",
+      "train_regression_n": 2490,
+      "validation_end_exclusive": "2026-05-01",
+      "validation_nonpush_n": 326,
+      "validation_start": "2026-04-01"
+    },
+    {
+      "month": "2026-05",
+      "train_classifier_n": 2711,
+      "train_end": "2026-04-30",
+      "train_regression_n": 2832,
+      "validation_end_exclusive": "2026-06-01",
+      "validation_nonpush_n": 349,
+      "validation_start": "2026-05-01"
+    },
+    {
+      "month": "2026-06",
+      "train_classifier_n": 3060,
+      "train_end": "2026-05-31",
+      "train_regression_n": 3195,
+      "validation_end_exclusive": "2026-07-01",
+      "validation_nonpush_n": 324,
+      "validation_start": "2026-06-01"
+    },
+    {
+      "month": "2026-07",
+      "train_classifier_n": 3384,
+      "train_end": "2026-06-30",
+      "train_regression_n": 3532,
+      "validation_end_exclusive": "2026-08-01",
+      "validation_nonpush_n": 310,
+      "validation_start": "2026-07-01"
+    },
+    {
+      "month": "2026-08",
+      "train_classifier_n": 3694,
+      "train_end": "2026-07-31",
+      "train_regression_n": 3851,
+      "validation_end_exclusive": "2026-09-01",
+      "validation_nonpush_n": 338,
+      "validation_start": "2026-08-01"
+    },
+    {
+      "month": "2026-09",
+      "train_classifier_n": 4032,
+      "train_end": "2026-08-31",
+      "train_regression_n": 4208,
+      "validation_end_exclusive": "2026-10-01",
+      "validation_nonpush_n": 97,
+      "validation_start": "2026-09-01"
+    }
+  ],
+  "forward_2026_09_20_plus_opened": false,
+  "forward_used_for_selection": false,
+  "github_sha_at_run": "977fec34be8c360f53707c84e717a8b6bc768e41",
+  "historical_max_allowed_game_date": "2026-09-18",
+  "market_closeout_state": "REVISIT_SECOND_PASS_BELOW_75",
+  "nonpush_oof_rows": 3631,
+  "numeric_features": [
+    "away_arsenal_matchup_score",
+    "away_away_runs_allowed_pg",
+    "away_away_runs_scored_pg",
+    "away_away_win_pct",
+    "away_bullpen_bb_pct",
+    "away_bullpen_k_pct",
+    "away_bullpen_l7_ra9",
+    "away_bullpen_pitches_last_2d",
+    "away_bullpen_ra9",
+    "away_bullpen_whip",
+    "away_common_win_pct",
+    "away_errors_pg",
+    "away_games_last_7d",
+    "away_games_prior",
+    "away_l10_games",
+    "away_l10_run_diff_pg",
+    "away_l10_win_pct",
+    "away_l5_games",
+    "away_l5_run_diff_pg",
+    "away_l5_win_pct",
+    "away_lineup_barrel_pct",
+    "away_lineup_hard_hit_pct",
+    "away_lineup_k_pct",
+    "away_lineup_ops_proxy",
+    "away_off_k_pct",
+    "away_off_ops_proxy",
+    "away_pyth_win_pct",
+    "away_rest_days",
+    "away_road_trip_game_number",
+    "away_run_diff_pg",
+    "away_sc_off_barrel_pct",
+    "away_sc_off_hard_hit_pct",
+    "away_sp_bb_pct",
+    "away_sp_hard_hit_pct",
+    "away_sp_k_pct",
+    "away_sp_l5_ra9",
+    "away_sp_l5_whip",
+    "away_sp_ra9",
+    "away_sp_starts_prior",
+    "away_sp_vs_opp_bb_pct",
+    "away_sp_vs_opp_k_pct",
+    "away_sp_whiff_rate",
+    "away_sp_whip",
+    "away_timezone_changes_48h",
+    "away_travel_miles_48h",
+    "away_vs_sp_hand_hard_hit_pct",
+    "away_vs_sp_hand_k_rate",
+    "away_win_pct",
+    "bullpen",
+    "close_over_price",
+    "close_total",
+    "close_under_price",
+    "defense_context",
+    "doubleheader_flag",
+    "fatigue_travel",
+    "game_number",
+    "history",
+    "home_arsenal_matchup_score",
+    "home_away",
+    "home_bullpen_bb_pct",
+    "home_bullpen_k_pct",
+    "home_bullpen_l7_ra9",
+    "home_bullpen_pitches_last_2d",
+    "home_bullpen_ra9",
+    "home_bullpen_whip",
+    "home_common_win_pct",
+    "home_errors_pg",
+    "home_games_last_7d",
+    "home_games_prior",
+    "home_h2h_win_pct_prior",
+    "home_home_runs_allowed_pg",
+    "home_home_runs_scored_pg",
+    "home_home_win_pct",
+    "home_l10_games",
+    "home_l10_run_diff_pg",
+    "home_l10_win_pct",
+    "home_l5_games",
+    "home_l5_run_diff_pg",
+    "home_l5_win_pct",
+    "home_lineup_barrel_pct",
+    "home_lineup_hard_hit_pct",
+    "home_lineup_k_pct",
+    "home_lineup_ops_proxy",
+    "home_off_k_pct",
+    "home_off_ops_proxy",
+    "home_pyth_win_pct",
+    "home_rest_days",
+    "home_road_trip_game_number",
+    "home_run_diff_pg",
+    "home_sc_off_barrel_pct",
+    "home_sc_off_hard_hit_pct",
+    "home_sp_bb_pct",
+    "home_sp_hard_hit_pct",
+    "home_sp_k_pct",
+    "home_sp_l5_ra9",
+    "home_sp_l5_whip",
+    "home_sp_ra9",
+    "home_sp_starts_prior",
+    "home_sp_vs_opp_bb_pct",
+    "home_sp_vs_opp_k_pct",
+    "home_sp_whiff_rate",
+    "home_sp_whip",
+    "home_timezone_changes_48h",
+    "home_travel_miles_48h",
+    "home_vs_sp_hand_hard_hit_pct",
+    "home_vs_sp_hand_k_rate",
+    "home_win_pct",
+    "lineup_matchup",
+    "offense",
+    "park_home_win_pct_prior",
+    "recent_form",
+    "starter",
+    "team_strength"
+  ],
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "provider_calls_made": 0,
+  "quarantine_2026_09_19_used": false,
+  "research_only": true,
+  "selected_candidate": {
+    "accuracy": 0.5348258706467661,
+    "architecture": "catboost_total_regression_ensemble",
+    "correct": 430,
+    "coverage_vs_oof_nonpush": 0.22142660424125585,
+    "edge_threshold": 1.0,
+    "lift_vs_selected_majority": 0.0,
+    "market_agreement_required": false,
+    "market_juice_side_accuracy": 0.5509950248756219,
+    "min_month_n": 12,
+    "mode": "over_only",
+    "monthly": {
+      "2025-05": {
+        "accuracy": 0.45263157894736844,
+        "correct": 43,
+        "n": 95
+      },
+      "2025-06": {
+        "accuracy": 0.5304347826086957,
+        "correct": 61,
+        "n": 115
+      },
+      "2025-07": {
+        "accuracy": 0.5394736842105263,
+        "correct": 82,
+        "n": 152
+      },
+      "2025-08": {
+        "accuracy": 0.5272727272727272,
+        "correct": 29,
+        "n": 55
+      },
+      "2025-09": {
+        "accuracy": 0.5871559633027523,
+        "correct": 64,
+        "n": 109
+      },
+      "2026-04": {
+        "accuracy": 0.5866666666666667,
+        "correct": 44,
+        "n": 75
+      },
+      "2026-05": {
+        "accuracy": 0.5,
+        "correct": 29,
+        "n": 58
+      },
+      "2026-06": {
+        "accuracy": 0.6756756756756757,
+        "correct": 25,
+        "n": 37
+      },
+      "2026-07": {
+        "accuracy": 0.45,
+        "correct": 18,
+        "n": 40
+      },
+      "2026-08": {
+        "accuracy": 0.44642857142857145,
+        "correct": 25,
+        "n": 56
+      },
+      "2026-09": {
+        "accuracy": 0.8333333333333334,
+        "correct": 10,
+        "n": 12
+      }
+    },
+    "monthly_accuracy_sd": 0.1095223227870303,
+    "months_with_selections": 11,
+    "n": 804,
+    "prob_threshold": null,
+    "sample_gate_met": true,
+    "selected_majority_baseline": 0.5348258706467661,
+    "target_met_75_plus": false,
+    "worst_month_accuracy": 0.44642857142857145
+  },
+  "source_counts": [
+    {
+      "_market_lineage": "SBR_2025_CLOSE_CONSENSUS",
+      "_season": 2025,
+      "n": 2425
+    },
+    {
+      "_market_lineage": "SPORTSDATAIO_CONSENSUS_LEGACY_V37",
+      "_season": 2026,
+      "n": 1576
+    },
+    {
+      "_market_lineage": "STORED_THE_ODDS_API_CROSSBOOK_CONSENSUS_V1",
+      "_season": 2026,
+      "n": 310
+    }
+  ],
+  "source_rows": 4311,
+  "specs": [
+    {
+      "depth": 4,
+      "iterations": 350,
+      "l2_leaf_reg": 7.0,
+      "learning_rate": 0.035,
+      "random_strength": 1.0
+    },
+    {
+      "depth": 6,
+      "iterations": 350,
+      "l2_leaf_reg": 7.0,
+      "learning_rate": 0.035,
+      "random_strength": 1.0
+    }
+  ],
+  "target_met_75_plus": false,
+  "top_candidates": [
+    {
+      "accuracy": 0.5348258706467661,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 430,
+      "coverage_vs_oof_nonpush": 0.22142660424125585,
+      "edge_threshold": 1.0,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5509950248756219,
+      "min_month_n": 12,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.45263157894736844,
+          "correct": 43,
+          "n": 95
+        },
+        "2025-06": {
+          "accuracy": 0.5304347826086957,
+          "correct": 61,
+          "n": 115
+        },
+        "2025-07": {
+          "accuracy": 0.5394736842105263,
+          "correct": 82,
+          "n": 152
+        },
+        "2025-08": {
+          "accuracy": 0.5272727272727272,
+          "correct": 29,
+          "n": 55
+        },
+        "2025-09": {
+          "accuracy": 0.5871559633027523,
+          "correct": 64,
+          "n": 109
+        },
+        "2026-04": {
+          "accuracy": 0.5866666666666667,
+          "correct": 44,
+          "n": 75
+        },
+        "2026-05": {
+          "accuracy": 0.5,
+          "correct": 29,
+          "n": 58
+        },
+        "2026-06": {
+          "accuracy": 0.6756756756756757,
+          "correct": 25,
+          "n": 37
+        },
+        "2026-07": {
+          "accuracy": 0.45,
+          "correct": 18,
+          "n": 40
+        },
+        "2026-08": {
+          "accuracy": 0.44642857142857145,
+          "correct": 25,
+          "n": 56
+        },
+        "2026-09": {
+          "accuracy": 0.8333333333333334,
+          "correct": 10,
+          "n": 12
+        }
+      },
+      "monthly_accuracy_sd": 0.1095223227870303,
+      "months_with_selections": 11,
+      "n": 804,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5348258706467661,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.44642857142857145
+    },
+    {
+      "accuracy": 0.5091370558375634,
+      "architecture": "catboost_classifier_ensemble",
+      "correct": 1003,
+      "coverage_vs_oof_nonpush": 0.542550261635913,
+      "edge_threshold": null,
+      "lift_vs_selected_majority": -0.011675126903553323,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5134722928317235,
+      "min_month_n": 35,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.47368421052631576,
+          "correct": 144,
+          "n": 304
+        },
+        "2025-06": {
+          "accuracy": 0.5446808510638298,
+          "correct": 128,
+          "n": 235
+        },
+        "2025-07": {
+          "accuracy": 0.545045045045045,
+          "correct": 121,
+          "n": 222
+        },
+        "2025-08": {
+          "accuracy": 0.5107296137339056,
+          "correct": 119,
+          "n": 233
+        },
+        "2025-09": {
+          "accuracy": 0.5714285714285714,
+          "correct": 108,
+          "n": 189
+        },
+        "2026-04": {
+          "accuracy": 0.4368421052631579,
+          "correct": 83,
+          "n": 190
+        },
+        "2026-05": {
+          "accuracy": 0.5028901734104047,
+          "correct": 87,
+          "n": 173
+        },
+        "2026-06": {
+          "accuracy": 0.47580645161290325,
+          "correct": 59,
+          "n": 124
+        },
+        "2026-07": {
+          "accuracy": 0.5,
+          "correct": 57,
+          "n": 114
+        },
+        "2026-08": {
+          "accuracy": 0.5364238410596026,
+          "correct": 81,
+          "n": 151
+        },
+        "2026-09": {
+          "accuracy": 0.45714285714285713,
+          "correct": 16,
+          "n": 35
+        }
+      },
+      "monthly_accuracy_sd": 0.03978282555635797,
+      "months_with_selections": 11,
+      "n": 1970,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5208121827411167,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4368421052631579
+    },
+    {
+      "accuracy": 0.5521821631878557,
+      "architecture": "catboost_classifier_ensemble",
+      "correct": 291,
+      "coverage_vs_oof_nonpush": 0.14513908014321122,
+      "edge_threshold": null,
+      "lift_vs_selected_majority": -1.1102230246251565e-16,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5038022813688213,
+      "min_month_n": 5,
+      "mode": "under_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.5638297872340425,
+          "correct": 53,
+          "n": 94
+        },
+        "2025-06": {
+          "accuracy": 0.6233766233766234,
+          "correct": 48,
+          "n": 77
+        },
+        "2025-07": {
+          "accuracy": 0.5684210526315789,
+          "correct": 54,
+          "n": 95
+        },
+        "2025-08": {
+          "accuracy": 0.45569620253164556,
+          "correct": 36,
+          "n": 79
+        },
+        "2025-09": {
+          "accuracy": 0.7037037037037037,
+          "correct": 19,
+          "n": 27
+        },
+        "2026-04": {
+          "accuracy": 0.453125,
+          "correct": 29,
+          "n": 64
+        },
+        "2026-05": {
+          "accuracy": 0.6216216216216216,
+          "correct": 23,
+          "n": 37
+        },
+        "2026-06": {
+          "accuracy": 0.43478260869565216,
+          "correct": 10,
+          "n": 23
+        },
+        "2026-07": {
+          "accuracy": 0.6,
+          "correct": 3,
+          "n": 5
+        },
+        "2026-08": {
+          "accuracy": 0.6111111111111112,
+          "correct": 11,
+          "n": 18
+        },
+        "2026-09": {
+          "accuracy": 0.625,
+          "correct": 5,
+          "n": 8
+        }
+      },
+      "monthly_accuracy_sd": 0.08204609204312979,
+      "months_with_selections": 11,
+      "n": 527,
+      "prob_threshold": 0.6,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5521821631878558,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.43478260869565216
+    },
+    {
+      "accuracy": 0.5323325635103926,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 461,
+      "coverage_vs_oof_nonpush": 0.23850179014045716,
+      "edge_threshold": 1.0,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5468208092485549,
+      "min_month_n": 13,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4537037037037037,
+          "correct": 49,
+          "n": 108
+        },
+        "2025-06": {
+          "accuracy": 0.5163934426229508,
+          "correct": 63,
+          "n": 122
+        },
+        "2025-07": {
+          "accuracy": 0.5394736842105263,
+          "correct": 82,
+          "n": 152
+        },
+        "2025-08": {
+          "accuracy": 0.5342465753424658,
+          "correct": 39,
+          "n": 73
+        },
+        "2025-09": {
+          "accuracy": 0.6017699115044248,
+          "correct": 68,
+          "n": 113
+        },
+        "2026-04": {
+          "accuracy": 0.5609756097560976,
+          "correct": 46,
+          "n": 82
+        },
+        "2026-05": {
+          "accuracy": 0.4838709677419355,
+          "correct": 30,
+          "n": 62
+        },
+        "2026-06": {
+          "accuracy": 0.6976744186046512,
+          "correct": 30,
+          "n": 43
+        },
+        "2026-07": {
+          "accuracy": 0.42857142857142855,
+          "correct": 18,
+          "n": 42
+        },
+        "2026-08": {
+          "accuracy": 0.44642857142857145,
+          "correct": 25,
+          "n": 56
+        },
+        "2026-09": {
+          "accuracy": 0.8461538461538461,
+          "correct": 11,
+          "n": 13
+        }
+      },
+      "monthly_accuracy_sd": 0.1177835024610074,
+      "months_with_selections": 11,
+      "n": 866,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5323325635103926,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.42857142857142855
+    },
+    {
+      "accuracy": 0.5125,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 41,
+      "coverage_vs_oof_nonpush": 0.02203249793445332,
+      "edge_threshold": 0.5,
+      "lift_vs_selected_majority": -0.012500000000000067,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5375,
+      "min_month_n": 1,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4807692307692308,
+          "correct": 25,
+          "n": 52
+        },
+        "2025-06": {
+          "accuracy": 0.5,
+          "correct": 3,
+          "n": 6
+        },
+        "2025-07": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        },
+        "2025-08": {
+          "accuracy": 0.5,
+          "correct": 1,
+          "n": 2
+        },
+        "2025-09": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        },
+        "2026-04": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4,
+          "n": 7
+        },
+        "2026-05": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.21901049966035438,
+      "months_with_selections": 8,
+      "n": 80,
+      "prob_threshold": 0.7,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.525,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.42857142857142855
+    },
+    {
+      "accuracy": 0.4857142857142857,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 34,
+      "coverage_vs_oof_nonpush": 0.019278435692646655,
+      "edge_threshold": 0.75,
+      "lift_vs_selected_majority": -0.04285714285714287,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5285714285714286,
+      "min_month_n": 1,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.42857142857142855,
+          "correct": 18,
+          "n": 42
+        },
+        "2025-06": {
+          "accuracy": 0.5,
+          "correct": 3,
+          "n": 6
+        },
+        "2025-07": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        },
+        "2025-08": {
+          "accuracy": 0.5,
+          "correct": 1,
+          "n": 2
+        },
+        "2025-09": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        },
+        "2026-04": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4,
+          "n": 7
+        },
+        "2026-05": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.2247713549138233,
+      "months_with_selections": 8,
+      "n": 70,
+      "prob_threshold": 0.7,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5285714285714286,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.42857142857142855
+    },
+    {
+      "accuracy": 0.4901315789473684,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 596,
+      "coverage_vs_oof_nonpush": 0.3348939686036904,
+      "edge_threshold": 0.75,
+      "lift_vs_selected_majority": -0.01973684210526322,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.522203947368421,
+      "min_month_n": 23,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4266666666666667,
+          "correct": 64,
+          "n": 150
+        },
+        "2025-06": {
+          "accuracy": 0.503448275862069,
+          "correct": 73,
+          "n": 145
+        },
+        "2025-07": {
+          "accuracy": 0.5077720207253886,
+          "correct": 98,
+          "n": 193
+        },
+        "2025-08": {
+          "accuracy": 0.4823529411764706,
+          "correct": 41,
+          "n": 85
+        },
+        "2025-09": {
+          "accuracy": 0.5269461077844312,
+          "correct": 88,
+          "n": 167
+        },
+        "2026-04": {
+          "accuracy": 0.5045871559633027,
+          "correct": 55,
+          "n": 109
+        },
+        "2026-05": {
+          "accuracy": 0.4752475247524752,
+          "correct": 48,
+          "n": 101
+        },
+        "2026-06": {
+          "accuracy": 0.5217391304347826,
+          "correct": 36,
+          "n": 69
+        },
+        "2026-07": {
+          "accuracy": 0.4634146341463415,
+          "correct": 38,
+          "n": 82
+        },
+        "2026-08": {
+          "accuracy": 0.43478260869565216,
+          "correct": 40,
+          "n": 92
+        },
+        "2026-09": {
+          "accuracy": 0.6521739130434783,
+          "correct": 15,
+          "n": 23
+        }
+      },
+      "monthly_accuracy_sd": 0.0574792683597182,
+      "months_with_selections": 11,
+      "n": 1216,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5098684210526316,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4266666666666667
+    },
+    {
+      "accuracy": 0.48088531187122735,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 956,
+      "coverage_vs_oof_nonpush": 0.547507573671165,
+      "edge_threshold": 0.5,
+      "lift_vs_selected_majority": -0.038229376257545356,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5191339375629406,
+      "min_month_n": 39,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.42916666666666664,
+          "correct": 103,
+          "n": 240
+        },
+        "2025-06": {
+          "accuracy": 0.5106382978723404,
+          "correct": 120,
+          "n": 235
+        },
+        "2025-07": {
+          "accuracy": 0.525691699604743,
+          "correct": 133,
+          "n": 253
+        },
+        "2025-08": {
+          "accuracy": 0.489010989010989,
+          "correct": 89,
+          "n": 182
+        },
+        "2025-09": {
+          "accuracy": 0.49122807017543857,
+          "correct": 112,
+          "n": 228
+        },
+        "2026-04": {
+          "accuracy": 0.46994535519125685,
+          "correct": 86,
+          "n": 183
+        },
+        "2026-05": {
+          "accuracy": 0.4419889502762431,
+          "correct": 80,
+          "n": 181
+        },
+        "2026-06": {
+          "accuracy": 0.5144927536231884,
+          "correct": 71,
+          "n": 138
+        },
+        "2026-07": {
+          "accuracy": 0.4236111111111111,
+          "correct": 61,
+          "n": 144
+        },
+        "2026-08": {
+          "accuracy": 0.4666666666666667,
+          "correct": 77,
+          "n": 165
+        },
+        "2026-09": {
+          "accuracy": 0.6153846153846154,
+          "correct": 24,
+          "n": 39
+        }
+      },
+      "monthly_accuracy_sd": 0.05167197044126454,
+      "months_with_selections": 11,
+      "n": 1988,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5191146881287727,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4236111111111111
+    },
+    {
+      "accuracy": 0.48490004253509145,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 1140,
+      "coverage_vs_oof_nonpush": 0.6474800330487469,
+      "edge_threshold": 0.25,
+      "lift_vs_selected_majority": -0.030199914929817107,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5202213707960834,
+      "min_month_n": 56,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.43700787401574803,
+          "correct": 111,
+          "n": 254
+        },
+        "2025-06": {
+          "accuracy": 0.5081967213114754,
+          "correct": 124,
+          "n": 244
+        },
+        "2025-07": {
+          "accuracy": 0.5209790209790209,
+          "correct": 149,
+          "n": 286
+        },
+        "2025-08": {
+          "accuracy": 0.5177664974619289,
+          "correct": 102,
+          "n": 197
+        },
+        "2025-09": {
+          "accuracy": 0.46153846153846156,
+          "correct": 126,
+          "n": 273
+        },
+        "2026-04": {
+          "accuracy": 0.5252525252525253,
+          "correct": 104,
+          "n": 198
+        },
+        "2026-05": {
+          "accuracy": 0.4577777777777778,
+          "correct": 103,
+          "n": 225
+        },
+        "2026-06": {
+          "accuracy": 0.5195530726256983,
+          "correct": 93,
+          "n": 179
+        },
+        "2026-07": {
+          "accuracy": 0.4225352112676056,
+          "correct": 90,
+          "n": 213
+        },
+        "2026-08": {
+          "accuracy": 0.4557522123893805,
+          "correct": 103,
+          "n": 226
+        },
+        "2026-09": {
+          "accuracy": 0.625,
+          "correct": 35,
+          "n": 56
+        }
+      },
+      "monthly_accuracy_sd": 0.05430683703422142,
+      "months_with_selections": 11,
+      "n": 2351,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5150999574649086,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4225352112676056
+    },
+    {
+      "accuracy": 0.4864767399927876,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 1349,
+      "coverage_vs_oof_nonpush": 0.7637014596529882,
+      "edge_threshold": 0.25,
+      "lift_vs_selected_majority": -0.025604038946988816,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5133574007220216,
+      "min_month_n": 63,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.445859872611465,
+          "correct": 140,
+          "n": 314
+        },
+        "2025-06": {
+          "accuracy": 0.5080385852090032,
+          "correct": 158,
+          "n": 311
+        },
+        "2025-07": {
+          "accuracy": 0.5252525252525253,
+          "correct": 156,
+          "n": 297
+        },
+        "2025-08": {
+          "accuracy": 0.5104895104895105,
+          "correct": 146,
+          "n": 286
+        },
+        "2025-09": {
+          "accuracy": 0.4750830564784053,
+          "correct": 143,
+          "n": 301
+        },
+        "2026-04": {
+          "accuracy": 0.4854771784232365,
+          "correct": 117,
+          "n": 241
+        },
+        "2026-05": {
+          "accuracy": 0.4559386973180077,
+          "correct": 119,
+          "n": 261
+        },
+        "2026-06": {
+          "accuracy": 0.5205479452054794,
+          "correct": 114,
+          "n": 219
+        },
+        "2026-07": {
+          "accuracy": 0.4217391304347826,
+          "correct": 97,
+          "n": 230
+        },
+        "2026-08": {
+          "accuracy": 0.472,
+          "correct": 118,
+          "n": 250
+        },
+        "2026-09": {
+          "accuracy": 0.6507936507936508,
+          "correct": 41,
+          "n": 63
+        }
+      },
+      "monthly_accuracy_sd": 0.05761239264633367,
+      "months_with_selections": 11,
+      "n": 2773,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5120807789397764,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4217391304347826
+    },
+    {
+      "accuracy": 0.5236567762630313,
+      "architecture": "catboost_classifier_ensemble",
+      "correct": 653,
+      "coverage_vs_oof_nonpush": 0.34343156155329113,
+      "edge_threshold": null,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5160771704180064,
+      "min_month_n": 31,
+      "mode": "under_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.5177304964539007,
+          "correct": 73,
+          "n": 141
+        },
+        "2025-06": {
+          "accuracy": 0.5414012738853503,
+          "correct": 85,
+          "n": 157
+        },
+        "2025-07": {
+          "accuracy": 0.5466666666666666,
+          "correct": 82,
+          "n": 150
+        },
+        "2025-08": {
+          "accuracy": 0.5141242937853108,
+          "correct": 91,
+          "n": 177
+        },
+        "2025-09": {
+          "accuracy": 0.6547619047619048,
+          "correct": 55,
+          "n": 84
+        },
+        "2026-04": {
+          "accuracy": 0.42105263157894735,
+          "correct": 56,
+          "n": 133
+        },
+        "2026-05": {
+          "accuracy": 0.54,
+          "correct": 54,
+          "n": 100
+        },
+        "2026-06": {
+          "accuracy": 0.45569620253164556,
+          "correct": 36,
+          "n": 79
+        },
+        "2026-07": {
+          "accuracy": 0.5573770491803278,
+          "correct": 34,
+          "n": 61
+        },
+        "2026-08": {
+          "accuracy": 0.5373134328358209,
+          "correct": 72,
+          "n": 134
+        },
+        "2026-09": {
+          "accuracy": 0.4838709677419355,
+          "correct": 15,
+          "n": 31
+        }
+      },
+      "monthly_accuracy_sd": 0.05757999215131612,
+      "months_with_selections": 11,
+      "n": 1247,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5236567762630313,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.42105263157894735
+    },
+    {
+      "accuracy": 0.49211119459053343,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 655,
+      "coverage_vs_oof_nonpush": 0.36656568438446707,
+      "edge_threshold": 0.75,
+      "lift_vs_selected_majority": -0.018031555221637907,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5210526315789473,
+      "min_month_n": 25,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.42105263157894735,
+          "correct": 72,
+          "n": 171
+        },
+        "2025-06": {
+          "accuracy": 0.5060240963855421,
+          "correct": 84,
+          "n": 166
+        },
+        "2025-07": {
+          "accuracy": 0.5077720207253886,
+          "correct": 98,
+          "n": 193
+        },
+        "2025-08": {
+          "accuracy": 0.46956521739130436,
+          "correct": 54,
+          "n": 115
+        },
+        "2025-09": {
+          "accuracy": 0.5406976744186046,
+          "correct": 93,
+          "n": 172
+        },
+        "2026-04": {
+          "accuracy": 0.49586776859504134,
+          "correct": 60,
+          "n": 121
+        },
+        "2026-05": {
+          "accuracy": 0.4727272727272727,
+          "correct": 52,
+          "n": 110
+        },
+        "2026-06": {
+          "accuracy": 0.5454545454545454,
+          "correct": 42,
+          "n": 77
+        },
+        "2026-07": {
+          "accuracy": 0.47126436781609193,
+          "correct": 41,
+          "n": 87
+        },
+        "2026-08": {
+          "accuracy": 0.44680851063829785,
+          "correct": 42,
+          "n": 94
+        },
+        "2026-09": {
+          "accuracy": 0.68,
+          "correct": 17,
+          "n": 25
+        }
+      },
+      "monthly_accuracy_sd": 0.06571026397166271,
+      "months_with_selections": 11,
+      "n": 1331,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5101427498121713,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.42105263157894735
+    },
+    {
+      "accuracy": 0.5699300699300699,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 163,
+      "coverage_vs_oof_nonpush": 0.07876618011567062,
+      "edge_threshold": 1.5,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.6013986013986014,
+      "min_month_n": 3,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4473684210526316,
+          "correct": 17,
+          "n": 38
+        },
+        "2025-06": {
+          "accuracy": 0.5961538461538461,
+          "correct": 31,
+          "n": 52
+        },
+        "2025-07": {
+          "accuracy": 0.5285714285714286,
+          "correct": 37,
+          "n": 70
+        },
+        "2025-08": {
+          "accuracy": 0.6153846153846154,
+          "correct": 8,
+          "n": 13
+        },
+        "2025-09": {
+          "accuracy": 0.631578947368421,
+          "correct": 24,
+          "n": 38
+        },
+        "2026-04": {
+          "accuracy": 0.6363636363636364,
+          "correct": 21,
+          "n": 33
+        },
+        "2026-05": {
+          "accuracy": 0.7,
+          "correct": 7,
+          "n": 10
+        },
+        "2026-06": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4,
+          "n": 7
+        },
+        "2026-07": {
+          "accuracy": 0.6,
+          "correct": 6,
+          "n": 10
+        },
+        "2026-08": {
+          "accuracy": 0.4166666666666667,
+          "correct": 5,
+          "n": 12
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        }
+      },
+      "monthly_accuracy_sd": 0.14570345254882888,
+      "months_with_selections": 11,
+      "n": 286,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5699300699300699,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4166666666666667
+    },
+    {
+      "accuracy": 0.5668789808917197,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 178,
+      "coverage_vs_oof_nonpush": 0.08647755439272928,
+      "edge_threshold": 1.5,
+      "lift_vs_selected_majority": 0.006369426751592355,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5955414012738853,
+      "min_month_n": 3,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4418604651162791,
+          "correct": 19,
+          "n": 43
+        },
+        "2025-06": {
+          "accuracy": 0.5818181818181818,
+          "correct": 32,
+          "n": 55
+        },
+        "2025-07": {
+          "accuracy": 0.5285714285714286,
+          "correct": 37,
+          "n": 70
+        },
+        "2025-08": {
+          "accuracy": 0.5909090909090909,
+          "correct": 13,
+          "n": 22
+        },
+        "2025-09": {
+          "accuracy": 0.6585365853658537,
+          "correct": 27,
+          "n": 41
+        },
+        "2026-04": {
+          "accuracy": 0.5833333333333334,
+          "correct": 21,
+          "n": 36
+        },
+        "2026-05": {
+          "accuracy": 0.7,
+          "correct": 7,
+          "n": 10
+        },
+        "2026-06": {
+          "accuracy": 0.6666666666666666,
+          "correct": 8,
+          "n": 12
+        },
+        "2026-07": {
+          "accuracy": 0.6,
+          "correct": 6,
+          "n": 10
+        },
+        "2026-08": {
+          "accuracy": 0.4166666666666667,
+          "correct": 5,
+          "n": 12
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        }
+      },
+      "monthly_accuracy_sd": 0.1476193942823011,
+      "months_with_selections": 11,
+      "n": 314,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5605095541401274,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4166666666666667
+    },
+    {
+      "accuracy": 0.5178082191780822,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 189,
+      "coverage_vs_oof_nonpush": 0.10052327182594327,
+      "edge_threshold": 1.0,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.536986301369863,
+      "min_month_n": 1,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4264705882352941,
+          "correct": 29,
+          "n": 68
+        },
+        "2025-06": {
+          "accuracy": 0.5641025641025641,
+          "correct": 22,
+          "n": 39
+        },
+        "2025-07": {
+          "accuracy": 0.5166666666666667,
+          "correct": 31,
+          "n": 60
+        },
+        "2025-08": {
+          "accuracy": 0.4230769230769231,
+          "correct": 11,
+          "n": 26
+        },
+        "2025-09": {
+          "accuracy": 0.5901639344262295,
+          "correct": 36,
+          "n": 61
+        },
+        "2026-04": {
+          "accuracy": 0.5384615384615384,
+          "correct": 21,
+          "n": 39
+        },
+        "2026-05": {
+          "accuracy": 0.5185185185185185,
+          "correct": 14,
+          "n": 27
+        },
+        "2026-06": {
+          "accuracy": 0.7142857142857143,
+          "correct": 10,
+          "n": 14
+        },
+        "2026-07": {
+          "accuracy": 0.5,
+          "correct": 9,
+          "n": 18
+        },
+        "2026-08": {
+          "accuracy": 0.4166666666666667,
+          "correct": 5,
+          "n": 12
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.1603696224454069,
+      "months_with_selections": 11,
+      "n": 365,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5178082191780822,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4166666666666667
+    },
+    {
+      "accuracy": 0.5169082125603864,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 214,
+      "coverage_vs_oof_nonpush": 0.11401817681079593,
+      "edge_threshold": 1.0,
+      "lift_vs_selected_majority": 0.0024154589371980784,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5278450363196125,
+      "min_month_n": 2,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4375,
+          "correct": 35,
+          "n": 80
+        },
+        "2025-06": {
+          "accuracy": 0.5348837209302325,
+          "correct": 23,
+          "n": 43
+        },
+        "2025-07": {
+          "accuracy": 0.5166666666666667,
+          "correct": 31,
+          "n": 60
+        },
+        "2025-08": {
+          "accuracy": 0.4883720930232558,
+          "correct": 21,
+          "n": 43
+        },
+        "2025-09": {
+          "accuracy": 0.6031746031746031,
+          "correct": 38,
+          "n": 63
+        },
+        "2026-04": {
+          "accuracy": 0.5111111111111111,
+          "correct": 23,
+          "n": 45
+        },
+        "2026-05": {
+          "accuracy": 0.5,
+          "correct": 15,
+          "n": 30
+        },
+        "2026-06": {
+          "accuracy": 0.7058823529411765,
+          "correct": 12,
+          "n": 17
+        },
+        "2026-07": {
+          "accuracy": 0.47368421052631576,
+          "correct": 9,
+          "n": 19
+        },
+        "2026-08": {
+          "accuracy": 0.4166666666666667,
+          "correct": 5,
+          "n": 12
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 2,
+          "n": 2
+        }
+      },
+      "monthly_accuracy_sd": 0.15762588854719145,
+      "months_with_selections": 11,
+      "n": 414,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5144927536231884,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4166666666666667
+    },
+    {
+      "accuracy": 0.47853107344632767,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 847,
+      "coverage_vs_oof_nonpush": 0.48746901679977966,
+      "edge_threshold": 0.5,
+      "lift_vs_selected_majority": -0.042937853107344603,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5211984171848502,
+      "min_month_n": 35,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.41545893719806765,
+          "correct": 86,
+          "n": 207
+        },
+        "2025-06": {
+          "accuracy": 0.5151515151515151,
+          "correct": 102,
+          "n": 198
+        },
+        "2025-07": {
+          "accuracy": 0.5222672064777328,
+          "correct": 129,
+          "n": 247
+        },
+        "2025-08": {
+          "accuracy": 0.48905109489051096,
+          "correct": 67,
+          "n": 137
+        },
+        "2025-09": {
+          "accuracy": 0.48372093023255813,
+          "correct": 104,
+          "n": 215
+        },
+        "2026-04": {
+          "accuracy": 0.4968152866242038,
+          "correct": 78,
+          "n": 157
+        },
+        "2026-05": {
+          "accuracy": 0.4444444444444444,
+          "correct": 72,
+          "n": 162
+        },
+        "2026-06": {
+          "accuracy": 0.5042016806722689,
+          "correct": 60,
+          "n": 119
+        },
+        "2026-07": {
+          "accuracy": 0.4264705882352941,
+          "correct": 58,
+          "n": 136
+        },
+        "2026-08": {
+          "accuracy": 0.445859872611465,
+          "correct": 70,
+          "n": 157
+        },
+        "2026-09": {
+          "accuracy": 0.6,
+          "correct": 21,
+          "n": 35
+        }
+      },
+      "monthly_accuracy_sd": 0.0499828947263309,
+      "months_with_selections": 11,
+      "n": 1770,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5214689265536723,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.41545893719806765
+    },
+    {
+      "accuracy": 0.5773809523809523,
+      "architecture": "catboost_classifier_regression_market_agreement",
+      "correct": 97,
+      "coverage_vs_oof_nonpush": 0.04626824566235197,
+      "edge_threshold": 1.25,
+      "lift_vs_selected_majority": -0.005952380952381042,
+      "market_agreement_required": true,
+      "market_juice_side_accuracy": 0.5773809523809523,
+      "min_month_n": 5,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4117647058823529,
+          "correct": 14,
+          "n": 34
+        },
+        "2025-06": {
+          "accuracy": 0.6111111111111112,
+          "correct": 11,
+          "n": 18
+        },
+        "2025-07": {
+          "accuracy": 0.5483870967741935,
+          "correct": 17,
+          "n": 31
+        },
+        "2025-08": {
+          "accuracy": 0.5,
+          "correct": 6,
+          "n": 12
+        },
+        "2025-09": {
+          "accuracy": 0.7692307692307693,
+          "correct": 20,
+          "n": 26
+        },
+        "2026-04": {
+          "accuracy": 0.65,
+          "correct": 13,
+          "n": 20
+        },
+        "2026-05": {
+          "accuracy": 0.6,
+          "correct": 3,
+          "n": 5
+        },
+        "2026-06": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4,
+          "n": 7
+        },
+        "2026-07": {
+          "accuracy": 0.75,
+          "correct": 6,
+          "n": 8
+        },
+        "2026-08": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        }
+      },
+      "monthly_accuracy_sd": 0.11380631919705837,
+      "months_with_selections": 10,
+      "n": 168,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5833333333333334,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4117647058823529
+    },
+    {
+      "accuracy": 0.5232558139534884,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 45,
+      "coverage_vs_oof_nonpush": 0.023684935279537318,
+      "edge_threshold": 0.75,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.4588235294117647,
+      "min_month_n": 2,
+      "mode": "under_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4117647058823529,
+          "correct": 7,
+          "n": 17
+        },
+        "2025-06": {
+          "accuracy": 0.5833333333333334,
+          "correct": 7,
+          "n": 12
+        },
+        "2025-08": {
+          "accuracy": 0.5,
+          "correct": 13,
+          "n": 26
+        },
+        "2025-09": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        },
+        "2026-04": {
+          "accuracy": 0.45454545454545453,
+          "correct": 5,
+          "n": 11
+        },
+        "2026-05": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        },
+        "2026-06": {
+          "accuracy": 0.5,
+          "correct": 2,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 0.5,
+          "correct": 1,
+          "n": 2
+        },
+        "2026-08": {
+          "accuracy": 1.0,
+          "correct": 2,
+          "n": 2
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 2,
+          "n": 2
+        }
+      },
+      "monthly_accuracy_sd": 0.2412364878863189,
+      "months_with_selections": 10,
+      "n": 86,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5232558139534884,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4117647058823529
+    },
+    {
+      "accuracy": 0.4789915966386555,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 57,
+      "coverage_vs_oof_nonpush": 0.03277334067749931,
+      "edge_threshold": 1.0,
+      "lift_vs_selected_majority": -0.02521008403361341,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.4745762711864407,
+      "min_month_n": 1,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.41509433962264153,
+          "correct": 22,
+          "n": 53
+        },
+        "2025-06": {
+          "accuracy": 0.4117647058823529,
+          "correct": 7,
+          "n": 17
+        },
+        "2025-07": {
+          "accuracy": 0.5,
+          "correct": 7,
+          "n": 14
+        },
+        "2025-08": {
+          "accuracy": 0.4166666666666667,
+          "correct": 5,
+          "n": 12
+        },
+        "2025-09": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-04": {
+          "accuracy": 0.6,
+          "correct": 6,
+          "n": 10
+        },
+        "2026-05": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4,
+          "n": 6
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.23714740973966214,
+      "months_with_selections": 10,
+      "n": 119,
+      "prob_threshold": 0.65,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5042016806722689,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4117647058823529
+    },
+    {
+      "accuracy": 0.5870967741935483,
+      "architecture": "catboost_classifier_regression_market_agreement",
+      "correct": 91,
+      "coverage_vs_oof_nonpush": 0.04268796474800331,
+      "edge_threshold": 1.25,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": true,
+      "market_juice_side_accuracy": 0.5870967741935483,
+      "min_month_n": 5,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.40625,
+          "correct": 13,
+          "n": 32
+        },
+        "2025-06": {
+          "accuracy": 0.5882352941176471,
+          "correct": 10,
+          "n": 17
+        },
+        "2025-07": {
+          "accuracy": 0.5483870967741935,
+          "correct": 17,
+          "n": 31
+        },
+        "2025-08": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4,
+          "n": 7
+        },
+        "2025-09": {
+          "accuracy": 0.75,
+          "correct": 18,
+          "n": 24
+        },
+        "2026-04": {
+          "accuracy": 0.7222222222222222,
+          "correct": 13,
+          "n": 18
+        },
+        "2026-05": {
+          "accuracy": 0.6,
+          "correct": 3,
+          "n": 5
+        },
+        "2026-06": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4,
+          "n": 6
+        },
+        "2026-07": {
+          "accuracy": 0.75,
+          "correct": 6,
+          "n": 8
+        },
+        "2026-08": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        }
+      },
+      "monthly_accuracy_sd": 0.1161151507670724,
+      "months_with_selections": 10,
+      "n": 155,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5870967741935483,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.40625
+    },
+    {
+      "accuracy": 0.5609756097560976,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 276,
+      "coverage_vs_oof_nonpush": 0.1354998622968879,
+      "edge_threshold": 1.25,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5772357723577236,
+      "min_month_n": 5,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.47619047619047616,
+          "correct": 30,
+          "n": 63
+        },
+        "2025-06": {
+          "accuracy": 0.5569620253164557,
+          "correct": 44,
+          "n": 79
+        },
+        "2025-07": {
+          "accuracy": 0.5677966101694916,
+          "correct": 67,
+          "n": 118
+        },
+        "2025-08": {
+          "accuracy": 0.631578947368421,
+          "correct": 12,
+          "n": 19
+        },
+        "2025-09": {
+          "accuracy": 0.6567164179104478,
+          "correct": 44,
+          "n": 67
+        },
+        "2026-04": {
+          "accuracy": 0.6136363636363636,
+          "correct": 27,
+          "n": 44
+        },
+        "2026-05": {
+          "accuracy": 0.5,
+          "correct": 14,
+          "n": 28
+        },
+        "2026-06": {
+          "accuracy": 0.5789473684210527,
+          "correct": 11,
+          "n": 19
+        },
+        "2026-07": {
+          "accuracy": 0.5,
+          "correct": 9,
+          "n": 18
+        },
+        "2026-08": {
+          "accuracy": 0.40625,
+          "correct": 13,
+          "n": 32
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 5,
+          "n": 5
+        }
+      },
+      "monthly_accuracy_sd": 0.14754400279915347,
+      "months_with_selections": 11,
+      "n": 492,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5609756097560976,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.40625
+    },
+    {
+      "accuracy": 0.5574387947269304,
+      "architecture": "catboost_total_regression_ensemble",
+      "correct": 296,
+      "coverage_vs_oof_nonpush": 0.14624070503993392,
+      "edge_threshold": 1.25,
+      "lift_vs_selected_majority": 0.0018832391713747842,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.569811320754717,
+      "min_month_n": 6,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4657534246575342,
+          "correct": 34,
+          "n": 73
+        },
+        "2025-06": {
+          "accuracy": 0.5487804878048781,
+          "correct": 45,
+          "n": 82
+        },
+        "2025-07": {
+          "accuracy": 0.5677966101694916,
+          "correct": 67,
+          "n": 118
+        },
+        "2025-08": {
+          "accuracy": 0.5806451612903226,
+          "correct": 18,
+          "n": 31
+        },
+        "2025-09": {
+          "accuracy": 0.676056338028169,
+          "correct": 48,
+          "n": 71
+        },
+        "2026-04": {
+          "accuracy": 0.574468085106383,
+          "correct": 27,
+          "n": 47
+        },
+        "2026-05": {
+          "accuracy": 0.5,
+          "correct": 14,
+          "n": 28
+        },
+        "2026-06": {
+          "accuracy": 0.625,
+          "correct": 15,
+          "n": 24
+        },
+        "2026-07": {
+          "accuracy": 0.47368421052631576,
+          "correct": 9,
+          "n": 19
+        },
+        "2026-08": {
+          "accuracy": 0.40625,
+          "correct": 13,
+          "n": 32
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 6,
+          "n": 6
+        }
+      },
+      "monthly_accuracy_sd": 0.1506400037444883,
+      "months_with_selections": 11,
+      "n": 531,
+      "prob_threshold": null,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5555555555555556,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.40625
+    },
+    {
+      "accuracy": 0.49355432780847147,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 268,
+      "coverage_vs_oof_nonpush": 0.1495455797301019,
+      "edge_threshold": 0.75,
+      "lift_vs_selected_majority": -0.020257826887661146,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5055350553505535,
+      "min_month_n": 4,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.40540540540540543,
+          "correct": 45,
+          "n": 111
+        },
+        "2025-06": {
+          "accuracy": 0.5370370370370371,
+          "correct": 29,
+          "n": 54
+        },
+        "2025-07": {
+          "accuracy": 0.5079365079365079,
+          "correct": 32,
+          "n": 63
+        },
+        "2025-08": {
+          "accuracy": 0.42857142857142855,
+          "correct": 24,
+          "n": 56
+        },
+        "2025-09": {
+          "accuracy": 0.5897435897435898,
+          "correct": 46,
+          "n": 78
+        },
+        "2026-04": {
+          "accuracy": 0.48214285714285715,
+          "correct": 27,
+          "n": 56
+        },
+        "2026-05": {
+          "accuracy": 0.5208333333333334,
+          "correct": 25,
+          "n": 48
+        },
+        "2026-06": {
+          "accuracy": 0.5357142857142857,
+          "correct": 15,
+          "n": 28
+        },
+        "2026-07": {
+          "accuracy": 0.4666666666666667,
+          "correct": 14,
+          "n": 30
+        },
+        "2026-08": {
+          "accuracy": 0.5333333333333333,
+          "correct": 8,
+          "n": 15
+        },
+        "2026-09": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        }
+      },
+      "monthly_accuracy_sd": 0.08752507486228296,
+      "months_with_selections": 11,
+      "n": 543,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5138121546961326,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.40540540540540543
+    },
+    {
+      "accuracy": 0.5,
+      "architecture": "catboost_classifier_regression_market_agreement",
+      "correct": 136,
+      "coverage_vs_oof_nonpush": 0.07491049297714128,
+      "edge_threshold": 0.25,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": true,
+      "market_juice_side_accuracy": 0.5,
+      "min_month_n": 1,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4025974025974026,
+          "correct": 31,
+          "n": 77
+        },
+        "2025-06": {
+          "accuracy": 0.5454545454545454,
+          "correct": 12,
+          "n": 22
+        },
+        "2025-07": {
+          "accuracy": 0.5454545454545454,
+          "correct": 12,
+          "n": 22
+        },
+        "2025-08": {
+          "accuracy": 0.4230769230769231,
+          "correct": 11,
+          "n": 26
+        },
+        "2025-09": {
+          "accuracy": 0.7419354838709677,
+          "correct": 23,
+          "n": 31
+        },
+        "2026-04": {
+          "accuracy": 0.5517241379310345,
+          "correct": 16,
+          "n": 29
+        },
+        "2026-05": {
+          "accuracy": 0.48148148148148145,
+          "correct": 13,
+          "n": 27
+        },
+        "2026-06": {
+          "accuracy": 0.5,
+          "correct": 5,
+          "n": 10
+        },
+        "2026-07": {
+          "accuracy": 0.4166666666666667,
+          "correct": 5,
+          "n": 12
+        },
+        "2026-08": {
+          "accuracy": 0.4666666666666667,
+          "correct": 7,
+          "n": 15
+        },
+        "2026-09": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.1676252438837907,
+      "months_with_selections": 11,
+      "n": 272,
+      "prob_threshold": 0.6,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4025974025974026
+    },
+    {
+      "accuracy": 0.5241935483870968,
+      "architecture": "catboost_classifier_ensemble",
+      "correct": 65,
+      "coverage_vs_oof_nonpush": 0.03415037179840264,
+      "edge_threshold": null,
+      "lift_vs_selected_majority": -0.008064516129032251,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5403225806451613,
+      "min_month_n": 1,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.4583333333333333,
+          "correct": 33,
+          "n": 72
+        },
+        "2025-06": {
+          "accuracy": 0.5833333333333334,
+          "correct": 7,
+          "n": 12
+        },
+        "2025-07": {
+          "accuracy": 0.6190476190476191,
+          "correct": 13,
+          "n": 21
+        },
+        "2025-08": {
+          "accuracy": 0.4,
+          "correct": 2,
+          "n": 5
+        },
+        "2025-09": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        },
+        "2026-04": {
+          "accuracy": 0.5714285714285714,
+          "correct": 4,
+          "n": 7
+        },
+        "2026-05": {
+          "accuracy": 0.8,
+          "correct": 4,
+          "n": 5
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.21551559878713705,
+      "months_with_selections": 8,
+      "n": 124,
+      "prob_threshold": 0.7,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.532258064516129,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4
+    },
+    {
+      "accuracy": 0.5,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 32,
+      "coverage_vs_oof_nonpush": 0.017625998347562656,
+      "edge_threshold": 0.25,
+      "lift_vs_selected_majority": 0.0,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.5,
+      "min_month_n": 1,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.46153846153846156,
+          "correct": 18,
+          "n": 39
+        },
+        "2025-06": {
+          "accuracy": 0.625,
+          "correct": 5,
+          "n": 8
+        },
+        "2025-07": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        },
+        "2026-04": {
+          "accuracy": 0.4,
+          "correct": 2,
+          "n": 5
+        },
+        "2026-05": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.21251580455089683,
+      "months_with_selections": 6,
+      "n": 64,
+      "prob_threshold": 0.7,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4
+    },
+    {
+      "accuracy": 0.497131931166348,
+      "architecture": "catboost_classifier_regression_market_agreement",
+      "correct": 260,
+      "coverage_vs_oof_nonpush": 0.14403745524648856,
+      "edge_threshold": 0.25,
+      "lift_vs_selected_majority": -0.009560229445506718,
+      "market_agreement_required": true,
+      "market_juice_side_accuracy": 0.497131931166348,
+      "min_month_n": 3,
+      "mode": "two_sided",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.44329896907216493,
+          "correct": 43,
+          "n": 97
+        },
+        "2025-06": {
+          "accuracy": 0.5652173913043478,
+          "correct": 26,
+          "n": 46
+        },
+        "2025-07": {
+          "accuracy": 0.5454545454545454,
+          "correct": 24,
+          "n": 44
+        },
+        "2025-08": {
+          "accuracy": 0.44776119402985076,
+          "correct": 30,
+          "n": 67
+        },
+        "2025-09": {
+          "accuracy": 0.5915492957746479,
+          "correct": 42,
+          "n": 71
+        },
+        "2026-04": {
+          "accuracy": 0.47058823529411764,
+          "correct": 24,
+          "n": 51
+        },
+        "2026-05": {
+          "accuracy": 0.48214285714285715,
+          "correct": 27,
+          "n": 56
+        },
+        "2026-06": {
+          "accuracy": 0.5185185185185185,
+          "correct": 14,
+          "n": 27
+        },
+        "2026-07": {
+          "accuracy": 0.4,
+          "correct": 14,
+          "n": 35
+        },
+        "2026-08": {
+          "accuracy": 0.5384615384615384,
+          "correct": 14,
+          "n": 26
+        },
+        "2026-09": {
+          "accuracy": 0.6666666666666666,
+          "correct": 2,
+          "n": 3
+        }
+      },
+      "monthly_accuracy_sd": 0.07311993884084962,
+      "months_with_selections": 11,
+      "n": 523,
+      "prob_threshold": 0.55,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5066921606118547,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4
+    },
+    {
+      "accuracy": 0.49230769230769234,
+      "architecture": "catboost_classifier_ensemble",
+      "correct": 32,
+      "coverage_vs_oof_nonpush": 0.017901404571743322,
+      "edge_threshold": null,
+      "lift_vs_selected_majority": -0.01538461538461533,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.49230769230769234,
+      "min_month_n": 1,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.45,
+          "correct": 18,
+          "n": 40
+        },
+        "2025-06": {
+          "accuracy": 0.625,
+          "correct": 5,
+          "n": 8
+        },
+        "2025-07": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        },
+        "2026-04": {
+          "accuracy": 0.4,
+          "correct": 2,
+          "n": 5
+        },
+        "2026-05": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.21390591341970508,
+      "months_with_selections": 6,
+      "n": 65,
+      "prob_threshold": 0.7,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5076923076923077,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4
+    },
+    {
+      "accuracy": 0.4918032786885246,
+      "architecture": "catboost_classifier_regression_agreement",
+      "correct": 30,
+      "coverage_vs_oof_nonpush": 0.016799779675020655,
+      "edge_threshold": 0.5,
+      "lift_vs_selected_majority": -0.016393442622950838,
+      "market_agreement_required": false,
+      "market_juice_side_accuracy": 0.4918032786885246,
+      "min_month_n": 1,
+      "mode": "over_only",
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.47368421052631576,
+          "correct": 18,
+          "n": 38
+        },
+        "2025-06": {
+          "accuracy": 0.5,
+          "correct": 3,
+          "n": 6
+        },
+        "2025-07": {
+          "accuracy": 0.42857142857142855,
+          "correct": 3,
+          "n": 7
+        },
+        "2026-04": {
+          "accuracy": 0.4,
+          "correct": 2,
+          "n": 5
+        },
+        "2026-05": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 1,
+          "n": 1
+        }
+      },
+      "monthly_accuracy_sd": 0.2150439928270777,
+      "months_with_selections": 6,
+      "n": 61,
+      "prob_threshold": 0.7,
+      "sample_gate_met": true,
+      "selected_majority_baseline": 0.5081967213114754,
+      "target_met_75_plus": false,
+      "worst_month_accuracy": 0.4
+    }
+  ]
+}
