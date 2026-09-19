@@ -49,6 +49,9 @@ All raw sportsbook snapshots remain in sports_odds_snapshots with sportsbook, li
 - pitcher_outs_under_18p5_p90_v1
 - batter_hits_under_1p5_edge_0p75_v1
 - batter_total_bases_under_2p5_edge_1p5_v1
+- batter_hr_under_0p5_proj_0p10_v1
+- batter_k_under_1p5_proj_0p5_v1
+- batter_walks_under_0p5_proj_0p20_v1
 - pitcher_win_forward_numeric_p015_v1
 
 Batter Hits, Total Bases, Home Runs, Strikeouts and Walks use alpha=0. The raw-feature order was reconstructed from the canonical backtest implementation and independently checked against the frozen 2026 one-shot counts. Current-corpus differences are limited to 1–2 rows from later data corrections while the frozen correct-count checksums are preserved or differ only by those corrections.
@@ -59,9 +62,6 @@ The market lines are captured now, but the following frozen candidates remain NO
 
 - pitcher_er_over_1p5_p70_v1
 - pitcher_hits_allowed_under_6p5_proj_5p0_v1
-- batter_hr_under_0p5_proj_0p10_v1
-- batter_k_under_1p5_proj_0p5_v1
-- batter_walks_under_0p5_proj_0p20_v1
 - batter_singles_under_1p5_proj_0p50_v1
 - batter_doubles_under_0p5_proj_0p16_v1
 - batter_triples_under_0p5_proj_0p015_v1
