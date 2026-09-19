@@ -6,6 +6,71 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 3 Innings 3-Way Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Development surface:
+
+- 2,425 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,148 rolling OOF games;
+- classes: HOME 1,946 / AWAY 1,572 / DRAW 1,162;
+- actual max target date 2026-09-14.
+
+Preserved fallback:
+
+`f3_3way_revisit_side_margin_p045_m075_fallback_v1`
+
+- multiclass confidence >=0.45;
+- HOME/AWAY only;
+- predicted absolute F3 margin >=0.75;
+- classifier and margin side agree;
+- **165/312 = 52.88%**;
+- worst month **37.50%**;
+- 11 months;
+- coverage **7.52%**;
+- unconditional majority baseline **41.37%**;
+- lift **+11.52 pts**.
+
+Highest pooled sample-eligible formula: **52/91 = 57.14%**, but worst month **33.33%** and min monthly n=1.
+
+Original first-pass side rule on unified OOF: **64/114 = 56.14%**, worst month **28.57%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F3_3WAY_REVISIT_V1.md`.
+
+## 2026-09-19 First 1 Inning 3-Way Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Development surface:
+
+- 2,428 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,149 rolling OOF games;
+- classes: HOME 1,219 / AWAY 982 / DRAW 2,482;
+- actual max target date 2026-09-14.
+
+Preserved fallback:
+
+`f1_3way_revisit_multiclass_p055_fallback_v1`
+
+- select highest-probability HOME / DRAW / AWAY when max class probability >=0.55;
+- **846/1,556 = 54.37%**;
+- worst month **47.92%**;
+- 11 months;
+- coverage **37.50%**;
+- unconditional majority baseline **52.78%**;
+- lift **+1.59 pts**.
+
+Original draw-closeness benchmark on unified OOF: **284/506 = 56.13%**, worst month **45.61%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F1_3WAY_REVISIT_V1.md`.
+
 ## 2026-09-19 First 7 Innings 3-Way Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
