@@ -60,3 +60,21 @@ Monthly:
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No ROI/EV/CLV claim without certified historical F7 prices/lines.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE`.
+
+- eligible prior-form rows: 2,178
+- baseline OVER reference 6.5: **50.64%**
+- selected: 1,084
+- correct: 569
+- accuracy: **52.49%**
+- selection coverage: **49.77%**
+- lift vs baseline: **+1.85 percentage points**
+- worst selected month: **43.33%**
+- retuned after external result: **NO**
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Reminder: 6.5 is a research reference line only because historical F7 sportsbook lines are not available in the current corpus.
