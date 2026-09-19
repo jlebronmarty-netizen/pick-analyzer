@@ -1,0 +1,55 @@
+name: MLB Pitcher Win Forward History Backfill
+
+on:
+  push:
+    branches: [research/pitcher-win-forward-compatible-20260919]
+    paths:
+      - '.github/workflows/mlb-pitcher-win-forward-backfill.yml'
+      - 'docs/research/pitcher-win-forward-backfill-request.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/pitcher-win-forward-compatible-20260919
+      - name: Validate request
+        run: |
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync('docs/research/pitcher-win-forward-backfill-request.json','utf8'))
+          if(r.contract!=='MLB_PITCHER_WIN_FORWARD_BACKFILL_REQUEST/1.0.0') throw new Error('BAD_CONTRACT')
+          if(r.researchOnly!==true||r.officialPicksWritesAllowed!==false||r.apostarActivationAllowed!==false) throw new Error('BOUNDARY')
+          if(!Array.isArray(r.dates)||!r.dates.length) throw new Error('DATES')
+          NODE
+      - name: Mint OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token=await core.getIDToken('supabase-pitcher-win-forward-backfill')
+            core.setSecret(token)
+            core.setOutput('token',token)
+      - name: Run bounded backfill
+        env:
+          OIDC: ${{ steps.oidc.outputs.token }}
+        run: |
+          BODY="$(cat docs/research/pitcher-win-forward-backfill-request.json)"
+          DATES="$(node -e "const r=JSON.parse(process.argv[1]);process.stdout.write(JSON.stringify({dates:r.dates}))" "$BODY")"
+          curl --fail-with-body --silent --show-error             -H "Content-Type: application/json"             -H "x-github-oidc-token: $OIDC"             -d "$DATES"             https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/mlb-pitcher-win-forward-backfill-temp             | tee /tmp/result.json
+          node <<'NODE'
+          const fs=require('fs')
+          const r=JSON.parse(fs.readFileSync('/tmp/result.json','utf8'))
+          if(r.contract!=='MLB_PITCHER_WIN_FORWARD_BACKFILL_TEMP/1.0.0') throw new Error('BAD_RESULT')
+          if(r.researchOnly!==true||r.officialPicksModified!==false||r.apostarActivated!==false||r.oddsApiCalls!==0) throw new Error('BOUNDARY_RESULT')
+          const d=r.results?.[0]
+          if(!d||d.date!=='2026-09-18'||d.resolvedGames!==15||d.updatedStarterRows!==30) throw new Error('SEP18_INCOMPLETE:'+JSON.stringify(d))
+          console.log(JSON.stringify(r,null,2))
+          NODE
