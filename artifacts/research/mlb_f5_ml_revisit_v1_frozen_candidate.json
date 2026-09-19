@@ -1,0 +1,81 @@
+{
+  "actual_max_game_date_used": "2026-09-14",
+  "apostar_activation": false,
+  "architecture_family": "pregame_catboost_classifier_margin_f5_moneyline_v1",
+  "candidate": {
+    "accuracy": 0.671875,
+    "architecture": "catboost_win_pct_sign_agreement",
+    "correct": 43,
+    "coverage_vs_oof_all": 0.01856763925729443,
+    "coverage_vs_oof_nonpush": 0.018285714285714287,
+    "legacy_absolute_advantage": null,
+    "lift_vs_unconditional_majority": 0.13844642857142853,
+    "min_month_n": 1,
+    "mode": "symmetric",
+    "monthly": {
+      "2025-05": {
+        "accuracy": 0.6410256410256411,
+        "correct": 25,
+        "n": 39,
+        "pushes": 9
+      },
+      "2025-06": {
+        "accuracy": 0.75,
+        "correct": 3,
+        "n": 4,
+        "pushes": 1
+      },
+      "2025-07": {
+        "accuracy": 0.6666666666666666,
+        "correct": 4,
+        "n": 6,
+        "pushes": 1
+      },
+      "2025-08": {
+        "accuracy": 1.0,
+        "correct": 1,
+        "n": 1,
+        "pushes": 0
+      },
+      "2025-09": {
+        "accuracy": 0.6923076923076923,
+        "correct": 9,
+        "n": 13,
+        "pushes": 1
+      },
+      "2026-06": {
+        "accuracy": 1.0,
+        "correct": 1,
+        "n": 1,
+        "pushes": 0
+      }
+    },
+    "monthly_accuracy_sd": 0.1509589298774748,
+    "months_with_selections": 6,
+    "n": 64,
+    "probability_threshold": 0.75,
+    "pushes": 13,
+    "sample_gate_met": true,
+    "sample_stability_gate_met": false,
+    "selected_total": 77,
+    "target_met_75_plus": false,
+    "unconditional_majority_baseline": 0.5334285714285715,
+    "worst_month_accuracy": 0.6410256410256411
+  },
+  "categorical_features": [],
+  "contract": "MLB_F5_ML_REVISIT_V1_FROZEN_CANDIDATE/1.0.0",
+  "forward_eligible": false,
+  "forward_min_game_date": "2026-09-20",
+  "forward_outcomes_opened": false,
+  "frozen": false,
+  "github_sha_at_freeze": null,
+  "historical_max_allowed_game_date": "2026-09-18",
+  "numeric_features": [],
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "production_promotion": false,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "reason": "75% F5 revisit gate not met; no forward candidate activated.",
+  "research_only": true,
+  "specs": []
+}
