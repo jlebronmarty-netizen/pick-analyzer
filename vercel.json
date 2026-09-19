@@ -27,10 +27,6 @@
     {
       "path": "/api/cron/nba-current-era-shadow",
       "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-sep18-repair",
-      "schedule": "20 15 19 9 *"
     }
   ]
 }
