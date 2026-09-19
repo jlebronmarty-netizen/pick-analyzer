@@ -6,6 +6,51 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 Game Totals second-pass revisit V1 — authoritative
+
+Protocol: `MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0`.
+
+Historical development surface:
+
+- 2025 SBR close-consensus rows: 2,425;
+- 2026 legacy SportsDataIO Consensus rows through 2026-08-13: 1,576;
+- stored The Odds API cross-book consensus extension: 310 rows, 2026-08-14 through 2026-09-10;
+- total historical rows: 4,311;
+- rolling non-push OOF rows: 3,631;
+- historical Odds API credits consumed: 0;
+- provider calls for the extension/backtest: 0.
+
+Architecture tested:
+
+`rolling_catboost_classifier_total_regression_ensemble_v1`
+
+This included classifier confidence, total-runs regression edge, classifier/regression agreement, and optional market-juice agreement. All folds were chronological. The payload excluded `actual_winner`; 2026-09-19 remained quarantined and 2026-09-20+ forward outcomes were not opened.
+
+Frozen-gate selection:
+
+`totals_revisit_v1_regression_over_edge_1p0_fallback`
+
+- rule family: CatBoost total-runs regression ensemble;
+- side: OVER only;
+- predicted total edge threshold: >=1.0 run over the stored market total;
+- correct: 430/804;
+- accuracy: **53.48%**;
+- coverage vs rolling non-push OOF: **22.14%**;
+- months with selections: 11;
+- worst selected month: **44.64%**;
+- selected-majority baseline: **53.48%**;
+- lift vs selected-majority baseline: **0.00 pts**.
+
+The highest pooled-accuracy persisted candidate was also below target: classifier + regression + market agreement, OVER-only, n=155, **58.71%**, worst month **40.63%**.
+
+State:
+
+`REVISIT_SECOND_PASS_BELOW_75`
+
+No candidate is frozen for prospective validation. `forward_eligible=false`; 2026-09-20+ remains unopened for Totals V1 revisit. Preserve these results and move to the next `REVISIT_AFTER_FIRST_PASS` market rather than tuning on future results.
+
+Next revisit market: **Pitcher Record a Win**, because its frozen first-pass rule retained positive external lift and finished closest to the 75% target among the currently documented failed markets (2025 79.46%; 2026 one-shot 70.34%).
+
 ## 2026-09-19 second-pass MLB market revisit protocol — authoritative
 
 Frozen contract:
