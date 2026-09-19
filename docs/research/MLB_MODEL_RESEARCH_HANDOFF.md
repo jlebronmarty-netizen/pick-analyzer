@@ -6,6 +6,26 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 First 7 Innings Moneyline first-pass closeout — authoritative
+
+Frozen candidate: `f7_ml_run_diff_extreme_q95_v1`.
+
+2025 target certification: 2,418/2,430 exact Statcast/Retrosheet score matches; 12 one-run mismatches excluded fail-closed.
+
+Rule:
+
+- feature = home prior run differential per game - away prior run differential per game;
+- absolute cutoff = 2.82541420162881;
+- positive predicts HOME, negative predicts AWAY.
+
+2025: 69/91 = **75.82%**, 8 pushes, worst month **66.67%**.
+
+2026 one-shot: 35/79 = **44.30%**, 12 pushes, coverage **4.06%**, worst month **34.62%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+This candidate passed the 2025 target but failed external validation. Do not retune from 2026.
+
 ## 2026-09-18 First 3 Innings Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f3_ml_winpct_extreme_q95_v1`.
