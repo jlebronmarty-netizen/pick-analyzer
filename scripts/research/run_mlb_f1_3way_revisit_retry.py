@@ -7,5 +7,5 @@ spec=importlib.util.spec_from_file_location("f1_3way_trainer",trainer)
 mod=importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(mod)
-mod.EDGE_URL="https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/mlb-f1-3way-revisit-github-export-retry-temp"
+mod.EDGE_URL="https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/mlb-f1-3way-run-read-v1"
 mod.main()
