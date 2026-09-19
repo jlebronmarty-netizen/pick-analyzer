@@ -7,6 +7,39 @@ Target benchmark: **>= 75% predictive accuracy on a sufficiently stable selectiv
 Official Picks: unchanged  
 APOSTAR: disabled
 
+## 2026-09-19 First 5 Innings 3-Way Moneyline second-pass revisit V1 — authoritative
+
+State: `REVISIT_SECOND_PASS_BELOW_75`.
+
+Development surface:
+
+- 2,423 certified 2025 games;
+- 2,255 usable 2026 games;
+- 4,147 rolling OOF games;
+- classes: HOME 2,122 / AWAY 1,823 / DRAW 733;
+- actual max target date 2026-09-14.
+
+Preserved fallback:
+
+`f5_3way_revisit_side_margin_p045_m050_fallback_v1`
+
+- multiclass confidence >=0.45;
+- HOME/AWAY only;
+- predicted absolute F5 margin >=0.50;
+- classifier and margin side agree;
+- **644/1,298 = 49.61%**;
+- worst month **44.95%**;
+- 11 months;
+- coverage **31.30%**;
+- unconditional majority baseline **45.02%**;
+- lift **+4.59 pts**.
+
+Original first-pass side rule on unified OOF: **75/132 = 56.82%**, worst month **39.29%**.
+
+No candidate reached the 75% gate. `forward_eligible=false`; no 2026-09-20+ outcomes were opened.
+
+Canonical detail: `docs/research/MLB_F5_3WAY_REVISIT_V1.md`.
+
 ## 2026-09-19 First 5 Innings Moneyline second-pass revisit V1 — authoritative
 
 State: `REVISIT_SECOND_PASS_BELOW_75`.
