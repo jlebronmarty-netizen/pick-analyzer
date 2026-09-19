@@ -2,7 +2,7 @@ name: MLB F5 Moneyline Revisit V1
 
 on:
   push:
-    branches: [research/f5-ml-revisit-20260919-clean2]
+    branches: [research/f5-ml-revisit-20260919]
     paths:
       - '.github/workflows/mlb-f5-ml-revisit-v1.yml'
       - 'docs/research/f5-ml-revisit-v1-request.json'
@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: research/f5-ml-revisit-20260919-clean2
+          ref: research/f5-ml-revisit-20260919
           fetch-depth: 0
 
       - name: Validate revisit request
@@ -126,8 +126,8 @@ jobs:
           git add "$RESULT_PATH" "$FREEZE_PATH"
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'research(f5-ml): record revisit V1 result'
-          git pull --rebase origin research/f5-ml-revisit-20260919-clean2
-          git push origin HEAD:research/f5-ml-revisit-20260919-clean2
+          git pull --rebase origin research/f5-ml-revisit-20260919
+          git push origin HEAD:research/f5-ml-revisit-20260919
 
       - uses: actions/upload-artifact@v4
         with:
