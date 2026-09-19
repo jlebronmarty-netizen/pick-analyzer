@@ -48,3 +48,27 @@ No tested stable 2025 F5 ML formula reached 75%.
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No F5 historical pricing exists in the current snapshot corpus. Accuracy only; no ROI/EV/CLV claim.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT`.
+
+- eligible feature rows: 1,966
+- selected including pushes: 70
+- non-push selections: 61
+- correct: 34
+- accuracy: **55.74%**
+- pushes: 9
+- selection coverage: **3.56%**
+- worst selected month: **40.00%**
+- retuned after external result: **NO**
+
+Monthly:
+- Apr: 15/30 = 50.00%, 8 pushes
+- May: 14/23 = 60.87%
+- Jun: 3/3 = 100.00%
+- Jul: 2/5 = 40.00%, 1 push
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this frozen fallback with 2026-driven thresholds. Revisit F5 ML later with a materially different architecture or certified F5 pricing information.
