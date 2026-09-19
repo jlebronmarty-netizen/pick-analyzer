@@ -1,0 +1,101 @@
+{
+  "contract": "MLB_PITCHER_WIN_FORWARD_NUMERIC/1.0.0",
+  "frozen": true,
+  "research_only": true,
+  "market": "PITCHER_RECORD_A_WIN",
+  "candidate_id": "pitcher_win_forward_numeric_p015_v1",
+  "direction": "NO",
+  "selection_rule": {
+    "ensemble_probability": "mean(model_0_p_win, model_1_p_win)",
+    "select_when": "p_win <= 0.15",
+    "threshold": 0.15
+  },
+  "historical_gate": {
+    "correct": 128,
+    "selected_n": 147,
+    "accuracy": 0.8707482993197279,
+    "coverage_vs_oof": 0.017541766109785202,
+    "months_with_selections": 8,
+    "worst_month_accuracy": 0.75,
+    "unconditional_no_baseline": 0.7091885441527447,
+    "lift": 0.16155975516698318,
+    "gate_met": true
+  },
+  "feature_contract": "DEPLOYABLE_EXACT_PARITY_NUMERIC_V1",
+  "feature_names": [
+    "starter_is_home",
+    "game_number",
+    "doubleheader_flag",
+    "own_games_prior",
+    "opp_games_prior",
+    "own_win_pct",
+    "opp_win_pct",
+    "own_run_diff_pg",
+    "opp_run_diff_pg",
+    "own_pyth_win_pct",
+    "opp_pyth_win_pct",
+    "own_l5_games",
+    "opp_l5_games",
+    "own_l5_win_pct",
+    "opp_l5_win_pct",
+    "own_l5_run_diff_pg",
+    "opp_l5_run_diff_pg",
+    "own_l10_games",
+    "opp_l10_games",
+    "own_l10_win_pct",
+    "opp_l10_win_pct",
+    "own_l10_run_diff_pg",
+    "opp_l10_run_diff_pg",
+    "own_rest_days",
+    "opp_rest_days",
+    "side_h2h_win_pct",
+    "prior_starts",
+    "prior_wins",
+    "prior_win_rate"
+  ],
+  "model_files": [
+    {
+      "path": "python_models/pitcher_win_forward_numeric_model_0.json",
+      "sha256": "1a65260e5a3d97a647dc990f433bfd27b8750e4557a1a33e02e9a0e07d4b2fda"
+    },
+    {
+      "path": "python_models/pitcher_win_forward_numeric_model_1.json",
+      "sha256": "13cfa39ecb8713580d740bb798279ce68bc2f301bb541eb09ed1f7bbd5211432"
+    }
+  ],
+  "inference_parity": {
+    "golden_contract": "MLB_PITCHER_WIN_FORWARD_NUMERIC_GOLDEN/1.0.0",
+    "golden_rows": 96,
+    "max_model_probability_diff": 1.1102230246251565e-16,
+    "max_ensemble_probability_diff": 1.1102230246251565e-16,
+    "status": "PASS"
+  },
+  "data_boundary": {
+    "historical_development_max_game_date": "2026-09-18",
+    "actual_historical_max_used": "2026-09-17",
+    "quarantine_date": "2026-09-19",
+    "prospective_min_game_date": "2026-09-20",
+    "prospective_label": "PROSPECTIVE_FORWARD_POST_2026_09_20",
+    "forward_outcomes_used_for_tuning": false
+  },
+  "runtime": {
+    "timezone": "America/Puerto_Rico",
+    "freeze_window": "10:45-10:59",
+    "freeze_before_first_pitch_required": true,
+    "previous_day_history_ready_required": true,
+    "same_day_prior_history_allowed": false,
+    "team_history_view": "public.mlb_pitcher_win_forward_team_game_v1",
+    "recent_actual_starter_view": "public.mlb_pitcher_win_forward_recent_starter_v1",
+    "tracker_table": "public.mlb_pitcher_win_forward_tracker_v1",
+    "cron": "/api/cron/mlb-statcast-daily",
+    "settlement_source": "MLB Official schedule hydrate=decisions"
+  },
+  "boundaries": {
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "odds_api_calls": 0,
+    "historical_odds_credits_consumed": 0,
+    "roi_ev_clv_certified": false
+  }
+}
