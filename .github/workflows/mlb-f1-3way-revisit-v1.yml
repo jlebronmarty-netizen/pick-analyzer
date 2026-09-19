@@ -7,6 +7,7 @@ on:
       - '.github/workflows/mlb-f1-3way-revisit-v1.yml'
       - 'docs/research/f1-3way-revisit-v1-request.json'
       - 'scripts/research/train_mlb_f1_3way_revisit_v1.py'
+      - 'scripts/research/run_mlb_f1_3way_revisit_retry.py'
   workflow_dispatch:
 
 permissions:
@@ -79,7 +80,7 @@ jobs:
       - name: Run historical rolling revisit
         env:
           GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
-        run: python scripts/research/train_mlb_f1_3way_revisit_v1.py
+        run: python scripts/research/run_mlb_f1_3way_revisit_retry.py
 
       - name: Validate result boundaries
         shell: bash
