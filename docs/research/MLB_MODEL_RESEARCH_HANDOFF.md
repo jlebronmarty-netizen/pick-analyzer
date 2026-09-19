@@ -6,6 +6,24 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 3 Innings Totals first-pass closeout — authoritative
+
+Frozen fallback: `f3_total_over_ref2p5_proj3p0_v1`.
+
+No historical F3 total-line corpus exists in the current snapshots; 2.5 is a balanced research reference only.
+
+Model uses strict-prior F3 team scored/allowed form, 75% last-5 and 25% all-history, minimum 5 prior games per team.
+
+2025 final fit: intercept 2.5303236380252, slope 0.151683250978056, MAE 1.99398.
+
+2025: 368/715 = **51.47%**, worst month **49.12%**.
+
+2026 one-shot: 410/841 = **48.75%**, reference baseline **48.94%**, coverage **38.61%**, worst month **45.22%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not interpret this reference-line result as historical sportsbook performance.
+
 ## 2026-09-19 First 1 Inning NRFI first-pass closeout — authoritative
 
 Frozen fallback: `f1_nrfi_both_starters_scoreless_0p80_v1`.

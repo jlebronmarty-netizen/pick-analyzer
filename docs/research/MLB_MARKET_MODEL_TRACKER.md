@@ -48,6 +48,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 5 Innings 3-Way ML** | `f5_3way_sp1p0_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 53/84 = **63.10%**; worst month **45.45%**; draw-only best 23.21% | 2026: 22/48 = **45.83%**; worst month **39.29%**; 9 selected outcomes were DRAW | 2026 coverage **2.44%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. Draw model also failed to approach target. |
 | **First 3 Innings Moneyline** | `f3_ml_winpct_extreme_q95_v1` — side from extreme prior win% advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 55/77 = **71.43%**; worst month **66.67%**; 22 pushes | 2026: 36/80 = **45.00%**; 25 pushes | 2026 coverage **4.69%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; no 2026 threshold rescue. |
 | **First 3 Innings 3-Way ML** | `f3_3way_sp1p5_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 44/73 = **60.27%**; worst month **28.57%**; draw-only best 33.33% | 2026: 20/41 = **48.78%**; 7 selected outcomes were DRAW | 2026 coverage **2.09%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
+| **First 3 Innings Totals** | `f3_total_over_ref2p5_proj3p0_v1` — OVER reference 2.5 when projected F3 total >=3.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 368/715 = **51.47%**; worst month **49.12%** | 2026: 410/841 = **48.75%**; baseline OVER ref2.5 48.94%; worst month **45.22%** | 2026 coverage **38.61%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 2.5 is research reference only; no historical F3 line corpus. |
 | **First 1 Inning Moneyline** | `f1_ml_sp1p0_win0p20_v1` — selective HOME/AWAY rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 51/74 = **68.92%**; worst month **50.00%**; 60 pushes | 2026: 24/40 = **60.00%**; 39 pushes | 2026 coverage **4.02%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Rejected unstable 76.36% q95 candidate before external; preserve stable fallback, no 2026 rescue. |
 | **First 1 Inning 3-Way ML** | `f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1` — selective DRAW rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 125/221 = **56.56%**; baseline DRAW 52.33%; worst month **45.61%** | 2026: 159/285 = **55.79%**; baseline DRAW 53.05%; worst month **48.78%** | 2026 coverage **14.50%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Modest lift only; preserve frozen DRAW rule, no 2026 rescue. |
 | **First 1 Inning NRFI** | `f1_nrfi_both_starters_scoreless_0p80_v1` — NRFI if both starters prior F1 scoreless rate >=80% | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 58/108 = **53.70%**; baseline 50.96%; worst month **36.84%** | 2026: 68/130 = **52.31%**; baseline 51.57%; worst month **25.00%** on n=4 | 2026 coverage **14.57%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Offense filter was redundant; preserve simple starter-only rule, no 2026 rescue. |
@@ -457,6 +458,18 @@ A team-offense filter was tested before freeze and was redundant; thresholds 0.4
 2025: **58/108 = 53.70%**, baseline NRFI **50.96%**, lift **+2.75 pts**, worst month **36.84%**.
 
 2026 one-shot: **68/130 = 52.31%**, baseline NRFI **51.57%**, lift **+0.74 pts**, coverage **14.57%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+## First-pass closeout — First 3 Innings Totals
+
+Frozen fallback: `f3_total_over_ref2p5_proj3p0_v1`.
+
+Pricing caveat: 2.5 is a research reference line only; no historical F3 total-line corpus is stored.
+
+2025: **368/715 = 51.47%**, worst month **49.12%**.
+
+2026 one-shot: **410/841 = 48.75%**, baseline OVER reference 2.5 **48.94%**, coverage **38.61%**, worst month **45.22%**, no retuning.
 
 State: `REVISIT_AFTER_FIRST_PASS`.
 
