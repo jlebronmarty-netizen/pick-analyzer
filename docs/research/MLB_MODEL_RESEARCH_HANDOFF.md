@@ -6,6 +6,20 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 First 3 Innings Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f3_ml_winpct_extreme_q95_v1`.
+
+2025 target certification: 2,425/2,430 exact Statcast/Retrosheet score matches; 5 mismatches excluded.
+
+2025: 55/77 = **71.43%**, 22 pushes, worst month **66.67%**.
+
+2026 one-shot: 36/80 = **45.00%**, 25 pushes, coverage **4.69%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not retune from external evidence.
+
 ## 2026-09-18 First 5 Innings 3-Way Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f5_3way_sp1p0_ops0p05_win0p20_v1`.
