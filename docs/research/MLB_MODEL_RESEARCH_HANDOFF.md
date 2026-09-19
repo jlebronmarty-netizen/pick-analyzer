@@ -6,6 +6,36 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 First 1 Inning Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f1_ml_sp1p0_win0p20_v1`.
+
+Target certification: 2,428/2,430 exact Statcast/Retrosheet inning-1 score matches; 2 one-run mismatches excluded fail-closed.
+
+2025 stable fallback: 51/74 = **68.92%**, 60 pushes, worst month **50.00%**.
+
+A q95 prior-win% candidate reached 42/55 = **76.36%**, but minimum monthly n=3 failed the stability gate and it was rejected before external validation.
+
+2026 one-shot: 24/40 = **60.00%**, 39 pushes, coverage **4.02%**, worst month **50.00%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue with 2026 thresholds.
+
+## 2026-09-18 First 3 Innings 3-Way Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f3_3way_sp1p5_ops0p05_win0p20_v1`.
+
+2025 side rule: 44/73 = **60.27%**, worst month **28.57%**.
+
+Pre-freeze DRAW-only search: best stable 38/114 = **33.33%**, baseline draw rate **25.00%**.
+
+2026 one-shot: 20/41 = **48.78%**, coverage **2.09%**, 7 selected games finished DRAW, worst month **44.44%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not retune from 2026 or filter away external DRAW outcomes.
+
 ## 2026-09-18 First 7 Innings 3-Way Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f7_3way_sp2p0_win0p20_v1`.
