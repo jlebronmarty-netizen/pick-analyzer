@@ -1,0 +1,2091 @@
+{
+  "actual_max_game_date_used": "2026-09-17",
+  "apostar_activation": false,
+  "architecture_family": "side_normalized_catboost_pitcher_win_v1",
+  "categorical_feature_count": 6,
+  "categorical_features": [
+    "day_night",
+    "opp_sp_hand",
+    "opp_team",
+    "own_sp_hand",
+    "own_team",
+    "venue"
+  ],
+  "contract": "MLB_PITCHER_RECORD_WIN_REVISIT_V1_RESULT/1.0.0",
+  "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+  "dropped_fields": [
+    "opp_bullpen_apps_prior",
+    "opp_bullpen_avg_pitches_per_app",
+    "opp_bullpen_innings_prior",
+    "opp_bullpen_k_minus_bb_pct",
+    "opp_bullpen_l7_bb_pct",
+    "opp_bullpen_l7_k_pct",
+    "opp_bullpen_l7_whip",
+    "opp_bullpen_pitches_last_1d",
+    "opp_bullpen_pitches_last_3d",
+    "opp_bullpen_prior_apps",
+    "opp_bullpen_relievers_used_yesterday",
+    "opp_common_games",
+    "opp_defense_drs",
+    "opp_defense_oaa",
+    "opp_extra_innings_prev_game",
+    "opp_games_last_14d",
+    "opp_h2h_wins_prior",
+    "opp_l10_runs_allowed_pg",
+    "opp_l10_runs_scored_pg",
+    "opp_l5_runs_allowed_pg",
+    "opp_l5_runs_scored_pg",
+    "opp_lineup_avg",
+    "opp_lineup_avg_exit_velocity",
+    "opp_lineup_bb_pct",
+    "opp_lineup_prior_pa",
+    "opp_lineup_starters_count",
+    "opp_losses_prior",
+    "opp_ml_close",
+    "opp_ml_move_cents",
+    "opp_ml_open",
+    "opp_ml_pregame",
+    "opp_off_ab",
+    "opp_off_avg",
+    "opp_off_bb_pct",
+    "opp_off_doubles",
+    "opp_off_hits",
+    "opp_off_hr",
+    "opp_off_iso",
+    "opp_off_l5_avg",
+    "opp_off_l5_barrel_pct",
+    "opp_off_l5_bb_pct",
+    "opp_off_l5_hard_hit_pct",
+    "opp_off_l5_hr_per_pa",
+    "opp_off_l5_k_pct",
+    "opp_off_l5_ops_proxy",
+    "opp_off_obp_proxy",
+    "opp_off_pa",
+    "opp_off_rbi",
+    "opp_off_runs",
+    "opp_off_singles",
+    "opp_off_slg",
+    "opp_off_strikeouts",
+    "opp_off_triples",
+    "opp_off_walks",
+    "opp_prev_bullpen_ra9",
+    "opp_prev_game_innings",
+    "opp_prev_ops_proxy",
+    "opp_prev_run_diff_pg",
+    "opp_prev_team_ra9",
+    "opp_prev_win_pct",
+    "opp_runs_allowed_pg",
+    "opp_runs_scored_pg",
+    "opp_sc_off_avg_exit_velocity",
+    "opp_sc_off_chase_rate",
+    "opp_sc_off_contact_rate",
+    "opp_sc_off_pitches_seen",
+    "opp_sc_off_whiff_rate",
+    "opp_sp_avg_ev_allowed",
+    "opp_sp_avg_ip_per_start",
+    "opp_sp_avg_pitches_per_start",
+    "opp_sp_avg_release_speed",
+    "opp_sp_barrel_pct",
+    "opp_sp_bb9",
+    "opp_sp_chase_rate",
+    "opp_sp_csw_rate",
+    "opp_sp_first_pitch_strike_rate",
+    "opp_sp_hr_per_pa",
+    "opp_sp_innings_prior",
+    "opp_sp_k9",
+    "opp_sp_l5_avg_ip",
+    "opp_sp_l5_avg_pitches",
+    "opp_sp_l5_barrel_pct",
+    "opp_sp_l5_bb_pct",
+    "opp_sp_l5_chase_rate",
+    "opp_sp_l5_csw_rate",
+    "opp_sp_l5_hard_hit_pct",
+    "opp_sp_l5_k_pct",
+    "opp_sp_l5_whiff_rate",
+    "opp_sp_primary_pitch",
+    "opp_sp_primary_usage_pct",
+    "opp_sp_primary_velocity",
+    "opp_sp_primary_whiff_rate",
+    "opp_sp_prior_starts",
+    "opp_sp_secondary_pitch",
+    "opp_sp_secondary_usage_pct",
+    "opp_sp_vs_opp_avg_exit_velocity",
+    "opp_sp_vs_opp_barrel_pct",
+    "opp_sp_vs_opp_games",
+    "opp_sp_vs_opp_hard_hit_pct",
+    "opp_sp_vs_opp_pa",
+    "opp_streak_signed",
+    "opp_vs_sp_hand_avg_exit_velocity",
+    "opp_vs_sp_hand_barrel_pct",
+    "opp_vs_sp_hand_bb_rate",
+    "opp_vs_sp_hand_hit_rate",
+    "opp_vs_sp_hand_hr_rate",
+    "opp_vs_sp_hand_pa",
+    "opp_wins_prior",
+    "own_bullpen_apps_prior",
+    "own_bullpen_avg_pitches_per_app",
+    "own_bullpen_innings_prior",
+    "own_bullpen_k_minus_bb_pct",
+    "own_bullpen_l7_bb_pct",
+    "own_bullpen_l7_k_pct",
+    "own_bullpen_l7_whip",
+    "own_bullpen_pitches_last_1d",
+    "own_bullpen_pitches_last_3d",
+    "own_bullpen_prior_apps",
+    "own_bullpen_relievers_used_yesterday",
+    "own_common_games",
+    "own_defense_drs",
+    "own_defense_oaa",
+    "own_extra_innings_prev_game",
+    "own_games_last_14d",
+    "own_h2h_wins_prior",
+    "own_l10_runs_allowed_pg",
+    "own_l10_runs_scored_pg",
+    "own_l5_runs_allowed_pg",
+    "own_l5_runs_scored_pg",
+    "own_lineup_avg",
+    "own_lineup_avg_exit_velocity",
+    "own_lineup_bb_pct",
+    "own_lineup_prior_pa",
+    "own_lineup_starters_count",
+    "own_losses_prior",
+    "own_ml_close",
+    "own_ml_move_cents",
+    "own_ml_open",
+    "own_ml_pregame",
+    "own_off_ab",
+    "own_off_avg",
+    "own_off_bb_pct",
+    "own_off_doubles",
+    "own_off_hits",
+    "own_off_hr",
+    "own_off_iso",
+    "own_off_l5_avg",
+    "own_off_l5_barrel_pct",
+    "own_off_l5_bb_pct",
+    "own_off_l5_hard_hit_pct",
+    "own_off_l5_hr_per_pa",
+    "own_off_l5_k_pct",
+    "own_off_l5_ops_proxy",
+    "own_off_obp_proxy",
+    "own_off_pa",
+    "own_off_rbi",
+    "own_off_runs",
+    "own_off_singles",
+    "own_off_slg",
+    "own_off_strikeouts",
+    "own_off_triples",
+    "own_off_walks",
+    "own_prev_bullpen_ra9",
+    "own_prev_game_innings",
+    "own_prev_ops_proxy",
+    "own_prev_run_diff_pg",
+    "own_prev_team_ra9",
+    "own_prev_win_pct",
+    "own_runs_allowed_pg",
+    "own_runs_scored_pg",
+    "own_sc_off_avg_exit_velocity",
+    "own_sc_off_chase_rate",
+    "own_sc_off_contact_rate",
+    "own_sc_off_pitches_seen",
+    "own_sc_off_whiff_rate",
+    "own_sp_avg_ev_allowed",
+    "own_sp_avg_ip_per_start",
+    "own_sp_avg_pitches_per_start",
+    "own_sp_avg_release_speed",
+    "own_sp_barrel_pct",
+    "own_sp_bb9",
+    "own_sp_chase_rate",
+    "own_sp_csw_rate",
+    "own_sp_first_pitch_strike_rate",
+    "own_sp_hr_per_pa",
+    "own_sp_innings_prior",
+    "own_sp_k9",
+    "own_sp_l5_avg_ip",
+    "own_sp_l5_avg_pitches",
+    "own_sp_l5_barrel_pct",
+    "own_sp_l5_bb_pct",
+    "own_sp_l5_chase_rate",
+    "own_sp_l5_csw_rate",
+    "own_sp_l5_hard_hit_pct",
+    "own_sp_l5_k_pct",
+    "own_sp_l5_whiff_rate",
+    "own_sp_primary_pitch",
+    "own_sp_primary_usage_pct",
+    "own_sp_primary_velocity",
+    "own_sp_primary_whiff_rate",
+    "own_sp_prior_starts",
+    "own_sp_secondary_pitch",
+    "own_sp_secondary_usage_pct",
+    "own_sp_vs_opp_avg_exit_velocity",
+    "own_sp_vs_opp_barrel_pct",
+    "own_sp_vs_opp_games",
+    "own_sp_vs_opp_hard_hit_pct",
+    "own_sp_vs_opp_pa",
+    "own_streak_signed",
+    "own_vs_sp_hand_avg_exit_velocity",
+    "own_vs_sp_hand_barrel_pct",
+    "own_vs_sp_hand_bb_rate",
+    "own_vs_sp_hand_hit_rate",
+    "own_vs_sp_hand_hr_rate",
+    "own_vs_sp_hand_pa",
+    "own_wins_prior",
+    "park_games_prior",
+    "park_runs_pg_prior",
+    "precip",
+    "roof_status",
+    "side_adv_arsenal_matchup",
+    "side_adv_bullpen_fatigue_2d",
+    "side_adv_bullpen_k_pct",
+    "side_adv_bullpen_ra9",
+    "side_adv_bullpen_whip",
+    "side_adv_common_opponents",
+    "side_adv_l10_win_pct",
+    "side_adv_l5_win_pct",
+    "side_adv_lineup_k_pct",
+    "side_adv_lineup_ops_proxy",
+    "side_adv_off_avg",
+    "side_adv_off_k_pct",
+    "side_adv_off_ops_proxy",
+    "side_adv_pyth_win_pct",
+    "side_adv_rest_days",
+    "side_adv_run_diff_pg",
+    "side_adv_sc_off_barrel_pct",
+    "side_adv_sc_off_hard_hit_pct",
+    "side_adv_sp_hard_hit_pct",
+    "side_adv_sp_k_pct",
+    "side_adv_sp_ra9",
+    "side_adv_sp_whiff_rate",
+    "side_adv_sp_whip",
+    "side_adv_venue_win_pct",
+    "side_adv_win_pct",
+    "sky",
+    "start_time_local",
+    "temperature_f",
+    "wind_direction",
+    "wind_mph"
+  ],
+  "folds": [
+    {
+      "month": "2025-05",
+      "train_end": "2025-04-30",
+      "train_n": 916,
+      "validation_n": 822
+    },
+    {
+      "month": "2025-06",
+      "train_end": "2025-05-31",
+      "train_n": 1738,
+      "validation_n": 794
+    },
+    {
+      "month": "2025-07",
+      "train_end": "2025-06-30",
+      "train_n": 2532,
+      "validation_n": 738
+    },
+    {
+      "month": "2025-08",
+      "train_end": "2025-07-31",
+      "train_n": 3270,
+      "validation_n": 842
+    },
+    {
+      "month": "2025-09",
+      "train_end": "2025-08-31",
+      "train_n": 4112,
+      "validation_n": 748
+    },
+    {
+      "month": "2026-04",
+      "train_end": "2026-03-31",
+      "train_n": 5012,
+      "validation_n": 784
+    },
+    {
+      "month": "2026-05",
+      "train_end": "2026-04-30",
+      "train_n": 5796,
+      "validation_n": 838
+    },
+    {
+      "month": "2026-06",
+      "train_end": "2026-05-31",
+      "train_n": 6634,
+      "validation_n": 788
+    },
+    {
+      "month": "2026-07",
+      "train_end": "2026-06-30",
+      "train_n": 7422,
+      "validation_n": 742
+    },
+    {
+      "month": "2026-08",
+      "train_end": "2026-07-31",
+      "train_n": 8164,
+      "validation_n": 834
+    },
+    {
+      "month": "2026-09",
+      "train_end": "2026-08-31",
+      "train_n": 8998,
+      "validation_n": 450
+    }
+  ],
+  "forward_2026_09_20_plus_opened": false,
+  "forward_used_for_selection": false,
+  "github_sha_at_run": "774ef828485cf0761fb24e99d8f1faf0f5f6d56d",
+  "highest_accuracy_stable_candidates": [
+    {
+      "accuracy": 0.8870056497175142,
+      "architecture": "catboost_probability",
+      "correct": 157,
+      "coverage_vs_oof": 0.021121718377088306,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.1778171055647696,
+      "min_month_n": 2,
+      "minimum_prior_starts": 0,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7307692307692307,
+          "correct": 38,
+          "n": 52
+        },
+        "2025-06": {
+          "accuracy": 0.9333333333333333,
+          "correct": 14,
+          "n": 15
+        },
+        "2025-07": {
+          "accuracy": 1.0,
+          "correct": 14,
+          "n": 14
+        },
+        "2025-08": {
+          "accuracy": 0.9375,
+          "correct": 15,
+          "n": 16
+        },
+        "2025-09": {
+          "accuracy": 0.875,
+          "correct": 7,
+          "n": 8
+        },
+        "2026-04": {
+          "accuracy": 1.0,
+          "correct": 2,
+          "n": 2
+        },
+        "2026-05": {
+          "accuracy": 0.6666666666666666,
+          "correct": 2,
+          "n": 3
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 11,
+          "n": 11
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 19,
+          "n": 19
+        },
+        "2026-08": {
+          "accuracy": 0.9473684210526315,
+          "correct": 18,
+          "n": 19
+        },
+        "2026-09": {
+          "accuracy": 0.9444444444444444,
+          "correct": 17,
+          "n": 18
+        }
+      },
+      "monthly_accuracy_sd": 0.10820271416537328,
+      "months_with_selections": 11,
+      "n": 177,
+      "prior_win_rate_cap": null,
+      "probability_threshold": 0.15,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8870056497175142,
+      "selected_yes_rate": 0.11299435028248588,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.8787878787878788,
+      "architecture": "catboost_probability",
+      "correct": 58,
+      "coverage_vs_oof": 0.007875894988066826,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.1695993346351342,
+      "min_month_n": 2,
+      "minimum_prior_starts": 0,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.6818181818181818,
+          "correct": 15,
+          "n": 22
+        },
+        "2025-06": {
+          "accuracy": 1.0,
+          "correct": 5,
+          "n": 5
+        },
+        "2025-07": {
+          "accuracy": 1.0,
+          "correct": 2,
+          "n": 2
+        },
+        "2025-08": {
+          "accuracy": 1.0,
+          "correct": 4,
+          "n": 4
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 2,
+          "n": 2
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 10,
+          "n": 10
+        },
+        "2026-08": {
+          "accuracy": 1.0,
+          "correct": 11,
+          "n": 11
+        },
+        "2026-09": {
+          "accuracy": 0.9,
+          "correct": 9,
+          "n": 10
+        }
+      },
+      "monthly_accuracy_sd": 0.10570014503848624,
+      "months_with_selections": 8,
+      "n": 66,
+      "prior_win_rate_cap": null,
+      "probability_threshold": 0.125,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8787878787878788,
+      "selected_yes_rate": 0.12121212121212122,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6818181818181818
+    },
+    {
+      "accuracy": 0.8552631578947368,
+      "architecture": "catboost_probability",
+      "correct": 325,
+      "coverage_vs_oof": 0.045346062052505964,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.14607461374199227,
+      "min_month_n": 11,
+      "minimum_prior_starts": 0,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7848101265822784,
+          "correct": 62,
+          "n": 79
+        },
+        "2025-06": {
+          "accuracy": 0.8260869565217391,
+          "correct": 38,
+          "n": 46
+        },
+        "2025-07": {
+          "accuracy": 0.8837209302325582,
+          "correct": 38,
+          "n": 43
+        },
+        "2025-08": {
+          "accuracy": 0.7619047619047619,
+          "correct": 32,
+          "n": 42
+        },
+        "2025-09": {
+          "accuracy": 0.8148148148148148,
+          "correct": 22,
+          "n": 27
+        },
+        "2026-04": {
+          "accuracy": 0.8181818181818182,
+          "correct": 9,
+          "n": 11
+        },
+        "2026-05": {
+          "accuracy": 0.9285714285714286,
+          "correct": 13,
+          "n": 14
+        },
+        "2026-06": {
+          "accuracy": 0.9655172413793104,
+          "correct": 28,
+          "n": 29
+        },
+        "2026-07": {
+          "accuracy": 0.9428571428571428,
+          "correct": 33,
+          "n": 35
+        },
+        "2026-08": {
+          "accuracy": 0.9259259259259259,
+          "correct": 25,
+          "n": 27
+        },
+        "2026-09": {
+          "accuracy": 0.9259259259259259,
+          "correct": 25,
+          "n": 27
+        }
+      },
+      "monthly_accuracy_sd": 0.06802438850786946,
+      "months_with_selections": 11,
+      "n": 380,
+      "prior_win_rate_cap": null,
+      "probability_threshold": 0.175,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8552631578947368,
+      "selected_yes_rate": 0.14473684210526316,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7619047619047619
+    },
+    {
+      "accuracy": 0.8333333333333334,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 65,
+      "coverage_vs_oof": 0.009307875894988066,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.1241447891805888,
+      "min_month_n": 3,
+      "minimum_prior_starts": 5,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7272727272727273,
+          "correct": 8,
+          "n": 11
+        },
+        "2025-06": {
+          "accuracy": 0.6666666666666666,
+          "correct": 2,
+          "n": 3
+        },
+        "2025-07": {
+          "accuracy": 0.8333333333333334,
+          "correct": 5,
+          "n": 6
+        },
+        "2025-08": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4,
+          "n": 6
+        },
+        "2025-09": {
+          "accuracy": 1.0,
+          "correct": 5,
+          "n": 5
+        },
+        "2026-04": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-05": {
+          "accuracy": 0.75,
+          "correct": 3,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        },
+        "2026-08": {
+          "accuracy": 0.8571428571428571,
+          "correct": 18,
+          "n": 21
+        },
+        "2026-09": {
+          "accuracy": 0.9333333333333333,
+          "correct": 14,
+          "n": 15
+        }
+      },
+      "monthly_accuracy_sd": 0.12024894843103884,
+      "months_with_selections": 10,
+      "n": 78,
+      "prior_win_rate_cap": 0.05,
+      "probability_threshold": 0.225,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8333333333333334,
+      "selected_yes_rate": 0.16666666666666666,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.8247422680412371,
+      "architecture": "catboost_probability",
+      "correct": 640,
+      "coverage_vs_oof": 0.09260143198090692,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.1155537238884925,
+      "min_month_n": 40,
+      "minimum_prior_starts": 0,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.8,
+          "correct": 104,
+          "n": 130
+        },
+        "2025-06": {
+          "accuracy": 0.7641509433962265,
+          "correct": 81,
+          "n": 106
+        },
+        "2025-07": {
+          "accuracy": 0.8,
+          "correct": 80,
+          "n": 100
+        },
+        "2025-08": {
+          "accuracy": 0.7066666666666667,
+          "correct": 53,
+          "n": 75
+        },
+        "2025-09": {
+          "accuracy": 0.8333333333333334,
+          "correct": 55,
+          "n": 66
+        },
+        "2026-04": {
+          "accuracy": 0.7560975609756098,
+          "correct": 31,
+          "n": 41
+        },
+        "2026-05": {
+          "accuracy": 0.925,
+          "correct": 37,
+          "n": 40
+        },
+        "2026-06": {
+          "accuracy": 0.92,
+          "correct": 46,
+          "n": 50
+        },
+        "2026-07": {
+          "accuracy": 0.9298245614035088,
+          "correct": 53,
+          "n": 57
+        },
+        "2026-08": {
+          "accuracy": 0.8939393939393939,
+          "correct": 59,
+          "n": 66
+        },
+        "2026-09": {
+          "accuracy": 0.9111111111111111,
+          "correct": 41,
+          "n": 45
+        }
+      },
+      "monthly_accuracy_sd": 0.07596328040532947,
+      "months_with_selections": 11,
+      "n": 776,
+      "prior_win_rate_cap": null,
+      "probability_threshold": 0.2,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8247422680412371,
+      "selected_yes_rate": 0.17525773195876287,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7066666666666667
+    },
+    {
+      "accuracy": 0.8171641791044776,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 219,
+      "coverage_vs_oof": 0.03198090692124105,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.10797563495173301,
+      "min_month_n": 5,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7857142857142857,
+          "correct": 44,
+          "n": 56
+        },
+        "2025-06": {
+          "accuracy": 0.7555555555555555,
+          "correct": 34,
+          "n": 45
+        },
+        "2025-07": {
+          "accuracy": 0.7857142857142857,
+          "correct": 33,
+          "n": 42
+        },
+        "2025-08": {
+          "accuracy": 0.7368421052631579,
+          "correct": 14,
+          "n": 19
+        },
+        "2025-09": {
+          "accuracy": 0.8620689655172413,
+          "correct": 25,
+          "n": 29
+        },
+        "2026-04": {
+          "accuracy": 0.8,
+          "correct": 4,
+          "n": 5
+        },
+        "2026-05": {
+          "accuracy": 1.0,
+          "correct": 5,
+          "n": 5
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 7,
+          "n": 7
+        },
+        "2026-07": {
+          "accuracy": 0.8666666666666667,
+          "correct": 13,
+          "n": 15
+        },
+        "2026-08": {
+          "accuracy": 0.92,
+          "correct": 23,
+          "n": 25
+        },
+        "2026-09": {
+          "accuracy": 0.85,
+          "correct": 17,
+          "n": 20
+        }
+      },
+      "monthly_accuracy_sd": 0.08675925969036107,
+      "months_with_selections": 11,
+      "n": 268,
+      "prior_win_rate_cap": 0.25,
+      "probability_threshold": 0.2,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8171641791044776,
+      "selected_yes_rate": 0.1828358208955224,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7368421052631579
+    },
+    {
+      "accuracy": 0.8135198135198135,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 349,
+      "coverage_vs_oof": 0.05119331742243437,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.10433126936706894,
+      "min_month_n": 14,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.75,
+          "correct": 48,
+          "n": 64
+        },
+        "2025-06": {
+          "accuracy": 0.7169811320754716,
+          "correct": 38,
+          "n": 53
+        },
+        "2025-07": {
+          "accuracy": 0.8076923076923077,
+          "correct": 42,
+          "n": 52
+        },
+        "2025-08": {
+          "accuracy": 0.8717948717948718,
+          "correct": 34,
+          "n": 39
+        },
+        "2025-09": {
+          "accuracy": 0.8787878787878788,
+          "correct": 29,
+          "n": 33
+        },
+        "2026-04": {
+          "accuracy": 0.7142857142857143,
+          "correct": 10,
+          "n": 14
+        },
+        "2026-05": {
+          "accuracy": 0.7272727272727273,
+          "correct": 16,
+          "n": 22
+        },
+        "2026-06": {
+          "accuracy": 0.8823529411764706,
+          "correct": 15,
+          "n": 17
+        },
+        "2026-07": {
+          "accuracy": 0.8611111111111112,
+          "correct": 31,
+          "n": 36
+        },
+        "2026-08": {
+          "accuracy": 0.8703703703703703,
+          "correct": 47,
+          "n": 54
+        },
+        "2026-09": {
+          "accuracy": 0.8666666666666667,
+          "correct": 39,
+          "n": 45
+        }
+      },
+      "monthly_accuracy_sd": 0.06835045971799529,
+      "months_with_selections": 11,
+      "n": 429,
+      "prior_win_rate_cap": 0.2,
+      "probability_threshold": 0.225,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8135198135198135,
+      "selected_yes_rate": 0.1864801864801865,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7142857142857143
+    },
+    {
+      "accuracy": 0.8124098124098124,
+      "architecture": "catboost_probability",
+      "correct": 1126,
+      "coverage_vs_oof": 0.16539379474940333,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.10322126825706779,
+      "min_month_n": 82,
+      "minimum_prior_starts": 0,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7708333333333334,
+          "correct": 148,
+          "n": 192
+        },
+        "2025-06": {
+          "accuracy": 0.7990196078431373,
+          "correct": 163,
+          "n": 204
+        },
+        "2025-07": {
+          "accuracy": 0.7672955974842768,
+          "correct": 122,
+          "n": 159
+        },
+        "2025-08": {
+          "accuracy": 0.7647058823529411,
+          "correct": 91,
+          "n": 119
+        },
+        "2025-09": {
+          "accuracy": 0.8376068376068376,
+          "correct": 98,
+          "n": 117
+        },
+        "2026-04": {
+          "accuracy": 0.7674418604651163,
+          "correct": 66,
+          "n": 86
+        },
+        "2026-05": {
+          "accuracy": 0.82,
+          "correct": 82,
+          "n": 100
+        },
+        "2026-06": {
+          "accuracy": 0.8571428571428571,
+          "correct": 84,
+          "n": 98
+        },
+        "2026-07": {
+          "accuracy": 0.875,
+          "correct": 91,
+          "n": 104
+        },
+        "2026-08": {
+          "accuracy": 0.872,
+          "correct": 109,
+          "n": 125
+        },
+        "2026-09": {
+          "accuracy": 0.8780487804878049,
+          "correct": 72,
+          "n": 82
+        }
+      },
+      "monthly_accuracy_sd": 0.044957082230000986,
+      "months_with_selections": 11,
+      "n": 1386,
+      "prior_win_rate_cap": null,
+      "probability_threshold": 0.225,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8124098124098125,
+      "selected_yes_rate": 0.18759018759018758,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7647058823529411
+    },
+    {
+      "accuracy": 0.8084714548802947,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 439,
+      "coverage_vs_oof": 0.06479713603818615,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.09928291072755013,
+      "min_month_n": 17,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7411764705882353,
+          "correct": 63,
+          "n": 85
+        },
+        "2025-06": {
+          "accuracy": 0.782051282051282,
+          "correct": 61,
+          "n": 78
+        },
+        "2025-07": {
+          "accuracy": 0.8387096774193549,
+          "correct": 52,
+          "n": 62
+        },
+        "2025-08": {
+          "accuracy": 0.8695652173913043,
+          "correct": 40,
+          "n": 46
+        },
+        "2025-09": {
+          "accuracy": 0.8409090909090909,
+          "correct": 37,
+          "n": 44
+        },
+        "2026-04": {
+          "accuracy": 0.7058823529411765,
+          "correct": 12,
+          "n": 17
+        },
+        "2026-05": {
+          "accuracy": 0.7241379310344828,
+          "correct": 21,
+          "n": 29
+        },
+        "2026-06": {
+          "accuracy": 0.84,
+          "correct": 21,
+          "n": 25
+        },
+        "2026-07": {
+          "accuracy": 0.8333333333333334,
+          "correct": 35,
+          "n": 42
+        },
+        "2026-08": {
+          "accuracy": 0.8412698412698413,
+          "correct": 53,
+          "n": 63
+        },
+        "2026-09": {
+          "accuracy": 0.8461538461538461,
+          "correct": 44,
+          "n": 52
+        }
+      },
+      "monthly_accuracy_sd": 0.05442957333746666,
+      "months_with_selections": 11,
+      "n": 543,
+      "prior_win_rate_cap": 0.25,
+      "probability_threshold": 0.225,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8084714548802947,
+      "selected_yes_rate": 0.19152854511970535,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7058823529411765
+    },
+    {
+      "accuracy": 0.8036951501154734,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 348,
+      "coverage_vs_oof": 0.051670644391408116,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.09450660596272886,
+      "min_month_n": 19,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.6764705882352942,
+          "correct": 23,
+          "n": 34
+        },
+        "2025-06": {
+          "accuracy": 0.7142857142857143,
+          "correct": 15,
+          "n": 21
+        },
+        "2025-07": {
+          "accuracy": 0.8461538461538461,
+          "correct": 22,
+          "n": 26
+        },
+        "2025-08": {
+          "accuracy": 0.8,
+          "correct": 20,
+          "n": 25
+        },
+        "2025-09": {
+          "accuracy": 0.8947368421052632,
+          "correct": 17,
+          "n": 19
+        },
+        "2026-04": {
+          "accuracy": 0.765625,
+          "correct": 49,
+          "n": 64
+        },
+        "2026-05": {
+          "accuracy": 0.6862745098039216,
+          "correct": 35,
+          "n": 51
+        },
+        "2026-06": {
+          "accuracy": 0.8205128205128205,
+          "correct": 32,
+          "n": 39
+        },
+        "2026-07": {
+          "accuracy": 0.8837209302325582,
+          "correct": 38,
+          "n": 43
+        },
+        "2026-08": {
+          "accuracy": 0.8823529411764706,
+          "correct": 60,
+          "n": 68
+        },
+        "2026-09": {
+          "accuracy": 0.8604651162790697,
+          "correct": 37,
+          "n": 43
+        }
+      },
+      "monthly_accuracy_sd": 0.07723030599375999,
+      "months_with_selections": 11,
+      "n": 433,
+      "prior_win_rate_cap": 0.05,
+      "probability_threshold": 0.325,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8036951501154734,
+      "selected_yes_rate": 0.19630484988452657,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6764705882352942
+    },
+    {
+      "accuracy": 0.8033707865168539,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 286,
+      "coverage_vs_oof": 0.04248210023866349,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.09418224236410933,
+      "min_month_n": 6,
+      "minimum_prior_starts": 5,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7457627118644068,
+          "correct": 44,
+          "n": 59
+        },
+        "2025-06": {
+          "accuracy": 0.7291666666666666,
+          "correct": 35,
+          "n": 48
+        },
+        "2025-07": {
+          "accuracy": 0.8,
+          "correct": 36,
+          "n": 45
+        },
+        "2025-08": {
+          "accuracy": 0.8717948717948718,
+          "correct": 34,
+          "n": 39
+        },
+        "2025-09": {
+          "accuracy": 0.8666666666666667,
+          "correct": 26,
+          "n": 30
+        },
+        "2026-04": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4,
+          "n": 6
+        },
+        "2026-05": {
+          "accuracy": 0.7142857142857143,
+          "correct": 15,
+          "n": 21
+        },
+        "2026-06": {
+          "accuracy": 0.8461538461538461,
+          "correct": 11,
+          "n": 13
+        },
+        "2026-07": {
+          "accuracy": 0.8095238095238095,
+          "correct": 17,
+          "n": 21
+        },
+        "2026-08": {
+          "accuracy": 0.8717948717948718,
+          "correct": 34,
+          "n": 39
+        },
+        "2026-09": {
+          "accuracy": 0.8571428571428571,
+          "correct": 30,
+          "n": 35
+        }
+      },
+      "monthly_accuracy_sd": 0.06959829577885927,
+      "months_with_selections": 11,
+      "n": 356,
+      "prior_win_rate_cap": 0.2,
+      "probability_threshold": 0.225,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8033707865168539,
+      "selected_yes_rate": 0.19662921348314608,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.8018018018018018,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 178,
+      "coverage_vs_oof": 0.02649164677804296,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.09261325764905726,
+      "min_month_n": 3,
+      "minimum_prior_starts": 5,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7647058823529411,
+          "correct": 39,
+          "n": 51
+        },
+        "2025-06": {
+          "accuracy": 0.7560975609756098,
+          "correct": 31,
+          "n": 41
+        },
+        "2025-07": {
+          "accuracy": 0.7894736842105263,
+          "correct": 30,
+          "n": 38
+        },
+        "2025-08": {
+          "accuracy": 0.7222222222222222,
+          "correct": 13,
+          "n": 18
+        },
+        "2025-09": {
+          "accuracy": 0.84,
+          "correct": 21,
+          "n": 25
+        },
+        "2026-04": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        },
+        "2026-05": {
+          "accuracy": 1.0,
+          "correct": 4,
+          "n": 4
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 4,
+          "n": 4
+        },
+        "2026-07": {
+          "accuracy": 0.8571428571428571,
+          "correct": 6,
+          "n": 7
+        },
+        "2026-08": {
+          "accuracy": 0.9333333333333333,
+          "correct": 14,
+          "n": 15
+        },
+        "2026-09": {
+          "accuracy": 0.8125,
+          "correct": 13,
+          "n": 16
+        }
+      },
+      "monthly_accuracy_sd": 0.10029673337072884,
+      "months_with_selections": 11,
+      "n": 222,
+      "prior_win_rate_cap": 0.25,
+      "probability_threshold": 0.2,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8018018018018018,
+      "selected_yes_rate": 0.1981981981981982,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7222222222222222
+    },
+    {
+      "accuracy": 0.801762114537445,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 182,
+      "coverage_vs_oof": 0.027088305489260143,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.09257357038470038,
+      "min_month_n": 3,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7777777777777778,
+          "correct": 35,
+          "n": 45
+        },
+        "2025-06": {
+          "accuracy": 0.6774193548387096,
+          "correct": 21,
+          "n": 31
+        },
+        "2025-07": {
+          "accuracy": 0.7567567567567568,
+          "correct": 28,
+          "n": 37
+        },
+        "2025-08": {
+          "accuracy": 0.7058823529411765,
+          "correct": 12,
+          "n": 17
+        },
+        "2025-09": {
+          "accuracy": 0.875,
+          "correct": 21,
+          "n": 24
+        },
+        "2026-04": {
+          "accuracy": 0.8,
+          "correct": 4,
+          "n": 5
+        },
+        "2026-05": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 6,
+          "n": 6
+        },
+        "2026-07": {
+          "accuracy": 0.8666666666666667,
+          "correct": 13,
+          "n": 15
+        },
+        "2026-08": {
+          "accuracy": 0.92,
+          "correct": 23,
+          "n": 25
+        },
+        "2026-09": {
+          "accuracy": 0.8421052631578947,
+          "correct": 16,
+          "n": 19
+        }
+      },
+      "monthly_accuracy_sd": 0.10283740224844226,
+      "months_with_selections": 11,
+      "n": 227,
+      "prior_win_rate_cap": 0.2,
+      "probability_threshold": 0.2,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.801762114537445,
+      "selected_yes_rate": 0.19823788546255505,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6774193548387096
+    },
+    {
+      "accuracy": 0.8009478672985783,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 169,
+      "coverage_vs_oof": 0.025178997613365155,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.09175932314583368,
+      "min_month_n": 6,
+      "minimum_prior_starts": 5,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.6956521739130435,
+          "correct": 16,
+          "n": 23
+        },
+        "2025-06": {
+          "accuracy": 0.8333333333333334,
+          "correct": 5,
+          "n": 6
+        },
+        "2025-07": {
+          "accuracy": 0.9285714285714286,
+          "correct": 13,
+          "n": 14
+        },
+        "2025-08": {
+          "accuracy": 0.7894736842105263,
+          "correct": 15,
+          "n": 19
+        },
+        "2025-09": {
+          "accuracy": 0.8571428571428571,
+          "correct": 6,
+          "n": 7
+        },
+        "2026-04": {
+          "accuracy": 0.7272727272727273,
+          "correct": 8,
+          "n": 11
+        },
+        "2026-05": {
+          "accuracy": 0.71875,
+          "correct": 23,
+          "n": 32
+        },
+        "2026-06": {
+          "accuracy": 0.6666666666666666,
+          "correct": 10,
+          "n": 15
+        },
+        "2026-07": {
+          "accuracy": 0.8823529411764706,
+          "correct": 15,
+          "n": 17
+        },
+        "2026-08": {
+          "accuracy": 0.8918918918918919,
+          "correct": 33,
+          "n": 37
+        },
+        "2026-09": {
+          "accuracy": 0.8333333333333334,
+          "correct": 25,
+          "n": 30
+        }
+      },
+      "monthly_accuracy_sd": 0.08413075865361723,
+      "months_with_selections": 11,
+      "n": 211,
+      "prior_win_rate_cap": 0.05,
+      "probability_threshold": 0.325,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.8009478672985781,
+      "selected_yes_rate": 0.1990521327014218,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.7991266375545851,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 183,
+      "coverage_vs_oof": 0.027326968973747017,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.08993809340184056,
+      "min_month_n": 7,
+      "minimum_prior_starts": 5,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.68,
+          "correct": 17,
+          "n": 25
+        },
+        "2025-06": {
+          "accuracy": 0.75,
+          "correct": 6,
+          "n": 8
+        },
+        "2025-07": {
+          "accuracy": 0.9375,
+          "correct": 15,
+          "n": 16
+        },
+        "2025-08": {
+          "accuracy": 0.7894736842105263,
+          "correct": 15,
+          "n": 19
+        },
+        "2025-09": {
+          "accuracy": 0.8571428571428571,
+          "correct": 6,
+          "n": 7
+        },
+        "2026-04": {
+          "accuracy": 0.7333333333333333,
+          "correct": 11,
+          "n": 15
+        },
+        "2026-05": {
+          "accuracy": 0.7368421052631579,
+          "correct": 28,
+          "n": 38
+        },
+        "2026-06": {
+          "accuracy": 0.7058823529411765,
+          "correct": 12,
+          "n": 17
+        },
+        "2026-07": {
+          "accuracy": 0.8823529411764706,
+          "correct": 15,
+          "n": 17
+        },
+        "2026-08": {
+          "accuracy": 0.8918918918918919,
+          "correct": 33,
+          "n": 37
+        },
+        "2026-09": {
+          "accuracy": 0.8333333333333334,
+          "correct": 25,
+          "n": 30
+        }
+      },
+      "monthly_accuracy_sd": 0.08135814965495985,
+      "months_with_selections": 11,
+      "n": 229,
+      "prior_win_rate_cap": 0.05,
+      "probability_threshold": 0.35,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.7991266375545851,
+      "selected_yes_rate": 0.20087336244541484,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.68
+    },
+    {
+      "accuracy": 0.7987421383647799,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 127,
+      "coverage_vs_oof": 0.018973747016706444,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.08955359421203535,
+      "min_month_n": 3,
+      "minimum_prior_starts": 8,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.84,
+          "correct": 21,
+          "n": 25
+        },
+        "2025-06": {
+          "accuracy": 0.7567567567567568,
+          "correct": 28,
+          "n": 37
+        },
+        "2025-07": {
+          "accuracy": 0.7741935483870968,
+          "correct": 24,
+          "n": 31
+        },
+        "2025-08": {
+          "accuracy": 0.7333333333333333,
+          "correct": 11,
+          "n": 15
+        },
+        "2025-09": {
+          "accuracy": 0.7894736842105263,
+          "correct": 15,
+          "n": 19
+        },
+        "2026-05": {
+          "accuracy": 1.0,
+          "correct": 4,
+          "n": 4
+        },
+        "2026-06": {
+          "accuracy": 1.0,
+          "correct": 3,
+          "n": 3
+        },
+        "2026-07": {
+          "accuracy": 0.8333333333333334,
+          "correct": 5,
+          "n": 6
+        },
+        "2026-08": {
+          "accuracy": 1.0,
+          "correct": 7,
+          "n": 7
+        },
+        "2026-09": {
+          "accuracy": 0.75,
+          "correct": 9,
+          "n": 12
+        }
+      },
+      "monthly_accuracy_sd": 0.10466172199254102,
+      "months_with_selections": 10,
+      "n": 159,
+      "prior_win_rate_cap": 0.25,
+      "probability_threshold": 0.2,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.7987421383647799,
+      "selected_yes_rate": 0.20125786163522014,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7333333333333333
+    },
+    {
+      "accuracy": 0.7981366459627329,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 257,
+      "coverage_vs_oof": 0.03842482100238664,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.08894810180998836,
+      "min_month_n": 12,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.6923076923076923,
+          "correct": 18,
+          "n": 26
+        },
+        "2025-06": {
+          "accuracy": 0.6666666666666666,
+          "correct": 10,
+          "n": 15
+        },
+        "2025-07": {
+          "accuracy": 0.7894736842105263,
+          "correct": 15,
+          "n": 19
+        },
+        "2025-08": {
+          "accuracy": 0.8333333333333334,
+          "correct": 15,
+          "n": 18
+        },
+        "2025-09": {
+          "accuracy": 1.0,
+          "correct": 12,
+          "n": 12
+        },
+        "2026-04": {
+          "accuracy": 0.6829268292682927,
+          "correct": 28,
+          "n": 41
+        },
+        "2026-05": {
+          "accuracy": 0.6666666666666666,
+          "correct": 20,
+          "n": 30
+        },
+        "2026-06": {
+          "accuracy": 0.782608695652174,
+          "correct": 18,
+          "n": 23
+        },
+        "2026-07": {
+          "accuracy": 0.875,
+          "correct": 28,
+          "n": 32
+        },
+        "2026-08": {
+          "accuracy": 0.8923076923076924,
+          "correct": 58,
+          "n": 65
+        },
+        "2026-09": {
+          "accuracy": 0.8536585365853658,
+          "correct": 35,
+          "n": 41
+        }
+      },
+      "monthly_accuracy_sd": 0.10402095595695936,
+      "months_with_selections": 11,
+      "n": 322,
+      "prior_win_rate_cap": 0.05,
+      "probability_threshold": 0.275,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.7981366459627329,
+      "selected_yes_rate": 0.20186335403726707,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.797752808988764,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 355,
+      "coverage_vs_oof": 0.053102625298329355,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.08856426483601942,
+      "min_month_n": 6,
+      "minimum_prior_starts": 5,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7297297297297297,
+          "correct": 54,
+          "n": 74
+        },
+        "2025-06": {
+          "accuracy": 0.782608695652174,
+          "correct": 54,
+          "n": 69
+        },
+        "2025-07": {
+          "accuracy": 0.8333333333333334,
+          "correct": 45,
+          "n": 54
+        },
+        "2025-08": {
+          "accuracy": 0.8604651162790697,
+          "correct": 37,
+          "n": 43
+        },
+        "2025-09": {
+          "accuracy": 0.8205128205128205,
+          "correct": 32,
+          "n": 39
+        },
+        "2026-04": {
+          "accuracy": 0.6666666666666666,
+          "correct": 4,
+          "n": 6
+        },
+        "2026-05": {
+          "accuracy": 0.72,
+          "correct": 18,
+          "n": 25
+        },
+        "2026-06": {
+          "accuracy": 0.8421052631578947,
+          "correct": 16,
+          "n": 19
+        },
+        "2026-07": {
+          "accuracy": 0.7777777777777778,
+          "correct": 21,
+          "n": 27
+        },
+        "2026-08": {
+          "accuracy": 0.8333333333333334,
+          "correct": 40,
+          "n": 48
+        },
+        "2026-09": {
+          "accuracy": 0.8292682926829268,
+          "correct": 34,
+          "n": 41
+        }
+      },
+      "monthly_accuracy_sd": 0.058661935204116236,
+      "months_with_selections": 11,
+      "n": 445,
+      "prior_win_rate_cap": 0.25,
+      "probability_threshold": 0.225,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.797752808988764,
+      "selected_yes_rate": 0.20224719101123595,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.7961783439490446,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 375,
+      "coverage_vs_oof": 0.056205250596658714,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.08698979979630006,
+      "min_month_n": 19,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.6923076923076923,
+          "correct": 27,
+          "n": 39
+        },
+        "2025-06": {
+          "accuracy": 0.6666666666666666,
+          "correct": 20,
+          "n": 30
+        },
+        "2025-07": {
+          "accuracy": 0.8,
+          "correct": 24,
+          "n": 30
+        },
+        "2025-08": {
+          "accuracy": 0.8,
+          "correct": 20,
+          "n": 25
+        },
+        "2025-09": {
+          "accuracy": 0.8947368421052632,
+          "correct": 17,
+          "n": 19
+        },
+        "2026-04": {
+          "accuracy": 0.7733333333333333,
+          "correct": 58,
+          "n": 75
+        },
+        "2026-05": {
+          "accuracy": 0.7017543859649122,
+          "correct": 40,
+          "n": 57
+        },
+        "2026-06": {
+          "accuracy": 0.8292682926829268,
+          "correct": 34,
+          "n": 41
+        },
+        "2026-07": {
+          "accuracy": 0.8636363636363636,
+          "correct": 38,
+          "n": 44
+        },
+        "2026-08": {
+          "accuracy": 0.8823529411764706,
+          "correct": 60,
+          "n": 68
+        },
+        "2026-09": {
+          "accuracy": 0.8604651162790697,
+          "correct": 37,
+          "n": 43
+        }
+      },
+      "monthly_accuracy_sd": 0.07624340228322424,
+      "months_with_selections": 11,
+      "n": 471,
+      "prior_win_rate_cap": 0.05,
+      "probability_threshold": 0.35,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.7961783439490446,
+      "selected_yes_rate": 0.20382165605095542,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.6666666666666666
+    },
+    {
+      "accuracy": 0.7947882736156352,
+      "architecture": "catboost_plus_prior_win_filter",
+      "correct": 244,
+      "coverage_vs_oof": 0.036634844868735084,
+      "direction": "NO",
+      "lift_vs_unconditional_direction_baseline": 0.08559972946289063,
+      "min_month_n": 5,
+      "minimum_prior_starts": 3,
+      "monthly": {
+        "2025-05": {
+          "accuracy": 0.7538461538461538,
+          "correct": 49,
+          "n": 65
+        },
+        "2025-06": {
+          "accuracy": 0.7454545454545455,
+          "correct": 41,
+          "n": 55
+        },
+        "2025-07": {
+          "accuracy": 0.7647058823529411,
+          "correct": 39,
+          "n": 51
+        },
+        "2025-08": {
+          "accuracy": 0.7368421052631579,
+          "correct": 14,
+          "n": 19
+        },
+        "2025-09": {
+          "accuracy": 0.8157894736842105,
+          "correct": 31,
+          "n": 38
+        },
+        "2026-04": {
+          "accuracy": 0.8,
+          "correct": 4,
+          "n": 5
+        },
+        "2026-05": {
+          "accuracy": 1.0,
+          "correct": 5,
+          "n": 5
+        },
+        "2026-06": {
+          "accuracy": 0.875,
+          "correct": 7,
+          "n": 8
+        },
+        "2026-07": {
+          "accuracy": 0.8666666666666667,
+          "correct": 13,
+          "n": 15
+        },
+        "2026-08": {
+          "accuracy": 0.92,
+          "correct": 23,
+          "n": 25
+        },
+        "2026-09": {
+          "accuracy": 0.8571428571428571,
+          "correct": 18,
+          "n": 21
+        }
+      },
+      "monthly_accuracy_sd": 0.07867913988455201,
+      "months_with_selections": 11,
+      "n": 307,
+      "prior_win_rate_cap": 0.3,
+      "probability_threshold": 0.2,
+      "sample_stability_gate_met": true,
+      "selected_majority_baseline": 0.7947882736156352,
+      "selected_yes_rate": 0.20521172638436483,
+      "target_met_75_plus": true,
+      "unconditional_direction_baseline": 0.7091885441527446,
+      "worst_month_accuracy": 0.7368421052631579
+    }
+  ],
+  "historical_max_allowed_game_date": "2026-09-18",
+  "market_closeout_state": "TARGET_MET_75_PLUS_FREEZE_READY",
+  "mlb_schedule_decisions_used": true,
+  "numeric_feature_count": 97,
+  "numeric_features": [
+    "doubleheader_flag",
+    "game_number",
+    "opp_arsenal_matchup_score",
+    "opp_bullpen_bb_pct",
+    "opp_bullpen_k_pct",
+    "opp_bullpen_l7_ra9",
+    "opp_bullpen_pitches_last_2d",
+    "opp_bullpen_ra9",
+    "opp_bullpen_whip",
+    "opp_common_win_pct",
+    "opp_errors_pg",
+    "opp_games_last_7d",
+    "opp_games_prior",
+    "opp_l10_games",
+    "opp_l10_run_diff_pg",
+    "opp_l10_win_pct",
+    "opp_l5_games",
+    "opp_l5_run_diff_pg",
+    "opp_l5_win_pct",
+    "opp_lineup_barrel_pct",
+    "opp_lineup_hard_hit_pct",
+    "opp_lineup_k_pct",
+    "opp_lineup_ops_proxy",
+    "opp_off_k_pct",
+    "opp_off_ops_proxy",
+    "opp_pyth_win_pct",
+    "opp_rest_days",
+    "opp_road_trip_game_number",
+    "opp_run_diff_pg",
+    "opp_sc_off_barrel_pct",
+    "opp_sc_off_hard_hit_pct",
+    "opp_sp_bb_pct",
+    "opp_sp_hard_hit_pct",
+    "opp_sp_k_pct",
+    "opp_sp_l5_ra9",
+    "opp_sp_l5_whip",
+    "opp_sp_ra9",
+    "opp_sp_starts_prior",
+    "opp_sp_vs_opp_bb_pct",
+    "opp_sp_vs_opp_k_pct",
+    "opp_sp_whiff_rate",
+    "opp_sp_whip",
+    "opp_timezone_changes_48h",
+    "opp_travel_miles_48h",
+    "opp_vs_sp_hand_hard_hit_pct",
+    "opp_vs_sp_hand_k_rate",
+    "opp_win_pct",
+    "own_arsenal_matchup_score",
+    "own_bullpen_bb_pct",
+    "own_bullpen_k_pct",
+    "own_bullpen_l7_ra9",
+    "own_bullpen_pitches_last_2d",
+    "own_bullpen_ra9",
+    "own_bullpen_whip",
+    "own_common_win_pct",
+    "own_errors_pg",
+    "own_games_last_7d",
+    "own_games_prior",
+    "own_l10_games",
+    "own_l10_run_diff_pg",
+    "own_l10_win_pct",
+    "own_l5_games",
+    "own_l5_run_diff_pg",
+    "own_l5_win_pct",
+    "own_lineup_barrel_pct",
+    "own_lineup_hard_hit_pct",
+    "own_lineup_k_pct",
+    "own_lineup_ops_proxy",
+    "own_off_k_pct",
+    "own_off_ops_proxy",
+    "own_pyth_win_pct",
+    "own_rest_days",
+    "own_road_trip_game_number",
+    "own_run_diff_pg",
+    "own_sc_off_barrel_pct",
+    "own_sc_off_hard_hit_pct",
+    "own_sp_bb_pct",
+    "own_sp_hard_hit_pct",
+    "own_sp_k_pct",
+    "own_sp_l5_ra9",
+    "own_sp_l5_whip",
+    "own_sp_ra9",
+    "own_sp_starts_prior",
+    "own_sp_vs_opp_bb_pct",
+    "own_sp_vs_opp_k_pct",
+    "own_sp_whiff_rate",
+    "own_sp_whip",
+    "own_timezone_changes_48h",
+    "own_travel_miles_48h",
+    "own_vs_sp_hand_hard_hit_pct",
+    "own_vs_sp_hand_k_rate",
+    "own_win_pct",
+    "park_home_win_pct_prior",
+    "prior_starts",
+    "prior_win_rate",
+    "prior_wins",
+    "starter_is_home"
+  ],
+  "odds_api_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "oof_rows": 8380,
+  "outcome_yes_by_season": {
+    "2025": 1450,
+    "2026": 1315
+  },
+  "production_promotion": false,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "quarantine_2026_09_19_used": false,
+  "research_only": true,
+  "selected_candidate": {
+    "accuracy": 0.8124098124098124,
+    "architecture": "catboost_probability",
+    "correct": 1126,
+    "coverage_vs_oof": 0.16539379474940333,
+    "direction": "NO",
+    "lift_vs_unconditional_direction_baseline": 0.10322126825706779,
+    "min_month_n": 82,
+    "minimum_prior_starts": 0,
+    "monthly": {
+      "2025-05": {
+        "accuracy": 0.7708333333333334,
+        "correct": 148,
+        "n": 192
+      },
+      "2025-06": {
+        "accuracy": 0.7990196078431373,
+        "correct": 163,
+        "n": 204
+      },
+      "2025-07": {
+        "accuracy": 0.7672955974842768,
+        "correct": 122,
+        "n": 159
+      },
+      "2025-08": {
+        "accuracy": 0.7647058823529411,
+        "correct": 91,
+        "n": 119
+      },
+      "2025-09": {
+        "accuracy": 0.8376068376068376,
+        "correct": 98,
+        "n": 117
+      },
+      "2026-04": {
+        "accuracy": 0.7674418604651163,
+        "correct": 66,
+        "n": 86
+      },
+      "2026-05": {
+        "accuracy": 0.82,
+        "correct": 82,
+        "n": 100
+      },
+      "2026-06": {
+        "accuracy": 0.8571428571428571,
+        "correct": 84,
+        "n": 98
+      },
+      "2026-07": {
+        "accuracy": 0.875,
+        "correct": 91,
+        "n": 104
+      },
+      "2026-08": {
+        "accuracy": 0.872,
+        "correct": 109,
+        "n": 125
+      },
+      "2026-09": {
+        "accuracy": 0.8780487804878049,
+        "correct": 72,
+        "n": 82
+      }
+    },
+    "monthly_accuracy_sd": 0.044957082230000986,
+    "months_with_selections": 11,
+    "n": 1386,
+    "prior_win_rate_cap": null,
+    "probability_threshold": 0.225,
+    "sample_stability_gate_met": true,
+    "selected_majority_baseline": 0.8124098124098125,
+    "selected_yes_rate": 0.18759018759018758,
+    "target_met_75_plus": true,
+    "unconditional_direction_baseline": 0.7091885441527446,
+    "worst_month_accuracy": 0.7647058823529411
+  },
+  "source_rows": 9448,
+  "source_rows_by_season": {
+    "2025": 4860,
+    "2026": 4588
+  },
+  "specs": [
+    {
+      "depth": 4,
+      "iterations": 350,
+      "l2_leaf_reg": 7.0,
+      "learning_rate": 0.035,
+      "random_strength": 1.0
+    },
+    {
+      "depth": 6,
+      "iterations": 350,
+      "l2_leaf_reg": 7.0,
+      "learning_rate": 0.035,
+      "random_strength": 1.0
+    }
+  ],
+  "target_met_75_plus": true
+}
