@@ -8,7 +8,7 @@
     "correct": 1126,
     "coverage_vs_oof": 0.16539379474940333,
     "direction": "NO",
-    "lift_vs_selected_majority": -1.1102230246251565e-16,
+    "lift_vs_unconditional_direction_baseline": 0.10322126825706779,
     "min_month_n": 82,
     "minimum_prior_starts": 0,
     "monthly": {
@@ -77,6 +77,7 @@
     "selected_majority_baseline": 0.8124098124098125,
     "selected_yes_rate": 0.18759018759018758,
     "target_met_75_plus": true,
+    "unconditional_direction_baseline": 0.7091885441527446,
     "worst_month_accuracy": 0.7647058823529411
   },
   "categorical_features": [
@@ -92,7 +93,7 @@
   "forward_min_game_date": "2026-09-20",
   "forward_outcomes_opened": false,
   "frozen": true,
-  "github_sha_at_freeze": "82347d04327b1eaf0c003202f56f5c37b8d9c154",
+  "github_sha_at_freeze": "774ef828485cf0761fb24e99d8f1faf0f5f6d56d",
   "historical_max_allowed_game_date": "2026-09-18",
   "numeric_features": [
     "doubleheader_flag",
