@@ -20,5 +20,6 @@
   "expectedOddsApiCredits": 0,
   "officialPicksWritesAllowed": false,
   "apostarActivationAllowed": false,
-  "productionPromotionAllowed": false
+  "productionPromotionAllowed": false,
+  "tieHandling": "DRAW_EXPLICIT_CLASS"
 }
