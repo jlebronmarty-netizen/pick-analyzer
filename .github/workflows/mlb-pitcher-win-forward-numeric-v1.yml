@@ -22,6 +22,7 @@ env:
   RESULT_PATH: artifacts/research/mlb_pitcher_win_forward_numeric_v1_result.json
   FREEZE_PATH: artifacts/research/mlb_pitcher_win_forward_numeric_v1_frozen_candidate.json
   DECISIONS_PATH: artifacts/research/mlb_pitcher_win_forward_numeric_2026_decisions_v1.json
+  GOLDEN_PATH: artifacts/research/mlb_pitcher_win_forward_numeric_v1_golden.json
 
 jobs:
   evaluate:
@@ -117,7 +118,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "$RESULT_PATH" "$FREEZE_PATH" "$DECISIONS_PATH" python_models/pitcher_win_forward_numeric_model_0.py python_models/pitcher_win_forward_numeric_model_1.py
+          git add "$RESULT_PATH" "$FREEZE_PATH" "$DECISIONS_PATH" "$GOLDEN_PATH" python_models/pitcher_win_forward_numeric_model_0.py python_models/pitcher_win_forward_numeric_model_1.py python_models/pitcher_win_forward_numeric_model_0.json python_models/pitcher_win_forward_numeric_model_1.json
           if git diff --cached --quiet; then exit 0; fi
           git commit -m 'research(pitcher-win): record numeric-only forward result'
           git pull --rebase origin research/pitcher-win-forward-compatible-20260919
@@ -132,5 +133,8 @@ jobs:
             artifacts/research/mlb_pitcher_win_forward_numeric_2026_decisions_v1.json
             python_models/pitcher_win_forward_numeric_model_0.py
             python_models/pitcher_win_forward_numeric_model_1.py
+            python_models/pitcher_win_forward_numeric_model_0.json
+            python_models/pitcher_win_forward_numeric_model_1.json
+            artifacts/research/mlb_pitcher_win_forward_numeric_v1_golden.json
           retention-days: 14
           if-no-files-found: error
