@@ -6,6 +6,30 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-18 First 5 Innings Moneyline first-pass closeout — authoritative
+
+Frozen fallback: `f5_ml_sp0p5_ops0p08_win0p05_v1`.
+
+Target certification:
+
+- F5 score from Statcast post-inning score;
+- 2,423/2,430 2025 mapped games agree exactly with Retrosheet F5 score;
+- 7 one-run disagreements excluded fail-closed from 2025 development;
+- ties are pushes.
+
+Rule is symmetric:
+
+- HOME when starter RA9 advantage >=0.50, offense OPS advantage >=0.08 and prior win% advantage >=0.05;
+- AWAY on the symmetric inverse.
+
+2025: 60/88 = **68.18%**, 15 pushes, worst month **64.71%**.
+
+2026 one-shot: 34/61 = **55.74%**, 9 pushes, coverage **3.56%**, worst month **40.00%**.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version using 2026. No certified historical F5 price corpus exists.
+
 ## 2026-09-18 standard MLB prop coverage integrity audit — authoritative
 
 Canonical audit:
