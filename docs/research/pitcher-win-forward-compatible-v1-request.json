@@ -1,0 +1,43 @@
+{
+  "contract": "MLB_PITCHER_WIN_FORWARD_COMPAT_V1_REQUEST/1.0.0",
+  "authorized": true,
+  "researchOnly": true,
+  "protocol": "MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0",
+  "market": "PITCHER_RECORD_A_WIN",
+  "purpose": "FORWARD_COMPATIBLE_PRE_2026_09_20_FREEZE",
+  "historicalDevelopmentMaxGameDate": "2026-09-18",
+  "developmentClass": "HISTORICAL_SEEN_DEVELOPMENT",
+  "sourceTable": "public.mlb_pitcher_win_revisit_base_v1",
+  "featureContract": "DEPLOYABLE_EXACT_PARITY_CORE_V1",
+  "allowedFeatureFamilies": [
+    "team_season_strength",
+    "team_recent_form_l5_l10",
+    "team_rest",
+    "head_to_head",
+    "starter_prior_start_count",
+    "starter_prior_win_decisions",
+    "side_and_schedule_context"
+  ],
+  "excludedForParity": [
+    "starter_ra9_whip_k_bb_whiff_hard_hit",
+    "bullpen",
+    "lineup",
+    "arsenal",
+    "travel_timezone",
+    "park_model",
+    "reconstructed_actual_lineup"
+  ],
+  "targetAccuracy": 0.75,
+  "minimumSelectedN": 60,
+  "minimumMonthsWithSelections": 5,
+  "minimumWorstMonthAccuracy": 0.65,
+  "forwardMinGameDate": "2026-09-20",
+  "openForwardOutcomesInThisRun": false,
+  "useForwardForSelection": false,
+  "oddsApiCallsAllowed": false,
+  "historicalOddsCreditSpendAllowed": false,
+  "expectedOddsApiCredits": 0,
+  "officialPicksWritesAllowed": false,
+  "apostarActivationAllowed": false,
+  "productionPromotionAllowed": false
+}
