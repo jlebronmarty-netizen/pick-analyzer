@@ -3,25 +3,39 @@ import json
 import urllib.parse
 import urllib.request
 
-GAME_PKS=[776135,776136,822924]
-FIELDS="liveData,decisions,winner,id,fullName,loser,save"
-out=[]
-for game_pk in GAME_PKS:
-    query=urllib.parse.urlencode({"fields":FIELDS})
-    url=f"https://statsapi.mlb.com/api/v1.1/game/{game_pk}/feed/live?{query}"
-    req=urllib.request.Request(url,headers={"User-Agent":"pick-analyzer-research/1.0"})
-    with urllib.request.urlopen(req,timeout=30) as resp:
-        payload=json.load(resp)
-    decisions=((payload.get("liveData") or {}).get("decisions") or {})
-    winner=decisions.get("winner") or {}
-    loser=decisions.get("loser") or {}
-    if not winner.get("id") or not loser.get("id"):
-        raise RuntimeError(f"MLB_DECISIONS_INCOMPLETE:{game_pk}:{decisions}")
-    out.append({
-        "game_pk":game_pk,
-        "winner_id":int(winner["id"]),
-        "winner_name":winner.get("fullName"),
-        "loser_id":int(loser["id"]),
-        "loser_name":loser.get("fullName"),
-    })
-print(json.dumps({"contract":"MLB_PITCHER_DECISIONS_PROBE/1.0.0","fields":FIELDS,"rows":out},indent=2))
+FIELDS="dates,date,games,gamePk,decisions,winner,id,fullName,loser,save"
+params={
+    "sportId":1,
+    "date":"2026-09-17",
+    "hydrate":"decisions",
+    "fields":FIELDS,
+}
+url="https://statsapi.mlb.com/api/v1/schedule?"+urllib.parse.urlencode(params)
+req=urllib.request.Request(url,headers={"User-Agent":"pick-analyzer-research/1.0"})
+with urllib.request.urlopen(req,timeout=30) as resp:
+    payload=json.load(resp)
+
+rows=[]
+for d in payload.get("dates",[]):
+    for game in d.get("games",[]):
+        dec=game.get("decisions") or {}
+        winner=dec.get("winner") or {}
+        loser=dec.get("loser") or {}
+        if not winner.get("id") or not loser.get("id"):
+            raise RuntimeError(f"SCHEDULE_DECISIONS_INCOMPLETE:{game.get('gamePk')}:{dec}")
+        rows.append({
+            "game_pk":int(game["gamePk"]),
+            "winner_id":int(winner["id"]),
+            "winner_name":winner.get("fullName"),
+            "loser_id":int(loser["id"]),
+            "loser_name":loser.get("fullName"),
+        })
+if not any(x["game_pk"]==822924 and x["winner_id"]==656876 for x in rows):
+    raise RuntimeError("SCHEDULE_DECISIONS_PARITY_FAILED")
+print(json.dumps({
+    "contract":"MLB_PITCHER_DECISIONS_SCHEDULE_PROBE/1.0.0",
+    "date":"2026-09-17",
+    "games":len(rows),
+    "parity_game_pk":822924,
+    "rows":rows
+},indent=2))
