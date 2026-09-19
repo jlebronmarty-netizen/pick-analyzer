@@ -50,3 +50,21 @@ A higher pooled candidate existed using the 95th percentile of prior win% advant
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No historical F1 pricing is certified in the current corpus.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT`.
+
+- eligible feature rows: 1,966
+- selected including pushes: 79
+- non-push selections: 40
+- correct: 24
+- accuracy: **60.00%**
+- pushes: 39
+- selection coverage: **4.02%**
+- worst selected month: **50.00%**
+- retuned after external result: **NO**
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not rescue this version with 2026-driven thresholds.
