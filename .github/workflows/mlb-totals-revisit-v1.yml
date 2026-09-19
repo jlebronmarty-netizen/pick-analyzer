@@ -1,0 +1,138 @@
+name: MLB Totals Revisit V1 Historical Development
+
+on:
+  push:
+    branches: [research/totals-revisit-20260919]
+    paths:
+      - '.github/workflows/mlb-totals-revisit-v1.yml'
+      - 'docs/research/totals-revisit-v1-request.json'
+      - 'scripts/research/train_mlb_totals_revisit_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: mlb-totals-revisit-v1
+  cancel-in-progress: false
+
+env:
+  REQUEST_PATH: docs/research/totals-revisit-v1-request.json
+  RESULT_PATH: artifacts/research/mlb_totals_revisit_v1_result.json
+  FREEZE_PATH: artifacts/research/mlb_totals_revisit_v1_frozen_candidate.json
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/totals-revisit-20260919
+          fetch-depth: 0
+
+      - name: Validate revisit request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync(process.env.REQUEST_PATH,'utf8'));
+          const checks=[
+            [r.contract==='MLB_TOTALS_REVISIT_V1_REQUEST/1.0.0','contract'],
+            [r.protocol==='MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0','protocol'],
+            [r.authorized===true,'authorized'],
+            [r.researchOnly===true,'research'],
+            [r.historicalDevelopmentMaxGameDate==='2026-09-18','cutoff'],
+            [r.developmentClass==='HISTORICAL_SEEN_DEVELOPMENT','class'],
+            [r.openForwardOutcomesInThisRun===false,'forward closed'],
+            [r.useForwardForSelection===false,'forward selection'],
+            [r.providerCallsAllowed===false,'providers'],
+            [r.historicalOddsCreditSpendAllowed===false,'historical credits'],
+            [r.expectedOddsApiCredits===0,'credits'],
+            [r.officialPicksWritesAllowed===false,'official'],
+            [r.apostarActivationAllowed===false,'apostar'],
+            [r.productionPromotionAllowed===false,'production']
+          ];
+          const bad=checks.filter(([ok])=>!ok).map(([,name])=>name);
+          if(bad.length) throw new Error('REVISIT_REQUEST_INVALID:'+bad.join(','));
+          console.log('PASS revisit request');
+          NODE
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned research dependencies
+        run: python -m pip install --disable-pip-version-check --no-cache-dir 'catboost==1.2.10' 'numpy>=2.0,<3' 'pandas>=2.2,<3' 'requests>=2.32,<3'
+
+      - name: Mint GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token=await core.getIDToken('supabase-totals-revisit');
+            core.setSecret(token);
+            core.setOutput('token',token);
+
+      - name: Run historical rolling revisit
+        env:
+          GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: python scripts/research/train_mlb_totals_revisit_v1.py
+
+      - name: Validate result boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync(process.env.RESULT_PATH,'utf8'));
+          const f=JSON.parse(fs.readFileSync(process.env.FREEZE_PATH,'utf8'));
+          const checks=[
+            [r.contract==='MLB_TOTALS_REVISIT_V1_RESULT/1.0.0','result contract'],
+            [r.protocol==='MLB_MARKET_REVISIT_FORWARD_PROTOCOL/1.0.0','protocol'],
+            [r.research_only===true,'research'],
+            [r.historical_max_allowed_game_date==='2026-09-18','cutoff'],
+            [r.forward_2026_09_20_plus_opened===false,'forward'],
+            [r.forward_used_for_selection===false,'selection'],
+            [r.quarantine_2026_09_19_used===false,'quarantine'],
+            [r.provider_calls_made===0,'providers'],
+            [r.odds_api_historical_credits_consumed===0,'credits'],
+            [r.official_picks_writes===0,'official'],
+            [r.apostar_activation===false,'apostar'],
+            [r.production_promotion===false,'production'],
+            [f.forward_outcomes_opened===false,'freeze forward'],
+            [f.odds_api_historical_credits_consumed===0,'freeze credits']
+          ];
+          const bad=checks.filter(([ok])=>!ok).map(([,name])=>name);
+          if(bad.length) throw new Error('REVISIT_RESULT_BOUNDARY:'+bad.join(','));
+          if(f.frozen && !r.target_met_75_plus) throw new Error('FREEZE_WITHOUT_75_GATE');
+          console.log(JSON.stringify({
+            state:r.market_closeout_state,
+            selected:r.selected_candidate,
+            source_rows:r.source_rows,
+            oof:r.nonpush_oof_rows
+          },null,2));
+          NODE
+
+      - name: Commit revisit artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$RESULT_PATH" "$FREEZE_PATH"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research(totals): record revisit V1 historical result'
+          git pull --rebase origin research/totals-revisit-20260919
+          git push origin HEAD:research/totals-revisit-20260919
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-totals-revisit-v1
+          path: |
+            artifacts/research/mlb_totals_revisit_v1_result.json
+            artifacts/research/mlb_totals_revisit_v1_frozen_candidate.json
+          retention-days: 14
+          if-no-files-found: error
