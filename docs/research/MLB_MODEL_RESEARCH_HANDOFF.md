@@ -6,6 +6,77 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
+
+Forward runtime candidate:
+
+`pitcher_win_forward_numeric_p015_v1`
+
+Contract:
+
+`MLB_PITCHER_WIN_FORWARD_NUMERIC/1.0.0`
+
+This is a **separate pre-forward deployability freeze**, not a retune from prospective outcomes.
+
+Why it exists:
+
+- the second-pass historical champion `pitcher_record_win_revisit_catboost_no_p0225_v1` remains the broad research champion at **1,126/1,386 = 81.24%**;
+- several reconstructed historical features in that champion could not be reproduced 1:1 by the live daily runtime;
+- a deployable parity subset was therefore evaluated before 2026-09-20, with no forward outcomes opened.
+
+Frozen forward runtime result:
+
+- direction: **NO — starter will not record a win**;
+- ensemble threshold: `p(win) <= 0.15`;
+- rolling OOF: **128/147 = 87.07%**;
+- worst selected month: **75.00%**;
+- months with selections: **8**;
+- coverage: **1.75%**;
+- unconditional NO baseline: **70.92%**;
+- lift: **+16.16 pts**;
+- state: `TARGET_MET_75_PLUS_FORWARD_COMPAT_FREEZE_READY`.
+
+Feature contract:
+
+`DEPLOYABLE_EXACT_PARITY_NUMERIC_V1`
+
+The runtime uses 29 numeric inputs only: schedule side/game-number/doubleheader context, team season/L5/L10 strength, rest, H2H, and strictly-prior starter win-decision history.
+
+Parity evidence:
+
+- sampled historical team/recent/rest/H2H features: maximum difference **0**;
+- operational game-number parity: **2,236/2,236**;
+- operational doubleheader parity: **2,236/2,236**;
+- Python CatBoost vs Node JSON inference: **96/96** golden rows, maximum probability difference **1.11e-16**.
+
+Prospective protocol:
+
+- forward min game date: **2026-09-20**;
+- freeze window: **10:45-10:59 America/Puerto_Rico**;
+- existing `/api/cron/mlb-statcast-daily` scheduler reused;
+- previous-day history readiness required;
+- freeze must precede first pitch;
+- settlement occurs only after final MLB Official pitcher decisions;
+- prospective results cannot change features, threshold, models, or selection direction.
+
+Storage:
+
+- `public.mlb_pitcher_win_forward_tracker_v1`;
+- `public.mlb_pitcher_win_forward_team_game_v1`;
+- `public.mlb_pitcher_win_forward_recent_starter_v1`.
+
+Boundaries remain unchanged:
+
+- Official Picks writes: 0;
+- APOSTAR: disabled;
+- production eligibility: false;
+- Odds API calls/credits: 0;
+- ROI/EV/CLV: not certified.
+
+Canonical detail:
+
+`docs/research/MLB_PITCHER_WIN_FORWARD_NUMERIC_V1.md`
+
 ## 2026-09-19 MLB second-pass revisit closeout — authoritative
 
 State:
