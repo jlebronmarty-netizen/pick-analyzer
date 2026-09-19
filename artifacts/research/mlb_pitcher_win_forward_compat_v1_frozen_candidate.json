@@ -90,8 +90,20 @@
   "forward_min_game_date": "2026-09-20",
   "forward_outcomes_opened": false,
   "frozen": true,
-  "github_sha_at_freeze": "d34afd5c097075e5bdb9e9fd85d897a12e3de2b6",
+  "github_sha_at_freeze": "ea7122b5a2f38d01c9fb0af6cd4a34d09a1c858a",
   "historical_max_allowed_game_date": "2026-09-18",
+  "model_files": [
+    {
+      "path": "python_models/pitcher_win_forward_compat_model_0.py",
+      "sha256": "cb66c3034ea00bfca41ead9822eaf1df8a48047b07c72db24639b71f79da251a",
+      "spec_index": 0
+    },
+    {
+      "path": "python_models/pitcher_win_forward_compat_model_1.py",
+      "sha256": "2dc5d0769cd1ffea4aedadc50751d1916e0b1957f523b33838a1ba056650d31d",
+      "spec_index": 1
+    }
+  ],
   "numeric_features": [
     "starter_is_home",
     "game_number",
