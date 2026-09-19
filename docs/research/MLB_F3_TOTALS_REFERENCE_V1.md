@@ -53,3 +53,21 @@ Final all-2025 fit:
 State before external: `REVISIT_AFTER_FIRST_PASS_EXTERNAL_PENDING`.
 
 No ROI/EV/CLV claim without certified historical F3 prices/lines.
+
+## 2026 one-shot external result
+
+Validation class: `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE`.
+
+- eligible prior-form rows: 2,178
+- baseline OVER reference 2.5: **48.94%**
+- selected: 841
+- correct: 410
+- accuracy: **48.75%**
+- selection coverage: **38.61%**
+- lift vs baseline: **−0.19 percentage points**
+- worst selected month: **45.22%**
+- retuned after external result: **NO**
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Reminder: 2.5 is a research reference line only because historical F3 sportsbook lines are not available in the current corpus.
