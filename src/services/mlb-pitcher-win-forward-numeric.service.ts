@@ -96,7 +96,7 @@ type TeamGame = {
   runs_for: number | null
   runs_against: number | null
   win: number | null
-  source_lineage: string | null
+  source: string | null
 }
 
 type HistoricalDecision = {
@@ -281,8 +281,8 @@ async function readPaged<T>(table: string, columns: string, configure: (query: a
 async function loadTeamGames(targetDate: string, teams: string[]) {
   const aliases = [...new Set(teams.flatMap(teamAliases))]
   const rows = await readPaged<TeamGame>(
-    'mlb_pitcher_win_forward_team_game_v1',
-    'game_pk,game_date,team,opponent,runs_for,runs_against,win,source_lineage',
+    'mlb_pitcher_win_forward_team_history_v1',
+    'game_pk,game_date,team,opponent,runs_for,runs_against,win,source',
     (query) => query
       .lt('game_date', targetDate)
       .in('team', aliases)
@@ -387,6 +387,13 @@ async function pitcherPriorCounts(targetDate: string, pitcherIds: number[]) {
 }
 
 export async function syncPitcherWinForwardHistory(targetDate: string) {
+  const teamSync = await supabaseAdmin.rpc('sync_mlb_pitcher_win_forward_team_history_v1', {
+    p_target_date: targetDate,
+  })
+  if (teamSync.error) {
+    throw new Error(`PITCHER_WIN_FORWARD_TEAM_SYNC:${teamSync.error.message}`)
+  }
+
   const starterSync = await supabaseAdmin.rpc('sync_mlb_pitcher_win_forward_starter_history_v1', {
     p_target_date: targetDate,
   })
@@ -442,6 +449,8 @@ export async function syncPitcherWinForwardHistory(targetDate: string) {
     status: 'HISTORY_SYNCED',
     targetDate,
     resolvedGames: winners.size,
+    teamRowsUpserted: Number(teamSync.data?.[0]?.inserted_rows ?? 0),
+    starterRowsUpserted: Number(starterSync.data?.[0]?.upserted_rows ?? 0),
     starterRows: rows?.length ?? 0,
     labeledStarterRows: labeled,
     researchOnly: true,
@@ -604,7 +613,10 @@ export async function freezePitcherWinForwardNumeric(input: PitcherWinForwardFre
         teamRows,
         decisions,
       })
-      const pWin = (\n        applyNumericCatBoostProbability(model0 as NumericCatBoostModel, built.values) +\n        applyNumericCatBoostProbability(model1 as NumericCatBoostModel, built.values)\n      ) / 2
+      const pWin = (
+        applyNumericCatBoostProbability(model0 as NumericCatBoostModel, built.values) +
+        applyNumericCatBoostProbability(model1 as NumericCatBoostModel, built.values)
+      ) / 2
       if (!Number.isFinite(pWin) || pWin < 0 || pWin > 1) {
         blockers.push({ gamePk: game.gamePk, side, pitcherId: pitcher.id, reason: 'MODEL_PROBABILITY_INVALID' })
         continue
@@ -615,7 +627,7 @@ export async function freezePitcherWinForwardNumeric(input: PitcherWinForwardFre
         featureValues: built.named,
         featureVector: built.values.map((value) => Number.isFinite(value) ? value : null),
         featureCutoffDateExclusive: targetDate,
-        historySource: 'mlb_pitcher_win_forward_team_game_v1',
+        historySource: 'mlb_pitcher_win_forward_team_history_v1',
         decisionHistory: 'mlb_pitcher_win_forward_starter_history_v1 + MLB Official decisions postgame',
         sameDayHistoryAllowed: false,
         quarantine20260919UsedForTuning: false,
