@@ -18,7 +18,10 @@ Deno.serve(async(req:Request)=>{
   if(!token) return json({error:"OIDC_REQUIRED"},401);
   try{
     const {payload}=await jwtVerify(token,JWKS,{issuer:"https://token.actions.githubusercontent.com",audience:AUDIENCE});
-    if(payload.repository!==REPOSITORY||payload.ref!==ALLOWED_REF) return json({error:"OIDC_SCOPE_REJECTED"},403);
+    const workflowRef=String(payload.job_workflow_ref||"");
+    const expectedWorkflowRef=REPOSITORY+"/.github/workflows/mlb-f7-3way-revisit-v1.yml@"+ALLOWED_REF;
+    const branchOk=payload.ref===ALLOWED_REF || workflowRef===expectedWorkflowRef;
+    if(payload.repository!==REPOSITORY||!branchOk) return json({error:"OIDC_SCOPE_REJECTED"},403);
   }catch{return json({error:"OIDC_INVALID"},401);}
 
   const body=await req.json().catch(()=>({}));
