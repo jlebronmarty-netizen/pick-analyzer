@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import time
@@ -10,7 +11,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import requests
-from catboost import CatBoostClassifier
+from catboost import CatBoostClassifier, Pool
 
 SEED=20260919
 EDGE_URL="https://ynuocvexviorgdjrfthw.supabase.co/functions/v1/mlb-pitcher-win-forward-compat-github-export-temp"
@@ -22,6 +23,7 @@ FORWARD_MIN_DATE=pd.Timestamp("2026-09-20")
 OUT=Path("artifacts/research/mlb_pitcher_win_forward_compat_v1_result.json")
 FREEZE=Path("artifacts/research/mlb_pitcher_win_forward_compat_v1_frozen_candidate.json")
 DECISIONS=Path("artifacts/research/mlb_pitcher_win_forward_compat_2026_decisions_v1.json")
+MODEL_DIR=Path("python_models")
 
 TARGET_ACC=0.75
 MIN_N=60
@@ -360,6 +362,21 @@ def main():
     target=bool(selected["target_met_75_plus"])
     high=sorted(sample,key=lambda c:(c["accuracy"],c["worst_month_accuracy"],c["n"]),reverse=True)[:25]
 
+    model_files=[]
+    if target:
+        MODEL_DIR.mkdir(parents=True,exist_ok=True)
+        pool=Pool(x,label=df["y_win"].to_numpy(int),cat_features=CATEGORICAL)
+        for si,params in enumerate(SPECS):
+            final_model=model(params,si)
+            final_model.fit(pool)
+            model_path=MODEL_DIR/f"pitcher_win_forward_compat_model_{si}.py"
+            final_model.save_model(str(model_path),format="python",pool=pool)
+            model_files.append({
+              "path":str(model_path),
+              "sha256":hashlib.sha256(model_path.read_bytes()).hexdigest(),
+              "spec_index":si
+            })
+
     result={
       "contract":"MLB_PITCHER_WIN_FORWARD_COMPAT_V1_RESULT/1.0.0",
       "protocol":PROTOCOL,"research_only":True,
@@ -372,6 +389,7 @@ def main():
       "numeric_features":NUMERIC_BASE,
       "categorical_features":CATEGORICAL,
       "specs":SPECS,
+      "model_files":model_files,
       "selected_candidate":selected,
       "highest_accuracy_sample_candidates":high,
       "target_met_75_plus":target,
@@ -393,6 +411,7 @@ def main():
       "numeric_features":NUMERIC_BASE if target else [],
       "categorical_features":CATEGORICAL if target else [],
       "specs":SPECS if target else [],
+      "model_files":model_files if target else [],
       "historical_max_allowed_game_date":"2026-09-18",
       "actual_max_game_date_used":result["actual_max_game_date_used"],
       "forward_min_game_date":"2026-09-20",
