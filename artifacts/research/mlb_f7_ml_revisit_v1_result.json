@@ -378,7 +378,7 @@
   ],
   "forward_2026_09_20_plus_opened": false,
   "forward_used_for_selection": false,
-  "github_sha_at_run": "ea4596c3d8c659bdb4e6b27d33c1809329a94641",
+  "github_sha_at_run": "ae58bc252eef889f00fc19bca547c8153e61dc22",
   "highest_accuracy_stable_candidates": [
     {
       "accuracy": 0.6629834254143646,
@@ -2018,7 +2018,7 @@
   ],
   "historical_max_allowed_game_date": "2026-09-18",
   "market_closeout_state": "REVISIT_SECOND_PASS_BELOW_75",
-  "missing_target_rows_excluded_fail_closed": 39,
+  "missing_target_rows_excluded_fail_closed": 0,
   "numeric_feature_count": 102,
   "numeric_features": [
     "away_arsenal_matchup_score",
@@ -2136,7 +2136,7 @@
     "2026": 236
   },
   "quarantine_2026_09_19_used": false,
-  "raw_source_rows": 4712,
+  "raw_source_rows": 4673,
   "research_only": true,
   "selected_candidate": {
     "accuracy": 0.5823575331772053,
