@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Registered workflow trigger; research logic unchanged.
 from __future__ import annotations
 
 import json, os
