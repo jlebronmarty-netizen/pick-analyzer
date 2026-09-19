@@ -1,6 +1,6 @@
 # MLB Pitcher Record a Win — Numeric Prospective Forward V1
 
-Status: `FROZEN_RESEARCH_FORWARD_READY_PENDING_DEPLOY`
+Status: `FROZEN_RESEARCH_FORWARD_READY_RUNTIME_WIRED`
 
 Candidate: `pitcher_win_forward_numeric_p015_v1`
 
@@ -106,7 +106,11 @@ The freeze writes to:
 
 `public.mlb_pitcher_win_forward_tracker_v1`
 
-Outcomes are read only on a later daily run and settled from MLB Official pitcher decisions.
+Strictly-prior starter decisions are read from:
+
+`public.mlb_pitcher_win_forward_starter_history_v1`
+
+After previous-day Statcast readiness is certified, the cron syncs actual starters from raw Statcast through `sync_mlb_pitcher_win_forward_starter_history_v1(date)` and labels those starter rows from MLB Official `hydrate=decisions`. The current day's freeze runs only after that sync. Outcomes for the current slate are never read during freeze and are settled only on a later daily run.
 
 ## Quarantine treatment
 
