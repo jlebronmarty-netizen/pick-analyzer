@@ -3,7 +3,7 @@ import 'server-only'
 import { createHash, randomUUID } from 'node:crypto'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { catboostNumericEnsembleProbability } from '@/lib/catboost-numeric-json.js'
+import { applyNumericCatBoostProbability, type NumericCatBoostModel } from '@/lib/catboost-oblivious-numeric'
 
 import model0 from '../../python_models/pitcher_win_forward_numeric_model_0.json'
 import model1 from '../../python_models/pitcher_win_forward_numeric_model_1.json'
@@ -599,7 +599,7 @@ export async function freezePitcherWinForwardNumeric(input: PitcherWinForwardFre
         teamRows,
         decisions,
       })
-      const pWin = catboostNumericEnsembleProbability([model0, model1], built.values)
+      const pWin = (\n        applyNumericCatBoostProbability(model0 as NumericCatBoostModel, built.values) +\n        applyNumericCatBoostProbability(model1 as NumericCatBoostModel, built.values)\n      ) / 2
       if (!Number.isFinite(pWin) || pWin < 0 || pWin > 1) {
         blockers.push({ gamePk: game.gamePk, side, pitcherId: pitcher.id, reason: 'MODEL_PROBABILITY_INVALID' })
         continue
