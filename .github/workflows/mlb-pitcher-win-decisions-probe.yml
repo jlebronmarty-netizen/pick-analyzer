@@ -1,0 +1,26 @@
+name: MLB Pitcher Win Decisions Probe
+
+on:
+  push:
+    branches: [research/pitcher-record-win-revisit-20260919]
+    paths:
+      - '.github/workflows/mlb-pitcher-win-decisions-probe.yml'
+      - 'scripts/research/probe_mlb_pitcher_decisions.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/pitcher-record-win-revisit-20260919
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe official MLB pitcher decisions
+        run: python scripts/research/probe_mlb_pitcher_decisions.py
