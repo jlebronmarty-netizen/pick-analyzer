@@ -50,6 +50,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **First 3 Innings 3-Way ML** | `f3_3way_sp1p5_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 44/73 = **60.27%**; worst month **28.57%**; draw-only best 33.33% | 2026: 20/41 = **48.78%**; 7 selected outcomes were DRAW | 2026 coverage **2.09%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
 | **First 1 Inning Moneyline** | `f1_ml_sp1p0_win0p20_v1` — selective HOME/AWAY rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 51/74 = **68.92%**; worst month **50.00%**; 60 pushes | 2026: 24/40 = **60.00%**; 39 pushes | 2026 coverage **4.02%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Rejected unstable 76.36% q95 candidate before external; preserve stable fallback, no 2026 rescue. |
 | **First 1 Inning 3-Way ML** | `f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1` — selective DRAW rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 125/221 = **56.56%**; baseline DRAW 52.33%; worst month **45.61%** | 2026: 159/285 = **55.79%**; baseline DRAW 53.05%; worst month **48.78%** | 2026 coverage **14.50%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Modest lift only; preserve frozen DRAW rule, no 2026 rescue. |
+| **First 1 Inning NRFI** | `f1_nrfi_both_starters_scoreless_0p80_v1` — NRFI if both starters prior F1 scoreless rate >=80% | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 58/108 = **53.70%**; baseline 50.96%; worst month **36.84%** | 2026: 68/130 = **52.31%**; baseline 51.57%; worst month **25.00%** on n=4 | 2026 coverage **14.57%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Offense filter was redundant; preserve simple starter-only rule, no 2026 rescue. |
 | **First 7 Innings Moneyline** | `f7_ml_run_diff_extreme_q95_v1` — side from extreme prior run-diff advantage | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 69/91 = **75.82%**; worst month **66.67%**; 8 pushes | 2026: 35/79 = **44.30%**; 12 pushes | 2026 coverage **4.06%** | **NO externally** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen q95 cutoff; failed external validation, no 2026 rescue. |
 | **First 7 Innings 3-Way ML** | `f7_3way_sp2p0_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 62/89 = **69.66%**; worst month **50.00%**; draw-only best 16.80% | 2026: 33/59 = **55.93%**; 5 selected outcomes were DRAW | 2026 coverage **3.00%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. |
 | **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
@@ -442,6 +443,20 @@ Frozen fallback: `f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1`.
 2025: **125/221 = 56.56%**, baseline DRAW **52.33%**, lift **+4.23 pts**, worst month **45.61%**.
 
 2026 one-shot: **159/285 = 55.79%**, baseline DRAW **53.05%**, lift **+2.74 pts**, coverage **14.50%**, worst month **48.78%**, no retuning.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+## First-pass closeout — First 1 Inning NRFI
+
+Frozen fallback: `f1_nrfi_both_starters_scoreless_0p80_v1`.
+
+Rule: select NRFI when both expected starters have at least 5 prior starts and each has a prior first-inning scoreless rate >=80%.
+
+A team-offense filter was tested before freeze and was redundant; thresholds 0.45–0.55 produced exactly the same selected set, so the simpler starter-only rule was frozen.
+
+2025: **58/108 = 53.70%**, baseline NRFI **50.96%**, lift **+2.75 pts**, worst month **36.84%**.
+
+2026 one-shot: **68/130 = 52.31%**, baseline NRFI **51.57%**, lift **+0.74 pts**, coverage **14.57%**, no retuning.
 
 State: `REVISIT_AFTER_FIRST_PASS`.
 

@@ -6,6 +6,28 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 First 1 Inning NRFI first-pass closeout — authoritative
+
+Frozen fallback: `f1_nrfi_both_starters_scoreless_0p80_v1`.
+
+Rule:
+
+- both expected starters have at least 5 prior starts;
+- home starter prior first-inning scoreless rate >=80%;
+- away starter prior first-inning scoreless rate >=80%;
+- deterministic team aliases AZ->ARI and CWS->CHW only;
+- no fuzzy identity matching.
+
+A team-offense filter was tested before freeze and proved redundant; it is omitted from the frozen rule.
+
+2025: 58/108 = **53.70%**, baseline NRFI **50.96%**, lift **+2.75 pts**, worst month **36.84%**.
+
+2026 one-shot: 68/130 = **52.31%**, baseline NRFI **51.57%**, lift **+0.74 pts**, coverage **14.57%**, worst month **25.00%** on n=4.
+
+State: `REVISIT_AFTER_FIRST_PASS`.
+
+Do not retune the 80% scoreless threshold from external evidence.
+
 ## 2026-09-19 First 1 Inning 3-Way Moneyline first-pass closeout — authoritative
 
 Frozen fallback: `f1_3way_draw_close_sp0p5_ops0p05_win0p20_v1`.
