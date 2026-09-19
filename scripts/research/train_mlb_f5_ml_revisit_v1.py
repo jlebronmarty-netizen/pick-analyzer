@@ -277,6 +277,10 @@ def main():
     pm=oof.pred_margin.to_numpy(float)
     candidates=[]
 
+    hrd=pd.to_numeric(oof.home_win_pct,errors="coerce").to_numpy(float)
+    ard=pd.to_numeric(oof.away_win_pct,errors="coerce").to_numpy(float)
+    adv=hrd-ard
+
     # Original stable F5 composite fallback benchmark.
     h_sp=pd.to_numeric(oof.home_sp_ra9,errors="coerce").to_numpy(float)
     a_sp=pd.to_numeric(oof.away_sp_ra9,errors="coerce").to_numpy(float)
