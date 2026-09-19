@@ -13,7 +13,7 @@ import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15
 import { capturePa13PitcherErForward } from '@/services/pa13-pitcher-er-forward-capture.service'
 import { freezePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-freeze.service'
 import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-settlement.service'
-import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'
+import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'\nimport { captureMlbApprovedPropMarkets } from '@/services/mlb-approved-prop-market-capture.service'\nimport { evaluateMlbApprovedPropsDaily } from '@/services/mlb-approved-prop-daily-evaluation.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -267,6 +267,44 @@ async function safeMoneylineForwardFreeze(historyReadiness: { ready: boolean; ta
   }
 }
 
+
+async function safeApprovedPropMarketCapture(id: string) {
+  try {
+    const clock = puertoRicoClock()
+    return await captureMlbApprovedPropMarkets({ operatingDate: clock.date, requestId: id })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'APPROVED_PROP_CAPTURE_FAILED_NON_BLOCKING',
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown approved MLB prop capture error'),
+    }
+  }
+}
+
+async function safeApprovedPropDailyEvaluation(targetDate: string) {
+  try {
+    return await evaluateMlbApprovedPropsDaily({ targetDate })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'APPROVED_PROP_DAILY_EVALUATION_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown approved MLB prop daily evaluation error'),
+    }
+  }
+}
+
 async function maybeCaptureProspectiveMlbMarkets(id: string) {
   const now = new Date()
   const clock = puertoRicoClock(now)
@@ -443,7 +481,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // multi-market evidence capture. Core ML/Run Line/Total prices are stored
     // first; then alternate HOME +1.5 is queried only for games whose standard
     // paired modal Run Line establishes HOME -1.5. All evidence is research-only.
-    const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
+    const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)\n    const approvedPropMarketCapture = await safeApprovedPropMarketCapture(id)
 
     // Independent research-only Pitcher ER V2 freeze/settlement run before
     // Statcast catch-up. This preserves fixed-clock evidence even if a separate
