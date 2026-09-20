@@ -1,0 +1,28 @@
+{
+  "certification": "MLB_OPERATIONAL_20260920_DEPLOYMENT_REBIND",
+  "date": "2026-09-20",
+  "purpose": "Force a fresh production deployment after concurrent main merges so Vercel Cron executes the current main runtime.",
+  "mainExpectedAtBranchCreation": "c93ea08e5bad1f2fa428ddab05647cb0961130d4",
+  "runtimeLogicChanges": 0,
+  "featureMathChanges": 0,
+  "modelChanges": 0,
+  "thresholdsChanged": 0,
+  "officialPicksModified": false,
+  "apostarActivated": false,
+  "operationalState": {
+    "approvedPropIdentityRecovery": {
+      "gamePk": 825028,
+      "recoveredRows": 92,
+      "fuzzyMatchingUsed": false,
+      "pricesModified": false,
+      "linesModified": false,
+      "snapshotTimesModified": false
+    },
+    "rawIdentityRepair": {
+      "targetGamePk": 824789,
+      "repairedHistoricalRows": 1502,
+      "repairedHistoricalGames": 5,
+      "postRepairBadTeamIdentityRows": 0
+    }
+  }
+}
