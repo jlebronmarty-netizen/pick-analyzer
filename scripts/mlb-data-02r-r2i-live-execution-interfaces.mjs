@@ -1430,14 +1430,20 @@ async function runR2ILegacyDryExecution({
   stages.push(policyStage)
 
   const eligiblePolicyIndex = policyResults.findIndex((row) => row.artifact.status === 'OFFICIAL_PICK_ELIGIBLE')
-  const pickRows = eligiblePolicyIndex >= 0 ? [officialPickFromPolicy(valueRows[eligiblePolicyIndex], policyResults[eligiblePolicyIndex], frozenRunAsOf)] : []
-  const officialPickCap = derivedCap(authCaps.officialPicks, pickRows.length)
+  const shadowPickRows = eligiblePolicyIndex >= 0
+    ? [officialPickFromPolicy(valueRows[eligiblePolicyIndex], policyResults[eligiblePolicyIndex], frozenRunAsOf)]
+    : []
+  // Research/shadow boundary: preserve policy evaluation evidence, but never
+  // write a new row to pick2_mlb_official_picks from this runtime.
+  const pickRows = []
+  const officialPickCap = 0
   schemaGuards.push(await repository.verifySchemaFingerprint(R2I_LIVE_TARGETS.officialPicks))
   const picks = await classifyOfficialPickPersistence({ mode: live ? 'LIVE_EXECUTE' : 'DRY_RUN', officialPickRows: pickRows, eligibleGamePks, runAsOf: frozenRunAsOf, dmlCap: officialPickCap, repository, liveAuthorization: live })
+  picks.artifact.shadowEligibleRows = shadowPickRows
+  picks.artifact.officialPickWritesAuthorized = false
   stages.push(picks)
-  if (live) writeResults.push(await insertRowsFromClassifications(picks.artifact.plan.classifications, pickRows, 'official_pick_identity', (rows, cap) => repository.insertOfficialPicks(rows, cap), officialPickCap))
 
-  const boardSource = live ? await repository.readValueBoard() : { rows: pickRows.map((row) => ({ status: 'OFFICIAL_PICK', ...row })), state: 'DRY_RUN', freshness: 'FRESH' }
+  const boardSource = live ? await repository.readValueBoard() : { rows: shadowPickRows.map((row) => ({ status: 'SHADOW_OFFICIAL_PICK_ELIGIBLE', ...row })), state: 'DRY_RUN', freshness: 'FRESH' }
   const board = readValueBoardAdapter({ board: boardSource, operatingDate: runContext.run_date, asOf: frozenRunAsOf })
   stages.push(board)
 
