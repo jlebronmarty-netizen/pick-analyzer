@@ -772,6 +772,25 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         continue
       }
 
+      const batterMarketState = marketState({
+        quotes,
+        gamePk: target.gamePk,
+        market: def.market,
+        playerName: target.playerName,
+        playerId: target.playerId,
+        direction: 'UNDER',
+        line: def.line,
+      })
+      const quote = bestQuote({
+        quotes,
+        gamePk: target.gamePk,
+        market: def.market,
+        playerName: target.playerName,
+        playerId: target.playerId,
+        direction: 'UNDER',
+        line: def.line,
+      })
+
       const parity = ADDITIONAL_PROP_RUNTIME_PARITY[def.market]
       if (!parity.certified) {
         rows.push(ledgerRow({
@@ -795,25 +814,6 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         }))
         continue
       }
-
-      const quote = bestQuote({
-        quotes,
-        gamePk: target.gamePk,
-        market: def.market,
-        playerName: target.playerName,
-        playerId: target.playerId,
-        direction: 'UNDER',
-        line: def.line,
-      })
-      const batterMarketState = marketState({
-        quotes,
-        gamePk: target.gamePk,
-        market: def.market,
-        playerName: target.playerName,
-        playerId: target.playerId,
-        direction: 'UNDER',
-        line: def.line,
-      })
 
       if (!batterTargetFeatureKeys.has(String(target.gamePk) + ':' + String(target.playerId))) {
         rows.push(ledgerRow({
