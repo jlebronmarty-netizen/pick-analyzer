@@ -67,6 +67,14 @@
     {
       "path": "/api/cron/mlb-statcast-daily",
       "schedule": "9 17 * * *"
+    },
+    {
+      "path": "/api/cron/mlb-operational",
+      "schedule": "50 19 * * *"
+    },
+    {
+      "path": "/api/cron/mlb-statcast-daily",
+      "schedule": "2 20 * * *"
     }
   ]
 }
