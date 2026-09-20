@@ -28,6 +28,14 @@ The five frozen markets requested for daily pregame operation now have exact rec
 
 Triples remains explicitly LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED.
 
+Production deployment gate:
+- PR #111 merged to `main` at `71bc3e2ac438b5bcd2eefb2dab3732aa81e3492c`;
+- Vercel production deployment `dpl_2JA4Nw4kUqVLx2qenrniGYSsTYXt` is READY;
+- the existing cron remains scheduled at 14:15 and 14:45 UTC (10:15 and 10:45 America/Puerto_Rico);
+- no `mlb_approved_prop_market_capture_v1` job exists for 2026-09-19 because the implementation reached production after today's pregame capture window;
+- therefore final market-level READY is fail-closed until the first future strictly-pregame capture + evaluator crossing is persisted. No retrospective snapshot will be manufactured.
+
+
 Pregame lineage:
 
 - Batter formulas use same-season history only with source game date strictly earlier than target game date; same-day Game 1 is never prior for Game 2.
