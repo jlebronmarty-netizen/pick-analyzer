@@ -7,6 +7,46 @@
 
 
 
+## 2026-09-20 Standard Run Line V2 forward freeze — authoritative
+
+Standard Run Line prospective shadow is now runtime-ready under the existing frozen candidates:
+
+- `rl_v2_core_fixed_v1`
+- `rl_v2_transfer_fixed_v1`
+- `rl_v2_broad_union_fixed_v1`
+
+The lineage was recovered exactly against 103 canonical 2026 V2 rows (Sep01-Sep10):
+
+- Recent Form DOG orientation: **103/103 exact**
+- History DOG orientation: **103/103 exact**
+- Fatigue/Travel DOG orientation: **103/103 exact**
+- dynamic Recent reconstruction: **103/103 exact**
+- dynamic Fatigue reconstruction: **103/103 exact**
+- `dogfav_hand = DOG/FAVORITE`: **103/103 exact**
+- opening-proxy identity/line/prices/books/timestamps: **103/103 exact**
+- `market_p_dog`: **103/103 exact**, max diff **0**
+- `market_z_v2`: logit-normalized, **4,313/4,313 exact replay**, max diff **0**
+- canonical V2 transform: `logit(p_dog)`, mean `0.334503755055181`, sample SD `0.354461459732156`
+
+Canonical market policy remains
+`MLB_RUNLINE_MARKET_2026_V1_EARLIEST_CAPTURED_PAIRED_MODAL_PROXY`.
+No market-policy substitution or threshold retune was made.
+
+Prospective job:
+`runline_v2_standard_forward_freeze_v1`.
+
+It is wired into the existing 10:46 Puerto Rico Run Line research cron, isolated from
+the already-operational HOME +1.5 alternate freeze. It adds **0 Odds API calls** and reads
+the existing product-primary standard `run_line` snapshot.
+
+No Sep20 retrospective freeze is authorized because the fixed pregame window had already passed
+before this runtime existed. First valid prospective date: **2026-09-21**.
+
+Official Picks unchanged. APOSTAR disabled. Research/shadow only.
+
+Canonical certification:
+`docs/research/MLB_STANDARD_RUNLINE_V2_FORWARD_FREEZE_CERTIFICATION.md`.
+
 ## 2026-09-20 Moneyline context components V6 — authoritative
 
 The five previously non-evaluable non-Lineup PREGAME component families are now parity-certified and
