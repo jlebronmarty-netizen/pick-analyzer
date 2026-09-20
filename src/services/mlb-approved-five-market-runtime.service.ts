@@ -99,11 +99,12 @@ type BatterHistoryRow = {
   triples: number
 }
 
-type PitcherKRow = {
-  game_date: string
-  pitcher: number
-  strikeouts: number | string | null
-  plate_appearances: number | string | null
+type PitcherFeatureRow = {
+  target_game_pk: number
+  mlbam_pitcher_id: number
+  k_rate: number | string | null
+  as_of_date: string
+  source_window: Record<string, unknown> | null
 }
 
 function n(value: unknown) {
@@ -142,18 +143,22 @@ async function loadBatterHistory(playerIds: number[], targetDate: string) {
   )
 }
 
-async function loadPitcherKHistory(playerIds: number[], targetDate: string) {
-  if (!playerIds.length) return [] as PitcherKRow[]
-  return pagedRead<PitcherKRow>(
-    'mlb_statcast_pitcher_game_logs',
-    'game_date,pitcher,strikeouts,plate_appearances',
-    (query) => query
-      .eq('season', SEASON)
-      .in('pitcher', playerIds)
-      .lt('game_date', targetDate)
-      .order('game_date', { ascending: true })
-      .order('game_pk', { ascending: true }),
-  )
+async function loadPitcherFeatures(targetDate: string, playerIds: number[]) {
+  if (!playerIds.length) return new Map<string, PitcherFeatureRow>()
+  const result = await supabaseAdmin
+    .from('pick2_mlb_pitcher_daily_features')
+    .select('target_game_pk,mlbam_pitcher_id,k_rate,as_of_date,source_window')
+    .eq('feature_date', targetDate)
+    .eq('feature_version', 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1')
+    .in('mlbam_pitcher_id', playerIds)
+    .order('target_game_pk', { ascending: true })
+  if (result.error) throw new Error('MLB_APPROVED_FIVE_PITCHER_FEATURE_READ_FAILED:' + result.error.message)
+
+  const map = new Map<string, PitcherFeatureRow>()
+  for (const row of (result.data ?? []) as PitcherFeatureRow[]) {
+    map.set(String(row.target_game_pk) + ':' + String(row.mlbam_pitcher_id), row)
+  }
+  return map
 }
 
 function batterProjection(
@@ -215,26 +220,12 @@ function pitcherHitsAllowedProjection(starts: MlbOfficialPitcherGameLogRow[]) {
   }
 }
 
-function pitcherKRate(rows: PitcherKRow[], playerId: number) {
-  const history = rows.filter((row) => Number(row.pitcher) === playerId)
-  let strikeouts = 0
-  let battersFaced = 0
-  let appearances = 0
-  for (const row of history) {
-    const k = n(row.strikeouts)
-    const bf = n(row.plate_appearances)
-    if (k === null || bf === null || bf < 0) continue
-    strikeouts += k
-    battersFaced += bf
-    appearances += 1
-  }
-  return {
-    appearances,
-    strikeouts,
-    battersFaced,
-    rate: battersFaced > 0 ? strikeouts / battersFaced : null,
-    latestPriorDate: history.at(-1)?.game_date ?? null,
-  }
+function strictPregamePitcherFeature(feature: PitcherFeatureRow | undefined, targetDate: string) {
+  if (!feature || feature.as_of_date >= targetDate) return false
+  const sourceWindow = feature.source_window && typeof feature.source_window === 'object' && !Array.isArray(feature.source_window)
+    ? feature.source_window as Record<string, unknown>
+    : {}
+  return String(sourceWindow.rule ?? '') === 'source_game_date < target_game_date'
 }
 
 export async function evaluateApprovedFiveMarketModels(input: {
@@ -252,9 +243,9 @@ export async function evaluateApprovedFiveMarketModels(input: {
       .map((target) => target.playerId),
   )]
 
-  const [batterHistory, kHistory, pitcherGameLogs, erRuntime] = await Promise.all([
+  const [batterHistory, pitcherFeatures, pitcherGameLogs, erRuntime] = await Promise.all([
     loadBatterHistory(uniqueBatterIds, input.targetDate),
-    loadPitcherKHistory(uniquePitcherIds, input.targetDate),
+    loadPitcherFeatures(input.targetDate, uniquePitcherIds),
     mapConcurrent(uniquePitcherIds, 8, async (pitcherId) => ({
       pitcherId,
       rows: (await readMlbOfficialPitcherGameLog(pitcherId, SEASON))
@@ -370,17 +361,20 @@ export async function evaluateApprovedFiveMarketModels(input: {
     const starts = (gameLogs.get(target.playerId) ?? []).filter((row) =>
       row.gamesStarted > 0 && row.earnedRuns !== null
     )
-    const k = pitcherKRate(kHistory, target.playerId)
+    const pitcherFeature = pitcherFeatures.get(String(target.gamePk) + ':' + String(target.playerId))
+    const kRate = strictPregamePitcherFeature(pitcherFeature, input.targetDate)
+      ? n(pitcherFeature?.k_rate)
+      : null
     const priorStarts = starts.length
     const priorErAll = priorStarts
       ? starts.reduce((sum, row) => sum + Number(row.earnedRuns), 0) / priorStarts
       : null
-    const eligible = priorStarts >= erParity.minimumPriorStarts && priorErAll !== null && k.rate !== null
+    const eligible = priorStarts >= erParity.minimumPriorStarts && priorErAll !== null && kRate !== null
     const projection = eligible
       ? FROZEN_PITCHER_ER_MODEL.baseIntercept +
         FROZEN_PITCHER_ER_MODEL.baseSlope * priorErAll +
         FROZEN_PITCHER_ER_MODEL.kResidualIntercept +
-        FROZEN_PITCHER_ER_MODEL.kResidualSlope * Number(k.rate)
+        FROZEN_PITCHER_ER_MODEL.kResidualSlope * Number(kRate)
       : null
     const probability = projection === null
       ? null
@@ -399,21 +393,19 @@ export async function evaluateApprovedFiveMarketModels(input: {
       evaluable: eligible && probability !== null,
       blocker: eligible ? null : priorStarts < erParity.minimumPriorStarts
         ? 'MINIMUM_3_STRICT_PRIOR_STARTS_NOT_MET'
-        : 'STRICT_PRIOR_K_RATE_NOT_AVAILABLE',
+        : 'STRICT_PRIOR_CANONICAL_K_RATE_NOT_AVAILABLE',
       featureSnapshot: {
         runtimeParity: erParity,
         priorStarts,
         priorErAll,
-        kRate: k.rate,
-        priorKAppearances: k.appearances,
-        priorStrikeouts: k.strikeouts,
-        priorBattersFaced: k.battersFaced,
+        kRate,
+        pitcherFeatureAsOfDate: pitcherFeature?.as_of_date ?? null,
+        pitcherFeatureSourceWindow: pitcherFeature?.source_window ?? null,
         latestPriorStartDate: starts.at(-1)?.date ?? null,
         latestPriorStartGamePk: starts.at(-1)?.gamePk ?? null,
-        latestPriorKDate: k.latestPriorDate,
         trainResidualN: erRuntime.trainResiduals.length,
         sourceEarnedRuns: 'MLB Official gameLog pitching',
-        sourceKRate: 'mlb_statcast_pitcher_game_logs',
+        sourceKRate: 'pick2_mlb_pitcher_daily_features.k_rate',
         strictPriorDate: true,
         sameDateHistoryAllowed: false,
       },
