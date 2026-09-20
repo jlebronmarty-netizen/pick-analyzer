@@ -323,7 +323,7 @@
     "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
     "scripts/mlb-operational-r6-run-store.mjs": "323e185b66d9125defe826cb2eaa3322525618ab8ae96c1dcf6413883bc75531",
     "scripts/mlb-operational-r6-state-client.mjs": "51a845c3d8b877c09ab62af90f2ba29bb8cc4aca38316114945572d90c573a18",
-    "scripts/mlb-operational-r6-vercel-runtime.mjs": "14866b6bbb0ada53cc745772ff34de21fd34e897f74113deeddd666dedfc0c7c",
+    "scripts/mlb-operational-r6-vercel-runtime.mjs": "5d62d0eaa16ee42ef5ec3e77b7143290636734597d460375615d5ceee7f44faa",
     "scripts/mlb-operational-r6-write-journal.mjs": "2b2c4c79c06e28265f3340c223c9c291fee4421b60a6066644f24bfb13859c78",
     "scripts/mlb-operational-readonly-network-guard.mjs": "b4c535d64cce41aa85ee40be0fbdd351fd47d873262c549711d8c265d3aad383",
     "scripts/mlb-operational-schema-preflight.sql": "6e796b5416eebea92dfc937ed757d05cc03bd753dad4da8b50769b66a035c30a",
@@ -490,5 +490,14 @@
     "officialPicksChanges": 0,
     "apostarChanges": 0,
     "guard": "Only FAILED DEPENDENCY_SCOPE runs with completed dependency checkpoint, zero DML stages and zero Odds calls are submitted to the existing fenced authority; authority revalidates schedule evidence and target rows before terminal disposition."
+  },
+  "dependencyNativeUpdateRecovery": {
+    "at": "2026-09-20T15:35:00Z",
+    "scope": "AUTHORITY_REVIEWED_NATIVE_GAME_UPDATES_ONLY",
+    "businessLogicChanges": 0,
+    "modelChanges": 0,
+    "oddsPolicyChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
   }
 }
