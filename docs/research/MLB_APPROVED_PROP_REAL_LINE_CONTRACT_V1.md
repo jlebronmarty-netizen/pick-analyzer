@@ -23,6 +23,9 @@ Alternate provider lines are captured and preserved as market evidence, but they
 | Candidate | Market | Side | Certified line | Historical certified evidence | Runtime line scope |
 |---|---|---|---:|---:|---|
 | `pitcher_bb_under_2p5_p85_v1` | Pitcher Walks | UNDER | 2.5 | 125/137 = 91.24% | `EXACT_FROZEN_LINE_ONLY` |
+| `pitcher_k_under_6p5_proj_4p5_v1` | Pitcher Strikeouts | UNDER | 6.5 | 1035/1163 = 88.99% | `EXACT_FROZEN_LINE_ONLY` |
+| `batter_rbi_under_0p5_proj_0p10_v1` | Batter RBIs | UNDER | 0.5 | MLB Official 2026 reconciliation 1133/1367 = 82.88% | `EXACT_FROZEN_LINE_ONLY` |
+| `batter_hrrbi_under_2p5_proj_0p70_v1` | Batter Hits + Runs + RBIs | UNDER | 2.5 | MLB Official 2026 reconciliation 1073/1255 = 85.50% | `EXACT_FROZEN_LINE_ONLY` |
 | `pitcher_er_over_1p5_p70_v1` | Pitcher Earned Runs | OVER | 1.5 | 73/91 = 80.22% | `EXACT_FROZEN_LINE_ONLY` |
 | `pitcher_hits_allowed_under_6p5_proj_5p0_v1` | Pitcher Hits Allowed | UNDER | 6.5 | 968/1226 = 78.96% | `EXACT_FROZEN_LINE_ONLY` |
 | `batter_hits_under_1p5_edge_0p75_v1` | Batter Hits | UNDER | 1.5 | 8496/9833 = 86.40% | `EXACT_FROZEN_LINE_ONLY` |
