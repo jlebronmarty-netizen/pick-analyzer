@@ -20,5 +20,7 @@ assert.match(performanceRead, /pick2_mlb_official_picks/)
 assert.match(performanceRead, /PICKS_AWAITING_SETTLEMENT/)
 assert.match(performanceRead, /uniqueSelections/)
 assert.match(performanceRead, /storedDecisionRows/)
+assert.match(performanceRead, /const uniqueSettlements: PickSettlement\[\] = \[\]/)
+assert.match(performanceRead, /repeated[\s\S]*scheduler snapshots must not multiply the result sample/)
 
 console.log('MLB Official Pick visibility + Performance ledger contract: PASS')
