@@ -14,6 +14,10 @@ import {
   getPitcherWalksRuntimeParity,
   loadStrictBatterTargetFeatureKeys,
 } from '@/services/mlb-approved-additional-prop-parity.service'
+import {
+  APPROVED_PROP_LINE_CONTRACT_VERSION,
+  assertApprovedPropLineContract,
+} from '@/services/mlb-approved-prop-line-contract'
 
 const CAPTURE_SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const JOB_TYPE = 'mlb_approved_prop_daily_freeze_v1'
@@ -140,8 +144,13 @@ function probablePitchers(game: GameRow) {
   return out
 }
 
+function positiveInteger(value: unknown) {
+  const parsed = n(value)
+  return parsed !== null && Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null
+}
+
 function quoteGamePk(quote: Quote) {
-  return n(asRecord(quote.metadata).canonicalGamePk)
+  return positiveInteger(asRecord(quote.metadata).canonicalGamePk)
 }
 
 function quotePlayer(quote: Quote) {
@@ -155,7 +164,72 @@ function quoteCanonicalPlayerName(quote: Quote) {
 
 function quotePlayerId(quote: Quote) {
   const metadata = asRecord(quote.metadata)
-  return n(metadata.playerMlbamId ?? metadata.pitcherMlbamId)
+  return positiveInteger(metadata.playerMlbamId ?? metadata.pitcherMlbamId)
+}
+
+function strictPregameQuote(quote: Quote) {
+  const metadata = asRecord(quote.metadata)
+  const targetStart = String(metadata.targetStart ?? '')
+  const quoteAt = Date.parse(quote.snapshot_time)
+  const startAt = Date.parse(targetStart)
+  const sportsbook = String(quote.sportsbook ?? '').trim()
+  const price = n(quote.price)
+  return Number.isFinite(quoteAt) && Number.isFinite(startAt) && quoteAt < startAt &&
+    Boolean(sportsbook) && price !== null && price !== 0
+}
+
+type MarketState = {
+  identityRows: Quote[]
+  pregameRows: Quote[]
+  sideRows: Quote[]
+  exactLineRows: Quote[]
+  observedLines: number[]
+  marketAvailable: boolean
+  pregameLineageVerified: boolean
+  requiredLineAvailable: boolean
+}
+
+function marketState(input: {
+  quotes: Quote[]
+  gamePk: number
+  market: string
+  playerName: string
+  playerId?: number | null
+  direction: string
+  line: number | null
+}): MarketState {
+  const playerKey = normalizePerson(input.playerName)
+  const outcome = requiredOutcome(input.direction)
+  const identityRows = input.quotes.filter((quote) => {
+    if (quoteGamePk(quote) !== input.gamePk || quote.market !== input.market) return false
+    return input.playerId !== undefined && input.playerId !== null
+      ? quotePlayerId(quote) === input.playerId
+      : normalizePerson(quotePlayer(quote)) === playerKey
+  })
+  const pregameRows = identityRows.filter(strictPregameQuote)
+  const sideRows = pregameRows.filter((quote) => quote.outcome.toLowerCase() === outcome)
+  const exactLineRows = input.line === null
+    ? sideRows
+    : sideRows.filter((quote) => {
+        const line = n(quote.line)
+        return line !== null && Math.abs(line - input.line!) < 1e-9
+      })
+  const observedLines = Array.from(new Set(
+    pregameRows.map((quote) => n(quote.line)).filter((line): line is number => line !== null),
+  )).sort((a, b) => a - b)
+  return {
+    identityRows,
+    pregameRows,
+    sideRows,
+    exactLineRows,
+    observedLines,
+    marketAvailable: pregameRows.length > 0,
+    pregameLineageVerified: identityRows.length === 0 || pregameRows.length > 0,
+    requiredLineAvailable: input.line === null ? sideRows.length > 0 : pregameRows.some((quote) => {
+      const line = n(quote.line)
+      return line !== null && Math.abs(line - input.line!) < 1e-9
+    }),
+  }
 }
 
 function requiredOutcome(direction: string) {
@@ -174,40 +248,31 @@ function bestQuote(input: {
   direction: string
   line: number | null
 }) {
-  const playerKey = normalizePerson(input.playerName)
-  const outcome = requiredOutcome(input.direction)
-  const candidates = input.quotes.filter((quote) => {
-    if (quoteGamePk(quote) !== input.gamePk || quote.market !== input.market) return false
-    const identityMatches = input.playerId !== undefined && input.playerId !== null
-      ? quotePlayerId(quote) === input.playerId
-      : normalizePerson(quotePlayer(quote)) === playerKey
-    if (!identityMatches || quote.outcome.toLowerCase() !== outcome) return false
-    if (input.line === null) return true
-    const line = n(quote.line)
-    return line !== null && Math.abs(line - input.line) < 1e-9
-  })
+  const state = marketState(input)
+  const candidates = [...state.exactLineRows]
   candidates.sort((a, b) => (n(b.price) ?? -Infinity) - (n(a.price) ?? -Infinity) || b.snapshot_time.localeCompare(a.snapshot_time))
   return candidates[0] ?? null
 }
 
 function observedLines(quotes: Quote[], gamePk: number, market: string, playerName: string, playerId?: number | null) {
-  const playerKey = normalizePerson(playerName)
-  return Array.from(new Set(
-    quotes
-      .filter((quote) => {
-        if (quoteGamePk(quote) !== gamePk || quote.market !== market) return false
-        return playerId !== undefined && playerId !== null
-          ? quotePlayerId(quote) === playerId
-          : normalizePerson(quotePlayer(quote)) === playerKey
-      })
-      .map((quote) => n(quote.line))
-      .filter((line): line is number => line !== null),
-  )).sort((a, b) => a - b)
+  return marketState({
+    quotes,
+    gamePk,
+    market,
+    playerName,
+    playerId,
+    direction: 'UNDER',
+    line: null,
+  }).observedLines
 }
 
-function statusFor(modelQualifies: boolean, marketVerified: boolean) {
+function statusFor(modelQualifies: boolean, marketVerified: boolean, state?: MarketState, requiredLine: number | null = null) {
   if (!modelQualifies) return 'NO_PLAY'
-  return marketVerified ? 'QUALIFIES_MARKET_VERIFIED' : 'MODEL_QUALIFIES_MARKET_NOT_VERIFIED'
+  if (marketVerified) return 'QUALIFIES_MARKET_VERIFIED'
+  if (state && state.identityRows.length > 0 && state.pregameRows.length === 0) return 'NO_EVALUABLE_PREGAME_LINEAGE'
+  if (!state || !state.marketAvailable) return 'MODEL_QUALIFIES_MARKET_NOT_AVAILABLE'
+  if (requiredLine !== null && !state.requiredLineAvailable) return 'MARKET_AVAILABLE_REQUIRED_LINE_NOT_AVAILABLE'
+  return 'MODEL_QUALIFIES_MARKET_NOT_AVAILABLE'
 }
 
 function ledgerRow(input: {
@@ -231,6 +296,13 @@ function ledgerRow(input: {
   frozenAt: string
 }): LedgerRow {
   const quote = input.quote ?? null
+  const lineContract = assertApprovedPropLineContract({
+    candidateId: input.candidateId,
+    market: input.market,
+    direction: input.direction,
+    requiredLine: input.line,
+  })
+  const quoteMetadata = quote ? asRecord(quote.metadata) : {}
   return {
     id: 'approvedprop_' + hash([input.date, input.game.game_pk, input.candidateId, input.playerId, normalizePerson(input.playerName)]),
     tracking_date: input.date,
@@ -254,7 +326,22 @@ function ledgerRow(input: {
     status: input.status,
     blocker: input.blocker ?? null,
     feature_snapshot: input.featureSnapshot ?? {},
-    market_snapshot: input.marketSnapshot ?? {},
+    market_snapshot: {
+      ...(input.marketSnapshot ?? {}),
+      lineContractVersion: APPROVED_PROP_LINE_CONTRACT_VERSION,
+      lineScope: lineContract.lineScope,
+      multipleLinesCertified: lineContract.multipleLinesCertified,
+      runtimeEligible: lineContract.runtimeEligible,
+      lineContractBlocker: lineContract.blocker,
+      actualQuote: quote ? {
+        oddsSnapshotId: quote.id,
+        sportsbook: quote.sportsbook,
+        line: n(quote.line),
+        price: n(quote.price),
+        quoteTimestamp: quote.snapshot_time,
+        providerTimestamp: String(quoteMetadata.providerTimestamp ?? quote.snapshot_time),
+      } : null,
+    },
     frozen_at: input.frozenAt,
     research_only: true,
     production_eligible: false,
@@ -402,7 +489,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         date: targetDate, game, market: 'pitcher_walks', candidateId: 'pitcher_bb_under_2p5_p85_v1',
         playerId: Number(feature.mlbam_pitcher_id), playerName: 'MLBAM ' + feature.mlbam_pitcher_id,
         direction: 'UNDER', line: 2.5, accuracy: 0.912408759124088,
-        status: 'NO_EVALUABLE', blocker: 'PROBABLE_PITCHER_IDENTITY_MISSING', frozenAt,
+        status: 'NO_EVALUABLE_IDENTITY', blocker: 'PROBABLE_PITCHER_IDENTITY_MISSING', frozenAt,
       }))
       continue
     }
@@ -646,7 +733,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           line: def.line,
           accuracy: def.accuracy,
           quote: nameQuote,
-          status: 'NO_EVALUABLE',
+          status: 'NO_EVALUABLE_IDENTITY',
           blocker: 'EXACT_MLBAM_IDENTITY_NOT_PERSISTED_IN_PREGAME_SNAPSHOT',
           marketSnapshot: {
             observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName),
@@ -851,7 +938,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       direction: def.direction,
       line: def.line,
       accuracy: def.accuracy,
-      status: 'NO_EVALUABLE',
+      status: 'NO_EVALUABLE_IDENTITY',
       blocker: 'EXACT_MLBAM_IDENTITY_NOT_PERSISTED_IN_PREGAME_SNAPSHOT',
       marketSnapshot: {
         observedLines: observedLines(quotes, unresolved.gamePk, unresolved.market, unresolved.playerName),
