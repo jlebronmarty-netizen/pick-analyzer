@@ -25,19 +25,20 @@ jobs:
       - name: Extract official per-player batting and pitching files
         run: |
           set -euo pipefail
-          unzip -j retrosheet-2025.zip '2025batting.csv' '2025pitching.csv' -d extracted
+          unzip -j retrosheet-2025.zip '2025batting.csv' '2025pitching.csv' '2025teamstats.csv' '2025allplayers.csv' -d extracted
           python - <<'PY'
           import csv, json, pathlib
           out = {}
-          for name in ('2025batting.csv','2025pitching.csv'):
+          for name in ('2025batting.csv','2025pitching.csv','2025teamstats.csv','2025allplayers.csv'):
               p = pathlib.Path('extracted')/name
               with p.open(newline='', encoding='utf-8-sig') as f:
                   r = csv.DictReader(f)
                   rows = list(r)
-              value = [x for x in rows if (x.get('stattype') or '').lower() == 'value']
+              value = [x for x in rows if not x.get('stattype') or (x.get('stattype') or '').lower() == 'value']
               out[name] = {
                   'columns': r.fieldnames,
                   'rows': len(rows),
+                  'stattype_counts': {k: sum(1 for x in rows if (x.get('stattype') or '') == k) for k in sorted({x.get('stattype') or '' for x in rows})},
                   'value_rows': len(value),
                   'games': len({x.get('gid') for x in value if x.get('gid')}),
                   'players': len({x.get('id') for x in value if x.get('id')}),
@@ -59,4 +60,6 @@ jobs:
             extracted/manifest.json
             extracted/2025batting_value.csv
             extracted/2025pitching_value.csv
+            extracted/2025teamstats_value.csv
+            extracted/2025allplayers_value.csv
           retention-days: 3
