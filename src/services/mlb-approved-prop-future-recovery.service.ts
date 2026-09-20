@@ -343,6 +343,7 @@ export async function recoverMlbApprovedPropsFutureGames(input: {
           line: n(quote.line),
           price: n(quote.price),
           quoteTimestamp: quote.snapshot_time,
+          providerTimestamp: String(asRecord(quote.metadata).providerTimestamp ?? quote.snapshot_time),
         } : null,
       },
       frozen_at: frozenAt,
