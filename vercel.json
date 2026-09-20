@@ -25,6 +25,10 @@
       "schedule": "55 14 * * *"
     },
     {
+      "path": "/api/cron/mlb-statcast-daily",
+      "schedule": "5 15 * * *"
+    },
+    {
       "path": "/api/cron/mlb-runline-v2-forward",
       "schedule": "46 14 * * *"
     },
