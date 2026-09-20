@@ -9,6 +9,11 @@ import {
   type ApprovedFiveMarket,
   type ApprovedModelTarget,
 } from '@/services/mlb-approved-five-market-runtime.service'
+import {
+  ADDITIONAL_PROP_RUNTIME_PARITY,
+  getPitcherWalksRuntimeParity,
+  loadStrictBatterTargetFeatureKeys,
+} from '@/services/mlb-approved-additional-prop-parity.service'
 
 const CAPTURE_SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const JOB_TYPE = 'mlb_approved_prop_daily_freeze_v1'
@@ -483,12 +488,11 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
   }
 
   const frozenAt = now.toISOString()
-  const [quotes, features, playerMap, starters, residuals] = await Promise.all([
+  const [quotes, features, playerMap, pitcherWalksParity] = await Promise.all([
     loadQuotes(targetDate),
     loadPitcherFeatures(targetDate),
     loadPlayers(),
-    loadSportsDataStarters(),
-    pitcherOutsResiduals(),
+    getPitcherWalksRuntimeParity(),
   ])
   const gameByPk = new Map(games.map((game) => [Number(game.game_pk), game]))
   const rows: LedgerRow[] = []
@@ -507,74 +511,136 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       continue
     }
 
-    const walkQuote = bestQuote({ quotes, gamePk: game.game_pk, market: 'pitcher_walks', playerName: pitcher.name, direction: 'UNDER', line: 2.5 })
-    const walk = await getMlbPitcherBbShadowProjection({ targetGamePk: game.game_pk, pitcherId: pitcher.id, line: 2.5 })
-    if (walk.status !== 'READY' || walk.probability.status !== 'READY') {
+    const walkQuote = bestQuote({
+      quotes,
+      gamePk: game.game_pk,
+      market: 'pitcher_walks',
+      playerName: pitcher.name,
+      playerId: pitcher.id,
+      direction: 'UNDER',
+      line: 2.5,
+    })
+
+    if (!pitcherWalksParity.certified) {
       rows.push(ledgerRow({
-        date: targetDate, game, market: 'pitcher_walks', candidateId: 'pitcher_bb_under_2p5_p85_v1',
-        playerId: pitcher.id, playerName: pitcher.name, direction: 'UNDER', line: 2.5, accuracy: 0.912408759124088,
-        projection: walk.status === 'READY' ? walk.projection.expectedWalks : null,
-        quote: walkQuote, status: 'NO_EVALUABLE',
-        blocker: walk.status === 'READY' ? walk.probability.status : walk.status,
-        marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name) },
+        date: targetDate,
+        game,
+        market: 'pitcher_walks',
+        candidateId: 'pitcher_bb_under_2p5_p85_v1',
+        playerId: pitcher.id,
+        playerName: pitcher.name,
+        direction: 'UNDER',
+        line: 2.5,
+        accuracy: 0.912408759124088,
+        quote: walkQuote,
+        status: 'RUNTIME_PARITY_NOT_CERTIFIED',
+        blocker: 'PITCHER_WALKS_RUNTIME_PARITY_CHECK_FAILED',
+        featureSnapshot: {
+          parityContract: pitcherWalksParity.contract,
+          parityFailures: pitcherWalksParity.failures,
+        },
+        marketSnapshot: {
+          observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name, pitcher.id),
+          exactMlbamIdentity: true,
+          fuzzyMatchingUsed: false,
+        },
         frozenAt,
       }))
     } else {
-      const qualifies = walk.probability.underProbability >= 0.85
-      rows.push(ledgerRow({
-        date: targetDate, game, market: 'pitcher_walks', candidateId: 'pitcher_bb_under_2p5_p85_v1',
-        playerId: pitcher.id, playerName: pitcher.name, direction: 'UNDER', line: 2.5, accuracy: 0.912408759124088,
-        projection: walk.projection.expectedWalks, probability: walk.probability.underProbability,
-        qualifies, quote: walkQuote, status: statusFor(qualifies, Boolean(walkQuote)),
-        featureSnapshot: {
-          priorAppearances: walk.featureState.priorAppearances,
-          priorPlateAppearances: walk.featureState.priorPlateAppearances,
-          expectedBattersFaced: walk.featureState.expectedBattersFaced,
-          predictionBin: walk.probability.predictionBin,
-          calibrationSample: walk.probability.sampleSize,
-        },
-        marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name) },
-        frozenAt,
-      }))
+      const walk = await getMlbPitcherBbShadowProjection({ targetGamePk: game.game_pk, pitcherId: pitcher.id, line: 2.5 })
+      if (walk.status !== 'READY' || walk.probability.status !== 'READY') {
+        rows.push(ledgerRow({
+          date: targetDate,
+          game,
+          market: 'pitcher_walks',
+          candidateId: 'pitcher_bb_under_2p5_p85_v1',
+          playerId: pitcher.id,
+          playerName: pitcher.name,
+          direction: 'UNDER',
+          line: 2.5,
+          accuracy: 0.912408759124088,
+          projection: walk.status === 'READY' ? walk.projection.expectedWalks : null,
+          quote: walkQuote,
+          status: 'NO_EVALUABLE',
+          blocker: walk.status === 'READY' ? walk.probability.status : walk.status,
+          featureSnapshot: { parityContract: pitcherWalksParity.contract },
+          marketSnapshot: {
+            observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name, pitcher.id),
+            exactMlbamIdentity: true,
+            fuzzyMatchingUsed: false,
+          },
+          frozenAt,
+        }))
+      } else {
+        const qualifies = walk.probability.underProbability >= 0.85
+        rows.push(ledgerRow({
+          date: targetDate,
+          game,
+          market: 'pitcher_walks',
+          candidateId: 'pitcher_bb_under_2p5_p85_v1',
+          playerId: pitcher.id,
+          playerName: pitcher.name,
+          direction: 'UNDER',
+          line: 2.5,
+          accuracy: 0.912408759124088,
+          projection: walk.projection.expectedWalks,
+          probability: walk.probability.underProbability,
+          qualifies,
+          quote: walkQuote,
+          status: statusFor(qualifies, Boolean(walkQuote)),
+          featureSnapshot: {
+            parityContract: pitcherWalksParity.contract,
+            priorAppearances: walk.featureState.priorAppearances,
+            priorPlateAppearances: walk.featureState.priorPlateAppearances,
+            expectedBattersFaced: walk.featureState.expectedBattersFaced,
+            predictionBin: walk.probability.predictionBin,
+            calibrationSample: walk.probability.sampleSize,
+          },
+          marketSnapshot: {
+            observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name, pitcher.id),
+            exactMlbamIdentity: true,
+            fuzzyMatchingUsed: false,
+          },
+          frozenAt,
+        }))
+      }
     }
 
-    const previousPitchCount = n(feature.previous_pitch_count)
-    const outsQuote = bestQuote({ quotes, gamePk: game.game_pk, market: 'pitcher_outs', playerName: pitcher.name, direction: 'UNDER', line: 18.5 })
-    const outs = previousPitchCount === null ? null : pitcherOutsProjection({
-      pitcherName: pitcher.name,
-      previousPitchCount,
-      targetDate,
-      starters,
-      residuals,
+    const outsQuote = bestQuote({
+      quotes,
+      gamePk: game.game_pk,
+      market: 'pitcher_outs',
+      playerName: pitcher.name,
+      playerId: pitcher.id,
+      direction: 'UNDER',
+      line: 18.5,
     })
-    if (!outs) {
-      rows.push(ledgerRow({
-        date: targetDate, game, market: 'pitcher_outs', candidateId: 'pitcher_outs_under_18p5_p90_v1',
-        playerId: pitcher.id, playerName: pitcher.name, direction: 'UNDER', line: 18.5, accuracy: 0.951327433628319,
-        quote: outsQuote, status: 'NO_EVALUABLE', blocker: 'PITCHER_OUTS_PRIOR_START_HISTORY_MISSING',
-        marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_outs', pitcher.name) },
-        frozenAt,
-      }))
-    } else {
-      const qualifies = outs.pUnder >= 0.90
-      rows.push(ledgerRow({
-        date: targetDate, game, market: 'pitcher_outs', candidateId: 'pitcher_outs_under_18p5_p90_v1',
-        playerId: pitcher.id, playerName: pitcher.name, direction: 'UNDER', line: 18.5, accuracy: 0.951327433628319,
-        projection: outs.predicted, probability: outs.pUnder, qualifies, quote: outsQuote,
-        status: statusFor(qualifies, Boolean(outsQuote)),
-        featureSnapshot: {
-          previousPitchCount,
-          priorStarts: outs.priorStarts,
-          priorOutsAll: outs.priorOutsAll,
-          priorOutsL5: outs.priorOutsL5,
-          priorPitchCountAll: outs.priorPitchCountAll,
-          latestPriorDate: outs.latestPriorDate,
-          trainResidualN: residuals.length,
-        },
-        marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_outs', pitcher.name) },
-        frozenAt,
-      }))
-    }
+    rows.push(ledgerRow({
+      date: targetDate,
+      game,
+      market: 'pitcher_outs',
+      candidateId: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.candidateId,
+      playerId: pitcher.id,
+      playerName: pitcher.name,
+      direction: 'UNDER',
+      line: 18.5,
+      accuracy: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.frozenAccuracy,
+      quote: outsQuote,
+      status: 'RUNTIME_PARITY_NOT_CERTIFIED',
+      blocker: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.blocker,
+      featureSnapshot: {
+        parityContract: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.contract,
+        frozenExternal2026: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.frozenExternal2026,
+        parityNote: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.note,
+      },
+      marketSnapshot: {
+        observedLines: observedLines(quotes, game.game_pk, 'pitcher_outs', pitcher.name, pitcher.id),
+        exactMlbamIdentity: true,
+        fuzzyMatchingUsed: false,
+      },
+      frozenAt,
+    }))
+
   }
 
   const exactBatterDefs = [
@@ -648,9 +714,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     if (matches.length === 1) resolved.set(normalizePerson(name), matches[0])
   }
   const batterIds = Array.from(new Set(Array.from(resolved.values()).map((player) => player.id)))
-  const [statcastBatterLogs, tbLogs] = await Promise.all([
+  const [statcastBatterLogs, tbLogs, batterTargetFeatureKeys] = await Promise.all([
     loadBatterHits(batterIds, targetDate),
     loadBatterTb(batterIds, targetDate),
+    loadStrictBatterTargetFeatureKeys(targetDate, batterIds),
   ])
 
   for (const def of exactBatterDefs) {
@@ -666,7 +733,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       const game = gameByPk.get(gamePk)
       if (!game) continue
       const player = resolved.get(normalizePerson(name))
-      const quote = bestQuote({
+      const nameQuote = bestQuote({
         quotes,
         gamePk,
         market: def.market,
@@ -685,14 +752,83 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           direction: 'UNDER',
           line: def.line,
           accuracy: def.accuracy,
-          quote,
+          quote: nameQuote,
           status: 'NO_EVALUABLE',
           blocker: 'EXACT_MLBAM_NAME_MATCH_NOT_UNIQUE',
-          marketSnapshot: { observedLines: observedLines(quotes, gamePk, def.market, name) },
+          marketSnapshot: {
+            observedLines: observedLines(quotes, gamePk, def.market, name),
+            exactMlbamIdentity: false,
+            fuzzyMatchingUsed: false,
+          },
           frozenAt,
         }))
         continue
       }
+
+      const parity = ADDITIONAL_PROP_RUNTIME_PARITY[def.market]
+      if (!parity.certified) {
+        rows.push(ledgerRow({
+          date: targetDate,
+          game,
+          market: def.market,
+          candidateId: def.candidateId,
+          playerId: player.id,
+          playerName: name,
+          direction: 'UNDER',
+          line: def.line,
+          accuracy: def.accuracy,
+          status: 'RUNTIME_PARITY_NOT_CERTIFIED',
+          blocker: 'ADDITIONAL_BATTER_RUNTIME_PARITY_NOT_CERTIFIED',
+          featureSnapshot: { parityContract: parity.contract },
+          marketSnapshot: {
+            observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+            exactMlbamIdentity: true,
+            fuzzyMatchingUsed: false,
+          },
+          frozenAt,
+        }))
+        continue
+      }
+
+      const quote = bestQuote({
+        quotes,
+        gamePk,
+        market: def.market,
+        playerName: name,
+        playerId: player.id,
+        direction: 'UNDER',
+        line: def.line,
+      })
+
+      if (!batterTargetFeatureKeys.has(String(gamePk) + ':' + String(player.id))) {
+        rows.push(ledgerRow({
+          date: targetDate,
+          game,
+          market: def.market,
+          candidateId: def.candidateId,
+          playerId: player.id,
+          playerName: name,
+          direction: 'UNDER',
+          line: def.line,
+          accuracy: def.accuracy,
+          quote,
+          status: 'NO_EVALUABLE',
+          blocker: 'STRICT_PREGAME_BATTER_FEATURE_NOT_AVAILABLE',
+          featureSnapshot: {
+            parityContract: parity.contract,
+            requiredFeatureVersion: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
+            requiredSourceRule: 'source_game_date < target_game_date',
+          },
+          marketSnapshot: {
+            observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+            exactMlbamIdentity: true,
+            fuzzyMatchingUsed: false,
+          },
+          frozenAt,
+        }))
+        continue
+      }
+
       const sourceRows = def.source === 'total_bases' ? tbLogs : statcastBatterLogs
       const projection = batterLinearProjection(
         sourceRows,
@@ -715,7 +851,12 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           quote,
           status: 'NO_EVALUABLE',
           blocker: 'MINIMUM_10_PRIOR_GAMES_NOT_MET',
-          marketSnapshot: { observedLines: observedLines(quotes, gamePk, def.market, name) },
+          featureSnapshot: { parityContract: parity.contract, strictTargetFeature: true },
+          marketSnapshot: {
+            observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+            exactMlbamIdentity: true,
+            fuzzyMatchingUsed: false,
+          },
           frozenAt,
         }))
         continue
@@ -736,6 +877,9 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         quote,
         status: statusFor(qualifies, Boolean(quote)),
         featureSnapshot: {
+          parityContract: parity.contract,
+          strictTargetFeature: true,
+          requiredSourceRule: 'source_game_date < target_game_date',
           rawFormulaAlpha: 0,
           priorGames: projection.priorGames,
           priorPa: projection.priorPa,
@@ -743,7 +887,11 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           recentPaPerGame: projection.recentPaPerGame,
           latestPriorDate: projection.latestPriorDate,
         },
-        marketSnapshot: { observedLines: observedLines(quotes, gamePk, def.market, name) },
+        marketSnapshot: {
+          observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+          exactMlbamIdentity: true,
+          fuzzyMatchingUsed: false,
+        },
         frozenAt,
       }))
     }
@@ -920,7 +1068,6 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       marketSummary,
       exactRuntimeEnabled: [
         'pitcher_walks',
-        'pitcher_outs',
         'batter_hits',
         'batter_total_bases',
         'batter_home_runs',
@@ -933,7 +1080,12 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         'batter_doubles',
         'batter_triples',
       ],
-      exactRuntimePending: [],
+      exactRuntimePending: ['pitcher_outs'],
+      exactRuntimeBlocked: [{
+        market: 'pitcher_outs',
+        status: 'RUNTIME_PARITY_NOT_CERTIFIED',
+        blocker: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.blocker,
+      }],
     },
     updated_at: completedAt,
   })
