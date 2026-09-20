@@ -16,6 +16,7 @@ import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v
 import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'
 import { captureMlbApprovedPropMarkets } from '@/services/mlb-approved-prop-market-capture.service'
 import { evaluateMlbApprovedPropsDaily } from '@/services/mlb-approved-prop-daily-evaluation.service'
+import { recoverMlbApprovedPropsFutureGames } from '@/services/mlb-approved-prop-future-recovery.service'
 import {
   captureMlbMoneylinePregameStarterEvidence,
   materializeMlbMoneylineResearchDaily,
@@ -352,6 +353,24 @@ async function safeApprovedPropDailyEvaluation(targetDate: string) {
   }
 }
 
+async function safeApprovedPropFutureRecovery(targetDate: string) {
+  try {
+    return await recoverMlbApprovedPropsFutureGames({ targetDate })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'APPROVED_PROP_FUTURE_RECOVERY_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown approved MLB prop future recovery error'),
+    }
+  }
+}
+
 async function maybeCaptureProspectiveMlbMarkets(id: string) {
   const now = new Date()
   const clock = puertoRicoClock(now)
@@ -641,6 +660,9 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     const approvedPropDailyFreeze = readiness.ready
       ? await safeApprovedPropDailyEvaluation(operatingClock.date)
       : null
+    const approvedPropFutureRecovery = readiness.ready
+      ? await safeApprovedPropFutureRecovery(operatingClock.date)
+      : null
 
     // Moneyline keeps its existing authorized gate and remains fail-closed.
     // Exceptions are represented as blocked results rather than aborting the
@@ -668,6 +690,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       pitcherWinForwardResearchFreeze: pitcherWinForwardFreeze,
       pitcherWinForwardResearchSettlement: pitcherWinForwardSettlement,
       approvedPropDailyFreeze,
+      approvedPropFutureRecovery,
       prospectiveMarketCapture,
       approvedPropMarketCapture,
       pa12ErForwardShadowFreeze,
