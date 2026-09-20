@@ -6,6 +6,37 @@
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
+## 2026-09-19 five-market daily pregame runtime — authoritative
+
+The following frozen market rules have been reconstructed to exact historical parity and wired into the existing approved-props daily capture/evaluator path:
+
+- pitcher_er_over_1p5_p70_v1
+- pitcher_hits_allowed_under_6p5_proj_5p0_v1
+- batter_singles_under_1p5_proj_0p50_v1
+- batter_doubles_under_0p5_proj_0p16_v1
+- batter_triples_under_0p5_proj_0p015_v1
+
+Canonical runtime evidence:
+
+artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json
+
+Key gates:
+
+- ER reproduces all four R2 coefficients, TEST MAE/RMSE and 73/91 market-rule checksum exactly.
+- Hits Allowed reproduces the 2025 n=3,099 refit and the 2026 2,568 eligible / 1,226 selected / 968 correct fingerprint exactly.
+- Singles/Doubles/Triples reproduce the common 2025 n=42,601 strict-prior-date refit and all published 2026 one-shot counts exactly.
+- Batter Game 1 never enters Game 2 because history is restricted to source game date < target game date.
+- Current-market snapshots persist exact MLBAM identity when uniquely resolved; fuzzy matching is not used.
+- A model qualifier is not market-verified without exact frozen line, sportsbook, price and strictly pregame timestamp.
+- Existing MLB Statcast cron is reused; no parallel scheduler was created.
+- Historical Odds API credits consumed for this work: 0.
+- Official Picks unchanged; APOSTAR disabled; all output remains research/shadow only.
+
+Triples remains LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED.
+
+The implementation is not to be labeled final READY until the code PR is merged and the resulting Vercel production deployment is READY.
+
+
 ## 2026-09-19 Five frozen prop markets daily runtime — authoritative
 
 State: `FIVE_MARKET_DAILY_RUNTIME_READY_RESEARCH_ONLY`.
