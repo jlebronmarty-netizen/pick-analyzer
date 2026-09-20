@@ -272,7 +272,8 @@
     "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
     "scripts/mlb-operational-r6-run-store.mjs": "323e185b66d9125defe826cb2eaa3322525618ab8ae96c1dcf6413883bc75531",
     "scripts/mlb-operational-r6-write-journal.mjs": "2b2c4c79c06e28265f3340c223c9c291fee4421b60a6066644f24bfb13859c78",
-    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6"
+    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6",
+    "supabase/functions/_shared/mlb-runtime-state.mjs": "394d4f36a3b17ae6ced32f8f145bc12d245d5b398365ddbe132f74dc58a9724b"
   },
   "manualEntrypoint": "scripts/mlb-operational-manual-refresh.mjs",
   "manualInvocation": "node --env-file=.env.local scripts/mlb-operational-manual-refresh.mjs --execute-current-slate --package-sha=<frozen HEAD>",
@@ -462,5 +463,23 @@
     "dependencyFilterChanges": 0,
     "cutoffChanges": 0,
     "provenanceGateChanges": 0
+  },
+  "dependencyNativeUpdateDispositionRevalidation": {
+    "at": "2026-09-20T15:35:00Z",
+    "scope": "DEPENDENCY_SCOPE_NATIVE_GAME_UPDATES_ONLY",
+    "allowedTable": "pick2_mlb_games",
+    "requiredProviderCalls": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 0,
+      "THE_ODDS_API": 0
+    },
+    "requiresReadbackPass": true,
+    "requiresZeroInserts": true,
+    "requiresAllTargetsStillPregame": true,
+    "downstreamWritePolicy": "FORBIDDEN",
+    "featureMathChanges": 0,
+    "modelChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
   }
 }
