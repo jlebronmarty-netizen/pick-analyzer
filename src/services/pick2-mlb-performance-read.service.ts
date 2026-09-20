@@ -112,9 +112,9 @@ export async function getMlbOfficialPerformance() {
 
   try {
     const settlements = resultRead.data.flatMap((r) => r.actual_result?.settlements ?? []) as PickSettlement[]
-    const summary = summarizeMlbPerformance(settlements)
     const picks = pickRead.data as OfficialPickRow[]
     const settled = outcomeMap(settlements)
+    const settlementByIdentity = new Map(settlements.map((settlement) => [settlement.official_pick_identity, settlement]))
     const games = await readGames(picks.map((pick) => pick.game_pk))
     const gameByPk = new Map(games.map((game) => [game.game_pk, game]))
     const teams = await readTeams(games.flatMap((game) => [game.home_team_id, game.away_team_id]))
@@ -178,6 +178,19 @@ export async function getMlbOfficialPerformance() {
       }
     }).sort((a, b) => Date.parse(b.firstDecisionAt) - Date.parse(a.firstDecisionAt))
 
+    // Public performance is one unit per unique game/side selection. All
+    // immutable decision snapshots remain stored/auditable, but repeated
+    // scheduler snapshots must not multiply the result sample.
+    const uniqueSettlements: PickSettlement[] = []
+    for (const rows of groups.values()) {
+      const ordered = [...rows].sort((a, b) => Date.parse(a.decision_at) - Date.parse(b.decision_at))
+      const found = ordered.map((pick) => settlementByIdentity.get(pick.official_pick_identity))
+      if (found.some((row) => !row)) continue
+      const concrete = found as PickSettlement[]
+      if (new Set(concrete.map((row) => row.outcome)).size !== 1) continue
+      uniqueSettlements.push(concrete[0])
+    }
+    const summary = summarizeMlbPerformance(uniqueSettlements)
     const settledDecisionRows = picks.filter((pick) => settled.has(pick.official_pick_identity)).length
     const settledUniqueSelections = selections.filter((row) => row.state === 'SETTLED').length
     const status = settlements.length
