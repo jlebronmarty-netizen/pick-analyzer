@@ -349,7 +349,7 @@
     "src/components/pick2/MlbToday.tsx": "8a8eea8809ca22c142b6d47f1e5fe6d4158765b3a48d4fe607887d8fbf53c2a1",
     "src/components/pick2/MlbValueBoardClient.tsx": "85944ea723017293f1da9d0bd4cdaaf0230ef9ae16ce4fbe26a5cfa7a60f1080",
     "src/services/pick2-mlb-health.service.ts": "d9c0fe474cfa6f4e872cf1b5db4f8268e4004bc0af1bc8c420d7b62498f337e2",
-    "src/services/pick2-mlb-performance-read.service.ts": "4d57a3cda44289edb88bbf71b48f6b357243eebd789428ef2907018564c6a9db",
+    "src/services/pick2-mlb-performance-read.service.ts": "90c7cfb3ecb7c2b8a1b9fbbba1941abb221b8ca189796a3f29e59105089c3c62",
     "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
     "src/services/pick2-mlb-settlement.ts": "7e61d78f9831637df24bae110c88ecf8937794a91cfaa3920a0d7cfdb76df2fe",
     "src/services/pick2-mlb-unattended-preflight.ts": "ccfe7dcf812f41c8fb9f7602d7fa7a45bec67eef942198fc1b6257a6f39f1cef",
@@ -525,6 +525,7 @@
       "src/components/pick2/MlbCards.tsx",
       "src/components/pick2/mlb-presentation.ts",
       "src/app/performance/page.tsx"
-    ]
+    ],
+    "performanceAggregation": "ONE_UNIT_PER_UNIQUE_GAME_SIDE_SELECTION;DECISION_SNAPSHOTS_AUDIT_ONLY"
   }
 }
