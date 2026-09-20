@@ -11,7 +11,7 @@ const LEAGUE_KEY = 'mlb'
 const JOB_TYPE = 'mlb_approved_prop_market_capture_v1'
 const SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const CREDIT_RESERVE = 2000
-const PAGE_SIZE = 1000
+const READ_BATCH_SIZE = 150
 const WRITE_BATCH_SIZE = 500
 
 const MAIN_MARKETS = [
@@ -468,8 +468,8 @@ export async function captureMlbApprovedPropMarkets(input: {
 
   const ids = rows.map((row) => String(row.id))
   let existingRows = 0
-  for (let offset = 0; offset < ids.length; offset += PAGE_SIZE) {
-    const readback = await supabaseAdmin.from('sports_odds_snapshots').select('id').in('id', ids.slice(offset, offset + PAGE_SIZE))
+  for (let offset = 0; offset < ids.length; offset += READ_BATCH_SIZE) {
+    const readback = await supabaseAdmin.from('sports_odds_snapshots').select('id').in('id', ids.slice(offset, offset + READ_BATCH_SIZE))
     if (readback.error) throw new Error('MLB_APPROVED_PROP_EXISTING_READ_FAILED:' + readback.error.message)
     existingRows += readback.data?.length ?? 0
   }
