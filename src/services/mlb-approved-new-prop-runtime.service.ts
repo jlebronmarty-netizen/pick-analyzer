@@ -189,16 +189,44 @@ async function evaluateBatterOfficial(
   if (!relevant.length) return []
 
   const ids = Array.from(new Set(relevant.map((target) => target.playerId)))
-  const logs = await mapConcurrent(ids, 6, async (playerId) => ({
-    playerId,
-    rows: (await readMlbOfficialBatterGameLog(playerId, 2026))
-      .filter((row) => row.date < targetDate),
-  }))
-  const byPlayer = new Map(logs.map((item) => [item.playerId, item.rows]))
+  const logs = await mapConcurrent(ids, 6, async (playerId) => {
+    try {
+      return {
+        playerId,
+        rows: (await readMlbOfficialBatterGameLog(playerId, 2026))
+          .filter((row) => row.date < targetDate),
+        error: null as string | null,
+      }
+    } catch (error) {
+      return {
+        playerId,
+        rows: [] as MlbOfficialBatterGameLogRow[],
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  })
+  const byPlayer = new Map(logs.map((item) => [item.playerId, item]))
 
   return relevant.map((target) => {
     const market = target.market as 'batter_rbis' | 'batter_hits_runs_rbis'
-    const rows = byPlayer.get(target.playerId) ?? []
+    const playerHistory = byPlayer.get(target.playerId)
+    const rows = playerHistory?.rows ?? []
+    if (playerHistory?.error) {
+      return {
+        ...target,
+        projection: null,
+        qualifies: null,
+        evaluable: false,
+        parityCertified: true,
+        blocker: 'MLB_OFFICIAL_BATTER_GAMELOG_UNAVAILABLE',
+        featureSnapshot: {
+          parityContract: 'MLB_OFFICIAL_BATTER_GAMELOG_RUNTIME_PARITY_V1',
+          requiredSourceRule: 'game_date < target_date',
+          source: 'MLB Official StatsAPI gameLog hitting',
+          fetchError: playerHistory.error.slice(0, 240),
+        },
+      }
+    }
     const projection = batterProjection(rows, market)
     if (!projection) {
       return {
