@@ -1,0 +1,60 @@
+{
+  "artifact": "MLB_BATTER_RUNS_RBI_HRRBI_2026_MLB_OFFICIAL_EXTERNAL_RECONCILIATION",
+  "createdAt": "2026-09-20",
+  "source": "MLB_OFFICIAL_STATSAPI_GAMELOG",
+  "sourceWindow": [
+    "2026-03-26",
+    "2026-07-19"
+  ],
+  "developmentFreezeCommit": "dee58764dd0f7bf9dd9efac110e14ffd01f64d02",
+  "exactExternalReconciliationAfterProxyRead": true,
+  "pristineOneShot": false,
+  "reasonNotPristine": "2026 proxy diagnostics were viewed before this exact MLB Official reconciliation; formulas were not retuned.",
+  "retuned": false,
+  "requestedPlayers": 516,
+  "successfulPlayers": 516,
+  "failedPlayers": 0,
+  "rawGameLogRows": 30889,
+  "eligibleRows": 25729,
+  "results": {
+    "runs": {
+      "candidateId": "batter_runs_under_0p5_proj_0p14_v1",
+      "selectedN": 1036,
+      "correct": 779,
+      "accuracy": 0.7519305019305019,
+      "coverage": 0.040265847875937656,
+      "eligibleBaseline": 0.6451474989311672,
+      "worstMonthAccuracy": 0.7022653721682848,
+      "status": "POOLED_75_PLUS_STABILITY_FLOOR_NOT_MET"
+    },
+    "rbi": {
+      "candidateId": "batter_rbi_under_0p5_proj_0p10_v1",
+      "selectedN": 1367,
+      "correct": 1133,
+      "accuracy": 0.8288222384784198,
+      "coverage": 0.05313070853900268,
+      "eligibleBaseline": 0.725484861440398,
+      "worstMonthAccuracy": 0.7925764192139738,
+      "status": "TARGET_MET_75_PLUS_EXACT_OUTCOME_RECONCILIATION_LINE_CAPTURE_PENDING"
+    },
+    "hrrbi": {
+      "candidateId": "batter_hrrbi_under_2p5_proj_0p70_v1",
+      "selectedN": 1255,
+      "correct": 1073,
+      "accuracy": 0.8549800796812749,
+      "coverage": 0.048777643903766175,
+      "eligibleBaseline": 0.7319755917447238,
+      "worstMonthAccuracy": 0.8263888888888888,
+      "status": "TARGET_MET_75_PLUS_EXACT_OUTCOME_RECONCILIATION_LINE_CAPTURE_PENDING"
+    }
+  },
+  "boundaries": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "historicalOddsApiCalls": 0,
+    "realLineRequiredForProspectiveUse": true,
+    "balldontlieOpeningLineCapturePending": true
+  }
+}
