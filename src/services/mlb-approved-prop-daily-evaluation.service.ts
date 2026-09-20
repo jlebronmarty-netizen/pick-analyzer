@@ -771,11 +771,11 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     }))
   }
 
-  const unresolvedFiveMarketRows: Array<{
+  const unresolvedFiveMarketByKey = new Map<string, {
     gamePk: number
     market: ApprovedFiveMarket
     playerName: string
-  }> = []
+  }>()
   const fiveTargetsByKey = new Map<string, ApprovedModelTarget>()
 
   for (const quote of quotes) {
@@ -786,7 +786,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     const playerName = quoteCanonicalPlayerName(quote) || quotePlayer(quote)
     if (gamePk === null || !playerName) continue
     if (playerId === null) {
-      unresolvedFiveMarketRows.push({ gamePk, market, playerName })
+      unresolvedFiveMarketByKey.set(market + ':' + gamePk + ':' + normalizePerson(playerName), { gamePk, market, playerName })
       continue
     }
     fiveTargetsByKey.set(
@@ -795,7 +795,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     )
   }
 
-  for (const unresolved of unresolvedFiveMarketRows) {
+  for (const unresolved of unresolvedFiveMarketByKey.values()) {
     const game = gameByPk.get(unresolved.gamePk)
     if (!game) continue
     const def = FIVE_MARKET_DEFS[unresolved.market]
