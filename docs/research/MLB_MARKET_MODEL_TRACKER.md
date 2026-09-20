@@ -63,6 +63,8 @@ Sep20 game 824789 successfully crossed PREGAME after the indexed raw identity pr
 
 The legacy core inserted one Official Pick during that successful run. Existing data is not rewritten.
 PR #145 disables future Official Pick DML from the research runtime while preserving policy results as shadow evidence.
+Prospective boundary validation: the 22:00Z PREGAME run on package `672b787dafc187ae4cd4d00684881b7dcf3c68c0` completed with `picks=0`, zero DML stages, and Official Picks total unchanged at one pre-existing Sep20 row. Approved props remained `apostar_enabled=false` and `official_picks_eligible=false`.
+
 APOSTAR remains disabled.
 
 Historical raw canonical team identity is now complete: global missing canonical home/away IDs = 0.
