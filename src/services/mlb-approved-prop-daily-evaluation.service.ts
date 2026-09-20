@@ -4,6 +4,11 @@ import { createHash, randomUUID } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { getMlbPitcherBbShadowProjection } from '@/services/mlb-pitcher-bb-shadow.service'
+import {
+  evaluateApprovedFiveMarketModels,
+  type ApprovedFiveMarket,
+  type ApprovedModelTarget,
+} from '@/services/mlb-approved-five-market-runtime.service'
 
 const CAPTURE_SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const JOB_TYPE = 'mlb_approved_prop_daily_freeze_v1'
@@ -32,13 +37,45 @@ type PitcherFeature = {
 }
 type LedgerRow = Record<string, unknown>
 
-const PENDING_DEFS = [
-  { market: 'pitcher_earned_runs', candidateId: 'pitcher_er_over_1p5_p70_v1', direction: 'OVER', line: 1.5, accuracy: 0.802197802197802, playerType: 'pitcher' },
-  { market: 'pitcher_hits_allowed', candidateId: 'pitcher_hits_allowed_under_6p5_proj_5p0_v1', direction: 'UNDER', line: 6.5, accuracy: 0.789559543230016, playerType: 'pitcher' },
-  { market: 'batter_singles', candidateId: 'batter_singles_under_1p5_proj_0p50_v1', direction: 'UNDER', line: 1.5, accuracy: 0.9308, playerType: 'batter' },
-  { market: 'batter_doubles', candidateId: 'batter_doubles_under_0p5_proj_0p16_v1', direction: 'UNDER', line: 0.5, accuracy: 0.8693, playerType: 'batter' },
-  { market: 'batter_triples', candidateId: 'batter_triples_under_0p5_proj_0p015_v1', direction: 'UNDER', line: 0.5, accuracy: 0.9882, playerType: 'batter' },
-] as const
+const FIVE_MARKET_DEFS: Record<ApprovedFiveMarket, {
+  candidateId: string
+  direction: 'UNDER' | 'OVER'
+  line: number
+  accuracy: number
+}> = {
+  pitcher_earned_runs: {
+    candidateId: 'pitcher_er_over_1p5_p70_v1',
+    direction: 'OVER',
+    line: 1.5,
+    accuracy: 0.802197802197802,
+  },
+  pitcher_hits_allowed: {
+    candidateId: 'pitcher_hits_allowed_under_6p5_proj_5p0_v1',
+    direction: 'UNDER',
+    line: 6.5,
+    accuracy: 0.789559543230016,
+  },
+  batter_singles: {
+    candidateId: 'batter_singles_under_1p5_proj_0p50_v1',
+    direction: 'UNDER',
+    line: 1.5,
+    accuracy: 0.930761331964207,
+  },
+  batter_doubles: {
+    candidateId: 'batter_doubles_under_0p5_proj_0p16_v1',
+    direction: 'UNDER',
+    line: 0.5,
+    accuracy: 0.869342273937482,
+  },
+  batter_triples: {
+    candidateId: 'batter_triples_under_0p5_proj_0p015_v1',
+    direction: 'UNDER',
+    line: 0.5,
+    accuracy: 0.988151106673323,
+  },
+}
+
+const FIVE_MARKETS = new Set<ApprovedFiveMarket>(Object.keys(FIVE_MARKET_DEFS) as ApprovedFiveMarket[])
 
 function asRecord(value: unknown): JsonMap {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as JsonMap : {}
@@ -109,6 +146,16 @@ function quotePlayer(quote: Quote) {
   return String(asRecord(quote.metadata).providerPlayerName ?? '').trim()
 }
 
+function quoteCanonicalPlayerName(quote: Quote) {
+  const metadata = asRecord(quote.metadata)
+  return String(metadata.canonicalPlayerName ?? metadata.pitcherName ?? metadata.providerPlayerName ?? '').trim()
+}
+
+function quotePlayerId(quote: Quote) {
+  const metadata = asRecord(quote.metadata)
+  return n(metadata.playerMlbamId ?? metadata.pitcherMlbamId)
+}
+
 function requiredOutcome(direction: string) {
   if (direction === 'UNDER') return 'under'
   if (direction === 'OVER') return 'over'
@@ -121,6 +168,7 @@ function bestQuote(input: {
   gamePk: number
   market: string
   playerName: string
+  playerId?: number | null
   direction: string
   line: number | null
 }) {
@@ -128,7 +176,10 @@ function bestQuote(input: {
   const outcome = requiredOutcome(input.direction)
   const candidates = input.quotes.filter((quote) => {
     if (quoteGamePk(quote) !== input.gamePk || quote.market !== input.market) return false
-    if (normalizePerson(quotePlayer(quote)) !== playerKey || quote.outcome.toLowerCase() !== outcome) return false
+    const identityMatches = input.playerId !== undefined && input.playerId !== null
+      ? quotePlayerId(quote) === input.playerId
+      : normalizePerson(quotePlayer(quote)) === playerKey
+    if (!identityMatches || quote.outcome.toLowerCase() !== outcome) return false
     if (input.line === null) return true
     const line = n(quote.line)
     return line !== null && Math.abs(line - input.line) < 1e-9
@@ -137,11 +188,16 @@ function bestQuote(input: {
   return candidates[0] ?? null
 }
 
-function observedLines(quotes: Quote[], gamePk: number, market: string, playerName: string) {
+function observedLines(quotes: Quote[], gamePk: number, market: string, playerName: string, playerId?: number | null) {
   const playerKey = normalizePerson(playerName)
   return Array.from(new Set(
     quotes
-      .filter((quote) => quoteGamePk(quote) === gamePk && quote.market === market && normalizePerson(quotePlayer(quote)) === playerKey)
+      .filter((quote) => {
+        if (quoteGamePk(quote) !== gamePk || quote.market !== market) return false
+        return playerId !== undefined && playerId !== null
+          ? quotePlayerId(quote) === playerId
+          : normalizePerson(quotePlayer(quote)) === playerKey
+      })
       .map((quote) => n(quote.line))
       .filter((line): line is number => line !== null),
   )).sort((a, b) => a - b)
@@ -446,7 +502,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         date: targetDate, game, market: 'pitcher_walks', candidateId: 'pitcher_bb_under_2p5_p85_v1',
         playerId: Number(feature.mlbam_pitcher_id), playerName: 'MLBAM ' + feature.mlbam_pitcher_id,
         direction: 'UNDER', line: 2.5, accuracy: 0.912408759124088,
-        status: 'NO_EVALUABLE_IDENTITY_UNRESOLVED', blocker: 'PROBABLE_PITCHER_IDENTITY_MISSING', frozenAt,
+        status: 'NO_EVALUABLE', blocker: 'PROBABLE_PITCHER_IDENTITY_MISSING', frozenAt,
       }))
       continue
     }
@@ -458,7 +514,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         date: targetDate, game, market: 'pitcher_walks', candidateId: 'pitcher_bb_under_2p5_p85_v1',
         playerId: pitcher.id, playerName: pitcher.name, direction: 'UNDER', line: 2.5, accuracy: 0.912408759124088,
         projection: walk.status === 'READY' ? walk.projection.expectedWalks : null,
-        quote: walkQuote, status: 'NO_EVALUABLE_FEATURE_MISSING',
+        quote: walkQuote, status: 'NO_EVALUABLE',
         blocker: walk.status === 'READY' ? walk.probability.status : walk.status,
         marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name) },
         frozenAt,
@@ -495,7 +551,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       rows.push(ledgerRow({
         date: targetDate, game, market: 'pitcher_outs', candidateId: 'pitcher_outs_under_18p5_p90_v1',
         playerId: pitcher.id, playerName: pitcher.name, direction: 'UNDER', line: 18.5, accuracy: 0.951327433628319,
-        quote: outsQuote, status: 'NO_EVALUABLE_INSUFFICIENT_HISTORY', blocker: 'PITCHER_OUTS_PRIOR_START_HISTORY_MISSING',
+        quote: outsQuote, status: 'NO_EVALUABLE', blocker: 'PITCHER_OUTS_PRIOR_START_HISTORY_MISSING',
         marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_outs', pitcher.name) },
         frozenAt,
       }))
@@ -630,7 +686,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           line: def.line,
           accuracy: def.accuracy,
           quote,
-          status: 'NO_EVALUABLE_IDENTITY_UNRESOLVED',
+          status: 'NO_EVALUABLE',
           blocker: 'EXACT_MLBAM_NAME_MATCH_NOT_UNIQUE',
           marketSnapshot: { observedLines: observedLines(quotes, gamePk, def.market, name) },
           frozenAt,
@@ -657,7 +713,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           line: def.line,
           accuracy: def.accuracy,
           quote,
-          status: 'NO_EVALUABLE_INSUFFICIENT_HISTORY',
+          status: 'NO_EVALUABLE',
           blocker: 'MINIMUM_10_PRIOR_GAMES_NOT_MET',
           marketSnapshot: { observedLines: observedLines(quotes, gamePk, def.market, name) },
           frozenAt,
@@ -715,40 +771,106 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     }))
   }
 
-  for (const def of PENDING_DEFS) {
-    const defQuotes = quotes.filter((quote) => quote.market === def.market)
-    const identities = new Map<string, { gamePk: number; name: string }>()
-    for (const quote of defQuotes) {
-      const gamePk = quoteGamePk(quote)
-      const name = quotePlayer(quote)
-      if (gamePk !== null && name) identities.set(String(gamePk) + ':' + normalizePerson(name), { gamePk, name })
+  const unresolvedFiveMarketByKey = new Map<string, {
+    gamePk: number
+    market: ApprovedFiveMarket
+    playerName: string
+  }>()
+  const fiveTargetsByKey = new Map<string, ApprovedModelTarget>()
+
+  for (const quote of quotes) {
+    if (!FIVE_MARKETS.has(quote.market as ApprovedFiveMarket)) continue
+    const market = quote.market as ApprovedFiveMarket
+    const gamePk = quoteGamePk(quote)
+    const playerId = quotePlayerId(quote)
+    const playerName = quoteCanonicalPlayerName(quote) || quotePlayer(quote)
+    if (gamePk === null || !playerName) continue
+    if (playerId === null) {
+      unresolvedFiveMarketByKey.set(market + ':' + gamePk + ':' + normalizePerson(playerName), { gamePk, market, playerName })
+      continue
     }
-    for (const identity of identities.values()) {
-      const game = gameByPk.get(identity.gamePk)
-      if (!game) continue
-      let playerId: number | null = null
-      if (def.playerType === 'pitcher') {
-        playerId = probablePitchers(game).find((pitcher) => normalizePerson(pitcher.name) === normalizePerson(identity.name))?.id ?? null
-      } else {
-        const matches = playerMap.get(normalizePerson(identity.name)) ?? []
-        playerId = matches.length === 1 ? matches[0].id : null
-      }
-      const quote = bestQuote({
-        quotes, gamePk: identity.gamePk, market: def.market, playerName: identity.name,
-        direction: def.direction, line: def.line,
-      })
-      rows.push(ledgerRow({
-        date: targetDate, game, market: def.market, candidateId: def.candidateId,
-        playerId, playerName: identity.name, direction: def.direction, line: def.line,
-        accuracy: def.accuracy, quote,
-        status: playerId === null ? 'NO_EVALUABLE_IDENTITY_UNRESOLVED' : 'NO_EVALUABLE_EXACT_RUNTIME_PENDING',
-        blocker: playerId === null
-          ? 'EXACT_MLBAM_NAME_MATCH_NOT_UNIQUE'
-          : 'FROZEN_RAW_FEATURE_OR_ELIGIBILITY_CONTRACT_NOT_YET_SERIALIZED_FOR_DAILY_RUNTIME',
-        marketSnapshot: { observedLines: observedLines(quotes, identity.gamePk, def.market, identity.name) },
-        frozenAt,
-      }))
-    }
+    fiveTargetsByKey.set(
+      market + ':' + gamePk + ':' + playerId,
+      { gamePk, market, playerId, playerName },
+    )
+  }
+
+  for (const unresolved of unresolvedFiveMarketByKey.values()) {
+    const game = gameByPk.get(unresolved.gamePk)
+    if (!game) continue
+    const def = FIVE_MARKET_DEFS[unresolved.market]
+    rows.push(ledgerRow({
+      date: targetDate,
+      game,
+      market: unresolved.market,
+      candidateId: def.candidateId,
+      playerId: null,
+      playerName: unresolved.playerName,
+      direction: def.direction,
+      line: def.line,
+      accuracy: def.accuracy,
+      status: 'NO_EVALUABLE',
+      blocker: 'EXACT_MLBAM_IDENTITY_NOT_PERSISTED_IN_PREGAME_SNAPSHOT',
+      marketSnapshot: {
+        observedLines: observedLines(quotes, unresolved.gamePk, unresolved.market, unresolved.playerName),
+        fuzzyMatchingUsed: false,
+      },
+      frozenAt,
+    }))
+  }
+
+  const fiveTargets = [...fiveTargetsByKey.values()]
+  const fiveEvaluations = await evaluateApprovedFiveMarketModels({ targetDate, targets: fiveTargets })
+  for (const evaluation of fiveEvaluations) {
+    const game = gameByPk.get(evaluation.gamePk)
+    if (!game) continue
+    const def = FIVE_MARKET_DEFS[evaluation.market]
+    const quote = bestQuote({
+      quotes,
+      gamePk: evaluation.gamePk,
+      market: evaluation.market,
+      playerName: evaluation.playerName,
+      playerId: evaluation.playerId,
+      direction: def.direction,
+      line: def.line,
+    })
+
+    const status = !evaluation.parityCertified
+      ? 'RUNTIME_PARITY_NOT_CERTIFIED'
+      : !evaluation.evaluable
+        ? 'NO_EVALUABLE'
+        : statusFor(Boolean(evaluation.qualifies), Boolean(quote))
+
+    rows.push(ledgerRow({
+      date: targetDate,
+      game,
+      market: evaluation.market,
+      candidateId: def.candidateId,
+      playerId: evaluation.playerId,
+      playerName: evaluation.playerName,
+      direction: def.direction,
+      line: def.line,
+      accuracy: def.accuracy,
+      projection: evaluation.projection,
+      probability: evaluation.probability,
+      qualifies: evaluation.qualifies,
+      quote,
+      status,
+      blocker: evaluation.blocker,
+      featureSnapshot: evaluation.featureSnapshot,
+      marketSnapshot: {
+        observedLines: observedLines(
+          quotes,
+          evaluation.gamePk,
+          evaluation.market,
+          evaluation.playerName,
+          evaluation.playerId,
+        ),
+        exactMlbamIdentity: true,
+        fuzzyMatchingUsed: false,
+      },
+      frozenAt,
+    }))
   }
 
   if (rows.length) {
@@ -805,8 +927,13 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         'batter_strikeouts',
         'batter_walks',
         'pitcher_record_a_win',
+        'pitcher_earned_runs',
+        'pitcher_hits_allowed',
+        'batter_singles',
+        'batter_doubles',
+        'batter_triples',
       ],
-      exactRuntimePending: PENDING_DEFS.map((item) => item.market),
+      exactRuntimePending: [],
     },
     updated_at: completedAt,
   })
@@ -844,7 +971,7 @@ export async function getMlbApprovedPropsDailyBoard(targetDate: string) {
     verifiedQualifiers: rows.filter((row) => row.status === 'QUALIFIES_MARKET_VERIFIED'),
     modelQualifiersMarketUnverified: rows.filter((row) => row.status === 'MODEL_QUALIFIES_MARKET_NOT_VERIFIED'),
     noPlay: rows.filter((row) => row.status === 'NO_PLAY'),
-    notEvaluable: rows.filter((row) => String(row.status).startsWith('NO_EVALUABLE_')),
+    notEvaluable: rows.filter((row) => row.status === 'NO_EVALUABLE' || row.status === 'RUNTIME_PARITY_NOT_CERTIFIED'),
     all: rows,
   }
 }

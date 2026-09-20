@@ -237,6 +237,27 @@ async function loadProviderEventIds(eventIds: string[]) {
   return map
 }
 
+async function loadPlayerDirectory() {
+  const result = await supabaseAdmin
+    .from('pick2_mlb_players')
+    .select('mlbam_person_id,full_name')
+    .order('mlbam_person_id', { ascending: true })
+    .limit(5000)
+  if (result.error) throw new Error('MLB_APPROVED_PROP_PLAYER_DIRECTORY_READ_FAILED:' + result.error.message)
+
+  const map = new Map<string, Array<{ id: number; name: string }>>()
+  for (const row of result.data ?? []) {
+    const id = Number(row.mlbam_person_id)
+    const name = String(row.full_name ?? '').trim()
+    const key = normalizePerson(name)
+    if (!Number.isSafeInteger(id) || id <= 0 || !name || !key) continue
+    const bucket = map.get(key) ?? []
+    bucket.push({ id, name })
+    map.set(key, bucket)
+  }
+  return map
+}
+
 async function existingCheckpoint(targetDate: string, checkpoint: string) {
   const range = puertoRicoUtcRange(targetDate)
   const result = await supabaseAdmin
@@ -263,6 +284,7 @@ function normalizeRows(input: {
   providerEvent: ProviderEvent
   providerEventId: string
   acquiredAt: string
+  playerDirectory: Map<string, Array<{ id: number; name: string }>>
 }) {
   const rows: Array<Record<string, unknown>> = []
   const startMs = Date.parse(input.event.start_time)
@@ -283,7 +305,15 @@ function normalizeRows(input: {
         const line = outcome.point === undefined || outcome.point === null ? null : Number(outcome.point)
         if (!playerName || !['over', 'under', 'yes', 'no'].includes(selection) || !Number.isFinite(price) || price === 0) continue
         if (line !== null && !Number.isFinite(line)) continue
-        const pitcher = pitcherByName.get(normalizePerson(playerName)) ?? null
+        const playerKey = normalizePerson(playerName)
+        const pitcher = pitcherByName.get(playerKey) ?? null
+        const playerMatches = input.playerDirectory.get(playerKey) ?? []
+        const exactPlayer = pitcher ?? (playerMatches.length === 1 ? playerMatches[0] : null)
+        const identityMatchMethod = pitcher
+          ? 'MLB_PROBABLE_PITCHER_EXACT_NORMALIZED_NAME'
+          : playerMatches.length === 1
+            ? 'PICK2_MLB_PLAYER_UNIQUE_EXACT_NORMALIZED_NAME'
+            : 'UNRESOLVED_EXACT_IDENTITY'
         rows.push({
           id: 'mlbprop_' + hash([
             input.event.id, sportsbook, providerMarket, playerName, selection, line, snapshotTime,
@@ -315,6 +345,11 @@ function normalizeRows(input: {
             providerMarketKey: providerMarket,
             alternateMarket: providerMarket.endsWith('_alternate'),
             providerPlayerName: playerName,
+            playerMlbamId: exactPlayer?.id ?? null,
+            canonicalPlayerName: exactPlayer?.name ?? null,
+            identityMatchMethod,
+            identityMatchCount: pitcher ? 1 : playerMatches.length,
+            fuzzyMatchingUsed: false,
             pitcherMlbamId: pitcher?.id ?? null,
             pitcherName: pitcher?.name ?? null,
             targetStart: input.event.start_time,
@@ -360,7 +395,11 @@ export async function captureMlbApprovedPropMarkets(input: {
     return { ...base, status: 'REUSE_NO_OP', checkpoint, jobId: existing.id, completedAt: existing.completed_at }
   }
 
-  const [events, slate] = await Promise.all([loadEvents(targetDate, now), officialSlate(targetDate)])
+  const [events, slate, playerDirectory] = await Promise.all([
+    loadEvents(targetDate, now),
+    officialSlate(targetDate),
+    loadPlayerDirectory(),
+  ])
   if (!events.length) return { ...base, status: 'NO_PREGAME_EVENTS', checkpoint }
   const providerIds = await loadProviderEventIds(events.map((event) => event.id))
   const planned = events.flatMap((event) => {
@@ -391,6 +430,7 @@ export async function captureMlbApprovedPropMarkets(input: {
         providerEvent: payload,
         providerEventId: item.providerEventId,
         acquiredAt: new Date().toISOString(),
+        playerDirectory,
       }) : []
       rows.push(...normalized)
       call = {
