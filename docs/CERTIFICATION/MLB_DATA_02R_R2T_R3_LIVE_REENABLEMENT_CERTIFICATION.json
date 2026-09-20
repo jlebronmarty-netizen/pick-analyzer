@@ -261,7 +261,7 @@
     "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
     "scripts/mlb-data-02r-r2t-production-bindings.mjs": "8a45528d089aa45cf3647686165ebba7f496eb0b000f786ea6078724c56f5ce2",
     "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
-    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "42cef6d4f6a3f321a94e26f398be6427a5dd77e91c765d4bd142980f7d0f80ae",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "d9a1b064c59e04f25b0ea067dbe633412c31281d4aefcfd8351e32243e0b9859",
     "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
     "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "40ff74968c54ab07d99d1e5145eeeb71a9b8c8b275d9d2f902508e89f8030ef2",
     "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
@@ -504,6 +504,17 @@
     },
     "modelChanges": 0,
     "thresholdChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "teamDependencyReadRevalidation": {
+    "at": "2026-09-20T20:47:00Z",
+    "scope": "QUERY_SHAPE_ONLY",
+    "priorSemantics": "home_team_id IN teamIds OR away_team_id IN teamIds",
+    "newSemantics": "union(home_team_id IN teamIds, away_team_id IN teamIds) deduped by game_pk",
+    "dependencyUniverseChanges": 0,
+    "featureMathChanges": 0,
+    "modelChanges": 0,
     "officialPicksChanges": 0,
     "apostarChanges": 0
   }
