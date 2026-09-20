@@ -40,6 +40,17 @@ export async function captureMlbMoneylinePregameStarterEvidence(targetDate: stri
 export async function materializeMlbMoneylineResearchDaily(targetDate: string) {
   assertDate(targetDate)
 
+  // The canonical xyear feature materializer depends on the target date's
+  // completed-game base/history layer. Refresh that layer first from already
+  // ingested final Statcast rows; the target game's postgame data is stored only
+  // as future history and is never consumed as same-game pregame input.
+  const { data: baseData, error: baseError } = await supabaseAdmin.rpc(
+    'mlb_ml_xyear_refresh_base_v2',
+    { p_target_date: targetDate },
+  )
+
+  if (baseError) throw new Error(`MLB_ML_XYEAR_BASE_V2_FAILED:${baseError.message}`)
+
   const { data, error } = await supabaseAdmin.rpc(
     'mlb_ml_xyear_materialize_pregame_v4',
     { p_target_date: targetDate },
@@ -47,6 +58,7 @@ export async function materializeMlbMoneylineResearchDaily(targetDate: string) {
 
   if (error) throw new Error(`MLB_ML_XYEAR_MATERIALIZER_V4_FAILED:${error.message}`)
 
+  const baseResult = objectResult(baseData)
   const result = objectResult(data)
   return {
     success: result.syncStatus === 'COMPLETE',
@@ -58,6 +70,7 @@ export async function materializeMlbMoneylineResearchDaily(targetDate: string) {
     apostarActivated: false,
     modelRetuned: false,
     providerCallsMade: 0,
+    baseRefresh: baseResult,
     ...result,
   }
 }
