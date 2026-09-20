@@ -91,9 +91,6 @@ function n(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-function mean(values: number[]) {
-  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null
-}
 
 function hash(parts: unknown[]) {
   return createHash('sha256').update(parts.map((part) => String(part ?? 'null')).join('|')).digest('hex').slice(0, 30)
@@ -289,23 +286,6 @@ async function loadQuotes(targetDate: string): Promise<Quote[]> {
   return rows.filter((row) => asRecord(row.metadata).source === CAPTURE_SOURCE)
 }
 
-async function loadPlayers() {
-  const rows = await pagedRead<{ mlbam_person_id: number; full_name: string }>(
-    'pick2_mlb_players',
-    'mlbam_person_id,full_name',
-    (query) => query.order('mlbam_person_id', { ascending: true }),
-  )
-  const map = new Map<string, Array<{ id: number; name: string }>>()
-  for (const row of rows) {
-    const key = normalizePerson(String(row.full_name))
-    if (!key) continue
-    const bucket = map.get(key) ?? []
-    bucket.push({ id: Number(row.mlbam_person_id), name: String(row.full_name) })
-    map.set(key, bucket)
-  }
-  return map
-}
-
 async function loadPitcherFeatures(targetDate: string) {
   const result = await supabaseAdmin
     .from('pick2_mlb_pitcher_daily_features')
@@ -315,89 +295,6 @@ async function loadPitcherFeatures(targetDate: string) {
     .order('target_game_pk', { ascending: true })
   if (result.error) throw new Error('MLB_APPROVED_PROP_PITCHER_FEATURE_READ_FAILED:' + result.error.message)
   return (result.data ?? []) as PitcherFeature[]
-}
-
-async function pitcherOutsResiduals() {
-  const rows = await pagedRead<any>(
-    'mlb_pitcher_prop_backtest_2025_v1_enriched',
-    'fixed_split,target_outs,prior_outs_l5,prior_outs_all,previous_pitch_count,prior_pitch_count_all',
-    (query) => query.eq('fixed_split', 'TRAIN'),
-  )
-  return rows.flatMap((row) => {
-    const actual = n(row.target_outs)
-    const l5 = n(row.prior_outs_l5)
-    const all = n(row.prior_outs_all)
-    const previous = n(row.previous_pitch_count)
-    const pitchAll = n(row.prior_pitch_count_all)
-    if (actual === null || l5 === null || all === null || previous === null || pitchAll === null || pitchAll <= 0) return []
-    const raw = 0.7 * (0.2 * l5 + 0.8 * all) + 0.3 * (previous * (all / pitchAll))
-    const predicted = 7.2635858445929635 + 0.547385023095297 * raw
-    return [actual - predicted]
-  }).sort((a, b) => a - b)
-}
-
-function residualAboveProbability(sorted: number[], threshold: number) {
-  let low = 0
-  let high = sorted.length
-  while (low < high) {
-    const mid = Math.floor((low + high) / 2)
-    if (sorted[mid] <= threshold) low = mid + 1
-    else high = mid
-  }
-  return sorted.length ? (sorted.length - low) / sorted.length : 0
-}
-
-async function loadSportsDataStarters() {
-  return pagedRead<any>(
-    'sport_player_stats',
-    'player_name,stats',
-    (query) => query
-      .eq('sport_key', 'baseball_mlb')
-      .eq('league_key', 'mlb')
-      .eq('season', '2026')
-      .eq('stat_type', 'game')
-      .eq('provider', 'sportsdataio')
-      .eq('stats->>Started', '1')
-      .gt('stats->>PitchesThrown', 0)
-      .order('source_timestamp', { ascending: true }),
-  )
-}
-
-function pitcherOutsProjection(input: {
-  pitcherName: string
-  previousPitchCount: number
-  targetDate: string
-  starters: any[]
-  residuals: number[]
-}) {
-  const key = normalizePerson(input.pitcherName)
-  const history = input.starters.flatMap((row) => {
-    if (normalizePerson(String(row.player_name ?? '')) !== key) return []
-    const stats = asRecord(row.stats)
-    const date = String(stats.Day ?? '').slice(0, 10)
-    const outs = n(stats.TotalOutsPitched)
-    const pitches = n(stats.PitchesThrown)
-    if (!date || date >= input.targetDate || outs === null || pitches === null || pitches <= 0) return []
-    return [{ date, outs, pitches }]
-  }).sort((a, b) => a.date.localeCompare(b.date))
-  if (!history.length) return null
-  const priorOutsAll = mean(history.map((row) => row.outs))
-  const priorOutsL5 = mean(history.slice(-5).map((row) => row.outs))
-  const priorPitchCountAll = mean(history.map((row) => row.pitches))
-  if (priorOutsAll === null || priorOutsL5 === null || priorPitchCountAll === null || priorPitchCountAll <= 0) return null
-  const raw = 0.7 * (0.2 * priorOutsL5 + 0.8 * priorOutsAll)
-    + 0.3 * (input.previousPitchCount * (priorOutsAll / priorPitchCountAll))
-  const predicted = 7.2635858445929635 + 0.547385023095297 * raw
-  const pOver = residualAboveProbability(input.residuals, 18.5 - predicted)
-  return {
-    predicted,
-    pUnder: 1 - pOver,
-    priorStarts: history.length,
-    priorOutsAll,
-    priorOutsL5,
-    priorPitchCountAll,
-    latestPriorDate: history[history.length - 1].date,
-  }
 }
 
 async function loadBatterHits(ids: number[], targetDate: string) {
