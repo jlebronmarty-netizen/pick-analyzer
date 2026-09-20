@@ -62,15 +62,27 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
 
   if(!hostDry && pending.length===1) {
     const failed=pending[0]
+    const stages=Array.isArray(failed.dml_accounting?.stages)?failed.dml_accounting.stages:[]
+    const nativeStage=stages.length===1?stages[0]:null
+    const nativeUpdatesOnly=Boolean(
+      nativeStage &&
+      nativeStage.target==='pick2_mlb_games' &&
+      nativeStage.inserted===0 &&
+      nativeStage.updated>0 &&
+      nativeStage.updated+nativeStage.reused===nativeStage.planned &&
+      nativeStage.readback==='PASS' &&
+      nativeStage.conflicts===0
+    )
     const safeDependencyFailure=
       failed.status==='FAILED' &&
       failed.checkpoint?.stage==='DEPENDENCY_SCOPE' &&
       failed.checkpoint?.failure?.stage==='DEPENDENCY_SCOPE' &&
       Array.isArray(failed.checkpoint?.completed) &&
       failed.checkpoint.completed.includes('DEPENDENCY_SCOPE') &&
-      Array.isArray(failed.dml_accounting?.stages) &&
-      failed.dml_accounting.stages.length===0 &&
-      Number(failed.odds_calls)===0
+      Number(failed.mlb_official_calls)===1 &&
+      Number(failed.statcast_calls)===0 &&
+      Number(failed.odds_calls)===0 &&
+      (stages.length===0 || nativeUpdatesOnly)
     if(safeDependencyFailure) {
       const expectedDigest=sha256({
         runId:failed.run_id,
