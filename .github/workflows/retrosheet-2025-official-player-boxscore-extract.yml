@@ -1,0 +1,62 @@
+name: Retrosheet 2025 official player boxscore extract
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/retrosheet-2025-official-player-boxscore-extract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download official Retrosheet 2025 CSV archive
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --retry-delay 2 \
+            https://www.retrosheet.org/downloads/2025/2025csvs.zip \
+            --output retrosheet-2025.zip
+          sha256sum retrosheet-2025.zip | tee archive.sha256
+          unzip -l retrosheet-2025.zip | tee archive-list.txt
+
+      - name: Extract official per-player batting and pitching files
+        run: |
+          set -euo pipefail
+          unzip -j retrosheet-2025.zip '2025batting.csv' '2025pitching.csv' -d extracted
+          python - <<'PY'
+          import csv, json, pathlib
+          out = {}
+          for name in ('2025batting.csv','2025pitching.csv'):
+              p = pathlib.Path('extracted')/name
+              with p.open(newline='', encoding='utf-8-sig') as f:
+                  r = csv.DictReader(f)
+                  rows = list(r)
+              value = [x for x in rows if (x.get('stattype') or '').lower() == 'value']
+              out[name] = {
+                  'columns': r.fieldnames,
+                  'rows': len(rows),
+                  'value_rows': len(value),
+                  'games': len({x.get('gid') for x in value if x.get('gid')}),
+                  'players': len({x.get('id') for x in value if x.get('id')}),
+              }
+              with (pathlib.Path('extracted')/name.replace('.csv','_value.csv')).open('w',newline='',encoding='utf-8') as g:
+                  w=csv.DictWriter(g,fieldnames=r.fieldnames)
+                  w.writeheader(); w.writerows(value)
+          pathlib.Path('extracted/manifest.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+
+      - name: Upload research artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrosheet-2025-official-player-boxscore
+          path: |
+            archive.sha256
+            archive-list.txt
+            extracted/manifest.json
+            extracted/2025batting_value.csv
+            extracted/2025pitching_value.csv
+          retention-days: 3
