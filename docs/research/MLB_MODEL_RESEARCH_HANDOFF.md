@@ -73,6 +73,15 @@ Do not retune Pitcher Outs to make the fingerprints match. Reconcile the input l
 
 All market verification remains exact MLBAM + exact line + sportsbook + price + pregame timestamp. No fuzzy matching. Official Picks unchanged; APOSTAR disabled; no historical Odds API credits used.
 
+Deployment closeout:
+- PR #115 merged to `main` at `dbfec611b99d887b4f3d6fce0c6cce160c397bcb`;
+- Vercel production deployment `dpl_8h1nhDr4ciTt1penocPrX5Vkmbfs` is READY;
+- Pitcher Walks, Batter Hits, Batter Total Bases, Batter Home Runs, Batter Strikeouts and Batter Walks are now `DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE`;
+- they must not be relabeled READY until a future strictly-pregame `MLB_APPROVED_PROP_MARKET_CAPTURE_V1` snapshot and daily evaluator crossing are persisted;
+- Pitcher Outs remains `RUNTIME_PARITY_NOT_CERTIFIED`;
+- do not retroconstruct a 2026-09-19 market snapshot.
+
+
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
 Forward runtime candidate:
