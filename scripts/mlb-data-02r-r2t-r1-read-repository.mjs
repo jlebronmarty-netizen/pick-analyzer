@@ -79,13 +79,18 @@ export function createPregameReadRepository(db) {
         // raw rows that the certified builder would reject on identity.
         // This does not change the dependency universe or feature math; it
         // avoids transferring ~90k pitches only to discover the same veto.
-        for (let start = 0; start < ids.length; start += 100) {
-          const scope = ids.slice(start, start + 100)
-          const bad = await read(db.from(RAW).select('id,game_pk')
-            .in('game_pk', scope)
+        for (let start = 0; start < ids.length; start += RAW_READ_CONCURRENCY) {
+          const scope = ids.slice(start, start + RAW_READ_CONCURRENCY)
+          const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW).select('id,game_pk')
+            .eq('game_pk', gamePk)
             .or('canonical_home_team_id.is.null,canonical_away_team_id.is.null,mlbam_pitcher_id.is.null,mlbam_batter_id.is.null,raw_payload_digest.is.null')
-            .limit(1), 'raw_identity_preflight')
-          requireRead(bad.data.length === 0, 'RAW_IDENTITY_PREFLIGHT')
+            .limit(1), 'raw_identity_preflight')))
+          // A database read error is not evidence of invalid identity and must
+          // remain a hard dependency-read failure. Only a successful read that
+          // returns an invalid row is eligible for the target-local RAW_IDENTITY veto.
+          const readError = results.find((result) => result.status === 'rejected')
+          if (readError) throw readError.reason
+          requireRead(results.every((result) => result.value.data.length === 0), 'RAW_IDENTITY_PREFLIGHT')
         }
       }
 
