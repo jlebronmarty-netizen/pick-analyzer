@@ -7,6 +7,33 @@ Target benchmark: **>= 75% predictive accuracy on a sufficiently stable selectiv
 Official Picks: unchanged  
 APOSTAR: disabled
 
+## 2026-09-19 Five frozen prop markets — daily pregame runtime certification
+
+State: `FIVE_MARKET_DAILY_RUNTIME_READY_RESEARCH_ONLY`.
+
+The five frozen markets below now have exact runtime parity, strict-pregame inputs, prospective current-market capture, exact MLBAM identity, and daily model+market classification through the existing MLB Statcast cron. This operational READY state does **not** promote any model to Official Picks or APOSTAR.
+
+| Mercado | Fórmula | Accuracy | Runtime exacto | Market capture | Daily evaluator | Estado final |
+|---|---|---:|---|---|---|---|
+| Pitcher Earned Runs | `pitcher_er_over_1p5_p70_v1`: OVER 1.5 when empirical TRAIN-residual P(OVER) >=70% | **80.22%** (73/91, 2025 VALIDATION+TEST; 2026 event accuracy unopened) | **YES — parity certified** | **YES — current main+alternate, exact line/price/timestamp** | **YES** | **READY / research-only** |
+| Pitcher Hits Allowed | `pitcher_hits_allowed_under_6p5_proj_5p0_v1`: UNDER 6.5 when projection <=5.0 | **78.96%** (968/1,226 2026 one-shot) | **YES — parity certified** | **YES — current main+alternate, exact line/price/timestamp** | **YES** | **READY / research-only** |
+| Batter Singles | `batter_singles_under_1p5_proj_0p50_v1`: UNDER 1.5 when projection <=0.50 | **93.08%** (12,690/13,634 2026 one-shot) | **YES — parity certified** | **YES — current main+alternate, exact line/price/timestamp** | **YES** | **READY / research-only** |
+| Batter Doubles | `batter_doubles_under_0p5_proj_0p16_v1`: UNDER 0.5 when projection <=0.16 | **86.93%** (17,632/20,282 2026 one-shot) | **YES — parity certified** | **YES — current main+alternate, exact line/price/timestamp** | **YES** | **READY / research-only** |
+| Batter Triples | `batter_triples_under_0p5_proj_0p015_v1`: UNDER 0.5 when projection <=0.015 | **98.82%** (29,689/30,045 2026 one-shot) | **YES — parity certified** | **YES — current main+alternate, exact line/price/timestamp** | **YES** | **READY / LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED** |
+
+Runtime parity evidence:
+
+- Pitcher ER: 3,568 modeled rows; TRAIN/VAL/TEST 2,194/729/645; all four R2 coefficients exact; TEST MAE/RMSE exact; 47/59 validation and 26/32 test selections exact.
+- Pitcher Hits Allowed: 2025 refit n=3,099 and both coefficients exact; 2026 2,568 eligible → 1,226 selected → 968 correct exact.
+- Singles/Doubles/Triples: 2025 refit n=42,601 and all six coefficients exact; all published 2026 eligible/selected/correct counts reproduced exactly.
+- Batter history enforces `source_game_date < target_game_date`; no same-date Game 1 → Game 2 leakage.
+- Market verification requires persisted MLBAM ID + canonical gamePk + exact frozen line + direction + sportsbook + price + provider timestamp, all strictly before first pitch.
+- Fuzzy matching is disabled for these five markets.
+- Daily classification is exactly one of `QUALIFIES_MARKET_VERIFIED`, `MODEL_QUALIFIES_MARKET_NOT_VERIFIED`, `NO_PLAY`, `NO_EVALUABLE`, or `RUNTIME_PARITY_NOT_CERTIFIED`.
+- Historical Odds API credits consumed for this runtime certification: **0**.
+
+Canonical runtime detail: `docs/research/MLB_APPROVED_PROPS_DAILY_RUNTIME_V1.md`.
+
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
 Forward runtime candidate:
