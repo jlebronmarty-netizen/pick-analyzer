@@ -6,6 +6,8 @@ const columns = ['id', 'game_pk', 'game_date', 'game_year', 'canonical_home_team
   'description', 'type', 'release_speed', 'launch_speed', 'estimated_woba_using_speedangle', 'post_home_score',
   'post_away_score', 'raw_payload_digest', 'ingested_at', 'created_at'].join(',')
 const requireRead = (condition, code) => { if (!condition) throw new Error(`R2TR1_READ_BLOCK:${code}`) }
+const RAW_READ_CONCURRENCY = 48
+const INVENTORY_SENTINEL_BATCH = 150
 
 export function createPregameReadRepository(db) {
   const read = async (query, label) => {
@@ -52,23 +54,43 @@ export function createPregameReadRepository(db) {
       const rows = []
       const counts = []
       const missingGamePks = []
-      for (let start = 0; start < ids.length; start += 8) {
-        const scope = ids.slice(start, start + 8)
-        const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW)
-          .select(inventoryOnly ? 'id' : columns, { count: 'exact', ...(inventoryOnly ? {head:true} : {}) }).eq('game_pk', gamePk).limit(1000), 'scoped_raw_history')))
-        // Inspect every settled result, including errors, before continuing.
-        const errors = results.filter((result) => result.status === 'rejected')
-        requireRead(errors.length === 0, `RAW_GAME_READ:${errors.map((result) => result.reason.message).join('|')}`)
-        for (const [index, result] of results.entries()) {
-          const page = result.value
-          if (inventoryMissing && page.count === 0 && (inventoryOnly || page.data.length === 0)) {
-            missingGamePks.push(scope[index])
-            continue
+
+      if (inventoryOnly) {
+        // Every canonical 2026 raw game has exactly one first-PA/first-pitch
+        // sentinel. Inventory needs presence only, not a full exact pitch count.
+        // This preserves missing-game semantics while collapsing hundreds of
+        // per-game HEAD requests into a few bounded reads.
+        const present = new Set()
+        for (let start = 0; start < ids.length; start += INVENTORY_SENTINEL_BATCH) {
+          const scope = ids.slice(start, start + INVENTORY_SENTINEL_BATCH)
+          const page = await read(db.from(RAW).select('game_pk')
+            .in('game_pk', scope).eq('at_bat_number', 1).eq('pitch_number', 1)
+            .limit(scope.length + 1), 'scoped_raw_inventory')
+          requireRead(page.data.length <= scope.length, 'RAW_INVENTORY_SENTINEL_DUPLICATE')
+          const observed = page.data.map((row) => row.game_pk)
+          requireRead(new Set(observed).size === observed.length && observed.every((gamePk) => scope.includes(gamePk)), 'RAW_INVENTORY_SENTINEL_SCOPE')
+          observed.forEach((gamePk) => present.add(gamePk))
+        }
+        if (inventoryMissing) ids.filter((gamePk) => !present.has(gamePk)).forEach((gamePk) => missingGamePks.push(gamePk))
+      } else {
+        for (let start = 0; start < ids.length; start += RAW_READ_CONCURRENCY) {
+          const scope = ids.slice(start, start + RAW_READ_CONCURRENCY)
+          const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW)
+            .select(columns, { count: 'exact' }).eq('game_pk', gamePk).limit(1000), 'scoped_raw_history')))
+          // Inspect every settled result, including errors, before continuing.
+          const errors = results.filter((result) => result.status === 'rejected')
+          requireRead(errors.length === 0, `RAW_GAME_READ:${errors.map((result) => result.reason.message).join('|')}`)
+          for (const [index, result] of results.entries()) {
+            const page = result.value
+            if (inventoryMissing && page.count === 0 && page.data.length === 0) {
+              missingGamePks.push(scope[index])
+              continue
+            }
+            requireRead(Number.isInteger(page.count) && page.count > 0 && page.count <= 1000, 'RAW_READ_CAP_OR_MISSING_GAME')
+            requireRead(page.data.length === page.count, 'RAW_READ_TRUNCATED')
+            rows.push(...page.data)
+            counts.push({ gamePks: [scope[index]], count: page.count })
           }
-          requireRead(Number.isInteger(page.count) && page.count > 0 && page.count <= 1000, 'RAW_READ_CAP_OR_MISSING_GAME')
-          requireRead(inventoryOnly || page.data.length === page.count, 'RAW_READ_TRUNCATED')
-          if(!inventoryOnly)rows.push(...page.data)
-          counts.push({ gamePks: [scope[index]], count: page.count })
         }
       }
       requireRead(rows.length <= ids.length * 1000, 'TOTAL_RAW_CAP')
