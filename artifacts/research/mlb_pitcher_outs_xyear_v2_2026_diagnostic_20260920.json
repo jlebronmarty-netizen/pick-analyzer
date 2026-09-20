@@ -1,0 +1,65 @@
+{
+  "artifact": "MLB_PITCHER_OUTS_XYEAR_V2_2026_DIAGNOSTIC",
+  "candidateId": "pitcher_outs_under_18p5_blend_15p75_v2",
+  "developmentFreezeCommit": "9a055d9f9d56465bd0f6972207ce36d2139ff6d2",
+  "pristineExternal": false,
+  "reason": "2026 Pitcher Outs outcomes were already seen by earlier research; this read is diagnostic only.",
+  "retunedAfterDiagnostic": false,
+  "diagnostic": {
+    "season": 2026,
+    "eligibleN": 3213,
+    "selectedN": 1423,
+    "coverage": 0.4428882664176782,
+    "correct": 1262,
+    "accuracy": 0.8868587491215741,
+    "eligibleUnder18p5Baseline": 0.8135698723934018,
+    "liftVsEligibleBaseline": 0.07328887672817233,
+    "worstMonthAccuracy": 0.8431372549019608,
+    "monthly": [
+      {
+        "month": "2026-04",
+        "n": 51,
+        "correct": 43,
+        "accuracy": 0.8431372549019608
+      },
+      {
+        "month": "2026-05",
+        "n": 272,
+        "correct": 234,
+        "accuracy": 0.8602941176470589
+      },
+      {
+        "month": "2026-06",
+        "n": 255,
+        "correct": 233,
+        "accuracy": 0.9137254901960784
+      },
+      {
+        "month": "2026-07",
+        "n": 290,
+        "correct": 258,
+        "accuracy": 0.8896551724137931
+      },
+      {
+        "month": "2026-08",
+        "n": 321,
+        "correct": 282,
+        "accuracy": 0.8785046728971962
+      },
+      {
+        "month": "2026-09",
+        "n": 234,
+        "correct": 212,
+        "accuracy": 0.905982905982906
+      }
+    ]
+  },
+  "state": "TARGET_MET_75_PLUS_RESEARCH_FORWARD_VALIDATION_REQUIRED",
+  "boundaries": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "historicalOddsApiCalls": 0
+  }
+}
