@@ -8,6 +8,7 @@ import type { StoredRow } from '@/services/pick2-operational-projection'
 const MAX_SETTLEMENT_GAMES_PER_RUN = 50
 const MAX_OFFICIAL_PICK_ROWS = 1000
 const MIN_GAME_AGE_MS = 90 * 60 * 1000
+const MAX_RUNTIME_MS = 240_000
 
 type GameRow = {
   game_pk: number
@@ -131,12 +132,18 @@ export async function settleMlbOfficialPickBacklog(input: {
     .slice(0, maxGames)
 
   const attempts: Array<Record<string, unknown>> = []
+  const startedAtMs = Date.now()
+  let yieldedForDeadline = false
   let providerCalls = 0
   let resultRowsInserted = 0
   let resultRowsReused = 0
   let gamesSettled = 0
 
   for (const gamePk of pendingGamePks) {
+    if (Date.now() - startedAtMs >= MAX_RUNTIME_MS) {
+      yieldedForDeadline = true
+      break
+    }
     const gamePicks = picks.filter((pick) => Number(pick.game_pk) === gamePk)
     ensure(gamePicks.length > 0 && gamePicks.length <= 100, 'GAME_PICK_CAP')
 
@@ -201,16 +208,21 @@ export async function settleMlbOfficialPickBacklog(input: {
 
   return {
     success: true,
-    status: pendingGamePks.length ? 'SETTLEMENT_BACKLOG_EVALUATED' : 'NO_SETTLEABLE_GAMES_YET',
+    status: yieldedForDeadline
+      ? 'SETTLEMENT_BACKLOG_YIELDED_FOR_DEADLINE'
+      : pendingGamePks.length
+        ? 'SETTLEMENT_BACKLOG_EVALUATED'
+        : 'NO_SETTLEABLE_GAMES_YET',
     pendingPickRows: pendingPicks.length,
     pendingGames: unique(pendingPicks.map((pick) => Number(pick.game_pk))).length,
-    gamesAttempted: pendingGamePks.length,
+    gamesAttempted: attempts.length,
     gamesSettled,
     resultRowsInserted,
     resultRowsReused,
     providerCalls: { MLB_OFFICIAL: providerCalls, sportsbook: 0 },
     providerCreditsConsumed: 0,
     attempts,
+    yieldedForDeadline,
     officialPicksModified: false,
     apostarActivated: false,
     writes: {
