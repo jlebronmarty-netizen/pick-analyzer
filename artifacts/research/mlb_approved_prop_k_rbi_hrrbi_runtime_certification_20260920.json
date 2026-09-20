@@ -1,0 +1,114 @@
+{
+  "artifact": "MLB_APPROVED_PROP_K_RBI_HRRBI_RUNTIME_CERTIFICATION",
+  "createdAt": "2026-09-20",
+  "state": "IMPLEMENTED_PENDING_FIRST_PROSPECTIVE_CAPTURE",
+  "researchOnly": true,
+  "productionEligible": false,
+  "officialPicksModified": false,
+  "apostarActivated": false,
+  "historicalOddsApiCalls": 0,
+  "realLineContract": "MLB_APPROVED_PROP_REAL_LINE_CONTRACT/1.0.0",
+  "permanentRule": "MODEL_QUALIFIES + REAL_LINE_EXISTS + EXACT_IDENTITY + PREGAME_QUOTE",
+  "markets": [
+    {
+      "candidateId": "pitcher_k_under_6p5_proj_4p5_v1",
+      "market": "pitcher_strikeouts",
+      "side": "UNDER",
+      "requiredLine": 6.5,
+      "lineScope": "EXACT_FROZEN_LINE_ONLY",
+      "runtimeSource": "public.mlb_ml_xyear_pitcher_game_v1",
+      "historyRule": "starter=true AND game_date < target_date",
+      "formula": "0.60*(prior_K_per_BF*L5_BF_per_start)+0.40*L5_K_per_start",
+      "modelGate": "projection <= 4.5",
+      "minHistory": 5,
+      "historicalEvidence": {
+        "development2025": {
+          "correct": 1189,
+          "n": 1367,
+          "accuracy": 0.8697878566203365,
+          "worstMonth": 0.8105726872246696
+        },
+        "external2026": {
+          "correct": 1035,
+          "n": 1163,
+          "accuracy": 0.8899398108340498,
+          "worstMonth": 0.7631578947368421
+        }
+      }
+    },
+    {
+      "candidateId": "batter_rbi_under_0p5_proj_0p10_v1",
+      "market": "batter_rbis",
+      "side": "UNDER",
+      "requiredLine": 0.5,
+      "lineScope": "EXACT_FROZEN_LINE_ONLY",
+      "runtimeSource": "MLB Official StatsAPI hitting gameLog",
+      "historyRule": "game_date < target_date",
+      "formula": "0.50*(prior_RBI_per_PA*L10_PA_per_game)+0.50*L10_RBI_per_game",
+      "modelGate": "projection <= 0.10",
+      "minHistory": 10,
+      "historicalEvidence": {
+        "development2025": {
+          "correct": 2053,
+          "n": 2402,
+          "accuracy": 0.8547044129891757,
+          "worstMonth": 0.8225806451612904
+        },
+        "exactMlbOfficial2026": {
+          "correct": 1133,
+          "n": 1367,
+          "accuracy": 0.8288222384784198,
+          "worstMonth": 0.7925764192139738
+        }
+      },
+      "externalNote": "Exact MLB Official reconciliation was performed after an earlier proxy read; no retune followed."
+    },
+    {
+      "candidateId": "batter_hrrbi_under_2p5_proj_0p70_v1",
+      "market": "batter_hits_runs_rbis",
+      "side": "UNDER",
+      "requiredLine": 2.5,
+      "lineScope": "EXACT_FROZEN_LINE_ONLY",
+      "runtimeSource": "MLB Official StatsAPI hitting gameLog",
+      "historyRule": "game_date < target_date",
+      "formula": "proj_hits + proj_runs + proj_rbi, each component=0.50*(prior_event_per_PA*L10_PA_per_game)+0.50*L10_event_per_game",
+      "modelGate": "projection <= 0.70",
+      "minHistory": 10,
+      "historicalEvidence": {
+        "development2025": {
+          "correct": 2278,
+          "n": 2582,
+          "accuracy": 0.8822618125484121,
+          "worstMonth": 0.8524173027989822
+        },
+        "exactMlbOfficial2026": {
+          "correct": 1073,
+          "n": 1255,
+          "accuracy": 0.8549800796812749,
+          "worstMonth": 0.8263888888888888
+        }
+      },
+      "externalNote": "Exact MLB Official reconciliation was performed after an earlier proxy read; no retune followed."
+    }
+  ],
+  "capture": {
+    "provider": "the-odds-api",
+    "addedCurrentMarketKeys": [
+      "pitcher_strikeouts",
+      "batter_rbis",
+      "batter_hits_runs_rbis"
+    ],
+    "alternateMarketsAdded": false,
+    "historicalEndpointsUsed": false,
+    "exactIdentityRule": "unique exact normalized name -> positive MLBAM ID; unresolved identity fails closed",
+    "pregameRule": "provider quote timestamp < target first pitch"
+  },
+  "runtime": {
+    "pitcherKParityContract": "PITCHER_K_XYEAR_RUNTIME_PARITY_V1",
+    "batterParityContract": "MLB_OFFICIAL_BATTER_GAMELOG_RUNTIME_PARITY_V1",
+    "perBatterProviderFailure": "NO_EVALUABLE",
+    "fuzzyMatchingUsed": false,
+    "onlyPlayableStatus": "QUALIFIES_MARKET_VERIFIED"
+  },
+  "nextGate": "First future strictly-pregame exact-line capture + daily evaluator crossing; no retrospective Sep20 board."
+}
