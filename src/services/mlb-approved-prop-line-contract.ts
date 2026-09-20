@@ -39,6 +39,9 @@ const exact = (
 
 export const APPROVED_PROP_LINE_CONTRACTS: Record<string, ApprovedPropLineContract> = Object.freeze({
   pitcher_bb_under_2p5_p85_v1: exact('pitcher_bb_under_2p5_p85_v1', 'pitcher_walks', 'UNDER', 2.5),
+  pitcher_k_under_6p5_proj_4p5_v1: exact('pitcher_k_under_6p5_proj_4p5_v1', 'pitcher_strikeouts', 'UNDER', 6.5),
+  batter_rbi_under_0p5_proj_0p10_v1: exact('batter_rbi_under_0p5_proj_0p10_v1', 'batter_rbis', 'UNDER', 0.5),
+  batter_hrrbi_under_2p5_proj_0p70_v1: exact('batter_hrrbi_under_2p5_proj_0p70_v1', 'batter_hits_runs_rbis', 'UNDER', 2.5),
   pitcher_er_over_1p5_p70_v1: exact('pitcher_er_over_1p5_p70_v1', 'pitcher_earned_runs', 'OVER', 1.5),
   pitcher_hits_allowed_under_6p5_proj_5p0_v1: exact('pitcher_hits_allowed_under_6p5_proj_5p0_v1', 'pitcher_hits_allowed', 'UNDER', 6.5),
   batter_hits_under_1p5_edge_0p75_v1: exact('batter_hits_under_1p5_edge_0p75_v1', 'batter_hits', 'UNDER', 1.5),

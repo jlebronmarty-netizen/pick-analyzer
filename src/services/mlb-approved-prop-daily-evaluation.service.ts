@@ -18,6 +18,12 @@ import {
   APPROVED_PROP_LINE_CONTRACT_VERSION,
   assertApprovedPropLineContract,
 } from '@/services/mlb-approved-prop-line-contract'
+import {
+  evaluateNewApprovedPropModels,
+  newApprovedPropDefinition,
+  type NewApprovedPropMarket,
+  type NewApprovedPropTarget,
+} from '@/services/mlb-approved-new-prop-runtime.service'
 
 const CAPTURE_SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const JOB_TYPE = 'mlb_approved_prop_daily_freeze_v1'
@@ -910,6 +916,119 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     }
   }
 
+  const newRuntimeMarkets = new Set<NewApprovedPropMarket>([
+    'pitcher_strikeouts',
+    'batter_rbis',
+    'batter_hits_runs_rbis',
+  ])
+  const newTargetsByKey = new Map<string, NewApprovedPropTarget>()
+  const unresolvedNewTargets = new Map<string, {
+    gamePk: number
+    market: NewApprovedPropMarket
+    playerName: string
+  }>()
+
+  for (const quoteRow of quotes) {
+    if (!newRuntimeMarkets.has(quoteRow.market as NewApprovedPropMarket)) continue
+    const market = quoteRow.market as NewApprovedPropMarket
+    const gamePk = quoteGamePk(quoteRow)
+    const playerId = quotePlayerId(quoteRow)
+    const playerName = quoteCanonicalPlayerName(quoteRow) || quotePlayer(quoteRow)
+    if (gamePk === null || !playerName) continue
+    if (playerId === null) {
+      unresolvedNewTargets.set(
+        market + ':' + gamePk + ':' + normalizePerson(playerName),
+        { gamePk, market, playerName },
+      )
+      continue
+    }
+    newTargetsByKey.set(
+      market + ':' + gamePk + ':' + playerId,
+      { gamePk, market, playerId, playerName },
+    )
+  }
+
+  for (const unresolved of unresolvedNewTargets.values()) {
+    const game = gameByPk.get(unresolved.gamePk)
+    if (!game) continue
+    const def = newApprovedPropDefinition(unresolved.market)
+    rows.push(ledgerRow({
+      date: targetDate,
+      game,
+      market: unresolved.market,
+      candidateId: def.candidateId,
+      playerId: null,
+      playerName: unresolved.playerName,
+      direction: def.direction,
+      line: def.line,
+      accuracy: def.accuracy,
+      status: 'NO_EVALUABLE_IDENTITY',
+      blocker: 'EXACT_MLBAM_IDENTITY_NOT_PERSISTED_IN_PREGAME_SNAPSHOT',
+      marketSnapshot: {
+        observedLines: observedLines(quotes, unresolved.gamePk, unresolved.market, unresolved.playerName),
+        exactMlbamIdentity: false,
+        fuzzyMatchingUsed: false,
+      },
+      frozenAt,
+    }))
+  }
+
+  const newEvaluations = await evaluateNewApprovedPropModels({
+    targetDate,
+    targets: [...newTargetsByKey.values()],
+  })
+  for (const evaluation of newEvaluations) {
+    const game = gameByPk.get(evaluation.gamePk)
+    if (!game) continue
+    const def = newApprovedPropDefinition(evaluation.market)
+    const newMarketState = marketState({
+      quotes,
+      gamePk: evaluation.gamePk,
+      market: evaluation.market,
+      playerName: evaluation.playerName,
+      playerId: evaluation.playerId,
+      direction: def.direction,
+      line: def.line,
+    })
+    const quote = bestQuote({
+      quotes,
+      gamePk: evaluation.gamePk,
+      market: evaluation.market,
+      playerName: evaluation.playerName,
+      playerId: evaluation.playerId,
+      direction: def.direction,
+      line: def.line,
+    })
+    const status = !evaluation.parityCertified
+      ? 'RUNTIME_PARITY_NOT_CERTIFIED'
+      : !evaluation.evaluable
+        ? 'NO_EVALUABLE'
+        : statusFor(Boolean(evaluation.qualifies), Boolean(quote), newMarketState, def.line)
+
+    rows.push(ledgerRow({
+      date: targetDate,
+      game,
+      market: evaluation.market,
+      candidateId: def.candidateId,
+      playerId: evaluation.playerId,
+      playerName: evaluation.playerName,
+      direction: def.direction,
+      line: def.line,
+      accuracy: def.accuracy,
+      projection: evaluation.projection,
+      qualifies: evaluation.qualifies,
+      quote,
+      status,
+      blocker: evaluation.blocker,
+      featureSnapshot: evaluation.featureSnapshot,
+      marketSnapshot: marketSnapshotFromState(newMarketState, {
+        exactMlbamIdentity: true,
+        fuzzyMatchingUsed: false,
+      }),
+      frozenAt,
+    }))
+  }
+
   const pitcherWin = await supabaseAdmin
     .from('mlb_pitcher_win_forward_tracker_v1')
     .select('game_pk,start_time,starter_mlbam_id,pitcher_name,p_win,selected_no,threshold')
@@ -1107,6 +1226,9 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       marketSummary,
       exactRuntimeEnabled: [
         'pitcher_walks',
+        'pitcher_strikeouts',
+        'batter_rbis',
+        'batter_hits_runs_rbis',
         'batter_hits',
         'batter_total_bases',
         'batter_home_runs',
