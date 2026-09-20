@@ -259,9 +259,9 @@
     "scripts/mlb-data-02r-r2t-market-binding.mjs": "c7a27a932d457552f6c23cb1f72d0dd87683c710188c1cb64275e3bee04772ba",
     "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
     "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
-    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "6333a3fe53d9530f75cb519f22541850f6ef6aa2d337ea1907a6ac581ae799ea",
+    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "8a45528d089aa45cf3647686165ebba7f496eb0b000f786ea6078724c56f5ce2",
     "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
-    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "aa3f9a9538c5f6579121e70900385ac8461dacdecced694e6d2629d8d3fa1a90",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "42cef6d4f6a3f321a94e26f398be6427a5dd77e91c765d4bd142980f7d0f80ae",
     "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
     "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "40ff74968c54ab07d99d1e5145eeeb71a9b8c8b275d9d2f902508e89f8030ef2",
     "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
@@ -484,5 +484,27 @@
     "edgeFunction": "mlb-runtime-state",
     "edgeVersion": 15,
     "sourceInventoryNote": "Edge authority is deployed/certified separately and is intentionally not part of the R3 local runtime sourceHashes inventory."
+  },
+  "rawIdentityTargetVetoRevalidation": {
+    "at": "2026-09-20T19:35:00Z",
+    "scope": "TARGET_LOCAL_RAW_IDENTITY_FAIL_CLOSED",
+    "semantics": "A target whose strict-prior dependency set contains raw identity-invalid rows is vetoed before full transfer; remaining targets continue. Dependency universe and feature math are unchanged.",
+    "observedFutureTargets": {
+      "clean": [
+        825028
+      ],
+      "rawIdentityBlocked": [
+        823247,
+        823975,
+        824789
+      ],
+      "starterBlocked": [
+        823896
+      ]
+    },
+    "modelChanges": 0,
+    "thresholdChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
   }
 }

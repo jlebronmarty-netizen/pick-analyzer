@@ -215,7 +215,16 @@ async function createBindings({ client, repository, store, runContext, authoriza
           throw error
         }
         await reconcileStarters(target, starters)
-        const dependencies = await pregame.readDependencies(target, starters, { inventoryMissing: true })
+        let dependencies
+        try {
+          dependencies = await pregame.readDependencies(target, starters, { inventoryMissing: true })
+        } catch (error) {
+          if (/R2TR1_READ_BLOCK:RAW_IDENTITY_PREFLIGHT/.test(error instanceof Error ? error.message : '')) {
+            blockedGames.push({ gamePk: game.game_pk, reason: 'RAW_IDENTITY' })
+            continue
+          }
+          throw error
+        }
         if (dependencies.missingGamePks.length) {
           await store.freezeDependencyScope?.(dependencies.missingGamePks)
           requireTarget('pick2_raw_mlb_statcast_pitches')

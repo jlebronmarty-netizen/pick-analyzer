@@ -55,6 +55,21 @@ export function createPregameReadRepository(db) {
       const counts = []
       const missingGamePks = []
 
+      if (!inventoryOnly) {
+        // Fail one target early when its historical dependency set contains
+        // raw rows that the certified builder would reject on identity.
+        // This does not change the dependency universe or feature math; it
+        // avoids transferring ~90k pitches only to discover the same veto.
+        for (let start = 0; start < ids.length; start += 100) {
+          const scope = ids.slice(start, start + 100)
+          const bad = await read(db.from(RAW).select('id,game_pk')
+            .in('game_pk', scope)
+            .or('canonical_home_team_id.is.null,canonical_away_team_id.is.null,mlbam_pitcher_id.is.null,mlbam_batter_id.is.null,raw_payload_digest.is.null')
+            .limit(1), 'raw_identity_preflight')
+          requireRead(bad.data.length === 0, 'RAW_IDENTITY_PREFLIGHT')
+        }
+      }
+
       if (inventoryOnly) {
         // Every canonical 2026 raw game has exactly one first-PA/first-pitch
         // sentinel. Inventory needs presence only, not a full exact pitch count.
