@@ -6,6 +6,7 @@ import { refreshMlbStatcastDaily } from '@/services/mlb-statcast-daily-refresh.s
 import { refreshMlbStatcastDailyAnalytics } from '@/services/mlb-statcast-daily-analytics.service'
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
 import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-freeze-runtime.service'
+import { captureMlbMoneylinePregameStarterEvidence, syncMlbMoneylineXyearDaily } from '@/services/mlb-moneyline-xyear-daily-sync.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-home-p15-alt-shadow.service'
 import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
@@ -251,6 +252,40 @@ async function safePitcherWinForwardSettlement(targetDate: string) {
   }
 }
 
+async function safeMoneylinePregameStarterEvidence(targetDate: string) {
+  try {
+    return await captureMlbMoneylinePregameStarterEvidence(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'MLB_ML_PREGAME_STARTER_EVIDENCE_CAPTURE_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown MLB Moneyline pregame starter evidence capture error'),
+    }
+  }
+}
+
+async function safeMoneylineXyearDailySync(targetDate: string) {
+  try {
+    return await syncMlbMoneylineXyearDaily(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'MLB_ML_XYEAR_DAILY_SYNC_FAILED_FAIL_CLOSED',
+      targetDate,
+      researchOnly: true,
+      sameGamePregameUse: false,
+      retroactiveForwardPicks: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown MLB Moneyline xyear daily sync error'),
+    }
+  }
+}
+
 async function safeMoneylineForwardFreeze(historyReadiness: { ready: boolean; targetDate: string }) {
   try {
     return await runMlbMoneylineForwardFreeze({ historyReadiness })
@@ -479,6 +514,12 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       return apiOk({ ...result, dailyHistoryReadiness: readiness }, id, { status, headers: { 'Cache-Control': 'no-store' } })
     }
 
+    const operatingClock = puertoRicoClock()
+
+    // Preserve today's probable-starter identities while they are still pregame.
+    // This is warehouse lineage only and cannot create or modify a recommendation.
+    const moneylinePregameStarterEvidence = await safeMoneylinePregameStarterEvidence(operatingClock.date)
+
     // Reuse this already-scheduled authenticated route for one bounded daily
     // multi-market evidence capture. Core ML/Run Line/Total prices are stored
     // first; then alternate HOME +1.5 is queried only for games whose standard
@@ -489,7 +530,6 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // Independent research-only Pitcher ER V2 freeze/settlement run before
     // Statcast catch-up. This preserves fixed-clock evidence even if a separate
     // ingestion/readiness stage fails later in the request.
-    const operatingClock = puertoRicoClock()
     const pa12ErForwardShadowFreeze = await safePa12ErForwardShadowFreeze()
     const pa12ErForwardShadowSettlement = await safePa12ErForwardShadowSettlement(addDays(operatingClock.date, -1))
 
@@ -550,6 +590,13 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       readiness = await getMlbDailyHistoryReadiness()
     }
 
+    // Once the previous day is certified complete, refresh the xyear postgame
+    // history layer and materialize its leakage-safe PREGAME research snapshot.
+    // A failure here blocks Moneyline only; independent shadow research continues.
+    const moneylineXyearDailySync = readiness.ready && typeof readiness.targetDate === 'string'
+      ? await safeMoneylineXyearDailySync(readiness.targetDate)
+      : null
+
     // Previous-day outcomes are read only after daily history/analytics are ready.
     // This is a separate research settlement stage and cannot affect today's freeze.
     const runlineHomeP15Settlement = readiness.ready && typeof readiness.targetDate === 'string'
@@ -583,12 +630,21 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // Moneyline keeps its existing authorized gate and remains fail-closed.
     // Exceptions are represented as blocked results rather than aborting the
     // entire cron after independent research evidence has already been captured.
-    const moneylineFreeze = readiness.ready
+    const moneylineHistoryReady = readiness.ready && moneylineXyearDailySync?.success !== false
+    const moneylineFreeze = moneylineHistoryReady
       ? await safeMoneylineForwardFreeze({
           ready: readiness.ready,
           targetDate: readiness.targetDate,
         })
-      : null
+      : readiness.ready
+        ? {
+            success: false,
+            status: 'MONEYLINE_XYEAR_HISTORY_NOT_READY_FAIL_CLOSED',
+            writes: 0,
+            officialPickWrites: 0,
+            apostarActive: false,
+          }
+        : null
     const moneylineBlocked = Boolean(moneylineFreeze && moneylineFreeze.success === false)
     const success = readiness.ready && !moneylineBlocked
 
@@ -599,6 +655,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       analyticsRefreshed: Boolean(analyticsRepair),
       analyticsRepair,
       dailyHistoryReadiness: readiness,
+      moneylinePregameStarterEvidence,
+      moneylineXyearDailySync,
       moneylineRecommendationFreeze: moneylineFreeze,
       runlineHomeP15ResearchFreeze: runlineHomeP15Freeze,
       runlineHomeP15ResearchSettlement: runlineHomeP15Settlement,
