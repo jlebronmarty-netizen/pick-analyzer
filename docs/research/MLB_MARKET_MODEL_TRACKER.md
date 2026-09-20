@@ -9,6 +9,66 @@ APOSTAR: disabled
 
 
 
+
+## 2026-09-20 Approved props real-line market board — authoritative
+
+Contract: `MLB_APPROVED_PROP_REAL_LINE_CONTRACT/1.0.0`.
+
+Permanent evaluability rule:
+
+`MODEL_QUALIFIES + REAL_LINE_EXISTS + EXACT_IDENTITY + PREGAME_QUOTE`.
+
+### Certified line scope
+
+All currently certified numeric prop candidates are `EXACT_FROZEN_LINE_ONLY`:
+
+- Pitcher Walks U2.5;
+- Pitcher ER O1.5;
+- Pitcher Hits Allowed U6.5;
+- Batter Hits U1.5;
+- Batter Total Bases U2.5;
+- Batter HR U0.5;
+- Batter K U1.5;
+- Batter Walks U0.5;
+- Batter Singles U1.5;
+- Batter Doubles U0.5;
+- Batter Triples U0.5.
+
+No multi-line extrapolation is authorized.
+
+`pitcher_win_forward_numeric_p015_v1` has no numeric line and requires a real sportsbook NO quote.
+
+Pitcher Outs remains fail-closed:
+`PITCHER_OUTS_INPUT_LINEAGE_NOT_EXACTLY_RECONCILED`.
+
+### Market-board status semantics
+
+- `QUALIFIES_MARKET_VERIFIED`: exact certified side/line quote exists with sportsbook, price, exact identity and strict pregame timestamp;
+- `MODEL_QUALIFIES_MARKET_NOT_AVAILABLE`: model qualifies but no usable required market/side quote exists;
+- `MARKET_AVAILABLE_REQUIRED_LINE_NOT_AVAILABLE`: market exists but the certified line is absent;
+- `NO_EVALUABLE_IDENTITY`: exact MLBAM identity is missing;
+- `NO_EVALUABLE_PREGAME_LINEAGE`: market evidence cannot be certified pregame;
+- `NO_PLAY`: model did not qualify;
+- `RUNTIME_PARITY_NOT_CERTIFIED`: runtime lineage is blocked.
+
+The market board separates:
+model projection, legitimate model probability when one exists, historical certified accuracy, required model line, observed/actual line, sportsbook, price and quote timestamps.
+
+Only `QUALIFIES_MARKET_VERIFIED` is included in `playable`.
+
+### Operational recovery
+
+Sep20 game 824789 successfully crossed PREGAME after the indexed raw identity preflight repair:
+301 dependency games, 90,280 raw pitches, 18 persisted feature rows, readback PASS.
+
+The legacy core inserted one Official Pick during that successful run. Existing data is not rewritten.
+PR #145 disables future Official Pick DML from the research runtime while preserving policy results as shadow evidence.
+Prospective boundary validation: the 22:00Z PREGAME run on package `672b787dafc187ae4cd4d00684881b7dcf3c68c0` completed with `picks=0`, zero DML stages, and Official Picks total unchanged at one pre-existing Sep20 row. Approved props remained `apostar_enabled=false` and `official_picks_eligible=false`.
+
+APOSTAR remains disabled.
+
+Historical raw canonical team identity is now complete: global missing canonical home/away IDs = 0.
+
 ## 2026-09-20 Standard Run Line V2 forward freeze — authoritative
 
 Standard Run Line prospective shadow is now runtime-ready under the existing frozen candidates:
