@@ -11,7 +11,7 @@ const LEAGUE_KEY = 'mlb'
 const JOB_TYPE = 'mlb_approved_prop_market_capture_v1'
 const SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const CREDIT_RESERVE = 2000
-const PAGE_SIZE = 1000
+const PAGE_SIZE = 100
 const WRITE_BATCH_SIZE = 500
 
 const MAIN_MARKETS = [
@@ -388,9 +388,12 @@ export async function captureMlbApprovedPropMarkets(input: {
   }
   if (!apiKey()) return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY' }
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
-  if (clock.hour !== 10) return { ...base, status: 'NOT_DUE' }
+  const recoveryWindow = clock.hour === 11 && clock.minute <= 10
+  if (clock.hour !== 10 && !recoveryWindow) return { ...base, status: 'NOT_DUE' }
 
-  const checkpoint = clock.minute < 30 ? '10:15' : '10:45'
+  // A bounded 11:00-11:10 recovery reuses the 10:45 checkpoint identity,
+  // so a successful normal capture remains a strict REUSE_NO_OP.
+  const checkpoint = clock.hour === 10 && clock.minute < 30 ? '10:15' : '10:45'
   const existing = await existingCheckpoint(targetDate, checkpoint)
   if (existing) {
     return { ...base, status: 'REUSE_NO_OP', checkpoint, jobId: existing.id, completedAt: existing.completed_at }
