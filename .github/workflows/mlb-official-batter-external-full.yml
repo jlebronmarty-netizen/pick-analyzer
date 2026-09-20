@@ -1,0 +1,113 @@
+name: MLB Official full batter external validation
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/mlb-official-batter-external-full.yml'
+      - 'artifacts/research/tmp_mlbam_516.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch MLB Official game logs and evaluate frozen candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,time,urllib.request
+          from concurrent.futures import ThreadPoolExecutor,as_completed
+          from collections import defaultdict
+
+          ids=[int(x) for x in open('artifacts/research/tmp_mlbam_516.txt').read().strip().split(',') if x]
+          START='2026-03-26'; END='2026-07-19'
+          BASE='https://statsapi.mlb.com/api/v1/people/{}/stats?stats=gameLog&group=hitting&season=2026'
+
+          def fetch(pid):
+              last=None
+              for attempt in range(3):
+                  try:
+                      req=urllib.request.Request(BASE.format(pid),headers={'User-Agent':'pick-analyzer-research/1.0'})
+                      with urllib.request.urlopen(req,timeout=20) as r:
+                          d=json.load(r)
+                      rows=[]
+                      for group in d.get('stats') or []:
+                          for s in group.get('splits') or []:
+                              date=str(s.get('date') or '')
+                              if not (START <= date <= END): continue
+                              st=s.get('stat') or {}; game=s.get('game') or {}
+                              if not game.get('gamePk'): continue
+                              rows.append({
+                                  'date':date,'gamePk':int(game['gamePk']),
+                                  'pa':int(st.get('plateAppearances') or 0),
+                                  'hits':int(st.get('hits') or 0),
+                                  'runs':int(st.get('runs') or 0),
+                                  'rbi':int(st.get('rbi') or 0),
+                              })
+                      rows.sort(key=lambda x:(x['date'],x['gamePk']))
+                      return pid,rows,None
+                  except Exception as e:
+                      last=repr(e); time.sleep(.4*(attempt+1))
+              return pid,[],last
+
+          player_rows={}; failures={}
+          with ThreadPoolExecutor(max_workers=4) as ex:
+              futs=[ex.submit(fetch,p) for p in ids]
+              for fut in as_completed(futs):
+                  pid,rows,err=fut.result()
+                  if err: failures[str(pid)]=err
+                  else: player_rows[pid]=rows
+
+          eligible=[]
+          for pid,rows in sorted(player_rows.items()):
+              for i,row in enumerate(rows):
+                  if i<10: continue
+                  prior=rows[:i]; last10=rows[max(0,i-10):i]
+                  pa_sum=sum(x['pa'] for x in prior)
+                  if pa_sum<=0: continue
+                  l10_pa=sum(x['pa'] for x in last10)/len(last10)
+                  proj_h=.5*((sum(x['hits'] for x in prior)/pa_sum)*l10_pa)+.5*(sum(x['hits'] for x in last10)/len(last10))
+                  proj_r=.5*((sum(x['runs'] for x in prior)/pa_sum)*l10_pa)+.5*(sum(x['runs'] for x in last10)/len(last10))
+                  proj_rbi=.5*((sum(x['rbi'] for x in prior)/pa_sum)*l10_pa)+.5*(sum(x['rbi'] for x in last10)/len(last10))
+                  eligible.append({**row,'playerId':pid,'proj_r':proj_r,'proj_rbi':proj_rbi,'proj_hrrbi':proj_h+proj_r+proj_rbi})
+
+          def summarize(rows,ok,baseok):
+              monthly=defaultdict(lambda:[0,0]); c=0
+              for x in rows:
+                  hit=1 if ok(x) else 0; c+=hit; m=x['date'][:7]; monthly[m][0]+=1; monthly[m][1]+=hit
+              months=[{'month':m,'n':n,'correct':cc,'accuracy':cc/n} for m,(n,cc) in sorted(monthly.items())]
+              base=sum(1 for x in eligible if baseok(x))/len(eligible) if eligible else None
+              return {'n':len(rows),'correct':c,'accuracy':c/len(rows) if rows else None,
+                      'coverage':len(rows)/len(eligible) if eligible else None,'eligibleBaseline':base,
+                      'monthly':months,'worstMonthAccuracy':min([x['accuracy'] for x in months],default=None)}
+
+          runs=[x for x in eligible if x['proj_r']<=.14]
+          rbi=[x for x in eligible if x['proj_rbi']<=.10]
+          hrrbi=[x for x in eligible if x['proj_hrrbi']<=.70]
+          out={
+            'status':'PASS' if not failures else 'PARTIAL',
+            'source':'MLB_OFFICIAL_STATSAPI_GAMELOG','window':[START,END],
+            'requestedPlayers':len(ids),'successfulPlayers':len(player_rows),'failedPlayers':len(failures),
+            'failureIds':sorted(failures),'rawGameLogRows':sum(len(v) for v in player_rows.values()),
+            'eligibleRows':len(eligible),'retuned':False,
+            'results':{
+              'runs':summarize(runs,lambda x:x['runs']==0,lambda x:x['runs']==0),
+              'rbi':summarize(rbi,lambda x:x['rbi']==0,lambda x:x['rbi']==0),
+              'hrrbi':summarize(hrrbi,lambda x:(x['hits']+x['runs']+x['rbi'])<2.5,lambda x:(x['hits']+x['runs']+x['rbi'])<2.5),
+            }
+          }
+          json.dump(out,open('mlb-official-batter-external-full-summary.json','w'),indent=2)
+          print(json.dumps(out,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-official-batter-external-full-summary
+          path: mlb-official-batter-external-full-summary.json
+          retention-days: 3
