@@ -70,7 +70,7 @@ assert.equal(MLB_RUNLINE_V2_CORE_THRESHOLD,1.0002553572466371)
 assert.equal(MLB_RUNLINE_V2_TRANSFER_THRESHOLD,0.889684454234473)
 
 const core = evaluateStandardRunlineV2({
-  market:{...proxy,marketPDog:0.56,marketZV2:(0.56-0.57629591863738)/0.0754955595992703,marketEligible:true,dogSide:'HOME'},
+  market:{...proxy,marketPDog:0.56,marketZV2:(Math.log(0.56/0.44)-0.334503755055181)/0.354461459732156,marketEligible:true,dogSide:'HOME'},
   recentFormDog:1.2,
   historyDog:0,
   fatigueTravelDog:1.0,
