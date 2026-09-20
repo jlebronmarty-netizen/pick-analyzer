@@ -73,6 +73,7 @@ type PitcherGame = {
   pitcher: number
   team: string
   opponent: string
+  starter: boolean
   outs: number | null
   batters_faced: number | null
   hits: number | null
@@ -239,8 +240,8 @@ async function loadPitcherGames(targetDate: string, pitcherIds: number[]) {
   if (!pitcherIds.length) return [] as PitcherGame[]
   return readPaged<PitcherGame>(
     'mlb_ml_xyear_pitcher_game_v1',
-    'game_pk,game_date,pitcher,team,opponent,outs,batters_faced,hits,walks,strikeouts,runs,swings,whiffs,batted_balls,hard_hits',
-    (query) => query.eq('season', SEASON).lt('game_date', targetDate).eq('starter', true).in('pitcher', pitcherIds).order('game_date', { ascending: false }).order('game_pk', { ascending: false }),
+    'game_pk,game_date,pitcher,team,opponent,starter,outs,batters_faced,hits,walks,strikeouts,runs,swings,whiffs,batted_balls,hard_hits',
+    (query) => query.eq('season', SEASON).lt('game_date', targetDate).in('pitcher', pitcherIds).order('game_date', { ascending: false }).order('game_pk', { ascending: false }),
   )
 }
 
@@ -273,8 +274,9 @@ function recentFormValues(game: SlateGame, rows: TeamGame[]): FeatureValue[] {
 
 function pitcherSummary(pitcherId: number | null, rows: PitcherGame[]) {
   if (!pitcherId) return null
-  const starts = rows.filter((row) => Number(row.pitcher) === pitcherId)
-  if (!starts.length) return null
+  const appearances = rows.filter((row) => Number(row.pitcher) === pitcherId)
+  if (!appearances.length) return null
+  const starts = appearances.filter((row) => row.starter === true)
   const aggregate = (selected: PitcherGame[]) => {
     const outs = selected.reduce((sum, row) => sum + (n(row.outs) ?? 0), 0)
     const innings = outs / 3
@@ -296,7 +298,10 @@ function pitcherSummary(pitcherId: number | null, rows: PitcherGame[]) {
       hardHitPct: ratio(hardHits, battedBalls),
     }
   }
-  const season = aggregate(starts)
+  // Frozen historical contract:
+  // - cumulative starter component metrics use ALL strict-prior pitcher appearances;
+  // - L5 RA9/WHIP use the last five strict-prior STARTS only.
+  const season = aggregate(appearances)
   const l5 = aggregate(starts.slice(0, 5))
   return { starts: starts.length, season, l5 }
 }
