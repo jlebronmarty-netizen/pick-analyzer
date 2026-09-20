@@ -1,0 +1,129 @@
+name: BALLDONTLIE MLB GOAT research probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/balldontlie-mlb-goat-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BALLDONTLIE_API_KEY: ${{ secrets.BALLDONTLIE_API_KEY || secrets.BDL_API_KEY }}
+    steps:
+      - name: Check configured credential
+        id: credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${BALLDONTLIE_API_KEY:-}" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo '{"status":"BLOCKED_MISSING_BALLDONTLIE_API_KEY"}' > bdl-probe-summary.json
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Probe GOAT MLB coverage
+        if: steps.credential.outputs.present == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE="2026-09-20"
+          AUTH=(-H "Authorization: $BALLDONTLIE_API_KEY")
+
+          curl -fsS "${AUTH[@]}"             "https://api.balldontlie.io/mlb/v1/games?dates[]=$DATE&season_type=regular&per_page=100"             -o games.json
+
+          GAME_ID=$(python - <<'PY'
+          import json
+          d=json.load(open('games.json'))
+          rows=d.get('data') or []
+          rows=[x for x in rows if x.get('status_state')!='canceled']
+          print(rows[0]['id'] if rows else '')
+          PY
+          )
+
+          if [ -z "$GAME_ID" ]; then
+            python - <<'PY'
+          import json
+          d=json.load(open('games.json'))
+          json.dump({
+            "status":"NO_GAME_AVAILABLE",
+            "games":len(d.get("data") or []),
+            "providerCalls":1
+          },open('bdl-probe-summary.json','w'),indent=2)
+          PY
+            exit 0
+          fi
+
+          curl -fsS "${AUTH[@]}"             "https://api.balldontlie.io/mlb/v1/odds/player_props/opening?game_id=$GAME_ID&vendors[]=fanduel&vendors[]=draftkings"             -o opening-props.json
+
+          curl -fsS "${AUTH[@]}"             "https://api.balldontlie.io/mlb/v1/odds/markets?game_id=$GAME_ID&vendors[]=fanduel&vendors[]=draftkings&per_page=100"             -o markets.json
+
+          curl -fsS "${AUTH[@]}"             "https://api.balldontlie.io/mlb/v1/odds/opening?dates[]=$DATE&per_page=100"             -o opening-odds.json
+
+          python - <<'PY'
+          import json,collections
+          games=json.load(open('games.json')).get('data') or []
+          props=json.load(open('opening-props.json')).get('data') or []
+          markets=json.load(open('markets.json')).get('data') or []
+          opening=json.load(open('opening-odds.json')).get('data') or []
+          game=next((x for x in games if x.get('status_state')!='canceled'), games[0] if games else {})
+          prop_types=collections.Counter(str(x.get('prop_type','unknown')) for x in props)
+          prop_vendors=collections.Counter(str(x.get('vendor','unknown')) for x in props)
+          market_keys=sorted({str(x.get('key','unknown')) for x in markets})
+          market_periods=collections.Counter(str(x.get('period','unknown')) for x in markets)
+          market_vendors=collections.Counter(str(x.get('vendor','unknown')) for x in markets)
+          wanted=[
+            'pitcher_strikeouts','pitcher_outs','pitcher_hits_allowed','pitcher_walks',
+            'pitcher_earned_runs','pitcher_record_a_win','hits','home_runs','total_bases',
+            'rbis','runs_scored','hits_runs_rbis','singles','doubles','triples','walks',
+            'strikeouts','stolen_bases'
+          ]
+          target_hints=('1st','first','inning','team_total','spread','total','moneyline')
+          target_keys=[k for k in market_keys if any(h in k.lower() for h in target_hints)]
+          out={
+            'status':'PASS',
+            'date':'2026-09-20',
+            'providerCalls':4,
+            'gamesFound':len(games),
+            'selectedGameId':game.get('id'),
+            'selectedMatchup':{
+              'away':(game.get('away_team') or {}).get('abbreviation') or game.get('away_team_name'),
+              'home':(game.get('home_team') or {}).get('abbreviation') or game.get('home_team_name'),
+              'date':game.get('date')
+            },
+            'openingProps':{
+              'rows':len(props),
+              'vendors':dict(sorted(prop_vendors.items())),
+              'propTypes':dict(sorted(prop_types.items())),
+              'certifiedModelMarketCoverage':{k:prop_types.get(k,0) for k in wanted}
+            },
+            'currentMarkets':{
+              'rows':len(markets),
+              'vendors':dict(sorted(market_vendors.items())),
+              'periods':dict(sorted(market_periods.items())),
+              'targetMarketKeys':target_keys,
+              'allMarketKeysCount':len(market_keys)
+            },
+            'openingOdds':{
+              'rows':len(opening),
+              'vendors':sorted({str(x.get('vendor','unknown')) for x in opening}),
+              'withMoneyline':sum(1 for x in opening if x.get('moneyline_home_odds') is not None or x.get('moneyline_away_odds') is not None),
+              'withSpread':sum(1 for x in opening if x.get('spread_home_value') is not None or x.get('spread_away_value') is not None),
+              'withTotal':sum(1 for x in opening if x.get('total_value') is not None)
+            }
+          }
+          json.dump(out,open('bdl-probe-summary.json','w'),indent=2)
+          print(json.dumps(out,indent=2))
+          PY
+
+      - name: Upload probe summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: balldontlie-mlb-goat-probe-summary
+          path: bdl-probe-summary.json
+          retention-days: 2
