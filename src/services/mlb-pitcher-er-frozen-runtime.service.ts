@@ -3,8 +3,6 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const PAGE_SIZE = 1000
-const SOURCE_FEATURE_VERSION = 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1'
-const MIN_PRIOR_STARTS = 3
 
 export const FROZEN_PITCHER_ER_MODEL = Object.freeze({
   candidateId: 'pitcher_er_over_1p5_p70_v1',
@@ -18,6 +16,10 @@ export const FROZEN_PITCHER_ER_MODEL = Object.freeze({
 })
 
 const EXPECTED = Object.freeze({
+  modeledRows: 3568,
+  trainRows: 2194,
+  validationRows: 729,
+  testRows: 645,
   testMae: 1.53264877098586,
   testRmse: 1.89392266393888,
   validationSelected: 59,
@@ -28,21 +30,15 @@ const EXPECTED = Object.freeze({
   combinedCorrect: 73,
 })
 
-type Split = 'TRAIN' | 'VALIDATION' | 'TEST'
-type RawRow = Record<string, unknown>
-type BaseRow = {
-  canonicalGameId: string
-  date: string
-  split: Split
-  pitcherSourceId: string
-  actual: number
-  pitcherKRate: number
-}
-type HistoricalRow = BaseRow & {
-  priorErAll: number
-  priorStartCount: number
-}
 type Fit = { intercept: number; slope: number }
+type FrozenRow = {
+  fixed_split: 'TRAIN' | 'VALIDATION' | 'TEST'
+  actual_er: number | string
+  prior_er_all: number | string
+  pitcher_k_rate: number | string
+  frozen_prediction: number | string
+  frozen_residual: number | string
+}
 
 export type PitcherErRuntimeParity = {
   certified: boolean
@@ -50,15 +46,14 @@ export type PitcherErRuntimeParity = {
   modelVersion: string
   strictPriorDate: true
   sameDateHistoryAllowed: false
-  minimumPriorStarts: number
-  sourceFeatureVersion: string
+  minimumPriorStarts: 3
+  sourceFeatureVersion: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1'
   officialOutcomeSource: 'retrosheet_data_er'
+  runtimeResidualSource: 'mlb_pitcher_er_frozen_2025_runtime_v1'
   frozenModel: typeof FROZEN_PITCHER_ER_MODEL
   observed: {
-    officialErLabels: number
-    strictPregameBaseRows: number
     modeledRows: number
-    splitRows: Record<Lowercase<Split>, number>
+    splitRows: { train: number; validation: number; test: number }
     baseFit: Fit | null
     kResidualFit: Fit | null
     testMae: number | null
@@ -79,16 +74,9 @@ export type PitcherErFrozenRuntime = {
   trainResiduals: number[]
 }
 
-function numberOrNull(value: unknown) {
-  if (value === null || value === undefined || value === '') return null
+function n(value: unknown) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
-}
-
-function textOrNull(value: unknown) {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  return trimmed ? trimmed : null
 }
 
 function mean(values: number[]) {
@@ -111,136 +99,6 @@ function linearFit(rows: Array<{ x: number; y: number }>): Fit | null {
   return { intercept: meanY - slope * meanX, slope }
 }
 
-function validStrictAsOf(value: unknown, targetDate: string) {
-  const asOf = textOrNull(value)
-  return asOf !== null && /^\d{4}-\d{2}-\d{2}$/.test(asOf) && asOf < targetDate
-}
-
-async function fetchOfficialEarnedRuns2025() {
-  const labels = new Map<string, number>()
-  let duplicateKeys = 0
-
-  for (let offset = 0; ; offset += PAGE_SIZE) {
-    const result = await supabaseAdmin
-      .from('historical_raw_records')
-      .select('game_reference,parsed_fields')
-      .eq('source', 'retrosheet')
-      .eq('season', '2025')
-      .eq('record_type', 'data')
-      .eq('parsed_fields->>0', 'data')
-      .eq('parsed_fields->>1', 'er')
-      .order('source_line', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1)
-    if (result.error) throw new Error('MLB_ER_PARITY_LABEL_READ_FAILED:' + result.error.message)
-
-    const page = (result.data ?? []) as unknown as RawRow[]
-    for (const row of page) {
-      const fields = Array.isArray(row.parsed_fields) ? row.parsed_fields : []
-      const pitcherSourceId = String(fields[2] ?? '')
-      const earnedRuns = numberOrNull(fields[3])
-      const gameReference = String(row.game_reference ?? '')
-      if (!pitcherSourceId || !gameReference || earnedRuns === null || earnedRuns < 0) continue
-      const key = 'retrosheet:mlb:game:' + gameReference + '|' + pitcherSourceId
-      if (labels.has(key)) duplicateKeys += 1
-      labels.set(key, earnedRuns)
-    }
-    if (page.length < PAGE_SIZE) break
-  }
-
-  if (duplicateKeys > 0) throw new Error('MLB_ER_PARITY_DUPLICATE_OFFICIAL_LABELS:' + duplicateKeys)
-  return labels
-}
-
-async function fetchPregameBase2025(labels: Map<string, number>) {
-  const rows: BaseRow[] = []
-
-  for (let offset = 0; ; offset += PAGE_SIZE) {
-    const result = await supabaseAdmin
-      .from('mlb_pitcher_prop_backtest_2025_v1_enriched')
-      .select('canonical_game_id,game_date,fixed_split,pitcher_source_id,target_outs,pitcher_k_rate,pitcher_as_of_date,opponent_as_of_date,matchup_as_of_date,feature_version')
-      .order('game_date', { ascending: true })
-      .order('canonical_game_id', { ascending: true })
-      .range(offset, offset + PAGE_SIZE - 1)
-    if (result.error) throw new Error('MLB_ER_PARITY_BASE_READ_FAILED:' + result.error.message)
-
-    const page = (result.data ?? []) as unknown as RawRow[]
-    for (const row of page) {
-      const canonicalGameId = String(row.canonical_game_id ?? '')
-      const pitcherSourceId = String(row.pitcher_source_id ?? '')
-      const date = String(row.game_date ?? '')
-      const split = String(row.fixed_split ?? '') as Split
-      const outs = numberOrNull(row.target_outs)
-      const pitcherKRate = numberOrNull(row.pitcher_k_rate)
-      const officialEr = labels.get(canonicalGameId + '|' + pitcherSourceId)
-
-      if (officialEr === undefined || outs === null || outs <= 0 || pitcherKRate === null) continue
-      if (!['TRAIN', 'VALIDATION', 'TEST'].includes(split)) continue
-      if (
-        !validStrictAsOf(row.pitcher_as_of_date, date) ||
-        !validStrictAsOf(row.opponent_as_of_date, date) ||
-        !validStrictAsOf(row.matchup_as_of_date, date) ||
-        String(row.feature_version ?? '') !== SOURCE_FEATURE_VERSION
-      ) continue
-
-      rows.push({ canonicalGameId, date, split, pitcherSourceId, actual: officialEr, pitcherKRate })
-    }
-
-    if (page.length < PAGE_SIZE) break
-  }
-
-  return rows
-}
-
-function addStrictPriorEr(rows: BaseRow[]) {
-  const sorted = [...rows].sort((a, b) =>
-    a.date.localeCompare(b.date) ||
-    a.canonicalGameId.localeCompare(b.canonicalGameId) ||
-    a.pitcherSourceId.localeCompare(b.pitcherSourceId),
-  )
-  const history = new Map<string, Array<{ date: string; er: number }>>()
-  const output: HistoricalRow[] = []
-  let index = 0
-
-  while (index < sorted.length) {
-    const date = sorted[index].date
-    let end = index
-    while (end < sorted.length && sorted[end].date === date) end += 1
-    const dayRows = sorted.slice(index, end)
-
-    for (const row of dayRows) {
-      const prior = history.get(row.pitcherSourceId) ?? []
-      if (prior.length < MIN_PRIOR_STARTS) continue
-      const priorErAll = mean(prior.map((item) => item.er))
-      if (priorErAll === null) continue
-      output.push({ ...row, priorErAll, priorStartCount: prior.length })
-    }
-
-    for (const row of dayRows) {
-      const prior = history.get(row.pitcherSourceId) ?? []
-      prior.push({ date: row.date, er: row.actual })
-      history.set(row.pitcherSourceId, prior)
-    }
-    index = end
-  }
-
-  return output
-}
-
-function basePrediction(row: HistoricalRow, fit: Fit) {
-  return fit.intercept + fit.slope * row.priorErAll
-}
-
-function finalPrediction(row: HistoricalRow, model: { baseFit: Fit; kResidualFit: Fit }) {
-  return basePrediction(row, model.baseFit) + model.kResidualFit.intercept + model.kResidualFit.slope * row.pitcherKRate
-}
-
-function frozenPrediction(row: HistoricalRow) {
-  return FROZEN_PITCHER_ER_MODEL.baseIntercept +
-    FROZEN_PITCHER_ER_MODEL.baseSlope * row.priorErAll +
-    FROZEN_PITCHER_ER_MODEL.kResidualIntercept +
-    FROZEN_PITCHER_ER_MODEL.kResidualSlope * row.pitcherKRate
-}
-
 function residualAboveProbability(sorted: number[], threshold: number) {
   let low = 0
   let high = sorted.length
@@ -260,51 +118,81 @@ function closeEnough(actual: number | null, expected: number, tolerance = 1e-12)
   return actual !== null && Math.abs(actual - expected) <= tolerance
 }
 
+async function loadFrozenRows() {
+  const rows: FrozenRow[] = []
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const result = await supabaseAdmin
+      .from('mlb_pitcher_er_frozen_2025_runtime_v1')
+      .select('fixed_split,actual_er,prior_er_all,pitcher_k_rate,frozen_prediction,frozen_residual')
+      .order('fixed_split', { ascending: true })
+      .range(offset, offset + PAGE_SIZE - 1)
+    if (result.error) throw new Error('MLB_ER_FROZEN_RUNTIME_READ_FAILED:' + result.error.message)
+    rows.push(...((result.data ?? []) as FrozenRow[]))
+    if (!result.data || result.data.length < PAGE_SIZE) break
+  }
+  return rows
+}
+
 let runtimePromise: Promise<PitcherErFrozenRuntime> | null = null
 
 async function buildRuntime(): Promise<PitcherErFrozenRuntime> {
-  const labels = await fetchOfficialEarnedRuns2025()
-  const base = await fetchPregameBase2025(labels)
-  const historical = addStrictPriorEr(base)
-  const train = historical.filter((row) => row.split === 'TRAIN')
-  const validation = historical.filter((row) => row.split === 'VALIDATION')
-  const test = historical.filter((row) => row.split === 'TEST')
+  const rawRows = await loadFrozenRows()
+  const rows = rawRows.flatMap((row) => {
+    const actual = n(row.actual_er)
+    const priorErAll = n(row.prior_er_all)
+    const kRate = n(row.pitcher_k_rate)
+    const predicted = n(row.frozen_prediction)
+    const residual = n(row.frozen_residual)
+    if (actual === null || priorErAll === null || kRate === null || predicted === null || residual === null) return []
+    return [{
+      split: row.fixed_split,
+      actual,
+      priorErAll,
+      kRate,
+      predicted,
+      residual,
+    }]
+  })
+
+  const train = rows.filter((row) => row.split === 'TRAIN')
+  const validation = rows.filter((row) => row.split === 'VALIDATION')
+  const test = rows.filter((row) => row.split === 'TEST')
+  const trainResiduals = train.map((row) => row.residual).sort((a, b) => a - b)
 
   const baseFit = linearFit(train.map((row) => ({ x: row.priorErAll, y: row.actual })))
   const kResidualFit = baseFit
     ? linearFit(train.map((row) => ({
-        x: row.pitcherKRate,
-        y: row.actual - basePrediction(row, baseFit),
+        x: row.kRate,
+        y: row.actual - (baseFit.intercept + baseFit.slope * row.priorErAll),
       })))
     : null
 
-  const frozenTrainResiduals = train
-    .map((row) => row.actual - frozenPrediction(row))
-    .sort((a, b) => a - b)
-
-  const testErrors = test.map((row) => frozenPrediction(row) - row.actual)
+  const testErrors = test.map((row) => row.predicted - row.actual)
   const testMae = mean(testErrors.map((error) => Math.abs(error)))
   const testRmse = testErrors.length
     ? Math.sqrt(testErrors.reduce((sum, error) => sum + error * error, 0) / testErrors.length)
     : null
 
-  function selected(rows: HistoricalRow[]) {
-    let n = 0
+  function selected(input: typeof rows) {
+    let count = 0
     let correct = 0
-    for (const row of rows) {
-      const predicted = frozenPrediction(row)
-      const probabilityOver = pitcherErOverProbability(frozenTrainResiduals, predicted, FROZEN_PITCHER_ER_MODEL.line)
-      if (probabilityOver < FROZEN_PITCHER_ER_MODEL.minimumOverProbability) continue
-      n += 1
+    for (const row of input) {
+      const probability = pitcherErOverProbability(trainResiduals, row.predicted, FROZEN_PITCHER_ER_MODEL.line)
+      if (probability < FROZEN_PITCHER_ER_MODEL.minimumOverProbability) continue
+      count += 1
       if (row.actual > FROZEN_PITCHER_ER_MODEL.line) correct += 1
     }
-    return { n, correct }
+    return { count, correct }
   }
 
-  const validationSelected = selected(validation)
-  const testSelected = selected(test)
+  const validationSelection = selected(validation)
+  const testSelection = selected(test)
   const failures: string[] = []
 
+  if (rows.length !== EXPECTED.modeledRows) failures.push('MODELED_ROW_COUNT_MISMATCH')
+  if (train.length !== EXPECTED.trainRows || validation.length !== EXPECTED.validationRows || test.length !== EXPECTED.testRows) {
+    failures.push('TEMPORAL_SPLIT_COUNT_MISMATCH')
+  }
   if (!baseFit || !closeEnough(baseFit.intercept, FROZEN_PITCHER_ER_MODEL.baseIntercept) || !closeEnough(baseFit.slope, FROZEN_PITCHER_ER_MODEL.baseSlope)) {
     failures.push('BASE_FIT_CHECKSUM_MISMATCH')
   }
@@ -314,51 +202,46 @@ async function buildRuntime(): Promise<PitcherErFrozenRuntime> {
   if (!closeEnough(testMae, EXPECTED.testMae) || !closeEnough(testRmse, EXPECTED.testRmse)) {
     failures.push('TEST_ERROR_CHECKSUM_MISMATCH')
   }
-  if (validationSelected.n !== EXPECTED.validationSelected || validationSelected.correct !== EXPECTED.validationCorrect) {
+  if (validationSelection.count !== EXPECTED.validationSelected || validationSelection.correct !== EXPECTED.validationCorrect) {
     failures.push('VALIDATION_SELECTION_CHECKSUM_MISMATCH')
   }
-  if (testSelected.n !== EXPECTED.testSelected || testSelected.correct !== EXPECTED.testCorrect) {
+  if (testSelection.count !== EXPECTED.testSelected || testSelection.correct !== EXPECTED.testCorrect) {
     failures.push('TEST_SELECTION_CHECKSUM_MISMATCH')
   }
   if (
-    validationSelected.n + testSelected.n !== EXPECTED.combinedSelected ||
-    validationSelected.correct + testSelected.correct !== EXPECTED.combinedCorrect
+    validationSelection.count + testSelection.count !== EXPECTED.combinedSelected ||
+    validationSelection.correct + testSelection.correct !== EXPECTED.combinedCorrect
   ) {
     failures.push('COMBINED_SELECTION_CHECKSUM_MISMATCH')
   }
-  if (!train.length || !frozenTrainResiduals.length) failures.push('TRAIN_RESIDUAL_DISTRIBUTION_EMPTY')
+  if (!trainResiduals.length) failures.push('TRAIN_RESIDUAL_DISTRIBUTION_EMPTY')
 
   return {
-    trainResiduals: frozenTrainResiduals,
+    trainResiduals,
     parity: {
       certified: failures.length === 0,
       contract: 'MLB_PITCHER_ER_FROZEN_RUNTIME_PARITY/1.0.0',
       modelVersion: FROZEN_PITCHER_ER_MODEL.modelVersion,
       strictPriorDate: true,
       sameDateHistoryAllowed: false,
-      minimumPriorStarts: MIN_PRIOR_STARTS,
-      sourceFeatureVersion: SOURCE_FEATURE_VERSION,
+      minimumPriorStarts: 3,
+      sourceFeatureVersion: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
       officialOutcomeSource: 'retrosheet_data_er',
+      runtimeResidualSource: 'mlb_pitcher_er_frozen_2025_runtime_v1',
       frozenModel: FROZEN_PITCHER_ER_MODEL,
       observed: {
-        officialErLabels: labels.size,
-        strictPregameBaseRows: base.length,
-        modeledRows: historical.length,
-        splitRows: {
-          train: train.length,
-          validation: validation.length,
-          test: test.length,
-        },
+        modeledRows: rows.length,
+        splitRows: { train: train.length, validation: validation.length, test: test.length },
         baseFit,
         kResidualFit,
         testMae,
         testRmse,
-        validationSelected: validationSelected.n,
-        validationCorrect: validationSelected.correct,
-        testSelected: testSelected.n,
-        testCorrect: testSelected.correct,
-        combinedSelected: validationSelected.n + testSelected.n,
-        combinedCorrect: validationSelected.correct + testSelected.correct,
+        validationSelected: validationSelection.count,
+        validationCorrect: validationSelection.correct,
+        testSelected: testSelection.count,
+        testCorrect: testSelection.correct,
+        combinedSelected: validationSelection.count + testSelection.count,
+        combinedCorrect: validationSelection.correct + testSelection.correct,
       },
       expected: EXPECTED,
       failures,
@@ -375,6 +258,5 @@ export async function getFrozenPitcherErRuntime() {
 }
 
 export async function getFrozenPitcherErRuntimeParity() {
-  const runtime = await getFrozenPitcherErRuntime()
-  return runtime.parity
+  return (await getFrozenPitcherErRuntime()).parity
 }
