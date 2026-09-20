@@ -31,6 +31,7 @@ set search_path=public
 as $$
 declare
   v_rows integer := 0;
+  v_rows_second integer := 0;
 begin
   insert into public.mlb_ml_pregame_starter_evidence_v1(
     game_date,game_pk,side,pitcher_mlbam_id,pitcher_name,
@@ -118,7 +119,8 @@ begin
   where excluded.evidence_timestamp > public.mlb_ml_pregame_starter_evidence_v1.evidence_timestamp
     and excluded.evidence_timestamp < excluded.first_pitch;
 
-  get diagnostics v_rows = v_rows + row_count;
+  get diagnostics v_rows_second = row_count;
+  v_rows := v_rows + v_rows_second;
 
   return jsonb_build_object(
     'targetDate',p_target_date,
