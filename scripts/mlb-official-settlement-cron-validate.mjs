@@ -7,6 +7,8 @@ const vercel = JSON.parse(fs.readFileSync('vercel.json','utf8'))
 const activation = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json','utf8'))
 
 assert.match(service, /MAX_SETTLEMENT_GAMES_PER_RUN = 50/)
+assert.match(service, /MAX_RUNTIME_MS = 240_000/)
+assert.match(service, /SETTLEMENT_BACKLOG_YIELDED_FOR_DEADLINE/)
 assert.match(service, /statsapi\.mlb\.com\/api\/v1\.1\/game\//)
 assert.match(service, /planMlbSettlement/)
 assert.match(service, /persistMlbSettlementPlan/)
