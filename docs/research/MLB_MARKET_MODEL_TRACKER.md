@@ -65,12 +65,12 @@ The remaining already-frozen 75%+ props were audited against their original hist
 
 | Market | Frozen rule | Frozen evidence | Runtime parity | Daily evaluator state |
 |---|---|---:|---|---|
-| Pitcher Walks | UNDER 2.5 when calibrated UNDER probability >=85% | 125/137 = **91.24%** | CERTIFIED: model digest + exact TRAIN calibration surface | ENABLED_PENDING_PR_AND_PRODUCTION |
-| Batter Hits | UNDER 1.5 when projection <=0.75 | 8,496/9,833 = **86.40%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/9,833/8,496 | ENABLED_PENDING_PR_AND_PRODUCTION |
-| Batter Total Bases | UNDER 2.5 when projection <=1.0 | 2,021/2,336 = **86.52%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/2,336/2,021 | ENABLED_PENDING_PR_AND_PRODUCTION |
-| Batter Home Runs | UNDER 0.5 when projection <=0.10 | 12,448/13,507 = **92.16%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/13,507/12,448 | ENABLED_PENDING_PR_AND_PRODUCTION |
-| Batter Strikeouts | UNDER 1.5 when projection <=0.50 | 1,000/1,074 = **93.11%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/1,074/1,000 | ENABLED_PENDING_PR_AND_PRODUCTION |
-| Batter Walks | UNDER 0.5 when projection <=0.20 | 2,590/3,106 = **83.39%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/3,106/2,590 | ENABLED_PENDING_PR_AND_PRODUCTION |
+| Pitcher Walks | UNDER 2.5 when calibrated UNDER probability >=85% | 125/137 = **91.24%** | CERTIFIED: model digest + exact TRAIN calibration surface | DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE |
+| Batter Hits | UNDER 1.5 when projection <=0.75 | 8,496/9,833 = **86.40%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/9,833/8,496 | DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE |
+| Batter Total Bases | UNDER 2.5 when projection <=1.0 | 2,021/2,336 = **86.52%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/2,336/2,021 | DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE |
+| Batter Home Runs | UNDER 0.5 when projection <=0.10 | 12,448/13,507 = **92.16%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/13,507/12,448 | DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE |
+| Batter Strikeouts | UNDER 1.5 when projection <=0.50 | 1,000/1,074 = **93.11%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/1,074/1,000 | DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE |
+| Batter Walks | UNDER 0.5 when projection <=0.20 | 2,590/3,106 = **83.39%** | CERTIFIED: 2025 n=40,886 refit + exact 2026 35,558/3,106/2,590 | DEPLOYED_PENDING_FIRST_PROSPECTIVE_CAPTURE |
 | Pitcher Outs | UNDER 18.5 when empirical P(UNDER) >=90% | 215/226 = **95.13%** | **NOT CERTIFIED**: frozen 226/215 universe does not equal exact-MLBAM reconstruction 254/243 | `RUNTIME_PARITY_NOT_CERTIFIED` |
 
 Daily batter eligibility now also requires the canonical target-game `pick2_mlb_batter_daily_features` row with feature version `MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1`, `as_of_date < target_game_date`, and source rule `source_game_date < target_game_date`. Game 1 of a same-day doubleheader cannot enter Game 2 history.
@@ -80,6 +80,15 @@ Market verification for these markets requires exact persisted MLBAM identity an
 Pitcher Outs was intentionally tightened rather than promoted from a stale name-based SportsDataIO history. The old SportsDataIO starter corpus ends 2026-07-19, and the exact-MLBAM replacement does not reproduce the frozen selection universe. It remains fail-closed until lineage is reconciled without retuning.
 
 Boundaries: research/shadow only; Official Picks unchanged; APOSTAR disabled; production betting eligibility false; historical Odds API credits consumed = 0.
+
+Production deployment gate:
+- PR #115 merged to `main` at `dbfec611b99d887b4f3d6fce0c6cce160c397bcb`;
+- Vercel production deployment `dpl_8h1nhDr4ciTt1penocPrX5Vkmbfs` is READY;
+- six parity-certified markets are deployed in the existing approved-props capture/evaluator path;
+- final market-level READY remains fail-closed until the first future strictly-pregame approved-capture snapshot plus evaluator crossing is persisted for each market;
+- Pitcher Outs remains `RUNTIME_PARITY_NOT_CERTIFIED` and is not part of this prospective-ready set;
+- no retrospective snapshot is manufactured for 2026-09-19.
+
 
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
