@@ -333,7 +333,7 @@ function ledgerRow(input: {
     model_probability: input.probability ?? null,
     historical_accuracy: input.accuracy,
     model_qualifies: input.qualifies ?? null,
-    market_verified: Boolean(quote),
+    market_verified: Boolean(quote) && input.playerId !== null,
     status: input.status,
     blocker: input.blocker ?? null,
     feature_snapshot: input.featureSnapshot ?? {},
@@ -1094,6 +1094,9 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     metadata: {
       targetDate,
       frozenAt,
+      lineContractVersion: APPROVED_PROP_LINE_CONTRACT_VERSION,
+      realLineRule: 'MODEL_QUALIFIES + REAL_LINE_EXISTS + EXACT_IDENTITY + PREGAME_QUOTE',
+      multipleLineExtrapolationAuthorized: false,
       researchOnly: true,
       productionEligible: false,
       officialPicksModified: false,
