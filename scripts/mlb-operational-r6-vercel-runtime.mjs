@@ -34,8 +34,32 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
   const started=Date.now(),at=new Date(started).toISOString(),date=operatingDate(at),results=[]
   const deadline=started+700000
   const newClient=()=>createDurableRuntimeClient({url:process.env.NEXT_PUBLIC_SUPABASE_URL,key:process.env.SUPABASE_SERVICE_ROLE_KEY,packageSha,deadline})
-  const inventory=await newClient().inspect(),pending=inventory.rows.filter(r=>r.state_kind==='RUN' && r.status!=='COMPLETE')
+  const pendingRuns=inventory=>inventory.rows.filter(r=>r.state_kind==='RUN' && r.status!=='COMPLETE')
+  let inventory=await newClient().inspect(),pending=pendingRuns(inventory)
   ensure(pending.length<=1,'AMBIGUOUS_PENDING_RUN')
+
+  if(!hostDry && pending.length===1) {
+    const stale=pending[0],staleDate=String(stale.run_date).slice(0,10)
+    if(staleDate<date) {
+      const expectedDigest=sha256({
+        runId:stale.run_id,
+        packageSha:stale.package_sha,
+        runAsOf:new Date(stale.run_as_of).toISOString(),
+        revision:Number(stale.revision),
+        status:stale.status,
+        checkpoint:stale.checkpoint,
+        dml:stale.dml_accounting,
+        providers:[stale.mlb_official_calls,stale.statcast_calls,stale.odds_calls],
+      })
+      const disposed=await newClient().dispose({runId:stale.run_id,expectedDigest})
+      ensure(disposed.status==='TERMINAL_PARTIAL_PRESERVED','STALE_PENDING_DISPOSITION')
+      results.push({mode:stale.checkpoint.mode,status:'TERMINAL_PARTIAL_PRESERVED',runId:stale.run_id,recovery:'STALE_PENDING_DISPOSED'})
+      inventory=await newClient().inspect()
+      pending=pendingRuns(inventory)
+      ensure(pending.length===0,'STALE_PENDING_DISPOSITION')
+    }
+  }
+
   if(hostDry)ensure(!pending.length || pending[0].checkpoint.mode==='HOST_DRY','LIVE_RUN_PENDING')
   const modes=hostDry?['HOST_DRY']:[...new Set([...(pending.length?[pending[0].checkpoint.mode]:[]),...scheduledModes(at)])]
   for(const mode of modes) {
