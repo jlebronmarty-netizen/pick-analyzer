@@ -253,13 +253,44 @@ export function createRuntimeStateAuthority({ transaction, writeRows = null, pre
         ensure(run.checkpoint.scope.length>0 && run.dml_accounting.stages.every(s=>s.readback==='PASS' && s.conflicts===0),'DISPOSITION_READBACK')
         const games=await query('SELECT game_pk,scheduled_at FROM public.pick2_mlb_games WHERE game_pk=ANY($1::bigint[]) FOR SHARE',[run.checkpoint.scope])
         const dependencyFailure=input.op==='disposeDependencyFailure'
+        let dependencyDispositionReason='DEPENDENCY_FAILURE_NO_BUSINESS_WRITES'
         if(dependencyFailure) {
-          ensure(run.status==='FAILED' && run.checkpoint.stage==='DEPENDENCY_SCOPE' && run.checkpoint.failure?.stage==='DEPENDENCY_SCOPE' && run.checkpoint.completed.includes('DEPENDENCY_SCOPE') && run.odds_calls===0 && run.dml_accounting.stages.length===0,'DEPENDENCY_DISPOSITION_NOT_SAFE')
+          const stages=run.dml_accounting.stages
+          const noBusinessWrites=stages.length===0
+          const nativeStage=stages.length===1?stages[0]:null
+          const nativeUpdatesOnly=Boolean(
+            nativeStage &&
+            nativeStage.target==='pick2_mlb_games' &&
+            nativeStage.inserted===0 &&
+            nativeStage.updated>0 &&
+            nativeStage.updated+nativeStage.reused===nativeStage.planned &&
+            nativeStage.readback==='PASS' &&
+            nativeStage.conflicts===0
+          )
+          ensure(
+            run.status==='FAILED' &&
+            run.checkpoint.stage==='DEPENDENCY_SCOPE' &&
+            run.checkpoint.failure?.stage==='DEPENDENCY_SCOPE' &&
+            run.checkpoint.completed.includes('DEPENDENCY_SCOPE') &&
+            run.mlb_official_calls===1 &&
+            run.statcast_calls===0 &&
+            run.odds_calls===0 &&
+            (noBusinessWrites || nativeUpdatesOnly),
+            'DEPENDENCY_DISPOSITION_NOT_SAFE'
+          )
           ensure(run.checkpoint.references.some(r=>r.kind==='schedule_evidence' && digest(r.digest)) && games.length===run.checkpoint.scope.length,'DEPENDENCY_DISPOSITION_EVIDENCE')
+          if(nativeUpdatesOnly) {
+            const gameRows=await query('SELECT game_pk,scheduled_at,created_at,updated_at,source_payload_digest FROM public.pick2_mlb_games WHERE game_pk=ANY($1::bigint[]) FOR SHARE',[run.checkpoint.scope])
+            ensure(gameRows.length===run.checkpoint.scope.length && gameRows.every(g=>g.source_payload_digest && Date.parse(g.scheduled_at)>Date.parse(clock.at)),'DEPENDENCY_DISPOSITION_NATIVE_GAME_READBACK')
+            const changed=gameRows.filter(g=>Date.parse(g.updated_at)>=Date.parse(run.run_as_of) && Date.parse(g.updated_at)<=Date.parse(run.checkpoint.failure.timestamp))
+            const inserted=gameRows.filter(g=>Date.parse(g.created_at)>=Date.parse(run.run_as_of) && Date.parse(g.created_at)<=Date.parse(run.checkpoint.failure.timestamp))
+            ensure(changed.length===nativeStage.updated && inserted.length===0,'DEPENDENCY_DISPOSITION_NATIVE_GAME_COUNT')
+            dependencyDispositionReason='DEPENDENCY_FAILURE_NATIVE_GAME_UPDATES_PRESERVED'
+          }
         } else ensure(games.length===run.checkpoint.scope.length && games.every(g=>Date.parse(g.scheduled_at)<=Date.parse(clock.at)),'DISPOSITION_NOT_EXPIRED')
         const predictions=await query('SELECT id FROM public.pick2_game_predictions WHERE game_pk=ANY($1::bigint[]) AND predicted_at=$2::timestamptz FOR SHARE',[run.checkpoint.scope,run.run_as_of])
         ensure(predictions.length===run.dml_accounting.stages.filter(s=>s.target==='pick2_game_predictions').reduce((n,s)=>n+s.inserted,0),'DISPOSITION_PREDICTION_READBACK')
-        const checkpoint={...run.checkpoint,stage:'TERMINAL_PARTIAL_PRESERVED',disposition:{status:'TERMINAL_PARTIAL_PRESERVED',reviewedAt:new Date(clock.at).toISOString(),reviewDigest:input.expectedDigest,reason:dependencyFailure?'DEPENDENCY_FAILURE_NO_BUSINESS_WRITES':'EXPIRED_FREEZE_NO_RETROACTIVE_MARKETS',predictionCount:predictions.length,readback:'PASS'}}
+        const checkpoint={...run.checkpoint,stage:'TERMINAL_PARTIAL_PRESERVED',disposition:{status:'TERMINAL_PARTIAL_PRESERVED',reviewedAt:new Date(clock.at).toISOString(),reviewDigest:input.expectedDigest,reason:dependencyFailure?dependencyDispositionReason:'EXPIRED_FREEZE_NO_RETROACTIVE_MARKETS',predictionCount:predictions.length,readback:'PASS'}}
         validateCheckpoint(checkpoint)
         return {status:'TERMINAL_PARTIAL_PRESERVED',run:await one(`UPDATE ${TABLE} SET checkpoint=$2::text::jsonb,status='FAILED',revision=revision+1,updated_at=$3 WHERE scope_key=$1 RETURNING *`,[run.scope_key,JSON.stringify(checkpoint),clock.at])}
       }
