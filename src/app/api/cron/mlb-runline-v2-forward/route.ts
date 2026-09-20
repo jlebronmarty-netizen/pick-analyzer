@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
 import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
+import { freezeMlbRunlineV2StandardForward } from '@/services/mlb-runline-v2-standard-forward-freeze.service'
 import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-settlement.service'
 
 export const dynamic = 'force-dynamic'
@@ -17,6 +18,23 @@ function authorized(request: NextRequest) {
   const secret = cronSecret()
   if (!secret) return false
   return request.headers.get('authorization') === `Bearer ${secret}`
+}
+
+async function safeStandardFreeze() {
+  try {
+    return await freezeMlbRunlineV2StandardForward()
+  } catch (error) {
+    return {
+      success: false,
+      status: 'RUNLINE_STANDARD_V2_FORWARD_FREEZE_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      writes: 0,
+      error: errorMessage(error, 'Unknown Standard Run Line V2 forward freeze error'),
+    }
+  }
 }
 
 async function safeFreeze() {
@@ -69,9 +87,12 @@ export async function GET(request: NextRequest) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized Run Line V2 forward research request.', status: 401 })
   }
 
-  // Freeze first. This must remain independent from yesterday's Statcast catchup,
-  // analytics refresh, Moneyline serving, Official Picks, and APOSTAR.
-  const freeze = await safeFreeze()
+  // Freeze both Run Line research tracks independently before settlement.
+  // Neither track may abort the other, and neither touches Official Picks/APOSTAR.
+  const [standardFreeze, freeze] = await Promise.all([
+    safeStandardFreeze(),
+    safeFreeze(),
+  ])
 
   let readiness: Awaited<ReturnType<typeof getMlbDailyHistoryReadiness>> | null = null
   let settlement: Awaited<ReturnType<typeof safeSettlement>> | null = null
@@ -86,7 +107,7 @@ export async function GET(request: NextRequest) {
     readinessError = errorMessage(error, 'Unknown MLB daily-history readiness error')
   }
 
-  const success = freeze.success !== false && (!settlement || settlement.success !== false)
+  const success = standardFreeze.success !== false && freeze.success !== false && (!settlement || settlement.success !== false)
   return apiOk({
     success,
     status: success ? 'RUNLINE_V2_FORWARD_RESEARCH_EVALUATED' : 'RUNLINE_V2_FORWARD_RESEARCH_PARTIAL',
@@ -96,6 +117,7 @@ export async function GET(request: NextRequest) {
     apostarActivated: false,
     roiCertified: false,
     pricingPolicyCertified: false,
+    standardFreeze,
     freeze,
     dailyHistoryReadiness: readiness,
     readinessError,
