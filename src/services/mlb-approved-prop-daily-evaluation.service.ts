@@ -275,6 +275,17 @@ function statusFor(modelQualifies: boolean, marketVerified: boolean, state?: Mar
   return 'MODEL_QUALIFIES_MARKET_NOT_AVAILABLE'
 }
 
+function marketSnapshotFromState(state: MarketState, extra: JsonMap = {}) {
+  return {
+    ...extra,
+    observedLines: state.observedLines,
+    marketAvailable: state.marketAvailable,
+    pregameLineageVerified: state.pregameLineageVerified,
+    requiredLineAvailable: state.requiredLineAvailable,
+    exactLineQuoteCount: state.exactLineRows.length,
+  }
+}
+
 function ledgerRow(input: {
   date: string
   game: GameRow
@@ -503,6 +514,15 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       direction: 'UNDER',
       line: 2.5,
     })
+    const walkMarketState = marketState({
+      quotes,
+      gamePk: game.game_pk,
+      market: 'pitcher_walks',
+      playerName: pitcher.name,
+      playerId: pitcher.id,
+      direction: 'UNDER',
+      line: 2.5,
+    })
 
     if (!pitcherWalksParity.certified) {
       rows.push(ledgerRow({
@@ -522,11 +542,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           parityContract: pitcherWalksParity.contract,
           parityFailures: pitcherWalksParity.failures,
         },
-        marketSnapshot: {
-          observedLines: observedLines(quotes, game.game_pk, 'pitcher_walks', pitcher.name, pitcher.id),
+        marketSnapshot: marketSnapshotFromState(walkMarketState, {
           exactMlbamIdentity: true,
           fuzzyMatchingUsed: false,
-        },
+        }),
         frozenAt,
       }))
     } else {
@@ -570,7 +589,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           probability: walk.probability.underProbability,
           qualifies,
           quote: walkQuote,
-          status: statusFor(qualifies, Boolean(walkQuote)),
+          status: statusFor(qualifies, Boolean(walkQuote), walkMarketState, 2.5),
           featureSnapshot: {
             parityContract: pitcherWalksParity.contract,
             priorAppearances: walk.featureState.priorAppearances,
@@ -598,6 +617,15 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       direction: 'UNDER',
       line: 18.5,
     })
+    const outsMarketState = marketState({
+      quotes,
+      gamePk: game.game_pk,
+      market: 'pitcher_outs',
+      playerName: pitcher.name,
+      playerId: pitcher.id,
+      direction: 'UNDER',
+      line: 18.5,
+    })
     rows.push(ledgerRow({
       date: targetDate,
       game,
@@ -616,11 +644,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         frozenExternal2026: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.frozenExternal2026,
         parityNote: ADDITIONAL_PROP_RUNTIME_PARITY.pitcher_outs.note,
       },
-      marketSnapshot: {
-        observedLines: observedLines(quotes, game.game_pk, 'pitcher_outs', pitcher.name, pitcher.id),
+      marketSnapshot: marketSnapshotFromState(outsMarketState, {
         exactMlbamIdentity: true,
         fuzzyMatchingUsed: false,
-      },
+      }),
       frozenAt,
     }))
 
@@ -760,17 +787,25 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           status: 'RUNTIME_PARITY_NOT_CERTIFIED',
           blocker: 'ADDITIONAL_BATTER_RUNTIME_PARITY_NOT_CERTIFIED',
           featureSnapshot: { parityContract: parity.contract },
-          marketSnapshot: {
-            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
+          marketSnapshot: marketSnapshotFromState(batterMarketState, {
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
-          },
+          }),
           frozenAt,
         }))
         continue
       }
 
       const quote = bestQuote({
+        quotes,
+        gamePk: target.gamePk,
+        market: def.market,
+        playerName: target.playerName,
+        playerId: target.playerId,
+        direction: 'UNDER',
+        line: def.line,
+      })
+      const batterMarketState = marketState({
         quotes,
         gamePk: target.gamePk,
         market: def.market,
@@ -799,11 +834,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
             requiredFeatureVersion: 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1',
             requiredSourceRule: 'source_game_date < target_game_date',
           },
-          marketSnapshot: {
-            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
+          marketSnapshot: marketSnapshotFromState(batterMarketState, {
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
-          },
+          }),
           frozenAt,
         }))
         continue
@@ -832,11 +866,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           status: 'NO_EVALUABLE',
           blocker: 'MINIMUM_10_PRIOR_GAMES_NOT_MET',
           featureSnapshot: { parityContract: parity.contract, strictTargetFeature: true },
-          marketSnapshot: {
-            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
+          marketSnapshot: marketSnapshotFromState(batterMarketState, {
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
-          },
+          }),
           frozenAt,
         }))
         continue
@@ -856,7 +889,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         projection: projection.predicted,
         qualifies,
         quote,
-        status: statusFor(qualifies, Boolean(quote)),
+        status: statusFor(qualifies, Boolean(quote), batterMarketState, def.line),
         featureSnapshot: {
           parityContract: parity.contract,
           strictTargetFeature: true,
@@ -868,11 +901,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           recentPaPerGame: projection.recentPaPerGame,
           latestPriorDate: projection.latestPriorDate,
         },
-        marketSnapshot: {
-          observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
+        marketSnapshot: marketSnapshotFromState(batterMarketState, {
           exactMlbamIdentity: true,
           fuzzyMatchingUsed: false,
-        },
+        }),
         frozenAt,
       }))
     }
@@ -887,16 +919,37 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     const game = gameByPk.get(Number(item.game_pk))
     if (!game) continue
     const name = String(item.pitcher_name)
-    const quote = bestQuote({ quotes, gamePk: game.game_pk, market: 'pitcher_record_a_win', playerName: name, direction: 'NO', line: null })
+    const pitcherId = positiveInteger(item.starter_mlbam_id)
+    if (pitcherId === null) {
+      rows.push(ledgerRow({
+        date: targetDate, game, market: 'pitcher_record_a_win', candidateId: 'pitcher_win_forward_numeric_p015_v1',
+        playerId: null, playerName: name, direction: 'NO', line: null,
+        accuracy: 0.870748299319728, status: 'NO_EVALUABLE_IDENTITY',
+        blocker: 'EXACT_MLBAM_IDENTITY_NOT_AVAILABLE', frozenAt,
+      }))
+      continue
+    }
+    const winMarketState = marketState({
+      quotes, gamePk: game.game_pk, market: 'pitcher_record_a_win',
+      playerName: name, playerId: pitcherId, direction: 'NO', line: null,
+    })
+    const quote = bestQuote({
+      quotes, gamePk: game.game_pk, market: 'pitcher_record_a_win',
+      playerName: name, playerId: pitcherId, direction: 'NO', line: null,
+    })
     const qualifies = item.selected_no === true
     const pWin = n(item.p_win)
     rows.push(ledgerRow({
       date: targetDate, game, market: 'pitcher_record_a_win', candidateId: 'pitcher_win_forward_numeric_p015_v1',
-      playerId: Number(item.starter_mlbam_id), playerName: name, direction: 'NO', line: null,
+      playerId: pitcherId, playerName: name, direction: 'NO', line: null,
       accuracy: 0.870748299319728, projection: pWin, probability: pWin === null ? null : 1 - pWin,
-      qualifies, quote, status: statusFor(qualifies, Boolean(quote)),
+      qualifies, quote, status: statusFor(qualifies, Boolean(quote), winMarketState, null),
       featureSnapshot: { pWin, threshold: n(item.threshold) },
-      marketSnapshot: { observedLines: observedLines(quotes, game.game_pk, 'pitcher_record_a_win', name) }, frozenAt,
+      marketSnapshot: marketSnapshotFromState(winMarketState, {
+        exactMlbamIdentity: true,
+        fuzzyMatchingUsed: false,
+      }),
+      frozenAt,
     }))
   }
 
@@ -963,12 +1016,21 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       direction: def.direction,
       line: def.line,
     })
+    const fiveMarketState = marketState({
+      quotes,
+      gamePk: evaluation.gamePk,
+      market: evaluation.market,
+      playerName: evaluation.playerName,
+      playerId: evaluation.playerId,
+      direction: def.direction,
+      line: def.line,
+    })
 
     const status = !evaluation.parityCertified
       ? 'RUNTIME_PARITY_NOT_CERTIFIED'
       : !evaluation.evaluable
         ? 'NO_EVALUABLE'
-        : statusFor(Boolean(evaluation.qualifies), Boolean(quote))
+        : statusFor(Boolean(evaluation.qualifies), Boolean(quote), fiveMarketState, def.line)
 
     rows.push(ledgerRow({
       date: targetDate,
@@ -987,17 +1049,10 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       status,
       blocker: evaluation.blocker,
       featureSnapshot: evaluation.featureSnapshot,
-      marketSnapshot: {
-        observedLines: observedLines(
-          quotes,
-          evaluation.gamePk,
-          evaluation.market,
-          evaluation.playerName,
-          evaluation.playerId,
-        ),
+      marketSnapshot: marketSnapshotFromState(fiveMarketState, {
         exactMlbamIdentity: true,
         fuzzyMatchingUsed: false,
-      },
+      }),
       frozenAt,
     }))
   }
@@ -1095,16 +1150,55 @@ export async function getMlbApprovedPropsDailyBoard(targetDate: string) {
     .order('player_name', { ascending: true })
   if (result.error) throw new Error('MLB_APPROVED_PROP_BOARD_READ_FAILED:' + result.error.message)
   const rows = result.data ?? []
+  const marketBoard = rows.map((row) => {
+    const marketSnapshot = asRecord(row.market_snapshot)
+    const actualQuote = asRecord(marketSnapshot.actualQuote)
+    return {
+      gamePk: Number(row.game_pk),
+      startTime: row.start_time,
+      playerOrTeam: row.player_name,
+      playerMlbamId: row.player_mlbam_id,
+      market: row.market,
+      model: row.candidate_id,
+      modelProjection: row.model_projection,
+      modelProbability: row.model_probability,
+      historicalCertifiedAccuracy: row.historical_accuracy,
+      requiredModelLine: row.required_line,
+      actualAvailableLine: row.observed_line,
+      observedLines: Array.isArray(marketSnapshot.observedLines) ? marketSnapshot.observedLines : [],
+      side: row.direction,
+      sportsbook: row.sportsbook,
+      price: row.price,
+      quoteTimestamp: actualQuote.quoteTimestamp ?? null,
+      providerTimestamp: actualQuote.providerTimestamp ?? null,
+      modelQualifies: row.model_qualifies,
+      marketVerified: row.market_verified,
+      lineScope: marketSnapshot.lineScope ?? null,
+      multipleLinesCertified: marketSnapshot.multipleLinesCertified ?? false,
+      finalStatus: row.status,
+      blocker: row.blocker,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksEligible: false,
+      apostarEnabled: false,
+    }
+  })
   return {
     targetDate,
+    contract: APPROVED_PROP_LINE_CONTRACT_VERSION,
     researchOnly: true,
     productionEligible: false,
     officialPicksEligible: false,
     apostarEnabled: false,
-    verifiedQualifiers: rows.filter((row) => row.status === 'QUALIFIES_MARKET_VERIFIED'),
-    modelQualifiersMarketUnverified: rows.filter((row) => row.status === 'MODEL_QUALIFIES_MARKET_NOT_VERIFIED'),
-    noPlay: rows.filter((row) => row.status === 'NO_PLAY'),
-    notEvaluable: rows.filter((row) => row.status === 'NO_EVALUABLE' || row.status === 'RUNTIME_PARITY_NOT_CERTIFIED'),
+    playable: marketBoard.filter((row) => row.finalStatus === 'QUALIFIES_MARKET_VERIFIED'),
+    verifiedQualifiers: marketBoard.filter((row) => row.finalStatus === 'QUALIFIES_MARKET_VERIFIED'),
+    modelQualifiersMarketUnavailable: marketBoard.filter((row) => row.finalStatus === 'MODEL_QUALIFIES_MARKET_NOT_AVAILABLE'),
+    requiredLineUnavailable: marketBoard.filter((row) => row.finalStatus === 'MARKET_AVAILABLE_REQUIRED_LINE_NOT_AVAILABLE'),
+    noEvaluableIdentity: marketBoard.filter((row) => row.finalStatus === 'NO_EVALUABLE_IDENTITY'),
+    noEvaluablePregameLineage: marketBoard.filter((row) => row.finalStatus === 'NO_EVALUABLE_PREGAME_LINEAGE'),
+    noPlay: marketBoard.filter((row) => row.finalStatus === 'NO_PLAY'),
+    notEvaluable: marketBoard.filter((row) => ['NO_EVALUABLE','NO_EVALUABLE_IDENTITY','NO_EVALUABLE_PREGAME_LINEAGE','RUNTIME_PARITY_NOT_CERTIFIED'].includes(String(row.finalStatus))),
+    marketBoard,
     all: rows,
   }
 }
