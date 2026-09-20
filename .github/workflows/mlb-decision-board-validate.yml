@@ -16,6 +16,9 @@ on:
       - 'src/services/pick2-*.ts'
       - 'src/app/performance/**'
       - 'scripts/mlb-official-pick-visibility-validate.mjs'
+      - 'scripts/mlb-official-settlement-cron-validate.mjs'
+      - 'src/app/api/cron/mlb-official-settlement/**'
+      - 'vercel.json'
       - 'src/types/mlb-*.ts'
       - 'src/components/dashboard/DashboardShell.tsx'
       - '.github/workflows/mlb-decision-board-validate.yml'
@@ -46,6 +49,8 @@ jobs:
       - run: npm ci
       - name: Validate Official Pick visibility contract
         run: node scripts/mlb-official-pick-visibility-validate.mjs
+      - name: Validate Official Pick settlement cron contract
+        run: node scripts/mlb-official-settlement-cron-validate.mjs
       - run: npm run build
 
       - name: Probe canonical Odds API credential at zero cost
