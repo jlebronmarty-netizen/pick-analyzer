@@ -18,7 +18,7 @@ export function matchesSlateFilter(game: MlbGame, rows: Pick2MlbValueBoardRow[],
   if (filter === 'Waiting') return !isStarted(game) && (Boolean(game.reason) || !game.predictionAt || statuses.includes('BLOCKED'))
   return statuses.includes(filter === 'Picks' ? 'OFFICIAL_PICK' : filter === 'Value' ? 'VALUE_CANDIDATE' : 'NO_EDGE')
 }
-export const labels: Record<DisplayStatus, string> = { OFFICIAL_PICK: 'Official Pick', VALUE_CANDIDATE: 'Value Candidate', WATCHLIST: 'Watchlist', NO_EDGE: 'No Edge', BLOCKED: 'Waiting / Blocked' }
+export const labels: Record<DisplayStatus, string> = { OFFICIAL_PICK: 'Official Pick', VALUE_CANDIDATE: 'Value Candidate', WATCHLIST: 'Watchlist', NO_EDGE: 'No Edge', BLOCKED: 'Currently Blocked' }
 export const presentationStatus = (row: Pick2MlbValueBoardRow): DisplayStatus => row.opportunity_status ?? row.status
 export const percent = (v: number | null | undefined, signed = false) => v == null || !Number.isFinite(v) ? '—' : `${signed && v > 0 ? '+' : ''}${(v * 100).toFixed(1)}%`
 export const price = (v: number | null | undefined) => v == null || !Number.isFinite(v) ? '—' : `${v > 0 ? '+' : ''}${v}`
@@ -32,7 +32,9 @@ export function friendlyReason(code: string | null | undefined): string {
   if (/STARTED|NOT_PREGAME|IN_PROGRESS/i.test(code)) return 'Game started — pregame recommendations locked'
   if (/STARTER.*MISSING|MISSING.*STARTER|STARTER.*UNKNOWN|UNKNOWN.*STARTER/i.test(code)) return 'Waiting for confirmed starter'
   if (/STARTER.*CHANG|CHANG.*STARTER/i.test(code)) return 'Starter changed — waiting for updated analysis'
-  if (/STALE.*MARKET|MARKET.*STALE|STALE.*ODDS|ODDS.*STALE|MARKET_TOO_OLD/i.test(code)) return 'Waiting for fresh odds'
+  if (/MARKET_NOT_FRESH|STALE.*MARKET|MARKET.*STALE|STALE.*ODDS|ODDS.*STALE|MARKET_TOO_OLD/i.test(code)) return 'Current market is stale — original decision price may no longer be available'
+  if (/NEW_MARKET_AWAITING_VALUE/i.test(code)) return 'A newer market snapshot is waiting for value evaluation'
+  if (/STALE_GAME_EVIDENCE/i.test(code)) return 'Current game evidence is stale — original pregame decision remains recorded'
   if (/STALE|EVIDENCE|FREEZE/i.test(code)) return 'Waiting for fresh game data'
   if (/NO_EDGE|NEGATIVE_EV|NON_POSITIVE/i.test(code)) return 'No positive edge at this price'
   if (/IDENTITY|MAPPING/i.test(code)) return 'Waiting for verified game and market details'
@@ -52,9 +54,14 @@ export function freshness(code: string | null | undefined) {
 }
 export function rowExplanation(row: Pick2MlbValueBoardRow) {
   const status = presentationStatus(row)
-  if (status === 'BLOCKED') return row.blocker_codes.length ? [...new Set(row.blocker_codes.map(friendlyReason))].join(' · ') : 'Waiting for complete analysis'
+  const currentConditions = [...new Set(row.blocker_codes.map(friendlyReason))]
+  if (status === 'BLOCKED') return currentConditions.length ? currentConditions.join(' · ') : 'Current evidence is incomplete; no pick is being created.'
   if (status === 'NO_EDGE') return 'No positive edge at this price.'
-  if (status === 'OFFICIAL_PICK') return 'Meets the recommendation criteria. Outcomes are uncertain.'
-  if (status === 'VALUE_CANDIDATE') return 'Potential value; does not qualify as an Official Pick.'
+  if (status === 'OFFICIAL_PICK') {
+    const certified = row.decision_at ? `Official Pick certified ${prTime(row.decision_at, true)}.` : 'Official Pick certified from persisted pregame evidence.'
+    const current = currentConditions.length ? ` Current state: ${currentConditions.join(' · ')}.` : ''
+    return `${certified} The original decision remains immutable even if the market later changes.${current}`
+  }
+  if (status === 'VALUE_CANDIDATE') return 'Potential value from stored pregame evidence; it does not qualify as an Official Pick.'
   return 'For monitoring only; not an Official Pick.'
 }

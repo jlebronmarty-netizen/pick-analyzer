@@ -341,7 +341,7 @@
     "src/app/layout.tsx": "40006cd7e1103ebc51528e19700a3ee7832b9e9ba881e45f5bce70d5d9d340b3",
     "src/app/mlb-value-board/page.tsx": "37eb4ae1160dba01388204500444c083ba4de45e58a29a6627bad6795a832a45",
     "src/app/page.tsx": "8ce9cf3e1720b7abbca7bf22c61714c8e26bd1679aa0e0edb8b3234d0c90a470",
-    "src/app/performance/page.tsx": "70661f96548baa6285a3c209cea300701c7b9fc5817184adc119ac367412f276",
+    "src/app/performance/page.tsx": "50577c25259173890a8fba25d8858524c7cc3fa2953d4de38008b4b909c814f0",
     "src/app/today/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
     "src/app/today/page.tsx": "211d45e7a6afd244db71c31c5c064daf8b2fc6d321a394739a8b387d74958ef6",
     "src/components/dashboard/DashboardShellClient.tsx": "eeeeda1eb1a09c9e93b8cbb0b999802dfeb3c09546da485d22b7edb52c9cd621",
@@ -349,12 +349,12 @@
     "src/components/pick2/MlbToday.tsx": "8a8eea8809ca22c142b6d47f1e5fe6d4158765b3a48d4fe607887d8fbf53c2a1",
     "src/components/pick2/MlbValueBoardClient.tsx": "85944ea723017293f1da9d0bd4cdaaf0230ef9ae16ce4fbe26a5cfa7a60f1080",
     "src/services/pick2-mlb-health.service.ts": "d9c0fe474cfa6f4e872cf1b5db4f8268e4004bc0af1bc8c420d7b62498f337e2",
-    "src/services/pick2-mlb-performance-read.service.ts": "537131cd7484a68959ff1ca94509e422ffe0e13a5982a14f9b374438ad4d923d",
+    "src/services/pick2-mlb-performance-read.service.ts": "90c7cfb3ecb7c2b8a1b9fbbba1941abb221b8ca189796a3f29e59105089c3c62",
     "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
     "src/services/pick2-mlb-settlement.ts": "7e61d78f9831637df24bae110c88ecf8937794a91cfaa3920a0d7cfdb76df2fe",
     "src/services/pick2-mlb-unattended-preflight.ts": "ccfe7dcf812f41c8fb9f7602d7fa7a45bec67eef942198fc1b6257a6f39f1cef",
     "src/services/pick2-mlb-value-board.service.ts": "b19ac743009b34ac4578f7c3131aa4514289bf0a772dcddc600b3d30e805a953",
-    "src/services/pick2-operational-projection.ts": "ccb115d4fd6337bd5cc3efb149f7869aa3954c4fe91607c2c6de56b9e4d3a430",
+    "src/services/pick2-operational-projection.ts": "ddeb226d056ffdceced2e4a22a40df000615dad23926cbba9c4cf6170c201585",
     "src/services/pick2-operational-read.service.ts": "bb579eb8c0af513aa4bc02b6be15f0efea6c4c12ef409cdac0769e888ca80edc",
     "src/services/pick2-operational-telemetry.ts": "696decb4a3ccfe6570f87d41fd621ed89bee7d413f887bd96eae7ec8980df22d",
     "src/types/pick2-value-board.ts": "4025e3da5bd62fec01c883e93c19e4de2aa19c201bcc0c32af9da685f09b6afa",
@@ -376,8 +376,8 @@
     "scripts/mlb-phase2-r10-read-model-validate.mjs": "91732a12b0bff5a95b34937fa5c4684bb7b8ffe624a7374e6ef208e5c389acf7",
     "src/services/pick2-mlb-observed-evidence.service.ts": "8063062810edfb8fce881c7cf43d5e79d1193b8bc7197f2c1e47175a1e4be539",
     "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6",
-    "src/components/pick2/MlbCards.tsx": "f3eb9720188797a24ade98dccd8c22da0a20b4632a3ca5679057d2d1984f240b",
-    "src/components/pick2/mlb-presentation.ts": "db3e833ccee1ca270d8719e02e6161e0a1a83969f5a5b30443ec917622ee2719",
+    "src/components/pick2/MlbCards.tsx": "f63ac57707e6adc3da52eab89cfd1b0023195ce1b828087f68d15b17e775b3e4",
+    "src/components/pick2/mlb-presentation.ts": "8a76eb1afc150cc9200f8cf0b50a0d28a8e1f0e7d54195ccb43b42c4efb35970",
     "src/components/dashboard/DashboardShell.tsx": "424150c084ea889d7032d4609f17b14a89da7189e2fe363ef2eb932711bbfc17",
     "src/app/today/error.tsx": "dc8a83da95361570cd05dc62882ee7f94379e71976f4d1b07356ca03a4b2ab52",
     "src/app/mlb-value-board/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
@@ -509,5 +509,23 @@
     "modelChanges": 0,
     "officialPicksChanges": 0,
     "apostarChanges": 0
+  },
+  "officialPickVisibilityRevalidation": {
+    "at": "2026-09-20",
+    "scope": "PRESENTATION_AND_READ_ONLY_PERFORMANCE_LEDGER",
+    "persistedOfficialPickPriority": "PRESERVED_OVER_CURRENT_MARKET_FRESHNESS",
+    "performanceScopes": "STORED_DECISIONS_AND_CERTIFIED_SETTLEMENTS_SEPARATED",
+    "modelChanges": 0,
+    "policyChanges": 0,
+    "officialPickWrites": 0,
+    "apostarChanges": 0,
+    "protectedHashesUpdated": [
+      "src/services/pick2-operational-projection.ts",
+      "src/services/pick2-mlb-performance-read.service.ts",
+      "src/components/pick2/MlbCards.tsx",
+      "src/components/pick2/mlb-presentation.ts",
+      "src/app/performance/page.tsx"
+    ],
+    "performanceAggregation": "ONE_UNIT_PER_UNIQUE_GAME_SIDE_SELECTION;DECISION_SNAPSHOTS_AUDIT_ONLY"
   }
 }

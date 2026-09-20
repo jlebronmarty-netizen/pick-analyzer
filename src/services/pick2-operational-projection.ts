@@ -70,7 +70,18 @@ export function projectMlbOperations(input: MlbReadInput) {
         const pick = persistedPicks.find(p => same(p.value_evaluation_id, value.id) && time(p.decision_at) >= time(value.evaluated_at))
         const blockers = [...strings(decision.blocker_codes), ...(reason ? [reason] : []), ...(!linksValid(value) ? ['VALUE_MARKET_LINKAGE_MISMATCH'] : []), ...(time(value.market_acquired_at) !== latestAcquisition ? ['NEW_MARKET_AWAITING_VALUE'] : []), ...(value.market_freshness !== 'FRESH' ? ['MARKET_NOT_FRESH'] : [])]
         const blocked = blockers.length > 0 || decision.status === 'BLOCKED'
-        const status = blocked ? 'BLOCKED' : pick && decision.status === 'OFFICIAL_PICK_ELIGIBLE' ? 'OFFICIAL_PICK' : ['OFFICIAL_PICK_ELIGIBLE', 'VALUE_CANDIDATE'].includes(decision.status) ? 'VALUE_CANDIDATE' : Number(value.consensus_edge) <= 0 || Number(value.unit_ev) <= 0 ? 'NO_EDGE' : 'WATCHLIST'
+        // A persisted Official Pick is an immutable historical decision. Current
+        // freshness/lifecycle blockers describe whether the original price is
+        // still actionable; they must never rewrite the original classification.
+        const status = pick
+          ? 'OFFICIAL_PICK'
+          : blocked
+            ? 'BLOCKED'
+            : ['OFFICIAL_PICK_ELIGIBLE', 'VALUE_CANDIDATE'].includes(decision.status)
+              ? 'VALUE_CANDIDATE'
+              : Number(value.consensus_edge) <= 0 || Number(value.unit_ev) <= 0
+                ? 'NO_EDGE'
+                : 'WATCHLIST'
         sources.push({ game_pk: Number(game.game_pk), game_date: String(game.game_date), start_time: scheduledAt, home_team: teamNames.get(game.home_team_id) ?? null, away_team: teamNames.get(game.away_team_id) ?? null,
           side: value.side as 'HOME' | 'AWAY', status: status === 'NO_EDGE' ? 'WATCHLIST' : status, opportunity_status: status, bookmaker_key: String(value.bookmaker_key), american_odds: Number(value.american_odds), model_probability: Number(value.model_probability), consensus_probability: value.consensus_probability == null ? null : Number(value.consensus_probability), consensus_edge: Number(value.consensus_edge), unit_ev: Number(value.unit_ev), book_count: Number(value.book_count), market_dispersion: Number(value.market_dispersion), market_freshness: String(value.market_freshness), starter_status: String(value.starter_status ?? 'UNKNOWN'),
           risk_flags: strings(decision.risk_flags), reason_codes: strings(decision.reason_codes), blocker_codes: [...new Set(blockers)], policy_version: MLB_POLICY,

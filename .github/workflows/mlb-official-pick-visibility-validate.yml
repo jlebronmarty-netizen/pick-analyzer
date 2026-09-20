@@ -1,0 +1,36 @@
+name: MLB Official Pick Visibility Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/services/pick2-operational-projection.ts'
+      - 'src/services/pick2-mlb-performance-read.service.ts'
+      - 'src/components/pick2/MlbCards.tsx'
+      - 'src/components/pick2/mlb-presentation.ts'
+      - 'src/app/performance/page.tsx'
+      - 'scripts/mlb-official-pick-visibility-validate.mjs'
+      - '.github/workflows/mlb-official-pick-visibility-validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Official Pick visibility contract
+        run: node scripts/mlb-official-pick-visibility-validate.mjs
+      - name: Production build
+        run: npm run build
