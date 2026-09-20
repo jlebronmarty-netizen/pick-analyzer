@@ -1,0 +1,34 @@
+name: Standard Run Line V2 Forward Freeze Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/lib/mlb-runline-v2-standard.ts'
+      - 'src/services/mlb-runline-v2-standard-forward-freeze.service.ts'
+      - 'src/app/api/cron/mlb-runline-v2-forward/route.ts'
+      - 'scripts/research/runline-standard-forward-freeze-check.mjs'
+      - '.github/workflows/runline-standard-forward-freeze-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Frozen Standard Run Line contract
+        run: node --experimental-strip-types scripts/research/runline-standard-forward-freeze-check.mjs
+      - name: Production build
+        run: npm run build
