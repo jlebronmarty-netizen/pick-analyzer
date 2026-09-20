@@ -25,11 +25,16 @@ The runtime preserves the existing frozen candidates without retuning:
 
 `(market_z_v2 + history + fatigue_travel) / sqrt(3) >= 0.889684454234473`
 
-Frozen market normalization:
+Frozen V2 market normalization:
 
-- mean = `0.57629591863738`
-- sd = `0.0754955595992703`
-- `market_z_v2 = (market_p_dog - mean) / sd`
+- transform: `market_logit = ln(market_p_dog / (1 - market_p_dog))`
+- development corpus: **4,313 rows** = 2025 + 2026 through 2026-09-10
+- `market_logit_mean = 0.334503755055181`
+- `market_logit_sd_samp = 0.354461459732156`
+- `market_z_v2 = (market_logit - market_logit_mean) / market_logit_sd_samp`
+- replay parity: **4,313/4,313 exact**, max diff **0**
+
+The raw 2025 `market_p_dog` mean/SD (`0.57629591863738` / `0.0754955595992703`) are descriptive market-probability statistics, **not** the V2 `market_z_v2` transform.
 
 Broad Union = Core OR Transfer.
 
@@ -94,6 +99,9 @@ Full reference parity:
 - earliest/latest opening timestamps: **103/103**
 - resulting `market_p_dog`: **103/103 exact**
 - max `market_p_dog` diff: **0**
+- resulting `market_logit`: exact by definition
+- resulting `market_z_v2`: **103/103 exact** on the reference window
+- full V2 development-corpus `market_z_v2` replay: **4,313/4,313 exact**, max diff **0**
 
 Historical doubleheader evidence confirmed that canonical identity must use
 teams + scheduled start rather than stale legacy provider gamePk metadata.
