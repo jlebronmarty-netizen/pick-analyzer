@@ -16,6 +16,10 @@ import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v
 import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'
 import { captureMlbApprovedPropMarkets } from '@/services/mlb-approved-prop-market-capture.service'
 import { evaluateMlbApprovedPropsDaily } from '@/services/mlb-approved-prop-daily-evaluation.service'
+import {
+  captureMlbMoneylinePregameStarterEvidence,
+  materializeMlbMoneylineResearchDaily,
+} from '@/services/mlb-moneyline-daily-materializer.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -251,6 +255,43 @@ async function safePitcherWinForwardSettlement(targetDate: string) {
   }
 }
 
+async function safeMoneylinePregameStarterEvidence(targetDate: string) {
+  try {
+    return await captureMlbMoneylinePregameStarterEvidence(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'MLB_ML_STARTER_EVIDENCE_CAPTURE_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      providerCallsMade: 0,
+      error: errorMessage(error, 'Unknown MLB Moneyline starter evidence capture error'),
+    }
+  }
+}
+
+async function safeMoneylineDailyMaterialization(targetDate: string) {
+  try {
+    return await materializeMlbMoneylineResearchDaily(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'MLB_ML_XYEAR_MATERIALIZER_V4_FAILED_NON_BLOCKING',
+      targetDate,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      modelRetuned: false,
+      providerCallsMade: 0,
+      error: errorMessage(error, 'Unknown MLB Moneyline daily materialization error'),
+    }
+  }
+}
+
 async function safeMoneylineForwardFreeze(historyReadiness: { ready: boolean; targetDate: string }) {
   try {
     return await runMlbMoneylineForwardFreeze({ historyReadiness })
@@ -479,8 +520,15 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     if (explicitDate) {
       const result = await refreshMlbStatcastDaily({ date: explicitDate })
       const readiness = await getMlbDailyHistoryReadiness({ date: explicitDate })
+      const moneylineResearchMaterialization = readiness.ready && typeof readiness.targetDate === 'string'
+        ? await safeMoneylineDailyMaterialization(readiness.targetDate)
+        : null
       const status = result.success ? (readiness.ready ? 200 : 409) : failureStatus(result)
-      return apiOk({ ...result, dailyHistoryReadiness: readiness }, id, { status, headers: { 'Cache-Control': 'no-store' } })
+      return apiOk({
+        ...result,
+        dailyHistoryReadiness: readiness,
+        moneylineResearchMaterialization,
+      }, id, { status, headers: { 'Cache-Control': 'no-store' } })
     }
 
     // Reuse this already-scheduled authenticated route for one bounded daily
@@ -494,6 +542,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // Statcast catch-up. This preserves fixed-clock evidence even if a separate
     // ingestion/readiness stage fails later in the request.
     const operatingClock = puertoRicoClock()
+    const moneylinePregameStarterEvidence = await safeMoneylinePregameStarterEvidence(operatingClock.date)
     const pa12ErForwardShadowFreeze = await safePa12ErForwardShadowFreeze()
     const pa12ErForwardShadowSettlement = await safePa12ErForwardShadowSettlement(addDays(operatingClock.date, -1))
 
@@ -516,6 +565,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
           approvedPropMarketCapture,
           pa12ErForwardShadowFreeze,
           pa12ErForwardShadowSettlement,
+          moneylinePregameStarterEvidence,
+          moneylineResearchMaterialization: null,
         }, id, {
           status: failureStatus(result),
           headers: { 'Cache-Control': 'no-store' },
@@ -553,6 +604,13 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       analyticsRepair = await refreshMlbStatcastDailyAnalytics()
       readiness = await getMlbDailyHistoryReadiness()
     }
+
+    // Once previous-day history is certified, materialize the leakage-safe Moneyline
+    // research layer before any downstream settlement/freeze consumers inspect it.
+    // Missing timestamped starter/lineup evidence remains NULL and route-gated.
+    const moneylineResearchMaterialization = readiness.ready && typeof readiness.targetDate === 'string'
+      ? await safeMoneylineDailyMaterialization(readiness.targetDate)
+      : null
 
     // Previous-day outcomes are read only after daily history/analytics are ready.
     // This is a separate research settlement stage and cannot affect today's freeze.
@@ -614,6 +672,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       approvedPropMarketCapture,
       pa12ErForwardShadowFreeze,
       pa12ErForwardShadowSettlement,
+      moneylinePregameStarterEvidence,
+      moneylineResearchMaterialization,
     }, id, {
       status: success ? 200 : 409,
       headers: { 'Cache-Control': 'no-store' },
