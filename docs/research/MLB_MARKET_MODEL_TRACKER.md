@@ -335,6 +335,36 @@ Canonical detail:
 
 `docs/research/MLB_PITCHER_WIN_FORWARD_NUMERIC_V1.md`
 
+## 2026-09-20 MLB third-pass architecture closeout — authoritative
+
+State:
+
+`THIRD_PASS_COMPLETE_FOR_LINE_FREE_REVISIT_FAMILIES`
+
+A bounded third-pass tested materially different transparent architectures on the already-seen historical development surface only. No 2026-09-20+ outcomes were opened for these probes and no failed family was threshold-rescued.
+
+Results:
+
+- **F1 NRFI/YRFI independent half-scoring model** — best n>=50: **34/52 = 65.38%**; worst month **0.00%**; no freeze.
+- **F1 Moneyline directional half-scoring model** — best n>=30: **21/37 = 56.76%**; worst month **0.00%**; no freeze.
+- **F1 3-Way DRAW via low-scoring probability** — best n>=50: **35/52 = 67.31%**; worst month **0.00%**; no freeze.
+- **F3 Moneyline period-run expectation model** — best n>=50: **103/162 = 63.58%**; worst month **41.67%**; no freeze.
+- **F5 Moneyline team-strength + starter + offense agreement** — tested fixed gates at **57.91%**, **54.89%**, and **57.32%**; no freeze.
+- **F7 Moneyline period-run + starter + bullpen model** — best n>=50: **42/58 = 72.41%**; worst month **0.00%**; no freeze.
+- **Game Totals transparent extreme-environment agreement** — best n>=20: **12/21 = 57.14%**; worst month **30.00%**; no freeze.
+
+Conclusion:
+
+- none of these line-free third-pass architectures reached the >=75% + stability gate;
+- do not continue threshold hunting inside these same families;
+- additional progress should come from new information, exact historical lines, materially different features, or genuinely new forward evidence;
+- historical line-dependent period spreads/totals/team totals remain blocked until exact sportsbook points are acquired;
+- historical Odds API credits consumed by this third pass: **0**.
+
+Canonical detail:
+
+`docs/research/MLB_THIRD_PASS_DATA_SOURCE_AUDIT_20260920.md`
+
 ## 2026-09-19 MLB second-pass revisit closeout — authoritative
 
 State:
