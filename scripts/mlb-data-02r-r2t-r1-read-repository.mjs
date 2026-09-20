@@ -6,12 +6,19 @@ const columns = ['id', 'game_pk', 'game_date', 'game_year', 'canonical_home_team
   'description', 'type', 'release_speed', 'launch_speed', 'estimated_woba_using_speedangle', 'post_home_score',
   'post_away_score', 'raw_payload_digest', 'ingested_at', 'created_at'].join(',')
 const requireRead = (condition, code) => { if (!condition) throw new Error(`R2TR1_READ_BLOCK:${code}`) }
-const RAW_READ_CONCURRENCY = 48
+const RAW_READ_CONCURRENCY = 16
 const INVENTORY_SENTINEL_BATCH = 150
 
 export function createPregameReadRepository(db) {
   const read = async (query, label) => {
     const result = await query
+    if (result.error) {
+      console.error(JSON.stringify({
+        event: 'MLB_DEPENDENCY_READ_FAILED',
+        label,
+        code: result.error.code ?? 'UNKNOWN',
+      }))
+    }
     requireRead(!result.error, `${label}:${result.error?.code ?? 'UNKNOWN'}`)
     return result
   }
