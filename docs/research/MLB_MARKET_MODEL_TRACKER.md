@@ -27,6 +27,8 @@ The lineage was recovered exactly against 103 canonical 2026 V2 rows (Sep01-Sep1
 - `dogfav_hand = DOG/FAVORITE`: **103/103 exact**
 - opening-proxy identity/line/prices/books/timestamps: **103/103 exact**
 - `market_p_dog`: **103/103 exact**, max diff **0**
+- `market_z_v2`: logit-normalized, **4,313/4,313 exact replay**, max diff **0**
+- canonical V2 transform: `logit(p_dog)`, mean `0.334503755055181`, sample SD `0.354461459732156`
 
 Canonical market policy remains
 `MLB_RUNLINE_MARKET_2026_V1_EARLIEST_CAPTURED_PAIRED_MODAL_PROXY`.
