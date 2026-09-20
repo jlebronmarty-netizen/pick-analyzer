@@ -261,7 +261,7 @@
     "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
     "scripts/mlb-data-02r-r2t-production-bindings.mjs": "6333a3fe53d9530f75cb519f22541850f6ef6aa2d337ea1907a6ac581ae799ea",
     "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
-    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "5982dbf0dfcb85360589ab97eb01fccddace46c95fe80d67aed20515a9d94fed",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "aa3f9a9538c5f6579121e70900385ac8461dacdecced694e6d2629d8d3fa1a90",
     "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
     "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "40ff74968c54ab07d99d1e5145eeeb71a9b8c8b275d9d2f902508e89f8030ef2",
     "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
@@ -447,5 +447,20 @@
     "marketPolicyChanges": 0,
     "officialPickPolicyChanges": 0,
     "semantics": "Same readDependencies contract and frozen dependency union; only three independent read-only inventory scans are allowed concurrently."
+  },
+  "dependencyReadPerformanceRevalidation": {
+    "at": "2026-09-20T15:12:00Z",
+    "scope": "READ_SCHEDULING_ONLY",
+    "inventorySentinel": "at_bat_number=1 AND pitch_number=1",
+    "sentinelCoverage2026": {
+      "rawGames": 2324,
+      "sentinelGames": 2324,
+      "missing": 0
+    },
+    "fullReadConcurrency": 48,
+    "featureMathChanges": 0,
+    "dependencyFilterChanges": 0,
+    "cutoffChanges": 0,
+    "provenanceGateChanges": 0
   }
 }
