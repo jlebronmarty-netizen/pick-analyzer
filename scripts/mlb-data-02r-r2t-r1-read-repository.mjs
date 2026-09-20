@@ -30,10 +30,22 @@ export function createPregameReadRepository(db) {
       const seasonStart = `${target.gameDate.slice(0, 4)}-01-01`
       const teamIds = [target.homeTeamId, target.awayTeamId]
       const pitcherIds = [starters.home.mlbam_pitcher_id, starters.away.mlbam_pitcher_id]
-      const games = await read(db.from('pick2_mlb_games').select('game_pk,home_team_id,away_team_id,game_date')
-        .gte('game_date', seasonStart).lt('game_date', target.performanceCutoff)
-        .or(teamIds.flatMap((team) => [`home_team_id.eq.${team}`, `away_team_id.eq.${team}`]).join(',')).limit(501), 'team_dependency_games')
-      requireRead(games.data.length < 501, 'DEPENDENCY_GAME_CAP')
+      // Avoid PostgREST .or(...) parsing on canonical team IDs that contain
+      // colons. Two bounded IN reads are semantically identical to
+      // (home_team_id IN teamIds OR away_team_id IN teamIds), and their union is
+      // deduplicated by game_pk below.
+      const [homeGames, awayGames] = await Promise.all([
+        read(db.from('pick2_mlb_games').select('game_pk,home_team_id,away_team_id,game_date')
+          .gte('game_date', seasonStart).lt('game_date', target.performanceCutoff)
+          .in('home_team_id', teamIds).limit(501), 'team_dependency_home_games'),
+        read(db.from('pick2_mlb_games').select('game_pk,home_team_id,away_team_id,game_date')
+          .gte('game_date', seasonStart).lt('game_date', target.performanceCutoff)
+          .in('away_team_id', teamIds).limit(501), 'team_dependency_away_games'),
+      ])
+      requireRead(homeGames.data.length < 501 && awayGames.data.length < 501, 'DEPENDENCY_GAME_CAP')
+      const gamesByPk = new Map()
+      for (const row of [...homeGames.data, ...awayGames.data]) gamesByPk.set(Number(row.game_pk), row)
+      const games = { data: [...gamesByPk.values()] }
       const gamePks = new Set(games.data.map((row) => row.game_pk))
       // Discover appearances outside current franchises, then read complete games
       // so the unchanged builder can identify historical starter/bullpen context.
