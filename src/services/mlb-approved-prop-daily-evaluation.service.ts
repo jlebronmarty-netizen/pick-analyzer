@@ -488,10 +488,9 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
   }
 
   const frozenAt = now.toISOString()
-  const [quotes, features, playerMap, pitcherWalksParity] = await Promise.all([
+  const [quotes, features, pitcherWalksParity] = await Promise.all([
     loadQuotes(targetDate),
     loadPitcherFeatures(targetDate),
-    loadPlayers(),
     getPitcherWalksRuntimeParity(),
   ])
   const gameByPk = new Map(games.map((game) => [Number(game.game_pk), game]))
@@ -702,18 +701,12 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
   ] as const
 
   const exactBatterMarkets = new Set(exactBatterDefs.map((item) => item.market))
-  const exactBatterNames = Array.from(new Set(
+  const batterIds = Array.from(new Set(
     quotes
       .filter((quote) => exactBatterMarkets.has(quote.market as any))
-      .map((quote) => quotePlayer(quote))
-      .filter(Boolean),
+      .map((quote) => quotePlayerId(quote))
+      .filter((value): value is number => value !== null),
   ))
-  const resolved = new Map<string, { id: number; name: string }>()
-  for (const name of exactBatterNames) {
-    const matches = playerMap.get(normalizePerson(name)) ?? []
-    if (matches.length === 1) resolved.set(normalizePerson(name), matches[0])
-  }
-  const batterIds = Array.from(new Set(Array.from(resolved.values()).map((player) => player.id)))
   const [statcastBatterLogs, tbLogs, batterTargetFeatureKeys] = await Promise.all([
     loadBatterHits(batterIds, targetDate),
     loadBatterTb(batterIds, targetDate),
@@ -721,42 +714,45 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
   ])
 
   for (const def of exactBatterDefs) {
-    const names = Array.from(new Set(
-      quotes.filter((quote) => quote.market === def.market).map((quote) => quotePlayer(quote)).filter(Boolean),
-    ))
-    for (const name of names) {
-      const samePlayerQuotes = quotes.filter(
-        (quote) => quote.market === def.market && normalizePerson(quotePlayer(quote)) === normalizePerson(name),
-      )
-      const gamePk = samePlayerQuotes.map(quoteGamePk).find((value): value is number => value !== null)
-      if (gamePk === undefined) continue
-      const game = gameByPk.get(gamePk)
+    const targets = new Map<string, { gamePk: number; playerId: number | null; playerName: string }>()
+    for (const quoteRow of quotes) {
+      if (quoteRow.market !== def.market) continue
+      const gamePk = quoteGamePk(quoteRow)
+      const playerId = quotePlayerId(quoteRow)
+      const playerName = quoteCanonicalPlayerName(quoteRow) || quotePlayer(quoteRow)
+      if (gamePk === null || !playerName) continue
+      const key = String(gamePk) + ':' + String(playerId ?? 'UNRESOLVED') + ':' + normalizePerson(playerName)
+      targets.set(key, { gamePk, playerId, playerName })
+    }
+
+    for (const target of targets.values()) {
+      const game = gameByPk.get(target.gamePk)
       if (!game) continue
-      const player = resolved.get(normalizePerson(name))
-      const nameQuote = bestQuote({
-        quotes,
-        gamePk,
-        market: def.market,
-        playerName: name,
-        direction: 'UNDER',
-        line: def.line,
-      })
-      if (!player) {
+
+      if (target.playerId === null) {
+        const nameQuote = bestQuote({
+          quotes,
+          gamePk: target.gamePk,
+          market: def.market,
+          playerName: target.playerName,
+          direction: 'UNDER',
+          line: def.line,
+        })
         rows.push(ledgerRow({
           date: targetDate,
           game,
           market: def.market,
           candidateId: def.candidateId,
           playerId: null,
-          playerName: name,
+          playerName: target.playerName,
           direction: 'UNDER',
           line: def.line,
           accuracy: def.accuracy,
           quote: nameQuote,
           status: 'NO_EVALUABLE',
-          blocker: 'EXACT_MLBAM_NAME_MATCH_NOT_UNIQUE',
+          blocker: 'EXACT_MLBAM_IDENTITY_NOT_PERSISTED_IN_PREGAME_SNAPSHOT',
           marketSnapshot: {
-            observedLines: observedLines(quotes, gamePk, def.market, name),
+            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName),
             exactMlbamIdentity: false,
             fuzzyMatchingUsed: false,
           },
@@ -772,8 +768,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           game,
           market: def.market,
           candidateId: def.candidateId,
-          playerId: player.id,
-          playerName: name,
+          playerId: target.playerId,
+          playerName: target.playerName,
           direction: 'UNDER',
           line: def.line,
           accuracy: def.accuracy,
@@ -781,7 +777,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           blocker: 'ADDITIONAL_BATTER_RUNTIME_PARITY_NOT_CERTIFIED',
           featureSnapshot: { parityContract: parity.contract },
           marketSnapshot: {
-            observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
           },
@@ -792,22 +788,22 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
 
       const quote = bestQuote({
         quotes,
-        gamePk,
+        gamePk: target.gamePk,
         market: def.market,
-        playerName: name,
-        playerId: player.id,
+        playerName: target.playerName,
+        playerId: target.playerId,
         direction: 'UNDER',
         line: def.line,
       })
 
-      if (!batterTargetFeatureKeys.has(String(gamePk) + ':' + String(player.id))) {
+      if (!batterTargetFeatureKeys.has(String(target.gamePk) + ':' + String(target.playerId))) {
         rows.push(ledgerRow({
           date: targetDate,
           game,
           market: def.market,
           candidateId: def.candidateId,
-          playerId: player.id,
-          playerName: name,
+          playerId: target.playerId,
+          playerName: target.playerName,
           direction: 'UNDER',
           line: def.line,
           accuracy: def.accuracy,
@@ -820,7 +816,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
             requiredSourceRule: 'source_game_date < target_game_date',
           },
           marketSnapshot: {
-            observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
           },
@@ -832,7 +828,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       const sourceRows = def.source === 'total_bases' ? tbLogs : statcastBatterLogs
       const projection = batterLinearProjection(
         sourceRows,
-        player.id,
+        target.playerId,
         def.metric,
         def.intercept,
         def.slope,
@@ -843,8 +839,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           game,
           market: def.market,
           candidateId: def.candidateId,
-          playerId: player.id,
-          playerName: name,
+          playerId: target.playerId,
+          playerName: target.playerName,
           direction: 'UNDER',
           line: def.line,
           accuracy: def.accuracy,
@@ -853,7 +849,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           blocker: 'MINIMUM_10_PRIOR_GAMES_NOT_MET',
           featureSnapshot: { parityContract: parity.contract, strictTargetFeature: true },
           marketSnapshot: {
-            observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+            observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
           },
@@ -861,14 +857,15 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         }))
         continue
       }
+
       const qualifies = projection.predicted <= def.maxProjection
       rows.push(ledgerRow({
         date: targetDate,
         game,
         market: def.market,
         candidateId: def.candidateId,
-        playerId: player.id,
-        playerName: name,
+        playerId: target.playerId,
+        playerName: target.playerName,
         direction: 'UNDER',
         line: def.line,
         accuracy: def.accuracy,
@@ -888,7 +885,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           latestPriorDate: projection.latestPriorDate,
         },
         marketSnapshot: {
-          observedLines: observedLines(quotes, gamePk, def.market, name, player.id),
+          observedLines: observedLines(quotes, target.gamePk, def.market, target.playerName, target.playerId),
           exactMlbamIdentity: true,
           fuzzyMatchingUsed: false,
         },
