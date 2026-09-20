@@ -34,7 +34,7 @@ Key gates:
 
 Triples remains LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED.
 
-The implementation is not to be labeled final READY until the code PR is merged and the resulting Vercel production deployment is READY.
+`PR #111` is merged to `main` at `71bc3e2ac438b5bcd2eefb2dab3732aa81e3492c`, and Vercel production deployment `dpl_2JA4Nw4kUqVLx2qenrniGYSsTYXt` is READY. The remaining fail-closed gate is the first future strictly-pregame `MLB_APPROVED_PROP_MARKET_CAPTURE_V1` snapshot plus persisted daily evaluator crossing. No such capture job exists for 2026-09-19 because production was reached after today's 10:15/10:45 Puerto Rico capture window; do not retroconstruct it.
 
 
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
