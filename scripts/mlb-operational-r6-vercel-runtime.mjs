@@ -60,6 +60,37 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
     }
   }
 
+  if(!hostDry && pending.length===1) {
+    const failed=pending[0]
+    const safeDependencyFailure=
+      failed.status==='FAILED' &&
+      failed.checkpoint?.stage==='DEPENDENCY_SCOPE' &&
+      failed.checkpoint?.failure?.stage==='DEPENDENCY_SCOPE' &&
+      Array.isArray(failed.checkpoint?.completed) &&
+      failed.checkpoint.completed.includes('DEPENDENCY_SCOPE') &&
+      Array.isArray(failed.dml_accounting?.stages) &&
+      failed.dml_accounting.stages.length===0 &&
+      Number(failed.odds_calls)===0
+    if(safeDependencyFailure) {
+      const expectedDigest=sha256({
+        runId:failed.run_id,
+        packageSha:failed.package_sha,
+        runAsOf:new Date(failed.run_as_of).toISOString(),
+        revision:Number(failed.revision),
+        status:failed.status,
+        checkpoint:failed.checkpoint,
+        dml:failed.dml_accounting,
+        providers:[failed.mlb_official_calls,failed.statcast_calls,failed.odds_calls],
+      })
+      const disposed=await newClient().disposeDependencyFailure({runId:failed.run_id,expectedDigest})
+      ensure(disposed.status==='TERMINAL_PARTIAL_PRESERVED','DEPENDENCY_FAILURE_DISPOSITION')
+      results.push({mode:failed.checkpoint.mode,status:'TERMINAL_PARTIAL_PRESERVED',runId:failed.run_id,recovery:'DEPENDENCY_FAILURE_DISPOSED'})
+      inventory=await newClient().inspect()
+      pending=pendingRuns(inventory)
+      ensure(pending.length===0,'DEPENDENCY_FAILURE_DISPOSITION')
+    }
+  }
+
   if(hostDry)ensure(!pending.length || pending[0].checkpoint.mode==='HOST_DRY','LIVE_RUN_PENDING')
   const modes=hostDry?['HOST_DRY']:[...new Set([...(pending.length?[pending[0].checkpoint.mode]:[]),...scheduledModes(at)])]
   for(const mode of modes) {
