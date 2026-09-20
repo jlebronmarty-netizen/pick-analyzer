@@ -8,6 +8,10 @@ import {
   type ApprovedFiveMarket,
   type ApprovedModelTarget,
 } from '@/services/mlb-approved-five-market-runtime.service'
+import {
+  APPROVED_PROP_LINE_CONTRACT_VERSION,
+  assertApprovedPropLineContract,
+} from '@/services/mlb-approved-prop-line-contract'
 
 const SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const JOB_TYPE = 'mlb_approved_prop_future_recovery_v1'
@@ -114,28 +118,52 @@ function requiredOutcome(direction: string) {
   return direction === 'UNDER' ? 'under' : 'over'
 }
 
-function bestQuote(input: {
+function strictPregameQuote(quote: Quote, scheduledAt: string) {
+  const quoteAt = Date.parse(quote.snapshot_time)
+  const startAt = Date.parse(scheduledAt)
+  const price = n(quote.price)
+  return Number.isFinite(quoteAt) && Number.isFinite(startAt) && quoteAt < startAt &&
+    Boolean(String(quote.sportsbook ?? '').trim()) && price !== null && price !== 0
+}
+
+function realLineState(input: {
   quotes: Quote[]
   gamePk: number
   market: ApprovedFiveMarket
   playerId: number
   direction: 'UNDER' | 'OVER'
   line: number
+  scheduledAt: string
 }) {
-  const outcome = requiredOutcome(input.direction)
-  return input.quotes
-    .filter((quote) =>
-      quoteGamePk(quote) === input.gamePk &&
-      quote.market === input.market &&
-      quotePlayerId(quote) === input.playerId &&
-      quote.outcome.toLowerCase() === outcome &&
-      n(quote.line) !== null &&
-      Math.abs(Number(quote.line) - input.line) < 1e-9
-    )
-    .sort((a, b) =>
-      (n(b.price) ?? -Infinity) - (n(a.price) ?? -Infinity) ||
-      b.snapshot_time.localeCompare(a.snapshot_time)
-    )[0] ?? null
+  const identityRows = input.quotes.filter((quote) =>
+    quoteGamePk(quote) === input.gamePk &&
+    quote.market === input.market &&
+    quotePlayerId(quote) === input.playerId
+  )
+  const pregameRows = identityRows.filter((quote) => strictPregameQuote(quote, input.scheduledAt))
+  const sideRows = pregameRows.filter((quote) => quote.outcome.toLowerCase() === requiredOutcome(input.direction))
+  const exactLineRows = sideRows.filter((quote) => {
+    const line = n(quote.line)
+    return line !== null && Math.abs(line - input.line) < 1e-9
+  })
+  const observedLines = Array.from(new Set(
+    pregameRows.map((quote) => n(quote.line)).filter((line): line is number => line !== null),
+  )).sort((a, b) => a - b)
+  const quote = [...exactLineRows].sort((a, b) =>
+    (n(b.price) ?? -Infinity) - (n(a.price) ?? -Infinity) ||
+    b.snapshot_time.localeCompare(a.snapshot_time)
+  )[0] ?? null
+  return {
+    quote,
+    identityRows,
+    pregameRows,
+    observedLines,
+    marketAvailable: pregameRows.length > 0,
+    requiredLineAvailable: pregameRows.some((row) => {
+      const line = n(row.line)
+      return line !== null && Math.abs(line - input.line) < 1e-9
+    }),
+  }
 }
 
 async function pagedRead<T>(
@@ -233,14 +261,22 @@ export async function recoverMlbApprovedPropsFutureGames(input: {
     const game = gameByPk.get(evaluation.gamePk)
     if (!game || Date.parse(game.scheduled_at) <= now.getTime()) continue
     const def = DEFS[evaluation.market]
-    const quote = bestQuote({
+    const lineContract = assertApprovedPropLineContract({
+      candidateId: def.candidateId,
+      market: evaluation.market,
+      direction: def.direction,
+      requiredLine: def.line,
+    })
+    const lineState = realLineState({
       quotes,
       gamePk: evaluation.gamePk,
       market: evaluation.market,
       playerId: evaluation.playerId,
       direction: def.direction,
       line: def.line,
+      scheduledAt: game.scheduled_at,
     })
+    const quote = lineState.quote
     const status = !evaluation.parityCertified
       ? 'RUNTIME_PARITY_NOT_CERTIFIED'
       : !evaluation.evaluable
@@ -249,7 +285,13 @@ export async function recoverMlbApprovedPropsFutureGames(input: {
           ? 'NO_PLAY'
           : quote
             ? 'QUALIFIES_MARKET_VERIFIED'
-            : 'MODEL_QUALIFIES_MARKET_NOT_VERIFIED'
+            : lineState.identityRows.length > 0 && lineState.pregameRows.length === 0
+              ? 'NO_EVALUABLE_PREGAME_LINEAGE'
+              : !lineState.marketAvailable
+                ? 'MODEL_QUALIFIES_MARKET_NOT_AVAILABLE'
+                : !lineState.requiredLineAvailable
+                  ? 'MARKET_AVAILABLE_REQUIRED_LINE_NOT_AVAILABLE'
+                  : 'MODEL_QUALIFIES_MARKET_NOT_AVAILABLE'
     const id = 'approvedprop_' + hash([
       targetDate,
       evaluation.gamePk,
@@ -286,9 +328,22 @@ export async function recoverMlbApprovedPropsFutureGames(input: {
       },
       market_snapshot: {
         futureOnlyRecovery: true,
+        lineContractVersion: APPROVED_PROP_LINE_CONTRACT_VERSION,
+        lineScope: lineContract.lineScope,
+        multipleLinesCertified: lineContract.multipleLinesCertified,
+        observedLines: lineState.observedLines,
+        marketAvailable: lineState.marketAvailable,
+        requiredLineAvailable: lineState.requiredLineAvailable,
         quoteCapturedBeforeTargetFirstPitch: Boolean(quote),
         exactMlbamIdentity: true,
         fuzzyMatchingUsed: false,
+        actualQuote: quote ? {
+          oddsSnapshotId: quote.id,
+          sportsbook: quote.sportsbook,
+          line: n(quote.line),
+          price: n(quote.price),
+          quoteTimestamp: quote.snapshot_time,
+        } : null,
       },
       frozen_at: frozenAt,
       research_only: true,
