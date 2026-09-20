@@ -275,6 +275,10 @@ async function safeApprovedPropMarketCapture(id: string) {
     const clock = puertoRicoClock()
     return await captureMlbApprovedPropMarkets({ operatingDate: clock.date, requestId: id })
   } catch (error) {
+    console.error(JSON.stringify({
+      event: 'MLB_APPROVED_PROP_CAPTURE_FAILED',
+      error: errorMessage(error, 'Unknown approved MLB prop capture error').slice(0, 300),
+    }))
     return {
       success: false,
       status: 'APPROVED_PROP_CAPTURE_FAILED_NON_BLOCKING',
