@@ -64,7 +64,7 @@ Runtime parity is certified before enablement:
 Canonical evidence:
 
 - `docs/research/MLB_APPROVED_PROPS_DAILY_RUNTIME_V1.md`;
-- `artifacts/research/mlb_five_frozen_markets_daily_runtime_parity_20260919.json`.
+- `artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json`.
 
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
