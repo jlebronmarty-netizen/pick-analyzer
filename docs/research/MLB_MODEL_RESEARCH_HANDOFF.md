@@ -7,6 +7,49 @@
 
 
 
+## 2026-09-20 Moneyline context components V6 — authoritative
+
+The five previously non-evaluable non-Lineup PREGAME component families are now parity-certified and
+materialized leakage-safe:
+
+- Offense
+- Bullpen
+- Home/Away
+- Fatigue/Travel
+- Defense Context
+
+Sep14 gold parity before DDL:
+
+- Offense **120/120** feature cells exact;
+- Bullpen **120/120** exact;
+- Home/Away **60/60** exact;
+- Fatigue/Travel **100/100** exact;
+- Defense Context **30/30** exact;
+- component scores **10/10 exact for each family**.
+
+Post-repair Sep18/Sep19 both have **15/15** evaluable rows for all five families.
+Lineup/Matchup remains **0/15** because no timestamped pregame lineup evidence exists.
+Starter remains evidence-gated at **12/15 Sep18** and **13/15 Sep19**.
+
+Daily audit V7 now requires Team Strength, Recent Form, Offense, Bullpen, Home/Away,
+Fatigue/Travel, Defense Context and History to be complete for every source game before the
+warehouse ledger can be `COMPLETE`. Missing Starter/Lineup evidence remains NULL fail-closed.
+
+Final idempotence gate: repeated Sep18+Sep19 materialization changed **0** component rows,
+maximum score difference **0**.
+
+Preserved exactly:
+
+- 69 frozen forward rows; digest `0ec434e1ca55b9cfc88dab0556a2f410`;
+- Sep18/Sep19 priors digest `1d93520502e45f4a6ee2c13808910ec4`;
+- `pregame_high_conf_home_v2` registry digest `edcc79d80888bd35edc23748ed6e3705`;
+- `STARTER_POPULATION_AUTHORITY = PRIOR_STARTS_ONLY`;
+- Official Picks unchanged;
+- APOSTAR disabled.
+
+Canonical detail:
+`docs/research/MLB_MONEYLINE_CONTEXT_COMPONENTS_V6_CERTIFICATION.md`.
+
 ## 2026-09-20 Moneyline daily xyear repair — authoritative
 
 `STARTER_POPULATION_AUTHORITY = PRIOR_STARTS_ONLY`.
