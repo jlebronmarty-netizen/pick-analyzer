@@ -102,31 +102,32 @@ Recovered exact player-game labels:
 
 This unblocked the 2025 development labels for Runs/RBI/HRRBI/SB and independently supports pitcher outcomes.
 
-### SportsDataIO
+### SportsDataIO — legacy stored data only, NOT an active subscription
 
-Official documentation says MLB Game Lines include full-game and partial-game markets such as 1st-5th, with opening/closing and line movement.
+User-confirmed active subscriptions do **not** include SportsDataIO.
 
-Observed project evidence:
-- `GameOddsByDate` succeeded with HTTP 200 on 2026-08-11.
-- project persisted current operating-day moneyline / total / run_line snapshots.
-- current normalized SportsDataIO snapshot markets do **not** include F1/F3/F5/F7 period markets or team totals.
-- a verification request to `/api/mlb/odds/json/GamesByDate/2026-SEP-16` returned HTTP **401**.
-- therefore current authorization/credential access must be repaired/verified before using SportsDataIO for additional line recovery.
-- SportsDataIO Historical Betting Archive is a separate historical-access surface; access is account-dependent and should not be assumed.
+Project history still contains legacy/quarantined SportsDataIO rows and old runtime compatibility code. Those rows may be used only as already-stored historical evidence when their lineage is independently valid. They must **not** be treated as an available provider, current entitlement, fallback subscription, or future acquisition source.
 
-### BALLDONTLIE
+The current odds-authority code still contains legacy SportsDataIO stage/rollback concepts. Do not change product authority automatically from this research branch; a production authority change requires an explicit gate. Until then, any path that requires new SportsDataIO calls must fail closed.
 
-Current MLB documentation:
-- betting odds available starting in 2026;
-- opening odds endpoint exists;
-- complete current market catalogs are available for DraftKings/FanDuel;
-- historical opening player props require GOAT;
-- live player props are not stored historically outside the opening-props endpoint.
+### BALLDONTLIE GOAT — active subscription / first acquisition priority
 
-Potential use:
-- 2026 opening/market recovery where exact market structure exists;
-- independent price/line cross-check;
-- not a substitute for 2025 period-line history unless documented coverage proves it.
+User-confirmed active subscription: **GOAT**.
+
+Current MLB documentation confirms:
+- historical opening betting odds are available through `/mlb/v1/odds/opening`, with coverage limited to the most recently completed season and ongoing season where available;
+- opening player props are available through `/mlb/v1/odds/player_props/opening` and require GOAT;
+- complete current market catalogs are available for DraftKings and FanDuel through `/mlb/v1/odds/markets`;
+- current player props support FanDuel, DraftKings, Caesars, BetMGM, BetRivers and Fanatics;
+- live/current player props are not a complete historical archive, so opening-props is the historical source of record for 2026 prop research.
+
+Priority use:
+1. recover 2026 opening player-prop lines/prices for certified prop models;
+2. inspect current complete market catalogs for exact supported period/team-total market structures;
+3. use opening game odds for 2026 full-game line cross-checks;
+4. do not assume 2025 coverage because MLB opening-odds historical coverage is limited to recent/ongoing seasons.
+
+BALLDONTLIE is the preferred 2026 acquisition source before spending The Odds API historical credits.
 
 ### The Odds API
 
@@ -141,8 +142,9 @@ Policy:
 
 ## Current priority order
 
-1. Repair/verify SportsDataIO authorization and inspect BettingMarket/period access without exposing secrets.
-2. Probe BALLDONTLIE 2026 opening/market coverage if an authorized key is available.
-3. Use recovered Retrosheet labels to expand outcome research (already active).
-4. Preserve F1 NRFI/F1 ML/F5 ML/Game Totals third-pass failures and stop tuning these architectures.
-5. Reserve The Odds API historical credits for exact line gaps that cannot be filled elsewhere.
+1. Integrate/probe **BALLDONTLIE GOAT** research-only for 2026 opening odds, opening player props and complete current market catalogs; no secret exposure.
+2. Reuse the existing **The Odds API** integration for exact market discovery and only spend historical credits after BALLDONTLIE/free coverage is exhausted.
+3. Use recovered Retrosheet/MLB free labels to expand outcome research.
+4. Preserve F1 NRFI/F1 ML/F5 ML/Game Totals third-pass failures and stop tuning those same architectures.
+5. Treat SportsDataIO only as legacy stored evidence; make **zero new SportsDataIO calls**.
+6. Separately audit the legacy odds-authority config because its default still references SportsDataIO; do not change production authority without an explicit gate.
