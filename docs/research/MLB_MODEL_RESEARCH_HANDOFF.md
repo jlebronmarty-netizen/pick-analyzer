@@ -60,6 +60,8 @@ The 21:45Z run for game 824789 then completed:
 
 The same run exposed one legacy Official Pick write. That existing row is preserved unchanged.
 PR #145 changes the operational research runtime so Moneyline policy eligibility remains visible as shadow evidence but Official Pick DML is forced to zero.
+Prospective boundary validation: the 22:00Z PREGAME run on package `672b787dafc187ae4cd4d00684881b7dcf3c68c0` completed with `picks=0`, zero DML stages, and Official Picks total unchanged at one pre-existing Sep20 row. Approved props remained `apostar_enabled=false` and `official_picks_eligible=false`.
+
 APOSTAR remains disabled.
 
 Historical Statcast canonical team-identity repair is complete:
