@@ -2,29 +2,13 @@
 
 Status: RESEARCH-ONLY / SHADOW-ONLY
 
-## Purpose
+## Operational contract
 
-This runtime separates a model signal from a real, timestamped sportsbook opportunity.
+The existing authenticated MLB Statcast cron remains the only scheduler. Current-market capture runs during the existing 10:15 and 10:45 Puerto Rico invocations; the immutable daily evaluator may freeze only from 10:45 through 10:59 and must finish before first pitch.
 
-A row may only be labeled QUALIFIES_MARKET_VERIFIED when:
-1. the frozen model is evaluated with its certified pregame feature contract;
-2. the frozen model gate is met;
-3. the exact frozen line exists in a captured pregame sportsbook snapshot;
-4. player identity is an exact unique MLBAM match.
+A row is QUALIFIES_MARKET_VERIFIED only when the frozen model qualifies and there is an exact pregame line, sportsbook, price, provider timestamp, canonical gamePk and exact persisted MLBAM player ID. Unresolved identity or missing exact line can never be called an available play.
 
-Main and alternate player-prop markets are captured so a frozen line can be verified even when it is not the sportsbook main line.
-
-## Fixed daily clocks
-
-The existing MLB Statcast cron remains the only scheduler.
-
-Approved prop market capture runs at the existing 10:15 and 10:45 Puerto Rico invocations.
-The immutable daily formula freeze is allowed only from 10:45 through 10:59 Puerto Rico and must occur before the first scheduled pitch.
-A completed daily freeze is never retroactively rewritten.
-
-## Status contract
-
-Every frozen daily observation ends in exactly one of:
+The only top-level daily statuses are:
 
 - QUALIFIES_MARKET_VERIFIED
 - MODEL_QUALIFIES_MARKET_NOT_VERIFIED
@@ -32,84 +16,106 @@ Every frozen daily observation ends in exactly one of:
 - NO_EVALUABLE
 - RUNTIME_PARITY_NOT_CERTIFIED
 
-Blocker detail is preserved separately in the `blocker` field.
+Detailed reasons remain in blocker / feature_snapshot.
 
-No status is an Official Pick and no row may activate APOSTAR.
+## Identity and market evidence
 
-## Markets captured
+The current Odds API capture stores canonical gamePk, provider player name, canonical name when resolved, MLBAM ID, exact identity method, match count, line, side, price, sportsbook, provider timestamp, acquired timestamp and provider provenance. fuzzyMatchingUsed is always false.
 
-Pitcher: outs, hits allowed, walks, record a win, earned runs, plus documented alternate line markets.
+Pitchers are bound to MLB Official probable-pitcher identities. Batter identities require one unique exact normalized match in the canonical MLBAM player directory. Ambiguous rows are retained as evidence but fail closed.
 
-Batter: hits, total bases, home runs, strikeouts, walks, singles, doubles, triples, plus documented alternate line markets.
+## Exact runtime: Pitcher Earned Runs
 
-All raw sportsbook snapshots remain in sports_odds_snapshots with sportsbook, line, price, provider timestamp and provider market key.
+Candidate: pitcher_er_over_1p5_p70_v1
 
-## Exact runtime enabled in V1
+Frozen math:
 
-- pitcher_bb_under_2p5_p85_v1
-- pitcher_outs_under_18p5_p90_v1
-- batter_hits_under_1p5_edge_0p75_v1
-- batter_total_bases_under_2p5_edge_1p5_v1
-- batter_hr_under_0p5_proj_0p10_v1
-- batter_k_under_1p5_proj_0p5_v1
-- batter_walks_under_0p5_proj_0p20_v1
-- pitcher_win_forward_numeric_p015_v1
-- pitcher_er_over_1p5_p70_v1
-- pitcher_hits_allowed_under_6p5_proj_5p0_v1
-- batter_singles_under_1p5_proj_0p50_v1
-- batter_doubles_under_0p5_proj_0p16_v1
-- batter_triples_under_0p5_proj_0p015_v1
+- base intercept 1.90273530551357
+- base slope 0.227085168912444 on prior ER all-history
+- K residual intercept 0.653408289475203
+- K residual slope -3.0156054216154
+- minimum prior starts 3
+- OVER 1.5 when empirical TRAIN P(OVER) >= 70%
 
-Batter Hits, Total Bases, Home Runs, Strikeouts and Walks use alpha=0. The raw-feature order was reconstructed from the canonical backtest implementation and independently checked against the frozen 2026 one-shot counts.
+Frozen parity surface: public.mlb_pitcher_er_frozen_2025_runtime_v1
 
-## Five-market exact parity certification
+Exact fingerprint:
 
-### Pitcher Earned Runs
+- modeled rows 3,568; TRAIN 2,194; VALIDATION 729; TEST 645
+- TEST MAE 1.53264877098586
+- TEST RMSE 1.89392266393888
+- VALIDATION 47/59
+- TEST 26/32
+- combined 73/91 = 80.22%
 
-- exact model: `MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2`;
-- strict prior-date ER history: MLB Official game logs, starts only;
-- K-rate: canonical `pick2_mlb_pitcher_daily_features.k_rate` for the target game with `as_of_date < target_date`;
-- no Runs Allowed substitution;
-- empirical probability source: frozen 2025 TRAIN residual distribution;
-- parity checksum: 3,568 modeled rows; TRAIN/VALIDATION/TEST = 2,194/729/645;
-- coefficients reproduced exactly: 1.90273530551357, 0.227085168912444, 0.653408289475203, -3.0156054216154;
-- TEST MAE/RMSE reproduced exactly: 1.53264877098586 / 1.89392266393888;
-- market selections reproduced exactly: VALIDATION 47/59, TEST 26/32, combined 73/91.
+Daily priorErAll comes from MLB Official earnedRuns over prior starts only with date < target date. K-rate comes from the canonical strict-pregame pick2_mlb_pitcher_daily_features row. Probability uses the frozen empirical TRAIN residual distribution. Runs Allowed is never substituted for Earned Runs.
 
-### Pitcher Hits Allowed
+## Exact runtime: Pitcher Hits Allowed
 
-- minimum 5 prior starts;
-- strict `prior.game_date < target_game_date`;
-- raw feature = average batters faced over last 5 starts × cumulative hits allowed / cumulative batters faced;
-- 2025 refit reproduced exactly: n=3,099, intercept=2.97876810879942, slope=0.415326852941172;
-- 2026 checksum reproduced exactly: 2,568 eligible → 1,226 selected → 968 correct.
+Candidate: pitcher_hits_allowed_under_6p5_proj_5p0_v1
 
-### Batter Singles / Doubles / Triples
+Raw feature:
 
-All three use the same strict-prior-date raw feature family:
+avg(BF in last 5 prior starts) * cumulative prior hits allowed / cumulative prior BF
 
-`average PA over last 10 prior games × cumulative metric / cumulative PA`
+Eligibility is at least 5 prior starts with source date < target date.
 
-The target date is excluded entirely, so Game 1 of a doubleheader cannot enter Game 2.
+Parity:
 
-- Singles: n=42,601; intercept=0.260944252887134; slope=0.515544560255828; 2026 checksum 40,648 → 13,634 → 12,690.
-- Doubles: n=42,601; intercept=0.126877618354346; slope=0.210234641434428; 2026 checksum 40,648 → 20,282 → 17,632.
-- Triples: n=42,601; intercept=0.00876081897272024; slope=0.294769143425622; 2026 checksum 40,648 → 30,045 → 29,689.
+- 2025 refit n 3,099
+- intercept 2.97876810879942
+- slope 0.415326852941172
+- 2026 frozen one-shot: eligible 2,568; selected 1,226; correct 968 = 78.96%
 
-Triples remains explicitly `LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED`.
+Daily source is MLB Official gameLog pitching hits and battersFaced.
 
-## Exact identity and market verification
+## Exact batter runtimes
 
-Current Odds API capture requests both main and supported alternate versions of these markets. Each persisted snapshot carries canonical gamePk, exact MLBAM player ID when uniquely resolved, provider player name, sportsbook, exact line, price, provider timestamp, acquired timestamp and source/provenance.
+All three use the same strict-prior shape:
 
-No fuzzy matching is used. A row cannot become `QUALIFIES_MARKET_VERIFIED` unless the exact MLBAM ID, frozen line, direction, sportsbook, price and strictly pregame timestamp all match.
+avg(PA over last 10 prior games) * cumulative prior metric / cumulative prior PA
 
-## Safety boundaries
+At least 10 prior games are required and same-date game 1 is never prior input for game 2.
+
+Batter Singles:
+- candidate batter_singles_under_1p5_proj_0p50_v1
+- 2025 n 42,601; intercept 0.260944252887134; slope 0.515544560255828
+- 2026 frozen one-shot 12,690/13,634 = 93.08%
+
+Batter Doubles:
+- candidate batter_doubles_under_0p5_proj_0p16_v1
+- 2025 n 42,601; intercept 0.126877618354346; slope 0.210234641434428
+- 2026 frozen one-shot 17,632/20,282 = 86.93%
+
+Batter Triples:
+- candidate batter_triples_under_0p5_proj_0p015_v1
+- 2025 n 42,601; intercept 0.00876081897272024; slope 0.294769143425622
+- 2026 frozen one-shot 29,689/30,045 = 98.82%
+- signal label remains LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED
+
+## Prospective batter source
+
+The daily rollup public.mlb_statcast_batter_sdt_game_mv is derived from current raw Statcast regular-season terminal plate appearances. It is refreshed through the existing Statcast analytics refresh function; no parallel ingestion pipeline was created.
+
+Against the frozen 2025 xyear corpus, PA/singles/doubles/triples parity is exactly 48,862/48,862 rows.
+
+The current 2026 Statcast corpus contains later corrections relative to the frozen one-shot xyear snapshot. Those corrected rows are used prospectively but do not rewrite the frozen historical one-shot results.
+
+## Market capture
+
+The existing current-odds capture requests main and alternate keys where supported for pitcher_earned_runs, pitcher_hits_allowed, batter_singles, batter_doubles and batter_triples.
+
+No historical Odds API credits are used.
+
+A model qualifier without the exact required line + sportsbook + price + pregame timestamp is MODEL_QUALIFIES_MARKET_NOT_VERIFIED.
+
+## Safety
 
 - research_only = true
 - production_eligible = false
-- official_picks_eligible = false
-- apostar_enabled = false
-- no retrospective market reconstruction
-- no historical Odds API credit spend
-- prospective outcomes may not retune frozen models
+- Official Picks unchanged
+- APOSTAR disabled
+- no historical odds spend
+- no fuzzy matching
+- no same-day outcome leakage
+- no prospective retuning
