@@ -24,14 +24,15 @@ A completed daily freeze is never retroactively rewritten.
 
 ## Status contract
 
+Every frozen daily observation ends in exactly one of:
+
 - QUALIFIES_MARKET_VERIFIED
 - MODEL_QUALIFIES_MARKET_NOT_VERIFIED
 - NO_PLAY
-- NO_EVALUABLE_EXACT_RUNTIME_PENDING
-- NO_EVALUABLE_IDENTITY_UNRESOLVED
-- NO_EVALUABLE_INSUFFICIENT_HISTORY
-- NO_EVALUABLE_FEATURE_MISSING
-- NO_EVALUABLE_LINEAGE_BLOCKED
+- NO_EVALUABLE
+- RUNTIME_PARITY_NOT_CERTIFIED
+
+Blocker detail is preserved separately in the `blocker` field.
 
 No status is an Official Pick and no row may activate APOSTAR.
 
@@ -53,20 +54,55 @@ All raw sportsbook snapshots remain in sports_odds_snapshots with sportsbook, li
 - batter_k_under_1p5_proj_0p5_v1
 - batter_walks_under_0p5_proj_0p20_v1
 - pitcher_win_forward_numeric_p015_v1
-
-Batter Hits, Total Bases, Home Runs, Strikeouts and Walks use alpha=0. The raw-feature order was reconstructed from the canonical backtest implementation and independently checked against the frozen 2026 one-shot counts. Current-corpus differences are limited to 1–2 rows from later data corrections while the frozen correct-count checksums are preserved or differ only by those corrections.
-
-## Fail-closed pending runtime contracts
-
-The market lines are captured now, but the following frozen candidates remain NO_EVALUABLE_EXACT_RUNTIME_PENDING until their exact raw-feature / eligibility contract is serialized and reproduced without approximation:
-
 - pitcher_er_over_1p5_p70_v1
 - pitcher_hits_allowed_under_6p5_proj_5p0_v1
 - batter_singles_under_1p5_proj_0p50_v1
 - batter_doubles_under_0p5_proj_0p16_v1
 - batter_triples_under_0p5_proj_0p015_v1
 
-This is intentional. Missing frozen semantics must never be replaced by a plausible proxy.
+Batter Hits, Total Bases, Home Runs, Strikeouts and Walks use alpha=0. The raw-feature order was reconstructed from the canonical backtest implementation and independently checked against the frozen 2026 one-shot counts.
+
+## Five-market exact parity certification
+
+### Pitcher Earned Runs
+
+- exact model: `MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2`;
+- strict prior-date ER history: MLB Official game logs, starts only;
+- K-rate: canonical `pick2_mlb_pitcher_daily_features.k_rate` for the target game with `as_of_date < target_date`;
+- no Runs Allowed substitution;
+- empirical probability source: frozen 2025 TRAIN residual distribution;
+- parity checksum: 3,568 modeled rows; TRAIN/VALIDATION/TEST = 2,194/729/645;
+- coefficients reproduced exactly: 1.90273530551357, 0.227085168912444, 0.653408289475203, -3.0156054216154;
+- TEST MAE/RMSE reproduced exactly: 1.53264877098586 / 1.89392266393888;
+- market selections reproduced exactly: VALIDATION 47/59, TEST 26/32, combined 73/91.
+
+### Pitcher Hits Allowed
+
+- minimum 5 prior starts;
+- strict `prior.game_date < target_game_date`;
+- raw feature = average batters faced over last 5 starts × cumulative hits allowed / cumulative batters faced;
+- 2025 refit reproduced exactly: n=3,099, intercept=2.97876810879942, slope=0.415326852941172;
+- 2026 checksum reproduced exactly: 2,568 eligible → 1,226 selected → 968 correct.
+
+### Batter Singles / Doubles / Triples
+
+All three use the same strict-prior-date raw feature family:
+
+`average PA over last 10 prior games × cumulative metric / cumulative PA`
+
+The target date is excluded entirely, so Game 1 of a doubleheader cannot enter Game 2.
+
+- Singles: n=42,601; intercept=0.260944252887134; slope=0.515544560255828; 2026 checksum 40,648 → 13,634 → 12,690.
+- Doubles: n=42,601; intercept=0.126877618354346; slope=0.210234641434428; 2026 checksum 40,648 → 20,282 → 17,632.
+- Triples: n=42,601; intercept=0.00876081897272024; slope=0.294769143425622; 2026 checksum 40,648 → 30,045 → 29,689.
+
+Triples remains explicitly `LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED`.
+
+## Exact identity and market verification
+
+Current Odds API capture requests both main and supported alternate versions of these markets. Each persisted snapshot carries canonical gamePk, exact MLBAM player ID when uniquely resolved, provider player name, sportsbook, exact line, price, provider timestamp, acquired timestamp and source/provenance.
+
+No fuzzy matching is used. A row cannot become `QUALIFIES_MARKET_VERIFIED` unless the exact MLBAM ID, frozen line, direction, sportsbook, price and strictly pregame timestamp all match.
 
 ## Safety boundaries
 
