@@ -1,0 +1,136 @@
+{
+  "contract": "MLB_FIVE_FROZEN_MARKETS_DAILY_RUNTIME_PARITY/1.0.0",
+  "certified_at": "2026-09-19",
+  "research_only": true,
+  "shadow_only": true,
+  "production_eligible": false,
+  "official_picks_modified": false,
+  "apostar_activated": false,
+  "historical_odds_api_credits_consumed": 0,
+  "identity_contract": {
+    "canonical_game_identity": "MLB gamePk",
+    "player_identity": "MLBAM exact",
+    "fuzzy_matching_used": false,
+    "market_verified_requires": [
+      "canonical gamePk",
+      "exact MLBAM player ID",
+      "exact frozen line",
+      "frozen direction",
+      "sportsbook",
+      "price",
+      "provider timestamp strictly before first pitch"
+    ]
+  },
+  "daily_status_contract": [
+    "QUALIFIES_MARKET_VERIFIED",
+    "MODEL_QUALIFIES_MARKET_NOT_VERIFIED",
+    "NO_PLAY",
+    "NO_EVALUABLE",
+    "RUNTIME_PARITY_NOT_CERTIFIED"
+  ],
+  "markets": {
+    "pitcher_earned_runs": {
+      "candidate": "pitcher_er_over_1p5_p70_v1",
+      "line": 1.5,
+      "direction": "OVER",
+      "gate": "P(OVER) >= 0.70",
+      "probability_source": "frozen 2025 TRAIN empirical residual distribution",
+      "parity": {
+        "modeled_rows": 3568,
+        "train_rows": 2194,
+        "validation_rows": 729,
+        "test_rows": 645,
+        "base_intercept": 1.90273530551357,
+        "base_slope": 0.227085168912444,
+        "residual_intercept": 0.653408289475203,
+        "residual_slope": -3.0156054216154,
+        "test_mae": 1.53264877098586,
+        "test_rmse": 1.89392266393888,
+        "validation_selected": 59,
+        "validation_correct": 47,
+        "test_selected": 32,
+        "test_correct": 26,
+        "combined_selected": 91,
+        "combined_correct": 73
+      },
+      "runtime_inputs": {
+        "prior_er_all": "MLB Official gameLog earnedRuns, prior starts only, date < target date",
+        "pitcher_k_rate": "pick2_mlb_pitcher_daily_features.k_rate with as_of_date < target date",
+        "runs_allowed_substitution": false
+      }
+    },
+    "pitcher_hits_allowed": {
+      "candidate": "pitcher_hits_allowed_under_6p5_proj_5p0_v1",
+      "line": 6.5,
+      "direction": "UNDER",
+      "gate": "projection <= 5.0",
+      "raw_feature": "avg_batters_faced_last_5_prior_starts * cumulative_hits_allowed / cumulative_batters_faced",
+      "minimum_prior_starts": 5,
+      "parity_2025": {
+        "refit_n": 3099,
+        "intercept": 2.97876810879942,
+        "slope": 0.415326852941172
+      },
+      "parity_2026": {
+        "eligible": 2568,
+        "selected": 1226,
+        "correct": 968
+      }
+    },
+    "batter_singles": {
+      "candidate": "batter_singles_under_1p5_proj_0p50_v1",
+      "line": 1.5,
+      "direction": "UNDER",
+      "gate": "projection <= 0.50",
+      "raw_feature": "avg_PA_last_10_strict_prior_games * cumulative_singles / cumulative_PA",
+      "minimum_prior_games": 10,
+      "parity_2025": {
+        "refit_n": 42601,
+        "intercept": 0.260944252887134,
+        "slope": 0.515544560255828
+      },
+      "parity_2026": {
+        "eligible": 40648,
+        "selected": 13634,
+        "correct": 12690
+      }
+    },
+    "batter_doubles": {
+      "candidate": "batter_doubles_under_0p5_proj_0p16_v1",
+      "line": 0.5,
+      "direction": "UNDER",
+      "gate": "projection <= 0.16",
+      "raw_feature": "avg_PA_last_10_strict_prior_games * cumulative_doubles / cumulative_PA",
+      "minimum_prior_games": 10,
+      "parity_2025": {
+        "refit_n": 42601,
+        "intercept": 0.126877618354346,
+        "slope": 0.210234641434428
+      },
+      "parity_2026": {
+        "eligible": 40648,
+        "selected": 20282,
+        "correct": 17632
+      }
+    },
+    "batter_triples": {
+      "candidate": "batter_triples_under_0p5_proj_0p015_v1",
+      "line": 0.5,
+      "direction": "UNDER",
+      "gate": "projection <= 0.015",
+      "raw_feature": "avg_PA_last_10_strict_prior_games * cumulative_triples / cumulative_PA",
+      "minimum_prior_games": 10,
+      "incremental_signal": "LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED",
+      "parity_2025": {
+        "refit_n": 42601,
+        "intercept": 0.00876081897272024,
+        "slope": 0.294769143425622
+      },
+      "parity_2026": {
+        "eligible": 40648,
+        "selected": 30045,
+        "correct": 29689
+      }
+    }
+  }
+}
