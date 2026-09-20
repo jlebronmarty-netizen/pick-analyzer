@@ -94,7 +94,18 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
         dml:failed.dml_accounting,
         providers:[failed.mlb_official_calls,failed.statcast_calls,failed.odds_calls],
       })
-      const disposed=await newClient().disposeDependencyFailure({runId:failed.run_id,expectedDigest})
+      let disposed
+      try {
+        disposed=await newClient().disposeDependencyFailure({runId:failed.run_id,expectedDigest})
+      } catch(error) {
+        console.error(JSON.stringify({
+          event:'MLB_DEPENDENCY_DISPOSITION_FAILED',
+          runId:failed.run_id,
+          stage:failed.checkpoint?.stage??null,
+          error:error instanceof Error ? error.message.slice(0,240) : 'UNKNOWN_DISPOSITION_ERROR',
+        }))
+        throw error
+      }
       ensure(disposed.status==='TERMINAL_PARTIAL_PRESERVED','DEPENDENCY_FAILURE_DISPOSITION')
       results.push({mode:failed.checkpoint.mode,status:'TERMINAL_PARTIAL_PRESERVED',runId:failed.run_id,recovery:'DEPENDENCY_FAILURE_DISPOSED'})
       inventory=await newClient().inspect()
