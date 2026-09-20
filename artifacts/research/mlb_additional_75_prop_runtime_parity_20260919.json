@@ -1,0 +1,141 @@
+{
+  "contract": "MLB_ADDITIONAL_75_PROP_RUNTIME_PARITY/1.0.0",
+  "generated_date": "2026-09-19",
+  "research_only": true,
+  "official_picks_modified": false,
+  "apostar_activated": false,
+  "historical_odds_api_credits_consumed": 0,
+  "strict_identity": {
+    "mlbam_required_for_market_verification": true,
+    "fuzzy_matching_used": false
+  },
+  "strict_batter_lineage": {
+    "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "source_rule": "source_game_date < target_game_date",
+    "same_day_doubleheader_prior_allowed": false,
+    "eligible_rows_2025": 40886,
+    "eligible_rows_2026": 35558
+  },
+  "certified": [
+    {
+      "market": "pitcher_walks",
+      "candidate": "pitcher_bb_under_2p5_p85_v1",
+      "rule": "UNDER 2.5 when calibrated UNDER probability >= 0.85",
+      "frozen_2026": {
+        "selected": 137,
+        "correct": 125,
+        "accuracy": 0.9124087591240876
+      },
+      "runtime_parity": "CERTIFIED",
+      "model_version": "MLB_PITCHER_BB_V1",
+      "artifact_digest": "6094bc6e096cd9a37f63dbdf58c3c683a9bab78fd01f44a3e13c2717a9681a17"
+    },
+    {
+      "market": "batter_hits",
+      "candidate": "batter_hits_under_1p5_edge_0p75_v1",
+      "rule": "UNDER 1.5 when projection <= 0.75",
+      "fit_2025": {
+        "n": 40886,
+        "intercept": 0.362037519693316,
+        "slope": 0.562031288216736
+      },
+      "frozen_2026": {
+        "eligible": 35558,
+        "selected": 9833,
+        "correct": 8496,
+        "accuracy": 0.864029289128445
+      },
+      "runtime_parity": "CERTIFIED"
+    },
+    {
+      "market": "batter_total_bases",
+      "candidate": "batter_total_bases_under_2p5_edge_1p5_v1",
+      "rule": "UNDER 2.5 when projection <= 1.0",
+      "fit_2025": {
+        "n": 40886,
+        "intercept": 0.599532796678854,
+        "slope": 0.563175501776575
+      },
+      "frozen_2026": {
+        "eligible": 35558,
+        "selected": 2336,
+        "correct": 2021,
+        "accuracy": 0.865154109589041
+      },
+      "runtime_parity": "CERTIFIED"
+    },
+    {
+      "market": "batter_home_runs",
+      "candidate": "batter_hr_under_0p5_proj_0p10_v1",
+      "rule": "UNDER 0.5 when projection <= 0.10",
+      "fit_2025": {
+        "n": 40886,
+        "intercept": 0.0562641814171271,
+        "slope": 0.536870614141035
+      },
+      "frozen_2026": {
+        "eligible": 35558,
+        "selected": 13507,
+        "correct": 12448,
+        "accuracy": 0.9215962093729178
+      },
+      "runtime_parity": "CERTIFIED"
+    },
+    {
+      "market": "batter_strikeouts",
+      "candidate": "batter_k_under_1p5_proj_0p5_v1",
+      "rule": "UNDER 1.5 when projection <= 0.50",
+      "fit_2025": {
+        "n": 40886,
+        "intercept": 0.243436273584974,
+        "slope": 0.713440597820141
+      },
+      "frozen_2026": {
+        "eligible": 35558,
+        "selected": 1074,
+        "correct": 1000,
+        "accuracy": 0.931098696461825
+      },
+      "runtime_parity": "CERTIFIED"
+    },
+    {
+      "market": "batter_walks",
+      "candidate": "batter_walks_under_0p5_proj_0p20_v1",
+      "rule": "UNDER 0.5 when projection <= 0.20",
+      "fit_2025": {
+        "n": 40886,
+        "intercept": 0.117815177785939,
+        "slope": 0.593708345578887
+      },
+      "frozen_2026": {
+        "eligible": 35558,
+        "selected": 3106,
+        "correct": 2590,
+        "accuracy": 0.8338699291693497
+      },
+      "runtime_parity": "CERTIFIED"
+    }
+  ],
+  "blocked": [
+    {
+      "market": "pitcher_outs",
+      "candidate": "pitcher_outs_under_18p5_p90_v1",
+      "frozen_2026": {
+        "selected": 226,
+        "correct": 215,
+        "accuracy": 0.9513274336283186
+      },
+      "status": "RUNTIME_PARITY_NOT_CERTIFIED",
+      "blocker": "PITCHER_OUTS_INPUT_LINEAGE_NOT_EXACTLY_RECONCILED",
+      "evidence": {
+        "frozen_source": "SportsDataIO starter outcomes cross-matched to Statcast + strict pregame feature",
+        "frozen_source_last_date": "2026-07-19",
+        "exact_mlbam_xyear_reconstruction_same_window": {
+          "selected": 254,
+          "correct": 243
+        },
+        "reason": "selected universe differs; no formula or threshold retune permitted"
+      }
+    }
+  ]
+}

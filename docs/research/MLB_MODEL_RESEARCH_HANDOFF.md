@@ -37,6 +37,42 @@ Triples remains LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED.
 `PR #111` is merged to `main` at `71bc3e2ac438b5bcd2eefb2dab3732aa81e3492c`, and Vercel production deployment `dpl_2JA4Nw4kUqVLx2qenrniGYSsTYXt` is READY. The remaining fail-closed gate is the first future strictly-pregame `MLB_APPROVED_PROP_MARKET_CAPTURE_V1` snapshot plus persisted daily evaluator crossing. No such capture job exists for 2026-09-19 because production was reached after today's 10:15/10:45 Puerto Rico capture window; do not retroconstruct it.
 
 
+## 2026-09-19 additional 75%+ prop runtimes — authoritative handoff
+
+Implementation branch:
+
+`research/mlb-additional-75-props-runtime-parity-20260919`
+
+Canonical evidence:
+
+- `artifacts/research/mlb_additional_75_prop_runtime_parity_20260919.json`
+- `docs/research/MLB_ADDITIONAL_75_PROP_RUNTIME_PARITY_20260919.md`
+
+Parity-certified without retuning:
+
+- Pitcher Walks — `pitcher_bb_under_2p5_p85_v1` — 125/137 = **91.24%**;
+- Batter Hits — `batter_hits_under_1p5_edge_0p75_v1` — 8,496/9,833 = **86.40%**;
+- Batter Total Bases — `batter_total_bases_under_2p5_edge_1p5_v1` — 2,021/2,336 = **86.52%**;
+- Batter Home Runs — `batter_hr_under_0p5_proj_0p10_v1` — 12,448/13,507 = **92.16%**;
+- Batter Strikeouts — `batter_k_under_1p5_proj_0p5_v1` — 1,000/1,074 = **93.11%**;
+- Batter Walks — `batter_walks_under_0p5_proj_0p20_v1` — 2,590/3,106 = **83.39%**.
+
+The five batter props reproduce the exact all-2025 refit universe **n=40,886** and exact 2026 eligible universe **n=35,558**. Daily scoring now requires the same canonical target-game pregame feature lineage used by the frozen research contract, in addition to strict prior-date batter history.
+
+Pitcher Walks validates the frozen `MLB_PITCHER_BB_V1` artifact digest and exact 2.5-line TRAIN calibration bins before evaluation.
+
+Pitcher Outs is **not** being promoted. Its frozen evidence remains 215/226 = **95.13%**, but the original SportsDataIO/Statcast holdout corpus ends 2026-07-19 and an exact-MLBAM reconstruction over the same window produces 254/243. Because the selected universe differs, state is:
+
+`RUNTIME_PARITY_NOT_CERTIFIED`
+
+Blocker:
+
+`PITCHER_OUTS_INPUT_LINEAGE_NOT_EXACTLY_RECONCILED`
+
+Do not retune Pitcher Outs to make the fingerprints match. Reconcile the input lineage or preserve the fail-closed state.
+
+All market verification remains exact MLBAM + exact line + sportsbook + price + pregame timestamp. No fuzzy matching. Official Picks unchanged; APOSTAR disabled; no historical Odds API credits used.
+
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
 Forward runtime candidate:
