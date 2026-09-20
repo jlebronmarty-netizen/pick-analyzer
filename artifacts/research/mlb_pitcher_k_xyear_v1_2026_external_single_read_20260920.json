@@ -1,0 +1,67 @@
+{
+  "artifact": "MLB_PITCHER_K_XYEAR_V1_2026_EXTERNAL_SINGLE_READ",
+  "candidateId": "pitcher_k_under_6p5_proj_4p5_v1",
+  "developmentFreezeCommit": "b88c9c017ccbb38deabe48eec3c26980a4123406",
+  "openedAfterFreeze": true,
+  "retunedAfterExternal": false,
+  "external": {
+    "season": 2026,
+    "source": "public.mlb_ml_xyear_pitcher_game_v1",
+    "eligibleN": 3213,
+    "selectedN": 1163,
+    "coverage": 0.36196700902583256,
+    "correct": 1035,
+    "accuracy": 0.8899398108340498,
+    "eligibleUnder6p5Baseline": 0.7472766884531591,
+    "liftVsEligibleBaseline": 0.14266312238089082,
+    "monthly": [
+      {
+        "month": "2026-04",
+        "n": 38,
+        "correct": 29,
+        "accuracy": 0.7631578947368421
+      },
+      {
+        "month": "2026-05",
+        "n": 225,
+        "correct": 199,
+        "accuracy": 0.8844444444444445
+      },
+      {
+        "month": "2026-06",
+        "n": 223,
+        "correct": 196,
+        "accuracy": 0.8789237668161435
+      },
+      {
+        "month": "2026-07",
+        "n": 216,
+        "correct": 195,
+        "accuracy": 0.9027777777777778
+      },
+      {
+        "month": "2026-08",
+        "n": 282,
+        "correct": 257,
+        "accuracy": 0.9113475177304965
+      },
+      {
+        "month": "2026-09",
+        "n": 179,
+        "correct": 159,
+        "accuracy": 0.888268156424581
+      }
+    ],
+    "worstMonthAccuracy": 0.7631578947368421
+  },
+  "state": "TARGET_MET_75_PLUS_EXTERNAL_PASS_MARKET_LINE_CAPTURE_PENDING",
+  "boundaries": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "historicalOddsApiCalls": 0,
+    "realLineRequiredForProspectiveUse": true,
+    "multiLineExtrapolationAuthorized": false
+  }
+}

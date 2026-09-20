@@ -1,0 +1,79 @@
+{
+  "artifact": "MLB_PITCHER_K_XYEAR_V1_DEVELOPMENT_FREEZE",
+  "createdAt": "2026-09-20",
+  "state": "FROZEN_BEFORE_2026_EXTERNAL_READ",
+  "researchOnly": true,
+  "productionEligible": false,
+  "officialPicksModified": false,
+  "apostarActivated": false,
+  "historicalOddsApiCalls": 0,
+  "candidate": {
+    "id": "pitcher_k_under_6p5_proj_4p5_v1",
+    "market": "pitcher_strikeouts",
+    "side": "UNDER",
+    "requiredLine": 6.5,
+    "multipleLinesCertified": false,
+    "minPriorStarts": 5,
+    "formula": "proj_k = 0.60 * (prior season-to-date K/BF * L5 BF/game) + 0.40 * (L5 K/game)",
+    "gate": "proj_k <= 4.5"
+  },
+  "development": {
+    "season": 2025,
+    "source": "public.mlb_ml_xyear_pitcher_game_v1",
+    "leakageRule": "all rolling inputs use rows strictly preceding target game within pitcher-season",
+    "eligibleN": 3404,
+    "selectedN": 1367,
+    "coverage": 0.4015863689776733,
+    "correct": 1189,
+    "accuracy": 0.8697878566203365,
+    "eligibleUnder6p5Baseline": 0.7523501762632198,
+    "liftVsEligibleBaseline": 0.11743768035711676,
+    "monthly": [
+      {
+        "month": "2025-04",
+        "n": 39,
+        "correct": 35,
+        "accuracy": 0.8974358974358975
+      },
+      {
+        "month": "2025-05",
+        "n": 272,
+        "correct": 241,
+        "accuracy": 0.8860294117647058
+      },
+      {
+        "month": "2025-06",
+        "n": 278,
+        "correct": 237,
+        "accuracy": 0.8525179856115108
+      },
+      {
+        "month": "2025-07",
+        "n": 262,
+        "correct": 235,
+        "accuracy": 0.8969465648854962
+      },
+      {
+        "month": "2025-08",
+        "n": 289,
+        "correct": 257,
+        "accuracy": 0.889273356401384
+      },
+      {
+        "month": "2025-09",
+        "n": 227,
+        "correct": 184,
+        "accuracy": 0.8105726872246696
+      }
+    ],
+    "worstMonthAccuracy": 0.8105726872246696
+  },
+  "external2026": {
+    "opened": false,
+    "rule": "single read only after this artifact is committed; no threshold/formula changes from 2026 result"
+  },
+  "marketCertification": {
+    "historicalExecutableLineEvidence": false,
+    "note": "6.5 is a fixed research reference line. A future recommendation requires an actual real sportsbook UNDER 6.5 quote under the real-line contract."
+  }
+}
