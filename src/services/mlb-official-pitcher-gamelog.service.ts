@@ -5,6 +5,7 @@ export type MlbOfficialPitcherGameLogRow = {
   date: string
   gamesStarted: number
   earnedRuns: number | null
+  hits: number | null
   strikeOuts: number | null
   battersFaced: number | null
 }
@@ -42,6 +43,7 @@ export async function readMlbOfficialPitcherGameLog(
       date,
       gamesStarted: n(split?.stat?.gamesStarted) ?? 0,
       earnedRuns: n(split?.stat?.earnedRuns),
+      hits: n(split?.stat?.hits),
       strikeOuts: n(split?.stat?.strikeOuts),
       battersFaced: n(split?.stat?.battersFaced),
     }]
