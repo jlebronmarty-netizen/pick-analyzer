@@ -153,13 +153,13 @@ begin
         and p.game_date>=f.game_date-7 and not p.starter
     ),
     home_bullpen_pitches_last_2d=(
-      select coalesce(sum(p.pitch_count),0)::double precision
+      select coalesce(sum(p.pitch_count),0)::int
       from public.mlb_ml_xyear_pitcher_game_v1 p
       where p.season=f.season and p.team=f.home_team and p.game_date<f.game_date
         and p.game_date>=f.game_date-2 and not p.starter
     ),
     away_bullpen_pitches_last_2d=(
-      select coalesce(sum(p.pitch_count),0)::double precision
+      select coalesce(sum(p.pitch_count),0)::int
       from public.mlb_ml_xyear_pitcher_game_v1 p
       where p.season=f.season and p.team=f.away_team and p.game_date<f.game_date
         and p.game_date>=f.game_date-2 and not p.starter
@@ -293,7 +293,7 @@ begin
       join public.mlb_ml_venue_geo_2025_v3 cv on cv.venue=f.venue
     ),
     home_timezone_changes_48h=(
-      select case when pg.game_date<f.game_date-2 then null else abs(cv.utc_offset_hours-pv.utc_offset_hours) end
+      select case when pg.game_date<f.game_date-2 then null else abs(cv.utc_offset_hours-pv.utc_offset_hours)::int end
       from (
         select g.game_date,g.venue
         from public.mlb_ml_xyear_team_game_v1 g
@@ -304,7 +304,7 @@ begin
       join public.mlb_ml_venue_geo_2025_v3 cv on cv.venue=f.venue
     ),
     away_timezone_changes_48h=(
-      select case when pg.game_date<f.game_date-2 then null else abs(cv.utc_offset_hours-pv.utc_offset_hours) end
+      select case when pg.game_date<f.game_date-2 then null else abs(cv.utc_offset_hours-pv.utc_offset_hours)::int end
       from (
         select g.game_date,g.venue
         from public.mlb_ml_xyear_team_game_v1 g
