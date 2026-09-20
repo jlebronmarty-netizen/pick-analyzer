@@ -42,6 +42,7 @@ export function createDurableRuntimeClient({url,key,packageSha,deadline=Infinity
       return result
     },
     dispose:({runId,expectedDigest})=>call({op:'dispose',holder,runId,expectedDigest}),
+    disposeDependencyFailure:({runId,expectedDigest})=>call({op:'disposeDependencyFailure',holder,runId,expectedDigest}),
     async resumeDependency({runId,originalPackageSha,expectedDigest,rawReadbackDigest}) {
       ensure(!lease,'ALREADY_HELD')
       const result=await call({op:'resumeDependency',holder,runId,packageSha:originalPackageSha,executorPackageSha:packageSha,expectedDigest,rawReadbackDigest})

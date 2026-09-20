@@ -12,6 +12,7 @@ const JOB_TYPE = 'mlb_approved_prop_market_capture_v1'
 const SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
 const CREDIT_RESERVE = 2000
 const PAGE_SIZE = 1000
+const WRITE_BATCH_SIZE = 500
 
 const MAIN_MARKETS = [
   'pitcher_outs',
@@ -473,8 +474,13 @@ export async function captureMlbApprovedPropMarkets(input: {
     existingRows += readback.data?.length ?? 0
   }
   if (rows.length) {
-    const write = await supabaseAdmin.from('sports_odds_snapshots').upsert(rows, { onConflict: 'id' })
-    if (write.error) throw new Error('MLB_APPROVED_PROP_SNAPSHOT_WRITE_FAILED:' + write.error.message)
+    // A full multi-market MLB slate can produce several thousand quote rows.
+    // Keep each PostgREST write bounded instead of sending one oversized upsert.
+    for (let offset = 0; offset < rows.length; offset += WRITE_BATCH_SIZE) {
+      const batch = rows.slice(offset, offset + WRITE_BATCH_SIZE)
+      const write = await supabaseAdmin.from('sports_odds_snapshots').upsert(batch, { onConflict: 'id' })
+      if (write.error) throw new Error('MLB_APPROVED_PROP_SNAPSHOT_WRITE_FAILED:' + write.error.message)
+    }
   }
 
   const completedAt = new Date().toISOString()
