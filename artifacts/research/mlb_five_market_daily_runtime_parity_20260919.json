@@ -1,0 +1,150 @@
+{
+  "contract": "MLB_FIVE_MARKET_DAILY_RUNTIME_PARITY/1.0.0",
+  "certified_at": "2026-09-19",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_modified": false,
+  "apostar_activated": false,
+  "historical_odds_api_credits_consumed": 0,
+  "classification_contract": [
+    "QUALIFIES_MARKET_VERIFIED",
+    "MODEL_QUALIFIES_MARKET_NOT_VERIFIED",
+    "NO_PLAY",
+    "NO_EVALUABLE",
+    "RUNTIME_PARITY_NOT_CERTIFIED"
+  ],
+  "markets": {
+    "pitcher_earned_runs": {
+      "candidate_id": "pitcher_er_over_1p5_p70_v1",
+      "formula": {
+        "line": 1.5,
+        "direction": "OVER",
+        "gate": "empirical TRAIN P(OVER) >= 0.70",
+        "base_intercept": 1.90273530551357,
+        "base_slope": 0.227085168912444,
+        "k_residual_intercept": 0.653408289475203,
+        "k_residual_slope": -3.0156054216154,
+        "minimum_prior_starts": 3
+      },
+      "frozen_parity": {
+        "modeled_rows": 3568,
+        "train_rows": 2194,
+        "validation_rows": 729,
+        "test_rows": 645,
+        "test_mae": 1.53264877098586,
+        "test_rmse": 1.89392266393888,
+        "validation": {
+          "selected": 59,
+          "correct": 47
+        },
+        "test": {
+          "selected": 32,
+          "correct": 26
+        },
+        "combined": {
+          "selected": 91,
+          "correct": 73,
+          "accuracy": 0.802197802197802
+        }
+      },
+      "live_inputs": {
+        "prior_er_all": "MLB Official gameLog earnedRuns, starts only, source date < target date",
+        "pitcher_k_rate": "pick2_mlb_pitcher_daily_features.k_rate, canonical feature version, strict prior-date lineage",
+        "residual_distribution": "public.mlb_pitcher_er_frozen_2025_runtime_v1 TRAIN residuals",
+        "runs_allowed_substitution": false
+      },
+      "runtime_parity_certified": true
+    },
+    "pitcher_hits_allowed": {
+      "candidate_id": "pitcher_hits_allowed_under_6p5_proj_5p0_v1",
+      "raw_feature": "avg(BF last 5 prior starts) * cumulative prior hits allowed / cumulative prior BF",
+      "minimum_prior_starts": 5,
+      "strict_prior_date": true,
+      "frozen_refit_2025": {
+        "n": 3099,
+        "intercept": 2.97876810879942,
+        "slope": 0.415326852941172
+      },
+      "frozen_external_2026": {
+        "eligible": 2568,
+        "selected": 1226,
+        "correct": 968,
+        "accuracy": 0.789559543230016
+      },
+      "live_source": "MLB Official gameLog pitching",
+      "runtime_parity_certified": true
+    },
+    "batter_singles": {
+      "candidate_id": "batter_singles_under_1p5_proj_0p50_v1",
+      "raw_feature": "avg(PA last 10 prior games) * cumulative prior singles / cumulative prior PA",
+      "minimum_prior_games": 10,
+      "strict_prior_date": true,
+      "frozen_refit_2025": {
+        "n": 42601,
+        "intercept": 0.260944252887134,
+        "slope": 0.515544560255828
+      },
+      "frozen_external_2026": {
+        "eligible": 40648,
+        "selected": 13634,
+        "correct": 12690,
+        "accuracy": 0.930761331964207
+      },
+      "runtime_parity_certified": true
+    },
+    "batter_doubles": {
+      "candidate_id": "batter_doubles_under_0p5_proj_0p16_v1",
+      "raw_feature": "avg(PA last 10 prior games) * cumulative prior doubles / cumulative prior PA",
+      "minimum_prior_games": 10,
+      "strict_prior_date": true,
+      "frozen_refit_2025": {
+        "n": 42601,
+        "intercept": 0.126877618354346,
+        "slope": 0.210234641434428
+      },
+      "frozen_external_2026": {
+        "eligible": 40648,
+        "selected": 20282,
+        "correct": 17632,
+        "accuracy": 0.869342273937482
+      },
+      "runtime_parity_certified": true
+    },
+    "batter_triples": {
+      "candidate_id": "batter_triples_under_0p5_proj_0p015_v1",
+      "raw_feature": "avg(PA last 10 prior games) * cumulative prior triples / cumulative prior PA",
+      "minimum_prior_games": 10,
+      "strict_prior_date": true,
+      "frozen_refit_2025": {
+        "n": 42601,
+        "intercept": 0.00876081897272024,
+        "slope": 0.294769143425622
+      },
+      "frozen_external_2026": {
+        "eligible": 40648,
+        "selected": 30045,
+        "correct": 29689,
+        "accuracy": 0.988151106673323
+      },
+      "incremental_signal": "LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED",
+      "runtime_parity_certified": true
+    }
+  },
+  "market_capture": {
+    "provider": "the-odds-api",
+    "current_only": true,
+    "main_and_alternate_keys": true,
+    "exact_pregame_timestamp_required": true,
+    "exact_mlbam_identity_required_for_verification": true,
+    "fuzzy_matching_used": false,
+    "historical_credit_spend": 0
+  },
+  "prospective_batter_runtime": {
+    "source": "public.mlb_statcast_batter_sdt_game_mv",
+    "frozen_2025_row_parity": {
+      "rows": 48862,
+      "exact": 48862
+    },
+    "note": "Current 2026 Statcast corrections are prospective inputs and do not rewrite the frozen 2026 one-shot checksum."
+  }
+}
