@@ -167,3 +167,43 @@ Manual capture before deployment:
 - Moneyline retuned: NO
 - historical Odds API credits used: 0
 - research/shadow boundary unchanged
+
+
+## Forward runtime parity bug found during recovery
+
+The active forward service had a separate implementation defect:
+
+- it queried `mlb_ml_xyear_pitcher_game_v1` with `starter=true` before constructing the Starter component;
+- therefore cumulative RA9/WHIP/K%/BB%/hard-hit/whiff were being computed from starts only;
+- the frozen historical contract uses **all strict-prior pitcher appearances** for cumulative metrics and **last five strict-prior starts** only for L5 RA9/WHIP.
+
+This was corrected without changing any coefficient, normalization statistic, route threshold or selected market rule.
+
+The corrected runtime now:
+1. loads all prior pitcher appearances;
+2. computes cumulative Starter metrics from all appearances;
+3. filters to starts only for L5 RA9/WHIP.
+
+This explains why the Sep18 frozen starter-score values failed historical parity while Sep19 happened to match in the limited overlapping cases.
+
+## Sep20 timing anomaly
+
+The existing Sep20 Moneyline tracker rows were already frozen at:
+
+`2026-09-20T04:39:02.003993Z` = **00:39:02 Puerto Rico**
+
+This is earlier than the runtime's 10:45 Puerto Rico freeze gate.
+
+All 15 rows are NO_PICK, but they are not accepted as valid fixed-window prospective evidence.
+
+The rows remain immutable and are not deleted or rewritten.
+
+Runtime hardening now requires any existing frozen row reused by `REUSE_NO_OP` to satisfy:
+
+- frozen local date equals target date;
+- frozen local time is at or after 10:45 Puerto Rico;
+- frozen timestamp precedes that game's first pitch.
+
+An existing tracker state that fails this timing validation is blocked rather than reused.
+
+The first clean prospective Moneyline observation after this repair must therefore be a future date with a valid runtime freeze.
