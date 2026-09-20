@@ -2,7 +2,7 @@
 
 **Repository:** `jlebronmarty-netizen/pick-analyzer`  
 **Canonical Supabase project:** `ynuocvexviorgdjrfthw` (`Pick Analyzer`)  
-**Last updated:** 2026-09-18  
+**Last updated:** 2026-09-19  
 **Status:** ACTIVE RESEARCH / CONTINUE FROM HERE
 
 
@@ -36,35 +36,6 @@ Triples remains LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED.
 
 The implementation is not to be labeled final READY until the code PR is merged and the resulting Vercel production deployment is READY.
 
-
-## 2026-09-19 Five frozen prop markets daily runtime — authoritative
-
-State: `FIVE_MARKET_DAILY_RUNTIME_READY_RESEARCH_ONLY`.
-
-The existing MLB Statcast cron now supports exact pregame daily evaluation for:
-
-- `pitcher_er_over_1p5_p70_v1`;
-- `pitcher_hits_allowed_under_6p5_proj_5p0_v1`;
-- `batter_singles_under_1p5_proj_0p50_v1`;
-- `batter_doubles_under_0p5_proj_0p16_v1`;
-- `batter_triples_under_0p5_proj_0p015_v1`.
-
-Runtime parity is certified before enablement:
-
-- Pitcher ER reproduces the frozen R2 coefficients, TEST MAE/RMSE and 73/91 selected-market checksum exactly from a persisted 2025 Retrosheet ER residual surface.
-- Pitcher Hits Allowed reproduces refit n=3,099 / intercept 2.97876810879942 / slope 0.415326852941172 and 2026 2,568 → 1,226 → 968 exactly.
-- Singles, Doubles and Triples reproduce 2025 refit n=42,601, all frozen coefficients, and all published 2026 eligible/selected/correct checksums exactly.
-- Batter inputs enforce `source_game_date < target_game_date`, so same-day doubleheader Game 1 never becomes prior history for Game 2.
-- Pitcher ER uses MLB Official earned runs over prior starts only plus the canonical target-game pregame `k_rate`; Runs Allowed is never substituted.
-- Market verification requires canonical gamePk + exact MLBAM player ID + frozen line + sportsbook + price + provider timestamp strictly before first pitch. No fuzzy player matching.
-- Daily statuses are limited to `QUALIFIES_MARKET_VERIFIED`, `MODEL_QUALIFIES_MARKET_NOT_VERIFIED`, `NO_PLAY`, `NO_EVALUABLE`, and `RUNTIME_PARITY_NOT_CERTIFIED`.
-- Batter Triples remains `LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED`.
-- Official Picks writes remain 0; APOSTAR remains disabled; production eligibility remains false; historical Odds API credits consumed remain 0.
-
-Canonical evidence:
-
-- `docs/research/MLB_APPROVED_PROPS_DAILY_RUNTIME_V1.md`;
-- `artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json`.
 
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
