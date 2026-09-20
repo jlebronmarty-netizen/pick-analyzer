@@ -180,12 +180,22 @@ async function createBindings({ client, repository, store, runContext, authoriza
       const existing = await repository.readNativeGames(scope)
       if(store.freezeDependencyScope) {
         const missing=new Set()
+        const inventoryCandidates=[]
         for(const native of existing) {
           let target,starters
           try {target=resolvePregameTarget({native:bindStoredNativeContext(native,aliases),runAsOf:runContext.run_as_of,eligibleGamePks:scope});starters=resolveStarterContext(target)}
           catch {continue} // The main reconciliation loop classifies the reason.
-          const inventory=await pregame.readDependencies(target,starters,{inventoryMissing:true,inventoryOnly:true})
-          inventory.missingGamePks.forEach(id=>missing.add(id))
+          inventoryCandidates.push({target,starters})
+        }
+        // Inventory reads are independent and read-only. Run them in small,
+        // bounded batches so a full 15-game slate does not serialize hundreds
+        // of historical read queries into the Vercel invocation ceiling.
+        for(let start=0;start<inventoryCandidates.length;start+=3) {
+          const batch=inventoryCandidates.slice(start,start+3)
+          const inventories=await Promise.all(batch.map(({target,starters})=>
+            pregame.readDependencies(target,starters,{inventoryMissing:true,inventoryOnly:true})
+          ))
+          for(const inventory of inventories)inventory.missingGamePks.forEach(id=>missing.add(id))
         }
         await store.freezeDependencyScope([...missing].sort((a,b)=>a-b))
       }
