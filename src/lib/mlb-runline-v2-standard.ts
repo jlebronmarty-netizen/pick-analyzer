@@ -4,8 +4,8 @@ export const MLB_RUNLINE_V2_BROAD_MODEL = 'rl_v2_broad_union_fixed_v1' as const
 export const MLB_RUNLINE_V2_STANDARD_FREEZE_VERSION = 'MLB_RUNLINE_V2_STANDARD_FORWARD_FREEZE_V1' as const
 export const MLB_RUNLINE_V2_STANDARD_MARKET_POLICY = 'MLB_RUNLINE_MARKET_2026_V1_EARLIEST_CAPTURED_PAIRED_MODAL_PROXY' as const
 
-export const MLB_RUNLINE_V2_MARKET_MU = 0.57629591863738
-export const MLB_RUNLINE_V2_MARKET_SD = 0.0754955595992703
+export const MLB_RUNLINE_V2_MARKET_LOGIT_MU = 0.334503755055181
+export const MLB_RUNLINE_V2_MARKET_LOGIT_SD_SAMP = 0.354461459732156
 export const MLB_RUNLINE_V2_CORE_THRESHOLD = 1.0002553572466371
 export const MLB_RUNLINE_V2_TRANSFER_THRESHOLD = 0.889684454234473
 
@@ -119,7 +119,8 @@ export function buildStandardRunlineOpeningProxy(rows: StandardRunlineOpeningRow
     const awayImp = americanImplied(awayPriceAvg)
     if (homeImp !== null && awayImp !== null && homeImp + awayImp > 0) {
       marketPDog = dogSide === 'HOME' ? homeImp / (homeImp + awayImp) : awayImp / (homeImp + awayImp)
-      marketZV2 = (marketPDog - MLB_RUNLINE_V2_MARKET_MU) / MLB_RUNLINE_V2_MARKET_SD
+      const marketLogit = Math.log(marketPDog / (1 - marketPDog))
+      marketZV2 = (marketLogit - MLB_RUNLINE_V2_MARKET_LOGIT_MU) / MLB_RUNLINE_V2_MARKET_LOGIT_SD_SAMP
     }
   }
 
