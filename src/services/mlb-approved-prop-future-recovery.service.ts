@@ -101,7 +101,8 @@ function quoteGamePk(quote: Quote) {
 
 function quotePlayerId(quote: Quote) {
   const metadata = asRecord(quote.metadata)
-  return n(metadata.playerMlbamId ?? metadata.pitcherMlbamId)
+  const playerId = n(metadata.playerMlbamId ?? metadata.pitcherMlbamId)
+  return playerId !== null && Number.isInteger(playerId) && playerId > 0 ? playerId : null
 }
 
 function quotePlayerName(quote: Quote) {
