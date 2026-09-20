@@ -8,6 +8,36 @@ Official Picks: unchanged
 APOSTAR: disabled
 
 
+
+## 2026-09-20 Moneyline daily xyear repair — authoritative
+
+`STARTER_POPULATION_AUTHORITY = PRIOR_STARTS_ONLY`.
+
+This supersedes the earlier claim that accumulated Starter metrics used all pitcher appearances.
+The Sep14 stored gold standard proves starts-only semantics: accumulated Starter cells reproduce
+**120/120** with max absolute difference **4.44e-16**. The all-appearance reconstruction matched
+only 90/120 and is not authoritative.
+
+The authorized repair SQL digest was
+`51e3151070e49cfc09c24e23d2cbf0770e1b8c8545f2188145aa1eac4f152455`.
+No model, formula, route or threshold was retuned.
+
+Post-repair daily state:
+
+- Sep18: 15 games / 1,350 feature values / 150 component rows / Starter 12 / Lineup 0;
+- Sep19: 15 games / 1,350 feature values / 150 component rows / Starter 13 / Lineup 0;
+- both dates: zero cutoff violations, zero starter-timing violations, zero non-null scores with zero populated inputs;
+- 69 forward tracker rows remain frozen and unchanged;
+- Lineup remains NULL without preserved pregame evidence;
+- Official Picks unchanged; APOSTAR disabled.
+
+Daily runtime order is now required to be:
+`completed Statcast -> mlb_ml_xyear_refresh_base_v2 -> mlb_ml_xyear_materialize_pregame_v4`.
+This closes the previous gap where V4 was scheduled but the xyear base refresh was not wired.
+
+Canonical certification:
+`docs/research/MLB_MONEYLINE_PRIOR_STARTS_EXECUTION_CERTIFICATION.md`.
+
 ## 2026-09-19 five approved prop markets — exact daily runtime operationalization
 
 Implementation branch: research/mlb-five-market-daily-runtime-20260919
