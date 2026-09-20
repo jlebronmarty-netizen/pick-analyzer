@@ -1,0 +1,202 @@
+{
+  "artifact": "MLB_BATTER_RUNS_RBI_HRRBI_2025_DEVELOPMENT_FREEZE",
+  "createdAt": "2026-09-20",
+  "source": {
+    "provider": "retrosheet",
+    "archive": "https://www.retrosheet.org/downloads/2025/2025csvs.zip",
+    "archiveSha256": "3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753",
+    "battingFile": "2025batting.csv",
+    "teamStatsFile": "2025teamstats.csv",
+    "regularSeasonGames": 2430,
+    "battingRows": 71550,
+    "teamPlayerTotalsAgree": {
+      "runs": 21614,
+      "rbi": 20740,
+      "stolenBases": 3440,
+      "pitcherOuts": 129225,
+      "pitcherStrikeouts": 40645
+    }
+  },
+  "featureContract": {
+    "minPriorGames": 10,
+    "priorRule": "strictly prior player games within 2025 only",
+    "recentWindow": 10,
+    "componentProjection": "0.50 * (prior season-to-date event/PA * L10 PA/game) + 0.50 * L10 event/game",
+    "hrrbiProjection": "proj_hits + proj_runs + proj_rbi"
+  },
+  "candidates": [
+    {
+      "id": "batter_runs_under_0p5_proj_0p14_v1",
+      "market": "batter_runs_scored",
+      "side": "UNDER",
+      "requiredLine": 0.5,
+      "projectionMax": 0.14,
+      "selectedN": 2075,
+      "correct": 1606,
+      "accuracy": 0.7739759036144578,
+      "coverage": 0.03552473891456942,
+      "eligibleBaseline": 0.7345317582605718,
+      "lift": 0.03944414535388596,
+      "worstMonthAccuracy": 0.7506702412868632,
+      "monthly": [
+        {
+          "month": "2025-04",
+          "n": 373,
+          "correct": 280,
+          "accuracy": 0.7506702412868632
+        },
+        {
+          "month": "2025-05",
+          "n": 423,
+          "correct": 322,
+          "accuracy": 0.7612293144208038
+        },
+        {
+          "month": "2025-06",
+          "n": 327,
+          "correct": 259,
+          "accuracy": 0.7920489296636085
+        },
+        {
+          "month": "2025-07",
+          "n": 347,
+          "correct": 271,
+          "accuracy": 0.7809798270893372
+        },
+        {
+          "month": "2025-08",
+          "n": 258,
+          "correct": 203,
+          "accuracy": 0.7868217054263565
+        },
+        {
+          "month": "2025-09",
+          "n": 347,
+          "correct": 271,
+          "accuracy": 0.7809798270893372
+        }
+      ]
+    },
+    {
+      "id": "batter_rbi_under_0p5_proj_0p10_v1",
+      "market": "batter_rbis",
+      "side": "UNDER",
+      "requiredLine": 0.5,
+      "projectionMax": 0.1,
+      "selectedN": 2402,
+      "correct": 2053,
+      "accuracy": 0.8547044129891757,
+      "coverage": 0.0411230953603835,
+      "eligibleBaseline": 0.7913713405238829,
+      "lift": 0.06333307246529274,
+      "worstMonthAccuracy": 0.8225806451612904,
+      "monthly": [
+        {
+          "month": "2025-04",
+          "n": 489,
+          "correct": 405,
+          "accuracy": 0.8282208588957055
+        },
+        {
+          "month": "2025-05",
+          "n": 472,
+          "correct": 401,
+          "accuracy": 0.8495762711864406
+        },
+        {
+          "month": "2025-06",
+          "n": 401,
+          "correct": 344,
+          "accuracy": 0.85785536159601
+        },
+        {
+          "month": "2025-07",
+          "n": 406,
+          "correct": 362,
+          "accuracy": 0.8916256157635468
+        },
+        {
+          "month": "2025-08",
+          "n": 310,
+          "correct": 255,
+          "accuracy": 0.8225806451612904
+        },
+        {
+          "month": "2025-09",
+          "n": 324,
+          "correct": 286,
+          "accuracy": 0.8827160493827161
+        }
+      ]
+    },
+    {
+      "id": "batter_hrrbi_under_2p5_proj_0p70_v1",
+      "market": "batter_hits_runs_rbis",
+      "side": "UNDER",
+      "requiredLine": 2.5,
+      "projectionMax": 0.7,
+      "selectedN": 2582,
+      "correct": 2278,
+      "accuracy": 0.8822618125484121,
+      "coverage": 0.04420475945899675,
+      "eligibleBaseline": 0.7962335216572505,
+      "lift": 0.0860282908911616,
+      "worstMonthAccuracy": 0.8524173027989822,
+      "monthly": [
+        {
+          "month": "2025-04",
+          "n": 303,
+          "correct": 272,
+          "accuracy": 0.8976897689768977
+        },
+        {
+          "month": "2025-05",
+          "n": 442,
+          "correct": 384,
+          "accuracy": 0.8687782805429864
+        },
+        {
+          "month": "2025-06",
+          "n": 471,
+          "correct": 425,
+          "accuracy": 0.9023354564755839
+        },
+        {
+          "month": "2025-07",
+          "n": 489,
+          "correct": 437,
+          "accuracy": 0.8936605316973415
+        },
+        {
+          "month": "2025-08",
+          "n": 393,
+          "correct": 335,
+          "accuracy": 0.8524173027989822
+        },
+        {
+          "month": "2025-09",
+          "n": 484,
+          "correct": 425,
+          "accuracy": 0.878099173553719
+        }
+      ]
+    }
+  ],
+  "external2026": {
+    "opened": false,
+    "rule": "Do not read target-specific 2026 outcomes until this artifact is committed. Use an independent exact per-game source; no fuzzy identity."
+  },
+  "stolenBases": {
+    "state": "BASELINE_DOMINATED_NOT_FROZEN_AS_SIGNAL",
+    "eligibleUnder0p5Baseline": 0.9526964560862866,
+    "note": "Simple UNDER 0.5 filters reach ~97% but add <3 points over a 95.27% unconditional eligible baseline; preserve as a low-incremental-signal research reference only."
+  },
+  "boundaries": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "historicalOddsApiCalls": 0,
+    "multiLineExtrapolationAuthorized": false
+  }
+}
