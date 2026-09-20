@@ -373,7 +373,17 @@ async function loadExisting(targetDate: string) {
   return data ?? []
 }
 
-function existingMatchesSlate(existing: any[], slate: SlateGame[]) {
+function validExistingFreezeTiming(row: any, targetDate: string, startTime: string) {
+  const frozenAt = String(row?.frozen_at ?? '')
+  const frozenMs = Date.parse(frozenAt)
+  const startMs = Date.parse(startTime)
+  if (!Number.isFinite(frozenMs) || !Number.isFinite(startMs)) return false
+  return dateInTimeZone(new Date(frozenMs)) === targetDate &&
+    minuteOfDay(new Date(frozenMs)) >= FREEZE_HOUR * 60 + FREEZE_MINUTE &&
+    frozenMs < startMs
+}
+
+function existingMatchesSlate(existing: any[], slate: SlateGame[], targetDate: string) {
   if (existing.length !== slate.length) return false
   return slate.every((game) => existing.some((row) =>
     (Number(row.game_pk) === game.gamePk || !row.game_pk) &&
@@ -381,7 +391,7 @@ function existingMatchesSlate(existing: any[], slate: SlateGame[]) {
     String(row.away_team) === game.awayTeam &&
     sameStart(String(row.start_time), game.startTime) &&
     row.data_status === 'FROZEN' &&
-    Boolean(row.frozen_at) &&
+    validExistingFreezeTiming(row, targetDate, game.startTime) &&
     (row.pick_status === 'PICK' || row.pick_status === 'NO_PICK')
   ))
 }
@@ -481,7 +491,7 @@ export async function freezeMlbMoneylineForwardTracker(input: FreezeMoneylineInp
 
   const existing = await loadExisting(targetDate)
   if (!dryRun && existing.length) {
-    if (existingMatchesSlate(existing, slate)) {
+    if (existingMatchesSlate(existing, slate, targetDate)) {
       const grading = await gradeOpenFrozenPicks(now)
       return { success: true, status: 'REUSE_NO_OP', targetDate, dryRun, games: slate.length, rows: existing.length, writes: grading.graded, grading, officialPickWrites: 0, apostarActive: false }
     }
@@ -592,7 +602,7 @@ export async function freezeMlbMoneylineForwardTracker(input: FreezeMoneylineInp
   const { error: insertError } = await supabaseAdmin.from('mlb_ml_forward_tracker_v1').insert(rows)
   if (insertError) throw new Error(`MLB_MONEYLINE_FREEZE_WRITE_FAILED:${insertError.message}`)
   const readback = await loadExisting(targetDate)
-  if (!existingMatchesSlate(readback, slate)) throw new Error('MLB_MONEYLINE_FREEZE_READBACK_MISMATCH')
+  if (!existingMatchesSlate(readback, slate, targetDate)) throw new Error('MLB_MONEYLINE_FREEZE_READBACK_MISMATCH')
   const grading = await gradeOpenFrozenPicks(now)
   return {
     success: true,
