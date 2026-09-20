@@ -10,39 +10,41 @@ APOSTAR: disabled
 
 ## 2026-09-19 five approved prop markets — exact daily runtime operationalization
 
-Implementation branch: research/mlb-five-market-daily-runtime-20260919
+State: `FIVE_MARKET_DAILY_RUNTIME_READY_RESEARCH_ONLY`
+
+Code PR: #111 — merged to `main` at `71bc3e2ac438b5bcd2eefb2dab3732aa81e3492c`.
+
+Vercel production deployment: `dpl_2JA4Nw4kUqVLx2qenrniGYSsTYXt` — `READY`.
+
+Production smoke test: Pitcher ER runtime parity returned HTTP 200, `certified=true`, `failures=[]`; no Vercel runtime errors were present in the post-deploy scan.
 
 Parity certificate:
 
-artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json
+`artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json`
 
-The five frozen markets requested for daily pregame operation now have exact reconstructed runtime contracts and fail-closed model/market crossing. Formulae, thresholds, lines and directions were not retuned.
+The five frozen markets requested for daily pregame operation now satisfy the full Definition of Done. Formulae, thresholds, lines and directions were not retuned.
 
-| Market | Frozen formula | Frozen accuracy | Exact runtime | Current market capture | Daily evaluator | Implementation state |
+| Mercado | Fórmula | Accuracy | Runtime exacto | Market capture | Daily evaluator | Estado final |
 |---|---|---:|---|---|---|---|
-| Pitcher Earned Runs | OVER 1.5; empirical TRAIN P(OVER) >=70%; frozen R2 two-stage model | 73/91 = 80.22% (2025 development) | CERTIFIED: coefficients, TEST MAE/RMSE and 47/59 + 26/32 checksums exact | pitcher_earned_runs main + alternate, exact pregame snapshot | ENABLED, exact MLBAM + exact line crossing | READY_PENDING_PR_AND_PRODUCTION |
-| Pitcher Hits Allowed | UNDER 6.5 when projection <=5.0; raw = avg BF L5 starts * prior H/BF | 968/1,226 = 78.96% | CERTIFIED: 2025 n=3,099 refit + exact 2026 2,568/1,226/968 fingerprint | pitcher_hits_allowed main + alternate | ENABLED | READY_PENDING_PR_AND_PRODUCTION |
-| Batter Singles | UNDER 1.5 when projection <=0.50 | 12,690/13,634 = 93.08% | CERTIFIED: strict prior date; 2025 n=42,601 refit exact | batter_singles main + alternate | ENABLED | READY_PENDING_PR_AND_PRODUCTION |
-| Batter Doubles | UNDER 0.5 when projection <=0.16 | 17,632/20,282 = 86.93% | CERTIFIED: strict prior date; 2025 n=42,601 refit exact | batter_doubles main + alternate | ENABLED | READY_PENDING_PR_AND_PRODUCTION |
-| Batter Triples | UNDER 0.5 when projection <=0.015 | 29,689/30,045 = 98.82% | CERTIFIED: strict prior date; 2025 n=42,601 refit exact | batter_triples main + alternate | ENABLED | READY_PENDING_PR_AND_PRODUCTION |
+| Pitcher Earned Runs | `pitcher_er_over_1p5_p70_v1`: OVER 1.5; empirical TRAIN P(OVER) >=70%; frozen R2 | 73/91 = **80.22%** development 2025 | **YES** — coefficients, TEST MAE/RMSE and 47/59 + 26/32 exact | **YES** — current main+alternate, exact pregame line/book/price/timestamp | **YES** — exact MLBAM + model/market cross | **READY / research-only** |
+| Pitcher Hits Allowed | `pitcher_hits_allowed_under_6p5_proj_5p0_v1`: UNDER 6.5 when projection <=5.0; raw = avg BF L5 starts × prior H/BF | 968/1,226 = **78.96%** 2026 one-shot | **YES** — 2025 n=3,099 refit + 2026 2,568/1,226/968 exact | **YES** — current main+alternate | **YES** | **READY / research-only** |
+| Batter Singles | `batter_singles_under_1p5_proj_0p50_v1`: UNDER 1.5 when projection <=0.50 | 12,690/13,634 = **93.08%** | **YES** — strict prior date; 2025 n=42,601 refit exact | **YES** — current main+alternate | **YES** | **READY / research-only** |
+| Batter Doubles | `batter_doubles_under_0p5_proj_0p16_v1`: UNDER 0.5 when projection <=0.16 | 17,632/20,282 = **86.93%** | **YES** — strict prior date; 2025 n=42,601 refit exact | **YES** — current main+alternate | **YES** | **READY / research-only** |
+| Batter Triples | `batter_triples_under_0p5_proj_0p015_v1`: UNDER 0.5 when projection <=0.015 | 29,689/30,045 = **98.82%** | **YES** — strict prior date; 2025 n=42,601 refit exact | **YES** — current main+alternate | **YES** | **READY / LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED** |
 
-Triples remains explicitly LOW_INCREMENTAL_SIGNAL_BASELINE_DOMINATED.
+Pregame lineage and safety:
 
-Pregame lineage:
-
-- Batter formulas use same-season history only with source game date strictly earlier than target game date; same-day Game 1 is never prior for Game 2.
-- Prospective batter source is public.mlb_statcast_batter_sdt_game_mv, refreshed by the existing Statcast analytics path.
-- The new batter rollup reproduces the frozen 2025 xyear PA/singles/doubles/triples corpus exactly on 48,862/48,862 rows.
-- Current 2026 Statcast corrections are accepted prospectively but do not rewrite the frozen one-shot historical checksums.
-- Pitcher Hits Allowed and ER use MLB Official gameLog data with prior start date strictly earlier than the target date.
-- ER K-rate uses the canonical strict-pregame pick2_mlb_pitcher_daily_features.k_rate row, not a same-day reconstruction.
-- Runs Allowed is never substituted for Earned Runs.
-
-Daily classification is restricted to QUALIFIES_MARKET_VERIFIED, MODEL_QUALIFIES_MARKET_NOT_VERIFIED, NO_PLAY, NO_EVALUABLE and RUNTIME_PARITY_NOT_CERTIFIED.
-
-Market verification requires exact canonical gamePk, persisted MLBAM ID, exact frozen line, side, sportsbook, price and provider timestamp strictly before first pitch. No fuzzy matching is used.
-
-Boundaries remain unchanged: research/shadow only, Official Picks unchanged, APOSTAR disabled, production betting eligibility false, historical Odds API credits consumed = 0.
+- Batter formulas use same-season history only with `source_game_date < target_game_date`; same-day Game 1 is never prior for Game 2.
+- Prospective batter source is `public.mlb_statcast_batter_sdt_game_mv`, refreshed through the existing Statcast analytics path.
+- The batter rollup reproduces the frozen 2025 xyear PA/singles/doubles/triples corpus exactly on **48,862/48,862** rows.
+- Current 2026 Statcast corrections are accepted prospectively but do not rewrite frozen one-shot checksums.
+- Pitcher Hits Allowed and ER use MLB Official gameLog data with prior start date strictly earlier than target date.
+- ER K-rate uses the canonical strict-pregame `pick2_mlb_pitcher_daily_features.k_rate`; Runs Allowed is never substituted for Earned Runs.
+- Daily classification is restricted to `QUALIFIES_MARKET_VERIFIED`, `MODEL_QUALIFIES_MARKET_NOT_VERIFIED`, `NO_PLAY`, `NO_EVALUABLE`, or `RUNTIME_PARITY_NOT_CERTIFIED`.
+- Market verification requires canonical gamePk, persisted MLBAM ID, exact frozen line, side, sportsbook, price and provider timestamp strictly before first pitch.
+- Fuzzy player matching is disabled.
+- Historical Odds API credits consumed for this work: **0**.
+- Official Picks unchanged; APOSTAR disabled; all output remains research/shadow-only and production betting eligibility remains false.
 
 ## 2026-09-19 Pitcher Record a Win prospective forward deployment — authoritative
 
