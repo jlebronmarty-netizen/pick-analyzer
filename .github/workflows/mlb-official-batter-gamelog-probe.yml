@@ -1,0 +1,46 @@
+name: MLB Official batter game-log research probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/mlb-official-batter-gamelog-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch one official MLB batter game log
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS             "https://statsapi.mlb.com/api/v1/people/668804/stats?stats=gameLog&group=hitting&season=2026"             -o mlb-gamelog.json
+          python - <<'PY'
+          import json
+          d=json.load(open('mlb-gamelog.json'))
+          groups=d.get('stats') or []
+          splits=[]
+          for g in groups:
+              splits.extend(g.get('splits') or [])
+          sample=splits[0] if splits else {}
+          out={
+            'status':'PASS' if splits else 'NO_SPLITS',
+            'splitCount':len(splits),
+            'topLevelStatsGroups':len(groups),
+            'sampleDate':sample.get('date'),
+            'sampleGamePk':(sample.get('game') or {}).get('gamePk'),
+            'statKeys':sorted((sample.get('stat') or {}).keys()),
+            'sampleStat':{k:(sample.get('stat') or {}).get(k) for k in ['plateAppearances','atBats','hits','runs','rbi','baseOnBalls','strikeOuts']},
+          }
+          json.dump(out,open('mlb-official-gamelog-probe-summary.json','w'),indent=2)
+          print(json.dumps(out,indent=2))
+          PY
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-official-batter-gamelog-probe-summary
+          path: mlb-official-gamelog-probe-summary.json
+          retention-days: 2
