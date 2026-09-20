@@ -360,7 +360,7 @@
     "src/types/pick2-value-board.ts": "4025e3da5bd62fec01c883e93c19e4de2aa19c201bcc0c32af9da685f09b6afa",
     "supabase/functions/_shared/mlb-fenced-write.mjs": "cabe2cba9e9b43bad0fd200fe149295ba05ce4571804ade7afea2bbebf875624",
     "supabase/functions/_shared/mlb-runtime-schema.mjs": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951",
-    "supabase/functions/_shared/mlb-runtime-state.mjs": "34043e6bcfa57919206effc75620fa46aa0a56755520148053d1cc5986629d59",
+    "supabase/functions/_shared/mlb-runtime-state.mjs": "394d4f36a3b17ae6ced32f8f145bc12d245d5b398365ddbe132f74dc58a9724b",
     "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
     "supabase/functions/mlb-operational-preflight/index.ts": "630006a001a94fedb729271f54c38820218976c2e18620e1042c8880bafdfc32",
     "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
@@ -497,6 +497,16 @@
     "businessLogicChanges": 0,
     "modelChanges": 0,
     "oddsPolicyChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "runtimeStateEdgeV15HashReconciliation": {
+    "at": "2026-09-20T16:56:00Z",
+    "priorHash": "34043e6bcfa57919206effc75620fa46aa0a56755520148053d1cc5986629d59",
+    "currentHash": "394d4f36a3b17ae6ced32f8f145bc12d245d5b398365ddbe132f74dc58a9724b",
+    "edgeVersion": 15,
+    "scope": "CERTIFICATE_HASH_SYNC_ONLY",
+    "modelChanges": 0,
     "officialPicksChanges": 0,
     "apostarChanges": 0
   }
