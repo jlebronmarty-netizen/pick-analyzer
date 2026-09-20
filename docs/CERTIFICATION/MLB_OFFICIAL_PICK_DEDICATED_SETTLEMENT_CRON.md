@@ -46,6 +46,7 @@ Schedule:
 Per-run limits:
 
 - at most **50 game_pk**;
+- total execution deadline: **240 seconds**; if reached, the backlog yields cleanly and resumes on the next scheduled run;
 - at most **1,000 stored Official Pick rows**;
 - at most **100 Official Pick rows per game**;
 - only games whose scheduled start is at least 90 minutes in the past are attempted;
