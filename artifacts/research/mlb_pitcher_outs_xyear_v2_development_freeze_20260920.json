@@ -1,0 +1,80 @@
+{
+  "artifact": "MLB_PITCHER_OUTS_XYEAR_V2_DEVELOPMENT_FREEZE",
+  "createdAt": "2026-09-20",
+  "state": "FROZEN_BEFORE_NEW_ARCHITECTURE_2026_DIAGNOSTIC",
+  "researchOnly": true,
+  "productionEligible": false,
+  "officialPicksModified": false,
+  "apostarActivated": false,
+  "historicalOddsApiCalls": 0,
+  "supersedesOldCandidate": false,
+  "oldCandidate": "pitcher_outs_under_18p5_p90_v1 remains RUNTIME_PARITY_NOT_CERTIFIED",
+  "candidate": {
+    "id": "pitcher_outs_under_18p5_blend_15p75_v2",
+    "market": "pitcher_outs",
+    "side": "UNDER",
+    "requiredLine": 18.5,
+    "multipleLinesCertified": false,
+    "minPriorStarts": 5,
+    "formula": "proj_outs = 0.50 * prior season-to-date outs/start + 0.50 * L5 outs/start",
+    "gate": "proj_outs <= 15.75"
+  },
+  "development": {
+    "season": 2025,
+    "source": "public.mlb_ml_xyear_pitcher_game_v1",
+    "eligibleN": 3404,
+    "selectedN": 1398,
+    "coverage": 0.4106933019976498,
+    "correct": 1245,
+    "accuracy": 0.8905579399141631,
+    "eligibleUnder18p5Baseline": 0.8096357226792009,
+    "liftVsEligibleBaseline": 0.08092221723496215,
+    "worstMonthAccuracy": 0.8372093023255814,
+    "monthly": [
+      {
+        "month": "2025-04",
+        "n": 43,
+        "correct": 36,
+        "accuracy": 0.8372093023255814
+      },
+      {
+        "month": "2025-05",
+        "n": 222,
+        "correct": 193,
+        "accuracy": 0.8693693693693694
+      },
+      {
+        "month": "2025-06",
+        "n": 241,
+        "correct": 218,
+        "accuracy": 0.9045643153526971
+      },
+      {
+        "month": "2025-07",
+        "n": 274,
+        "correct": 243,
+        "accuracy": 0.8868613138686131
+      },
+      {
+        "month": "2025-08",
+        "n": 318,
+        "correct": 280,
+        "accuracy": 0.8805031446540881
+      },
+      {
+        "month": "2025-09",
+        "n": 300,
+        "correct": 275,
+        "accuracy": 0.9166666666666666
+      }
+    ]
+  },
+  "external2026": {
+    "pristine": false,
+    "reason": "Pitcher Outs 2026 outcomes were previously inspected under the older candidate family. Any 2026 read for this new architecture is diagnostic only; certification requires a future untouched forward window."
+  },
+  "marketCertification": {
+    "historicalExecutableLineEvidence": false,
+    "prospectiveRealLineRequired": true
+  }
+}
