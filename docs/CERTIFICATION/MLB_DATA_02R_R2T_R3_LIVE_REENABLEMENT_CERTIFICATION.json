@@ -261,7 +261,7 @@
     "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
     "scripts/mlb-data-02r-r2t-production-bindings.mjs": "8a45528d089aa45cf3647686165ebba7f496eb0b000f786ea6078724c56f5ce2",
     "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
-    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "0aae515107f38e3956d6065caa85c4b672bbe2895b47208fc830fc676b140ad2",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "8a67465f7bbb8719459453ad3d0377c7b674bb2879541a49764320b82c71e4eb",
     "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
     "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "40ff74968c54ab07d99d1e5145eeeb71a9b8c8b275d9d2f902508e89f8030ef2",
     "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
@@ -527,6 +527,34 @@
     "dependencyUniverseChanges": 0,
     "featureMathChanges": 0,
     "modelChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "rawIdentityPreflightReadRevalidation": {
+    "at": "2026-09-20T21:31:00Z",
+    "scope": "TARGET_LOCAL_RAW_IDENTITY_FAIL_CLOSED_QUERY_SHAPE",
+    "observedProductionFailure": {
+      "label": "raw_identity_preflight",
+      "databaseCode": "57014",
+      "stage": "DEPENDENCY_SCOPE"
+    },
+    "priorQueryShape": "up to 100 dependency game_pk values per IN predicate plus the unchanged identity-null OR predicate",
+    "newQueryShape": "one indexed game_pk equality predicate per dependency game, bounded with existing RAW_READ_CONCURRENCY=16, plus the unchanged identity-null OR predicate",
+    "indexEvidence": {
+      "index": "pick2_raw_mlb_statcast_pitches_game_idx",
+      "representativeGamePk": 823333,
+      "representativeRowsScanned": 294,
+      "explainAnalyzeExecutionMs": 0.917
+    },
+    "successfulReadInvalidRowPolicy": "TARGET_LOCAL_RAW_IDENTITY",
+    "databaseReadErrorPolicy": "HARD_DEPENDENCY_READ_FAILURE_NOT_RAW_IDENTITY",
+    "dependencyUniverseChanges": 0,
+    "featureMathChanges": 0,
+    "cutoffChanges": 0,
+    "modelChanges": 0,
+    "thresholdChanges": 0,
+    "providerCallsAdded": 0,
+    "historicalOddsCallsAdded": 0,
     "officialPicksChanges": 0,
     "apostarChanges": 0
   }
