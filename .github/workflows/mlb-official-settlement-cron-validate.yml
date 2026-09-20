@@ -1,0 +1,34 @@
+name: MLB Official Pick Settlement Cron Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/services/pick2-mlb-certified-settlement-cron.service.ts'
+      - 'src/app/api/cron/mlb-official-settlement/route.ts'
+      - 'vercel.json'
+      - 'docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json'
+      - 'docs/CERTIFICATION/MLB_OFFICIAL_PICK_DEDICATED_SETTLEMENT_CRON.md'
+      - 'scripts/mlb-official-settlement-cron-validate.mjs'
+      - '.github/workflows/mlb-official-settlement-cron-validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/mlb-official-settlement-cron-validate.mjs
+      - run: npm run build

@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+
+const service = fs.readFileSync('src/services/pick2-mlb-certified-settlement-cron.service.ts','utf8')
+const route = fs.readFileSync('src/app/api/cron/mlb-official-settlement/route.ts','utf8')
+const vercel = JSON.parse(fs.readFileSync('vercel.json','utf8'))
+const activation = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json','utf8'))
+
+assert.match(service, /MAX_SETTLEMENT_GAMES_PER_RUN = 50/)
+assert.match(service, /MAX_RUNTIME_MS = 240_000/)
+assert.match(service, /SETTLEMENT_BACKLOG_YIELDED_FOR_DEADLINE/)
+assert.match(service, /statsapi\.mlb\.com\/api\/v1\.1\/game\//)
+assert.match(service, /planMlbSettlement/)
+assert.match(service, /persistMlbSettlementPlan/)
+assert.match(service, /pick2_prediction_results/)
+assert.match(service, /pick2_mlb_official_picks/)
+assert.match(service, /officialPicksModified: false/)
+assert.match(service, /apostarActivated: false/)
+assert.doesNotMatch(service, /executeTheOddsApi|THE_ODDS_API|sports_odds_snapshots/)
+assert.doesNotMatch(service, /from\('pick2_mlb_official_picks'\)\s*\.insert/)
+assert.doesNotMatch(service, /from\('pick2_mlb_official_picks'\)\s*\.update/)
+assert.match(route, /CRON_SECRET/)
+assert.match(route, /settleMlbOfficialPickBacklog/)
+assert.equal(activation.settlementAutomation,'DISABLED')
+assert.equal(activation.dedicatedSettlementRuntime.writeTarget,'public.pick2_prediction_results')
+assert.equal(activation.dedicatedSettlementRuntime.officialPickWrites,0)
+assert.equal(activation.dedicatedSettlementRuntime.apostar,false)
+assert.ok(vercel.crons.some((row)=>row.path==='/api/cron/mlb-official-settlement' && row.schedule==='12 * * * *'))
+
+console.log('MLB dedicated Official Pick settlement cron contract: PASS')
