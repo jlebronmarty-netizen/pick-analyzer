@@ -148,3 +148,80 @@ Policy:
 4. Preserve F1 NRFI/F1 ML/F5 ML/Game Totals third-pass failures and stop tuning those same architectures.
 5. Treat SportsDataIO only as legacy stored evidence; make **zero new SportsDataIO calls**.
 6. Separately audit the legacy odds-authority config because its default still references SportsDataIO; do not change production authority without an explicit gate.
+
+
+## Additional line-free third-pass probes
+
+### F1 3-Way DRAW — low-scoring probability transfer
+
+Reused the independently estimated top/bottom first-inning scoring probabilities, but targeted DRAW rather than NRFI.
+
+Best n>=50:
+- offense weight 0.25;
+- low-scoring / NRFI-like threshold 0.75;
+- **35/52 = 67.31%**;
+- worst month **0.00%**;
+- min selected month n=1.
+
+Closeout: `THIRD_PASS_BELOW_75_NO_FREEZE`.
+
+### F3 Moneyline — period-run expectation architecture
+
+Materially different from the previous classifier/regression revisit.
+
+Features:
+- strictly prior F3 team scoring and F3 runs allowed;
+- season-to-date + L10 period scoring;
+- opposing starter RA9;
+- fixed weight grid;
+- fixed predicted-margin thresholds.
+
+Best n>=50:
+- team weight 0.50;
+- starter weight 0.30;
+- predicted F3 margin >=0.75;
+- **103/162 = 63.58%**;
+- worst month **41.67%**.
+
+Closeout: `THIRD_PASS_BELOW_75_NO_FREEZE`.
+
+### F7 Moneyline — period-run + starter + bullpen architecture
+
+Features:
+- strictly prior F7 scoring/allowance;
+- L10 F7 team context;
+- opposing starter RA9;
+- opposing bullpen RA9;
+- fixed transparent weight grid;
+- fixed margin thresholds.
+
+Best n>=50:
+- weights 0.45 team / 0.25 opponent allowance / 0.20 starter / 0.10 bullpen;
+- predicted margin >=1.50;
+- **42/58 = 72.41%**;
+- worst month **0.00%**;
+- min selected month n=1.
+
+Closeout: `THIRD_PASS_BELOW_75_NO_FREEZE`.
+
+These additional probes do not justify a fourth threshold pass. New work requires materially new information or exact historical market points.
+
+## BALLDONTLIE GOAT credential placement audit
+
+Canonical environment variable from the existing NBA/NFL BALLDONTLIE integration:
+
+`BALLDONTLIE_API_KEY`
+
+Verified existing scripts already use this exact variable.
+
+Temporary MLB GOAT probes were built read-only and preview-only, but:
+- GitHub Actions reported the BALLDONTLIE probe credential step as absent/skipped;
+- no BALLDONTLIE provider call was made from the probe;
+- Vercel Deployment Protection prevented external execution of the preview route;
+- available Vercel tools do not expose environment-variable names/values.
+
+Therefore current state is:
+
+`BALLDONTLIE_GOAT_ACCESS_CONFIRMED_BY_USER_KEY_PLACEMENT_NOT_VERIFIED_IN_RUNTIME`
+
+No GOAT line/prop backfill is claimed until the key is available to the execution environment. Do not expose or print the key.
