@@ -322,8 +322,8 @@
     "scripts/mlb-operational-preflight.mjs": "c8e76badafcbfd13d1ac549799e3b8984e2faecd377542f331358e7c491e4005",
     "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
     "scripts/mlb-operational-r6-run-store.mjs": "323e185b66d9125defe826cb2eaa3322525618ab8ae96c1dcf6413883bc75531",
-    "scripts/mlb-operational-r6-state-client.mjs": "4f552e28b3f6968049716c8e5542c82f82ba89712cc69ec8642457017eac8606",
-    "scripts/mlb-operational-r6-vercel-runtime.mjs": "8350ed61382af908a4044d6bed7b6d2ffe360c638ec24ee1431d589034f55311",
+    "scripts/mlb-operational-r6-state-client.mjs": "226d9891043a88c0dc1bee14630df04c4b9651f5882441870efa7c171d924e92",
+    "scripts/mlb-operational-r6-vercel-runtime.mjs": "d2c96aa8ff5e3fb735516fe212e8b2c9d7d9bde250bb70af5666b6ed725acd4a",
     "scripts/mlb-operational-r6-write-journal.mjs": "2b2c4c79c06e28265f3340c223c9c291fee4421b60a6066644f24bfb13859c78",
     "scripts/mlb-operational-readonly-network-guard.mjs": "b4c535d64cce41aa85ee40be0fbdd351fd47d873262c549711d8c265d3aad383",
     "scripts/mlb-operational-schema-preflight.sql": "6e796b5416eebea92dfc937ed757d05cc03bd753dad4da8b50769b66a035c30a",
@@ -468,5 +468,16 @@
       "src/components/dashboard/DashboardShell.tsx",
       "scripts/mlb-operational-budget-exhaustion.mjs"
     ]
+  },
+  "stalePendingRunRevalidation": {
+    "at": "2026-09-20T13:50:00Z",
+    "scope": "EXPIRED_PRIOR_DATE_RUN_DISPOSITION_ONLY",
+    "authorityOperation": "dispose",
+    "businessLogicChanges": 0,
+    "modelChanges": 0,
+    "oddsPolicyChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0,
+    "behavior": "A prior-date RUNNING state may be disposed only through the existing fenced authority after expired-game and readback checks pass; current-date or active-lease runs remain fail-closed."
   }
 }
