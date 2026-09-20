@@ -1,0 +1,148 @@
+{
+  "artifact": "MLB_BATTER_RUNS_RBI_HRRBI_2026_PROXY_DIAGNOSTIC",
+  "createdAt": "2026-09-20",
+  "developmentFreezeCommit": "dee58764dd0f7bf9dd9efac110e14ffd01f64d02",
+  "source": {
+    "provider": "sportsdataio",
+    "table": "public.sport_player_stats",
+    "season": 2026,
+    "statType": "game",
+    "sourceRows": 31371,
+    "eligibleRows": 25778,
+    "dateRange": [
+      "2026-03-26T17:15:00Z",
+      "2026-07-19T19:20:00Z"
+    ]
+  },
+  "paContract": {
+    "exact": false,
+    "proxy": "AtBats + Walks + HitByPitch + SacrificeFlies + Sacrifices",
+    "developmentParityAudit": {
+      "source": "official Retrosheet 2025 batting.csv",
+      "exactPaRows": 71550,
+      "proxyPaMismatchRows": 87,
+      "proxyPlusBXiMismatchRows": 0,
+      "frozenSelectionDifference": {
+        "runs": 1,
+        "rbi": 1,
+        "hrrbi": 2
+      }
+    },
+    "implication": "2026 results are diagnostic only; exact external certification requires exact PA/identity lineage or untouched forward validation."
+  },
+  "results": {
+    "runs": {
+      "candidateId": "batter_runs_under_0p5_proj_0p14_v1",
+      "selectedN": 1085,
+      "correct": 818,
+      "accuracy": 0.7539170506912443,
+      "coverage": 0.04209015439522073,
+      "eligibleBaseline": 0.6458220187757002,
+      "monthly": [
+        {
+          "month": "2026-04",
+          "n": 338,
+          "correct": 240,
+          "accuracy": 0.7100591715976331
+        },
+        {
+          "month": "2026-05",
+          "n": 383,
+          "correct": 308,
+          "accuracy": 0.804177545691906
+        },
+        {
+          "month": "2026-06",
+          "n": 272,
+          "correct": 202,
+          "accuracy": 0.7426470588235294
+        },
+        {
+          "month": "2026-07",
+          "n": 92,
+          "correct": 68,
+          "accuracy": 0.7391304347826086
+        }
+      ],
+      "status": "DEVELOPMENT_75_PLUS_PROXY_DIAGNOSTIC_MIXED"
+    },
+    "rbi": {
+      "candidateId": "batter_rbi_under_0p5_proj_0p10_v1",
+      "selectedN": 1362,
+      "correct": 1130,
+      "accuracy": 0.8296622613803231,
+      "coverage": 0.05283575141593607,
+      "eligibleBaseline": 0.7262006362014121,
+      "monthly": [
+        {
+          "month": "2026-04",
+          "n": 450,
+          "correct": 357,
+          "accuracy": 0.7933333333333333
+        },
+        {
+          "month": "2026-05",
+          "n": 437,
+          "correct": 373,
+          "accuracy": 0.8535469107551488
+        },
+        {
+          "month": "2026-06",
+          "n": 339,
+          "correct": 289,
+          "accuracy": 0.8525073746312685
+        },
+        {
+          "month": "2026-07",
+          "n": 136,
+          "correct": 111,
+          "accuracy": 0.8161764705882353
+        }
+      ],
+      "status": "TARGET_MET_75_PLUS_PROXY_DIAGNOSTIC_EXACT_EXTERNAL_PENDING"
+    },
+    "hrrbi": {
+      "candidateId": "batter_hrrbi_under_2p5_proj_0p70_v1",
+      "selectedN": 1303,
+      "correct": 1110,
+      "accuracy": 0.851880276285495,
+      "coverage": 0.05054697804329273,
+      "eligibleBaseline": 0.73256265032198,
+      "monthly": [
+        {
+          "month": "2026-04",
+          "n": 314,
+          "correct": 261,
+          "accuracy": 0.8312101910828026
+        },
+        {
+          "month": "2026-05",
+          "n": 450,
+          "correct": 398,
+          "accuracy": 0.8844444444444445
+        },
+        {
+          "month": "2026-06",
+          "n": 381,
+          "correct": 322,
+          "accuracy": 0.8451443569553806
+        },
+        {
+          "month": "2026-07",
+          "n": 158,
+          "correct": 129,
+          "accuracy": 0.8164556962025317
+        }
+      ],
+      "status": "TARGET_MET_75_PLUS_PROXY_DIAGNOSTIC_EXACT_EXTERNAL_PENDING"
+    }
+  },
+  "boundaries": {
+    "researchOnly": true,
+    "productionEligible": false,
+    "officialPicksModified": false,
+    "apostarActivated": false,
+    "historicalOddsApiCalls": 0,
+    "retunedAfterDiagnostic": false
+  }
+}
