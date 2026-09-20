@@ -388,7 +388,7 @@ export async function captureMlbApprovedPropMarkets(input: {
   }
   if (!apiKey()) return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY' }
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
-  const recoveryWindow = clock.hour === 11 && clock.minute <= 10
+  const recoveryWindow = clock.hour === 11 && clock.minute <= 20
   if (clock.hour !== 10 && !recoveryWindow) return { ...base, status: 'NOT_DUE' }
 
   // A bounded 11:00-11:10 recovery reuses the 10:45 checkpoint identity,
@@ -469,18 +469,28 @@ export async function captureMlbApprovedPropMarkets(input: {
     if (call.requestsRemaining === null) break
   }
 
-  const ids = rows.map((row) => String(row.id))
+  const uniqueRowsById = new Map<string, Record<string, unknown>>()
+  for (const row of rows) {
+    const id = String(row.id)
+    const previous = uniqueRowsById.get(id)
+    if (previous && JSON.stringify(previous) !== JSON.stringify(row)) {
+      throw new Error('MLB_APPROVED_PROP_DUPLICATE_ID_PAYLOAD_CONFLICT:' + id)
+    }
+    uniqueRowsById.set(id, row)
+  }
+  const uniqueRows = [...uniqueRowsById.values()]
+  const ids = uniqueRows.map((row) => String(row.id))
   let existingRows = 0
   for (let offset = 0; offset < ids.length; offset += PAGE_SIZE) {
     const readback = await supabaseAdmin.from('sports_odds_snapshots').select('id').in('id', ids.slice(offset, offset + PAGE_SIZE))
     if (readback.error) throw new Error('MLB_APPROVED_PROP_EXISTING_READ_FAILED:' + readback.error.message)
     existingRows += readback.data?.length ?? 0
   }
-  if (rows.length) {
+  if (uniqueRows.length) {
     // A full multi-market MLB slate can produce several thousand quote rows.
     // Keep each PostgREST write bounded instead of sending one oversized upsert.
-    for (let offset = 0; offset < rows.length; offset += WRITE_BATCH_SIZE) {
-      const batch = rows.slice(offset, offset + WRITE_BATCH_SIZE)
+    for (let offset = 0; offset < uniqueRows.length; offset += WRITE_BATCH_SIZE) {
+      const batch = uniqueRows.slice(offset, offset + WRITE_BATCH_SIZE)
       const write = await supabaseAdmin.from('sports_odds_snapshots').upsert(batch, { onConflict: 'id' })
       if (write.error) throw new Error('MLB_APPROVED_PROP_SNAPSHOT_WRITE_FAILED:' + write.error.message)
     }
@@ -502,9 +512,9 @@ export async function captureMlbApprovedPropMarkets(input: {
     started_at: now.toISOString(),
     completed_at: completedAt,
     status,
-    records_fetched: rows.length,
-    records_inserted: Math.max(0, rows.length - existingRows),
-    records_updated: Math.min(existingRows, rows.length),
+    records_fetched: uniqueRows.length,
+    records_inserted: Math.max(0, uniqueRows.length - existingRows),
+    records_updated: Math.min(existingRows, uniqueRows.length),
     records_skipped: 0,
     error_count: failedCalls,
     metadata: {
@@ -536,9 +546,9 @@ export async function captureMlbApprovedPropMarkets(input: {
     jobId,
     providerCallsMade: calls.length,
     providerCreditsConsumed: credits,
-    rowsAccepted: rows.length,
-    rowsInserted: Math.max(0, rows.length - existingRows),
-    rowsUpdated: Math.min(existingRows, rows.length),
+    rowsAccepted: uniqueRows.length,
+    rowsInserted: Math.max(0, uniqueRows.length - existingRows),
+    rowsUpdated: Math.min(existingRows, uniqueRows.length),
     requestsRemainingAfter: remaining,
     calls,
   }
