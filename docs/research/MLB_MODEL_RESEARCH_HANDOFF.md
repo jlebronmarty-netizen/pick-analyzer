@@ -7,6 +7,70 @@
 
 
 
+
+## 2026-09-20 approved props real-line operational contract — authoritative
+
+Permanent rule:
+
+`MODEL_QUALIFIES + REAL_LINE_EXISTS + EXACT_IDENTITY + PREGAME_QUOTE = EVALUABLE_PLAY`.
+
+Canonical contract:
+`MLB_APPROVED_PROP_REAL_LINE_CONTRACT/1.0.0`.
+
+Canonical detail:
+`docs/research/MLB_APPROVED_PROP_REAL_LINE_CONTRACT_V1.md`.
+
+Runtime policy:
+
+- main and alternate provider lines are captured as real market evidence with sportsbook, side, line, price and timestamps;
+- numeric-line models remain eligible only at their exact frozen/certified line;
+- no alternate-line threshold or probability transfer is authorized;
+- `pitcher_win_forward_numeric_p015_v1` is a binary NO market with no numeric line;
+- Pitcher Outs remains `RUNTIME_PARITY_NOT_CERTIFIED` with blocker `PITCHER_OUTS_INPUT_LINEAGE_NOT_EXACTLY_RECONCILED`;
+- exact MLBAM identity must be a positive integer; NULL is never coerced to 0;
+- sportsbook and price must exist and the quote timestamp must precede target first pitch.
+
+Final market states include:
+
+- `QUALIFIES_MARKET_VERIFIED`;
+- `MODEL_QUALIFIES_MARKET_NOT_AVAILABLE`;
+- `MARKET_AVAILABLE_REQUIRED_LINE_NOT_AVAILABLE`;
+- `NO_EVALUABLE_IDENTITY`;
+- `NO_EVALUABLE_PREGAME_LINEAGE`;
+- `NO_EVALUABLE`;
+- `NO_PLAY`;
+- `RUNTIME_PARITY_NOT_CERTIFIED`.
+
+Only `QUALIFIES_MARKET_VERIFIED` is emitted in the board's `playable` collection.
+Historical certified accuracy remains separate from an individual model probability.
+
+ARI-NYY game 825028 is audit evidence only because the game had already begun before this contract was finalized.
+The preserved 92 pitcher quotes demonstrate real alternate-line coverage without authorizing model extrapolation.
+
+### Sep20 PREGAME recovery closeout
+
+PR #144 removed the timeout-prone 100-game raw-identity preflight query shape while preserving the exact fail-closed identity veto.
+The 21:45Z run for game 824789 then completed:
+
+- package: `5586cac82d978ae232d65c88385386b2409d778b`;
+- dependency games: 301;
+- raw dependency pitches: 90,280;
+- persisted feature rows: 18;
+- PREGAME readback: PASS.
+
+The same run exposed one legacy Official Pick write. That existing row is preserved unchanged.
+PR #145 changes the operational research runtime so Moneyline policy eligibility remains visible as shadow evidence but Official Pick DML is forced to zero.
+APOSTAR remains disabled.
+
+Historical Statcast canonical team-identity repair is complete:
+
+- 10,011 additional rows across 34 games repaired after the earlier 1,502-row/5-game target repair;
+- global remaining canonical home/away team NULL rows: 0;
+- repaired mapping mismatches: 0;
+- raw payload digest chain unchanged: `61e777d23bbd82b2a8e7a6d5dd76763f`;
+- fuzzy matching: false;
+- historical Odds API calls: 0.
+
 ## 2026-09-20 Standard Run Line V2 forward freeze — authoritative
 
 Standard Run Line prospective shadow is now runtime-ready under the existing frozen candidates:
