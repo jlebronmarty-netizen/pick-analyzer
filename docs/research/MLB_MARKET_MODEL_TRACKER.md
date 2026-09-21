@@ -64,9 +64,9 @@ Only `QUALIFIES_MARKET_VERIFIED` is included in `playable`.
 Sep20 game 824789 successfully crossed PREGAME after the indexed raw identity preflight repair:
 301 dependency games, 90,280 raw pitches, 18 persisted feature rows, readback PASS.
 
-The legacy core inserted one Official Pick during that successful run. Existing data is not rewritten.
-PR #145 disables future Official Pick DML from the research runtime while preserving policy results as shadow evidence.
-Prospective boundary validation: the 22:00Z PREGAME run on package `672b787dafc187ae4cd4d00684881b7dcf3c68c0` completed with `picks=0`, zero DML stages, and Official Picks total unchanged at one pre-existing Sep20 row. Approved props remained `apostar_enabled=false` and `official_picks_eligible=false`.
+The Sep20 research runtime ultimately produced three historical Official Pick rows for game 824789 before the full write boundary was closed. The first row was created at 21:46Z; two additional rows were created by `/api/cron/mlb-operational` at 22:31Z and 22:46Z. Existing rows are preserved unchanged.
+PR #145 disabled the separate legacy Official Pick DML path, but a later audit found the canonical `runCanonicalR2IStages` path still persisted `buildCanonicalOfficialPicks(...)` output. The Sep20 canonical-boundary repair makes that path shadow-only and adds a repository-level hard guard rejecting any non-empty `insertOfficialPicks` call.
+Approved props remain `apostar_enabled=false` and `official_picks_eligible=false`. Official Pick creation is not authorized.
 
 APOSTAR remains disabled.
 
