@@ -1,0 +1,41 @@
+name: MLB historical period market discovery execute
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/mlb-historical-period-market-discovery-execute.yml'
+      - 'scripts/the-odds-api-historical-period-market-discovery-v1.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      ODDS_API_HISTORICAL_PERIOD_DISCOVERY_CONFIRM: ODDS_API_HISTORICAL_PERIOD_MARKET_DISCOVERY_V1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require configured secret without exposing it
+        id: preflight
+        shell: bash
+        run: |
+          if [ -z "${THE_ODDS_API_KEY:-}" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo '{"success":false,"status":"BLOCKED_MISSING_THE_ODDS_API_KEY","providerCallsMade":0,"creditsObserved":0}' > historical-period-market-discovery.json
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Execute bounded two-credit discovery
+        if: steps.preflight.outputs.present == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/the-odds-api-historical-period-market-discovery-v1.mjs | tee historical-period-market-discovery.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-historical-period-market-discovery
+          path: historical-period-market-discovery.json
+          retention-days: 3
