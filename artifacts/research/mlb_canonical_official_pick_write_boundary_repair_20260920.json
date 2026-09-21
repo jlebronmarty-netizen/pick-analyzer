@@ -1,0 +1,40 @@
+{
+  "artifact": "MLB_CANONICAL_OFFICIAL_PICK_WRITE_BOUNDARY_REPAIR",
+  "createdAt": "2026-09-20",
+  "state": "IMPLEMENTED_PENDING_PRODUCTION_VALIDATION",
+  "researchOnly": true,
+  "officialPicksModifiedByRepair": false,
+  "apostarActivated": false,
+  "discoveredRows": [
+    {
+      "id": "d403c83b-74c2-4173-9110-a6afb3d73d8e",
+      "gamePk": 824789,
+      "createdAt": "2026-09-20T21:46:30.744375Z"
+    },
+    {
+      "id": "440dff06-7f42-4a7e-b4a6-ae0300a55b26",
+      "gamePk": 824789,
+      "createdAt": "2026-09-20T22:31:26.508532Z"
+    },
+    {
+      "id": "c8190322-79a0-48b8-ba5e-5a6ebb040b7f",
+      "gamePk": 824789,
+      "createdAt": "2026-09-20T22:46:35.990291Z"
+    }
+  ],
+  "rootCause": {
+    "route": "/api/cron/mlb-operational",
+    "canonicalRuntime": "runCanonicalR2IStages",
+    "issue": "buildCanonicalOfficialPicks output was persisted by persistDownstreamRows(domain=officialPicks) while the separate legacy path had already been shadow-only"
+  },
+  "repair": {
+    "canonicalDecisionEvidence": "preserved as shadow/watchlist evidence",
+    "persistedOfficialPickRows": 0,
+    "persistedOfficialPickCap": 0,
+    "repositoryGuard": "insertOfficialPicks rejects any non-empty rows or non-zero cap",
+    "sourceFile": "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs",
+    "normalizedSha256": "ccc56523abdd7ce8b13e91c3befcc53d6d361d81b5c035538c66317d5441bee4",
+    "r3CertificateUpdated": true
+  },
+  "nextValidation": "After production deployment, observe next /api/cron/mlb-operational tick and verify Official Pick count does not increase."
+}
