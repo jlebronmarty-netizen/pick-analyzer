@@ -58,9 +58,9 @@ The 21:45Z run for game 824789 then completed:
 - persisted feature rows: 18;
 - PREGAME readback: PASS.
 
-The same run exposed one legacy Official Pick write. That existing row is preserved unchanged.
-PR #145 changes the operational research runtime so Moneyline policy eligibility remains visible as shadow evidence but Official Pick DML is forced to zero.
-Prospective boundary validation: the 22:00Z PREGAME run on package `672b787dafc187ae4cd4d00684881b7dcf3c68c0` completed with `picks=0`, zero DML stages, and Official Picks total unchanged at one pre-existing Sep20 row. Approved props remained `apostar_enabled=false` and `official_picks_eligible=false`.
+The Sep20 runtime exposed an incomplete Official Pick write boundary. Three historical rows for game 824789 were created before the full canonical path was closed: 21:46Z, 22:31Z and 22:46Z. They are preserved unchanged.
+PR #145 closed the legacy path, but the canonical `runCanonicalR2IStages` path still persisted `buildCanonicalOfficialPicks(...)` output. The Sep20 canonical-boundary repair changes that path to shadow-only, persists zero Official Pick rows, and hard-rejects any non-empty repository `insertOfficialPicks` call.
+Approved props remain `apostar_enabled=false` and `official_picks_eligible=false`. Official Pick creation is not authorized.
 
 APOSTAR remains disabled.
 
