@@ -320,7 +320,7 @@ function normalizeRows(input: {
             : 'UNRESOLVED_EXACT_IDENTITY'
         rows.push({
           id: 'mlbprop_' + hash([
-            input.event.id, sportsbook, providerMarket, playerName, selection, line, snapshotTime,
+            input.event.id, sportsbook, providerMarket, playerName, selection, line, price, snapshotTime,
           ]),
           sport_key: SPORT_KEY,
           league_key: LEAGUE_KEY,
@@ -391,7 +391,7 @@ export async function captureMlbApprovedPropMarkets(input: {
   }
   if (!apiKey()) return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY' }
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
-  const recoveryWindow = clock.hour === 11 && clock.minute <= 30
+  const recoveryWindow = clock.hour === 11 && clock.minute <= 50
   if (clock.hour !== 10 && !recoveryWindow) return { ...base, status: 'NOT_DUE' }
 
   // A bounded 11:00-11:10 recovery reuses the 10:45 checkpoint identity,
