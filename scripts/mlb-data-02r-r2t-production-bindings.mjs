@@ -260,12 +260,28 @@ async function createBindings({ client, repository, store, runContext, authoriza
           blockedGames.push({ gamePk: game.game_pk, reason: 'NEW_RAW_EVIDENCE_AFTER_RUN_FREEZE' }); continue
         }
         if (compactContexts) {
-          const prepared=prepareCompactFeatureContext({context:{target,starters,dependencies},runDate:runContext.run_date,runAsOf:runContext.run_as_of})
-          contexts.push(prepared.context);preparedPlans.set(target.gamePk,prepared.generated)
+          try {
+            const prepared=prepareCompactFeatureContext({context:{target,starters,dependencies},runDate:runContext.run_date,runAsOf:runContext.run_as_of})
+            contexts.push(prepared.context);preparedPlans.set(target.gamePk,prepared.generated)
+          } catch (error) {
+            if (error instanceof Error && error.message === 'R2TR1_BLOCK:REQUIRED_HISTORY_MISSING') {
+              blockedGames.push({ gamePk: game.game_pk, reason: 'REQUIRED_HISTORY_MISSING' })
+              continue
+            }
+            throw error
+          }
         }
         else {
-          buildPregameFeatureRows({ target, starters, rawRows: dependencies.rows, dependencyGamePks: dependencies.dependencyGamePks })
-          contexts.push({ target, starters, dependencies })
+          try {
+            buildPregameFeatureRows({ target, starters, rawRows: dependencies.rows, dependencyGamePks: dependencies.dependencyGamePks })
+            contexts.push({ target, starters, dependencies })
+          } catch (error) {
+            if (error instanceof Error && error.message === 'R2TR1_BLOCK:REQUIRED_HISTORY_MISSING') {
+              blockedGames.push({ gamePk: game.game_pk, reason: 'REQUIRED_HISTORY_MISSING' })
+              continue
+            }
+            throw error
+          }
         }
         const rawGame = scheduleEvidence.payload.dates.flatMap(d => d.games).find(g => g.gamePk === game.game_pk)
         nativeGames.push({ game_pk: game.game_pk, scheduled_at: target.scheduledAt, home_team_name: rawGame.teams.home.team.name, away_team_name: rawGame.teams.away.team.name })
