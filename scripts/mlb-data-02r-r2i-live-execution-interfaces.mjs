@@ -829,7 +829,10 @@ export function createSupabaseProductionRepository({ client, schemaFingerprint =
     async readValues(ids) { return selectByIds(client, R2I_LIVE_TARGETS.values, 'value_identity', ids) },
     async insertValues(rows, cap) { return write(R2I_LIVE_TARGETS.values, rows, cap) },
     async readOfficialPicks(ids) { return selectByIds(client, R2I_LIVE_TARGETS.officialPicks, 'official_pick_identity', ids) },
-    async insertOfficialPicks(rows, cap) { return write(R2I_LIVE_TARGETS.officialPicks, rows, cap) },
+    async insertOfficialPicks(rows, cap) {
+      if (rows.length !== 0 || cap !== 0) throw new Error('OFFICIAL_PICK_WRITES_DISABLED_RESEARCH_BOUNDARY')
+      return { inserted: 0, table: R2I_LIVE_TARGETS.officialPicks, rows: [] }
+    },
     async readValueBoard({ valueIdentities, pickIdentities }) {
       const values = await selectByIds(client, R2I_LIVE_TARGETS.values, 'value_identity', valueIdentities)
       const picks = await selectByIds(client, R2I_LIVE_TARGETS.officialPicks, 'official_pick_identity', pickIdentities)
@@ -1244,7 +1247,13 @@ async function runCanonicalR2IStages({ mode, runContext, providers, repository, 
   const values = await persistDownstreamRows({ domain: 'values', rows: valueRows, repository, eligibleGamePks: scope, cap: limits.nativeValues ?? valueRows.length, beforeWrite: assertPregame })
   await canonical.checkpoint.markStage?.('OFFICIAL_PICKS')
   const decision = buildCanonicalOfficialPicks({ values: activeRows(values.rows), decisionAt: checkpoint.evaluatedAt, scheduledByGame: new Map(contexts.map(c => [c.target.gamePk, c.target.scheduledAt])) })
-  const picks = await persistDownstreamRows({ domain: 'officialPicks', rows: decision.rows, repository, eligibleGamePks: scope, cap: limits.officialPicks ?? decision.rows.length, beforeWrite: assertPregame })
+  // Research/shadow boundary: policy decisions remain observable, but canonical
+  // production runtime is forbidden from creating new Official Pick rows.
+  const shadowOfficialPickRows = decision.rows
+  const picks = await persistDownstreamRows({ domain: 'officialPicks', rows: [], repository, eligibleGamePks: scope, cap: 0, beforeWrite: assertPregame })
+  picks.shadowEligibleRows = shadowOfficialPickRows
+  picks.officialPickWritesAuthorized = false
+  if (picks.rows.length !== 0 || picks.inserted !== 0) throw new Error('OFFICIAL_PICK_WRITE_BOUNDARY_VIOLATION')
   await canonical.checkpoint.markStage?.('BOARD_READBACK')
   const boardReadback = await repository.readValueBoard({ valueIdentities: values.rows.map(r => r.value_identity), pickIdentities: picks.rows.map(r => r.official_pick_identity) })
   const boardValues = new Map(boardReadback.values.map(r => [r.id, r]))
