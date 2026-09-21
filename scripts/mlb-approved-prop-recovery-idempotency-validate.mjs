@@ -5,7 +5,7 @@ const evals=fs.readFileSync('src/services/mlb-approved-prop-daily-evaluation.ser
 const checks=[
   ['quote identity includes price', /playerName, selection, line, price, snapshotTime/.test(capture)],
   ['capture recovery extends through 11:50', /clock\.hour === 11 && clock\.minute <= 50/.test(capture)],
-  ['daily evaluator has 11:50 recovery window', /recoveryFreezeWindow = clock\.hour === 11 && clock\.minute <= 50/.test(evals)],
+  ['daily evaluator recovery covers 12:05 cron through 12:10', /clock\.hour === 11/.test(evals) && /clock\.hour === 12 && clock\.minute <= 10/.test(evals)],
   ['freeze still blocks after first pitch', /BLOCK_FREEZE_AFTER_FIRST_PITCH/.test(evals)],
   ['duplicate payload conflict guard preserved', /MLB_APPROVED_PROP_DUPLICATE_ID_PAYLOAD_CONFLICT/.test(capture)],
 ]
