@@ -108,6 +108,17 @@ export async function GET(request: NextRequest) {
   }
 
   const success = standardFreeze.success !== false && freeze.success !== false && (!settlement || settlement.success !== false)
+  if (!success) {
+    console.error('RUNLINE_V2_FORWARD_RESEARCH_PARTIAL', {
+      standardStatus: standardFreeze.status ?? null,
+      standardError: 'error' in standardFreeze ? standardFreeze.error : null,
+      alternateStatus: freeze.status ?? null,
+      alternateError: 'error' in freeze ? freeze.error : null,
+      settlementStatus: settlement?.status ?? null,
+      settlementError: settlement && 'error' in settlement ? settlement.error : null,
+      readinessError,
+    })
+  }
   return apiOk({
     success,
     status: success ? 'RUNLINE_V2_FORWARD_RESEARCH_EVALUATED' : 'RUNLINE_V2_FORWARD_RESEARCH_PARTIAL',
