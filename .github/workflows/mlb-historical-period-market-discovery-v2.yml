@@ -1,0 +1,83 @@
+name: MLB historical period market discovery V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/app/api/mlb/research/oddsapi/historical-period-discovery/route.ts'
+      - '.github/workflows/mlb-historical-period-market-discovery-v2.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      ENDPOINT: https://pick-analyzer.vercel.app/api/mlb/research/oddsapi/historical-period-discovery
+      CONFIRM: ODDS_API_HISTORICAL_PERIOD_MARKET_DISCOVERY_V2
+    steps:
+      - name: Require execution credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CRON_SECRET:-}"
+
+      - name: Wait for gated production route
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=false
+          for _ in $(seq 1 60); do
+            code="$(curl -sS --connect-timeout 5 --max-time 10 -o /dev/null -w '%{http_code}' "${ENDPOINT}?confirm=${CONFIRM}" || true)"
+            if [ "$code" = "401" ]; then
+              ready=true
+              break
+            fi
+            sleep 5
+          done
+          if [ "$ready" != "true" ]; then
+            echo '{"success":false,"status":"PRODUCTION_ROUTE_NOT_READY","providerCallsMade":0,"creditsObserved":0}' > historical-period-market-discovery-v2.json
+            exit 1
+          fi
+
+      - name: Execute bounded discovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS             --connect-timeout 10             --max-time 45             -H "Authorization: Bearer ${CRON_SECRET}"             "${ENDPOINT}?confirm=${CONFIRM}"             -o historical-period-market-discovery-v2.json
+          cat historical-period-market-discovery-v2.json
+
+      - name: Enforce research boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const p = JSON.parse(fs.readFileSync('historical-period-market-discovery-v2.json','utf8'))
+          if (p.providerCallsMade > 2) throw new Error('provider call cap exceeded')
+          if (p.creditsObserved > 2) throw new Error('credit cap exceeded')
+          if (p.requestsRemainingAfter !== null && p.requestsRemainingAfter < 2000) throw new Error('credit reserve breached')
+          if (p.historicalOddsRequested !== false) throw new Error('historical odds request forbidden')
+          if (p.rowsPersisted !== 0) throw new Error('DB writes forbidden')
+          if (p.productionMutationsMade !== 0) throw new Error('production mutation forbidden')
+          if (!p.success) throw new Error('discovery did not complete: ' + String(p.status))
+          console.log(JSON.stringify({
+            success: p.success,
+            status: p.status,
+            providerCallsMade: p.providerCallsMade,
+            creditsObserved: p.creditsObserved,
+            requestsRemainingAfter: p.requestsRemainingAfter,
+            targetMarketKeys: p.targetMarketKeys,
+            allMarketKeys: p.allMarketKeys,
+          }, null, 2))
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlb-historical-period-market-discovery-v2
+          path: historical-period-market-discovery-v2.json
+          retention-days: 7
