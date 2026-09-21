@@ -1,0 +1,35 @@
+name: MLB Sep20 official schedule diagnostic
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/mlb-sep20-schedule-diagnostic.yml'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch MLB Official Sep20 schedule
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS "https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-09-20" -o schedule.json
+          python - <<'PY'
+          import json
+          d=json.load(open('schedule.json'))
+          games=[g for x in d.get('dates',[]) for g in x.get('games',[])]
+          out=[]
+          for g in games:
+              st=g.get('status') or {}
+              out.append({
+                'gamePk':g.get('gamePk'),
+                'abstract':st.get('abstractGameState'),
+                'coded':st.get('codedGameState'),
+                'detailed':st.get('detailedState'),
+              })
+          print(json.dumps({'count':len(out),'games':out},indent=2))
+          if any((x.get('abstract')!='Final' and x.get('coded')!='F' and 'final' not in str(x.get('detailed','')).lower()
+                  and 'postpon' not in str(x.get('detailed','')).lower()
+                  and 'cancel' not in str(x.get('detailed','')).lower()) for x in out):
+              raise SystemExit(2)
+          PY
