@@ -1270,16 +1270,16 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
 }
 
 export async function getMlbApprovedPropsDailyBoard(targetDate: string) {
-  const result = await supabaseAdmin
-    .from('mlb_approved_prop_daily_v1')
-    .select('*')
-    .eq('tracking_date', targetDate)
-    .order('status', { ascending: true })
-    .order('market', { ascending: true })
-    .order('start_time', { ascending: true })
-    .order('player_name', { ascending: true })
-  if (result.error) throw new Error('MLB_APPROVED_PROP_BOARD_READ_FAILED:' + result.error.message)
-  const rows = result.data ?? []
+  const rows = await pagedRead<any>(
+    'mlb_approved_prop_daily_v1',
+    '*',
+    (query) => query
+      .eq('tracking_date', targetDate)
+      .order('status', { ascending: true })
+      .order('market', { ascending: true })
+      .order('start_time', { ascending: true })
+      .order('player_name', { ascending: true }),
+  )
   const marketBoard = rows.map((row) => {
     const marketSnapshot = asRecord(row.market_snapshot)
     const actualQuote = asRecord(marketSnapshot.actualQuote)
