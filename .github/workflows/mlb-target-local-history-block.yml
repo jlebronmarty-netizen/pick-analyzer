@@ -1,0 +1,16 @@
+name: MLB target-local history block
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/mlb-target-local-history-block-validate.mjs

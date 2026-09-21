@@ -259,7 +259,7 @@
     "scripts/mlb-data-02r-r2t-market-binding.mjs": "c7a27a932d457552f6c23cb1f72d0dd87683c710188c1cb64275e3bee04772ba",
     "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
     "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
-    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "8a45528d089aa45cf3647686165ebba7f496eb0b000f786ea6078724c56f5ce2",
+    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "cf7843dc76bcdb6127887fca0e666d287031c605e27def2398dbfc64ed6dfbc5",
     "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
     "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "8a67465f7bbb8719459453ad3d0377c7b674bb2879541a49764320b82c71e4eb",
     "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
@@ -586,5 +586,46 @@
     "existingRowsModified": false,
     "officialPickCreationAuthorized": false,
     "apostarActivated": false
+  },
+  "requiredHistoryTargetLocalRepair": {
+    "at": "2026-09-21T20:54:00Z",
+    "scope": "TARGET_LOCAL_REQUIRED_STARTER_HISTORY_FAIL_CLOSED",
+    "observedProductionFailure": {
+      "stage": "DEPENDENCY_SCOPE",
+      "sanitizedCode": "UNCLASSIFIED_STAGE_EXCEPTION",
+      "affectedSlate": [
+        824787,
+        824221,
+        823169
+      ]
+    },
+    "evidence": {
+      "gamePk": 824221,
+      "awayStarter": {
+        "mlbamId": 687792,
+        "name": "DJ Herz",
+        "prior2026RawGames": 0
+      },
+      "homeStarter": {
+        "mlbamId": 689981,
+        "name": "River Ryan",
+        "prior2026RawGames": 0
+      },
+      "certifiedBuilderGuard": "R2TR1_BLOCK:REQUIRED_HISTORY_MISSING"
+    },
+    "repair": {
+      "allowedTargetLocalGuard": [
+        "R2TR1_BLOCK:REQUIRED_HISTORY_MISSING"
+      ],
+      "blockedReason": "REQUIRED_HISTORY_MISSING",
+      "allOtherR2TR1Errors": "HARD_FAIL",
+      "modelChanges": 0,
+      "thresholdChanges": 0,
+      "dependencyUniverseChanges": 0,
+      "providerCallsAdded": 0,
+      "historicalOddsCallsAdded": 0,
+      "officialPicksChanges": 0,
+      "apostarChanges": 0
+    }
   }
 }
