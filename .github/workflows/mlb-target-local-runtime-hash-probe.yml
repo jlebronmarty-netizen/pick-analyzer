@@ -1,0 +1,24 @@
+name: MLB target-local runtime hash probe
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/mlb-data-02r-r2t-production-bindings.mjs'
+      - '.github/workflows/mlb-target-local-runtime-hash-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  hash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,pathlib
+          p=pathlib.Path('scripts/mlb-data-02r-r2t-production-bindings.mjs')
+          b=p.read_text(encoding='utf-8').replace('\r\n','\n').encode()
+          print('PRODUCTION_BINDINGS_SHA256='+hashlib.sha256(b).hexdigest())
+          PY
