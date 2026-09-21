@@ -5,7 +5,7 @@ const SPORT='baseball_mlb'
 const CREDIT_RESERVE=2000
 const MAX_CALLS=2
 const CONFIRM='ODDS_API_HISTORICAL_PERIOD_MARKET_DISCOVERY_V1'
-const DATE='2025-09-01T16:05:00Z'
+const DATE='2025-09-01T19:05:00Z'
 const TARGET={home:'Washington Nationals',away:'Miami Marlins'}
 
 function key(){return (process.env.THE_ODDS_API_KEY||'').trim()}
@@ -40,7 +40,8 @@ async function get(path,query,calls){
   return payload
 }
 function marketKeys(payload){
-  const books=Array.isArray(payload?.bookmakers)?payload.bookmakers:[]
+  const event=payload?.data && typeof payload.data==='object' ? payload.data : payload
+  const books=Array.isArray(event?.bookmakers)?event.bookmakers:[]
   const keys=new Set()
   for(const b of books)for(const m of b.markets??[])if(m?.key)keys.add(String(m.key))
   return [...keys].sort()
