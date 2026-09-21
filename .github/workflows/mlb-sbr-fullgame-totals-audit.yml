@@ -1,0 +1,43 @@
+name: MLB SBR full-game totals audit
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/sbr-mlb-fullgame-totals-audit.mjs'
+      - '.github/workflows/mlb-sbr-fullgame-totals-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download public release dataset ephemerally
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/sbr-audit
+          curl -fL --retry 3 --connect-timeout 10 --max-time 180             'https://github.com/ArnavSaraogi/mlb-odds-scraper/releases/download/dataset/mlb_odds_dataset.json'             -o tmp/sbr-audit/mlb_odds_dataset.json
+          echo '3f952fd0bfae9f4f2d17e66692cb936ce6e1a5f6b415318012090c85933b882b  tmp/sbr-audit/mlb_odds_dataset.json' | sha256sum -c -
+
+      - name: Audit totals coverage without persisting raw data
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/research/sbr-mlb-fullgame-totals-audit.mjs             --input=tmp/sbr-audit/mlb_odds_dataset.json             --output=tmp/sbr-audit-summary.json
+
+      - name: Remove raw third-party dataset
+        if: always()
+        shell: bash
+        run: rm -f tmp/sbr-audit/mlb_odds_dataset.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlb-sbr-fullgame-totals-audit-summary
+          path: tmp/sbr-audit-summary.json
+          retention-days: 7
