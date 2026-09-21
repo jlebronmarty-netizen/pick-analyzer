@@ -69,6 +69,8 @@ type OfficialGame = {
   startTime: string
   homeTeam: string
   awayTeam: string
+  homeMlbTeamId: number
+  awayMlbTeamId: number
   homePitcher: { id: number; name: string } | null
   awayPitcher: { id: number; name: string } | null
 }
@@ -187,6 +189,8 @@ async function officialSlate(targetDate: string): Promise<OfficialGame[]> {
       startTime,
       homeTeam,
       awayTeam,
+      homeMlbTeamId: Number(game?.teams?.home?.team?.id),
+      awayMlbTeamId: Number(game?.teams?.away?.team?.id),
       homePitcher: Number.isSafeInteger(hpId) && hpId > 0 && typeof hp?.fullName === 'string'
         ? { id: hpId, name: hp.fullName }
         : null,
@@ -241,7 +245,43 @@ async function loadProviderEventIds(eventIds: string[]) {
   return map
 }
 
-async function loadPlayerDirectory() {
+function addDirectoryPerson(
+  map: Map<string, Array<{ id: number; name: string }>>,
+  person: { id: number; name: string },
+) {
+  const key = normalizePerson(person.name)
+  if (!Number.isSafeInteger(person.id) || person.id <= 0 || !person.name || !key) return
+  const bucket = map.get(key) ?? []
+  if (!bucket.some((item) => item.id === person.id)) bucket.push(person)
+  map.set(key, bucket)
+}
+
+async function loadOfficialRosterDirectory(slate: OfficialGame[]) {
+  const teamIds = Array.from(new Set(
+    slate.flatMap((game) => [game.homeMlbTeamId, game.awayMlbTeamId])
+      .filter((id) => Number.isSafeInteger(id) && id > 0),
+  ))
+  const map = new Map<string, Array<{ id: number; name: string }>>()
+  await Promise.all(teamIds.map(async (teamId) => {
+    try {
+      const url = 'https://statsapi.mlb.com/api/v1/teams/' + teamId + '/roster?rosterType=active&season=2026'
+      const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(15_000) })
+      if (!response.ok) return
+      const payload = await response.json() as any
+      for (const row of payload?.roster ?? []) {
+        const id = Number(row?.person?.id)
+        const name = String(row?.person?.fullName ?? '').trim()
+        addDirectoryPerson(map, { id, name })
+      }
+    } catch {
+      // Roster enrichment is optional identity evidence. Failed teams remain
+      // unresolved rather than blocking market capture or falling back to fuzzy.
+    }
+  }))
+  return map
+}
+
+async function loadPlayerDirectory(slate: OfficialGame[]) {
   const result = await supabaseAdmin
     .from('pick2_mlb_players')
     .select('mlbam_person_id,full_name')
@@ -251,13 +291,15 @@ async function loadPlayerDirectory() {
 
   const map = new Map<string, Array<{ id: number; name: string }>>()
   for (const row of result.data ?? []) {
-    const id = Number(row.mlbam_person_id)
-    const name = String(row.full_name ?? '').trim()
-    const key = normalizePerson(name)
-    if (!Number.isSafeInteger(id) || id <= 0 || !name || !key) continue
-    const bucket = map.get(key) ?? []
-    bucket.push({ id, name })
-    map.set(key, bucket)
+    addDirectoryPerson(map, {
+      id: Number(row.mlbam_person_id),
+      name: String(row.full_name ?? '').trim(),
+    })
+  }
+
+  const rosterMap = await loadOfficialRosterDirectory(slate)
+  for (const bucket of rosterMap.values()) {
+    for (const person of bucket) addDirectoryPerson(map, person)
   }
   return map
 }
@@ -316,7 +358,7 @@ function normalizeRows(input: {
         const identityMatchMethod = pitcher
           ? 'MLB_PROBABLE_PITCHER_EXACT_NORMALIZED_NAME'
           : playerMatches.length === 1
-            ? 'PICK2_MLB_PLAYER_UNIQUE_EXACT_NORMALIZED_NAME'
+            ? 'MLB_PLAYER_DIRECTORY_OR_ACTIVE_ROSTER_UNIQUE_EXACT_NORMALIZED_NAME'
             : 'UNRESOLVED_EXACT_IDENTITY'
         rows.push({
           id: 'mlbprop_' + hash([
@@ -402,11 +444,11 @@ export async function captureMlbApprovedPropMarkets(input: {
     return { ...base, status: 'REUSE_NO_OP', checkpoint, jobId: existing.id, completedAt: existing.completed_at }
   }
 
-  const [events, slate, playerDirectory] = await Promise.all([
+  const [events, slate] = await Promise.all([
     loadEvents(targetDate, now),
     officialSlate(targetDate),
-    loadPlayerDirectory(),
   ])
+  const playerDirectory = await loadPlayerDirectory(slate)
   if (!events.length) return { ...base, status: 'NO_PREGAME_EVENTS', checkpoint }
   const providerIds = await loadProviderEventIds(events.map((event) => event.id))
   const planned = events.flatMap((event) => {
