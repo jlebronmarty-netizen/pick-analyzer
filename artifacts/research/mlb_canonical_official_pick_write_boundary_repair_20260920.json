@@ -1,7 +1,7 @@
 {
   "artifact": "MLB_CANONICAL_OFFICIAL_PICK_WRITE_BOUNDARY_REPAIR",
   "createdAt": "2026-09-20",
-  "state": "IMPLEMENTED_PENDING_PRODUCTION_VALIDATION",
+  "state": "PRODUCTION_VALIDATED",
   "researchOnly": true,
   "officialPicksModifiedByRepair": false,
   "apostarActivated": false,
@@ -36,5 +36,32 @@
     "normalizedSha256": "ccc56523abdd7ce8b13e91c3befcc53d6d361d81b5c035538c66317d5441bee4",
     "r3CertificateUpdated": true
   },
-  "nextValidation": "After production deployment, observe next /api/cron/mlb-operational tick and verify Official Pick count does not increase."
+  "nextValidation": "After production deployment, observe next /api/cron/mlb-operational tick and verify Official Pick count does not increase.",
+  "productionValidation": {
+    "validatedAt": "2026-09-21T00:15:24.776Z",
+    "packageSha": "9a0456c63ac0acd84e1fd17e12fd9a34a958f55e",
+    "deployment": "dpl_A6X7oPgYaJtBG3HWJmyGzk6qkADj",
+    "pregameRun": {
+      "runId": "automation-139f481688c5f8627740ec0c9999f63cffe539d07d3f50002b20789af07c2a2a",
+      "status": "COMPLETE",
+      "resultStatus": "NO_VALID_PREGAME_SLATE",
+      "picks": 0,
+      "inserted": 0,
+      "readback": "PASS"
+    },
+    "incrementalRun": {
+      "runId": "automation-3864eb5669149e52f3203ee229c14cf69b1c8800cc1628f61544f3088cf5f985",
+      "status": "COMPLETE",
+      "picks": 0,
+      "inserted": 0,
+      "readback": "PASS"
+    },
+    "officialPickCountBefore": 3,
+    "officialPickCountAfter": 3,
+    "latestOfficialPickCreatedAt": "2026-09-20T22:46:35.990291Z",
+    "approvedPropsApostarTrue": 0,
+    "approvedPropsOfficialEligibleTrue": 0,
+    "runtimeErrorsObserved": false,
+    "verdict": "PASS"
+  }
 }
