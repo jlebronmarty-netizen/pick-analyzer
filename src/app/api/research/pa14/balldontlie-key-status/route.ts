@@ -8,7 +8,7 @@ function cronSecret() {
 
 function authorized(request: NextRequest) {
   const secret = cronSecret()
-  return Boolean(secret) && request.headers.get('authorization') === `Bearer ${secret}`
+  return Boolean(secret) && request.headers.get('x-pick-analyzer-cron-secret') === secret
 }
 
 export async function GET(request: NextRequest) {

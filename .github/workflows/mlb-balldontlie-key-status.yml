@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsS             --connect-timeout 10             --max-time 30             -H "Authorization: Bearer ${CRON_SECRET}"             "${ENDPOINT}"             -o balldontlie-key-status.json
+          curl -fsS             --connect-timeout 10             --max-time 30             -H "x-pick-analyzer-cron-secret: ${CRON_SECRET}"             "${ENDPOINT}"             -o balldontlie-key-status.json
           cat balldontlie-key-status.json
 
       - name: Enforce no-provider-call contract
