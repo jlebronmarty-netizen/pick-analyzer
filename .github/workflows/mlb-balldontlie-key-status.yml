@@ -1,0 +1,75 @@
+name: MLB BALLDONTLIE runtime key status
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/app/api/research/pa14/balldontlie-key-status/route.ts'
+      - '.github/workflows/mlb-balldontlie-key-status.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      ENDPOINT: https://pick-analyzer.vercel.app/api/research/pa14/balldontlie-key-status
+    steps:
+      - name: Require execution credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CRON_SECRET:-}"
+
+      - name: Wait for authenticated route
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=false
+          for _ in $(seq 1 60); do
+            code="$(curl -sS --connect-timeout 5 --max-time 10 -o /dev/null -w '%{http_code}' "${ENDPOINT}" || true)"
+            if [ "$code" = "401" ]; then
+              ready=true
+              break
+            fi
+            sleep 5
+          done
+          test "$ready" = "true"
+
+      - name: Read presence only
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS             --connect-timeout 10             --max-time 30             -H "Authorization: Bearer ${CRON_SECRET}"             "${ENDPOINT}"             -o balldontlie-key-status.json
+          cat balldontlie-key-status.json
+
+      - name: Enforce no-provider-call contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const p = JSON.parse(fs.readFileSync('balldontlie-key-status.json','utf8'))
+          if (p.ok !== true) throw new Error('key status route failed')
+          if (p.provider !== 'balldontlie') throw new Error('unexpected provider')
+          if (p.providerCallsMade !== 0) throw new Error('provider call forbidden')
+          if (p.secretValueExposed !== false) throw new Error('secret exposure contract failed')
+          if (typeof p.configured !== 'boolean') throw new Error('configured must be boolean')
+          console.log(JSON.stringify({
+            provider: p.provider,
+            environment: p.environment,
+            configured: p.configured,
+            providerCallsMade: p.providerCallsMade,
+            secretValueExposed: p.secretValueExposed,
+          }, null, 2))
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlb-balldontlie-key-status
+          path: balldontlie-key-status.json
+          retention-days: 7
