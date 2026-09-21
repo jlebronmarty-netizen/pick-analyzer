@@ -18,10 +18,11 @@ function headerNum(h:Headers,n:string){
   const v=h.get(n); if(v===null)return null
   const x=Number(v); return Number.isFinite(x)?x:null
 }
-function keys(payload:any){
+function keys(payload:any): string[]{
   const event=payload?.data && typeof payload.data==='object' ? payload.data : payload
   const books=Array.isArray(event?.bookmakers)?event.bookmakers:[]
-  return [...new Set(books.flatMap((b:any)=>Array.isArray(b?.markets)?b.markets.map((m:any)=>String(m.key||'')):[]).filter(Boolean))].sort()
+  const values:string[]=books.flatMap((b:any)=>Array.isArray(b?.markets)?b.markets.map((m:any)=>String(m.key||'')):[]).filter((v:string)=>Boolean(v))
+  return [...new Set<string>(values)].sort()
 }
 
 export async function GET(req:NextRequest){
