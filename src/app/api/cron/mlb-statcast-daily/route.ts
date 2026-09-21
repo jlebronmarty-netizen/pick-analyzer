@@ -339,6 +339,11 @@ async function safeApprovedPropDailyEvaluation(targetDate: string) {
   try {
     return await evaluateMlbApprovedPropsDaily({ targetDate })
   } catch (error) {
+    console.error(JSON.stringify({
+      event: 'MLB_APPROVED_PROP_DAILY_EVALUATION_FAILED',
+      targetDate,
+      error: errorMessage(error, 'Unknown approved MLB prop daily evaluation error'),
+    }))
     return {
       success: false,
       status: 'APPROVED_PROP_DAILY_EVALUATION_FAILED_NON_BLOCKING',
