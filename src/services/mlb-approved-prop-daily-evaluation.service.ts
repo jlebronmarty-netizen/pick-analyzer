@@ -469,7 +469,9 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
   }
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
   const normalFreezeWindow = clock.hour === 10 && clock.minute >= 45
-  const recoveryFreezeWindow = clock.hour === 11 && clock.minute <= 50
+  const recoveryFreezeWindow =
+    (clock.hour === 11) ||
+    (clock.hour === 12 && clock.minute <= 10)
   if (!normalFreezeWindow && !recoveryFreezeWindow) return { ...base, status: 'NOT_IN_FREEZE_WINDOW' }
   if (await existingFreeze(targetDate)) {
     const summary = await getMlbApprovedPropsDailyBoard(targetDate)
