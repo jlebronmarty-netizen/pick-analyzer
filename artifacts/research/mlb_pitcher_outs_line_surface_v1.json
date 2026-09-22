@@ -66,7 +66,7 @@
         "min_month_n": 81,
         "wilson_lower": 0.770243869472416
       },
-      "state": "CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS"
+      "state": "CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED"
     },
     {
       "line": 17.5,
