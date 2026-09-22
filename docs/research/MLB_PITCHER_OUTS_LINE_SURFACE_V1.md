@@ -97,6 +97,18 @@ The new stable O14.5 rule had one exact-line crossing today:
 - projection: **17.204**
 - frozen line-surface threshold: **projection >=15.75**
 - result at evaluation time: **QUALIFIES RESEARCH-ONLY**
+- final settlement: **WIN**
+- observed workload: **6.0 IP = 18 recorded outs**
+- final game: **Yankees 2, Rays 0**
+- outcome evidence: Yahoo Sports play-by-play records Ty Johnson relieving Nick Martinez to begin the bottom of the 7th.
+
+Settlement state:
+
+`SETTLED_RESEARCH_CROSSING_WIN_NOT_FORWARD_CERTIFICATION`
+
+This settlement is observational only. It does not retune the threshold, does not upgrade the
+candidate to certified, and does not by itself open or satisfy a formal untouched forward-validation
+gate.
 
 This is not an Official Pick and does not activate APOSTAR.
 
