@@ -1,0 +1,89 @@
+name: MLB period totals and team totals pilot V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/app/api/mlb/research/oddsapi/period-total-teamtotal-pilot/route.ts'
+      - '.github/workflows/mlb-period-total-teamtotal-pilot-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      ENDPOINT: https://pick-analyzer.vercel.app/api/mlb/research/oddsapi/period-total-teamtotal-pilot
+      CONFIRM: MLB_PERIOD_TOTAL_TEAMTOTAL_PILOT_V1
+      ROUTE_VERSION: period-total-teamtotal-pilot-v1
+    steps:
+      - name: Require execution credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CRON_SECRET:-}"
+
+      - name: Wait for exact production route version
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=false
+          for _ in $(seq 1 72); do
+            body="$(mktemp)"
+            code="$(curl -sS --connect-timeout 5 --max-time 10 -o "$body" -w '%{http_code}' "${ENDPOINT}" || true)"
+            if [ "$code" = "401" ]; then
+              version="$(node -e "const fs=require('fs');try{const p=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(String(p.routeVersion||''))}catch{}" "$body")"
+              if [ "$version" = "${ROUTE_VERSION}" ]; then
+                ready=true
+                rm -f "$body"
+                break
+              fi
+            fi
+            rm -f "$body"
+            sleep 5
+          done
+          test "$ready" = "true"
+
+      - name: Execute bounded totals/team-totals pilot
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS             --connect-timeout 10             --max-time 300             -H "x-pick-analyzer-cron-secret: ${CRON_SECRET}"             "${ENDPOINT}?confirm=${CONFIRM}"             -o period-total-teamtotal-pilot-v1.json
+          cat period-total-teamtotal-pilot-v1.json
+
+      - name: Enforce research boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync('period-total-teamtotal-pilot-v1.json','utf8'))
+          if (p.success !== true) throw new Error('pilot failed: '+String(p.status))
+          if (p.providerCallsMade > 10) throw new Error('provider call cap exceeded')
+          if (p.creditsObserved > 402) throw new Error('credit cap exceeded')
+          if (p.requestsRemainingAfter !== null && p.requestsRemainingAfter < 2000) throw new Error('reserve breached')
+          if (p.rowsPersisted !== 0) throw new Error('DB writes forbidden')
+          if (p.productionMutationsMade !== 0) throw new Error('production mutation forbidden')
+          console.log(JSON.stringify({
+            status:p.status,
+            providerCallsMade:p.providerCallsMade,
+            creditsObserved:p.creditsObserved,
+            requestsRemainingAfter:p.requestsRemainingAfter,
+            events:(p.eventRows||[]).map((row)=>({
+              target:row.target,
+              status:row.status,
+              snapshotAt:row.snapshotAt,
+              markets:row.markets,
+            })),
+          },null,2))
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlb-period-total-teamtotal-pilot-v1
+          path: period-total-teamtotal-pilot-v1.json
+          retention-days: 7
