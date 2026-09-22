@@ -1,0 +1,146 @@
+{
+  "contract": "MLB_BATTER_LINE_SURFACE_CLOSEOUTS_V1/1.0.0",
+  "research_only": true,
+  "source_lineage": {
+    "sdt": "public.mlb_statcast_batter_sdt_game_mv",
+    "total_bases": "public.mlb_statcast_batter_total_bases_game_mv",
+    "game_logs": "public.mlb_statcast_batter_game_logs"
+  },
+  "exact_replays": [
+    {
+      "market": "batter_singles",
+      "control": "U1.5 projection<=0.50",
+      "expected": {
+        "n": 8328,
+        "wins": 7822,
+        "accuracy": 0.9392
+      },
+      "observed": {
+        "n": 8328,
+        "wins": 7822,
+        "accuracy": 0.9392
+      },
+      "status": "EXACT_REPLAY_PASS"
+    },
+    {
+      "market": "batter_doubles",
+      "control": "U0.5 projection<=0.16",
+      "expected": {
+        "n": 14454,
+        "wins": 12507,
+        "accuracy": 0.8653
+      },
+      "observed": {
+        "n": 14454,
+        "wins": 12507,
+        "accuracy": 0.8653
+      },
+      "status": "EXACT_REPLAY_PASS"
+    },
+    {
+      "market": "batter_triples",
+      "control": "U0.5 projection<=0.015",
+      "expected": {
+        "n": 27832,
+        "wins": 27562,
+        "accuracy": 0.9903
+      },
+      "observed": {
+        "n": 27832,
+        "wins": 27562,
+        "accuracy": 0.9903
+      },
+      "status": "EXACT_REPLAY_PASS"
+    }
+  ],
+  "line_surface_results": [
+    {
+      "market": "batter_singles",
+      "target": "U0.5",
+      "best_n_ge_60": {
+        "threshold": 0.35,
+        "n": 91,
+        "wins": 67,
+        "accuracy": 0.7363,
+        "baseline": 0.573,
+        "lift_pp": 16.32,
+        "months": 3,
+        "worst_month": 0.6
+      },
+      "state": "NO_75_PLUS_STABLE_CANDIDATE"
+    },
+    {
+      "market": "batter_doubles",
+      "target": "OVER0.5",
+      "best_surface_state": "NO_75_PLUS_SIGNAL_CANDIDATE",
+      "note": "No threshold passed accuracy>=75%, n>=60, >=5 months, worst month>=65%, lift>=5pp."
+    },
+    {
+      "market": "batter_doubles",
+      "target": "U1.5/U2.5",
+      "best_surface_state": "BASELINE_DOMINATED",
+      "note": "Raw UNDER accuracy is extremely high but line-specific lift collapses to baseline at broad coverage."
+    },
+    {
+      "market": "batter_triples",
+      "target": "OVER0.5",
+      "best_n_ge_60": {
+        "threshold": 0.037,
+        "n": 149,
+        "wins": 11,
+        "accuracy": 0.0738,
+        "baseline": 0.0126,
+        "lift_pp": 6.13,
+        "months": 5,
+        "worst_month": 0
+      },
+      "state": "NO_75_PLUS_CANDIDATE"
+    }
+  ],
+  "blocked_exact_replay": [
+    {
+      "market": "pitcher_hits_allowed",
+      "expected_control": "U6.5 projection<=5.0 = 634/761 rolling 2025",
+      "observed_replay": "near but not exact; May and total counts differ",
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+    },
+    {
+      "market": "batter_hits",
+      "expected_control": "U1.5 projection<=0.75 = 6123/7011",
+      "observed_replay": "close but not exact; May 954/1079 vs 967/1095",
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+    },
+    {
+      "market": "batter_total_bases",
+      "expected_control": "U2.5 projection<=1.0 = 1081/1187",
+      "observed_replay": "close but not exact; monthly counts differ",
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+    },
+    {
+      "market": "batter_strikeouts",
+      "expected_control": "U1.5 projection<=0.50 = 564/592",
+      "observed_replay": "close but not exact on both candidate sources",
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+    },
+    {
+      "market": "batter_walks",
+      "expected_control": "U0.5 projection<=0.20 = 1253/1489",
+      "observed_replay": "1288 selected in reconstructed source",
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+    },
+    {
+      "market": "batter_home_runs",
+      "expected_control": "U0.5 projection<=0.10 = 11176/12016",
+      "observed_replay": "11251/12092",
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+    }
+  ],
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
