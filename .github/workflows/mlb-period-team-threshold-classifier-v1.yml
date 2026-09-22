@@ -1,12 +1,7 @@
 name: MLB Period Team Threshold Classifier V1
 
 on:
-  push:
-    branches: [research/period-team-threshold-classifier-v1-20260921]
-    paths:
-      - 'scripts/research/train_mlb_period_team_threshold_classifier_v1.py'
-      - '.github/workflows/mlb-period-team-threshold-classifier-v1.yml'
-      - 'supabase/functions/mlb-period-team-threshold-github-export-temp/index.ts'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,6 +13,8 @@ concurrency:
 
 jobs:
   research:
+    # Archived after successful run 35674048891; no post-result retuning.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
