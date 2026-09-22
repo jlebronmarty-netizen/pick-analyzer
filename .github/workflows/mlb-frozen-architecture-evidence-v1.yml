@@ -15,6 +15,8 @@ on:
       - 'scripts/research/*multiperiod_bilinear*'
       - 'scripts/research/*honest_regime_tree*'
       - 'scripts/research/*nrfi_boosting*'
+      - 'scripts/research/*f7_stability*'
+      - 'scripts/research/*f5_opponent_count*'
       - 'scripts/research/audit_mlb_public_snapshot_v1.mjs'
       - 'scripts/research/verify_mlb_frozen_architectures_v1.test.mjs'
       - 'artifacts/research/*factorized*'
@@ -29,6 +31,10 @@ on:
       - 'artifacts/research/*multiperiod_bilinear*'
       - 'artifacts/research/*honest_regime_tree*'
       - 'artifacts/research/*nrfi_boosting*'
+      - 'artifacts/research/*f7_stability*'
+      - 'artifacts/research/*f5_opponent_count*'
+      - 'contracts/MLB_F7_STABILITY_BLOCK_V1.json'
+      - 'contracts/MLB_F5_OPPONENT_COUNT_V1.json'
       - 'contracts/MLB_NEW_FAMILIES_V1.json'
       - 'contracts/MLB_MULTIPERIOD_BILINEAR_V1.json'
       - 'contracts/MLB_HONEST_REGIME_TREE_V1.json'
@@ -54,3 +60,4 @@ jobs:
       - run: node --test scripts/research/verify_mlb_lineup_temporal_sample_v1.test.mjs scripts/research/verify_mlb_period_bayesian_mixture_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_new_families_v1.test.mjs scripts/research/verify_mlb_multiperiod_bilinear_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_honest_regime_tree_v1.test.mjs scripts/research/verify_mlb_nrfi_boosting_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_f7_stability_block_v1.test.mjs scripts/research/verify_mlb_f5_opponent_count_v1.test.mjs
