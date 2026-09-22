@@ -1,0 +1,17 @@
+{
+  "project_id":"ynuocvexviorgdjrfthw",
+  "research_only":true,
+  "source_table":"mlb_totals_v11e_projected_lineup_players_2025_v1",
+  "comparison_table":"pick2_raw_mlb_statcast_pitches",
+  "window":"game_date >= target_date - 30 AND game_date < target_date; regular-season game_type R; exact coalesce(mlbam_batter_id,source_batter_id)",
+  "plate_appearance_key":["game_pk","at_bat_number"],
+  "first_bounded_probe":{"target_date":"2025-04-01","rows":5,"pa_hits_walks_hr_matches":5},
+  "full_check":{"rows_checked":35802,"pa_mismatch":372,"hits_mismatch":334,"walks_mismatch":259,"hr_mismatch":175},
+  "caveat":"Mismatch counts overlap; not their union. A discrepancy is not proof of leakage: original population SQL/window/category semantics and source versions are not established. No alternate window or matching rule was tried to force parity.",
+  "decision":"NOT_ADMITTED_UNRESOLVED_AGGREGATE_PROVENANCE_AND_REPLAY_MISMATCH",
+  "next_gate":"Recover authoritative builder/source versions or independently certify a new reconstruction; do not train on this table as certified or remove mismatches after seeing outcomes",
+  "provider_calls":0,
+  "database_writes":0,
+  "odds_api_credits_consumed":0,
+  "external_opened":false
+}

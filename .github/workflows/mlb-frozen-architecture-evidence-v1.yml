@@ -6,11 +6,15 @@ on:
       - 'scripts/research/*factorized*'
       - 'scripts/research/*poisson*'
       - 'scripts/research/*davidson*'
+      - 'scripts/research/*qda*'
+      - 'scripts/research/*nrfi_analog*'
       - 'scripts/research/audit_mlb_public_snapshot_v1.mjs'
       - 'scripts/research/verify_mlb_frozen_architectures_v1.test.mjs'
       - 'artifacts/research/*factorized*'
       - 'artifacts/research/*poisson*'
       - 'artifacts/research/*davidson*'
+      - 'artifacts/research/*qda*'
+      - 'artifacts/research/*nrfi_analog*'
       - 'artifacts/research/mlb_public_snapshot_audit_20260922.json'
       - '.github/workflows/mlb-frozen-architecture-evidence-v1.yml'
   workflow_dispatch:
@@ -27,3 +31,4 @@ jobs:
           node-version: '22'
       - run: node --test scripts/research/verify_mlb_frozen_architectures_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_period_davidson_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_period_qda_v1.test.mjs scripts/research/verify_mlb_nrfi_analog_v1.test.mjs

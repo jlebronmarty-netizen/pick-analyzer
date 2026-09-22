@@ -1,0 +1,18 @@
+{
+  "project_id":"ynuocvexviorgdjrfthw",
+  "research_only":true,
+  "query_type":"read_only_schema_and_bounded_historical_aggregates",
+  "historical_cutoff":"2026-09-18",
+  "observed_lineup_columns":["season","game_pk","game_date","team","batter","batting_order"],
+  "observed_lineup_inventory":[
+    {"season":2025,"rows":43740,"games":2430,"min_date":"2025-03-18","max_date":"2025-09-28"},
+    {"season":2026,"rows":41562,"games":2309,"min_date":"2026-03-25","max_date":"2026-09-18"}
+  ],
+  "lineup_builder_evidence":"supabase/migrations/20260920161000_mlb_ml_xyear_prior_starts_reconcile_v5.sql:258; derives batting order from target-game first at_bat_number, no pregame announcement timestamp",
+  "raw_transition_schema_probe":{"date_from":"2025-03-01","date_to":"2025-03-31","inning":1,"limit":500,"sample_rows":500,"rows_with_on_1b_on_2b_on_3b_keys":500,"admitted_transition_training_rows":0,"limitation":"Schema presence only; not transition integrity certification"},
+  "projected_lineup_inventory":{"table":"mlb_totals_v11e_projected_lineup_players_2025_v1","rows":35802,"games":1989,"min_date":"2025-04-01","max_date":"2025-08-31","nonprior_last_start":0,"missing_last_start":0,"limitation":"Projection, not a confirmed pregame lineup; separate source/cutoff admission review required"},
+  "official_writes":0,
+  "provider_requests":0,
+  "odds_api_credits_consumed":0,
+  "external_opened":false
+}
