@@ -1,0 +1,74 @@
+name: MLB F5 spread line sample V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/app/api/mlb/research/oddsapi/f5-spread-line-sample/route.ts'
+      - '.github/workflows/mlb-f5-spread-line-sample-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      ENDPOINT: https://pick-analyzer.vercel.app/api/mlb/research/oddsapi/f5-spread-line-sample
+      CONFIRM: MLB_F5_SPREAD_LINE_SAMPLE_V1
+      ROUTE_VERSION: f5-spread-line-sample-v1
+    steps:
+      - name: Require execution credential
+        run: test -n "${CRON_SECRET:-}"
+
+      - name: Wait for exact production route version
+        shell: bash
+        run: |
+          set -euo pipefail
+          ready=false
+          for _ in $(seq 1 72); do
+            body="$(mktemp)"
+            code="$(curl -sS --connect-timeout 5 --max-time 10 -o "$body" -w '%{http_code}' "${ENDPOINT}" || true)"
+            if [ "$code" = "401" ]; then
+              version="$(node -e "const fs=require('fs');try{const p=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));process.stdout.write(String(p.routeVersion||''))}catch{}" "$body")"
+              if [ "$version" = "${ROUTE_VERSION}" ]; then ready=true; rm -f "$body"; break; fi
+            fi
+            rm -f "$body"; sleep 5
+          done
+          test "$ready" = "true"
+
+      - name: Execute bounded F5 spread sample
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --connect-timeout 10 --max-time 240             -H "x-pick-analyzer-cron-secret: ${CRON_SECRET}"             "${ENDPOINT}?confirm=${CONFIRM}"             -o f5-spread-line-sample-v1.json
+          cat f5-spread-line-sample-v1.json
+
+      - name: Enforce boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync('f5-spread-line-sample-v1.json','utf8'))
+          if(p.success!==true) throw new Error('sample failed: '+String(p.status))
+          if(p.providerCallsMade>27) throw new Error('call cap exceeded')
+          if(p.creditsObserved>243) throw new Error('credit cap exceeded')
+          if(p.requestsRemainingAfter!==null && p.requestsRemainingAfter<2000) throw new Error('reserve breached')
+          if(p.rowsPersisted!==0 || p.productionMutationsMade!==0) throw new Error('write boundary failed')
+          console.log(JSON.stringify({
+            status:p.status,observedGames:p.observedGames,totalBookRows:p.totalBookRows,
+            aggregatePointPairFrequency:p.aggregatePointPairFrequency,
+            providerCallsMade:p.providerCallsMade,creditsObserved:p.creditsObserved,
+            requestsRemainingAfter:p.requestsRemainingAfter
+          },null,2))
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlb-f5-spread-line-sample-v1
+          path: f5-spread-line-sample-v1.json
+          retention-days: 7
