@@ -1,0 +1,14 @@
+{
+  "architecture": "joint_nrfi_prior_outcome_boosting_v1",
+  "research_only": true,
+  "external_opened": false,
+  "source": "Existing certified F1 historical-development outcome bundle; exact prior Poisson input hash. No lineup, starter, odds, target-game features or external outcomes.",
+  "representation": "Ten predictors, five for each exact team: scoring-zero rate, allowing-zero rate, joint NRFI rate, log1p mean runs scored, log1p mean runs allowed. Last30 strictly earlier same-season games; each rate/mean shrinks with10 pseudo-games toward strictly prior league rate/mean. Minimum300 league games and20 team games. Predict every game on date before any same-date histories update.",
+  "learner": "Direct joint NRFI Bernoulli gradient boosting of decision stumps, not factorized zero-run probabilities or analog matching. Refit at first available date each month using all prior eligible contexts of same season, minimum600. Initialize smoothed prior training NRFI logit. Fixed60 rounds, learning_rate0.05, Newton leaf update with L2 denominator10, minimum60 training rows each child. Ten features; candidate cuts at20/40/60/80th empirical training percentiles. Greedy maximum positive Newton gain versus unsplit parent; deterministic feature/cut ties. No validation early stopping, grids, calibration refit or external selection.",
+  "selection": "NRFI only when p_NRFI>=0.75; no YRFI flip or alternate thresholds. No pushes for exact completed F1 outcomes.",
+  "baseline": "Prior league modal NRFI/YRFI on identical selected cohort and eligible population; also report unconditional NRFI prevalence.",
+  "max_date": "2026-09-18",
+  "gates": {"accuracy": 0.75, "min_n": 60, "min_months": 5, "worst_month": 0.65},
+  "odds_api_credits": 0,
+  "limitations": "Repeated historical development only. Inherits prior-game outcome certificate; no claim of as-published lineup/pitcher or prospective availability proof. No retuning after this one-shot historical evaluation."
+}
