@@ -22,8 +22,17 @@ test('alternate Walks and HR lines remain unpromoted', () => {
   assert.match(surface('batter_home_runs','U1.5').state,/BASELINE_DOMINATED/)
 })
 
-test('only unresolved exact replay blockers remain active', () => {
-  assert.deepEqual(artifact.blocked_exact_replay.map((row) => row.market).sort(),['batter_total_bases','pitcher_hits_allowed'])
+test('Total Bases replay is exact and new lines fail frozen 2026 gates', () => {
+  assert.deepEqual(replay('batter_total_bases').observed,{n:1187,wins:1081,accuracy:0.910699241786015})
+  assert.equal(replay('batter_total_bases').status,'EXACT_REPLAY_PASS')
+  assert.match(surface('batter_total_bases','U1.5').state,/BELOW_75/)
+  assert.match(surface('batter_total_bases','U2.5').state,/LIFT_BELOW_5PP/)
+  assert.match(surface('batter_total_bases','U3.5').state,/LIFT_BELOW_5PP/)
+})
+
+test('only Pitcher Hits Allowed remains an active traditional replay blocker', () => {
+  assert.deepEqual(artifact.blocked_exact_replay.map((row) => row.market),['pitcher_hits_allowed'])
+  assert.equal(artifact.additional_market_audit_2026_09_22.batter_hits_runs_rbis.state,'LINE_SURFACE_BLOCKED_EXACT_SOURCE_CORPUS_NOT_RECOVERED')
 })
 
 test('research boundaries remain closed', () => {
