@@ -23,7 +23,7 @@ jobs:
       - name: Install pinned audit dependency
         run: python -m pip install --disable-pip-version-check --no-cache-dir 'requests>=2.32,<3'
 
-      - name: Probe one F5 oddsViews schema without recording values
+      - name: Probe one F5 game through public GraphQL without recording odds values
         shell: bash
         run: |
           set -euo pipefail
@@ -39,9 +39,15 @@ jobs:
           if(p.researchOnly!==true) throw new Error('research boundary')
           if(p.rawPayloadPersisted!==false) throw new Error('raw persistence forbidden')
           if(p.subscriptionCreditsConsumed!==0) throw new Error('credit spend forbidden')
-          if(p.providerRequestsMade!==1) throw new Error('schema probe must make exactly one request')
-          if(!p.oddsViewsShape || typeof p.oddsViewsShape!=='object') throw new Error('shape missing')
-          console.log(JSON.stringify({games:p.games,oddsViewsShape:p.oddsViewsShape},null,2))
+          if(p.providerRequestsMade!==3) throw new Error('probe must make exactly three requests')
+          if(p.gameIdResolved!==true) throw new Error('game id missing')
+          if(!p.currentLines || !p.openingLines) throw new Error('line schema summaries missing')
+          console.log(JSON.stringify({
+            games:p.games,
+            oddsViewsAllNull:p.oddsViewsAllNull,
+            currentLines:p.currentLines,
+            openingLines:p.openingLines,
+          },null,2))
           NODE
 
       - uses: actions/upload-artifact@v4
