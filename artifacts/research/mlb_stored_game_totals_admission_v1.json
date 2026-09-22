@@ -1,0 +1,546 @@
+{
+  "audit": "stored_game_totals_admission_v1",
+  "research_only": true,
+  "project": "ynuocvexviorgdjrfthw",
+  "audited_at": "2026-09-22",
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "scope": "Read-only stored metadata, no outcome evaluation, no provider request. Counts are coverage upper bounds before pairing and full lineage validation.",
+  "queries": {
+    "canonical2026": "select market_lineage,count(*) as rows,min(game_date) as first_date,max(game_date) as last_date,count(distinct date_trunc('month',game_date)) as represented_months,count(*) filter(where close_snapshot_at is not null) as timestamp_present,count(*) filter(where seconds_before_start > 0) as positive_seconds_before_start,min(seconds_before_start) as min_seconds_before_start,max(seconds_before_start) as max_seconds_before_start,array_agg(distinct sportsbook) as sportsbook_labels from public.mlb_totals_revisit_market_2026_v1 where game_date <= date '2026-09-18' group by market_lineage order by market_lineage;",
+    "raw2026": "select s.provider,s.sportsbook,count(distinct m.game_pk) as games,count(distinct date_trunc('month',g.game_date)) as months,min(g.game_date) as first_game_date,max(g.game_date) as last_game_date from public.mlb_ml_sdi_event_game_map_2026_v1 m join public.mlb_ml_xyear_game_v1 g on g.season=2026 and g.game_pk=m.game_pk join public.sports_odds_snapshots s on s.event_id=m.event_id and s.sport_key='baseball_mlb' and s.market='total' and s.snapshot_time<m.start_time where g.game_date between date '2026-03-01' and date '2026-09-18' and s.line is not null group by s.provider,s.sportsbook order by s.provider,s.sportsbook;",
+    "canonical2025": "select market_source_version,source_layers,consensus_method,count(*) as rows,min(game_date) as first_date,max(game_date) as last_date,min(created_at) as first_created_at,max(created_at) as last_created_at from public.mlb_totals_market_2025_v1 group by market_source_version,source_layers,consensus_method order by rows desc;"
+  },
+  "canonical_schema": [
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "game_pk",
+      "data_type": "bigint"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "game_date",
+      "data_type": "date"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "home_team",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "away_team",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "source_identity",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "market_source_version",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "open_total",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "close_total",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "open_over_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "open_under_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "close_over_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "close_under_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "opening_sportsbook_count",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "closing_sportsbook_count",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "raw_row_count",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "has_opening",
+      "data_type": "boolean"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "has_closing",
+      "data_type": "boolean"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "consensus_method",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "research_only",
+      "data_type": "boolean"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "source_layers",
+      "data_type": "ARRAY"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "opening_sportsbooks",
+      "data_type": "ARRAY"
+    },
+    {
+      "table_name": "mlb_totals_market_2025_v1",
+      "column_name": "closing_sportsbooks",
+      "data_type": "ARRAY"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "game_pk",
+      "data_type": "bigint"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "game_date",
+      "data_type": "date"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "home_team",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "away_team",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "close_total",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "close_over_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "close_under_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "close_snapshot_at",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "seconds_before_start",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "provider",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "sportsbook",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "snapshot_policy",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_market_2026_v1",
+      "column_name": "research_only",
+      "data_type": "boolean"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "season",
+      "data_type": "smallint"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "game_pk",
+      "data_type": "bigint"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "game_date",
+      "data_type": "date"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "payload",
+      "data_type": "jsonb"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "y_total_runs",
+      "data_type": "double precision"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "y_close_margin",
+      "data_type": "double precision"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "close_over_label",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "market_lineage",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "development_class",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_dev_rows_v1",
+      "column_name": "research_only",
+      "data_type": "boolean"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "game_pk",
+      "data_type": "bigint"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "game_date",
+      "data_type": "date"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "home_team",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "away_team",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "close_total",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "close_over_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "close_under_price",
+      "data_type": "numeric"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "close_snapshot_at",
+      "data_type": "timestamp with time zone"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "seconds_before_start",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "provider",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "sportsbook",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "snapshot_policy",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "source_book_count",
+      "data_type": "integer"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "market_lineage",
+      "data_type": "text"
+    },
+    {
+      "table_name": "mlb_totals_revisit_market_2026_v1",
+      "column_name": "research_only",
+      "data_type": "boolean"
+    }
+  ],
+  "canonical2026": [
+    {
+      "market_lineage": "SPORTSDATAIO_CONSENSUS_LEGACY_V37",
+      "rows": 1576,
+      "first_date": "2026-03-26",
+      "last_date": "2026-08-13",
+      "represented_months": 6,
+      "timestamp_present": 1576,
+      "positive_seconds_before_start": 1576,
+      "min_seconds_before_start": 1,
+      "max_seconds_before_start": 100962,
+      "sportsbook_labels": [
+        "Consensus"
+      ]
+    },
+    {
+      "market_lineage": "STORED_THE_ODDS_API_CROSSBOOK_CONSENSUS_V1",
+      "rows": 310,
+      "first_date": "2026-08-14",
+      "last_date": "2026-09-10",
+      "represented_months": 2,
+      "timestamp_present": 310,
+      "positive_seconds_before_start": 310,
+      "min_seconds_before_start": 1,
+      "max_seconds_before_start": 65445,
+      "sportsbook_labels": [
+        "CrossBookConsensus"
+      ]
+    }
+  ],
+  "raw2026": [
+    {
+      "provider": "sportsdataio",
+      "sportsbook": "Consensus",
+      "games": 1576,
+      "months": 6,
+      "first_game_date": "2026-03-26",
+      "last_game_date": "2026-08-13"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "betmgm",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "betonlineag",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "betrivers",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "betus",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "bovada",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "draftkings",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "fanatics",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "fanduel",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "lowvig",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "mybookieag",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    },
+    {
+      "provider": "the-odds-api",
+      "sportsbook": "williamhill_us",
+      "games": 354,
+      "months": 2,
+      "first_game_date": "2026-08-09",
+      "last_game_date": "2026-09-10"
+    }
+  ],
+  "canonical2025": [
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_direct_scrape",
+        "sportsbookreview_via_arnavsaraogi_dataset"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 1415,
+      "first_date": "2025-03-28",
+      "last_date": "2025-08-16",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    },
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_direct_scrape"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 499,
+      "first_date": "2025-05-21",
+      "last_date": "2025-09-28",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    },
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_direct_scrape",
+        "sportsbookreview_multigame_retry",
+        "sportsbookreview_via_arnavsaraogi_dataset"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 276,
+      "first_date": "2025-03-27",
+      "last_date": "2025-08-09",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    },
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_athletics_totals_v1"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 162,
+      "first_date": "2025-03-27",
+      "last_date": "2025-09-28",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    },
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_direct_scrape",
+        "sportsbookreview_multigame_retry"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 43,
+      "first_date": "2025-04-27",
+      "last_date": "2025-09-20",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    },
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_multigame_retry"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 27,
+      "first_date": "2025-04-20",
+      "last_date": "2025-09-20",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    },
+    {
+      "market_source_version": "sbr_2025_open_close_totals_v1_price_sanitized",
+      "source_layers": [
+        "sportsbookreview_via_arnavsaraogi_dataset"
+      ],
+      "consensus_method": "sportsbook_mode_line_actual_price_nearest_median_implied_probability",
+      "rows": 3,
+      "first_date": "2025-03-18",
+      "last_date": "2025-05-21",
+      "first_created_at": "2026-09-17 15:41:00.04664+00",
+      "last_created_at": "2026-09-17 15:41:00.04664+00"
+    }
+  ],
+  "decision": "BLOCKED_EXACT_BOOK_TOTALS_FIVE_MONTH_ADMISSION",
+  "limitations": [
+    "2026 SportsDataIO has prestart timestamps but raw table retains only Consensus, not identified original books.",
+    "Stored The Odds API raw identified books cover 354 games each across only August and September; overlapping books must not be added as games. This query does not certify paired sides, license or raw immutable capture.",
+    "2025 stored source is previously reviewed SBR family, canonical created_at is retrospective and schema lacks per-quote timestamps. No new SBR crawl or re-admission.",
+    "This audit does not invalidate old exploratory results, prove all upstream snapshots absent, or show every line-free architecture exhausted."
+  ]
+}

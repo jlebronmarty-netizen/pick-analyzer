@@ -1,0 +1,13 @@
+# F3 ordered-margin ML V1 closeout
+
+Research-only. Frozen **c4da535c before evaluation**, after the F1 kernel failed and following the previously declared next-market priority. **FAIL**; no retuning or external opening.
+
+The proportional-odds model learns one joint ordered likelihood over margins<=-2,-1,0,+1,>=+2, with four ordered cutpoints and eight slopes. Its fixed prior-history features describe team scoring/allowing means, win/loss and zero/high-score rates; last30 same-season games with10league pseudo-games, minimum20team/300league history. Monthly fits use600earlier contexts including draws. Fixed500-step Adam/L2 recipe and cutpoint parameterization were frozen; no epoch/feature/threshold search. Numerical gradient tests verify the joint likelihood independently using finite differences. Terminal gradients are retained; a fixed epoch count is not claimed to prove optimizer convergence.
+
+4,680 certified F3 source games;4,052 prior-history contexts;2,136 rolling forecasts;1,916 fit-burn-in exclusions.0selections at the fixed conditional0.75 threshold. W-L-P0-0-0,n0,coverage0%,selected months0; accuracy, worst-month, selected baseline/lift and uncertainty bounds undefined. Eligible prior-league modal nonpush baseline56.20%. Every July–September2025/2026 eligible month is retained with0selections. Original sample/accuracy/month gates fail.
+
+Artifacts `mlb_f3_ordinal_margin_v1.json` and `.json.gz` preserve source/contract hashes, as-of features, model parameters/diagnostics and every forecast. Reproduce offline with `node scripts/research/evaluate_mlb_f3_ordinal_margin_v1.mjs`. Tests verify analytic gradients, ordered probability mass, date isolation, identity, season reset and full decision/metric replay (probabilities1e-10 numerical tolerance; selections exact).
+
+Prior F3 results55/77=71.43% (2025,worst66.67%) and202/320=63.13% (broader revisit,worst52.94%) remain unchanged. Continue to F5 three-way: its supported historical63.10%/n84 reference exceeds the remaining F1/F3 three-way references, while its2/2 maximum is explicitly rejected. A hidden-state sequence model is a materially different available family: learned state transitions/emissions, not a variant of this ordinal loss or the recent F5 negative-binomial model. Freeze its contract before evaluating outcomes. F7, lineup, exact-line blockers and external remain closed; zero provider calls/Odds credits.
+
+Validation: 72 combined offline tests PASS; this module build PASS (400 pages). Exporter HTTP 410 verified. See MLB_NEXT_MARKET_BLOCK_V1_CLOSEOUT.md for subsequent-market admission and remaining limits.
