@@ -1,0 +1,34 @@
+{
+  "architecture": "multiperiod_bilinear_softmax_v1",
+  "research_only": true,
+  "external_opened": false,
+  "periods": [
+    1,
+    3,
+    5,
+    7
+  ],
+  "threshold": 0.75,
+  "inputs": "Exact intersection of pre-certified F1/F3/F5/F7 historical outcome exports; verify date/team identity and cumulative run monotonicity. Segment prior scores into inning1, innings2-3,4-5,6-7. No current-game labels used in predictors.",
+  "representation": "For each team retain last30 strictly prior same-season complete joined games. Smooth each scored/allowed segment mean with10games at prior league segment mean. Eight contrasts: four(home offense-away offense) and four(away allowed-home allowed), each difference of log1p smoothed means. Append all28 distinct pair products plus intercept:37dimensions. No label-driven feature selection.",
+  "training": "Four separate3class softmax heads, zeros initialization. First300 eligible contexts train but are not scored. Predict full calendar date with preday weights; then mean crossentropy gradient across date updates weights once. Fixed learning rate0.1, nonintercept L2penalty0.01, component gradient clipped[-1,1]. Same-season reset. No retrospective multi-epoch fit or external labels.",
+  "min_team_history": 20,
+  "min_league_games": 300,
+  "min_training": 300,
+  "window": 30,
+  "rate_prior": 10,
+  "learning_rate": 0.1,
+  "l2": 0.01,
+  "gradient_clip": 1,
+  "baseline": "Prior league modal outcome on identical selected cohort and all eligible games, inherited metric definitions",
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month": 0.65
+  },
+  "max_development_date": "2026-09-18",
+  "tuning": "One37dimensional feature map and fixed update; no grids, reweighting old models, alternate thresholds or post-result changes.",
+  "limitations": "Historical-seen development; probabilities not claimed calibrated. Segments need exact complete period outcome coverage. Not an as-published lineup or starter certificate.",
+  "odds_api_credits": 0
+}
