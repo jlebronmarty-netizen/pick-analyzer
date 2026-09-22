@@ -204,10 +204,13 @@ def main() -> None:
         url = page_url(DATES[0], "totals")
         response = fetch(session, url)
         payload = extract_next_payload(response.text)
+        tables = payload.get("props", {}).get("pageProps", {}).get("oddsTables") or []
+        table0 = tables[0] if tables else {}
+        model = table0.get("oddsTableModel") or {}
         rows = game_rows(payload)
         first_game = rows[0] if rows else {}
         summary = {
-            "schema": "mlb-sbr-f5-oddsviews-shape/1.0.0",
+            "schema": "mlb-sbr-f5-oddsviews-shape/1.1.0",
             "researchOnly": True,
             "date": DATES[0],
             "market": "totals",
@@ -216,6 +219,10 @@ def main() -> None:
             "providerRequestsMade": 1,
             "subscriptionCreditsConsumed": 0,
             "rawPayloadPersisted": False,
+            "pagePropsShape": schema_shape(payload.get("props", {}).get("pageProps", {}), max_depth=3),
+            "oddsTableShape": schema_shape(table0, max_depth=4),
+            "oddsTableModelShape": schema_shape(model, max_depth=5),
+            "firstGameShape": schema_shape(first_game, max_depth=5),
             "oddsViewsShape": schema_shape(first_game.get("oddsViews")),
         }
         output.parent.mkdir(parents=True, exist_ok=True)
