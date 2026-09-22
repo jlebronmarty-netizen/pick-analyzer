@@ -93,14 +93,22 @@ exactly reproduce the certified frozen result:
 | Market | Certified control | Reconstructed evidence | State |
 |---|---|---|---|
 | Pitcher Hits Allowed | U6.5 <=5.0 = 634/761 | close, but May and total counts differ | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
-| Batter Hits | U1.5 <=0.75 = 6123/7011 | May 954/1079 vs certified 967/1095; other months also differ | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
 | Batter Total Bases | U2.5 <=1.0 = 1081/1187 | near but monthly universe differs | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
-| Batter Strikeouts | U1.5 <=0.50 = 564/592 | close but not exact on both candidate sources | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
 | Batter Walks | U0.5 <=0.20 = 1253/1489 | reconstructed selected n=1288 | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
 | Batter Home Runs | U0.5 <=0.10 = 11176/12016 | reconstructed 11251/12092 | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
 
 These are not evidence that alternate lines cannot work. They are lineage/replay blocks. No line
 surface should be promoted from an approximate reconstruction.
+
+## Concurrent replay reconciliation
+
+Two earlier generic replay blocks in this closeout were superseded by later exact lineage recovery:
+
+- **Batter Hits** — PR #194 recovered the exact U1.5 <=0.75 control at **6123/7011** by using the canonical target-game pregame feature-key gate. The earlier block here is no longer authoritative.
+- **Batter Strikeouts** — PR #193 recovered the exact U1.5 <=0.50 control at **564/592** using the same canonical target-game pregame lineage gate. The earlier block here is no longer authoritative.
+
+Active replay blockers in this document are therefore limited to Pitcher Hits Allowed, Batter Total
+Bases, Batter Walks, and Batter Home Runs unless a later exact-replay branch supersedes them.
 
 ## Boundaries
 
