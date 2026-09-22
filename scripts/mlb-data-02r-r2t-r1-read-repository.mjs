@@ -81,16 +81,13 @@ export function createPregameReadRepository(db) {
         // avoids transferring ~90k pitches only to discover the same veto.
         for (let start = 0; start < ids.length; start += RAW_READ_CONCURRENCY) {
           const scope = ids.slice(start, start + RAW_READ_CONCURRENCY)
-          const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW).select('id,game_pk')
-            .eq('game_pk', gamePk)
+          const page = await read(db.from(RAW).select('id,game_pk')
+            .in('game_pk', scope)
             .or('canonical_home_team_id.is.null,canonical_away_team_id.is.null,mlbam_pitcher_id.is.null,mlbam_batter_id.is.null,raw_payload_digest.is.null')
-            .limit(1), 'raw_identity_preflight')))
-          // A database read error is not evidence of invalid identity and must
-          // remain a hard dependency-read failure. Only a successful read that
-          // returns an invalid row is eligible for the target-local RAW_IDENTITY veto.
-          const readError = results.find((result) => result.status === 'rejected')
-          if (readError) throw readError.reason
-          requireRead(results.every((result) => result.value.data.length === 0), 'RAW_IDENTITY_PREFLIGHT')
+            .limit(1), 'raw_identity_preflight')
+          // Any invalid raw row in the bounded scope vetoes the target exactly
+          // as before, without issuing one PostgREST request per game.
+          requireRead(page.data.length === 0, 'RAW_IDENTITY_PREFLIGHT')
         }
       }
 
@@ -114,22 +111,34 @@ export function createPregameReadRepository(db) {
       } else {
         for (let start = 0; start < ids.length; start += RAW_READ_CONCURRENCY) {
           const scope = ids.slice(start, start + RAW_READ_CONCURRENCY)
-          const results = await Promise.allSettled(scope.map((gamePk) => read(db.from(RAW)
-            .select(columns, { count: 'exact' }).eq('game_pk', gamePk).limit(1000), 'scoped_raw_history')))
-          // Inspect every settled result, including errors, before continuing.
-          const errors = results.filter((result) => result.status === 'rejected')
-          requireRead(errors.length === 0, `RAW_GAME_READ:${errors.map((result) => result.reason.message).join('|')}`)
-          for (const [index, result] of results.entries()) {
-            const page = result.value
-            if (inventoryMissing && page.count === 0 && page.data.length === 0) {
-              missingGamePks.push(scope[index])
+          const scopedRows = []
+          for (let from = 0; ; from += 1000) {
+            const page = await read(db.from(RAW)
+              .select(columns)
+              .in('game_pk', scope)
+              .order('game_pk', { ascending: true })
+              .order('id', { ascending: true })
+              .range(from, from + 999), 'scoped_raw_history')
+            scopedRows.push(...page.data)
+            requireRead(scopedRows.length <= scope.length * 1000, 'TOTAL_RAW_CAP')
+            if (page.data.length < 1000) break
+          }
+          const countByGame = new Map(scope.map((gamePk) => [Number(gamePk), 0]))
+          for (const row of scopedRows) {
+            const gamePk = Number(row.game_pk)
+            requireRead(countByGame.has(gamePk), 'RAW_READ_SCOPE_ESCAPE')
+            countByGame.set(gamePk, (countByGame.get(gamePk) ?? 0) + 1)
+          }
+          for (const gamePk of scope) {
+            const count = countByGame.get(Number(gamePk)) ?? 0
+            if (inventoryMissing && count === 0) {
+              missingGamePks.push(gamePk)
               continue
             }
-            requireRead(Number.isInteger(page.count) && page.count > 0 && page.count <= 1000, 'RAW_READ_CAP_OR_MISSING_GAME')
-            requireRead(page.data.length === page.count, 'RAW_READ_TRUNCATED')
-            rows.push(...page.data)
-            counts.push({ gamePks: [scope[index]], count: page.count })
+            requireRead(count > 0 && count <= 1000, 'RAW_READ_CAP_OR_MISSING_GAME')
+            counts.push({ gamePks: [gamePk], count })
           }
+          rows.push(...scopedRows)
         }
       }
       requireRead(rows.length <= ids.length * 1000, 'TOTAL_RAW_CAP')
