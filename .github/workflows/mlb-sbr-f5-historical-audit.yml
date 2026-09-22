@@ -1,0 +1,52 @@
+name: MLB SBR F5 Historical Sample Audit
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/sbr-mlb-f5-historical-audit.py'
+      - '.github/workflows/mlb-sbr-f5-historical-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned audit dependency
+        run: python -m pip install --disable-pip-version-check --no-cache-dir 'requests>=2.32,<3'
+
+      - name: Audit six 2025 F5 slates at low request rate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/research/sbr-mlb-f5-historical-audit.py tmp/sbr-f5-historical-audit.json
+
+      - name: Enforce research-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs')
+          const p=JSON.parse(fs.readFileSync('tmp/sbr-f5-historical-audit.json','utf8'))
+          if(p.researchOnly!==true) throw new Error('research boundary')
+          if(p.rawPayloadPersisted!==false || p.rawPayloadUploaded!==false) throw new Error('raw persistence forbidden')
+          if(p.subscriptionCreditsConsumed!==0) throw new Error('credit spend forbidden')
+          if(p.scope!=='1st-half' || p.mlbInterpretation!=='1st 5') throw new Error('scope mismatch')
+          if(!['F5_PUBLIC_HISTORY_SAMPLE_AVAILABLE','F5_PUBLIC_HISTORY_SAMPLE_INCOMPLETE'].includes(p.disposition)) throw new Error('bad disposition')
+          console.log(JSON.stringify({disposition:p.disposition,aggregate:p.aggregate,providerRequestsMade:p.providerRequestsMade},null,2))
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-sbr-f5-historical-audit
+          path: tmp/sbr-f5-historical-audit.json
+          retention-days: 7
+          if-no-files-found: error
