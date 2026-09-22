@@ -61,7 +61,7 @@ maximize selected n among signal-gate passers; tiebreak lift, accuracy, then low
 
 | Line | Side | Threshold | 2025 n | 2025 Acc. | Baseline | Lift | Worst month | 2026 diag n | 2026 diag Acc. | 2026 worst | State |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| 14.5 | OVER | 15.75 | 2,010 | **77.11%** | 71.45% | +5.67 pp | 72.37% | 1,811 | **78.96%** | **75.86%** | CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS |
+| 14.5 | OVER | 15.75 | 2,010 | **77.11%** | 71.45% | +5.67 pp | 72.37% | 1,811 | **78.96%** | **75.86%** | CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED |
 | 17.5 | UNDER | 14.75 | 671 | **75.56%** | 61.84% | +13.72 pp | 70.54% | 788 | **78.05%** | **56.00%** | POOLED_75_PLUS_2026_STABILITY_FAIL |
 | 18.5 | UNDER | 16.75 | 2,234 | **86.44%** | 80.96% | +5.47 pp | 83.82% | 2,119 | **86.03%** | 80.49% | DIAGNOSTIC_LIFT_BELOW_5PP_DO_NOT_REPLACE_V2 |
 
@@ -79,6 +79,10 @@ Failed development sides:
 ## 2026 evidence label
 
 2026 is **diagnostic only**.
+
+Authoritative O14.5 state:
+
+`CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED`.
 
 Pitcher Outs 2026 outcomes were previously inspected under older candidate families, so this
 cannot be represented as pristine external validation. No thresholds were changed after reading
