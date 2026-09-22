@@ -1,0 +1,21 @@
+{
+  "version": "MLB_F7_STABILITY_BLOCK_V1/1.0.0",
+  "research_only": true,
+  "external_opened": false,
+  "period": 7,
+  "source_models": ["hierarchical", "kalman", "archetype", "isotonic"],
+  "lineage": "Immutable e4072652 rolling predictions from certified historical-development prior-game outcomes. Exact gamePK/date/truth/baseline join; admit only common availability, not outcome-based subsets. Source artifact and outcome hashes verified. No lineup/starter/odds/new provider inputs. All four models included, none chosen by pairwise win results.",
+  "score": "For each source, conditional HOME p=HOME/(HOME+AWAY); shared score is arithmetic mean of all four, without fitting weights. Side HOME if mean>=0.5 else AWAY. Draws push and never train conditional calibration.",
+  "rules": {
+    "consensus": "All four conditional probabilities must favor the same side and at least two must assign that side probability>=0.75. Ties at0.5 abstain. No selected-outcome learning or preferred pairs.",
+    "conformal": "Same-season rolling last300 previous-date nondraw contexts, at least100 per true class. Mondrian nonconformity=1-p_true from shared score. For each candidate label use (1+count calibration scores>=test score)/(class_n+1); label retained when pvalue>0.25. Select only singleton prediction set agreeing with mean-score direction AND mean side probability>=0.75. Batch dates before labels enter calibration. No exchangeability/conditional-coverage guarantee under temporal drift claimed.",
+    "month_bootstrap": "Shared side confidence>=0.75. Fixed confidence bins[.5,.6),[.6,.7),[.7,.8),[.8,.9),[.9,1]. Reliability uses same-season strictly prior completed months in that bin, at least60 nondraw cases, at least3 represented months and at least10 cases in every represented month.1000 deterministic resamples of whole month accuracy values, equal month weights, lower empirical5th percentile must>=0.75. No incomplete current month, alternate bins or post-result threshold changes. This is a stability diagnostic, not a guaranteed calibrated confidence interval."
+  },
+  "base_gates": {"accuracy": 0.75, "min_n": 60, "min_months": 5, "worst_month": 0.65},
+  "additional_robustness_policy": {"min_selected_month_n": 10, "min_leave_one_month_out_accuracy": 0.75, "max_top_two_month_selected_share": 0.5, "min_wilson_95_two_sided_lower": 0.75},
+  "policy_note": "Additional numeric robustness requirements are conservative predeclared operational definitions for this new block, not changes to old candidates or user-supplied numeric thresholds. No requirement is weakened. LOMO deletes each selected month from frozen prequential decisions; it is a sensitivity diagnostic, NOT a retrained fold and never affects selections. Report every eligible month including zero selections. Wilson/Beta bounds assume Bernoulli sampling and are descriptive under dependence/repeated development.",
+  "max_date": "2026-09-18",
+  "same_season_reset": true,
+  "odds_api_credits": 0,
+  "stop_rule": "Evaluate three frozen rules. Any full robust pass stops for authorization; external never opens. Otherwise preserve failures and mark F7_ML_RESEARCH_SATURATION_PENDING_NEW_INFORMATION, then move to next evidence-supported market. No claim of mathematical exhaustion."
+}
