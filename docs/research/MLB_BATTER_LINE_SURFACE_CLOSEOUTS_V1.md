@@ -148,18 +148,71 @@ State: `NO_NEW_LINE_SURFACE_CANDIDATE`.
 
 No 2026 threshold rescue was attempted.
 
+### Batter Total Bases
+
+Certified control:
+`batter_total_bases_under_2p5_edge_1p5_v1`
+
+The canonical target-game feature-key gate recovered exact parity:
+
+- all-2025 refit: n **40,886**
+- intercept **0.599532796678854**
+- slope **0.563175501776575**
+- 2025 control: **1,081/1,187 = 91.07%**
+- 2026 control: **2,021/2,336 = 86.52%**
+- exact parity: **PASS**
+
+A fixed 2025 threshold grid (0.25..4.00 by 0.05) was evaluated across current exact lines before any
+2026 diagnostic read.
+
+Development passers:
+
+- U1.5 @ projection <=1.20: **5,217/6,843 = 76.24%**, +9.70 pp lift, worst month 75.05%
+- U2.5 @ projection <=1.30: **10,557/12,280 = 85.97%**, +5.56 pp lift, worst month 85.33%
+- U3.5 @ projection <=1.20: **6,264/6,843 = 91.54%**, +5.46 pp lift, worst month 90.12%
+
+Frozen-threshold 2026 diagnostic:
+
+- U1.5 <=1.20: **7,081/9,471 = 74.77%** -> below 75%; no retune
+- U2.5 <=1.30: **12,193/14,405 = 84.64%**, but lift falls to **+3.91 pp**
+- U3.5 <=1.20: **8,583/9,471 = 90.62%**, but lift falls to **+4.12 pp**
+
+Therefore no new Total Bases line survives the full cross-year signal gate. The existing U2.5
+<=1.00 control remains unchanged and retains 2026 lift **+5.78 pp**.
+
+State: `NO_NEW_CROSS_YEAR_LINE_SURFACE_CANDIDATE`.
+
 ## Exact replay blocks
 
-The following markets were NOT expanded because the reconstructed development universe did not
-exactly reproduce the certified frozen result:
+### Pitcher Hits Allowed
 
-| Market | Certified control | Reconstructed evidence | State |
-|---|---|---|---|
-| Pitcher Hits Allowed | U6.5 <=5.0 = 634/761 | close, but May and total counts differ | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
-| Batter Total Bases | U2.5 <=1.0 = 1081/1187 | near but monthly universe differs | LINE_SURFACE_BLOCKED_EXACT_REPLAY |
+Frozen control:
+`pitcher_hits_allowed_under_6p5_proj_5p0_v1` = **634/761** on 2025, with all-2025 refit n=3,099.
 
-These are not evidence that alternate lines cannot work. They are lineage/replay blocks. No line
-surface should be promoted from an approximate reconstruction.
+Two read-only reconstructions were attempted without retuning:
+
+- xyear starter rows + canonical target-game pitcher gate -> refit n=3,334; control **663/783**
+- Retrosheet historical starter rows -> refit n=3,404; control **672/796**
+
+Neither reproduces the frozen universe. State remains:
+
+`LINE_SURFACE_BLOCKED_EXACT_REPLAY`
+
+No approximate corpus is authorized for alternate-line search.
+
+### RBI / H+R+RBI current-board audit
+
+Batter RBI has only line **0.5** on the captured 2026-09-22 board, the same line as its existing
+certified U0.5 control. There is no alternate exact line to expand today.
+
+Batter H+R+RBI has real **0.5 and 1.5** lines today, but its frozen 2025 development control
+(2,278/2,582 = 88.23% on U2.5 <=0.70) came from Retrosheet `2025batting.csv` inside the frozen
+2025 CSV archive. That exact player-game source is not preserved in the repository or current
+Supabase normalized tables. The normalized event-derived tables do not reproduce the frozen
+player-run/RBI totals exactly, so they are not substituted.
+
+State:
+`LINE_SURFACE_BLOCKED_EXACT_SOURCE_CORPUS_NOT_RECOVERED`.
 
 ## Concurrent replay reconciliation
 
@@ -168,7 +221,7 @@ Two earlier generic replay blocks in this closeout were superseded by later exac
 - **Batter Hits** — PR #194 recovered the exact U1.5 <=0.75 control at **6123/7011** by using the canonical target-game pregame feature-key gate. The earlier block here is no longer authoritative.
 - **Batter Strikeouts** — PR #193 recovered the exact U1.5 <=0.50 control at **564/592** using the same canonical target-game pregame lineage gate. The earlier block here is no longer authoritative.
 
-Active replay blockers in this document are therefore limited to **Pitcher Hits Allowed** and **Batter Total Bases** unless a later exact-replay branch supersedes them. Batter Walks and Batter Home Runs were subsequently recovered to exact parity in this PR.
+Active traditional replay blocker is now limited to **Pitcher Hits Allowed**. Batter Total Bases, Walks and Home Runs were recovered to exact parity in this PR. H+R+RBI is separately blocked on recovery of its exact frozen 2025 CSV source corpus.
 
 ## Boundaries
 
