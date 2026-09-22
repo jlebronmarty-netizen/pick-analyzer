@@ -1,0 +1,58 @@
+[
+  {
+    "game_pk": 776521,
+    "official_date": "2025-08-31",
+    "scheduled_at": "2025-08-31 17:40:00+00",
+    "fetched_at": "2026-09-17 22:14:21.354491+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 776522,
+    "official_date": "2025-08-31",
+    "scheduled_at": "2025-08-31 23:10:00+00",
+    "fetched_at": "2026-09-17 22:14:21.354491+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 776669,
+    "official_date": "2025-08-20",
+    "scheduled_at": "2025-08-20 23:15:00+00",
+    "fetched_at": "2026-09-17 22:14:21.354491+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 777356,
+    "official_date": "2025-06-26",
+    "scheduled_at": "2025-06-26 17:10:00+00",
+    "fetched_at": "2026-09-17 22:14:10.246424+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 777491,
+    "official_date": "2025-06-15",
+    "scheduled_at": "2025-06-15 20:10:00+00",
+    "fetched_at": "2026-09-17 22:14:10.246424+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 777492,
+    "official_date": "2025-06-15",
+    "scheduled_at": "2025-06-15 18:10:00+00",
+    "fetched_at": "2026-09-17 22:14:10.246424+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 778485,
+    "official_date": "2025-04-01",
+    "scheduled_at": "2025-04-02 01:40:00+00",
+    "fetched_at": "2026-09-17 22:13:52.381096+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  },
+  {
+    "game_pk": 778486,
+    "official_date": "2025-04-01",
+    "scheduled_at": "2025-04-02 01:40:00+00",
+    "fetched_at": "2026-09-17 22:13:52.381096+00",
+    "source": "MLB_STATS_API_SCHEDULE_FINAL_RECORD"
+  }
+]
