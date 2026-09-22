@@ -1,0 +1,3055 @@
+{
+  "baseline": "12de8d43ffac19b908732305d349da8d6944a77d",
+  "main_at_review": "8df2a5ba3d81aa64334fd0dd73361c23c025aa8c",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "scope": "Complete baseline artifact inventory; closed in-scope frozen candidate summaries normalized. External/forward/operational files inventoried only, no outcome arrays opened or used for prioritization. Historical candidate grids are not rescanned; preserve only selected/frozen formulas. Null is unreported, not zero.",
+  "inventory": [
+    {
+      "path": "artifacts/research/mlb_additional_75_prop_runtime_parity_20260919.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_approved_prop_k_rbi_hrrbi_runtime_certification_20260920.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_doubles_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_doubles_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "58cbff42664547a39d07ed7f55494426e01472a54e896d28465bbd0d894a0789"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_hits_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_hits_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "e8b7dabe9dae76a4538ce050b54307edfcc7d1cb68801870b535ee426dd87a95"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_home_runs_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_home_runs_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "d5fd565606e555ded4e6e326e45a5cf8a1bbd5b09ddd408bb003a42a795b934b"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_runs_rbi_hrrbi_2025_development_freeze_20260920.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "e507c93ef7bfd074ebbc521353d53871ac98a1f669b7ca05d9253551d827fc3c"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_runs_rbi_hrrbi_2026_mlb_official_external_20260920.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_runs_rbi_hrrbi_2026_proxy_diagnostic_20260920.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_singles_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_singles_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "f62138f28bcdf92fd82ee5fdefddc046ce0db6fb2e40587d9f5151568fa21688"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_strikeouts_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_strikeouts_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "508a64355c60f6a40b6e60c915d853f1e368a24d09778c1ca12d260c828d02f0"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_total_bases_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_total_bases_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "6992457b754726ba5a563e7ec07c392cd12b7049f0608931e75582cc3c8e3519"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_triples_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_triples_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "e19ded90db4f1109746ccb524c7351d7661c0927bbab5fa3754854835edf4bb0"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_walks_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_batter_walks_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "11392d059a39c6e724ab589a8d380fa786a38032e3bdd171176876ebd9f68e13"
+    },
+    {
+      "path": "artifacts/research/mlb_bdl_bounded_probe_ledger_20260922.jsonl",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_bdl_historical_period_probe_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_bdl_opening_access_probe_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_canonical_official_pick_write_boundary_repair_20260920.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_3way_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_3way_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "7dbd5199924e8a0b4d49339a0e4e4070cdc337fec0fad265a88862ae227449ba"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_3way_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "d048b266fabb41b927f778d776ce2dbb90597dc2b8b2525b21a6d16ff2ac3541"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_3way_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "3cc718d8494ea8cb35cb45171b03108757a11b7fe351e9d1ad4e68d89deeb29b"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_ml_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_ml_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "de2fdcb00f86b468212c8326b0a254ac59630329f6a1748f5ee4fb9f58ff9c8c"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_ml_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "4fdb2e35941d357e4953f26730fcf062aab726832fbb5796ced111f1d720634a"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_ml_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "5162824bf1fcaf907be7b00445c7df94ab35c4b780f82073546bb29b02d1016d"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_nrfi_factorized_v1_result.json",
+      "classification": "CLOSED_NRFI_ARCHITECTURE",
+      "canonical_json_sha256": "27b929d8c995275394d7c467632d2a02416c9f33c57bdaedc6d668cd85117130"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_nrfi_factorized_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_nrfi_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_nrfi_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "03488ca1c61dda7e24215e5f5f69f7b4c2fd4cd203541b5d2e9ddb33720db67d"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_nrfi_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "4927ab1c0540b511dbb19fa0f940402125cfb605eb113479237b8099c030af51"
+    },
+    {
+      "path": "artifacts/research/mlb_f1_nrfi_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "968e8f0ce8b9fd2bf7cd8e94902a8902ae1789663b4149ddde5060c813b3c32b"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_3way_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_3way_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "230dddaef275a3c4e281783d31e3390bbd5de76fefad2787c89bfe1d98d45fed"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_3way_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "ab677602aa988eba5f9233a03ade0fc32b860b5708a5604b999f004cdb4a8fea"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_3way_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "eb58068469896b5206aee430a9e8d0fb5f6f996daa2e23063ce929d83aeef865"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_ml_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_ml_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "c302e256b7d301f69ddb7a5e70fd6f4693e1d371c0650cbd817cf82b289e1c0f"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_ml_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "138e11a3f65192f1394c8c7056390558ecaae571edef14dfb592f0eca8e9d860"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_ml_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "862582a34eebbcdfcb791607b70c296e6607f7c6af46f41edeee6cf29fa434be"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_totals_reference_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f3_totals_reference_v1_frozen_candidate.json",
+      "classification": "CLOSED_REFERENCE_LINE_NOT_REAL_MARKET",
+      "canonical_json_sha256": "0dd640e0d6cb98fad131245a0f52a17d5a56f18746d184c4099f00da70dd1bff"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_3way_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_3way_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "98351cf495d547465728612a050478a2ba1064278573458a97336905c3e94ae0"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_3way_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "d17d4e0a8cac906cc0d2e7c1941f93f0e324f1c86ef29d5cc4cc0fd1ad74918c"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_3way_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "a885564357971693fd346149041add5f6bc8f5d8951dad3ad15bb8bc59ce427f"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_ml_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_ml_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "91374e84012d2ccf5f86b4830dfa61296cbd92276726edfb0cddd8968921c3f1"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_ml_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "e4d04405886752c6fa54c5698be380c726f200345e24f8c4f8036bdcb3ccf912"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_ml_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "516b05f401498fb0461a4b33f91583bc8a8c613083ae3a2d2441062b481de9aa"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_opponent_count_v1.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "f2d4b829dbb5680d69c9b8389265e475202a2d200735b1ff76167ce3e950701b"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_opponent_count_v1.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_totals_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f5_totals_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "86ebece53db9dd469fbff400c5195dbcad989dfadb335ceb91c2bfebc316472c"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_3way_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_3way_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "f56152b4f1821da0f8b2c7556dcbc24c55dcb490e731c45ea38f921c4c5db77c"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_3way_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "940fd9b502d6e5c566dd8e1e6f1faf05e519de0452bb35b73d006969871e4c90"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_3way_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "bbedd4cfdc4049ed52f751ebf4c3ccbcbdcc674c870d8d76e571133664dfc33b"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_ml_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_ml_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "b8be28fce523051ea98b5c28fe1704d0e68b146b044c83c4bb7ca62631d7491e"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_ml_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "76473901472ad4646def10cd8e6c4b012b443438312b175360fb63207538a40c"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_ml_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "b2976077fdd16d9e8d424ecb1308c6917734a1c4c4e54c601d29e24ad73dda36"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_stability_block_v1.json",
+      "classification": "F7_FROZEN_READ_ONLY",
+      "canonical_json_sha256": "c7cde7198fb0993d1dcc5c6e136cb19aa35a12cf77b132ea257ba644357e9c04"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_stability_block_v1.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_stability_metrics_audit_v1.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_totals_reference_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_f7_totals_reference_v1_frozen_candidate.json",
+      "classification": "CLOSED_REFERENCE_LINE_NOT_REAL_MARKET",
+      "canonical_json_sha256": "e53c195bd99566a19d8b0989af624893de9ec4258fe46e1cbbdb7f63d5a9e9ce"
+    },
+    {
+      "path": "artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "7fed71da4fa4b100e602b940b298df0582d2b4dc21b30844c6f3c3cfa24cd147"
+    },
+    {
+      "path": "artifacts/research/mlb_honest_regime_tree_v1.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_admission_readback_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_integrity_v1.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_integrity_v1.projected.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_integrity_v1.provenance.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_integrity_v1.raw.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_integrity_v1.records.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_integrity_v1.selection.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_lineage_sample_v1.evidence.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_lineage_sample_v1.github.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_lineage_sample_v1.result.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_lineup_lineage_sample_v1.schedule.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "8750a72ea9b9db853789531ef49e34b54507652fb8e0a935c57e7393dc9c9840"
+    },
+    {
+      "path": "artifacts/research/mlb_multiperiod_bilinear_v1.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "20b51baad8682a700ee31262eb9813f91469cc7ebaeee31974cf23d126e8afc2"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_archetype.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "d37b0c954837bf2963513d1186d2587513c79a096d189c1ac91fa0b8a2690302"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_hierarchical.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "4b46bf095a191e99da5e7f5a50de7e3ab94ae9218c5443087a55304e180b248b"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_isotonic.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "486da837d28b647aa48b616c567e790969eb2720dffcb323f689e00d80138924"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_kalman.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_new_families_v1_source.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_nrfi_analog_v1_result.json",
+      "classification": "CLOSED_NRFI_ARCHITECTURE",
+      "canonical_json_sha256": "097d024a6e79b4588266c4a94a059f56e9b54342e88a34b3809ab53ad73ef2ff"
+    },
+    {
+      "path": "artifacts/research/mlb_nrfi_analog_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_nrfi_boosting_v1.json",
+      "classification": "CLOSED_NRFI_ARCHITECTURE",
+      "canonical_json_sha256": "95fa93b1ea3e3401a6478b6093a09e68645f5ac7a1acd55d433280be8bed2119"
+    },
+    {
+      "path": "artifacts/research/mlb_nrfi_boosting_v1.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_nrfi_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_nrfi_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_2025_DEVELOPMENT_ONLY",
+      "canonical_json_sha256": "3a95f11c93cd2b4e63dde56f0d69ac67f2b626dfecc1d51dbbf9b631506f5d10"
+    },
+    {
+      "path": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "576a03bd6adc5f9cfbb6b71a5daf03a431dbad92922e157fd8ca6263e9811b5c"
+    },
+    {
+      "path": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "b9497075e12e464a5cb54e8e25f099216ab92ee4ec807f6c1fe12eb791562e9d"
+    },
+    {
+      "path": "artifacts/research/mlb_period_davidson_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "57990c4c458939274df90fc6d3341f5d170c91d5e13bdaabe022c98d494de029"
+    },
+    {
+      "path": "artifacts/research/mlb_period_empirical_convolution_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_period_line_coverage_readback_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "8c19a95497f3d6061a29f25e4d1a6d2dae1765fa8f01f5fc0cae86c960774a4a"
+    },
+    {
+      "path": "artifacts/research/mlb_period_poisson_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_period_qda_v1_result.json",
+      "classification": "CLOSED_FROZEN_OUTCOME_ONLY_FAMILY",
+      "canonical_json_sha256": "877e26825f8149f19c9d8e8701d22ad38ffcd478a542b975821c5abc45804c78"
+    },
+    {
+      "path": "artifacts/research/mlb_period_qda_v1_result.json.gz",
+      "classification": "COMPRESSED_EVIDENCE_REFERENCED_BY_SUMMARY"
+    },
+    {
+      "path": "artifacts/research/mlb_period_team_threshold_classifier_v1.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_bb_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_bb_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "e230c773378a589e7f96095d5337f777605d18bf33248b1de9d461a8b5e5874a"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_er_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "747924c67399ee775b1db7996e43eccb95ac29365596c17a7a050bec4cc3446d"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_hits_allowed_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_hits_allowed_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "c4eceb8b99d13f403a231b8413b9c27080fe6bb204d161f4add4636cb947ca35"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_k_xyear_v1_2026_external_single_read_20260920.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_k_xyear_v1_development_freeze_20260920.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "3256b8119e412deea555a980043480effbe8aa81df5283ab7835c68b1561c0fd"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_outs_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_outs_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "bc44a3060e514e94d68128dc714df459547d58e9be1782b578a8457fbc4abeb5"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_outs_xyear_v2_2026_diagnostic_20260920.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_outs_xyear_v2_development_freeze_20260920.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "8a1ba21c0a9dd41c6d43835542e61b85617975015ae477cd8be91d79f81151b7"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_record_win_market_v1_external_2026_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_record_win_market_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "f2d2f34e889e38433b8d5b7054a05d485c5fe2b81da9573c83fa834915c99474"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_record_win_revisit_2026_decisions_v1.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_record_win_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "d79cbb1f125e152887c5b3fb7f56bbef4fad7f40ecf20bedecca3ca34c03a68a"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_record_win_revisit_v1_result.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_win_forward_numeric_2026_decisions_v1.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_win_forward_numeric_v1_frozen_candidate.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_win_forward_numeric_v1_golden.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_pitcher_win_forward_numeric_v1_result.json",
+      "classification": "EXCLUDED_EXTERNAL_FORWARD_OR_OPERATIONAL"
+    },
+    {
+      "path": "artifacts/research/mlb_projected_lineup_reconciliation_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_public_snapshot_audit_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_public_source_audit_environment_20260922.json",
+      "classification": "INVENTORY_ONLY_SUPPORT_OR_OUT_OF_SCOPE"
+    },
+    {
+      "path": "artifacts/research/mlb_totals_revisit_v1_frozen_candidate.json",
+      "classification": "CLOSED_OTHER_MARKET_DEVELOPMENT_NOT_RANKED",
+      "canonical_json_sha256": "7f50d52da74e43d6118742a4e7d645577a3e1e68b2629d837114ad2e5fb886f9"
+    },
+    {
+      "path": "artifacts/research/mlb_totals_revisit_v1_result.json",
+      "classification": "CLOSED_HISTORICAL_SELECTED_CANDIDATE",
+      "canonical_json_sha256": "28e865b12e583218df1fedf2409e968268cf0b51eb46ad5163a005287476748d"
+    }
+  ],
+  "records": [
+    {
+      "market": "F1_3WAY",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f1_3way_market_v1_frozen_candidate.json",
+      "accuracy": 0.5656108597285068,
+      "n": 221,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.45614035087719296,
+      "months": 5,
+      "minimum_month_n": 34,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "catboost_multiclass_probability",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f1_3way_revisit_v1_result.json",
+      "accuracy": 0.5437017994858612,
+      "n": 1556,
+      "coverage": 0.3750301277416245,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.4791666666666667,
+      "months": 11,
+      "minimum_month_n": 75,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f1_ml_market_v1_frozen_candidate.json",
+      "accuracy": 0.6891891891891891,
+      "n": 74,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.5,
+      "months": 5,
+      "minimum_month_n": 8,
+      "pushes": 60,
+      "original_gate": null
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "catboost_classifier_margin_agreement",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f1_ml_revisit_v1_result.json",
+      "accuracy": 0.7391304347826086,
+      "n": 69,
+      "coverage": 0.035430224150397684,
+      "coverage_definition": "selected incl pushes/all OOF",
+      "worst_month": 0.631578947368421,
+      "months": 6,
+      "minimum_month_n": 2,
+      "pushes": 78,
+      "original_gate": false
+    },
+    {
+      "market": "F1_NRFI",
+      "architecture": "beta_smoothed_pitcher_offense_log_odds_half_inning_factorization",
+      "cohort": "historical rolling development; starter caveat on older sources",
+      "artifact": "artifacts/research/mlb_f1_nrfi_factorized_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_NRFI",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f1_nrfi_market_v1_frozen_candidate.json",
+      "accuracy": 0.5370370370370371,
+      "n": 108,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.3684210526315789,
+      "months": 5,
+      "minimum_month_n": 17,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F1_NRFI",
+      "architecture": "both_starters_scoreless_rate_only",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f1_nrfi_revisit_v1_result.json",
+      "accuracy": 0.540650406504065,
+      "n": 738,
+      "coverage": 0.17787418655097614,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.4794520547945205,
+      "months": 11,
+      "minimum_month_n": 36,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f3_3way_market_v1_frozen_candidate.json",
+      "accuracy": 0.6027397260273972,
+      "n": 73,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.2857142857142857,
+      "months": 5,
+      "minimum_month_n": 5,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "catboost_multiclass_margin_agreement",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f3_3way_revisit_v1_result.json",
+      "accuracy": 0.5288461538461539,
+      "n": 312,
+      "coverage": 0.07521697203471553,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.375,
+      "months": 11,
+      "minimum_month_n": 8,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f3_ml_market_v1_frozen_candidate.json",
+      "accuracy": 0.7142857142857143,
+      "n": 77,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.6666666666666666,
+      "months": 5,
+      "minimum_month_n": 7,
+      "pushes": 22,
+      "original_gate": null
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "catboost_classifier_margin_agreement",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f3_ml_revisit_v1_result.json",
+      "accuracy": 0.63125,
+      "n": 320,
+      "coverage": 0.09980713596914176,
+      "coverage_definition": "selected incl pushes/all OOF",
+      "worst_month": 0.5294117647058824,
+      "months": 11,
+      "minimum_month_n": 12,
+      "pushes": 94,
+      "original_gate": false
+    },
+    {
+      "market": "F3_TOTALS",
+      "architecture": "fixed reference-line projection",
+      "cohort": "2025 diagnostic reference line, not executable market",
+      "artifact": "artifacts/research/mlb_f3_totals_reference_v1_frozen_candidate.json",
+      "accuracy": 0.5146853146853146,
+      "n": 715,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.49122807017543857,
+      "months": 5,
+      "minimum_month_n": 96,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f5_3way_market_v1_frozen_candidate.json",
+      "accuracy": 0.6309523809523809,
+      "n": 84,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.45454545454545453,
+      "months": 5,
+      "minimum_month_n": 7,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "catboost_multiclass_margin_agreement",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f5_3way_revisit_v1_result.json",
+      "accuracy": 0.49614791987673346,
+      "n": 1298,
+      "coverage": 0.3129973474801061,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.44954128440366975,
+      "months": 11,
+      "minimum_month_n": 67,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f5_ml_market_v1_frozen_candidate.json",
+      "accuracy": 0.6818181818181818,
+      "n": 88,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.6470588235294118,
+      "months": 5,
+      "minimum_month_n": 6,
+      "pushes": 15,
+      "original_gate": null
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "catboost_win_pct_sign_agreement",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f5_ml_revisit_v1_result.json",
+      "accuracy": 0.671875,
+      "n": 64,
+      "coverage": 0.01856763925729443,
+      "coverage_definition": "selected incl pushes/all OOF",
+      "worst_month": 0.6410256410256411,
+      "months": 6,
+      "minimum_month_n": 1,
+      "pushes": 13,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "f5_opponent_adjusted_offense_defense_negative_binomial_v1",
+      "cohort": "historical monthly expanding fits",
+      "artifact": "artifacts/research/mlb_f5_opponent_count_v1.json",
+      "accuracy": 0.5833333333333334,
+      "n": 12,
+      "coverage": 0.004442925495557075,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.3333333333333333,
+      "months": 2,
+      "minimum_month_n": 3,
+      "pushes": 1,
+      "original_gate": false
+    },
+    {
+      "market": "F5_TOTALS",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f5_totals_market_v1_frozen_candidate.json",
+      "accuracy": 0.5463917525773195,
+      "n": 679,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.4857142857142857,
+      "months": 5,
+      "minimum_month_n": 35,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f7_3way_market_v1_frozen_candidate.json",
+      "accuracy": 0.6966292134831461,
+      "n": 89,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.5,
+      "months": 5,
+      "minimum_month_n": 10,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "catboost_multiclass_margin_agreement",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f7_3way_revisit_v1_result.json",
+      "accuracy": 0.5659163987138264,
+      "n": 311,
+      "coverage": 0.07508450024142926,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.48717948717948717,
+      "months": 11,
+      "minimum_month_n": 2,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "first-pass frozen composite/reference",
+      "cohort": "2025 development only; not comparable to unified OOF",
+      "artifact": "artifacts/research/mlb_f7_ml_market_v1_frozen_candidate.json",
+      "accuracy": 0.7582417582417582,
+      "n": 91,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.6666666666666666,
+      "months": 5,
+      "minimum_month_n": 8,
+      "pushes": 8,
+      "original_gate": null
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "catboost_probability",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_f7_ml_revisit_v1_result.json",
+      "accuracy": 0.5823575331772053,
+      "n": 1281,
+      "coverage": 0.3503138580395944,
+      "coverage_definition": "selected incl pushes/all OOF",
+      "worst_month": 0.5403225806451613,
+      "months": 11,
+      "minimum_month_n": 39,
+      "pushes": 170,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "consensus",
+      "cohort": "historical common-availability rolling development",
+      "artifact": "artifacts/research/mlb_f7_stability_block_v1.json",
+      "accuracy": 0.8461538461538461,
+      "n": 52,
+      "coverage": 0.017173847544441095,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.75,
+      "months": 6,
+      "minimum_month_n": 1,
+      "pushes": 5,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "conformal",
+      "cohort": "historical common-availability rolling development",
+      "artifact": "artifacts/research/mlb_f7_stability_block_v1.json",
+      "accuracy": 0.6666666666666666,
+      "n": 3,
+      "coverage": 0.0009038867128653209,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.6666666666666666,
+      "months": 1,
+      "minimum_month_n": 3,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "month_bootstrap",
+      "cohort": "historical common-availability rolling development",
+      "artifact": "artifacts/research/mlb_f7_stability_block_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_TOTALS",
+      "architecture": "fixed reference-line projection",
+      "cohort": "2025 diagnostic reference line, not executable market",
+      "artifact": "artifacts/research/mlb_f7_totals_reference_v1_frozen_candidate.json",
+      "accuracy": 0.5529595015576324,
+      "n": 642,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.5178571428571429,
+      "months": 5,
+      "minimum_month_n": 42,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "honest_pregame_regime_tree_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_honest_regime_tree_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "multiperiod_bilinear_softmax_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_multiperiod_bilinear_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": 0.5,
+      "n": 2,
+      "coverage": 0.0008398656215005599,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.5,
+      "months": 1,
+      "minimum_month_n": 2,
+      "pushes": 1,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "archetype",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_archetype.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 0.5528455284552846,
+      "n": 123,
+      "coverage": 0.05767808725659354,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 12,
+      "minimum_month_n": 1,
+      "pushes": 111,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 0.5,
+      "n": 24,
+      "coverage": 0.005915701257086517,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 8,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 0.52,
+      "n": 25,
+      "coverage": 0.0093711467324291,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 8,
+      "minimum_month_n": 1,
+      "pushes": 13,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 0.6764705882352942,
+      "n": 34,
+      "coverage": 0.010609425117197138,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 9,
+      "minimum_month_n": 1,
+      "pushes": 9,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 1,
+      "n": 2,
+      "coverage": 0.0004934616333580064,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 1,
+      "months": 2,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 0.7857142857142857,
+      "n": 84,
+      "coverage": 0.023715415019762844,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 7,
+      "minimum_month_n": 1,
+      "pushes": 12,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "hierarchical",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+      "accuracy": 0.7272727272727273,
+      "n": 33,
+      "coverage": 0.008152173913043478,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 6,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": 0.625,
+      "n": 8,
+      "coverage": 0.005216324025774778,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.6,
+      "months": 2,
+      "minimum_month_n": 3,
+      "pushes": 9,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": 1,
+      "n": 4,
+      "coverage": 0.0015087507543753772,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 1,
+      "months": 1,
+      "minimum_month_n": 4,
+      "pushes": 1,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": 0.7804878048780488,
+      "n": 41,
+      "coverage": 0.012522361359570662,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.3333333333333333,
+      "months": 5,
+      "minimum_month_n": 3,
+      "pushes": 1,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "isotonic",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.6021505376344086,
+      "n": 93,
+      "coverage": 0.04658614739955632,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 12,
+      "minimum_month_n": 1,
+      "pushes": 96,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0,
+      "n": 3,
+      "coverage": 0.0007394626571358146,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 2,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.5675675675675675,
+      "n": 148,
+      "coverage": 0.05030826140567201,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.3333333333333333,
+      "months": 12,
+      "minimum_month_n": 1,
+      "pushes": 56,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.3,
+      "n": 20,
+      "coverage": 0.004932182490752158,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 7,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.6025641025641025,
+      "n": 156,
+      "coverage": 0.044905008635578586,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.2,
+      "months": 12,
+      "minimum_month_n": 3,
+      "pushes": 26,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.6,
+      "n": 45,
+      "coverage": 0.011102886750555145,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 10,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.7062146892655368,
+      "n": 177,
+      "coverage": 0.04792490118577075,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.5,
+      "months": 12,
+      "minimum_month_n": 2,
+      "pushes": 17,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "kalman",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_new_families_v1_kalman.json",
+      "accuracy": 0.5660377358490566,
+      "n": 53,
+      "coverage": 0.013092885375494072,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 11,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_NRFI",
+      "architecture": "mlb_nrfi_analog_v1_result.json",
+      "cohort": "historical rolling development; starter caveat on older sources",
+      "artifact": "artifacts/research/mlb_nrfi_analog_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_NRFI",
+      "architecture": "joint_nrfi_prior_outcome_boosting_v1",
+      "cohort": "historical rolling development; starter caveat on older sources",
+      "artifact": "artifacts/research/mlb_nrfi_boosting_v1.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_NRFI",
+      "architecture": {
+        "id": 39,
+        "wOff": 0,
+        "wDef": 1,
+        "wStarter": 0,
+        "betaRecent": 0,
+        "gammaLeague": 0.5
+      },
+      "cohort": "2025 development only",
+      "artifact": "artifacts/research/mlb_nrfi_market_v1_frozen_candidate.json",
+      "accuracy": 0.558823529411765,
+      "n": 340,
+      "coverage": null,
+      "coverage_definition": "original artifact denominator; unknown if null",
+      "worst_month": 0.391304347826087,
+      "months": 5,
+      "minimum_month_n": 46,
+      "pushes": 0,
+      "original_gate": null
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": 0.25,
+      "n": 4,
+      "coverage": 0.002317497103128621,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 2,
+      "minimum_month_n": 2,
+      "pushes": 4,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": 0.16666666666666666,
+      "n": 6,
+      "coverage": 0.002607939727615184,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 3,
+      "minimum_month_n": 1,
+      "pushes": 3,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": 0.6666666666666666,
+      "n": 3,
+      "coverage": 0.0011594202898550724,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.6666666666666666,
+      "months": 1,
+      "minimum_month_n": 3,
+      "pushes": 1,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": 0.5,
+      "n": 2,
+      "coverage": 0.0005805515239477503,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.5,
+      "months": 1,
+      "minimum_month_n": 2,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "sequential_bayesian_expert_mixture_v1",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_bayesian_mixture_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": 0.7333333333333333,
+      "n": 15,
+      "coverage": 0.007394626571358146,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.3333333333333333,
+      "months": 3,
+      "minimum_month_n": 2,
+      "pushes": 15,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": 0.5384615384615384,
+      "n": 13,
+      "coverage": 0.00468557336621455,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 5,
+      "minimum_month_n": 1,
+      "pushes": 6,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": 0.5909090909090909,
+      "n": 22,
+      "coverage": 0.006661732050333087,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.5,
+      "months": 4,
+      "minimum_month_n": 2,
+      "pushes": 5,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": 0.7761194029850746,
+      "n": 67,
+      "coverage": 0.018280632411067192,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 7,
+      "minimum_month_n": 1,
+      "pushes": 7,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_davidson_v1_result.json",
+      "accuracy": 0,
+      "n": 2,
+      "coverage": 0.0004940711462450593,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 2,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": 0,
+      "n": 1,
+      "coverage": 0.0002457606291472106,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 1,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "dirichlet_empirical_run_histogram_convolution",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_empirical_convolution_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": 0.6290322580645161,
+      "n": 62,
+      "coverage": 0.030071481390189794,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.14285714285714285,
+      "months": 9,
+      "minimum_month_n": 2,
+      "pushes": 60,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": 0.5806451612903226,
+      "n": 124,
+      "coverage": 0.041430332922318125,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 11,
+      "minimum_month_n": 1,
+      "pushes": 44,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": null,
+      "n": 0,
+      "coverage": 0,
+      "coverage_definition": "selected/eligible",
+      "worst_month": null,
+      "months": 0,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": 0.6474358974358975,
+      "n": 156,
+      "coverage": 0.04465827781889958,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 11,
+      "minimum_month_n": 1,
+      "pushes": 25,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": 0.6363636363636364,
+      "n": 33,
+      "coverage": 0.008142116950407105,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.3333333333333333,
+      "months": 4,
+      "minimum_month_n": 3,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": 0.7135135135135136,
+      "n": 185,
+      "coverage": 0.05014822134387352,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.5,
+      "months": 12,
+      "minimum_month_n": 1,
+      "pushes": 18,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "gamma_poisson_team_attack_defense",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_poisson_v1_result.json",
+      "accuracy": 0.6808510638297872,
+      "n": 47,
+      "coverage": 0.011610671936758894,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.5,
+      "months": 5,
+      "minimum_month_n": 4,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F1_ML",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.631578947368421,
+      "n": 19,
+      "coverage": 0.011587485515643106,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 5,
+      "minimum_month_n": 1,
+      "pushes": 21,
+      "original_gate": false
+    },
+    {
+      "market": "F1_3WAY",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0,
+      "n": 1,
+      "coverage": 0.00028968713789107763,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 1,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F3_ML",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.5813953488372093,
+      "n": 43,
+      "coverage": 0.015357867284844973,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.25,
+      "months": 7,
+      "minimum_month_n": 2,
+      "pushes": 10,
+      "original_gate": false
+    },
+    {
+      "market": "F3_3WAY",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.5,
+      "n": 6,
+      "coverage": 0.0017386264850767893,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.4,
+      "months": 2,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F5_ML",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.6265060240963856,
+      "n": 83,
+      "coverage": 0.027246376811594204,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.35294117647058826,
+      "months": 6,
+      "minimum_month_n": 3,
+      "pushes": 11,
+      "original_gate": false
+    },
+    {
+      "market": "F5_3WAY",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.5789473684210527,
+      "n": 38,
+      "coverage": 0.011014492753623189,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0,
+      "months": 4,
+      "minimum_month_n": 1,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "F7_ML",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.6571428571428571,
+      "n": 175,
+      "coverage": 0.055152394775036286,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.45454545454545453,
+      "months": 8,
+      "minimum_month_n": 5,
+      "pushes": 15,
+      "original_gate": false
+    },
+    {
+      "market": "F7_3WAY",
+      "architecture": "mlb_period_qda_v1_result.json",
+      "cohort": "historical rolling/prequential development",
+      "artifact": "artifacts/research/mlb_period_qda_v1_result.json",
+      "accuracy": 0.6271186440677966,
+      "n": 118,
+      "coverage": 0.03425253991291727,
+      "coverage_definition": "selected/eligible",
+      "worst_month": 0.3333333333333333,
+      "months": 7,
+      "minimum_month_n": 4,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "TOTALS",
+      "architecture": "catboost_total_regression_ensemble",
+      "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+      "artifact": "artifacts/research/mlb_totals_revisit_v1_result.json",
+      "accuracy": 0.5348258706467661,
+      "n": 804,
+      "coverage": 0.22142660424125585,
+      "coverage_definition": "nonpush selected/nonpush OOF",
+      "worst_month": 0.44642857142857145,
+      "months": 11,
+      "minimum_month_n": 12,
+      "pushes": 0,
+      "original_gate": false
+    },
+    {
+      "market": "TOTALS",
+      "architecture": "totals_v37_xyear_under_catboost_v1",
+      "cohort": "2025 chronological development; coverage/worst-month reported rounded; month count unreported",
+      "artifact": "docs/research/MLB_MARKET_MODEL_TRACKER.md:840",
+      "accuracy": 0.5532359081419624,
+      "n": 479,
+      "coverage": 0.2538,
+      "coverage_definition": "selected/nonpush rolling OOF, rounded from archived doc",
+      "worst_month": 0.5263,
+      "months": null,
+      "minimum_month_n": null,
+      "pushes": 0,
+      "original_gate": null
+    }
+  ],
+  "comparison": [
+    {
+      "market": "F1_3WAY",
+      "best_observed_closed": {
+        "market": "F1_3WAY",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f1_3way_market_v1_frozen_candidate.json",
+        "accuracy": 0.5656108597285068,
+        "n": 221,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.45614035087719296,
+        "months": 5,
+        "minimum_month_n": 34,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F1_3WAY",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f1_3way_market_v1_frozen_candidate.json",
+        "accuracy": 0.5656108597285068,
+        "n": 221,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.45614035087719296,
+        "months": 5,
+        "minimum_month_n": 34,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "honest regime tree",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "NO_BLOCKER_FOR_CERTIFIED_PRIOR_OUTCOMES; legacy wider feature sets not re-admitted",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 13
+    },
+    {
+      "market": "F1_ML",
+      "best_observed_closed": {
+        "market": "F1_ML",
+        "architecture": "catboost_classifier_margin_agreement",
+        "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+        "artifact": "artifacts/research/mlb_f1_ml_revisit_v1_result.json",
+        "accuracy": 0.7391304347826086,
+        "n": 69,
+        "coverage": 0.035430224150397684,
+        "coverage_definition": "selected incl pushes/all OOF",
+        "worst_month": 0.631578947368421,
+        "months": 6,
+        "minimum_month_n": 2,
+        "pushes": 78,
+        "original_gate": false
+      },
+      "best_with_n_at_least_60": {
+        "market": "F1_ML",
+        "architecture": "catboost_classifier_margin_agreement",
+        "cohort": "historical rolling OOF through <=2026-09-18; no external selection",
+        "artifact": "artifacts/research/mlb_f1_ml_revisit_v1_result.json",
+        "accuracy": 0.7391304347826086,
+        "n": 69,
+        "coverage": 0.035430224150397684,
+        "coverage_definition": "selected incl pushes/all OOF",
+        "worst_month": 0.631578947368421,
+        "months": 6,
+        "minimum_month_n": 2,
+        "pushes": 78,
+        "original_gate": false
+      },
+      "latest_family": "honest regime tree",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "NO_BLOCKER_FOR_CERTIFIED_PRIOR_OUTCOMES; legacy wider feature sets not re-admitted",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 13
+    },
+    {
+      "market": "F1_NRFI",
+      "best_observed_closed": {
+        "market": "F1_NRFI",
+        "architecture": {
+          "id": 39,
+          "wOff": 0,
+          "wDef": 1,
+          "wStarter": 0,
+          "betaRecent": 0,
+          "gammaLeague": 0.5
+        },
+        "cohort": "2025 development only",
+        "artifact": "artifacts/research/mlb_nrfi_market_v1_frozen_candidate.json",
+        "accuracy": 0.558823529411765,
+        "n": 340,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.391304347826087,
+        "months": 5,
+        "minimum_month_n": 46,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F1_NRFI",
+        "architecture": {
+          "id": 39,
+          "wOff": 0,
+          "wDef": 1,
+          "wStarter": 0,
+          "betaRecent": 0,
+          "gammaLeague": 0.5
+        },
+        "cohort": "2025 development only",
+        "artifact": "artifacts/research/mlb_nrfi_market_v1_frozen_candidate.json",
+        "accuracy": 0.558823529411765,
+        "n": 340,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.391304347826087,
+        "months": 5,
+        "minimum_month_n": 46,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "joint NRFI boosting",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "NO_BLOCKER_FOR_OUTCOME_ONLY; older starter features excluded",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 6
+    },
+    {
+      "market": "F3_3WAY",
+      "best_observed_closed": {
+        "market": "F3_3WAY",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f3_3way_market_v1_frozen_candidate.json",
+        "accuracy": 0.6027397260273972,
+        "n": 73,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.2857142857142857,
+        "months": 5,
+        "minimum_month_n": 5,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F3_3WAY",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f3_3way_market_v1_frozen_candidate.json",
+        "accuracy": 0.6027397260273972,
+        "n": 73,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.2857142857142857,
+        "months": 5,
+        "minimum_month_n": 5,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "honest regime tree",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "NO_BLOCKER_FOR_CERTIFIED_PRIOR_OUTCOMES; legacy wider feature sets not re-admitted",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 13
+    },
+    {
+      "market": "F3_ML",
+      "best_observed_closed": {
+        "market": "F3_ML",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f3_ml_market_v1_frozen_candidate.json",
+        "accuracy": 0.7142857142857143,
+        "n": 77,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.6666666666666666,
+        "months": 5,
+        "minimum_month_n": 7,
+        "pushes": 22,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F3_ML",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f3_ml_market_v1_frozen_candidate.json",
+        "accuracy": 0.7142857142857143,
+        "n": 77,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.6666666666666666,
+        "months": 5,
+        "minimum_month_n": 7,
+        "pushes": 22,
+        "original_gate": null
+      },
+      "latest_family": "honest regime tree",
+      "stability_status": "MONTHLY_FLOOR_ONLY_MET",
+      "data_blocker": "NO_BLOCKER_FOR_CERTIFIED_PRIOR_OUTCOMES; legacy wider feature sets not re-admitted",
+      "reason_for_fail": "accuracy; closed historical evidence only",
+      "closed_records": 13
+    },
+    {
+      "market": "F3_TOTALS",
+      "best_observed_closed": {
+        "market": "F3_TOTALS",
+        "architecture": "fixed reference-line projection",
+        "cohort": "2025 diagnostic reference line, not executable market",
+        "artifact": "artifacts/research/mlb_f3_totals_reference_v1_frozen_candidate.json",
+        "accuracy": 0.5146853146853146,
+        "n": 715,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.49122807017543857,
+        "months": 5,
+        "minimum_month_n": 96,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F3_TOTALS",
+        "architecture": "fixed reference-line projection",
+        "cohort": "2025 diagnostic reference line, not executable market",
+        "artifact": "artifacts/research/mlb_f3_totals_reference_v1_frozen_candidate.json",
+        "accuracy": 0.5146853146853146,
+        "n": 715,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.49122807017543857,
+        "months": 5,
+        "minimum_month_n": 96,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "reference-line study",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "EXACT_HISTORICAL_LINE_COVERAGE",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 1
+    },
+    {
+      "market": "F5_3WAY",
+      "best_observed_closed": {
+        "market": "F5_3WAY",
+        "architecture": "hierarchical",
+        "cohort": "historical rolling/prequential development",
+        "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+        "accuracy": 1,
+        "n": 2,
+        "coverage": 0.0004934616333580064,
+        "coverage_definition": "selected/eligible",
+        "worst_month": 1,
+        "months": 2,
+        "minimum_month_n": 1,
+        "pushes": 0,
+        "original_gate": false
+      },
+      "best_with_n_at_least_60": {
+        "market": "F5_3WAY",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f5_3way_market_v1_frozen_candidate.json",
+        "accuracy": 0.6309523809523809,
+        "n": 84,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.45454545454545453,
+        "months": 5,
+        "minimum_month_n": 7,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "honest regime tree",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "NO_BLOCKER_FOR_CERTIFIED_PRIOR_OUTCOMES; legacy wider feature sets not re-admitted",
+      "reason_for_fail": "sample; months; closed historical evidence only",
+      "closed_records": 13
+    },
+    {
+      "market": "F5_ML",
+      "best_observed_closed": {
+        "market": "F5_ML",
+        "architecture": "isotonic",
+        "cohort": "historical rolling/prequential development",
+        "artifact": "artifacts/research/mlb_new_families_v1_isotonic.json",
+        "accuracy": 1,
+        "n": 4,
+        "coverage": 0.0015087507543753772,
+        "coverage_definition": "selected/eligible",
+        "worst_month": 1,
+        "months": 1,
+        "minimum_month_n": 4,
+        "pushes": 1,
+        "original_gate": false
+      },
+      "best_with_n_at_least_60": {
+        "market": "F5_ML",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f5_ml_market_v1_frozen_candidate.json",
+        "accuracy": 0.6818181818181818,
+        "n": 88,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.6470588235294118,
+        "months": 5,
+        "minimum_month_n": 6,
+        "pushes": 15,
+        "original_gate": null
+      },
+      "latest_family": "opponent-adjusted NB count",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "NO_BLOCKER_FOR_CERTIFIED_PRIOR_OUTCOMES; legacy wider feature sets not re-admitted",
+      "reason_for_fail": "sample; months; closed historical evidence only",
+      "closed_records": 14
+    },
+    {
+      "market": "F5_TOTALS",
+      "best_observed_closed": {
+        "market": "F5_TOTALS",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f5_totals_market_v1_frozen_candidate.json",
+        "accuracy": 0.5463917525773195,
+        "n": 679,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.4857142857142857,
+        "months": 5,
+        "minimum_month_n": 35,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F5_TOTALS",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f5_totals_market_v1_frozen_candidate.json",
+        "accuracy": 0.5463917525773195,
+        "n": 679,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.4857142857142857,
+        "months": 5,
+        "minimum_month_n": 35,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "reference-line study",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "EXACT_HISTORICAL_LINE_COVERAGE",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 1
+    },
+    {
+      "market": "F7_3WAY",
+      "best_observed_closed": {
+        "market": "F7_3WAY",
+        "architecture": "hierarchical",
+        "cohort": "historical rolling/prequential development",
+        "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+        "accuracy": 0.7272727272727273,
+        "n": 33,
+        "coverage": 0.008152173913043478,
+        "coverage_definition": "selected/eligible",
+        "worst_month": 0,
+        "months": 6,
+        "minimum_month_n": 1,
+        "pushes": 0,
+        "original_gate": false
+      },
+      "best_with_n_at_least_60": {
+        "market": "F7_3WAY",
+        "architecture": "first-pass frozen composite/reference",
+        "cohort": "2025 development only; not comparable to unified OOF",
+        "artifact": "artifacts/research/mlb_f7_3way_market_v1_frozen_candidate.json",
+        "accuracy": 0.6966292134831461,
+        "n": 89,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.5,
+        "months": 5,
+        "minimum_month_n": 10,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "honest regime tree; F7 frozen",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "F7_FROZEN_PENDING_NEW_INFORMATION",
+      "reason_for_fail": "sample; accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 13
+    },
+    {
+      "market": "F7_ML",
+      "best_observed_closed": {
+        "market": "F7_ML",
+        "architecture": "consensus",
+        "cohort": "historical common-availability rolling development",
+        "artifact": "artifacts/research/mlb_f7_stability_block_v1.json",
+        "accuracy": 0.8461538461538461,
+        "n": 52,
+        "coverage": 0.017173847544441095,
+        "coverage_definition": "selected/eligible",
+        "worst_month": 0.75,
+        "months": 6,
+        "minimum_month_n": 1,
+        "pushes": 5,
+        "original_gate": false
+      },
+      "best_with_n_at_least_60": {
+        "market": "F7_ML",
+        "architecture": "hierarchical",
+        "cohort": "historical rolling/prequential development",
+        "artifact": "artifacts/research/mlb_new_families_v1_hierarchical.json",
+        "accuracy": 0.7857142857142857,
+        "n": 84,
+        "coverage": 0.023715415019762844,
+        "coverage_definition": "selected/eligible",
+        "worst_month": 0,
+        "months": 7,
+        "minimum_month_n": 1,
+        "pushes": 12,
+        "original_gate": false
+      },
+      "latest_family": "consensus/conformal/month-bootstrap; frozen",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "F7_FROZEN_PENDING_NEW_INFORMATION",
+      "reason_for_fail": "sample; closed historical evidence only",
+      "closed_records": 16
+    },
+    {
+      "market": "F7_TOTALS",
+      "best_observed_closed": {
+        "market": "F7_TOTALS",
+        "architecture": "fixed reference-line projection",
+        "cohort": "2025 diagnostic reference line, not executable market",
+        "artifact": "artifacts/research/mlb_f7_totals_reference_v1_frozen_candidate.json",
+        "accuracy": 0.5529595015576324,
+        "n": 642,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.5178571428571429,
+        "months": 5,
+        "minimum_month_n": 42,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "F7_TOTALS",
+        "architecture": "fixed reference-line projection",
+        "cohort": "2025 diagnostic reference line, not executable market",
+        "artifact": "artifacts/research/mlb_f7_totals_reference_v1_frozen_candidate.json",
+        "accuracy": 0.5529595015576324,
+        "n": 642,
+        "coverage": null,
+        "coverage_definition": "original artifact denominator; unknown if null",
+        "worst_month": 0.5178571428571429,
+        "months": 5,
+        "minimum_month_n": 42,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "reference-line study",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "F7_FROZEN_PENDING_NEW_INFORMATION",
+      "reason_for_fail": "accuracy; monthly stability; closed historical evidence only",
+      "closed_records": 1
+    },
+    {
+      "market": "TOTALS",
+      "best_observed_closed": {
+        "market": "TOTALS",
+        "architecture": "totals_v37_xyear_under_catboost_v1",
+        "cohort": "2025 chronological development; coverage/worst-month reported rounded; month count unreported",
+        "artifact": "docs/research/MLB_MARKET_MODEL_TRACKER.md:840",
+        "accuracy": 0.5532359081419624,
+        "n": 479,
+        "coverage": 0.2538,
+        "coverage_definition": "selected/nonpush rolling OOF, rounded from archived doc",
+        "worst_month": 0.5263,
+        "months": null,
+        "minimum_month_n": null,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "best_with_n_at_least_60": {
+        "market": "TOTALS",
+        "architecture": "totals_v37_xyear_under_catboost_v1",
+        "cohort": "2025 chronological development; coverage/worst-month reported rounded; month count unreported",
+        "artifact": "docs/research/MLB_MARKET_MODEL_TRACKER.md:840",
+        "accuracy": 0.5532359081419624,
+        "n": 479,
+        "coverage": 0.2538,
+        "coverage_definition": "selected/nonpush rolling OOF, rounded from archived doc",
+        "worst_month": 0.5263,
+        "months": null,
+        "minimum_month_n": null,
+        "pushes": 0,
+        "original_gate": null
+      },
+      "latest_family": "CatBoost regression/classification",
+      "stability_status": "FAIL_OR_NOT_ESTABLISHED",
+      "data_blocker": "ARCHIVED_LINEAGE_MIX_REQUIRES_SEPARATE_ADMISSION",
+      "reason_for_fail": "accuracy; monthly stability; months; closed historical evidence only",
+      "closed_records": 2
+    },
+    {
+      "market": "F3_SPREAD",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "No adequate exact historical lines",
+      "reason_for_fail": "No adequate exact historical lines"
+    },
+    {
+      "market": "F5_SPREAD",
+      "best_observed_closed": {
+        "accuracy": 1,
+        "n": 2,
+        "coverage": 0.09090909090909091,
+        "worst_month": 1,
+        "months": 1,
+        "artifact": "https://github.com/jlebronmarty-netizen/pick-analyzer/blob/7ef615585f046f6ab885961dee927e5347c3593d/artifacts/research/mlb_f5_spread_transfer_diagnostic_v1.json",
+        "cohort": "2025 bought exact-line diagnostic only"
+      },
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "PR186 fixed sample:2/2,coverage2/22=9.09%,one selected month; insufficient exact-line corpus",
+      "reason_for_fail": "PR186 fixed sample:2/2,coverage2/22=9.09%,one selected month; insufficient exact-line corpus"
+    },
+    {
+      "market": "F7_SPREAD",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "F7 frozen; no adequate exact historical lines",
+      "reason_for_fail": "F7 frozen; no adequate exact historical lines"
+    },
+    {
+      "market": "PERIOD_ALTERNATE_SPREADS",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "No exact historical lines; margins are not a sportsbook-line backtest",
+      "reason_for_fail": "No exact historical lines; margins are not a sportsbook-line backtest"
+    },
+    {
+      "market": "ALTERNATE_PERIOD_TOTALS",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "No adequate exact historical lines",
+      "reason_for_fail": "No adequate exact historical lines"
+    },
+    {
+      "market": "TEAM_TOTALS_AND_ALTERNATES",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "No adequate exact historical lines; team-run threshold classifier diagnostic only",
+      "reason_for_fail": "No adequate exact historical lines; team-run threshold classifier diagnostic only"
+    },
+    {
+      "market": "GAME_ALTERNATE_SPREADS_TOTALS",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "No adequate exact historical lines",
+      "reason_for_fail": "No adequate exact historical lines"
+    },
+    {
+      "market": "GAME_3WAY",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "Settlement semantics not certified",
+      "reason_for_fail": "Settlement semantics not certified"
+    },
+    {
+      "market": "LINEUP_DEPENDENT_MARKETS",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "BLOCKED_LINEUP_FEATURE_LINEAGE",
+      "reason_for_fail": "BLOCKED_LINEUP_FEATURE_LINEAGE"
+    },
+    {
+      "market": "ALREADY_QUALIFIED_OR_OPERATIONAL_PROPS",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "Outside below-target research continuation; no operational work",
+      "reason_for_fail": "Outside below-target research continuation; no operational work"
+    },
+    {
+      "market": "BATTER_RUNS_AND_OTHER_PARTICIPATION_PROPS",
+      "best_observed_closed": null,
+      "best_with_n_at_least_60": null,
+      "latest_family": "See preserved closeouts",
+      "stability_status": "BLOCKED_OR_EXCLUDED",
+      "data_blocker": "Do not reopen from external outcomes; lineup/participation and exact-line admission required",
+      "reason_for_fail": "Do not reopen from external outcomes; lineup/participation and exact-line admission required"
+    }
+  ]
+}
