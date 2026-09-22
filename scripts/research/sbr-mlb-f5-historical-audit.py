@@ -79,6 +79,35 @@ def line_complete(market: str, line: dict | None) -> bool:
     return False
 
 
+def odds_view_rows(container) -> list[dict]:
+    out: list[dict] = []
+
+    def walk(value, depth: int = 0) -> None:
+        if depth > 8:
+            return
+        if isinstance(value, list):
+            for item in value:
+                walk(item, depth + 1)
+            return
+        if not isinstance(value, dict):
+            return
+
+        looks_like_book_row = (
+            ("sportsbook" in value or "sportsbookName" in value)
+            and ("openingLine" in value or "currentLine" in value)
+        )
+        if looks_like_book_row:
+            out.append(value)
+            return
+
+        for nested in value.values():
+            if isinstance(nested, (dict, list)):
+                walk(nested, depth + 1)
+
+    walk(container)
+    return out
+
+
 def audit_rows(market: str, rows: list[dict]) -> dict:
     books = Counter()
     games_with_views = 0
@@ -98,17 +127,16 @@ def audit_rows(market: str, rows: list[dict]) -> dict:
         if away.get("startingPitcher") or home.get("startingPitcher"):
             starter_games += 1
 
-        odds_views = game.get("oddsViews") or []
-        if odds_views:
+        odds_container = game.get("oddsViews") or []
+        odds_views = odds_view_rows(odds_container)
+        if odds_container:
             games_with_views += 1
         has_open = False
         has_current = False
         has_both = False
         for row in odds_views:
-            if not isinstance(row, dict):
-                continue
             total_views += 1
-            book = str(row.get("sportsbook") or "").strip().lower()
+            book = str(row.get("sportsbook") or row.get("sportsbookName") or "").strip().lower()
             if book:
                 books[book] += 1
             opening = row.get("openingLine")
