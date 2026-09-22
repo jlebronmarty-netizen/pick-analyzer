@@ -1,0 +1,14 @@
+{
+  "architecture": "f5_opponent_adjusted_offense_defense_negative_binomial_v1",
+  "research_only": true,
+  "external_opened": false,
+  "source": "Exact previously certified F5 historical-development outcome bundle; preserve source SHA. Team identities and strictly prior completed games only; no lineup, starter, exact lines, target-game postgame features or prospective outcomes.",
+  "mechanism": "Joint opponent-adjusted offense/defense count regression. Each prior game contributes two run-count observations. log(mu)=intercept+home_indicator*home_effect+scoring_team_offense+opponent_defense. Shared NB2 shape fixed2, variance mu+mu^2/2. Separate offense/defense team effects fitted jointly on the schedule graph, not independently pooled team averages or a latent margin/Kalman state. Model HOME/AWAY/DRAW by independent NB count convolution, conditional ML excludes draw.",
+  "training": "Same-season expanding history, refit first game date of each calendar month with>=600 strictly earlier games. Predict complete date before admitting date outcomes to history; reset every season. Fit team inventory derived only from training history; require both teams at least20 games in the fitted history. No cross-season carry.50 maximum Fisher-scoring iterations with dense SPD solve; component steps clipped[-.5,.5]; stop if max step<1e-8. Nonconverged max final step>1e-6 abstains for whole fit; no solver retry parameters. Initial intercept log smoothed league mean, other coefficients0. L2 penalties1e-6 intercept,10 home effect,20 offense/defense coefficients. log means clipped[-5,log50] as fixed numerical bound. No validation tuning or dispersion estimation.",
+  "settlement": "Confidence>=0.75 conditional HOME or AWAY. Exact F5 equal scores are pushes. Count PMF recurrence to tail<1e-12, maximum10000 terms; throw if mass tolerance not met. No actual betting lines/odds/ROI implied.",
+  "gates": {"accuracy": 0.75, "min_n": 60, "min_months": 5, "worst_month": 0.65},
+  "baseline": "Prior league modal HOME/AWAY on identical selected nonpush cohort; also all eligible. Additional descriptive monthly/LOMO/Wilson/Beta/concentration metrics use shared frozen reporting helper; F7-specific additional robustness policy is reported separately, not a replacement for F5 base gates.",
+  "max_date": "2026-09-18",
+  "odds_api_credits": 0,
+  "tuning": "Single joint count-regression architecture, fixed shape/penalties/solver; no hyperparameter grids or post-result variants. Close if FAIL, preserve prior candidates. Stop for authorization if historical gates pass; never open external automatically."
+}
