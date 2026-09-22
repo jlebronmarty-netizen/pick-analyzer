@@ -1,0 +1,24 @@
+{
+  "research_only": true,
+  "source_date": "2025-05-15",
+  "games_http_status": 200,
+  "provider_calls_made": 2,
+  "odds_api_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "raw_response_persisted": false,
+  "game": {
+    "id": 15611,
+    "date": "2025-05-15T00:05:00.000Z",
+    "datetime": null,
+    "home_team_id": 28,
+    "away_team_id": 9,
+    "status_state": "final"
+  },
+  "markets_http_status": 200,
+  "returned_market_rows": 0,
+  "has_next_cursor": false,
+  "periods": [],
+  "keys": [],
+  "relevant_markets": [],
+  "state": "HISTORICAL_GAME_CATALOG_EMPTY"
+}

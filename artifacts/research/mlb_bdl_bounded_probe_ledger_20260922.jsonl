@@ -1,0 +1,6 @@
+{"id":"60ed1124-7a04-4634-8608-90918f76662e","timestamp":"2026-09-22T02:26:23.011Z","provider":"BALLDONTLIE","path":"/mlb/v1/odds/opening","date":"2025-05-15","per_page":1,"max_calls":1,"business_reason":"Verify current MLB historical opening access and response capability before claiming missing credential or acquiring any line corpus","odds_api_calls":0,"state":"RESERVED"}
+{"id":"60ed1124-7a04-4634-8608-90918f76662e","state":"RESPONSE_RECEIVED","http_status":200}
+{"id":"ca277739-310a-44a2-b9d6-7cae5e3fee96","timestamp":"2026-09-22T02:27:29.239Z","path":"/mlb/v1/games?dates%5B%5D=2025-05-15&per_page=1","reason":"Resolve exact BDL game ID for bounded historical period-market availability probe","state":"RESERVED","budget":2,"call":1}
+{"id":"ca277739-310a-44a2-b9d6-7cae5e3fee96","state":"RESPONSE","http_status":200}
+{"id":"717a0b79-27e9-4cb2-aa7f-38aef6953fed","timestamp":"2026-09-22T02:27:31.198Z","path":"/mlb/v1/odds/markets?game_id=15611&per_page=100","reason":"Check whether historical game catalog exposes exact period/team lines with pregame timestamps; never substitute full-game opening lines","state":"RESERVED","budget":2,"call":2}
+{"id":"717a0b79-27e9-4cb2-aa7f-38aef6953fed","state":"RESPONSE","http_status":200}
