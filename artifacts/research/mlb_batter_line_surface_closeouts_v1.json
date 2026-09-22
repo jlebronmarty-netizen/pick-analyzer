@@ -105,21 +105,9 @@
       "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
     },
     {
-      "market": "batter_hits",
-      "expected_control": "U1.5 projection<=0.75 = 6123/7011",
-      "observed_replay": "close but not exact; May 954/1079 vs 967/1095",
-      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
-    },
-    {
       "market": "batter_total_bases",
       "expected_control": "U2.5 projection<=1.0 = 1081/1187",
       "observed_replay": "close but not exact; monthly counts differ",
-      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
-    },
-    {
-      "market": "batter_strikeouts",
-      "expected_control": "U1.5 projection<=0.50 = 564/592",
-      "observed_replay": "close but not exact on both candidate sources",
       "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
     },
     {
@@ -142,5 +130,23 @@
     "apostar_activation": false,
     "production_promotion": false,
     "tracker_modified": false
-  }
+  },
+  "superseded_replay_blocks": [
+    {
+      "market": "batter_hits",
+      "prior_attempt": "close but not exact; May 954/1079 vs 967/1095",
+      "resolution": "Exact replay recovered with canonical target-game pregame feature-key gate",
+      "authoritative_pr": 194,
+      "exact_control": "U1.5 projection<=0.75 = 6123/7011",
+      "state": "SUPERSEDED_BY_EXACT_REPLAY_PR_194"
+    },
+    {
+      "market": "batter_strikeouts",
+      "prior_attempt": "close but not exact on generic candidate sources",
+      "resolution": "Exact replay recovered with canonical target-game pregame feature-key gate",
+      "authoritative_pr": 193,
+      "exact_control": "U1.5 projection<=0.50 = 564/592",
+      "state": "SUPERSEDED_BY_EXACT_REPLAY_PR_193"
+    }
+  ]
 }
