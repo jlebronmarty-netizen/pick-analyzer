@@ -11,6 +11,10 @@ on:
       - 'scripts/research/*lineup*'
       - 'scripts/research/*empirical_convolution*'
       - 'scripts/research/*bayesian_mixture*'
+      - 'scripts/research/*new_families*'
+      - 'scripts/research/*multiperiod_bilinear*'
+      - 'scripts/research/*honest_regime_tree*'
+      - 'scripts/research/*nrfi_boosting*'
       - 'scripts/research/audit_mlb_public_snapshot_v1.mjs'
       - 'scripts/research/verify_mlb_frozen_architectures_v1.test.mjs'
       - 'artifacts/research/*factorized*'
@@ -21,6 +25,14 @@ on:
       - 'artifacts/research/*lineup*'
       - 'artifacts/research/*empirical_convolution*'
       - 'artifacts/research/*bayesian_mixture*'
+      - 'artifacts/research/*new_families*'
+      - 'artifacts/research/*multiperiod_bilinear*'
+      - 'artifacts/research/*honest_regime_tree*'
+      - 'artifacts/research/*nrfi_boosting*'
+      - 'contracts/MLB_NEW_FAMILIES_V1.json'
+      - 'contracts/MLB_MULTIPERIOD_BILINEAR_V1.json'
+      - 'contracts/MLB_HONEST_REGIME_TREE_V1.json'
+      - 'contracts/MLB_NRFI_BOOSTING_V1.json'
       - 'artifacts/research/mlb_public_snapshot_audit_20260922.json'
       - '.github/workflows/mlb-frozen-architecture-evidence-v1.yml'
   workflow_dispatch:
@@ -40,3 +52,5 @@ jobs:
       - run: node --test scripts/research/verify_mlb_period_qda_v1.test.mjs scripts/research/verify_mlb_nrfi_analog_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_lineup_integrity_v1.test.mjs scripts/research/verify_mlb_period_empirical_convolution_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_lineup_temporal_sample_v1.test.mjs scripts/research/verify_mlb_period_bayesian_mixture_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_new_families_v1.test.mjs scripts/research/verify_mlb_multiperiod_bilinear_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_honest_regime_tree_v1.test.mjs scripts/research/verify_mlb_nrfi_boosting_v1.test.mjs

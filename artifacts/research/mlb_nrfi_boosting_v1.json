@@ -1,0 +1,29 @@
+{
+  "architecture": "joint_nrfi_prior_outcome_boosting_v1",
+  "contract_sha256": "e655a2ddcb24d92d60a3b1d91baafacdc8d95795595c982034f00a385b065b4a",
+  "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "source_rows": 4683,
+  "feature_contexts": 4055,
+  "eligible": 2136,
+  "market": {
+    "selected": 0,
+    "n": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "accuracy": null,
+    "coverage": 0,
+    "monthly": {},
+    "selected_months": 0,
+    "worst_month_accuracy": null,
+    "baseline_selected_accuracy": null,
+    "baseline_eligible_accuracy": 0.4887640449438202,
+    "lift_percentage_points": null,
+    "development_gate_pass": false
+  },
+  "eligible_nrfi_prevalence": 0.4934456928838951,
+  "full_result_sha256": "92ce8bc64a928070120f58791c948ee99f024385897ca537d400b2c5792d8957"
+}
