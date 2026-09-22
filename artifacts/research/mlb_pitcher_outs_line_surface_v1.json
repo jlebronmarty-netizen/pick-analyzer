@@ -162,9 +162,22 @@
         "price": -189,
         "projection": 17.204,
         "threshold": 15.75,
-        "passes": true
+        "passes": true,
+        "settlement": {
+          "game_status": "FINAL",
+          "final_score": "NYY 2, TB 0",
+          "observed_innings_pitched": 6,
+          "observed_outs": 18,
+          "result": "WIN",
+          "outcome_source": "Yahoo Sports play-by-play",
+          "outcome_source_url": "https://sports.yahoo.com/mlb/tampa-bay-rays-new-york-yankees-460922210/?section=plays",
+          "note": "Ty Johnson relieved Nick Martinez to begin the bottom of the 7th; Martinez therefore completed 6.0 innings = 18 recorded outs."
+        }
       }
-    ]
+    ],
+    "settlement_state": "SETTLED_RESEARCH_CROSSING_WIN_NOT_FORWARD_CERTIFICATION",
+    "forward_gate_opened": false,
+    "forward_gate_note": "Settlement is recorded without retuning. This single same-day research crossing does not by itself satisfy or open a formal untouched forward-validation gate."
   },
   "external_2026_note": "2026 is diagnostic only because Pitcher Outs outcomes were previously inspected by earlier candidate families; forward untouched validation is still required for certification.",
   "provider_calls_made": 0,
