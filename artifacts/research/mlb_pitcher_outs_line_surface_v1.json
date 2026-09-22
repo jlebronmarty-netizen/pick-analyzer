@@ -1,0 +1,176 @@
+{
+  "contract": "MLB_PITCHER_OUTS_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "base_candidate": "pitcher_outs_under_18p5_blend_15p75_v2",
+  "source": "public.mlb_ml_xyear_pitcher_game_v1",
+  "projection_formula": "0.50 * prior season-to-date outs/start + 0.50 * L5 outs/start",
+  "minimum_prior_starts": 5,
+  "development_season": 2025,
+  "lines": [
+    14.5,
+    15.5,
+    16.5,
+    17.5,
+    18.5
+  ],
+  "threshold_grid": {
+    "min": 12,
+    "max": 20,
+    "step": 0.25
+  },
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "signal_lift_pp": 5
+  },
+  "champion_policy": "maximize selected n among development signal-gate passers; tiebreak lift, accuracy, lower threshold",
+  "control": {
+    "line": 18.5,
+    "side": "UNDER",
+    "threshold": 15.75,
+    "development_2025": {
+      "eligible": 3404,
+      "n": 1398,
+      "wins": 1245,
+      "accuracy": 0.8905579399141631,
+      "baseline": 0.8096357226792009
+    },
+    "reproduced_exactly": true
+  },
+  "candidates": [
+    {
+      "line": 14.5,
+      "side": "OVER",
+      "threshold": 15.75,
+      "dev2025": {
+        "n": 2010,
+        "wins": 1550,
+        "accuracy": 0.7711442786069652,
+        "baseline": 0.7145,
+        "lift_pp": 5.67,
+        "coverage": 0.5905,
+        "worst_month": 0.7237,
+        "min_month_n": 75,
+        "wilson_lower": 0.75227161201351
+      },
+      "diagnostic2026": {
+        "n": 1811,
+        "wins": 1430,
+        "accuracy": 0.7896189950303699,
+        "baseline": 0.7083,
+        "lift_pp": 8.13,
+        "coverage": 0.5584,
+        "worst_month": 0.7586,
+        "min_month_n": 81,
+        "wilson_lower": 0.770243869472416
+      },
+      "state": "CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS"
+    },
+    {
+      "line": 17.5,
+      "side": "UNDER",
+      "threshold": 14.75,
+      "dev2025": {
+        "n": 671,
+        "wins": 507,
+        "accuracy": 0.7555886736214605,
+        "baseline": 0.6184,
+        "lift_pp": 13.72,
+        "coverage": 0.1971,
+        "worst_month": 0.7054,
+        "min_month_n": 19,
+        "wilson_lower": 0.7216776839843086
+      },
+      "diagnostic2026": {
+        "n": 788,
+        "wins": 615,
+        "accuracy": 0.7804568527918782,
+        "baseline": 0.6263,
+        "lift_pp": 15.42,
+        "coverage": 0.243,
+        "worst_month": 0.56,
+        "min_month_n": 25,
+        "wilson_lower": 0.7502323656123473
+      },
+      "state": "POOLED_75_PLUS_2026_STABILITY_FAIL"
+    },
+    {
+      "line": 18.5,
+      "side": "UNDER",
+      "threshold": 16.75,
+      "dev2025": {
+        "n": 2234,
+        "wins": 1931,
+        "accuracy": 0.8643688451208594,
+        "baseline": 0.8096,
+        "lift_pp": 5.47,
+        "coverage": 0.6563,
+        "worst_month": 0.8382,
+        "min_month_n": 68,
+        "wilson_lower": 0.8495432166839807
+      },
+      "diagnostic2026": {
+        "n": 2119,
+        "wins": 1823,
+        "accuracy": 0.8603114676734309,
+        "baseline": 0.8131,
+        "lift_pp": 4.72,
+        "coverage": 0.6534,
+        "worst_month": 0.8049,
+        "min_month_n": 82,
+        "wilson_lower": 0.844897960156338
+      },
+      "state": "DIAGNOSTIC_LIFT_BELOW_5PP_DO_NOT_REPLACE_V2"
+    }
+  ],
+  "failed_lines": [
+    "UNDER 14.5",
+    "OVER 15.5",
+    "UNDER 15.5",
+    "OVER 16.5",
+    "UNDER 16.5",
+    "OVER 17.5",
+    "OVER 18.5"
+  ],
+  "current_availability_2026_09_22": {
+    "exact_lines": [
+      {
+        "line": 14.5,
+        "books": [
+          "draftkings"
+        ]
+      },
+      {
+        "line": 15.5,
+        "books": [
+          "betmgm",
+          "draftkings",
+          "fanduel"
+        ]
+      }
+    ],
+    "qualifying_today": [
+      {
+        "player_id": 607259,
+        "player_name": "Nick Martinez",
+        "game_pk": 823543,
+        "line": 14.5,
+        "side": "OVER",
+        "sportsbook": "draftkings",
+        "price": -189,
+        "projection": 17.204,
+        "threshold": 15.75,
+        "passes": true
+      }
+    ]
+  },
+  "external_2026_note": "2026 is diagnostic only because Pitcher Outs outcomes were previously inspected by earlier candidate families; forward untouched validation is still required for certification.",
+  "provider_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false
+}
