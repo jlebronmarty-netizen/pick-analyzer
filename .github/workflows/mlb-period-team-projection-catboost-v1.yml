@@ -1,83 +1,14 @@
 name: MLB Period Team Projection CatBoost V1
 
 on:
-  push:
-    branches: [research/period-team-projection-catboost-v1-20260921]
-    paths:
-      - 'scripts/research/train_mlb_period_team_projection_catboost_v1.py'
-      - '.github/workflows/mlb-period-team-projection-catboost-v1.yml'
-      - 'supabase/functions/mlb-period-team-projection-github-export-temp/index.ts'
   workflow_dispatch:
 
 permissions:
   contents: read
   id-token: write
 
-concurrency:
-  group: mlb-period-team-projection-catboost-v1
-  cancel-in-progress: false
-
 jobs:
-  research:
+  closed:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: research/period-team-projection-catboost-v1-20260921
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install pinned research dependencies
-        run: python -m pip install --disable-pip-version-check --no-cache-dir 'catboost==1.2.10' 'numpy>=2.0,<3' 'pandas>=2.2,<3' 'requests>=2.32,<3'
-
-      - name: Mint GitHub OIDC token
-        id: oidc
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token=await core.getIDToken('supabase-period-team-projection');
-            core.setSecret(token);
-            core.setOutput('token',token);
-
-      - name: Run projection-only research
-        env:
-          GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
-        run: python scripts/research/train_mlb_period_team_projection_catboost_v1.py
-
-      - name: Enforce research boundaries
-        shell: bash
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs')
-          const p=JSON.parse(fs.readFileSync('artifacts/research/mlb_period_team_projection_catboost_v1.json','utf8'))
-          const checks=[
-            [p.contract==='MLB_PERIOD_TEAM_PROJECTION_CATBOOST_V1_RESULT/1.0.0','contract'],
-            [p.provider_calls_made===0,'provider'],
-            [p.odds_api_historical_credits_consumed===0,'credits'],
-            [p.official_picks_writes===0,'official'],
-            [p.apostar_activation===false,'apostar'],
-            [p.production_promotion===false,'production'],
-            [p.real_line_backtest_performed===false,'real-line'],
-          ]
-          const bad=checks.filter(([ok])=>!ok).map(([,n])=>n)
-          if(bad.length) throw new Error('BOUNDARY:'+bad.join(','))
-          console.log(JSON.stringify({
-            f5Champion:p.f5_margin.champion_selected_on_2025_oof_mae,
-            f5Dev:p.f5_margin.development_2025_oof[p.f5_margin.champion_selected_on_2025_oof_mae],
-            f5External:p.f5_margin.external_2026,
-            teamChampion:p.team_runs.champion_selected_on_2025_oof_combined_mae,
-            teamDev:p.team_runs.development_2025_oof[p.team_runs.champion_selected_on_2025_oof_combined_mae],
-            teamExternal:p.team_runs.external_2026,
-          },null,2))
-          NODE
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mlb-period-team-projection-catboost-v1
-          path: artifacts/research/mlb_period_team_projection_catboost_v1.json
-          retention-days: 14
-          if-no-files-found: error
+      - run: echo "CLOSED_RESEARCH_RUN_COMPLETE"
