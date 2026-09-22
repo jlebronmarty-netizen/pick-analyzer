@@ -1,0 +1,16 @@
+{
+  "architecture": "f5_threeway_hidden_markov_team_sequences_v1",
+  "research_only": true,
+  "external_opened": false,
+  "market": "F5_3WAY",
+  "source": "Certified exact F5 historical-development scores and exact team IDs/dates only. Team-oriented emitted states are W,L,D from strictly prior games. No lineup, starter, odds, external or F7 inputs.",
+  "mechanism": "Shared three-state HMM across separate team-season W/L/D sequences. Learn transition and emission matrices jointly by20fixed Baum-Welch iterations on monthly prior games, not a mixture of existing model experts. Initial hidden distribution fixed uniform. Initialize emissions with0.6 matching state W/L/D and0.2 other labels; transition diagonal0.8/off0.1. Each EM transition row has fixed prior counts diagonal8/off1; each emission cell has prior count1. No labels from current game or future dates.",
+  "fit": "Same-season expanding history, monthly first available date, minimum600 prior games; both teams require20 prior games. Each team is a separate sequence; no transition across team or season. Fixed20EMiterations, positive scaled forward-backward recursion. Predict all games on date before appending observations. Between refits, filter all prior team observations under frozen monthly parameters and propagate one transition for next game.",
+  "fusion": "Predict each team's next W/L/D. Convert home and opposite away to HOME/AWAY/DRAW using products hpW*apL,hpL*apW,hpD*apD; divide by strictly prior league HOME/AWAY/DRAW probabilities with Laplace1 then normalize. This factorization is a modeling assumption; opponents are not claimed independent. It is learned sequence-state forecasting, not altered coefficients or probabilities from a failed source model.",
+  "selection": "Select most probable HOME/AWAY/DRAW only when its unconditional3way probability>=0.75. Draw selections are real outcomes, never pushes. No conditional ML side channel evaluated.",
+  "gates": {"accuracy": 0.75, "min_n": 60, "min_months": 5, "worst_month": 0.65},
+  "baseline": "Strict-prior league modal HOME/AWAY/DRAW; identical selected cohort and full eligible population.",
+  "max_date": "2026-09-18",
+  "odds_api_credits": 0,
+  "tuning": "No state-count, pseudocount, transition persistence, EM budget, fusion or threshold variations after outcome evaluation. Preserve failure; stop before external on historical pass."
+}
