@@ -171,6 +171,27 @@ def audit_rows(market: str, rows: list[dict]) -> dict:
     }
 
 
+def schema_shape(value, depth: int = 0, max_depth: int = 5):
+    if depth > max_depth:
+        return {"type": type(value).__name__}
+    if isinstance(value, dict):
+        keys = sorted(str(k) for k in value.keys())
+        children = {}
+        for key in keys[:40]:
+            nested = value.get(key)
+            if isinstance(nested, (dict, list)):
+                children[key] = schema_shape(nested, depth + 1, max_depth)
+        return {"type": "dict", "keys": keys[:80], "children": children}
+    if isinstance(value, list):
+        first = next((x for x in value if x is not None), None)
+        return {
+            "type": "list",
+            "length": len(value),
+            "itemShape": schema_shape(first, depth + 1, max_depth) if first is not None else None,
+        }
+    return {"type": type(value).__name__}
+
+
 def main() -> None:
     output = Path(sys.argv[1] if len(sys.argv) > 1 else "sbr-f5-historical-audit.json")
     session = requests.Session()
@@ -178,6 +199,29 @@ def main() -> None:
         "User-Agent": UA,
         "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
     })
+
+    if "--schema-only" in sys.argv:
+        url = page_url(DATES[0], "totals")
+        response = fetch(session, url)
+        payload = extract_next_payload(response.text)
+        rows = game_rows(payload)
+        first_game = rows[0] if rows else {}
+        summary = {
+            "schema": "mlb-sbr-f5-oddsviews-shape/1.0.0",
+            "researchOnly": True,
+            "date": DATES[0],
+            "market": "totals",
+            "scope": SCOPE,
+            "games": len(rows),
+            "providerRequestsMade": 1,
+            "subscriptionCreditsConsumed": 0,
+            "rawPayloadPersisted": False,
+            "oddsViewsShape": schema_shape(first_game.get("oddsViews")),
+        }
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(summary, indent=2))
+        return
 
     results: dict[str, dict] = {}
     provider_requests = 0
