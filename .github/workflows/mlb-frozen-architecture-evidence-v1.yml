@@ -1,0 +1,24 @@
+name: MLB frozen architecture evidence V1
+on:
+  push:
+    branches: [research/period-team-threshold-classifier-v1-20260921]
+    paths:
+      - 'scripts/research/*factorized*'
+      - 'scripts/research/*poisson*'
+      - 'scripts/research/verify_mlb_frozen_architectures_v1.test.mjs'
+      - 'artifacts/research/*factorized*'
+      - 'artifacts/research/*poisson*'
+      - '.github/workflows/mlb-frozen-architecture-evidence-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/research/verify_mlb_frozen_architectures_v1.test.mjs

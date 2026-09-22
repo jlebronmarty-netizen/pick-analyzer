@@ -1,0 +1,90 @@
+{
+  "project": "ynuocvexviorgdjrfthw",
+  "source": "sports_odds_snapshots",
+  "sport_key": "baseball_mlb",
+  "read_date_utc": "2026-09-22",
+  "scope": "stored snapshot corpus only; purchased pilot GitHub artifacts remain separate",
+  "provider_calls": 0,
+  "rows": [
+    {
+      "market": "alternate_spreads_1st_1_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_spreads_1st_3_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_spreads_1st_5_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_spreads_1st_7_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_team_totals",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_totals_1st_1_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_totals_1st_3_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_totals_1st_5_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "alternate_totals_1st_7_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "spreads_1st_3_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "spreads_1st_5_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "spreads_1st_7_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "team_totals",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "totals_1st_3_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "totals_1st_5_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    },
+    {
+      "market": "totals_1st_7_innings",
+      "stored_rows": 0,
+      "nonnull_line_rows": 0
+    }
+  ]
+}
