@@ -1,0 +1,61 @@
+{
+  "version": "MLB_NEW_FAMILIES_V1/1.0.0",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "periods": [
+    1,
+    3,
+    5,
+    7
+  ],
+  "threshold": 0.75,
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month": 0.65
+  },
+  "history": {
+    "seasons": [
+      2025,
+      2026
+    ],
+    "max_date": "2026-09-18",
+    "classification": "HISTORICAL_SEEN_DEVELOPMENT",
+    "min_league_games": 300,
+    "min_team_games": 10,
+    "cutoff": "Predict complete date batch before applying any outcomes; reset all states by season",
+    "inputs": "Only existing exact period outcomes, exact team IDs, dates and certified historical outcome lineage. No payload features, starters, lineups, exact lines or target outcomes in predictors.",
+    "certification_scope": "Inherits the existing certified historical-development outcome contract and hashes; does not upgrade it to a prospective/as-published feature certificate."
+  },
+  "baseline": "Strict-prior same-season league modal outcome: ML chooses higher HOME/AWAY count, draws push;3way chooses HOME/AWAY/DRAW mode. Report eligible-population baseline and identical selected-cohort baseline; lift is accuracy difference in percentage points.",
+  "tuning": "One fixed design per family; no parameter grids, threshold search, changed expert weights, external selection or post-result revision.",
+  "architectures": {
+    "hierarchical": {
+      "mechanism": "Nested Dirichlet categorical outcome pooling: team overall W/L/D shrinks30pseudo games to pooled league team W/L/D; team venue W/L/D shrinks30 to its overall posterior. Combine home-venue W/L/D and reversed away-venue probabilities by product divided by prior league HOME/AWAY/DRAW probabilities, normalize.",
+      "prior_strength": 30
+    },
+    "kalman": {
+      "mechanism": "Joint Gaussian latent team run-margin states, full covariance. Observation is home-minus-away exact period runs; design vector +1home/-1away. Prior means0, independent variance2*period. Daily random-walk covariance inflation0.01*period per elapsed calendar day. Observation variance from strictly prior margins with20 pseudo observations variance2*period, lowerbound0.25. All batch predictions first, then standard full Kalman updates with same preday observation variance. Discretized predictive normal: DRAW integral[-0.5,+0.5], HOME above+0.5, AWAY below-0.5.",
+      "initial_variance_per_period": 2,
+      "process_variance_per_day_period": 0.01,
+      "variance_prior_n": 20
+    },
+    "archetype": {
+      "mechanism": "Online unsupervised8-centroid kmeans of four normalized log scoring/allowing rates from last30 prior team games,10league-mean pseudo games. Seed with first8 eligible contexts in fixed date/gamePK order; all contexts from prior dates. Nearest centroid categorical HOME/AWAY/DRAW counts, Dirichlet20 toward prior league distribution. Require30 assigned prior contexts in predicted cluster. Update centroids by running average after complete date predictions. No label-driven cluster selection.",
+      "clusters": 8,
+      "window": 30,
+      "rate_prior": 10,
+      "cluster_prior": 20,
+      "min_cluster": 30
+    },
+    "isotonic": {
+      "mechanism": "Direct monotonic conditional ML calibration of log home offense + log away allowed minus log away offense minus log home allowed; same last30 prior team games and10league-mean pseudo games. Require300 prior non-draw training contexts. Sort prior x, keep identical x together, bins at least30 cases, merge short final bin; bin Beta(1,1) rates, weighted PAVA. Predict step function at first block whose maxX >=x, clamp to edge block. DRAW probability is prior league Laplace rate; HOME=(1-draw)*p, AWAY=(1-draw)*(1-p). Fit once per date exclusively on prior labels.",
+      "window": 30,
+      "rate_prior": 10,
+      "min_training": 300,
+      "min_bin": 30
+    }
+  }
+}

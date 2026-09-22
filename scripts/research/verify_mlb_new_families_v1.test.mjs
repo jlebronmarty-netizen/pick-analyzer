@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {evaluate,pava,normalCdf,metrics,contract} from './evaluate_mlb_new_families_v1.mjs';
+const rows=Array.from({length:1400},(_,i)=>{const d=new Date(Date.UTC(2025,2,1+Math.floor(i/7))).toISOString().slice(0,10);return[2025,100000+i,d,i%5,(i*7)%6,'H'+i%10,'A'+(i*3)%10,new Date(Date.parse(d)-86400000).toISOString().slice(0,10),'EXACT_F7',true,'HISTORICAL_SEEN_DEVELOPMENT'];});
+const withoutTruth=xs=>xs.map(({truth,...x})=>x);
+for(const architecture of Object.keys(contract.architectures))test(architecture+': daily rolling chronology, source order, reset and guards',()=>{
+ const original=evaluate(rows,7,architecture);assert(original.eligible>100);const mutated=structuredClone(rows),date=rows[1050][2];for(const r of mutated)if(r[2]===date){r[3]=12;r[4]=0;}
+ const changed=evaluate(mutated,7,architecture);assert.deepEqual(withoutTruth(original.predictions.filter(r=>r.game_date<=date)),withoutTruth(changed.predictions.filter(r=>r.game_date<=date)));assert.deepEqual(evaluate([...rows].reverse(),7,architecture),original);
+ const next=[...rows[0]];next[0]=2026;next[1]=999999;next[2]='2026-03-25';next[7]='2026-03-24';assert.equal(evaluate([...rows,next],7,architecture).eligible,original.eligible);
+ assert.throws(()=>evaluate([...rows,rows[0]],7,architecture),/DUPLICATE/);assert.throws(()=>evaluate(rows,5,architecture),/LINEAGE/);const bad=structuredClone(rows);bad[0][7]=bad[0][2];assert.throws(()=>evaluate(bad,7,architecture),/CUTOFF/);
+});
+test('PAVA pools violating probabilities and preserves monotonic bounds including equal predictors',()=>{assert.deepEqual(pava([[0,1],[1,0]],1),[{max:1,p:.5}]);const ps=pava(Array.from({length:120},(_,i)=>[Math.floor(i/10),i%3===0?1:0]));assert(ps.every((p,i)=>p.p>0&&p.p<1&&(!i||ps[i-1].p<=p.p)));});
+test('normal CDF matches standard quantiles and symmetry',()=>{assert(Math.abs(normalCdf(0)-.5)<1e-7);assert(Math.abs(normalCdf(1.959963984540054)-.975)<1e-7);for(const x of [-4,-1,.5,3])assert(Math.abs(normalCdf(x)+normalCdf(-x)-1)<1e-12);});
+test('baseline/lift use the same selected nonpush cohort and gate retains worst month',()=>{const p=[{game_date:'2025-04-01',truth:'HOME',ml_side:'HOME',baseline_ml:'AWAY'},{game_date:'2025-05-01',truth:'DRAW',ml_side:'AWAY',baseline_ml:'HOME'},{game_date:'2025-06-01',truth:'AWAY',ml_side:'HOME',baseline_ml:'AWAY'}];const m=metrics(p,'ML');assert.equal(m.n,2);assert.equal(m.pushes,1);assert.equal(m.accuracy,.5);assert.equal(m.baseline_selected_accuracy,.5);assert.equal(m.lift_percentage_points,0);assert.equal(m.worst_month_accuracy,0);assert.equal(m.development_gate_pass,false);});
