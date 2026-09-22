@@ -1,0 +1,41 @@
+{
+  "research_only": true,
+  "main_readback": "c8aac46648b38935a6dd00f17e0987b90b042033",
+  "canonical_supabase": "ynuocvexviorgdjrfthw",
+  "supabase_access": "read_only",
+  "temporary_exporters": [
+    {"slug":"mlb-f5-ml-revisit-github-export-temp","version":5,"source_readback":"unconditional HTTP410 GONE; dataExportEnabled=false","source_sha256":"f89c588234ca5214f2589b9b71d05cefbc5da033899dcec6e835df32eb77bac0"},
+    {"slug":"mlb-period-team-threshold-github-export-temp","version":2,"source_readback":"unconditional HTTP410 GONE; dataExportEnabled=false","source_sha256":"de25592ba208387e48f12245f9ca1eafd0a633d02f271c98e5ec560f0b2e8488"}
+  ],
+  "sbr_prior_run_reused": {
+    "run_id":35670890352,
+    "job_id":106566846502,
+    "artifact_id":10671345159,
+    "run_conclusion":"success",
+    "evidence_method":"read existing job log summary, not a new probe",
+    "probe_date":"2025-04-15",
+    "market":"totals",
+    "scope":"1st-half",
+    "page_games":15,
+    "graphql_games_probed":1,
+    "original_probe_requests":3,
+    "current_line_records":0,
+    "opening_line_records":0,
+    "odds_views_all_null":true,
+    "new_sbr_requests_this_block":0
+  },
+  "game_totals_inventory_only": [
+    {"season":2025,"lineage":"SBR_2025_CLOSE_CONSENSUS","rows":2425,"min_date":"2025-03-18","max_date":"2025-09-28","invalid_feature_cutoffs":0},
+    {"season":2026,"lineage":"SPORTSDATAIO_CONSENSUS_LEGACY_V37","rows":1576,"min_date":"2026-03-26","max_date":"2026-08-13","invalid_feature_cutoffs":0},
+    {"season":2026,"lineage":"STORED_THE_ODDS_API_CROSSBOOK_CONSENSUS_V1","rows":310,"min_date":"2026-08-14","max_date":"2026-09-10","invalid_feature_cutoffs":0}
+  ],
+  "new_public_sample_csv_reads":1,
+  "sample_training_rows_admitted":0,
+  "new_bdl_requests":0,
+  "odds_api_requests":0,
+  "odds_api_credits_consumed":0,
+  "external_opened":false,
+  "production_promotion":false,
+  "official_data_writes":0,
+  "tracker_modified":false
+}

@@ -1,0 +1,2823 @@
+{
+  "contract": "MLB_PERIOD_DAVIDSON_V1/1.0.0",
+  "contract_sha256": "0d01bebca79e305f4e16c93c225e9bfc575cf228df924db2f9179403acd7a0e5",
+  "architecture": "daily_batched_online_elo_with_davidson_draw_mass",
+  "probability_threshold": 0.75,
+  "periods": {
+    "1": {
+      "source_rows": 4683,
+      "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+      "eligible": 4057,
+      "excluded_insufficient_prior": 626,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 30,
+          "wins": 11,
+          "losses": 4,
+          "pushes": 15,
+          "accuracy": 0.7333333333333333,
+          "coverage": 0.007394626571358146,
+          "monthly": {
+            "2025-05": {
+              "n": 2,
+              "wins": 1,
+              "accuracy": 0.5
+            },
+            "2025-08": {
+              "n": 3,
+              "wins": 1,
+              "accuracy": 0.3333333333333333
+            },
+            "2025-09": {
+              "n": 10,
+              "wins": 9,
+              "accuracy": 0.9
+            }
+          },
+          "worst_month_accuracy": 0.3333333333333333,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      },
+      "selected_rows": [
+        {
+          "game_pk": 777782,
+          "game_date": "2025-05-24",
+          "rating_home": 1387.962753930957,
+          "rating_away": 1593.090940617179,
+          "prior_league_games": 762,
+          "prior_draw_rate": 0.5510471204188482,
+          "probabilities": {
+            "HOME": 0.11511096108349479,
+            "AWAY": 0.3749187381401961,
+            "DRAW": 0.509970300776309
+          },
+          "ml_home_conditional": 0.23490609092847747,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777768,
+          "game_date": "2025-05-25",
+          "rating_home": 1380.560831701524,
+          "rating_away": 1600.492862846612,
+          "prior_league_games": 778,
+          "prior_draw_rate": 0.5474358974358975,
+          "probabilities": {
+            "HOME": 0.10985512623469741,
+            "AWAY": 0.3896282208053259,
+            "DRAW": 0.5005166529599767
+          },
+          "ml_home_conditional": 0.2199375152058769,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776730,
+          "game_date": "2025-08-15",
+          "rating_home": 1340.73899524047,
+          "rating_away": 1536.9972473311177,
+          "prior_league_games": 1819,
+          "prior_draw_rate": 0.5381658429434377,
+          "probabilities": {
+            "HOME": 0.12202735536372723,
+            "AWAY": 0.3776616005418208,
+            "DRAW": 0.5003110440944522
+          },
+          "ml_home_conditional": 0.24420662878687482,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776542,
+          "game_date": "2025-08-29",
+          "rating_home": 1319.6557037104053,
+          "rating_away": 1511.8043700034675,
+          "prior_league_games": 2010,
+          "prior_draw_rate": 0.5377733598409543,
+          "probabilities": {
+            "HOME": 0.12394760897414916,
+            "AWAY": 0.3746362685246552,
+            "DRAW": 0.5014161225011957
+          },
+          "ml_home_conditional": 0.24859931210761302,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776536,
+          "game_date": "2025-08-30",
+          "rating_home": 1542.0764522435775,
+          "rating_away": 1337.9597717577876,
+          "prior_league_games": 2025,
+          "prior_draw_rate": 0.5377405032067094,
+          "probabilities": {
+            "HOME": 0.38435812226392374,
+            "AWAY": 0.118698262497407,
+            "DRAW": 0.4969436152386693
+          },
+          "ml_home_conditional": 0.7640458085951498,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776511,
+          "game_date": "2025-08-31",
+          "rating_home": 1314.6066629643017,
+          "rating_away": 1516.8534107495711,
+          "prior_league_games": 2040,
+          "prior_draw_rate": 0.5381978452497551,
+          "probabilities": {
+            "HOME": 0.11939940438166322,
+            "AWAY": 0.38248907046475633,
+            "DRAW": 0.4981115251535804
+          },
+          "ml_home_conditional": 0.23790027140631204,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776518,
+          "game_date": "2025-08-31",
+          "rating_home": 1549.4198536459123,
+          "rating_away": 1330.6163703554528,
+          "prior_league_games": 2040,
+          "prior_draw_rate": 0.5381978452497551,
+          "probabilities": {
+            "HOME": 0.3959656167389296,
+            "AWAY": 0.11236958264159728,
+            "DRAW": 0.49166480061947304
+          },
+          "ml_home_conditional": 0.778945894798286,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776492,
+          "game_date": "2025-09-01",
+          "rating_home": 1317.2375596251327,
+          "rating_away": 1530.3678284683685,
+          "prior_league_games": 2055,
+          "prior_draw_rate": 0.5381623723869713,
+          "probabilities": {
+            "HOME": 0.11475119551034417,
+            "AWAY": 0.3913658174292177,
+            "DRAW": 0.49388298706043815
+          },
+          "ml_home_conditional": 0.22672858761230225,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776497,
+          "game_date": "2025-09-01",
+          "rating_home": 1343.452330696426,
+          "rating_away": 1545.5203463524801,
+          "prior_league_games": 2055,
+          "prior_draw_rate": 0.5381623723869713,
+          "probabilities": {
+            "HOME": 0.11948550045539416,
+            "AWAY": 0.3823712634454699,
+            "DRAW": 0.4981432360991359
+          },
+          "ml_home_conditional": 0.23808685874162516,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776483,
+          "game_date": "2025-09-02",
+          "rating_home": 1346.0811883263268,
+          "rating_away": 1542.8914887225794,
+          "prior_league_games": 2068,
+          "prior_draw_rate": 0.5381642512077295,
+          "probabilities": {
+            "HOME": 0.12178446386507756,
+            "AWAY": 0.3781095438822436,
+            "DRAW": 0.5001059922526788
+          },
+          "ml_home_conditional": 0.243620571516503,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776486,
+          "game_date": "2025-09-02",
+          "rating_home": 1310.0037058443215,
+          "rating_away": 1537.6016822491797,
+          "prior_league_games": 2068,
+          "prior_draw_rate": 0.5381642512077295,
+          "probabilities": {
+            "HOME": 0.10876953793054052,
+            "AWAY": 0.4031830116750305,
+            "DRAW": 0.48804745039442887
+          },
+          "ml_home_conditional": 0.21246019384870918,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776467,
+          "game_date": "2025-09-03",
+          "rating_home": 1302.9478405817665,
+          "rating_away": 1544.6575475117347,
+          "prior_league_games": 2082,
+          "prior_draw_rate": 0.5379078694817658,
+          "probabilities": {
+            "HOME": 0.10321393673082033,
+            "AWAY": 0.4149660915537678,
+            "DRAW": 0.48181997171541185
+          },
+          "ml_home_conditional": 0.19918547820630114,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776470,
+          "game_date": "2025-09-03",
+          "rating_home": 1348.6444391264986,
+          "rating_away": 1540.3282379224077,
+          "prior_league_games": 2082,
+          "prior_draw_rate": 0.5379078694817658,
+          "probabilities": {
+            "HOME": 0.12412145124862439,
+            "AWAY": 0.3741591254345092,
+            "DRAW": 0.5017194233168664
+          },
+          "ml_home_conditional": 0.24909951753458706,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776437,
+          "game_date": "2025-09-06",
+          "rating_home": 1343.6297303815884,
+          "rating_away": 1549.0551114502744,
+          "prior_league_games": 2118,
+          "prior_draw_rate": 0.5363207547169812,
+          "probabilities": {
+            "HOME": 0.1184682468010403,
+            "AWAY": 0.38651416455064813,
+            "DRAW": 0.4950175886483116
+          },
+          "ml_home_conditional": 0.2345987585665328,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776416,
+          "game_date": "2025-09-07",
+          "rating_home": 1346.3101895590844,
+          "rating_away": 1546.3746522727783,
+          "prior_league_games": 2133,
+          "prior_draw_rate": 0.536768149882904,
+          "probabilities": {
+            "HOME": 0.12069474194976657,
+            "AWAY": 0.3818119415930133,
+            "DRAW": 0.49749331645722017
+          },
+          "ml_home_conditional": 0.24018534658851254,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776408,
+          "game_date": "2025-09-08",
+          "rating_home": 1533.3178834469027,
+          "rating_away": 1300.84483476295,
+          "prior_league_games": 2148,
+          "prior_draw_rate": 0.5362790697674419,
+          "probabilities": {
+            "HOME": 0.4086779419638396,
+            "AWAY": 0.10720093566757546,
+            "DRAW": 0.4841211223685848
+          },
+          "ml_home_conditional": 0.792197470538485,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776389,
+          "game_date": "2025-09-09",
+          "rating_home": 1530.30311338394,
+          "rating_away": 1303.8596048259128,
+          "prior_league_games": 2159,
+          "prior_draw_rate": 0.5367885238315595,
+          "probabilities": {
+            "HOME": 0.40332527074613006,
+            "AWAY": 0.10953342368464973,
+            "DRAW": 0.48714130556922025
+          },
+          "ml_home_conditional": 0.786425725303886,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776380,
+          "game_date": "2025-09-10",
+          "rating_home": 1527.3651949133252,
+          "rating_away": 1306.7975232965275,
+          "prior_league_games": 2173,
+          "prior_draw_rate": 0.5351724137931034,
+          "probabilities": {
+            "HOME": 0.3997801044681076,
+            "AWAY": 0.11230575144791333,
+            "DRAW": 0.4879141440839792
+          },
+          "ml_home_conditional": 0.7806896047792213,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776273,
+          "game_date": "2025-09-19",
+          "rating_home": 1442.6613626912706,
+          "rating_away": 1642.0277398652663,
+          "prior_league_games": 2292,
+          "prior_draw_rate": 0.5318221447253705,
+          "probabilities": {
+            "HOME": 0.12219796669839258,
+            "AWAY": 0.3850170148713913,
+            "DRAW": 0.4927850184302162
+          },
+          "ml_home_conditional": 0.240919474263558,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776257,
+          "game_date": "2025-09-20",
+          "rating_home": 1445.2895531730005,
+          "rating_away": 1639.3995493835364,
+          "prior_league_games": 2307,
+          "prior_draw_rate": 0.5292334343871806,
+          "probabilities": {
+            "HOME": 0.1251891707963587,
+            "AWAY": 0.38268527645390443,
+            "DRAW": 0.49212555274973696
+          },
+          "ml_home_conditional": 0.2464962974100364,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776240,
+          "game_date": "2025-09-21",
+          "rating_home": 1437.864514229576,
+          "rating_away": 1646.824588326961,
+          "prior_league_games": 2323,
+          "prior_draw_rate": 0.5290322580645161,
+          "probabilities": {
+            "HOME": 0.1186370547513615,
+            "AWAY": 0.39502132530225226,
+            "DRAW": 0.4863416199463863
+          },
+          "ml_home_conditional": 0.23096489682301807,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776212,
+          "game_date": "2025-09-23",
+          "rating_home": 1515.137355600501,
+          "rating_away": 1309.2701321368418,
+          "prior_league_games": 2341,
+          "prior_draw_rate": 0.5296628254374733,
+          "probabilities": {
+            "HOME": 0.3919938273733089,
+            "AWAY": 0.1198425854191587,
+            "DRAW": 0.4881635872075323
+          },
+          "ml_home_conditional": 0.7658576404024798,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776194,
+          "game_date": "2025-09-24",
+          "rating_home": 1512.4158431809594,
+          "rating_away": 1311.9916445563833,
+          "prior_league_games": 2356,
+          "prior_draw_rate": 0.5292620865139949,
+          "probabilities": {
+            "HOME": 0.38783416519084996,
+            "AWAY": 0.12234481479412447,
+            "DRAW": 0.4898210200150257
+          },
+          "ml_home_conditional": 0.7601923646526407,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776179,
+          "game_date": "2025-09-25",
+          "rating_home": 1519.7609496769921,
+          "rating_away": 1304.6465380603506,
+          "prior_league_games": 2371,
+          "prior_draw_rate": 0.5301306363253266,
+          "probabilities": {
+            "HOME": 0.39923612392246943,
+            "AWAY": 0.11572942662632058,
+            "DRAW": 0.48503444945121
+          },
+          "ml_home_conditional": 0.7752676339165023,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776166,
+          "game_date": "2025-09-26",
+          "rating_home": 1571.9993975545551,
+          "rating_away": 1307.481605033312,
+          "prior_league_games": 2383,
+          "prior_draw_rate": 0.529559748427673,
+          "probabilities": {
+            "HOME": 0.440608947339485,
+            "AWAY": 0.09610784310147431,
+            "DRAW": 0.46328320955904073
+          },
+          "ml_home_conditional": 0.8209337870303752,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776174,
+          "game_date": "2025-09-26",
+          "rating_home": 1647.8187815431502,
+          "rating_away": 1445.4571684222242,
+          "prior_league_games": 2383,
+          "prior_draw_rate": 0.529559748427673,
+          "probabilities": {
+            "HOME": 0.38919571467110503,
+            "AWAY": 0.12141267198067687,
+            "DRAW": 0.4893916133482181
+          },
+          "ml_home_conditional": 0.7622195891124751,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776146,
+          "game_date": "2025-09-27",
+          "rating_home": 1578.554386512175,
+          "rating_away": 1300.9266160756922,
+          "prior_league_games": 2398,
+          "prior_draw_rate": 0.5279166666666667,
+          "probabilities": {
+            "HOME": 0.45286985942425123,
+            "AWAY": 0.09160179651974852,
+            "DRAW": 0.4555283440560001
+          },
+          "ml_home_conditional": 0.8317602109866855,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776162,
+          "game_date": "2025-09-27",
+          "rating_home": 1655.1409511162458,
+          "rating_away": 1438.1349988491286,
+          "prior_league_games": 2398,
+          "prior_draw_rate": 0.5279166666666667,
+          "probabilities": {
+            "HOME": 0.40251839332982864,
+            "AWAY": 0.11541728388685288,
+            "DRAW": 0.48206432278331846
+          },
+          "ml_home_conditional": 0.7771590393094945,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776137,
+          "game_date": "2025-09-28",
+          "rating_home": 1564.94170588313,
+          "rating_away": 1314.5392967047371,
+          "prior_league_games": 2413,
+          "prior_draw_rate": 0.527536231884058,
+          "probabilities": {
+            "HOME": 0.430516542973259,
+            "AWAY": 0.10185534433647574,
+            "DRAW": 0.46762811269026533
+          },
+          "ml_home_conditional": 0.8086763280247814,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776140,
+          "game_date": "2025-09-28",
+          "rating_home": 1662.269940021816,
+          "rating_away": 1431.0060099435584,
+          "prior_league_games": 2413,
+          "prior_draw_rate": 0.527536231884058,
+          "probabilities": {
+            "HOME": 0.41461808273235373,
+            "AWAY": 0.10951873374741251,
+            "DRAW": 0.4758631835202337
+          },
+          "ml_home_conditional": 0.7910493399739257,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        }
+      ]
+    },
+    "3": {
+      "source_rows": 4680,
+      "input_sha256": "1dfeb60f740238940128edb3df05f671148f1350e00ca40ee34360f75be41d6c",
+      "eligible": 4055,
+      "excluded_insufficient_prior": 625,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 19,
+          "wins": 7,
+          "losses": 6,
+          "pushes": 6,
+          "accuracy": 0.5384615384615384,
+          "coverage": 0.00468557336621455,
+          "monthly": {
+            "2025-06": {
+              "n": 1,
+              "wins": 1,
+              "accuracy": 1
+            },
+            "2025-08": {
+              "n": 2,
+              "wins": 1,
+              "accuracy": 0.5
+            },
+            "2025-09": {
+              "n": 8,
+              "wins": 5,
+              "accuracy": 0.625
+            },
+            "2026-06": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            },
+            "2026-09": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            }
+          },
+          "worst_month_accuracy": 0,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      },
+      "selected_rows": [
+        {
+          "game_pk": 777768,
+          "game_date": "2025-05-25",
+          "rating_home": 1374.0537810228504,
+          "rating_away": 1570.639586402157,
+          "prior_league_games": 775,
+          "prior_draw_rate": 0.2574002574002574,
+          "probabilities": {
+            "HOME": 0.1879185273839757,
+            "AWAY": 0.5826853698533845,
+            "DRAW": 0.22939610276263991
+          },
+          "ml_home_conditional": 0.24385878147991424,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 777339,
+          "game_date": "2025-06-27",
+          "rating_home": 1594.670832891736,
+          "rating_away": 1394.1508282893271,
+          "prior_league_games": 1210,
+          "prior_draw_rate": 0.2533003300330033,
+          "probabilities": {
+            "HOME": 0.5895412405299593,
+            "AWAY": 0.18587208877955017,
+            "DRAW": 0.22458667069049051
+          },
+          "ml_home_conditional": 0.7602928892838795,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 777321,
+          "game_date": "2025-06-28",
+          "rating_home": 1590.6341413742318,
+          "rating_away": 1398.1875198068312,
+          "prior_league_games": 1225,
+          "prior_draw_rate": 0.2526487367563162,
+          "probabilities": {
+            "HOME": 0.581785603201745,
+            "AWAY": 0.19215266675851855,
+            "DRAW": 0.2260617300397365
+          },
+          "ml_home_conditional": 0.7517209392315175,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777301,
+          "game_date": "2025-06-29",
+          "rating_home": 1596.7378120097997,
+          "rating_away": 1392.0838491712634,
+          "prior_league_games": 1240,
+          "prior_draw_rate": 0.25201288244766507,
+          "probabilities": {
+            "HOME": 0.5946165532330707,
+            "AWAY": 0.1830636376872482,
+            "DRAW": 0.22231980907968107
+          },
+          "ml_home_conditional": 0.7646029308389509,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776730,
+          "game_date": "2025-08-15",
+          "rating_home": 1352.4507897875956,
+          "rating_away": 1543.843899916801,
+          "prior_league_games": 1816,
+          "prior_draw_rate": 0.24972497249724973,
+          "probabilities": {
+            "HOME": 0.19363948494115132,
+            "AWAY": 0.5827425017963586,
+            "DRAW": 0.2236180132624902
+          },
+          "ml_home_conditional": 0.24941264512699168,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776542,
+          "game_date": "2025-08-29",
+          "rating_home": 1353.9058146793177,
+          "rating_away": 1554.5355474629735,
+          "prior_league_games": 2007,
+          "prior_draw_rate": 0.24838227974116475,
+          "probabilities": {
+            "HOME": 0.18687372153989237,
+            "AWAY": 0.5930926834545936,
+            "DRAW": 0.22003359500551384
+          },
+          "ml_home_conditional": 0.23959201363450197,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776526,
+          "game_date": "2025-08-30",
+          "rating_home": 1347.9680042984646,
+          "rating_away": 1560.4733578438265,
+          "prior_league_games": 2022,
+          "prior_draw_rate": 0.24950592885375494,
+          "probabilities": {
+            "HOME": 0.17780798462892813,
+            "AWAY": 0.6042471954100807,
+            "DRAW": 0.21794481996099113
+          },
+          "ml_home_conditional": 0.22735989629281544,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776511,
+          "game_date": "2025-08-31",
+          "rating_home": 1352.2323964062762,
+          "rating_away": 1556.208965736015,
+          "prior_league_games": 2037,
+          "prior_draw_rate": 0.2511034820990682,
+          "probabilities": {
+            "HOME": 0.1837649433651574,
+            "AWAY": 0.5945715004973722,
+            "DRAW": 0.22166355613747038
+          },
+          "ml_home_conditional": 0.23609962608613777,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776498,
+          "game_date": "2025-09-01",
+          "rating_home": 1359.6243714775947,
+          "rating_away": 1553.8909848774963,
+          "prior_league_games": 2052,
+          "prior_draw_rate": 0.2526777020447907,
+          "probabilities": {
+            "HOME": 0.19075076232299937,
+            "AWAY": 0.5836235605017754,
+            "DRAW": 0.22562567717522514
+          },
+          "ml_home_conditional": 0.24632888346190993,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776277,
+          "game_date": "2025-09-17",
+          "rating_home": 1295.5802653604856,
+          "rating_away": 1494.3117487809268,
+          "prior_league_games": 2264,
+          "prior_draw_rate": 0.24933804060017653,
+          "probabilities": {
+            "HOME": 0.1881006455633049,
+            "AWAY": 0.5904987663090574,
+            "DRAW": 0.22140058812763777
+          },
+          "ml_home_conditional": 0.24158847630126482,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776212,
+          "game_date": "2025-09-23",
+          "rating_home": 1542.6195879345066,
+          "rating_away": 1301.2331143870294,
+          "prior_league_games": 2338,
+          "prior_draw_rate": 0.24871794871794872,
+          "probabilities": {
+            "HOME": 0.6330258455114073,
+            "AWAY": 0.15774487494020192,
+            "DRAW": 0.2092292795483909
+          },
+          "ml_home_conditional": 0.8005175572887754,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776194,
+          "game_date": "2025-09-24",
+          "rating_home": 1527.8667782287946,
+          "rating_away": 1315.9859240927415,
+          "prior_league_games": 2353,
+          "prior_draw_rate": 0.2475583864118896,
+          "probabilities": {
+            "HOME": 0.6049928538411689,
+            "AWAY": 0.178668548601934,
+            "DRAW": 0.216338597556897
+          },
+          "ml_home_conditional": 0.772007976857191,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776179,
+          "game_date": "2025-09-25",
+          "rating_home": 1533.6035351764021,
+          "rating_away": 1310.249167145134,
+          "prior_league_games": 2368,
+          "prior_draw_rate": 0.2481012658227848,
+          "probabilities": {
+            "HOME": 0.6159796810881988,
+            "AWAY": 0.17028659695775622,
+            "DRAW": 0.21373372195404497
+          },
+          "ml_home_conditional": 0.7834237564137229,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776166,
+          "game_date": "2025-09-26",
+          "rating_home": 1576.3981533680567,
+          "rating_away": 1304.7060979864384,
+          "prior_league_games": 2380,
+          "prior_draw_rate": 0.24811083123425692,
+          "probabilities": {
+            "HOME": 0.6617123422622502,
+            "AWAY": 0.13849659516526325,
+            "DRAW": 0.19979106257248663
+          },
+          "ml_home_conditional": 0.8269244584914313,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776146,
+          "game_date": "2025-09-27",
+          "rating_home": 1581.1659958970868,
+          "rating_away": 1299.9382554574083,
+          "prior_league_games": 2395,
+          "prior_draw_rate": 0.24822695035460993,
+          "probabilities": {
+            "HOME": 0.6702142191550703,
+            "AWAY": 0.13278355335870765,
+            "DRAW": 0.1970022274862221
+          },
+          "ml_home_conditional": 0.8346401971414817,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776137,
+          "game_date": "2025-09-28",
+          "rating_home": 1585.7916892391231,
+          "rating_away": 1295.312562115372,
+          "prior_league_games": 2410,
+          "prior_draw_rate": 0.24792703150912107,
+          "probabilities": {
+            "HOME": 0.6786093514573791,
+            "AWAY": 0.12747411991259566,
+            "DRAW": 0.19391652863002523
+          },
+          "ml_home_conditional": 0.8418599010646531,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 824350,
+          "game_date": "2026-06-05",
+          "rating_home": 1375.3039485101067,
+          "rating_away": 1569.4825539650096,
+          "prior_league_games": 935,
+          "prior_draw_rate": 0.2508004268943437,
+          "probabilities": {
+            "HOME": 0.19124601666295207,
+            "AWAY": 0.5848424825232524,
+            "DRAW": 0.22391150081379543
+          },
+          "ml_home_conditional": 0.24642294901095682,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 824227,
+          "game_date": "2026-09-11",
+          "rating_home": 1591.9850363836608,
+          "rating_away": 1383.1092753209396,
+          "prior_league_games": 2200,
+          "prior_draw_rate": 0.25022706630336056,
+          "probabilities": {
+            "HOME": 0.6001113107251543,
+            "AWAY": 0.18031938174087,
+            "DRAW": 0.21956930753397563
+          },
+          "ml_home_conditional": 0.7689488849149534,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 824224,
+          "game_date": "2026-09-12",
+          "rating_home": 1587.787117093818,
+          "rating_away": 1387.3071946107823,
+          "prior_league_games": 2215,
+          "prior_draw_rate": 0.2498872350022553,
+          "probabilities": {
+            "HOME": 0.591888659214984,
+            "AWAY": 0.186655251247546,
+            "DRAW": 0.22145608953746998
+          },
+          "ml_home_conditional": 0.7602508365434972,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        }
+      ]
+    },
+    "5": {
+      "source_rows": 4678,
+      "input_sha256": "205b0db939d9e3623fd4934a70d361b0a06b65b460774309ced8924f567b140b",
+      "eligible": 4053,
+      "excluded_insufficient_prior": 625,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 27,
+          "wins": 13,
+          "losses": 9,
+          "pushes": 5,
+          "accuracy": 0.5909090909090909,
+          "coverage": 0.006661732050333087,
+          "monthly": {
+            "2025-05": {
+              "n": 6,
+              "wins": 3,
+              "accuracy": 0.5
+            },
+            "2025-06": {
+              "n": 6,
+              "wins": 3,
+              "accuracy": 0.5
+            },
+            "2025-08": {
+              "n": 8,
+              "wins": 5,
+              "accuracy": 0.625
+            },
+            "2025-09": {
+              "n": 2,
+              "wins": 2,
+              "accuracy": 1
+            }
+          },
+          "worst_month_accuracy": 0.5,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      },
+      "selected_rows": [
+        {
+          "game_pk": 777936,
+          "game_date": "2025-05-13",
+          "rating_home": 1592.821552225505,
+          "rating_away": 1390.686814278048,
+          "prior_league_games": 615,
+          "prior_draw_rate": 0.17017828200972449,
+          "probabilities": {
+            "HOME": 0.6486764642091666,
+            "AWAY": 0.2026241919529444,
+            "DRAW": 0.1486993438378892
+          },
+          "ml_home_conditional": 0.7619828077351332,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 777921,
+          "game_date": "2025-05-14",
+          "rating_home": 1588.3610295029428,
+          "rating_away": 1395.1473370006102,
+          "prior_league_games": 628,
+          "prior_draw_rate": 0.16825396825396827,
+          "probabilities": {
+            "HOME": 0.6406866396000531,
+            "AWAY": 0.2106742402349471,
+            "DRAW": 0.14863912016499986
+          },
+          "ml_home_conditional": 0.7525441381852344,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777852,
+          "game_date": "2025-05-19",
+          "rating_home": 1355.0953207769635,
+          "rating_away": 1560.5143711972828,
+          "prior_league_games": 695,
+          "prior_draw_rate": 0.17216642754662842,
+          "probabilities": {
+            "HOME": 0.1994506696487671,
+            "AWAY": 0.6507034731913067,
+            "DRAW": 0.14984585715992613
+          },
+          "ml_home_conditional": 0.23460530226021215,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777817,
+          "game_date": "2025-05-22",
+          "rating_home": 1357.757288936745,
+          "rating_away": 1557.8524030375013,
+          "prior_league_games": 735,
+          "prior_draw_rate": 0.17367706919945725,
+          "probabilities": {
+            "HOME": 0.2035940884538454,
+            "AWAY": 0.6441736395739306,
+            "DRAW": 0.1522322719722239
+          },
+          "ml_home_conditional": 0.24015314775838567,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777802,
+          "game_date": "2025-05-23",
+          "rating_home": 1352.163084447946,
+          "rating_away": 1559.2271597647011,
+          "prior_league_games": 743,
+          "prior_draw_rate": 0.17181208053691274,
+          "probabilities": {
+            "HOME": 0.19815707436267158,
+            "AWAY": 0.6526341120942687,
+            "DRAW": 0.14920881354305973
+          },
+          "ml_home_conditional": 0.23290917620795143,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777731,
+          "game_date": "2025-05-28",
+          "rating_home": 1539.44601446639,
+          "rating_away": 1342.900131286765,
+          "prior_league_games": 816,
+          "prior_draw_rate": 0.17237163814180928,
+          "probabilities": {
+            "HOME": 0.6413716371440512,
+            "AWAY": 0.20689264060525278,
+            "DRAW": 0.15173572225069584
+          },
+          "ml_home_conditional": 0.7560988408539374,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777700,
+          "game_date": "2025-05-31",
+          "rating_home": 1531.0537044827665,
+          "rating_away": 1331.4272761084153,
+          "prior_league_games": 850,
+          "prior_draw_rate": 0.17136150234741784,
+          "probabilities": {
+            "HOME": 0.6452687623126246,
+            "AWAY": 0.20449117497727123,
+            "DRAW": 0.15024006271010415
+          },
+          "ml_home_conditional": 0.7593541822771188,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777686,
+          "game_date": "2025-06-01",
+          "rating_home": 1536.645928609413,
+          "rating_away": 1325.8350519817689,
+          "prior_league_games": 865,
+          "prior_draw_rate": 0.1707035755478662,
+          "probabilities": {
+            "HOME": 0.6572195195066913,
+            "AWAY": 0.19529146439385295,
+            "DRAW": 0.14748901609945578
+          },
+          "ml_home_conditional": 0.7709220548686373,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777616,
+          "game_date": "2025-06-06",
+          "rating_home": 1348.0969510282935,
+          "rating_away": 1574.8737591074903,
+          "prior_league_games": 929,
+          "prior_draw_rate": 0.16648764769065522,
+          "probabilities": {
+            "HOME": 0.18326451735921342,
+            "AWAY": 0.6761147455215694,
+            "DRAW": 0.1406207371192172
+          },
+          "ml_home_conditional": 0.21325219873805212,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777604,
+          "game_date": "2025-06-07",
+          "rating_home": 1363.025453309917,
+          "rating_away": 1559.9452568258666,
+          "prior_league_games": 944,
+          "prior_draw_rate": 0.16596194503171247,
+          "probabilities": {
+            "HOME": 0.2079797442593468,
+            "AWAY": 0.6461309562030757,
+            "DRAW": 0.14588929953757757
+          },
+          "ml_home_conditional": 0.2435044358380534,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777583,
+          "game_date": "2025-06-08",
+          "rating_home": 1357.4069654293544,
+          "rating_away": 1565.5637447064294,
+          "prior_league_games": 959,
+          "prior_draw_rate": 0.16857440166493237,
+          "probabilities": {
+            "HOME": 0.19792043895850064,
+            "AWAY": 0.6559679092508227,
+            "DRAW": 0.14611165179067662
+          },
+          "ml_home_conditional": 0.23178725810412645,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777444,
+          "game_date": "2025-06-19",
+          "rating_home": 1423.1609912516433,
+          "rating_away": 1617.2463087638512,
+          "prior_league_games": 1100,
+          "prior_draw_rate": 0.1724137931034483,
+          "probabilities": {
+            "HOME": 0.20899233176168247,
+            "AWAY": 0.638768726393191,
+            "DRAW": 0.1522389418451265
+          },
+          "ml_home_conditional": 0.2465226843711694,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777399,
+          "game_date": "2025-06-22",
+          "rating_home": 1380.4627656439825,
+          "rating_away": 1580.0994217968132,
+          "prior_league_games": 1146,
+          "prior_draw_rate": 0.16898954703832753,
+          "probabilities": {
+            "HOME": 0.20499549462739394,
+            "AWAY": 0.646898220769547,
+            "DRAW": 0.1481062846030591
+          },
+          "ml_home_conditional": 0.24063505918913375,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777301,
+          "game_date": "2025-06-29",
+          "rating_home": 1575.2723559177932,
+          "rating_away": 1378.3200038291593,
+          "prior_league_games": 1239,
+          "prior_draw_rate": 0.17002417405318293,
+          "probabilities": {
+            "HOME": 0.6433969075367612,
+            "AWAY": 0.2070608959800231,
+            "DRAW": 0.14954219648321587
+          },
+          "ml_home_conditional": 0.756530076949389,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776894,
+          "game_date": "2025-08-03",
+          "rating_home": 1390.5013401311926,
+          "rating_away": 1584.9844728984388,
+          "prior_league_games": 1661,
+          "prior_draw_rate": 0.16596512327119664,
+          "probabilities": {
+            "HOME": 0.2100839487799472,
+            "AWAY": 0.6435772798308833,
+            "DRAW": 0.14633877138916948
+          },
+          "ml_home_conditional": 0.24609756392687349,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776794,
+          "game_date": "2025-08-10",
+          "rating_home": 1559.1239084320396,
+          "rating_away": 1362.940624464286,
+          "prior_league_games": 1753,
+          "prior_draw_rate": 0.1658119658119658,
+          "probabilities": {
+            "HOME": 0.6454629875145583,
+            "AWAY": 0.20864747523738156,
+            "DRAW": 0.14588953724806003
+          },
+          "ml_home_conditional": 0.7557137111221885,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776742,
+          "game_date": "2025-08-14",
+          "rating_home": 1351.353356986505,
+          "rating_away": 1552.6785855060707,
+          "prior_league_games": 1809,
+          "prior_draw_rate": 0.16565433462175594,
+          "probabilities": {
+            "HOME": 0.20427649731830141,
+            "AWAY": 0.6509257824396596,
+            "DRAW": 0.144797720242039
+          },
+          "ml_home_conditional": 0.23886336853091136,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776730,
+          "game_date": "2025-08-15",
+          "rating_home": 1345.8198498377187,
+          "rating_away": 1558.212092654857,
+          "prior_league_games": 1814,
+          "prior_draw_rate": 0.16629955947136563,
+          "probabilities": {
+            "HOME": 0.19488261333834153,
+            "AWAY": 0.6618410523150943,
+            "DRAW": 0.14327633434656425
+          },
+          "ml_home_conditional": 0.22747429673219272,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776701,
+          "game_date": "2025-08-17",
+          "rating_home": 1354.5974905322496,
+          "rating_away": 1549.4344519603262,
+          "prior_league_games": 1844,
+          "prior_draw_rate": 0.1668472372697725,
+          "probabilities": {
+            "HOME": 0.2095818337605113,
+            "AWAY": 0.6433481249213133,
+            "DRAW": 0.1470700413181755
+          },
+          "ml_home_conditional": 0.24571986436543178,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776542,
+          "game_date": "2025-08-29",
+          "rating_home": 1363.3385288308295,
+          "rating_away": 1570.9084243367279,
+          "prior_league_games": 2005,
+          "prior_draw_rate": 0.1654210264075735,
+          "probabilities": {
+            "HOME": 0.19906073168996316,
+            "AWAY": 0.6575220702458621,
+            "DRAW": 0.14341719806417472
+          },
+          "ml_home_conditional": 0.23238936298989188,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776526,
+          "game_date": "2025-08-30",
+          "rating_home": 1357.9231422163884,
+          "rating_away": 1576.323810951169,
+          "prior_league_games": 2020,
+          "prior_draw_rate": 0.16567754698318496,
+          "probabilities": {
+            "HOME": 0.19010386655298703,
+            "AWAY": 0.6683325634875664,
+            "DRAW": 0.14156356995944658
+          },
+          "ml_home_conditional": 0.22145363349037542,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776511,
+          "game_date": "2025-08-31",
+          "rating_home": 1352.7054291857341,
+          "rating_away": 1581.5415239818233,
+          "prior_league_games": 2035,
+          "prior_draw_rate": 0.16691212567501226,
+          "probabilities": {
+            "HOME": 0.18157021955991456,
+            "AWAY": 0.6778519593470285,
+            "DRAW": 0.14057782109305694
+          },
+          "ml_home_conditional": 0.21127011149612734,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776212,
+          "game_date": "2025-09-23",
+          "rating_home": 1564.3518259712168,
+          "rating_away": 1352.542531316796,
+          "prior_league_games": 2336,
+          "prior_draw_rate": 0.16039349871685202,
+          "probabilities": {
+            "HOME": 0.6652838739960053,
+            "AWAY": 0.19655484792991382,
+            "DRAW": 0.1381612780740808
+          },
+          "ml_home_conditional": 0.7719354643399173,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776194,
+          "game_date": "2025-09-24",
+          "rating_home": 1559.664535710556,
+          "rating_away": 1357.2298215774567,
+          "prior_league_games": 2351,
+          "prior_draw_rate": 0.16107097322566935,
+          "probabilities": {
+            "HOME": 0.6551992633339055,
+            "AWAY": 0.2043085846024892,
+            "DRAW": 0.14049215206360516
+          },
+          "ml_home_conditional": 0.7622958474515191,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776179,
+          "game_date": "2025-09-25",
+          "rating_home": 1565.155628923242,
+          "rating_away": 1351.7387283647709,
+          "prior_league_games": 2366,
+          "prior_draw_rate": 0.16047297297297297,
+          "probabilities": {
+            "HOME": 0.6668624634687222,
+            "AWAY": 0.19520638596133838,
+            "DRAW": 0.13793115056993935
+          },
+          "ml_home_conditional": 0.773560561792257,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 824227,
+          "game_date": "2026-09-11",
+          "rating_home": 1582.162941792362,
+          "rating_away": 1375.7493391172707,
+          "prior_league_games": 2200,
+          "prior_draw_rate": 0.15485921889191645,
+          "probabilities": {
+            "HOME": 0.6635359565865454,
+            "AWAY": 0.20222295640859222,
+            "DRAW": 0.1342410870048624
+          },
+          "ml_home_conditional": 0.7664211671711337,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 824224,
+          "game_date": "2026-09-12",
+          "rating_home": 1577.5498117905825,
+          "rating_away": 1380.3624691190503,
+          "prior_league_games": 2215,
+          "prior_draw_rate": 0.15516463689670726,
+          "probabilities": {
+            "HOME": 0.6537526179362246,
+            "AWAY": 0.21010920733106841,
+            "DRAW": 0.136138174732707
+          },
+          "ml_home_conditional": 0.7567791501076493,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        }
+      ]
+    },
+    "7": {
+      "source_rows": 4673,
+      "input_sha256": "97ffba441a043a4d082012c81a7b2e165f31242a8c7a96913f20c5339b86d93b",
+      "eligible": 4048,
+      "excluded_insufficient_prior": 625,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 74,
+          "wins": 52,
+          "losses": 15,
+          "pushes": 7,
+          "accuracy": 0.7761194029850746,
+          "coverage": 0.018280632411067192,
+          "monthly": {
+            "2025-05": {
+              "n": 22,
+              "wins": 18,
+              "accuracy": 0.8181818181818182
+            },
+            "2025-06": {
+              "n": 7,
+              "wins": 7,
+              "accuracy": 1
+            },
+            "2025-07": {
+              "n": 13,
+              "wins": 10,
+              "accuracy": 0.7692307692307693
+            },
+            "2025-08": {
+              "n": 9,
+              "wins": 7,
+              "accuracy": 0.7777777777777778
+            },
+            "2025-09": {
+              "n": 7,
+              "wins": 5,
+              "accuracy": 0.7142857142857143
+            },
+            "2026-07": {
+              "n": 8,
+              "wins": 5,
+              "accuracy": 0.625
+            },
+            "2026-08": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            }
+          },
+          "worst_month_accuracy": 0,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 2,
+          "wins": 0,
+          "losses": 2,
+          "pushes": 0,
+          "accuracy": 0,
+          "coverage": 0.0004940711462450593,
+          "monthly": {
+            "2025-05": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            },
+            "2025-09": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            }
+          },
+          "worst_month_accuracy": 0,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      },
+      "selected_rows": [
+        {
+          "game_pk": 778013,
+          "game_date": "2025-05-07",
+          "rating_home": 1332.6719750363263,
+          "rating_away": 1538.5927063090191,
+          "prior_league_games": 535,
+          "prior_draw_rate": 0.10800744878957169,
+          "probabilities": {
+            "HOME": 0.21231587885623196,
+            "AWAY": 0.6946792135356769,
+            "DRAW": 0.09300490760809117
+          },
+          "ml_home_conditional": 0.23408713083145455,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 778004,
+          "game_date": "2025-05-08",
+          "rating_home": 1337.4956083831207,
+          "rating_away": 1533.7690729622248,
+          "prior_league_games": 550,
+          "prior_draw_rate": 0.10869565217391304,
+          "probabilities": {
+            "HOME": 0.22103045364667825,
+            "AWAY": 0.6841254967377359,
+            "DRAW": 0.09484404961558576
+          },
+          "ml_home_conditional": 0.2441904663531273,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 778029,
+          "game_date": "2025-05-08",
+          "rating_home": 1337.4956083831207,
+          "rating_away": 1533.7690729622248,
+          "prior_league_games": 550,
+          "prior_draw_rate": 0.10869565217391304,
+          "probabilities": {
+            "HOME": 0.22103045364667825,
+            "AWAY": 0.6841254967377359,
+            "DRAW": 0.09484404961558576
+          },
+          "ml_home_conditional": 0.2441904663531273,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777993,
+          "game_date": "2025-05-09",
+          "rating_home": 1326.757509244942,
+          "rating_away": 1526.5427191471335,
+          "prior_league_games": 559,
+          "prior_draw_rate": 0.11051693404634581,
+          "probabilities": {
+            "HOME": 0.21739158212525492,
+            "AWAY": 0.6866030811536173,
+            "DRAW": 0.09600533672112774
+          },
+          "ml_home_conditional": 0.2404788335107594,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777976,
+          "game_date": "2025-05-10",
+          "rating_home": 1321.4496242352257,
+          "rating_away": 1531.8506041568498,
+          "prior_league_games": 574,
+          "prior_draw_rate": 0.109375,
+          "probabilities": {
+            "HOME": 0.20801098178329316,
+            "AWAY": 0.6983750470429134,
+            "DRAW": 0.09361397117379357
+          },
+          "ml_home_conditional": 0.2294949118453125,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777955,
+          "game_date": "2025-05-11",
+          "rating_home": 1316.3532648878218,
+          "rating_away": 1536.9469635042537,
+          "prior_league_games": 589,
+          "prior_draw_rate": 0.1116751269035533,
+          "probabilities": {
+            "HOME": 0.19862180543495608,
+            "AWAY": 0.7071493911221841,
+            "DRAW": 0.09422880344285972
+          },
+          "ml_home_conditional": 0.21928474452480132,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777949,
+          "game_date": "2025-05-12",
+          "rating_home": 1533.6630438141501,
+          "rating_away": 1331.4385407446941,
+          "prior_league_games": 604,
+          "prior_draw_rate": 0.11056105610561057,
+          "probabilities": {
+            "HOME": 0.6891253508443187,
+            "AWAY": 0.21514782941124674,
+            "DRAW": 0.09572681974443452
+          },
+          "ml_home_conditional": 0.7620765117124875,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777934,
+          "game_date": "2025-05-13",
+          "rating_home": 1538.9232685998195,
+          "rating_away": 1326.1783159590248,
+          "prior_league_games": 615,
+          "prior_draw_rate": 0.1085899513776337,
+          "probabilities": {
+            "HOME": 0.7012966398752367,
+            "AWAY": 0.20608167542365266,
+            "DRAW": 0.09262168470111061
+          },
+          "ml_home_conditional": 0.7728823006357942,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777918,
+          "game_date": "2025-05-14",
+          "rating_home": 1543.9711189553036,
+          "rating_away": 1321.1304656035406,
+          "prior_league_games": 628,
+          "prior_draw_rate": 0.10793650793650794,
+          "probabilities": {
+            "HOME": 0.7119001997633092,
+            "AWAY": 0.1973865159509211,
+            "DRAW": 0.09071328428576976
+          },
+          "ml_home_conditional": 0.7829215883838386,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777897,
+          "game_date": "2025-05-16",
+          "rating_home": 1544.9879178712463,
+          "rating_away": 1316.2756024416644,
+          "prior_league_games": 651,
+          "prior_draw_rate": 0.10719754977029096,
+          "probabilities": {
+            "HOME": 0.7181946743617336,
+            "AWAY": 0.19251358954512982,
+            "DRAW": 0.08929173609313663
+          },
+          "ml_home_conditional": 0.7886111313855193,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777887,
+          "game_date": "2025-05-17",
+          "rating_home": 1549.7311070230803,
+          "rating_away": 1311.5324132898304,
+          "prior_league_games": 665,
+          "prior_draw_rate": 0.10494752623688156,
+          "probabilities": {
+            "HOME": 0.7288900233325535,
+            "AWAY": 0.18499724953695335,
+            "DRAW": 0.08611272713049321
+          },
+          "ml_home_conditional": 0.7975710407301306,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777870,
+          "game_date": "2025-05-18",
+          "rating_home": 1534.2921792851243,
+          "rating_away": 1326.9713410277864,
+          "prior_league_games": 680,
+          "prior_draw_rate": 0.10557184750733138,
+          "probabilities": {
+            "HOME": 0.697758957727903,
+            "AWAY": 0.21154527277581422,
+            "DRAW": 0.09069576949628283
+          },
+          "ml_home_conditional": 0.7673547909717445,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777852,
+          "game_date": "2025-05-19",
+          "rating_home": 1321.8334778773074,
+          "rating_away": 1567.9612785037123,
+          "prior_league_games": 695,
+          "prior_draw_rate": 0.10616929698708752,
+          "probabilities": {
+            "HOME": 0.17836640154904124,
+            "AWAY": 0.7355844711250777,
+            "DRAW": 0.08604912732588099
+          },
+          "ml_home_conditional": 0.19515972562853504,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777842,
+          "game_date": "2025-05-20",
+          "rating_home": 1337.4056585730677,
+          "rating_away": 1552.3890978079519,
+          "prior_league_games": 707,
+          "prior_draw_rate": 0.1071932299012694,
+          "probabilities": {
+            "HOME": 0.20437496016152185,
+            "AWAY": 0.7045085748327342,
+            "DRAW": 0.09111646500574387
+          },
+          "ml_home_conditional": 0.22486375018644544,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777823,
+          "game_date": "2025-05-21",
+          "rating_home": 1332.40699471978,
+          "rating_away": 1557.3877616612397,
+          "prior_league_games": 721,
+          "prior_draw_rate": 0.10650069156293222,
+          "probabilities": {
+            "HOME": 0.19581488625054794,
+            "AWAY": 0.7149861382679152,
+            "DRAW": 0.08919897548153674
+          },
+          "ml_home_conditional": 0.2149919477243391,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777817,
+          "game_date": "2025-05-22",
+          "rating_home": 1327.5987072399537,
+          "rating_away": 1562.196049141066,
+          "prior_league_games": 735,
+          "prior_draw_rate": 0.10583446404341927,
+          "probabilities": {
+            "HOME": 0.18782163392255635,
+            "AWAY": 0.7248346881709676,
+            "DRAW": 0.08734367790647594
+          },
+          "ml_home_conditional": 0.2057966721708738,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777802,
+          "game_date": "2025-05-23",
+          "rating_home": 1322.9688377824377,
+          "rating_away": 1593.5550058982255,
+          "prior_league_games": 743,
+          "prior_draw_rate": 0.10469798657718121,
+          "probabilities": {
+            "HOME": 0.15981825987285692,
+            "AWAY": 0.7587379694723194,
+            "DRAW": 0.08144377065482376
+          },
+          "ml_home_conditional": 0.1739885428535918,
+          "ml_side": "AWAY",
+          "threeway_side": "AWAY",
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777782,
+          "game_date": "2025-05-24",
+          "rating_home": 1338.9580348784323,
+          "rating_away": 1577.565808802231,
+          "prior_league_games": 758,
+          "prior_draw_rate": 0.10657894736842105,
+          "probabilities": {
+            "HOME": 0.18438509272904086,
+            "AWAY": 0.7281908890759765,
+            "DRAW": 0.08742401819498266
+          },
+          "ml_home_conditional": 0.20204903088106574,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777768,
+          "game_date": "2025-05-25",
+          "rating_home": 1334.3960928419017,
+          "rating_away": 1582.1277508387616,
+          "prior_league_games": 774,
+          "prior_draw_rate": 0.1095360824742268,
+          "probabilities": {
+            "HOME": 0.17654804567436558,
+            "AWAY": 0.7348387663938407,
+            "DRAW": 0.08861318793179382
+          },
+          "ml_home_conditional": 0.19371362777756881,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777757,
+          "game_date": "2025-05-26",
+          "rating_home": 1549.0223621618725,
+          "rating_away": 1329.9790000490964,
+          "prior_league_games": 789,
+          "prior_draw_rate": 0.11125158027812895,
+          "probabilities": {
+            "HOME": 0.7058802032438932,
+            "AWAY": 0.20004264893794851,
+            "DRAW": 0.09407714781815815
+          },
+          "ml_home_conditional": 0.7791835712542607,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777751,
+          "game_date": "2025-05-27",
+          "rating_home": 1553.9639866188131,
+          "rating_away": 1325.0373755921557,
+          "prior_league_games": 801,
+          "prior_draw_rate": 0.1095890410958904,
+          "probabilities": {
+            "HOME": 0.7168016225780112,
+            "AWAY": 0.1919033040545337,
+            "DRAW": 0.09129507336745504
+          },
+          "ml_home_conditional": 0.7888167011862872,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 777731,
+          "game_date": "2025-05-28",
+          "rating_home": 1548.7150034335784,
+          "rating_away": 1330.2863587773904,
+          "prior_league_games": 816,
+          "prior_draw_rate": 0.11124694376528117,
+          "probabilities": {
+            "HOME": 0.7052657030710222,
+            "AWAY": 0.2005770100298714,
+            "DRAW": 0.09415728689910645
+          },
+          "ml_home_conditional": 0.7785741308849818,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777718,
+          "game_date": "2025-05-30",
+          "rating_home": 1524.214785729786,
+          "rating_away": 1325.333245707802,
+          "prior_league_games": 835,
+          "prior_draw_rate": 0.11230585424133811,
+          "probabilities": {
+            "HOME": 0.6844545609185989,
+            "AWAY": 0.21784157672371882,
+            "DRAW": 0.09770386235768239
+          },
+          "ml_home_conditional": 0.7585697559418412,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777700,
+          "game_date": "2025-05-31",
+          "rating_home": 1529.5486558878372,
+          "rating_away": 1319.9993755497508,
+          "prior_league_games": 849,
+          "prior_draw_rate": 0.11045828437132785,
+          "probabilities": {
+            "HOME": 0.696774573993465,
+            "AWAY": 0.20855427358112186,
+            "DRAW": 0.0946711524254133
+          },
+          "ml_home_conditional": 0.7696369952864671,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777686,
+          "game_date": "2025-06-01",
+          "rating_home": 1534.6664528837136,
+          "rating_away": 1314.8815785538743,
+          "prior_league_games": 864,
+          "prior_draw_rate": 0.11085450346420324,
+          "probabilities": {
+            "HOME": 0.7068906790933448,
+            "AWAY": 0.1994757328811693,
+            "DRAW": 0.09363358802548591
+          },
+          "ml_home_conditional": 0.7799171171330008,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777616,
+          "game_date": "2025-06-06",
+          "rating_home": 1337.4487282314483,
+          "rating_away": 1579.457381945768,
+          "prior_league_games": 928,
+          "prior_draw_rate": 0.110752688172043,
+          "probabilities": {
+            "HOME": 0.18092151015459543,
+            "AWAY": 0.7286380361937458,
+            "DRAW": 0.09044045365165869
+          },
+          "ml_home_conditional": 0.19891112229094948,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 777604,
+          "game_date": "2025-06-07",
+          "rating_home": 1342.9258934918398,
+          "rating_away": 1573.9802166853765,
+          "prior_league_games": 943,
+          "prior_draw_rate": 0.11428571428571428,
+          "probabilities": {
+            "HOME": 0.18928382575560282,
+            "AWAY": 0.7157301516974154,
+            "DRAW": 0.09498602254698171
+          },
+          "ml_home_conditional": 0.20915016836348152,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777583,
+          "game_date": "2025-06-08",
+          "rating_home": 1338.190356751258,
+          "rating_away": 1578.7157534259584,
+          "prior_league_games": 958,
+          "prior_draw_rate": 0.11666666666666667,
+          "probabilities": {
+            "HOME": 0.18112731520170078,
+            "AWAY": 0.7232649867769525,
+            "DRAW": 0.09560769802134682
+          },
+          "ml_home_conditional": 0.20027516245486132,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777344,
+          "game_date": "2025-06-26",
+          "rating_home": 1360.090097010147,
+          "rating_away": 1559.8033937700986,
+          "prior_league_games": 1198,
+          "prior_draw_rate": 0.115,
+          "probabilities": {
+            "HOME": 0.2165048837417107,
+            "AWAY": 0.6835195474929839,
+            "DRAW": 0.09997556876530547
+          },
+          "ml_home_conditional": 0.2405544518882664,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777339,
+          "game_date": "2025-06-27",
+          "rating_home": 1552.238134419165,
+          "rating_away": 1354.7602436476598,
+          "prior_league_games": 1207,
+          "prior_draw_rate": 0.1141439205955335,
+          "probabilities": {
+            "HOME": 0.6817444497034167,
+            "AWAY": 0.21873933324221684,
+            "DRAW": 0.09951621705436642
+          },
+          "ml_home_conditional": 0.7570868710964636,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777321,
+          "game_date": "2025-06-28",
+          "rating_home": 1557.6080832545529,
+          "rating_away": 1349.3902948122718,
+          "prior_league_games": 1222,
+          "prior_draw_rate": 0.11356209150326797,
+          "probabilities": {
+            "HOME": 0.6933213663614908,
+            "AWAY": 0.20911737232717562,
+            "DRAW": 0.09756126131133368
+          },
+          "ml_home_conditional": 0.7682752708166717,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777301,
+          "game_date": "2025-06-29",
+          "rating_home": 1562.7660433142098,
+          "rating_away": 1344.2323347526149,
+          "prior_league_games": 1237,
+          "prior_draw_rate": 0.11299435028248588,
+          "probabilities": {
+            "HOME": 0.7041973434011204,
+            "AWAY": 0.20015208149925973,
+            "DRAW": 0.09565057509961994
+          },
+          "ml_home_conditional": 0.778678378082335,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777285,
+          "game_date": "2025-07-01",
+          "rating_home": 1339.2727873716335,
+          "rating_away": 1540.93623261105,
+          "prior_league_games": 1260,
+          "prior_draw_rate": 0.1133122028526149,
+          "probabilities": {
+            "HOME": 0.21508211215183953,
+            "AWAY": 0.6866934513852471,
+            "DRAW": 0.09822443646291343
+          },
+          "ml_home_conditional": 0.2385095813732305,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777265,
+          "game_date": "2025-07-02",
+          "rating_home": 1389.2785898051095,
+          "rating_away": 1600.3266070218754,
+          "prior_league_games": 1272,
+          "prior_draw_rate": 0.11538461538461539,
+          "probabilities": {
+            "HOME": 0.2062361295193759,
+            "AWAY": 0.6949999808503894,
+            "DRAW": 0.09876388963023469
+          },
+          "ml_home_conditional": 0.22883695753686562,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777269,
+          "game_date": "2025-07-02",
+          "rating_home": 1333.9889007639676,
+          "rating_away": 1546.2201192187158,
+          "prior_league_games": 1272,
+          "prior_draw_rate": 0.11538461538461539,
+          "probabilities": {
+            "HOME": 0.20519236600511265,
+            "AWAY": 0.696208378279789,
+            "DRAW": 0.09859925571509835
+          },
+          "ml_home_conditional": 0.22763722717790258,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777284,
+          "game_date": "2025-07-02",
+          "rating_home": 1389.2785898051095,
+          "rating_away": 1600.3266070218754,
+          "prior_league_games": 1272,
+          "prior_draw_rate": 0.11538461538461539,
+          "probabilities": {
+            "HOME": 0.2062361295193759,
+            "AWAY": 0.6949999808503894,
+            "DRAW": 0.09876388963023469
+          },
+          "ml_home_conditional": 0.22883695753686562,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777258,
+          "game_date": "2025-07-03",
+          "rating_home": 1379.0538668317297,
+          "rating_away": 1610.5513299952552,
+          "prior_league_games": 1290,
+          "prior_draw_rate": 0.11377708978328173,
+          "probabilities": {
+            "HOME": 0.18900566321121584,
+            "AWAY": 0.7165037621999727,
+            "DRAW": 0.09449057458881159
+          },
+          "ml_home_conditional": 0.20872854319035836,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777264,
+          "game_date": "2025-07-03",
+          "rating_home": 1328.8990608867143,
+          "rating_away": 1551.3099590959691,
+          "prior_league_games": 1290,
+          "prior_draw_rate": 0.11377708978328173,
+          "probabilities": {
+            "HOME": 0.19666655032394553,
+            "AWAY": 0.7075509941792438,
+            "DRAW": 0.09578245549681068
+          },
+          "ml_home_conditional": 0.21749915329501976,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777209,
+          "game_date": "2025-07-07",
+          "rating_home": 1538.9715144488123,
+          "rating_away": 1344.0067362632367,
+          "prior_league_games": 1345,
+          "prior_draw_rate": 0.11804008908685969,
+          "probabilities": {
+            "HOME": 0.6764751641768627,
+            "AWAY": 0.22021145744643397,
+            "DRAW": 0.10331337837670329
+          },
+          "ml_home_conditional": 0.7544164793629027,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777196,
+          "game_date": "2025-07-08",
+          "rating_home": 1544.408877381508,
+          "rating_away": 1338.5693733305409,
+          "prior_league_games": 1355,
+          "prior_draw_rate": 0.11790714812085483,
+          "probabilities": {
+            "HOME": 0.6879460315754775,
+            "AWAY": 0.21035634181152185,
+            "DRAW": 0.10169762661300055
+          },
+          "ml_home_conditional": 0.7658290259009504,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777179,
+          "game_date": "2025-07-09",
+          "rating_home": 1549.6329804838686,
+          "rating_away": 1333.3452702281804,
+          "prior_league_games": 1370,
+          "prior_draw_rate": 0.11661807580174927,
+          "probabilities": {
+            "HOME": 0.6994968030580442,
+            "AWAY": 0.20140324254692268,
+            "DRAW": 0.09909995439503326
+          },
+          "ml_home_conditional": 0.7764421885319391,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777149,
+          "game_date": "2025-07-11",
+          "rating_home": 1563.585399030186,
+          "rating_away": 1371.3070262019135,
+          "prior_league_games": 1394,
+          "prior_draw_rate": 0.11604584527220631,
+          "probabilities": {
+            "HOME": 0.6749606374691459,
+            "AWAY": 0.2231426129172575,
+            "DRAW": 0.10189674961359675
+          },
+          "ml_home_conditional": 0.7515401343651169,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777160,
+          "game_date": "2025-07-11",
+          "rating_home": 1530.1399551434429,
+          "rating_away": 1328.3262058332916,
+          "prior_league_games": 1394,
+          "prior_draw_rate": 0.11604584527220631,
+          "probabilities": {
+            "HOME": 0.6850144229013875,
+            "AWAY": 0.2143706586594897,
+            "DRAW": 0.10061491843912274
+          },
+          "ml_home_conditional": 0.761647526677393,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 777135,
+          "game_date": "2025-07-12",
+          "rating_home": 1569.0672187846671,
+          "rating_away": 1365.8252064474323,
+          "prior_league_games": 1410,
+          "prior_draw_rate": 0.11543909348441926,
+          "probabilities": {
+            "HOME": 0.6869105198003973,
+            "AWAY": 0.21320389605450418,
+            "DRAW": 0.09988558414509861
+          },
+          "ml_home_conditional": 0.7631368942669254,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 777140,
+          "game_date": "2025-07-12",
+          "rating_home": 1525.433517501024,
+          "rating_away": 1333.0326434757105,
+          "prior_league_games": 1410,
+          "prior_draw_rate": 0.11543909348441926,
+          "probabilities": {
+            "HOME": 0.6754978671718982,
+            "AWAY": 0.22316279754842622,
+            "DRAW": 0.1013393352796757
+          },
+          "ml_home_conditional": 0.7516717863489913,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 777123,
+          "game_date": "2025-07-13",
+          "rating_home": 1574.3301525472082,
+          "rating_away": 1360.5622726848912,
+          "prior_league_games": 1425,
+          "prior_draw_rate": 0.11422564821303434,
+          "probabilities": {
+            "HOME": 0.6985522651961672,
+            "AWAY": 0.20407001933196658,
+            "DRAW": 0.09737771547186623
+          },
+          "ml_home_conditional": 0.77391426864821,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776903,
+          "game_date": "2025-08-02",
+          "rating_home": 1386.8116217513536,
+          "rating_away": 1583.7898042245085,
+          "prior_league_games": 1643,
+          "prior_draw_rate": 0.1148936170212766,
+          "probabilities": {
+            "HOME": 0.21903807467029138,
+            "AWAY": 0.6807146064216539,
+            "DRAW": 0.10024731890805466
+          },
+          "ml_home_conditional": 0.2434425362361415,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776894,
+          "game_date": "2025-08-03",
+          "rating_home": 1381.4283870688673,
+          "rating_away": 1589.1730389069949,
+          "prior_league_games": 1658,
+          "prior_draw_rate": 0.11506024096385542,
+          "probabilities": {
+            "HOME": 0.20923582036793528,
+            "AWAY": 0.6918272523912089,
+            "DRAW": 0.09893692724085587
+          },
+          "ml_home_conditional": 0.23220996031635668,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776872,
+          "game_date": "2025-08-04",
+          "rating_home": 1350.077886777436,
+          "rating_away": 1582.922128709616,
+          "prior_league_games": 1672,
+          "prior_draw_rate": 0.11469534050179211,
+          "probabilities": {
+            "HOME": 0.1877275870350712,
+            "AWAY": 0.7171973939147746,
+            "DRAW": 0.0950750190501542
+          },
+          "ml_home_conditional": 0.20745099426697752,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776854,
+          "game_date": "2025-08-05",
+          "rating_home": 1345.3725848462332,
+          "rating_away": 1587.6274306408188,
+          "prior_league_games": 1685,
+          "prior_draw_rate": 0.11440426793123888,
+          "probabilities": {
+            "HOME": 0.18011693997735304,
+            "AWAY": 0.7264264928595031,
+            "DRAW": 0.09345656716314384
+          },
+          "ml_home_conditional": 0.19868539493326995,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776836,
+          "game_date": "2025-08-06",
+          "rating_home": 1340.8356803750546,
+          "rating_away": 1592.1643351119974,
+          "prior_league_games": 1700,
+          "prior_draw_rate": 0.11398354876615746,
+          "probabilities": {
+            "HOME": 0.1730185680787622,
+            "AWAY": 0.735214985168746,
+            "DRAW": 0.09176644675249171
+          },
+          "ml_home_conditional": 0.19050008388273218,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776693,
+          "game_date": "2025-08-18",
+          "rating_home": 1358.8601954765754,
+          "rating_away": 1597.6792100593666,
+          "prior_league_games": 1856,
+          "prior_draw_rate": 0.11356297093649086,
+          "probabilities": {
+            "HOME": 0.1830296001700012,
+            "AWAY": 0.7237171552996362,
+            "DRAW": 0.09325324453036254
+          },
+          "ml_home_conditional": 0.20185305220662572,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 776671,
+          "game_date": "2025-08-19",
+          "rating_home": 1364.2670710278717,
+          "rating_away": 1592.2723345080703,
+          "prior_league_games": 1868,
+          "prior_draw_rate": 0.11336898395721925,
+          "probabilities": {
+            "HOME": 0.19199762048320032,
+            "AWAY": 0.7133604129227826,
+            "DRAW": 0.09464196659401695
+          },
+          "ml_home_conditional": 0.21206816905451178,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776660,
+          "game_date": "2025-08-20",
+          "rating_home": 1359.4806989522674,
+          "rating_away": 1597.0587065836746,
+          "prior_league_games": 1884,
+          "prior_draw_rate": 0.11346765641569459,
+          "probabilities": {
+            "HOME": 0.18405518207264618,
+            "AWAY": 0.7225918660921224,
+            "DRAW": 0.0933529518352314
+          },
+          "ml_home_conditional": 0.203006431714756,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776644,
+          "game_date": "2025-08-21",
+          "rating_home": 1374.8660657924622,
+          "rating_away": 1581.6733397434798,
+          "prior_league_games": 1898,
+          "prior_draw_rate": 0.11421052631578947,
+          "probabilities": {
+            "HOME": 0.21024758071031108,
+            "AWAY": 0.6914315492164683,
+            "DRAW": 0.09832087007322057
+          },
+          "ml_home_conditional": 0.23317339143402838,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776511,
+          "game_date": "2025-08-31",
+          "rating_home": 1346.4921180177664,
+          "rating_away": 1538.7411616464542,
+          "prior_league_games": 2032,
+          "prior_draw_rate": 0.11455260570304818,
+          "probabilities": {
+            "HOME": 0.22350093533993115,
+            "AWAY": 0.6759303606966515,
+            "DRAW": 0.10056870396341729
+          },
+          "ml_home_conditional": 0.24849139264422557,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776408,
+          "game_date": "2025-09-08",
+          "rating_home": 1571.2576329799615,
+          "rating_away": 1340.517218925257,
+          "prior_league_games": 2139,
+          "prior_draw_rate": 0.11396543671181691,
+          "probabilities": {
+            "HOME": 0.7156389052760022,
+            "AWAY": 0.18960199712461143,
+            "DRAW": 0.09475909759938654
+          },
+          "ml_home_conditional": 0.7905507841925781,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776389,
+          "game_date": "2025-09-09",
+          "rating_home": 1575.9972638984475,
+          "rating_away": 1335.777588006771,
+          "prior_league_games": 2150,
+          "prior_draw_rate": 0.11384758364312268,
+          "probabilities": {
+            "HOME": 0.7248641204515209,
+            "AWAY": 0.1818475330231554,
+            "DRAW": 0.09328834652532374
+          },
+          "ml_home_conditional": 0.7994428191958446,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776380,
+          "game_date": "2025-09-10",
+          "rating_home": 1580.567098024164,
+          "rating_away": 1331.2077538810547,
+          "prior_league_games": 2164,
+          "prior_draw_rate": 0.11357340720221606,
+          "probabilities": {
+            "HOME": 0.7336599622440906,
+            "AWAY": 0.17462099509874482,
+            "DRAW": 0.09171904265716464
+          },
+          "ml_home_conditional": 0.8077456169403833,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776357,
+          "game_date": "2025-09-12",
+          "rating_home": 1515.8783867073855,
+          "rating_away": 1321.1478975370767,
+          "prior_league_games": 2188,
+          "prior_draw_rate": 0.1136986301369863,
+          "probabilities": {
+            "HOME": 0.6791396196529444,
+            "AWAY": 0.22137717655631922,
+            "DRAW": 0.09948320379073627
+          },
+          "ml_home_conditional": 0.7541665213928167,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776212,
+          "game_date": "2025-09-23",
+          "rating_home": 1594.5498575366837,
+          "rating_away": 1320.64548035568,
+          "prior_league_games": 2331,
+          "prior_draw_rate": 0.11401628804114873,
+          "probabilities": {
+            "HOME": 0.755484990212207,
+            "AWAY": 0.15612228441756915,
+            "DRAW": 0.08839272537022387
+          },
+          "ml_home_conditional": 0.8287395364621527,
+          "ml_side": "HOME",
+          "threeway_side": "HOME",
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 776194,
+          "game_date": "2025-09-24",
+          "rating_home": 1578.5562304787372,
+          "rating_away": 1336.6391074136266,
+          "prior_league_games": 2346,
+          "prior_draw_rate": 0.1137137989778535,
+          "probabilities": {
+            "HOME": 0.7265686373980018,
+            "AWAY": 0.1805027570329787,
+            "DRAW": 0.09292860556901951
+          },
+          "ml_home_conditional": 0.8010049064040755,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 776179,
+          "game_date": "2025-09-25",
+          "rating_home": 1583.095571675087,
+          "rating_away": 1332.0997662172767,
+          "prior_league_games": 2361,
+          "prior_draw_rate": 0.11299195937367752,
+          "probabilities": {
+            "HOME": 0.7355688575558263,
+            "AWAY": 0.17343383212235067,
+            "DRAW": 0.09099731032182296
+          },
+          "ml_home_conditional": 0.8092042695893968,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 823932,
+          "game_date": "2026-07-04",
+          "rating_home": 1619.1615193166456,
+          "rating_away": 1423.3885221734797,
+          "prior_league_games": 1317,
+          "prior_draw_rate": 0.10462471569370735,
+          "probabilities": {
+            "HOME": 0.6863207205423235,
+            "AWAY": 0.22237943265842214,
+            "DRAW": 0.09129984679925425
+          },
+          "ml_home_conditional": 0.7552774346134669,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 823931,
+          "game_date": "2026-07-05",
+          "rating_home": 1624.5221064378065,
+          "rating_away": 1418.0279350523188,
+          "prior_league_games": 1332,
+          "prior_draw_rate": 0.10494752623688156,
+          "probabilities": {
+            "HOME": 0.6973235048957089,
+            "AWAY": 0.21242169791175403,
+            "DRAW": 0.09025479719253707
+          },
+          "ml_home_conditional": 0.7665041846263952,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 823930,
+          "game_date": "2026-07-06",
+          "rating_home": 1609.673088367967,
+          "rating_away": 1400.99041692041,
+          "prior_league_games": 1347,
+          "prior_draw_rate": 0.10452186805040771,
+          "probabilities": {
+            "HOME": 0.6998656002394971,
+            "AWAY": 0.210527081035573,
+            "DRAW": 0.08960731872492993
+          },
+          "ml_home_conditional": 0.768751347231049,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 823929,
+          "game_date": "2026-07-07",
+          "rating_home": 1614.7797031759278,
+          "rating_away": 1395.8838021124493,
+          "prior_league_games": 1355,
+          "prior_draw_rate": 0.10390567428150331,
+          "probabilities": {
+            "HOME": 0.7106596041030708,
+            "AWAY": 0.2015681347324889,
+            "DRAW": 0.08777226116444034
+          },
+          "ml_home_conditional": 0.7790374857600948,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 823928,
+          "game_date": "2026-07-08",
+          "rating_home": 1619.688788482222,
+          "rating_away": 1390.9747168061551,
+          "prior_league_games": 1371,
+          "prior_draw_rate": 0.10342316096139839,
+          "probabilities": {
+            "HOME": 0.7207236751708244,
+            "AWAY": 0.19318954040774394,
+            "DRAW": 0.08608678442143188
+          },
+          "ml_home_conditional": 0.7886128167153792,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 824979,
+          "game_date": "2026-07-18",
+          "rating_home": 1402.2564631079108,
+          "rating_away": 1596.434996623089,
+          "prior_league_games": 1459,
+          "prior_draw_rate": 0.10746064339493498,
+          "probabilities": {
+            "HOME": 0.22325651399123947,
+            "AWAY": 0.6827323365425186,
+            "DRAW": 0.09401114946624178
+          },
+          "ml_home_conditional": 0.24642302591219437,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 824328,
+          "game_date": "2026-07-20",
+          "rating_home": 1374.1255997879825,
+          "rating_away": 1587.8509223803926,
+          "prior_league_games": 1490,
+          "prior_draw_rate": 0.10656836461126006,
+          "probabilities": {
+            "HOME": 0.2056097570887308,
+            "AWAY": 0.7036505419241512,
+            "DRAW": 0.0907397009871179
+          },
+          "ml_home_conditional": 0.2261285985013823,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 824329,
+          "game_date": "2026-07-21",
+          "rating_home": 1369.1060076363367,
+          "rating_away": 1592.8705145320384,
+          "prior_league_games": 1505,
+          "prior_draw_rate": 0.10617120106171202,
+          "probabilities": {
+            "HOME": 0.19691916230994405,
+            "AWAY": 0.7140017017339908,
+            "DRAW": 0.08907913595606515
+          },
+          "ml_home_conditional": 0.2161759271115415,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "DRAW"
+        },
+        {
+          "game_pk": 824327,
+          "game_date": "2026-07-22",
+          "rating_home": 1374.276833030577,
+          "rating_away": 1587.699689137798,
+          "prior_league_games": 1518,
+          "prior_draw_rate": 0.10592105263157894,
+          "probabilities": {
+            "HOME": 0.2060050752870049,
+            "AWAY": 0.7037769849592069,
+            "DRAW": 0.09021793975378802
+          },
+          "ml_home_conditional": 0.22643343311391995,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "AWAY"
+        },
+        {
+          "game_pk": 824976,
+          "game_date": "2026-07-28",
+          "rating_home": 1397.0378057787773,
+          "rating_away": 1597.828718595341,
+          "prior_league_games": 1596,
+          "prior_draw_rate": 0.10513141426783479,
+          "probabilities": {
+            "HOME": 0.2176044796996676,
+            "AWAY": 0.6912658681290911,
+            "DRAW": 0.09112965217124132
+          },
+          "ml_home_conditional": 0.23942301585645603,
+          "ml_side": "AWAY",
+          "threeway_side": null,
+          "truth": "HOME"
+        },
+        {
+          "game_pk": 824726,
+          "game_date": "2026-08-08",
+          "rating_home": 1594.2161493992305,
+          "rating_away": 1401.0931786936503,
+          "prior_league_games": 1746,
+          "prior_draw_rate": 0.10812356979405034,
+          "probabilities": {
+            "HOME": 0.6811663326096191,
+            "AWAY": 0.22410200782325773,
+            "DRAW": 0.09473165956712318
+          },
+          "ml_home_conditional": 0.7524468736904046,
+          "ml_side": "HOME",
+          "threeway_side": null,
+          "truth": "AWAY"
+        }
+      ]
+    }
+  },
+  "research_only": true,
+  "external_opened": false,
+  "provider_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false,
+  "contract_freeze_commit": "b76a1c8d",
+  "evaluator_freeze_commit": "2b5d4a5a",
+  "full_result_sha256": "4a92015e90786be29205369df559264297fa06a8ae10cb6bb224c9ce3a80c877"
+}
