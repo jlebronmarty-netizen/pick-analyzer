@@ -24,7 +24,7 @@ test('pitcher outs line surface preserves base V2 and research boundaries', () =
 test('O14.5 is the only new cross-year stable candidate', () => {
   const over145 = artifact.candidates.find((r) => r.line===14.5 && r.side==='OVER')
   assert(over145)
-  assert.equal(over145.state,'CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS')
+  assert.equal(over145.state,'CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED')
   assert(over145.dev2025.accuracy>=0.75)
   assert(over145.dev2025.worst_month>=0.65)
   assert(over145.dev2025.lift_pp>=5)
