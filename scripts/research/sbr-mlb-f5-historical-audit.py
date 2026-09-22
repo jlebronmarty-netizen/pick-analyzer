@@ -35,28 +35,22 @@ def fetch(session: requests.Session, url: str) -> requests.Response:
     return response
 
 
-def get_build_id(session: requests.Session) -> str:
-    url = f"{BASE}/betting-odds/{LEAGUE}/totals/{SCOPE}/?date={DATES[0]}"
-    response = fetch(session, url)
-    match = re.search(r'__NEXT_DATA__" type="application/json">(.*?)</script>', response.text)
+def page_url(date: str, path_market: str) -> str:
+    return f"{BASE}/betting-odds/{LEAGUE}/{path_market}/{SCOPE}/?date={date}"
+
+
+def extract_next_payload(html: str) -> dict:
+    match = re.search(r'__NEXT_DATA__" type="application/json">(.*?)</script>', html)
     if not match:
         raise RuntimeError("NEXT_DATA_NOT_FOUND")
     payload = json.loads(match.group(1))
-    build_id = str(payload.get("buildId") or "").strip()
-    if not build_id:
-        raise RuntimeError("BUILD_ID_MISSING")
-    return build_id
-
-
-def next_url(build_id: str, date: str, path_market: str, odds_type: str) -> str:
-    return (
-        f"{BASE}/_next/data/{build_id}/betting-odds/{LEAGUE}/{path_market}/{SCOPE}.json"
-        f"?league={LEAGUE}&oddsType={odds_type}&oddsScope={SCOPE}&date={date}"
-    )
+    if not isinstance(payload, dict):
+        raise RuntimeError("NEXT_DATA_OBJECT_REQUIRED")
+    return payload
 
 
 def game_rows(payload: dict) -> list[dict]:
-    tables = payload.get("pageProps", {}).get("oddsTables") or []
+    tables = payload.get("props", {}).get("pageProps", {}).get("oddsTables") or []
     if not tables:
         return []
     model = tables[0].get("oddsTableModel") or {}
@@ -157,17 +151,16 @@ def main() -> None:
         "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
     })
 
-    build_id = get_build_id(session)
     results: dict[str, dict] = {}
-    provider_requests = 1
+    provider_requests = 0
 
     for date in DATES:
         results[date] = {}
         for logical_market, (path_market, odds_type) in MARKETS.items():
-            url = next_url(build_id, date, path_market, odds_type)
+            url = page_url(date, path_market)
             response = fetch(session, url)
             provider_requests += 1
-            payload = response.json()
+            payload = extract_next_payload(response.text)
             rows = game_rows(payload)
             results[date][logical_market] = {
                 "urlPath": f"/betting-odds/{LEAGUE}/{path_market}/{SCOPE}/?date={date}",
@@ -202,6 +195,7 @@ def main() -> None:
         "scope": "1st-half",
         "mlbInterpretation": "1st 5",
         "sampleDates": DATES,
+        "htmlNextDataParser": True,
         "buildIdRecorded": False,
         "rawPayloadPersisted": False,
         "rawPayloadUploaded": False,
