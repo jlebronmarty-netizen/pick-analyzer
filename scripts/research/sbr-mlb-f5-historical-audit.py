@@ -35,6 +35,40 @@ def fetch(session: requests.Session, url: str) -> requests.Response:
     return response
 
 
+GRAPHQL_URL = "https://ms.virginia.us-east-1.bookmakersreview.com/ms-odds-v2/odds-v2-service"
+F5_MTIDS = [91, 397, 398]
+
+
+def graphql_lines(session: requests.Session, query_name: str, event_id: int) -> list[dict]:
+    query = "{ " + query_name + f"(eid: [{int(event_id)}], mtid: {F5_MTIDS})" + " }"
+    response = session.post(
+        GRAPHQL_URL,
+        json={"query": query},
+        timeout=45,
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://www.bookmakersreview.com",
+            "Referer": "https://www.bookmakersreview.com/",
+        },
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if isinstance(payload, dict) and isinstance(payload.get("data"), dict):
+        payload = payload["data"]
+    rows = payload.get(query_name) if isinstance(payload, dict) else None
+    return [row for row in (rows or []) if isinstance(row, dict)]
+
+
+def line_schema_summary(rows: list[dict]) -> dict:
+    return {
+        "records": len(rows),
+        "marketIds": sorted({int(row["mtid"]) for row in rows if row.get("mtid") is not None}),
+        "sportsbookIds": sorted({int(row["paid"]) for row in rows if row.get("paid") is not None}),
+        "fieldNames": sorted({str(k) for row in rows for k in row.keys()}),
+    }
+
+
 def page_url(date: str, path_market: str) -> str:
     return f"{BASE}/betting-odds/{LEAGUE}/{path_market}/{SCOPE}/?date={date}"
 
@@ -209,21 +243,25 @@ def main() -> None:
         model = table0.get("oddsTableModel") or {}
         rows = game_rows(payload)
         first_game = rows[0] if rows else {}
+        game_id = (first_game.get("gameView") or {}).get("gameId")
+        if game_id is None:
+            raise RuntimeError("GAME_ID_MISSING")
+        current_rows = graphql_lines(session, "currentLines", int(game_id))
+        opening_rows = graphql_lines(session, "openingLines", int(game_id))
         summary = {
-            "schema": "mlb-sbr-f5-oddsviews-shape/1.1.0",
+            "schema": "mlb-sbr-f5-graphql-probe/1.0.0",
             "researchOnly": True,
             "date": DATES[0],
             "market": "totals",
             "scope": SCOPE,
             "games": len(rows),
-            "providerRequestsMade": 1,
+            "gameIdResolved": True,
+            "providerRequestsMade": 3,
             "subscriptionCreditsConsumed": 0,
             "rawPayloadPersisted": False,
-            "pagePropsShape": schema_shape(payload.get("props", {}).get("pageProps", {}), max_depth=3),
-            "oddsTableShape": schema_shape(table0, max_depth=4),
-            "oddsTableModelShape": schema_shape(model, max_depth=5),
-            "firstGameShape": schema_shape(first_game, max_depth=5),
-            "oddsViewsShape": schema_shape(first_game.get("oddsViews")),
+            "oddsViewsAllNull": isinstance(first_game.get("oddsViews"), list) and all(x is None for x in first_game.get("oddsViews")),
+            "currentLines": line_schema_summary(current_rows),
+            "openingLines": line_schema_summary(opening_rows),
         }
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
