@@ -1,0 +1,37 @@
+{
+  "audited_at_utc": "2026-09-22",
+  "project": "ynuocvexviorgdjrfthw",
+  "canonical_source_builder_migration": "20260915203807",
+  "projected_ddl_migration": "20260917230325",
+  "original_projected_population_version": null,
+  "raw_source": "statcast",
+  "raw_source_version": "baseball-savant-statcast-2025-original",
+  "raw_pitch_rows": 597796,
+  "raw_missing_digests": 0,
+  "min_ingested_at": "2026-08-28T01:42:50.750447Z",
+  "max_ingested_at": "2026-08-28T02:25:36.201920Z",
+  "raw_prior_observed_order_reconciliation": {
+    "checked": 36738,
+    "missing_raw": 0,
+    "missing_canonical": 0,
+    "order_mismatch": 0
+  },
+  "canonical_projection_reconciliation": {
+    "checked": 35802,
+    "starts_mismatch": 0,
+    "avg_order_mismatch_with_tolerance_1e_9": 0,
+    "last_date_mismatch": 0,
+    "membership_missing": 0,
+    "membership_extra": 0,
+    "projected_order_mismatch": 0
+  },
+  "selection_rule": "Same-team exact batter, prior21 calendar days; starts DESC,last_start_date DESC,avg_order ASC,batter ASC; first9, rank is projected_order",
+  "stats_rule": "Same-team exact batter, prior30 calendar days excluding entire target date",
+  "certification": "BLOCKED_LINEUP_FEATURE_LINEAGE",
+  "reason": "Value reconstruction succeeds. Original builder/snapshot and as-published per-cutoff revision evidence unavailable; ingestion in2026 does not prove availability of these values at2025 cutoffs.",
+  "database_writes": 0,
+  "provider_calls": 0,
+  "odds_api_credits": 0,
+  "exporters_opened": 0,
+  "external_opened": false
+}

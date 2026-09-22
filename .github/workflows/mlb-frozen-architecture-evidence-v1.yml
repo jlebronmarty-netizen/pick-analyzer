@@ -8,6 +8,8 @@ on:
       - 'scripts/research/*davidson*'
       - 'scripts/research/*qda*'
       - 'scripts/research/*nrfi_analog*'
+      - 'scripts/research/*lineup*'
+      - 'scripts/research/*empirical_convolution*'
       - 'scripts/research/audit_mlb_public_snapshot_v1.mjs'
       - 'scripts/research/verify_mlb_frozen_architectures_v1.test.mjs'
       - 'artifacts/research/*factorized*'
@@ -15,6 +17,8 @@ on:
       - 'artifacts/research/*davidson*'
       - 'artifacts/research/*qda*'
       - 'artifacts/research/*nrfi_analog*'
+      - 'artifacts/research/*lineup*'
+      - 'artifacts/research/*empirical_convolution*'
       - 'artifacts/research/mlb_public_snapshot_audit_20260922.json'
       - '.github/workflows/mlb-frozen-architecture-evidence-v1.yml'
   workflow_dispatch:
@@ -32,3 +36,4 @@ jobs:
       - run: node --test scripts/research/verify_mlb_frozen_architectures_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_period_davidson_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_period_qda_v1.test.mjs scripts/research/verify_mlb_nrfi_analog_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_lineup_integrity_v1.test.mjs scripts/research/verify_mlb_period_empirical_convolution_v1.test.mjs

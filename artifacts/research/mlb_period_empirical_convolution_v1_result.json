@@ -1,0 +1,168 @@
+{
+  "contract": "MLB_PERIOD_EMPIRICAL_CONVOLUTION_V1/1.0.0",
+  "contract_sha256": "c75e2eddf7674c41f16ca1edaa1aecb749f6b878da4cff99d6c833426923f004",
+  "architecture": "dirichlet_empirical_run_histogram_convolution",
+  "probability_threshold": 0.75,
+  "periods": {
+    "1": {
+      "source_rows": 4683,
+      "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+      "eligible": 4069,
+      "excluded_insufficient_prior": 614,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 1,
+          "wins": 0,
+          "losses": 1,
+          "pushes": 0,
+          "nonpush": 1,
+          "accuracy": 0,
+          "coverage": 0.0002457606291472106,
+          "monthly": {
+            "2025-09": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            }
+          },
+          "worst_month_accuracy": 0,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      }
+    },
+    "3": {
+      "source_rows": 4680,
+      "input_sha256": "1dfeb60f740238940128edb3df05f671148f1350e00ca40ee34360f75be41d6c",
+      "eligible": 4066,
+      "excluded_insufficient_prior": 614,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      }
+    },
+    "5": {
+      "source_rows": 4678,
+      "input_sha256": "205b0db939d9e3623fd4934a70d361b0a06b65b460774309ced8924f567b140b",
+      "eligible": 4064,
+      "excluded_insufficient_prior": 614,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      }
+    },
+    "7": {
+      "source_rows": 4673,
+      "input_sha256": "97ffba441a043a4d082012c81a7b2e165f31242a8c7a96913f20c5339b86d93b",
+      "eligible": 4059,
+      "excluded_insufficient_prior": 614,
+      "min_date": "2025-03-18",
+      "max_date": "2026-09-14",
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "nonpush": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false,
+          "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL"
+        }
+      }
+    }
+  },
+  "research_only": true,
+  "external_opened": false,
+  "provider_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false,
+  "full_result_sha256": "bdbbedc5ffeb5638eab502b1bba3048902ae58b99d2ef58b837d871fe214ca17",
+  "freeze_commit": "292dc45d"
+}
