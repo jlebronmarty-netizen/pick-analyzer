@@ -63,7 +63,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          # Match the runtime used to freeze the numerical research artifacts.
+          node-version: '24.17.0'
       - run: node --test scripts/research/verify_mlb_frozen_architectures_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_period_davidson_v1.test.mjs
       - run: node --test scripts/research/verify_mlb_period_qda_v1.test.mjs scripts/research/verify_mlb_nrfi_analog_v1.test.mjs
