@@ -173,14 +173,18 @@ def build_eligible(rows):
         history = []
         for game in games:
             if len(history) >= MIN_PRIOR_GAMES:
-                ph = component(history, "h")
-                pr = component(history, "r")
-                pi = component(history, "rbi")
+                strict_prior_date = [x for x in history if x["date"] < game["date"]]
+                if len(strict_prior_date) >= MIN_PRIOR_GAMES:
+                    ph = component(strict_prior_date, "h")
+                    pr = component(strict_prior_date, "r")
+                    pi = component(strict_prior_date, "rbi")
+                else:
+                    ph = pr = pi = None
                 eligible.append({
                     "id": player_id,
                     "gid": game["gid"],
                     "date": game["date"],
-                    "month": game["date"][:7],
+                    "month": f"{game['date'][:4]}-{game['date'][4:6]}",
                     "rbi_proj": pi,
                     "hrrbi_proj": None if ph is None or pr is None or pi is None else ph + pr + pi,
                     "rbi": game["rbi"],
