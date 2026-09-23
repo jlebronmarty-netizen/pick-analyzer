@@ -85,7 +85,8 @@ def build(raw):
    if cum_bf<=0 or recent_bf<=0:continue
    avg_bf=recent_bf/len(recent)
    raw_feature=avg_bf*(cum_hits/cum_bf)
-   modeled.append({**target,"month":target["date"][:7],"raw":raw_feature,"prior_starts":len(history)})
+   if target["date"] >= "2025-05-01":
+    modeled.append({**target,"month":target["date"][:7],"raw":raw_feature,"prior_starts":len(history)})
  modeled.sort(key=lambda r:(r["date"],r["gamePk"],r["pitcher_id"]))
  return modeled
 
