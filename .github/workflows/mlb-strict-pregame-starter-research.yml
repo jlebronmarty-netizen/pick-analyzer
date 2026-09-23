@@ -9,10 +9,18 @@ on:
       - artifacts/research/mlb_f1_strict_pregame_logit_v1.json
       - artifacts/research/mlb_f1_nrfi_strict_pregame_poisson_v1.json
       - artifacts/research/mlb_f5_strict_pregame_starter_logit_v1.json
+      - artifacts/research/mlb_f5_strict_pregame_count_v1.json
+      - artifacts/research/mlb_f7_strict_pregame_fatigue_count_v1.json
+      - artifacts/research/mlb_f5_strict_pregame_count_v1.json
+      - artifacts/research/mlb_f7_strict_pregame_fatigue_count_v1.json
       - scripts/research/verify_mlb_f1_nrfi_starter_l5_zero_logit_v1.test.mjs
       - scripts/research/verify_mlb_f1_strict_pregame_logit_v1.test.mjs
       - scripts/research/verify_mlb_f1_nrfi_strict_pregame_poisson_v1.test.mjs
       - scripts/research/verify_mlb_f5_strict_pregame_starter_logit_v1.test.mjs
+      - scripts/research/verify_mlb_f5_strict_pregame_count_v1.test.mjs
+      - scripts/research/verify_mlb_f7_strict_pregame_fatigue_count_v1.test.mjs
+      - scripts/research/verify_mlb_f5_strict_pregame_count_v1.test.mjs
+      - scripts/research/verify_mlb_f7_strict_pregame_fatigue_count_v1.test.mjs
       - .github/workflows/mlb-strict-pregame-starter-research.yml
   pull_request:
     branches:
@@ -43,3 +51,5 @@ jobs:
           node --test scripts/research/verify_mlb_f1_strict_pregame_logit_v1.test.mjs
           node --test scripts/research/verify_mlb_f1_nrfi_strict_pregame_poisson_v1.test.mjs
           node --test scripts/research/verify_mlb_f5_strict_pregame_starter_logit_v1.test.mjs
+          node --test scripts/research/verify_mlb_f5_strict_pregame_count_v1.test.mjs
+          node --test scripts/research/verify_mlb_f7_strict_pregame_fatigue_count_v1.test.mjs
