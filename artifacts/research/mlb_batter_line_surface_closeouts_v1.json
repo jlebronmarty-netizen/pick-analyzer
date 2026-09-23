@@ -582,5 +582,66 @@
       "internal_normalized_replay_note": "Supabase event-normalized batter/run/RBI tables do not reproduce frozen source totals exactly; do not substitute them.",
       "state": "LINE_SURFACE_BLOCKED_EXACT_SOURCE_CORPUS_NOT_RECOVERED"
     }
+  },
+  "rbi_hrrbi_line_surface_admission": {
+    "batter_rbis": {
+      "certified_control": "batter_rbi_under_0p5_proj_0p10_v1",
+      "certified_line": 0.5,
+      "certified_direction": "UNDER",
+      "frozen_2025": {
+        "n": 2402,
+        "wins": 2053,
+        "accuracy": 0.8547044129891757
+      },
+      "current_2026_09_22_lines": [
+        0.5
+      ],
+      "current_books": [
+        "betmgm",
+        "betrivers",
+        "draftkings",
+        "fanatics"
+      ],
+      "state": "NO_NEW_EXACT_LINE_TO_EXPAND"
+    },
+    "batter_hits_runs_rbis": {
+      "certified_control": "batter_hrrbi_under_2p5_proj_0p70_v1",
+      "certified_line": 2.5,
+      "certified_direction": "UNDER",
+      "frozen_2025": {
+        "n": 2582,
+        "wins": 2278,
+        "accuracy": 0.8822618125484121
+      },
+      "current_2026_09_22_lines": [
+        0.5,
+        1.5
+      ],
+      "current_books": [
+        "betmgm",
+        "bovada",
+        "draftkings",
+        "fanatics",
+        "williamhill_us"
+      ],
+      "exact_replay_source": "Retrosheet 2025 player-game batting CSV frozen in PR #155",
+      "exact_replay_source_digest": "3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753",
+      "approximate_supabase_reconstruction": {
+        "source": "historical_baseball_batter_appearances",
+        "rbi_control_observed": {
+          "selected_n": 1167,
+          "correct": 930,
+          "baseline_under_0p5": 0.705450192470191
+        },
+        "rbi_control_expected": {
+          "selected_n": 2402,
+          "correct": 2053,
+          "baseline_under_0p5": 0.7913713405238829
+        },
+        "parity": false
+      },
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY",
+      "note": "Do not use the approximate Supabase event-derived corpus to test HRRBI 0.5/1.5. Exact frozen player-game source must be recovered first."
+    }
   }
 }
