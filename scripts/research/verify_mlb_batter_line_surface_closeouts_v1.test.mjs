@@ -57,3 +57,12 @@ test('RBI and HRRBI admission remains fail-closed where appropriate', () => {
   assert.equal(artifact.rbi_hrrbi_line_surface_admission.batter_hits_runs_rbis.approximate_supabase_reconstruction.parity,false)
   assert.equal(artifact.rbi_hrrbi_line_surface_admission.batter_hits_runs_rbis.state,'LINE_SURFACE_BLOCKED_EXACT_REPLAY')
 })
+
+test('Pitcher Hits Allowed remains blocked on exact MLB Official corpus replay', () => {
+  const row = artifact.blocked_exact_replay.find((x) => x.market === 'pitcher_hits_allowed')
+  assert(row)
+  assert.equal(row.frozen_refit.n,3099)
+  assert.equal(row.failed_reconstruction.eligible_n,3334)
+  assert.equal(row.failed_reconstruction.parity,false)
+  assert.equal(row.state,'LINE_SURFACE_BLOCKED_EXACT_REPLAY_MLB_OFFICIAL_GAMELOG_CORPUS_NOT_PERSISTED')
+})
