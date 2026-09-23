@@ -16,7 +16,9 @@
     0.5,
     1.5,
     2.5,
-    3.5
+    3.5,
+    4.5,
+    5.5
   ],
   "validation_gate": {
     "accuracy": 0.75,
@@ -96,6 +98,42 @@
         "coverage": 0.1116
       },
       "state": "CROSS_SPLIT_STABLE_75_PLUS"
+    },
+    {
+      "line": 4.5,
+      "side": "UNDER",
+      "threshold": 0.875,
+      "validation": {
+        "n": 69,
+        "wins": 59,
+        "accuracy": 0.855072463768116,
+        "baseline": 0.790123456790123,
+        "lift_pp": 6.49490069779926,
+        "coverage": 0.09465020576131687
+      },
+      "test": {
+        "n": 71,
+        "wins": 62,
+        "accuracy": 0.873239436619718,
+        "baseline": 0.857364341085271,
+        "lift_pp": 1.5875095534447,
+        "coverage": 0.11007751937984496
+      },
+      "state": "TEST_75_PLUS_BASELINE_DOMINATED_LIFT_FAIL"
+    },
+    {
+      "line": 5.5,
+      "side": "UNDER",
+      "threshold": 0.9,
+      "validation": {
+        "n": 685,
+        "wins": 609,
+        "accuracy": 0.889051094890511,
+        "baseline": 0.882030178326475,
+        "lift_pp": 0.702091656403636,
+        "coverage": 0.9396433470507545
+      },
+      "state": "VALIDATION_75_PLUS_BASELINE_DOMINATED_LIFT_FAIL"
     }
   ],
   "certified_control": {
@@ -143,6 +181,22 @@
       "books": [],
       "games": 0,
       "pitchers": 0
+    },
+    {
+      "line": 4.5,
+      "books": [
+        "betonlineag"
+      ],
+      "games": 1,
+      "pitchers": 2
+    },
+    {
+      "line": 5.5,
+      "books": [
+        "betonlineag"
+      ],
+      "games": 1,
+      "pitchers": 1
     }
   ],
   "provider_calls_made": 0,
@@ -150,5 +204,9 @@
   "official_picks_writes": 0,
   "apostar_activation": false,
   "production_promotion": false,
-  "tracker_modified": false
+  "tracker_modified": false,
+  "failed_sides": [
+    "OVER 4.5: no selections at any threshold in the frozen 0.55-0.90 grid",
+    "OVER 5.5: no selections at any threshold in the frozen 0.55-0.90 grid"
+  ]
 }
