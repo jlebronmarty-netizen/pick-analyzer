@@ -65,6 +65,10 @@ def resolve_all522():
   if len(matches)==1:
    resolved.append({**matches[0],"source":item,"identity_method":"UNIQUE_EXACT_NORMALIZED_NAME"})
    continue
+  raw_exact=[m for m in matches if str(m["name"]).strip()==str(item["player_name"]).strip()]
+  if len(raw_exact)==1:
+   resolved.append({**raw_exact[0],"source":item,"identity_method":"EXACT_RAW_FULL_NAME_WITHIN_NORMALIZED_BUCKET"})
+   continue
   source_teams=set(str(x).upper() for x in (item.get("team_abbreviations") or []))
   team_matches=[]
   for m in matches:
@@ -73,7 +77,7 @@ def resolve_all522():
   if len(team_matches)==1:
    resolved.append({**team_matches[0],"source":item,"identity_method":"EXACT_NORMALIZED_NAME_PLUS_EXACT_TEAM"})
   else:
-   unresolved.append({"source":item,"normalized":k,"matches":matches,"team_matches":team_matches})
+   unresolved.append({"source":item,"normalized":k,"matches":matches,"raw_exact":raw_exact,"team_matches":team_matches})
  if unresolved or len(resolved)!=522 or len({x["id"] for x in resolved})!=522:
   fail("ALL_522_EXACT_IDENTITY_RECOVERY_FAIL",resolved=len(resolved),unique_ids=len({x["id"] for x in resolved}),unresolved=unresolved)
  return resolved,len(people)
