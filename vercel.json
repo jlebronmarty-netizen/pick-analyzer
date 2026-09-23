@@ -88,5 +88,6 @@
       "path": "/api/cron/mlb-official-settlement",
       "schedule": "12 * * * *"
     }
-  ]
+  ],
+  "ignoreCommand": "bash scripts/vercel-ignore-build.sh"
 }
