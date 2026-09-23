@@ -1,0 +1,69 @@
+{
+  "contract": "MLB_F5_STRICT_PREGAME_STARTER_LOGIT_V1/1.0.0",
+  "architecture": "monthly_rolling_l2_logistic_f5_ml_team_strength_plus_starter_l5",
+  "research_only": true,
+  "source": {
+    "source_rows": 2662,
+    "target_surface": "public.mlb_f5_ml_revisit_base_v1",
+    "starter_admission": "MLB_F1_STARTER_L5_PREGAME_ADMISSION_V1/1.0.0",
+    "development_class": "HISTORICAL_SEEN_DEVELOPMENT"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "694457f57a664507a203d3cb2ff96ac980eed006",
+    "evaluator_commit": "f77422be787109f9364952158207df22cad24d10",
+    "l2_lambda": 8,
+    "confidence_threshold": 0.75,
+    "min_training_nonpush": 300,
+    "feature_count": 12
+  },
+  "result": {
+    "eligible": 1562,
+    "selected": 13,
+    "nonpush_n": 12,
+    "wins": 9,
+    "losses": 3,
+    "pushes": 1,
+    "accuracy": 0.75,
+    "coverage": 0.008322663252240717,
+    "selected_months": 3,
+    "worst_month_accuracy": 0.625,
+    "p_home_range": [
+      0.17338334576580428,
+      0.8195633664472461
+    ],
+    "monthly": {
+      "2025-09": {
+        "n": 2,
+        "wins": 2,
+        "accuracy": 1
+      },
+      "2026-07": {
+        "n": 8,
+        "wins": 5,
+        "accuracy": 0.625
+      },
+      "2026-08": {
+        "n": 2,
+        "wins": 2,
+        "accuracy": 1
+      }
+    },
+    "development_gate_pass": false,
+    "state": "POOLED_75_INSUFFICIENT_SAMPLE_STABILITY_FAIL",
+    "external_opened": false
+  },
+  "interpretation": {
+    "note": "Pooled non-push accuracy exactly meets 75%, but n=12 is far below the frozen n>=60 gate, only three selected months are present, and worst-month 62.5% is below the 65% floor.",
+    "retuned": false,
+    "threshold_rescue": false,
+    "feature_rescue": false
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
