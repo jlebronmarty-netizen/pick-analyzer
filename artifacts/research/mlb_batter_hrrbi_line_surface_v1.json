@@ -140,9 +140,42 @@
     ]
   },
   "external_2026": {
-    "opened": false,
-    "status": "AUTHORIZATION_REQUIRED",
-    "note": "Thresholds are frozen from 2025. Do not read 2026 for rescue or retuning. Prior 2026 HRRBI family outcomes have been seen for the existing U2.5 model, so any next validation must be labeled correctly and not misrepresented as pristine external."
+    "authorized": true,
+    "attempted": true,
+    "evaluation_completed": false,
+    "status": "BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT",
+    "evidence_label": "WOULD_BE_EXACT_MLB_OFFICIAL_2026_DIAGNOSTIC_AFTER_PRIOR_HRRBI_FAMILY_READ_NOT_PRISTINE_EXTERNAL",
+    "frozen_reference": {
+      "source": "PR #158 MLB Official StatsAPI reconciliation",
+      "requested_players": 516,
+      "raw_game_log_rows": 30889,
+      "eligible_rows": 25729,
+      "control_u2p5": {
+        "n": 1255,
+        "wins": 1073,
+        "accuracy": 0.8549800796812749
+      }
+    },
+    "current_source_recovery": {
+      "source": "current MLB Official StatsAPI season=2026 gameLog + exact 522-player SportsData source universe",
+      "raw_game_log_rows": 30927,
+      "eligible_rows": 25707,
+      "runs_control": {
+        "n": 1029,
+        "wins": 773
+      },
+      "rbi_control": {
+        "n": 1373,
+        "wins": 1140
+      },
+      "hrrbi_u2p5_control": {
+        "n": 1263,
+        "wins": 1079
+      },
+      "parity": false
+    },
+    "decision": "FAIL_CLOSED_NO_U0P5_OR_U1P5_2026_SCORE",
+    "note": "Authorization was received, but the frozen 2026 row-level snapshot from PR #158 was not persisted and the current MLB Official source no longer reproduces its checksums. Frozen U0.5<=0.05 and U1.5<=0.90 thresholds remain unchanged; no threshold rescue or retuning was performed."
   },
   "boundaries": {
     "official_picks_writes": 0,
