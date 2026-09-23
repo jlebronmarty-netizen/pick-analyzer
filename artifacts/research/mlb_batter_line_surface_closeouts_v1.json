@@ -428,7 +428,49 @@
       "market": "pitcher_hits_allowed",
       "expected_control": "U6.5 projection<=5.0 = 634/761 rolling 2025",
       "observed_replay": "xyear+target gate: n=3334, control 663/783; Retrosheet starter corpus: n=3404, control 672/796; neither reproduces frozen n=3099 or 634/761",
-      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY"
+      "state": "LINE_SURFACE_BLOCKED_EXACT_REPLAY_MLB_OFFICIAL_GAMELOG_CORPUS_NOT_PERSISTED",
+      "frozen_source": "MLB Official gameLog pitching",
+      "frozen_refit": {
+        "n": 3099,
+        "intercept": 2.97876810879942,
+        "slope": 0.415326852941172
+      },
+      "required_raw_feature": "avg(BF last 5 prior starts) * cumulative prior hits allowed / cumulative prior BF",
+      "minimum_prior_starts": 5,
+      "failed_reconstruction": {
+        "source": "public.mlb_ml_xyear_pitcher_game_v1 + canonical pregame pitcher feature-key gate",
+        "eligible_n": 3334,
+        "refit_intercept": 2.9146649671004927,
+        "refit_slope": 0.4302550256495246,
+        "parity": false
+      },
+      "current_2026_09_22_lines": {
+        "3.5": [
+          "betonlineag"
+        ],
+        "4.5": [
+          "betmgm",
+          "betonlineag",
+          "bovada",
+          "draftkings",
+          "fanatics"
+        ],
+        "5.5": [
+          "betonlineag"
+        ],
+        "6.5": [
+          "betonlineag"
+        ],
+        "7.5": [
+          "betonlineag"
+        ],
+        "8.5": [
+          "betonlineag"
+        ],
+        "9.5": [
+          "betonlineag"
+        ]
+      }
     }
   ],
   "boundaries": {
