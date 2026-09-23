@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
+import { reconcileMlbCanonicalSlateFromOfficial } from '@/services/mlb-canonical-slate-preflight.service'
 import { freezeRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-freeze.service'
 import { freezeMlbRunlineV2StandardForward } from '@/services/mlb-runline-v2-standard-forward-freeze.service'
 import { settleRunlineV2HomeP15Alternate } from '@/services/mlb-runline-home-p15-alt-forward-settlement.service'
