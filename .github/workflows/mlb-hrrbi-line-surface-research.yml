@@ -35,6 +35,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Diagnose frozen-control lineage variants
+        run: python3 scripts/research/mlb_hrrbi_lineage_diagnostic_v1.py
       - name: Run exact-source HRRBI development research
         env:
           HRRBI_RESULT_PATH: /tmp/mlb_hrrbi_line_surface_v1_result.json
