@@ -1,0 +1,55 @@
+{
+  "contract": "MLB_F7_NEW_INFO_ADMISSION_V1/1.0.0",
+  "research_only": true,
+  "target_surface": "public.mlb_f7_ml_revisit_base_v1",
+  "feature_surface": "public.mlb_ml_xyear_features_v1 / xyear_raw_v1 / A_XYEAR_RAW",
+  "starter_history": "public.mlb_ml_xyear_pitcher_game_v1",
+  "evidence_label": "HISTORICAL_RECONSTRUCTED_STRICT_PRIOR_NEW_INFORMATION",
+  "coverage": {
+    "2025": {
+      "joined_games": 2418,
+      "both_starters_l5": 1398,
+      "strict_l5": 1398,
+      "complete_new_info": 1393,
+      "pushes": 271
+    },
+    "2026": {
+      "joined_games": 2255,
+      "both_starters_l5": 1261,
+      "strict_l5": 1261,
+      "complete_new_info": 1129,
+      "pushes": 236
+    }
+  },
+  "admitted_new_information": [
+    "strict-prior starter L5 K/BF",
+    "strict-prior starter L5 BB/BF",
+    "strict-prior starter L5 Hits/BF",
+    "strict-prior starter L5 IP/start",
+    "strict-prior starter L5 Whiff/Swings",
+    "strict-prior starter L5 Chase/OZ",
+    "strict-prior starter L5 HardHit/BIP",
+    "bullpen RA9",
+    "bullpen pitches last 2d",
+    "team rest days",
+    "team travel miles last 48h",
+    "team timezone changes last 48h",
+    "team win pct/run diff/pyth/off OPS"
+  ],
+  "reopening_reason": "F7 was previously frozen pending genuinely new information. This surface adds starter-L5 and fatigue/bullpen context not present in the prior F7 outcome-only models.",
+  "limitations": [
+    "historical reconstructed strict-prior evidence; not claimed as pristine live snapshot",
+    "no lineup features",
+    "no target-day FULL data",
+    "no odds or closing-line inputs"
+  ],
+  "state": "ADMITTED_F7_NEW_INFORMATION_RESEARCH_ONLY",
+  "boundaries": {
+    "provider_calls": 0,
+    "odds_api_historical_credits": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
