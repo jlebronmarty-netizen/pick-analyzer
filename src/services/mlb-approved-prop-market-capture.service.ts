@@ -595,7 +595,12 @@ export async function captureMlbApprovedPropMarkets(input: {
   const creditsKnown = calls.every((call) => typeof call.requestsLast === 'number')
   const credits = creditsKnown ? calls.reduce((sum, call) => sum + Number(call.requestsLast ?? 0), 0) : null
   const failedCalls = calls.filter((call) => !call.ok).length
-  const combinedCoverageComplete = oddsCoverageComplete || Boolean(bdlFallback?.coverageComplete)
+  const bdlCoverageComplete = Boolean(
+    bdlFallback &&
+    'coverageComplete' in bdlFallback &&
+    bdlFallback.coverageComplete === true
+  )
+  const combinedCoverageComplete = oddsCoverageComplete || bdlCoverageComplete
   const status = failedCalls || !combinedCoverageComplete ? 'partial' : 'completed'
   const jobId = randomUUID()
   const job = await supabaseAdmin.from('sports_sync_jobs').insert({
