@@ -1,529 +1,7106 @@
 {
-  "contract": "MLB_HRRBI_2026_FROZEN_GATE_NAME_UNIVERSE_V1",
-  "source": "public.sport_player_stats / sportsdataio / 2026 / stat_type=game",
-  "source_window_end": "2026-07-19",
-  "admission": "at least 10 rows with positive PA proxy (AB+BB+HBP+SF+Sacrifices)",
-  "usage": "identity discovery only; outcomes and projections validated from MLB Official StatsAPI",
+  "contract": "MLB_HRRBI_2026_FROZEN_GATE_IDENTITY_UNIVERSE_V1",
+  "source": "public.sport_player_stats / sportsdataio / season=2026 / stat_type=game",
+  "source_contract": {
+    "position_category": "non-empty and != P",
+    "source_rows_expected": 31371,
+    "eligibility": "row_number within player ordered by game Day,event_id > 10",
+    "eligible_rows_expected": 25778,
+    "eligible_players_pre_identity_expected": 522
+  },
+  "usage": "identity discovery only; all evaluated outcomes/features come from MLB Official StatsAPI",
   "no_fuzzy_matching": true,
-  "names": [
-    "A.J. Ewing",
-    "Aaron Judge",
-    "Adam Frazier",
-    "Adley Rutschman",
-    "Adolis García",
-    "Adrian Del Castillo",
-    "Agustín Ramírez",
-    "Alec Bohm",
-    "Alec Burleson",
-    "Alejandro Kirk",
-    "Alejandro Osuna",
-    "Alek Thomas",
-    "Alex Bregman",
-    "Alex Call",
-    "Alex Freeland",
-    "Alex Jackson",
-    "Ali Sánchez",
-    "Alika Williams",
-    "Amed Rosario",
-    "Andrés Chaparro",
-    "Andrés Giménez",
-    "Andrew Benintendi",
-    "Andrew McCutchen",
-    "Andrew Vaughn",
-    "Andruw Monasterio",
-    "Andy Ibáñez",
-    "Andy Pages",
-    "Angel Martínez",
-    "Anthony Seigler",
-    "Anthony Volpe",
-    "Austin Hays",
-    "Austin Hedges",
-    "Austin Martin",
-    "Austin Riley",
-    "Austin Slater",
-    "Austin Wells",
-    "Austin Wynns",
-    "Ben Malgeri",
-    "Ben Rice",
-    "Ben Williamson",
-    "Billy Cook",
-    "Blake Dunn",
-    "Blake Perkins",
-    "Blaze Alexander",
-    "Blaze Jordan",
-    "Bo Bichette",
-    "Bo Naylor",
-    "Bobby Witt Jr.",
-    "Braden Montgomery",
-    "Braden Shewmake",
-    "Brady House",
-    "Brandon Lockridge",
-    "Brandon Lowe",
-    "Brandon Marsh",
-    "Brandon Nimmo",
-    "Brandon Valenzuela",
-    "Braxton Fulford",
-    "Brayan Rocchio",
-    "Brendan Donovan",
-    "Brent Rooker",
-    "Brenton Doyle",
-    "Brett Baty",
-    "Brett Sullivan",
-    "Brice Matthews",
-    "Brice Turang",
-    "Brooks Lee",
-    "Bryan Reynolds",
-    "Bryan Torres",
-    "Bryce Eldridge",
-    "Bryce Harper",
-    "Bryce Johnson",
-    "Bryce Teodosio",
-    "Bryson Stott",
-    "Byron Buxton",
-    "Cal Raleigh",
-    "Caleb Durbin",
-    "Cam Cauley",
-    "Cam Smith",
-    "Carlos Correa",
-    "Carlos Cortes",
-    "Carlos Narváez",
-    "Carson Benge",
-    "Carson Kelly",
-    "Carter Jensen",
-    "Casey Schmitt",
-    "Ceddanne Rafaela",
-    "Cedric Mullins",
-    "Chad Stevens",
-    "Chadwick Tromp",
-    "Chandler Simpson",
-    "Chase DeLauter",
-    "Chase Meidroth",
-    "Chris Paddack",
-    "Christian Koss",
-    "Christian Vázquez",
-    "Christian Walker",
-    "Christian Yelich",
-    "Christopher Morel",
-    "CJ Abrams",
-    "Coby Mayo",
-    "Cody Bellinger",
-    "Colby Thomas",
-    "Cole Carrigg",
-    "Cole Young",
-    "Colson Montgomery",
-    "Colt Emerson",
-    "Colt Keith",
-    "Colton Cowser",
-    "Connor Joe",
-    "Connor Norby",
-    "Connor Wong",
-    "Cooper Pratt",
-    "Corbin Carroll",
-    "Corey Seager",
-    "Curtis Mead",
-    "Dalton Rushing",
-    "Dane Myers",
-    "Daniel Schneemann",
-    "Daniel Susac",
-    "Danny Jansen",
-    "Dansby Swanson",
-    "Darell Hernaiz",
-    "Daulton Varsho",
-    "David Fry",
-    "David Hamilton",
-    "Davis Schneider",
-    "Daylen Lile",
-    "Denzel Clarke",
-    "Denzer Guzman",
-    "Derek Hill",
-    "Dillon Dingler",
-    "Dominic Canzone",
-    "Dominic Smith",
-    "Donovan Walton",
-    "Drake Baldwin",
-    "Drew Cavanaugh",
-    "Drew Gilbert",
-    "Drew Millas",
-    "Drew Romo",
-    "Dylan Beavers",
-    "Dylan Crews",
-    "Dylan Moore",
-    "Edgar Quero",
-    "Edmundo Sosa",
-    "Edouard Julien",
-    "Edwin Arroyo",
-    "Eli White",
-    "Elias Díaz",
-    "Elly De La Cruz",
-    "Eloy Jiménez",
-    "Endy Rodríguez",
-    "Eric Haase",
-    "Eric Wagaman",
-    "Ernie Clement",
-    "Esmerlyn Valdez",
-    "Esteury Ruiz",
-    "Eugenio Suárez",
-    "Evan Carter",
-    "Everson Pereira",
-    "Ezequiel Duran",
-    "Ezequiel Tovar",
-    "Felix Reyes",
-    "Fernando Tatis Jr.",
-    "Francisco Alvarez",
-    "Francisco Lindor",
-    "Freddie Freeman",
-    "Freddy Fermin",
-    "Gabriel Arias",
-    "Gabriel Moreno",
-    "Gabriel Rincones Jr.",
-    "Gage Workman",
-    "Garrett Mitchell",
-    "Garrett Stubbs",
-    "Gary Sánchez",
-    "Gavin Sheets",
-    "George Springer",
-    "George Valera",
-    "Geraldo Perdomo",
-    "Giancarlo Stanton",
-    "Gleyber Torres",
-    "Graham Pauley",
-    "Griffin Conine",
-    "Gunnar Henderson",
-    "Ha-Seong Kim",
-    "Hao-Yu Lee",
-    "Harrison Bader",
-    "Heliot Ramos",
-    "Henry Bolte",
-    "Henry Davis",
-    "Heriberto Hernández",
-    "Hunter Feduccia",
-    "Hunter Goodman",
-    "Hyeseong Kim",
-    "Ian Happ",
-    "Ildemaro Vargas",
-    "Isaac Collins",
-    "Isaac Paredes",
-    "Isiah Kiner-Falefa",
-    "Iván Herrera",
-    "J.C. Escarra",
-    "J.P. Crawford",
-    "J.T. Realmuto",
-    "Jac Caglianone",
-    "Jackson Chourio",
-    "Jackson Holliday",
-    "Jackson Merrill",
-    "Jacob Gonzalez",
-    "Jacob Wilson",
-    "Jacob Young",
-    "Jahmai Jones",
-    "Jake Bauers",
-    "Jake Burger",
-    "Jake Cronenworth",
-    "Jake Fraley",
-    "Jake Mangum",
-    "Jake McCarthy",
-    "Jake Meyers",
-    "Jake Rogers",
-    "Jakob Marsee",
-    "James McCann",
-    "James Outman",
-    "James Wood",
-    "Jared Triolo",
-    "Jared Young",
-    "Jarred Kelenic",
-    "Jarren Duran",
-    "Jase Bowen",
-    "Jasson Domínguez",
-    "Javier Báez",
-    "Javier Sanoja",
-    "Jazz Chisholm Jr.",
-    "Jeff McNeil",
-    "Jeremiah Jackson",
-    "Jeremy Peña",
-    "Jesus Rodriguez",
-    "Jesús Sánchez",
-    "Jhonny Pereda",
-    "Jhostynxon Garcia",
-    "Jim Jarvis",
-    "Jimmy Crooks",
-    "JJ Bleday",
-    "JJ Wetherholt",
-    "Jo Adell",
-    "Joc Pederson",
-    "Joe Mack",
-    "Joey Bart",
-    "Joey Loperfido",
-    "Joey Ortiz",
-    "Joey Wiemer",
-    "Jonah Cox",
-    "Jonah Heim",
-    "Jonathan Aranda",
-    "Jonathan India",
-    "Jonny DeLuca",
-    "Jorbit Vivas",
-    "Jordan Beck",
-    "Jordan Lawlar",
-    "Jordan Walker",
-    "Jorge Barrosa",
-    "Jorge Mateo",
-    "Jorge Polanco",
-    "Jorge Soler",
-    "Jose Altuve",
-    "José Azócar",
-    "José Caballero",
-    "José Fermín",
-    "Jose Fernandez",
-    "José Ramírez",
-    "Jose Siri",
-    "José Tena",
-    "Jose Trevino",
-    "Josh Bell",
-    "Josh Jung",
-    "Josh Lowe",
-    "Josh Naylor",
-    "Josh Rojas",
-    "Josh Smith",
-    "Joshua Kuroda-Grauer",
-    "Juan Brito",
-    "Juan Soto",
-    "Julio Rodríguez",
-    "Jung Hoo Lee",
-    "Junior Caminero",
-    "Junior Perez",
-    "Justin Crawford",
-    "Justin Foscue",
-    "Kahlil Watson",
-    "Kameron Misner",
-    "Kazuma Okamoto",
-    "Ke'Bryan Hayes",
-    "Keibert Ruiz",
-    "Kerry Carpenter",
-    "Ketel Marte",
-    "Kevin Alcántara",
-    "Kevin McGonigle",
-    "Kody Clemens",
-    "Konnor Griffin",
-    "Kyle Higashioka",
-    "Kyle Isbel",
-    "Kyle Karros",
-    "Kyle Manzardo",
-    "Kyle Schwarber",
-    "Kyle Stowers",
-    "Kyle Teel",
-    "Kyle Tucker",
-    "LaMonte Wade Jr.",
-    "Lane Thomas",
-    "Lars Nootbaar",
-    "Lawrence Butler",
-    "Lenyn Sosa",
-    "Leo Jiménez",
-    "Leo Rivas",
-    "Leody Taveras",
-    "Liam Hicks",
-    "Logan O'Hoppe",
-    "Lourdes Gurriel Jr.",
-    "Luis Arraez",
-    "Luis Campusano",
-    "Luis García Jr.",
-    "Luis Rengifo",
-    "Luis Robert Jr.",
-    "Luis Torrens",
-    "Luis Urías",
-    "Luisangel Acuña",
-    "LuJames Groover",
-    "Luke Keaschall",
-    "Luke Raley",
-    "Maikel Garcia",
-    "Manny Machado",
-    "Marcell Ozuna",
-    "Marcelo Mayer",
-    "Marcus Semien",
-    "Mark Vientos",
-    "Masataka Yoshida",
-    "Masyn Winn",
-    "Matt Chapman",
-    "Matt McLain",
-    "Matt Olson",
-    "Matt Shaw",
-    "Matt Vierling",
-    "Matt Wallner",
-    "Mauricio Dubón",
-    "Max Kepler",
-    "Max Muncy",
-    "Max Muncy",
-    "Max Schuemann",
-    "Michael Busch",
-    "Michael Conforto",
-    "Michael Harris II",
-    "Michael Helman",
-    "Michael Massey",
-    "Mickey Gasper",
-    "Mickey Moniak",
-    "Miguel Amaya",
-    "Miguel Andujar",
-    "Miguel Rojas",
-    "Miguel Vargas",
-    "Mike Trout",
-    "Mike Yastrzemski",
-    "Miles Mastrobuoni",
-    "Mitch Garver",
-    "MJ Melendez",
-    "Moisés Ballesteros",
-    "Mookie Betts",
-    "Munetaka Murakami",
-    "Myles Straw",
-    "Nasim Nuñez",
-    "Nate Eaton",
-    "Nathan Church",
-    "Nathan Lukes",
-    "Nathaniel Lowe",
-    "Nelson Velázquez",
-    "Nick Allen",
-    "Nick Fortes",
-    "Nick Gonzales",
-    "Nick Kurtz",
-    "Nick Loftin",
-    "Nick Madrigal",
-    "Nick Sogard",
-    "Nick Yorke",
-    "Nicky Lopez",
-    "Nico Hoerner",
-    "Noelvi Marte",
-    "Nolan Arenado",
-    "Nolan Gorman",
-    "Nolan Schanuel",
-    "Oneil Cruz",
-    "Orlando Arcia",
-    "Oswald Peraza",
-    "Otto Kemp",
-    "Otto Lopez",
-    "Owen Caissie",
-    "Ozzie Albies",
-    "P.J. Higgins",
-    "Parker Meadows",
-    "Patrick Bailey",
-    "Patrick Wisdom",
-    "Paul Goldschmidt",
-    "Pavin Smith",
-    "Pedro Pagés",
-    "Pedro Ramírez",
-    "Pete Alonso",
-    "Pete Crow-Armstrong",
-    "Petey Halpin",
-    "Rafael Devers",
-    "Rafael Marchán",
-    "Ramón Laureano",
-    "Ramón Urías",
-    "Randal Grichuk",
-    "Randy Arozarena",
-    "Raynel Delgado",
-    "Rece Hinds",
-    "Rhys Hoskins",
-    "Richie Palacios",
-    "Rikuu Nishida",
-    "Riley Greene",
-    "Rob Refsnyder",
-    "Rodolfo Durán",
-    "Roman Anthony",
-    "Romy Gonzalez",
-    "Ronald Acuña Jr.",
-    "Ronny Mauricio",
-    "Royce Lewis",
-    "Ryan Jeffers",
-    "Ryan Kreidler",
-    "Ryan McMahon",
-    "Ryan O'Hearn",
-    "Ryan Vilade",
-    "Ryan Waldschmidt",
-    "Ryan Ward",
-    "Sal Frelick",
-    "Sal Stewart",
-    "Salvador Perez",
-    "Sam Antonacci",
-    "Sam Haggerty",
-    "Samad Taylor",
-    "Samuel Basallo",
-    "Sandy León",
-    "Santiago Espinal",
-    "Sean Keys",
-    "Sebastián Rivero",
-    "Seiya Suzuki",
-    "Shay Whitcomb",
-    "Shea Langeliers",
-    "Shohei Ohtani",
-    "Spencer Horwitz",
-    "Spencer Jones",
-    "Spencer Steer",
-    "Spencer Torkelson",
-    "Starling Marte",
-    "Sterlin Thompson",
-    "Steven Kwan",
-    "Stuart Fairchild",
-    "Sung-Mun Song",
-    "Tanner Murray",
-    "Taylor Trammell",
-    "Taylor Walls",
-    "Taylor Ward",
-    "Teoscar Hernández",
-    "Thomas Saggese",
-    "Tim Tawa",
-    "TJ Friedl",
-    "TJ Rumfield",
-    "Tommy Edman",
-    "Tommy Troy",
-    "Travis Bazzana",
-    "Travis d'Arnaud",
-    "Trea Turner",
-    "Trent Grisham",
-    "Trevor Larnach",
-    "Trevor Story",
-    "Tristan Gray",
-    "Tristan Peters",
-    "Troy Johnston",
-    "Tsung-Che Cheng",
-    "Ty France",
-    "Tyler Callihan",
-    "Tyler Freeman",
-    "Tyler Heineman",
-    "Tyler O'Neill",
-    "Tyler Soderstrom",
-    "Tyler Stephenson",
-    "Tyler Tolbert",
-    "Tyrone Taylor",
-    "Vaughn Grissom",
-    "Victor Bericoto",
-    "Victor Caratini",
-    "Victor Mesa Jr.",
-    "Victor Robles",
-    "Victor Scott II",
-    "Vinnie Pasquantino",
-    "Vladimir Guerrero Jr.",
-    "Wade Meckler",
-    "Wenceel Pérez",
-    "Weston Wilson",
-    "Will Benson",
-    "Will Brennan",
-    "Will Smith",
-    "Will Wagner",
-    "Willi Castro",
-    "William Contreras",
-    "Willson Contreras",
-    "Willy Adames",
-    "Wilyer Abreu",
-    "Wyatt Langford",
-    "Xander Bogaerts",
-    "Xavier Edwards",
-    "Yainer Diaz",
-    "Yandy Díaz",
-    "Yoán Moncada",
-    "Yohel Pozo",
-    "Yohendrick Piñango",
-    "Yordan Alvarez",
-    "Zach Cole",
-    "Zach Dezenzo",
-    "Zach McKinstry",
-    "Zach Neto",
-    "Zack Gelof",
-    "Zack Short"
+  "expected_unique_exact_mlbam_players": 516,
+  "players": [
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015666",
+      "player_name": "A.J. Ewing",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10002087",
+      "player_name": "Aaron Judge",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 58,
+      "eligible_rows": 48
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005834",
+      "player_name": "Adam Frazier",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 38,
+      "eligible_rows": 28
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010331",
+      "player_name": "Adley Rutschman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 67,
+      "eligible_rows": 57
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009516",
+      "player_name": "Adolis García",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 67,
+      "eligible_rows": 57
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012533",
+      "player_name": "Adrian Del Castillo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 51,
+      "eligible_rows": 41
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010566",
+      "player_name": "Agustín Ramírez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 31,
+      "eligible_rows": 21
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009271",
+      "player_name": "Alec Bohm",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011466",
+      "player_name": "Alec Burleson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009628",
+      "player_name": "Alejandro Kirk",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 29,
+      "eligible_rows": 19
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011889",
+      "player_name": "Alejandro Osuna",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 62,
+      "eligible_rows": 52
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009383",
+      "player_name": "Alek Thomas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005589",
+      "player_name": "Alex Bregman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007060",
+      "player_name": "Alex Call",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015147",
+      "player_name": "Alex Freeland",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006140",
+      "player_name": "Alex Jackson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 21,
+      "eligible_rows": 11
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006707",
+      "player_name": "Ali Sánchez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 20,
+      "eligible_rows": 10
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011503",
+      "player_name": "Alika Williams",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 38,
+      "eligible_rows": 28
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006695",
+      "player_name": "Amed Rosario",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011137",
+      "player_name": "Andrés Chaparro",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 33,
+      "eligible_rows": 23
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005878",
+      "player_name": "Andrés Giménez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005530",
+      "player_name": "Andrew Benintendi",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001010",
+      "player_name": "Andrew McCutchen",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 37,
+      "eligible_rows": 27
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010464",
+      "player_name": "Andrew Vaughn",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008986",
+      "player_name": "Andruw Monasterio",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006136",
+      "player_name": "Andy Ibáñez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18",
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009542",
+      "player_name": "Andy Pages",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010559",
+      "player_name": "Angel Martínez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 66,
+      "eligible_rows": 56
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009376",
+      "player_name": "Anthony Seigler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 25,
+      "eligible_rows": 15
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010465",
+      "player_name": "Anthony Volpe",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 47,
+      "eligible_rows": 37
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007075",
+      "player_name": "Austin Hays",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001910",
+      "player_name": "Austin Hedges",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011449",
+      "player_name": "Austin Martin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 87,
+      "eligible_rows": 77
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006622",
+      "player_name": "Austin Riley",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006767",
+      "player_name": "Austin Slater",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11",
+        "baseball_mlb:mlb:sportsdataio:team:18",
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011501",
+      "player_name": "Austin Wells",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 67,
+      "eligible_rows": 57
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007848",
+      "player_name": "Austin Wynns",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24",
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 20,
+      "eligible_rows": 10
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012824",
+      "player_name": "Ben Malgeri",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013075",
+      "player_name": "Ben Rice",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015823",
+      "player_name": "Ben Williamson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 66,
+      "eligible_rows": 56
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012792",
+      "player_name": "Billy Cook",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012930",
+      "player_name": "Blake Dunn",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 38,
+      "eligible_rows": 28
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006562",
+      "player_name": "Blake Perkins",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009412",
+      "player_name": "Blaze Alexander",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 82,
+      "eligible_rows": 72
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011537",
+      "player_name": "Blaze Jordan",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 25,
+      "eligible_rows": 15
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007013",
+      "player_name": "Bo Bichette",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010038",
+      "player_name": "Bo Naylor",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010332",
+      "player_name": "Bobby Witt Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017664",
+      "player_name": "Braden Montgomery",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010438",
+      "player_name": "Braden Shewmake",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30",
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012490",
+      "player_name": "Brady House",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 44,
+      "eligible_rows": 34
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010957",
+      "player_name": "Brandon Lockridge",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006272",
+      "player_name": "Brandon Lowe",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007049",
+      "player_name": "Brandon Marsh",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001907",
+      "player_name": "Brandon Nimmo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013210",
+      "player_name": "Brandon Valenzuela",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 59,
+      "eligible_rows": 49
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013617",
+      "player_name": "Braxton Fulford",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 37,
+      "eligible_rows": 27
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009481",
+      "player_name": "Brayan Rocchio",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010048",
+      "player_name": "Brendan Donovan",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 25,
+      "eligible_rows": 15
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008431",
+      "player_name": "Brent Rooker",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010383",
+      "player_name": "Brenton Doyle",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 43,
+      "eligible_rows": 33
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010334",
+      "player_name": "Brett Baty",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007320",
+      "player_name": "Brett Sullivan",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 45,
+      "eligible_rows": 35
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015648",
+      "player_name": "Brice Matthews",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 82,
+      "eligible_rows": 72
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009385",
+      "player_name": "Brice Turang",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013968",
+      "player_name": "Brooks Lee",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007111",
+      "player_name": "Bryan Reynolds",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 100,
+      "eligible_rows": 90
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016872",
+      "player_name": "Bryan Torres",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015730",
+      "player_name": "Bryce Eldridge",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001365",
+      "player_name": "Bryce Harper",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 100,
+      "eligible_rows": 90
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008627",
+      "player_name": "Bryce Johnson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012937",
+      "player_name": "Bryce Teodosio",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "OF",
+        "PR"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010448",
+      "player_name": "Bryson Stott",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001934",
+      "player_name": "Byron Buxton",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 75,
+      "eligible_rows": 65
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009359",
+      "player_name": "Cal Raleigh",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 68,
+      "eligible_rows": 58
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012804",
+      "player_name": "Caleb Durbin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 91,
+      "eligible_rows": 81
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012527",
+      "player_name": "Cam Cauley",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017208",
+      "player_name": "Cam Smith",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001918",
+      "player_name": "Carlos Correa",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009319",
+      "player_name": "Carlos Cortes",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 71,
+      "eligible_rows": 61
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013727",
+      "player_name": "Carlos Narváez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 55,
+      "eligible_rows": 45
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017531",
+      "player_name": "Carson Benge",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001958",
+      "player_name": "Carson Kelly",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 71,
+      "eligible_rows": 61
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012663",
+      "player_name": "Carson Williams",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012560",
+      "player_name": "Carter Jensen",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011511",
+      "player_name": "Casey Schmitt",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010899",
+      "player_name": "Ceddanne Rafaela",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007647",
+      "player_name": "Cedric Mullins",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013087",
+      "player_name": "Chad Stevens",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 16,
+      "eligible_rows": 6
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008719",
+      "player_name": "Chadwick Tromp",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19",
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014302",
+      "player_name": "Chandler Simpson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013989",
+      "player_name": "Chase DeLauter",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 83,
+      "eligible_rows": 73
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014069",
+      "player_name": "Chase Meidroth",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010656",
+      "player_name": "Christian Koss",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 11,
+      "eligible_rows": 1
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000164",
+      "player_name": "Christian Vázquez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 61,
+      "eligible_rows": 51
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003268",
+      "player_name": "Christian Walker",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000691",
+      "player_name": "Christian Yelich",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 65,
+      "eligible_rows": 55
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010810",
+      "player_name": "Christopher Morel",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 22,
+      "eligible_rows": 12
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010333",
+      "player_name": "CJ Abrams",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011561",
+      "player_name": "Coby Mayo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 77,
+      "eligible_rows": 67
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003122",
+      "player_name": "Cody Bellinger",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014339",
+      "player_name": "Colby Thomas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 50,
+      "eligible_rows": 40
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015716",
+      "player_name": "Cole Carrigg",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 33,
+      "eligible_rows": 23
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014141",
+      "player_name": "Cole Young",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 100,
+      "eligible_rows": 90
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012502",
+      "player_name": "Colson Montgomery",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015721",
+      "player_name": "Colt Emerson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011556",
+      "player_name": "Colt Keith",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 89,
+      "eligible_rows": 79
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012485",
+      "player_name": "Colton Cowser",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 87,
+      "eligible_rows": 77
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006157",
+      "player_name": "Connor Joe",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 21,
+      "eligible_rows": 11
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012591",
+      "player_name": "Connor Norby",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 65,
+      "eligible_rows": 55
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008463",
+      "player_name": "Connor Wong",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PR"
+      ],
+      "source_rows": 44,
+      "eligible_rows": 34
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015989",
+      "player_name": "Cooper Pratt",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 27,
+      "eligible_rows": 17
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010342",
+      "player_name": "Corbin Carroll",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001979",
+      "player_name": "Corey Seager",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 51,
+      "eligible_rows": 41
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010800",
+      "player_name": "Curtis Mead",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 83,
+      "eligible_rows": 73
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014271",
+      "player_name": "Dalton Rushing",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009801",
+      "player_name": "Dane Myers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 66,
+      "eligible_rows": 56
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010181",
+      "player_name": "Daniel Schneemann",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 80,
+      "eligible_rows": 70
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014307",
+      "player_name": "Daniel Susac",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 38,
+      "eligible_rows": 28
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007535",
+      "player_name": "Danny Jansen",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 41,
+      "eligible_rows": 31
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006826",
+      "player_name": "Dansby Swanson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PR"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010895",
+      "player_name": "Darell Hernaiz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 47,
+      "eligible_rows": 37
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008455",
+      "player_name": "Daulton Varsho",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009886",
+      "player_name": "David Fry",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011155",
+      "player_name": "David Hamilton",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 74,
+      "eligible_rows": 64
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013566",
+      "player_name": "Davis Schneider",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 49,
+      "eligible_rows": 39
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012568",
+      "player_name": "Daylen Lile",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012530",
+      "player_name": "Denzel Clarke",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 22,
+      "eligible_rows": 12
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012120",
+      "player_name": "Denzer Guzman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 31,
+      "eligible_rows": 21
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006112",
+      "player_name": "Derek Hill",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12",
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 74,
+      "eligible_rows": 64
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011480",
+      "player_name": "Dillon Dingler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013281",
+      "player_name": "Dominic Canzone",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006775",
+      "player_name": "Dominic Smith",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 82,
+      "eligible_rows": 72
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007686",
+      "player_name": "Donovan Walton",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21",
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 35,
+      "eligible_rows": 25
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014004",
+      "player_name": "Drake Baldwin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 75,
+      "eligible_rows": 65
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016261",
+      "player_name": "Drew Cavanaugh",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013994",
+      "player_name": "Drew Gilbert",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 77,
+      "eligible_rows": 67
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012320",
+      "player_name": "Drew Millas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 50,
+      "eligible_rows": 40
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011453",
+      "player_name": "Drew Romo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 36,
+      "eligible_rows": 26
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013973",
+      "player_name": "Dylan Beavers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 46,
+      "eligible_rows": 36
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016087",
+      "player_name": "Dylan Crews",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 50,
+      "eligible_rows": 40
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007284",
+      "player_name": "Dylan Moore",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013186",
+      "player_name": "Edgar Quero",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 55,
+      "eligible_rows": 45
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006792",
+      "player_name": "Edmundo Sosa",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 54,
+      "eligible_rows": 44
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010682",
+      "player_name": "Edouard Julien",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 81,
+      "eligible_rows": 71
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012510",
+      "player_name": "Edwin Arroyo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 36,
+      "eligible_rows": 26
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008798",
+      "player_name": "Eli White",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 58,
+      "eligible_rows": 48
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003204",
+      "player_name": "Elias Díaz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28",
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 39,
+      "eligible_rows": 29
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012721",
+      "player_name": "Elly De La Cruz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 79,
+      "eligible_rows": 69
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006154",
+      "player_name": "Eloy Jiménez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "PH"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014140",
+      "player_name": "Endy Rodríguez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 35,
+      "eligible_rows": 25
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007675",
+      "player_name": "Eric Haase",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 29,
+      "eligible_rows": 19
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013487",
+      "player_name": "Eric Wagaman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 21,
+      "eligible_rows": 11
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008388",
+      "player_name": "Ernie Clement",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012036",
+      "player_name": "Esmerlyn Valdez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 31,
+      "eligible_rows": 21
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008548",
+      "player_name": "Esteury Ruiz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000311",
+      "player_name": "Eugenio Suárez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011472",
+      "player_name": "Evan Carter",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 81,
+      "eligible_rows": 71
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008510",
+      "player_name": "Everson Pereira",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 21,
+      "eligible_rows": 11
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011104",
+      "player_name": "Ezequiel Duran",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013284",
+      "player_name": "Ezequiel Tovar",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011428",
+      "player_name": "Felix Reyes",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007217",
+      "player_name": "Fernando Tatis Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009441",
+      "player_name": "Francisco Alvarez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 66,
+      "eligible_rows": 56
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001911",
+      "player_name": "Francisco Lindor",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 43,
+      "eligible_rows": 33
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000077",
+      "player_name": "Freddie Freeman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010130",
+      "player_name": "Freddy Fermin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 61,
+      "eligible_rows": 51
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007175",
+      "player_name": "Gabriel Arias",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009629",
+      "player_name": "Gabriel Moreno",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014159",
+      "player_name": "Gabriel Rincones Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 23,
+      "eligible_rows": 13
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011601",
+      "player_name": "Gage Workman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 16,
+      "eligible_rows": 6
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008468",
+      "player_name": "Garrett Mitchell",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 89,
+      "eligible_rows": 79
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007287",
+      "player_name": "Garrett Stubbs",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 16,
+      "eligible_rows": 6
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000857",
+      "player_name": "Gary Sánchez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 55,
+      "eligible_rows": 45
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008437",
+      "player_name": "Gavin Sheets",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000499",
+      "player_name": "George Springer",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 68,
+      "eligible_rows": 58
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008517",
+      "player_name": "George Valera",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009505",
+      "player_name": "Geraldo Perdomo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000690",
+      "player_name": "Giancarlo Stanton",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "PH"
+      ],
+      "source_rows": 23,
+      "eligible_rows": 13
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005406",
+      "player_name": "Gleyber Torres",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 43,
+      "eligible_rows": 33
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014311",
+      "player_name": "Graham Pauley",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 37,
+      "eligible_rows": 27
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009277",
+      "player_name": "Griffin Conine",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 33,
+      "eligible_rows": 23
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010354",
+      "player_name": "Gunnar Henderson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007812",
+      "player_name": "Ha-Seong Kim",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 27,
+      "eligible_rows": 17
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012446",
+      "player_name": "Hao-Yu Lee",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005503",
+      "player_name": "Harrison Bader",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 29,
+      "eligible_rows": 19
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008423",
+      "player_name": "Heliot Ramos",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013977",
+      "player_name": "Henry Bolte",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 56,
+      "eligible_rows": 46
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012487",
+      "player_name": "Henry Davis",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PR"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009626",
+      "player_name": "Heriberto Hernández",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010047",
+      "player_name": "Hunter Feduccia",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 54,
+      "eligible_rows": 44
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012545",
+      "player_name": "Hunter Goodman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017810",
+      "player_name": "Hyeseong Kim",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 43,
+      "eligible_rows": 33
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006046",
+      "player_name": "Ian Happ",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005581",
+      "player_name": "Ildemaro Vargas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 84,
+      "eligible_rows": 74
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010539",
+      "player_name": "Isaac Collins",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 89,
+      "eligible_rows": 79
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007465",
+      "player_name": "Isaac Paredes",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007554",
+      "player_name": "Isiah Kiner-Falefa",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PR"
+      ],
+      "source_rows": 47,
+      "eligible_rows": 37
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009515",
+      "player_name": "Iván Herrera",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009892",
+      "player_name": "J.C. Escarra",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005680",
+      "player_name": "J.P. Crawford",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 82,
+      "eligible_rows": 72
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000675",
+      "player_name": "J.T. Realmuto",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 71,
+      "eligible_rows": 61
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017430",
+      "player_name": "Jac Caglianone",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012116",
+      "player_name": "Jackson Chourio",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 65,
+      "eligible_rows": 55
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013999",
+      "player_name": "Jackson Holliday",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012919",
+      "player_name": "Jackson Merrill",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015676",
+      "player_name": "Jacob Gonzalez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16",
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015714",
+      "player_name": "Jacob Wilson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 59,
+      "eligible_rows": 49
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013683",
+      "player_name": "Jacob Young",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 88,
+      "eligible_rows": 78
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006168",
+      "player_name": "Jahmai Jones",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17",
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005519",
+      "player_name": "Jake Bauers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008336",
+      "player_name": "Jake Burger",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007416",
+      "player_name": "Jake Cronenworth",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007028",
+      "player_name": "Jake Fraley",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010408",
+      "player_name": "Jake Mangum",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 80,
+      "eligible_rows": 70
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009345",
+      "player_name": "Jake McCarthy",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009116",
+      "player_name": "Jake Meyers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 51,
+      "eligible_rows": 41
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007115",
+      "player_name": "Jake Rogers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014309",
+      "player_name": "Jakob Marsee",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000437",
+      "player_name": "James McCann",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 21,
+      "eligible_rows": 11
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010045",
+      "player_name": "James Outman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17",
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 76,
+      "eligible_rows": 66
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012669",
+      "player_name": "James Wood",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 100,
+      "eligible_rows": 90
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010462",
+      "player_name": "Jared Triolo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 65,
+      "eligible_rows": 55
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009774",
+      "player_name": "Jared Young",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009303",
+      "player_name": "Jarred Kelenic",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16",
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 26,
+      "eligible_rows": 16
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009517",
+      "player_name": "Jarren Duran",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 91,
+      "eligible_rows": 81
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010666",
+      "player_name": "Jase Bowen",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 30,
+      "eligible_rows": 20
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010608",
+      "player_name": "Jasson Domínguez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 39,
+      "eligible_rows": 29
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000213",
+      "player_name": "Javier Báez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 24,
+      "eligible_rows": 14
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010838",
+      "player_name": "Javier Sanoja",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 79,
+      "eligible_rows": 69
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007299",
+      "player_name": "Jazz Chisholm Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005542",
+      "player_name": "Jeff McNeil",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 87,
+      "eligible_rows": 77
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009299",
+      "player_name": "Jeremiah Jackson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009354",
+      "player_name": "Jeremy Peña",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009908",
+      "player_name": "Jesus Rodriguez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005191",
+      "player_name": "Jesús Sánchez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 73,
+      "eligible_rows": 63
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009090",
+      "player_name": "Jhonny Pereda",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 19,
+      "eligible_rows": 9
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015389",
+      "player_name": "Jhostynxon Garcia",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015904",
+      "player_name": "Jim Jarvis",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014290",
+      "player_name": "Jimmy Crooks",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 27,
+      "eligible_rows": 17
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010337",
+      "player_name": "JJ Bleday",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017188",
+      "player_name": "JJ Wetherholt",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008331",
+      "player_name": "Jo Adell",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000646",
+      "player_name": "Joc Pederson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012495",
+      "player_name": "Joe Mack",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 56,
+      "eligible_rows": 46
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009268",
+      "player_name": "Joey Bart",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26",
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 35,
+      "eligible_rows": 25
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013105",
+      "player_name": "Joey Loperfido",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 39,
+      "eligible_rows": 29
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010423",
+      "player_name": "Joey Ortiz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011607",
+      "player_name": "Joey Wiemer",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 30,
+      "eligible_rows": 20
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016137",
+      "player_name": "Jonah Cox",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 24,
+      "eligible_rows": 14
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006058",
+      "player_name": "Jonah Heim",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24",
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009164",
+      "player_name": "Jonathan Aranda",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009298",
+      "player_name": "Jonathan India",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 17,
+      "eligible_rows": 7
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013645",
+      "player_name": "Jonny DeLuca",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012389",
+      "player_name": "Jorbit Vivas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013974",
+      "player_name": "Jordan Beck",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 30,
+      "eligible_rows": 20
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012493",
+      "player_name": "Jordan Lawlar",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011497",
+      "player_name": "Jordan Walker",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009501",
+      "player_name": "Jorge Barrosa",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 68,
+      "eligible_rows": 58
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006394",
+      "player_name": "Jorge Mateo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 61,
+      "eligible_rows": 51
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000774",
+      "player_name": "Jorge Polanco",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 20,
+      "eligible_rows": 10
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000225",
+      "player_name": "Jorge Soler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 78,
+      "eligible_rows": 68
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000485",
+      "player_name": "Jose Altuve",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 77,
+      "eligible_rows": 67
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006974",
+      "player_name": "José Azócar",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "OF",
+        "PR"
+      ],
+      "source_rows": 11,
+      "eligible_rows": 1
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008607",
+      "player_name": "José Caballero",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 84,
+      "eligible_rows": 74
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005810",
+      "player_name": "José Fermín",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 63,
+      "eligible_rows": 53
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012395",
+      "player_name": "Jose Fernandez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 55,
+      "eligible_rows": 45
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000352",
+      "player_name": "José Ramírez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005405",
+      "player_name": "Jose Siri",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 47,
+      "eligible_rows": 37
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010223",
+      "player_name": "José Tena",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 73,
+      "eligible_rows": 63
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007553",
+      "player_name": "Jose Trevino",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 22,
+      "eligible_rows": 12
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005299",
+      "player_name": "Josh Bell",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010362",
+      "player_name": "Josh Jung",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007045",
+      "player_name": "Josh Lowe",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "OF",
+        "PR"
+      ],
+      "source_rows": 62,
+      "eligible_rows": 52
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006506",
+      "player_name": "Josh Naylor",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009104",
+      "player_name": "Josh Rojas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 17,
+      "eligible_rows": 7
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010443",
+      "player_name": "Josh Smith",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 40,
+      "eligible_rows": 30
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017572",
+      "player_name": "Joshua Kuroda-Grauer",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014432",
+      "player_name": "Juan Brito",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006794",
+      "player_name": "Juan Soto",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 81,
+      "eligible_rows": 71
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008513",
+      "player_name": "Julio Rodríguez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 89,
+      "eligible_rows": 79
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016353",
+      "player_name": "Jung Hoo Lee",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013289",
+      "player_name": "Junior Caminero",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010778",
+      "player_name": "Junior Perez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 19,
+      "eligible_rows": 9
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013986",
+      "player_name": "Justin Crawford",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 91,
+      "eligible_rows": 81
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009766",
+      "player_name": "Justin Dean",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 11,
+      "eligible_rows": 1
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011438",
+      "player_name": "Justin Foscue",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 49,
+      "eligible_rows": 39
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012657",
+      "player_name": "Kahlil Watson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 26,
+      "eligible_rows": 16
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010419",
+      "player_name": "Kameron Misner",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 18,
+      "eligible_rows": 8
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10019272",
+      "player_name": "Kazuma Okamoto",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006053",
+      "player_name": "Ke'Bryan Hayes",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007310",
+      "player_name": "Keibert Ruiz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 63,
+      "eligible_rows": 53
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010954",
+      "player_name": "Kerry Carpenter",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 76,
+      "eligible_rows": 66
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001087",
+      "player_name": "Ketel Marte",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009440",
+      "player_name": "Kevin Alcántara",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 18,
+      "eligible_rows": 8
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016051",
+      "player_name": "Kevin McGonigle",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009316",
+      "player_name": "Kody Clemens",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017687",
+      "player_name": "Konnor Griffin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 59,
+      "eligible_rows": 49
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007359",
+      "player_name": "Kyle Farmer",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001865",
+      "player_name": "Kyle Higashioka",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 54,
+      "eligible_rows": 44
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009338",
+      "player_name": "Kyle Isbel",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 56,
+      "eligible_rows": 46
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015743",
+      "player_name": "Kyle Karros",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 95,
+      "eligible_rows": 85
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012572",
+      "player_name": "Kyle Manzardo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10002093",
+      "player_name": "Kyle Schwarber",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010450",
+      "player_name": "Kyle Stowers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 75,
+      "eligible_rows": 65
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016038",
+      "player_name": "Kyle Teel",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 18,
+      "eligible_rows": 8
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006868",
+      "player_name": "Kyle Tucker",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015016",
+      "player_name": "Kyler Fedko",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006977",
+      "player_name": "LaMonte Wade Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007911",
+      "player_name": "Lane Thomas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012277",
+      "player_name": "Lars Nootbaar",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 35,
+      "eligible_rows": 25
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010579",
+      "player_name": "Lawrence Butler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 91,
+      "eligible_rows": 81
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008493",
+      "player_name": "Lenyn Sosa",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16",
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 40,
+      "eligible_rows": 30
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009236",
+      "player_name": "Leo Jiménez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 44,
+      "eligible_rows": 34
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008544",
+      "player_name": "Leo Rivas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PR"
+      ],
+      "source_rows": 38,
+      "eligible_rows": 28
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006836",
+      "player_name": "Leody Taveras",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012636",
+      "player_name": "Liam Hicks",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 89,
+      "eligible_rows": 79
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009630",
+      "player_name": "Logan O'Hoppe",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007259",
+      "player_name": "Lourdes Gurriel Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 47,
+      "eligible_rows": 37
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005493",
+      "player_name": "Luis Arraez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008337",
+      "player_name": "Luis Campusano",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007180",
+      "player_name": "Luis García Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007973",
+      "player_name": "Luis Rengifo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32",
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 59,
+      "eligible_rows": 49
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008206",
+      "player_name": "Luis Robert Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 24,
+      "eligible_rows": 14
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006863",
+      "player_name": "Luis Torrens",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007151",
+      "player_name": "Luis Urías",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010571",
+      "player_name": "Luisangel Acuña",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 68,
+      "eligible_rows": 58
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015791",
+      "player_name": "LuJames Groover",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10016018",
+      "player_name": "Luke Keaschall",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009041",
+      "player_name": "Luke Raley",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013287",
+      "player_name": "Maikel Garcia",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 69,
+      "eligible_rows": 59
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000129",
+      "player_name": "Manny Machado",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000689",
+      "player_name": "Marcell Ozuna",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "PH"
+      ],
+      "source_rows": 62,
+      "eligible_rows": 52
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012497",
+      "player_name": "Marcelo Mayer",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000908",
+      "player_name": "Marcus Semien",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 82,
+      "eligible_rows": 72
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008456",
+      "player_name": "Mark Vientos",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 73,
+      "eligible_rows": 63
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014462",
+      "player_name": "Masataka Yoshida",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011513",
+      "player_name": "Masyn Winn",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005661",
+      "player_name": "Matt Chapman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 83,
+      "eligible_rows": 73
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009348",
+      "player_name": "Matt McLain",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 83,
+      "eligible_rows": 73
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001961",
+      "player_name": "Matt Olson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015639",
+      "player_name": "Matt Shaw",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 56,
+      "eligible_rows": 46
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009878",
+      "player_name": "Matt Vierling",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 84,
+      "eligible_rows": 74
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010467",
+      "player_name": "Matt Wallner",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005772",
+      "player_name": "Mauricio Dubón",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000779",
+      "player_name": "Max Kepler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001955",
+      "player_name": "Max Muncy",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012504",
+      "player_name": "Max Muncy",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 46,
+      "eligible_rows": 36
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013590",
+      "player_name": "Max Schuemann",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 33,
+      "eligible_rows": 23
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010338",
+      "player_name": "Michael Busch",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005235",
+      "player_name": "Michael Conforto",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010393",
+      "player_name": "Michael Harris II",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009660",
+      "player_name": "Michael Helman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010411",
+      "player_name": "Michael Massey",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 80,
+      "eligible_rows": 70
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015039",
+      "player_name": "Mickey Gasper",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007006",
+      "player_name": "Mickey Moniak",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 65,
+      "eligible_rows": 55
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005466",
+      "player_name": "Miguel Amaya",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005476",
+      "player_name": "Miguel Andujar",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 74,
+      "eligible_rows": 64
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000685",
+      "player_name": "Miguel Rojas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 62,
+      "eligible_rows": 52
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010953",
+      "player_name": "Miguel Vargas",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000600",
+      "player_name": "Mike Trout",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 81,
+      "eligible_rows": 71
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003177",
+      "player_name": "Mike Yastrzemski",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009757",
+      "player_name": "Miles Mastrobuoni",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10002089",
+      "player_name": "Mitch Garver",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 45,
+      "eligible_rows": 35
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008374",
+      "player_name": "MJ Melendez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 56,
+      "eligible_rows": 46
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013473",
+      "player_name": "Moisés Ballesteros",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 59,
+      "eligible_rows": 49
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000176",
+      "player_name": "Mookie Betts",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 63,
+      "eligible_rows": 53
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10019269",
+      "player_name": "Munetaka Murakami",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 63,
+      "eligible_rows": 53
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008190",
+      "player_name": "Myles Straw",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010422",
+      "player_name": "Nasim Nuñez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011056",
+      "player_name": "Nate Eaton",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015074",
+      "player_name": "Nathan Church",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 80,
+      "eligible_rows": 70
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008771",
+      "player_name": "Nathan Lukes",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "OF",
+        "PR"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008989",
+      "player_name": "Nathaniel Lowe",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008611",
+      "player_name": "Nelson Velázquez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 25,
+      "eligible_rows": 15
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008379",
+      "player_name": "Nick Allen",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 50,
+      "eligible_rows": 40
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009327",
+      "player_name": "Nick Fortes",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 74,
+      "eligible_rows": 64
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011439",
+      "player_name": "Nick Gonzales",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017332",
+      "player_name": "Nick Kurtz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011448",
+      "player_name": "Nick Loftin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 62,
+      "eligible_rows": 52
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009344",
+      "player_name": "Nick Madrigal",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011153",
+      "player_name": "Nick Sogard",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011496",
+      "player_name": "Nick Yorke",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 27,
+      "eligible_rows": 17
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007427",
+      "player_name": "Nicky Lopez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28",
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 46,
+      "eligible_rows": 36
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009296",
+      "player_name": "Nico Hoerner",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009457",
+      "player_name": "Noelvi Marte",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 43,
+      "eligible_rows": 33
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000393",
+      "player_name": "Nolan Arenado",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009287",
+      "player_name": "Nolan Gorman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 62,
+      "eligible_rows": 52
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015615",
+      "player_name": "Nolan Schanuel",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 80,
+      "eligible_rows": 70
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007308",
+      "player_name": "Oneil Cruz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005377",
+      "player_name": "Orlando Arcia",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 18,
+      "eligible_rows": 8
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008700",
+      "player_name": "Oswald Peraza",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015360",
+      "player_name": "Otto Kemp",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009558",
+      "player_name": "Otto Lopez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011468",
+      "player_name": "Owen Caissie",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 80,
+      "eligible_rows": 70
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005445",
+      "player_name": "Ozzie Albies",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008893",
+      "player_name": "P.J. Higgins",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009349",
+      "player_name": "Parker Meadows",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011430",
+      "player_name": "Patrick Bailey",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10",
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 66,
+      "eligible_rows": 56
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006940",
+      "player_name": "Patrick Wisdom",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 15,
+      "eligible_rows": 5
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000031",
+      "player_name": "Paul Goldschmidt",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 70,
+      "eligible_rows": 60
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008438",
+      "player_name": "Pavin Smith",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010888",
+      "player_name": "Pedro Pagés",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 57,
+      "eligible_rows": 47
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013737",
+      "player_name": "Pedro Ramírez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007009",
+      "player_name": "Pete Alonso",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 100,
+      "eligible_rows": 90
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011436",
+      "player_name": "Pete Crow-Armstrong",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011543",
+      "player_name": "Petey Halpin",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 33,
+      "eligible_rows": 23
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005751",
+      "player_name": "Rafael Devers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006358",
+      "player_name": "Rafael Marchán",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 31,
+      "eligible_rows": 21
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007398",
+      "player_name": "Ramón Laureano",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009032",
+      "player_name": "Ramón Urías",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 25,
+      "eligible_rows": 15
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001181",
+      "player_name": "Randal Grichuk",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16",
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 64,
+      "eligible_rows": 54
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007224",
+      "player_name": "Randy Arozarena",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009504",
+      "player_name": "Raynel Delgado",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 17,
+      "eligible_rows": 7
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010356",
+      "player_name": "Rece Hinds",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2",
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006124",
+      "player_name": "Rhys Hoskins",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 78,
+      "eligible_rows": 68
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009353",
+      "player_name": "Richie Palacios",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015794",
+      "player_name": "Rikuu Nishida",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010353",
+      "player_name": "Riley Greene",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003163",
+      "player_name": "Rob Refsnyder",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 49,
+      "eligible_rows": 39
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009008",
+      "player_name": "Rodolfo Durán",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 34,
+      "eligible_rows": 24
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013970",
+      "player_name": "Roman Anthony",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 30,
+      "eligible_rows": 20
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009532",
+      "player_name": "Romy Gonzalez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006969",
+      "player_name": "Ronald Acuña Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008506",
+      "player_name": "Ronny Mauricio",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 17,
+      "eligible_rows": 7
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008329",
+      "player_name": "Royce Lewis",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 65,
+      "eligible_rows": 55
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009300",
+      "player_name": "Ryan Jeffers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 42,
+      "eligible_rows": 32
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010400",
+      "player_name": "Ryan Kreidler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 55,
+      "eligible_rows": 45
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006345",
+      "player_name": "Ryan McMahon",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 79,
+      "eligible_rows": 69
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006521",
+      "player_name": "Ryan O'Hearn",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008457",
+      "player_name": "Ryan Vilade",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 55,
+      "eligible_rows": 45
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017735",
+      "player_name": "Ryan Waldschmidt",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 37,
+      "eligible_rows": 27
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013190",
+      "player_name": "Ryan Ward",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 20,
+      "eligible_rows": 10
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012489",
+      "player_name": "Sal Frelick",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014087",
+      "player_name": "Sal Stewart",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000525",
+      "player_name": "Salvador Perez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017224",
+      "player_name": "Sam Antonacci",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 78,
+      "eligible_rows": 68
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008079",
+      "player_name": "Sam Haggerty",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 35,
+      "eligible_rows": 25
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008524",
+      "player_name": "Samad Taylor",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 26,
+      "eligible_rows": 16
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011955",
+      "player_name": "Samuel Basallo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 86,
+      "eligible_rows": 76
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001354",
+      "player_name": "Sandy León",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 21,
+      "eligible_rows": 11
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008834",
+      "player_name": "Santiago Espinal",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 36,
+      "eligible_rows": 26
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017308",
+      "player_name": "Sean Keys",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 11,
+      "eligible_rows": 1
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009619",
+      "player_name": "Sebastián Rivero",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 24,
+      "eligible_rows": 14
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007727",
+      "player_name": "Seiya Suzuki",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 83,
+      "eligible_rows": 73
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011613",
+      "player_name": "Shay Whitcomb",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 17,
+      "eligible_rows": 7
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010367",
+      "player_name": "Shea Langeliers",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 89,
+      "eligible_rows": 79
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008667",
+      "player_name": "Shohei Ohtani",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013268",
+      "player_name": "Spencer Horwitz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 74,
+      "eligible_rows": 64
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013969",
+      "player_name": "Spencer Jones",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 30,
+      "eligible_rows": 20
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010446",
+      "player_name": "Spencer Steer",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011494",
+      "player_name": "Spencer Torkelson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001009",
+      "player_name": "Starling Marte",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 44,
+      "eligible_rows": 34
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014340",
+      "player_name": "Sterlin Thompson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 27,
+      "eligible_rows": 17
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010180",
+      "player_name": "Steven Kwan",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "OF"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008350",
+      "player_name": "Stuart Fairchild",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10019267",
+      "player_name": "Sung-Mun Song",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 44,
+      "eligible_rows": 34
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011565",
+      "player_name": "Tanner Murray",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 13,
+      "eligible_rows": 3
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007135",
+      "player_name": "Taylor Trammell",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 45,
+      "eligible_rows": 35
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008458",
+      "player_name": "Taylor Walls",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "IF",
+        "PR"
+      ],
+      "source_rows": 79,
+      "eligible_rows": 69
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006902",
+      "player_name": "Taylor Ward",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006072",
+      "player_name": "Teoscar Hernández",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 66,
+      "eligible_rows": 56
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011573",
+      "player_name": "Thomas Saggese",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 32,
+      "eligible_rows": 22
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013131",
+      "player_name": "Tim Tawa",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 42,
+      "eligible_rows": 32
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007252",
+      "player_name": "TJ Friedl",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 61,
+      "eligible_rows": 51
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013293",
+      "player_name": "TJ Rumfield",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 98,
+      "eligible_rows": 88
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008749",
+      "player_name": "Tommy Edman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 25,
+      "eligible_rows": 15
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015846",
+      "player_name": "Tommy Troy",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 39,
+      "eligible_rows": 29
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10017170",
+      "player_name": "Travis Bazzana",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 68,
+      "eligible_rows": 58
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000809",
+      "player_name": "Travis d'Arnaud",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 14,
+      "eligible_rows": 4
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10002094",
+      "player_name": "Trea Turner",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005672",
+      "player_name": "Trent Grisham",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 78,
+      "eligible_rows": 68
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009306",
+      "player_name": "Trevor Larnach",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 82,
+      "eligible_rows": 72
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10001896",
+      "player_name": "Trevor Story",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 41,
+      "eligible_rows": 31
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008635",
+      "player_name": "Tristan Gray",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 63,
+      "eligible_rows": 53
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012905",
+      "player_name": "Tristan Peters",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "position_categories": [
+        "OF",
+        "PH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013497",
+      "player_name": "Troy Johnston",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 90,
+      "eligible_rows": 80
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010952",
+      "player_name": "Tsung-Che Cheng",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 12,
+      "eligible_rows": 2
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006284",
+      "player_name": "Ty France",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 73,
+      "eligible_rows": 63
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010379",
+      "player_name": "Tyler Callihan",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 30,
+      "eligible_rows": 20
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008351",
+      "player_name": "Tyler Freeman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF"
+      ],
+      "source_rows": 68,
+      "eligible_rows": 58
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003324",
+      "player_name": "Tyler Heineman",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21",
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 38,
+      "eligible_rows": 28
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10003149",
+      "player_name": "Tyler O'Neill",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 60,
+      "eligible_rows": 50
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10011500",
+      "player_name": "Tyler Soderstrom",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 87,
+      "eligible_rows": 77
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006804",
+      "player_name": "Tyler Stephenson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 75,
+      "eligible_rows": 65
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013574",
+      "player_name": "Tyler Tolbert",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PR"
+      ],
+      "source_rows": 31,
+      "eligible_rows": 21
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006837",
+      "player_name": "Tyrone Taylor",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 58,
+      "eligible_rows": 48
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010737",
+      "player_name": "Vaughn Grissom",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 59,
+      "eligible_rows": 49
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010575",
+      "player_name": "Victor Bericoto",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 24,
+      "eligible_rows": 14
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005633",
+      "player_name": "Victor Caratini",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015400",
+      "player_name": "Victor Mesa Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 36,
+      "eligible_rows": 26
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006634",
+      "player_name": "Victor Robles",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 44,
+      "eligible_rows": 34
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014281",
+      "player_name": "Victor Scott II",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 61,
+      "eligible_rows": 51
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010866",
+      "player_name": "Vinnie Pasquantino",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 72,
+      "eligible_rows": 62
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007501",
+      "player_name": "Vladimir Guerrero Jr.",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015006",
+      "player_name": "Wade Meckler",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 45,
+      "eligible_rows": 35
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008520",
+      "player_name": "Wenceel Pérez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 53,
+      "eligible_rows": 43
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008142",
+      "player_name": "Weston Wilson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:13",
+        "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 29,
+      "eligible_rows": 19
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007012",
+      "player_name": "Will Benson",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 51,
+      "eligible_rows": 41
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012442",
+      "player_name": "Will Brennan",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 11,
+      "eligible_rows": 1
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007125",
+      "player_name": "Will Smith",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 52,
+      "eligible_rows": 42
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013054",
+      "player_name": "Will Wagner",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 16,
+      "eligible_rows": 6
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10002148",
+      "player_name": "Willi Castro",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 85,
+      "eligible_rows": 75
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008579",
+      "player_name": "William Contreras",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 92,
+      "eligible_rows": 82
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005307",
+      "player_name": "Willson Contreras",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 91,
+      "eligible_rows": 81
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005433",
+      "player_name": "Willy Adames",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 93,
+      "eligible_rows": 83
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10013507",
+      "player_name": "Wilyer Abreu",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 96,
+      "eligible_rows": 86
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015789",
+      "player_name": "Wyatt Langford",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 48,
+      "eligible_rows": 38
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10000165",
+      "player_name": "Xander Bogaerts",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "position_categories": [
+        "IF"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10009282",
+      "player_name": "Xavier Edwards",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 100,
+      "eligible_rows": 90
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012310",
+      "player_name": "Yainer Diaz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "IF"
+      ],
+      "source_rows": 46,
+      "eligible_rows": 36
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10005684",
+      "player_name": "Yandy Díaz",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "position_categories": [
+        "DH"
+      ],
+      "source_rows": 94,
+      "eligible_rows": 84
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10006462",
+      "player_name": "Yoán Moncada",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 41,
+      "eligible_rows": 31
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010108",
+      "player_name": "Yohel Pozo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "position_categories": [
+        "DH",
+        "IF",
+        "PH"
+      ],
+      "source_rows": 18,
+      "eligible_rows": 8
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10010564",
+      "player_name": "Yohendrick Piñango",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 51,
+      "eligible_rows": 41
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10007152",
+      "player_name": "Yordan Alvarez",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "OF"
+      ],
+      "source_rows": 99,
+      "eligible_rows": 89
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014078",
+      "player_name": "Zach Cole",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 19,
+      "eligible_rows": 9
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10015449",
+      "player_name": "Zach Dezenzo",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "position_categories": [
+        "DH",
+        "OF",
+        "PH",
+        "PR"
+      ],
+      "source_rows": 29,
+      "eligible_rows": 19
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008086",
+      "player_name": "Zach McKinstry",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "position_categories": [
+        "IF",
+        "OF"
+      ],
+      "source_rows": 74,
+      "eligible_rows": 64
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10014061",
+      "player_name": "Zach Neto",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 97,
+      "eligible_rows": 87
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10012542",
+      "player_name": "Zack Gelof",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "position_categories": [
+        "IF",
+        "OF",
+        "PH"
+      ],
+      "source_rows": 67,
+      "eligible_rows": 57
+    },
+    {
+      "player_id": "baseball_mlb:mlb:sportsdataio:player:10008174",
+      "player_name": "Zack Short",
+      "team_ids": [
+        "baseball_mlb:mlb:sportsdataio:team:17",
+        "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "position_categories": [
+        "IF",
+        "PH"
+      ],
+      "source_rows": 28,
+      "eligible_rows": 18
+    }
   ]
 }
