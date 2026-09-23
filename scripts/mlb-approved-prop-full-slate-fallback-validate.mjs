@@ -17,7 +17,8 @@ test('Odds API reserve is checked before the per-event loop',()=>{
 test('capture completion is coverage-aware and can use BDL fallback',()=>{
   assert(capture.includes('const oddsCoverageComplete = planned.every'))
   assert(capture.includes('captureApprovedPropsFromBallDontLie'))
-  assert(capture.includes('const combinedCoverageComplete = oddsCoverageComplete || Boolean(bdlFallback?.coverageComplete)'))
+  assert(capture.includes("'coverageComplete' in bdlFallback"))
+  assert(capture.includes('const combinedCoverageComplete = oddsCoverageComplete || bdlCoverageComplete'))
   assert(capture.includes('coverageComplete: combinedCoverageComplete'))
 })
 
