@@ -25,8 +25,8 @@
     "github_code_search_mentions_balldontlie": 0
   },
   "interpretation": "BALLDONTLIE schema/identity/timestamp capability is proven by one persisted pregame player-prop quote, but no historical corpus or reusable persisted ingestion pipeline is currently present in canonical storage/repo search.",
-  "decision": "CAPABILITY_PROVEN_CORPUS_AND_REUSABLE_PIPELINE_NOT_PRESENT",
-  "next_gate": "Find an existing credential/workflow contract or create a separate research-only prospective capture path; do not infer historical coverage from the single quote and do not call Odds API historical.",
+  "decision": "CAPABILITY_PROVEN_BUT_PRODUCTION_RUNTIME_KEY_MISSING_AND_NO_HISTORICAL_CORPUS",
+  "next_gate": "Configure BALLDONTLIE_API_KEY in Vercel production from the user's existing subscription, then run a separately bounded research-only capability/capture gate. No provider call is authorized by this audit itself.",
   "boundaries": {
     "provider_calls_made": 0,
     "odds_api_historical_credits_consumed": 0,
@@ -34,5 +34,14 @@
     "apostar_activation": false,
     "production_promotion": false,
     "tracker_modified": false
+  },
+  "runtime_key_audit": {
+    "audited_at": "2026-09-23T03:16:23Z",
+    "environment": "production",
+    "configured": false,
+    "provider_calls_made": 0,
+    "secret_value_exposed": false,
+    "workflow_run_id": 35813665015,
+    "state": "BLOCKED_BALLDONTLIE_KEY_NOT_CONFIGURED_IN_VERCEL_PRODUCTION"
   }
 }
