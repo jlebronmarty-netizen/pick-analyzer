@@ -266,3 +266,45 @@ Active traditional replay blocker is now limited to **Pitcher Hits Allowed**. Ba
 - APOSTAR disabled
 - no production promotion
 - tracker unchanged
+
+## RBI / H+R+RBI line-surface admission
+
+### Batter RBI
+
+Certified control:
+`batter_rbi_under_0p5_proj_0p10_v1`
+
+Frozen 2025 evidence:
+- **2,053/2,402 = 85.47%**
+
+The persisted 2026-09-22 board contains only the exact **0.5** RBI line. There is therefore no new
+exact RBI line to expand today. The certified U0.5 rule remains unchanged.
+
+State:
+`NO_NEW_EXACT_LINE_TO_EXPAND`
+
+### Batter Hits + Runs + RBIs
+
+Certified control:
+`batter_hrrbi_under_2p5_proj_0p70_v1`
+
+Frozen 2025 evidence:
+- **2,278/2,582 = 88.23%**
+
+Current 2026-09-22 captured lines include **0.5** and **1.5**, so alternate-line research would be
+relevant if the exact frozen 2025 replay corpus were available.
+
+The authoritative 2025 source was the frozen Retrosheet player-game batting CSV used by PR #155,
+digest:
+
+`3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753`
+
+The currently available Supabase event-derived reconstruction is **not** exact. As a parity test,
+replaying the RBI U0.5 control on that reconstruction produced **930/1,167** versus the frozen
+**2,053/2,402**, with a materially different baseline. Therefore it cannot be substituted for the
+frozen player-game corpus.
+
+State:
+`LINE_SURFACE_BLOCKED_EXACT_REPLAY`
+
+No HRRBI 0.5/1.5 threshold search was performed on the approximate corpus.
