@@ -11,7 +11,7 @@ from collections import defaultdict
 
 SOURCE_URL = "https://www.retrosheet.org/downloads/2025/2025csvs.zip"
 EXPECTED_SHA256 = "3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753"
-EXPECTED_BATTING_ROWS = 71550
+EXPECTED_REGULAR_BATTING_ROWS = 71550
 EXPECTED_REGULAR_GAMES = 2430
 EXPECTED_RBI_CONTROL = {"n": 2402, "wins": 2053}
 EXPECTED_HRRBI_CONTROL = {"n": 2582, "wins": 2278}
@@ -97,14 +97,6 @@ def load_rows(archive_bytes):
     batting_text = batting_bytes.decode("utf-8-sig")
     reader = csv.DictReader(io.StringIO(batting_text))
     all_rows = list(reader)
-    if len(all_rows) != EXPECTED_BATTING_ROWS:
-        fail(
-            "BATTING_ROW_COUNT_MISMATCH",
-            expected=EXPECTED_BATTING_ROWS,
-            observed=len(all_rows),
-            batting_member=batting_name,
-        )
-
     stattypes = defaultdict(int)
     gametypes = defaultdict(int)
     for r in all_rows:
@@ -128,6 +120,16 @@ def load_rows(archive_bytes):
                 "r": to_int(r.get("b_r")),
                 "rbi": to_int(r.get("b_rbi")),
             }
+        )
+
+    if len(rows) != EXPECTED_REGULAR_BATTING_ROWS:
+        fail(
+            "REGULAR_BATTING_ROW_COUNT_MISMATCH",
+            expected=EXPECTED_REGULAR_BATTING_ROWS,
+            observed=len(rows),
+            all_batting_rows=len(all_rows),
+            stattypes=dict(sorted(stattypes.items())),
+            gametypes=dict(sorted(gametypes.items())),
         )
 
     unique_games = len({r["gid"] for r in rows})
