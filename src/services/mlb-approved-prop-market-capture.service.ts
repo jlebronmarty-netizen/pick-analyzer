@@ -458,7 +458,10 @@ export async function captureMlbApprovedPropMarkets(input: {
   }
   if (!apiKey()) return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY' }
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
-  const recoveryWindow = clock.hour === 11 && clock.minute <= 50
+  const recoveryWindow =
+    clock.hour === 11 ||
+    clock.hour === 12 ||
+    (clock.hour === 13 && clock.minute <= 10)
   if (clock.hour !== 10 && !recoveryWindow) return { ...base, status: 'NOT_DUE' }
 
   // A bounded 11:00-11:10 recovery reuses the 10:45 checkpoint identity,
