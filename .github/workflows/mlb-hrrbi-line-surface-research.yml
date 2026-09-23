@@ -6,12 +6,24 @@ on:
       - research/batter-line-surface-closeouts-v1-20260922
     paths:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
+      - scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs
+      - scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
+      - artifacts/research/mlb_batter_hrrbi_line_surface_v1.json
+      - artifacts/research/mlb_batter_line_surface_closeouts_v1.json
+      - docs/research/MLB_BATTER_HRRBI_LINE_SURFACE_V1.md
+      - docs/research/MLB_BATTER_LINE_SURFACE_CLOSEOUTS_V1.md
       - .github/workflows/mlb-hrrbi-line-surface-research.yml
   pull_request:
     branches:
       - main
     paths:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
+      - scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs
+      - scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
+      - artifacts/research/mlb_batter_hrrbi_line_surface_v1.json
+      - artifacts/research/mlb_batter_line_surface_closeouts_v1.json
+      - docs/research/MLB_BATTER_HRRBI_LINE_SURFACE_V1.md
+      - docs/research/MLB_BATTER_LINE_SURFACE_CLOSEOUTS_V1.md
       - .github/workflows/mlb-hrrbi-line-surface-research.yml
 
 permissions:
@@ -27,6 +39,8 @@ jobs:
         env:
           HRRBI_RESULT_PATH: /tmp/mlb_hrrbi_line_surface_v1_result.json
         run: python3 scripts/research/mlb_hrrbi_line_surface_v1.py
+      - name: Verify frozen HRRBI artifacts and closeout
+        run: node --test scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
       - name: Upload research result
         if: always()
         uses: actions/upload-artifact@v4
