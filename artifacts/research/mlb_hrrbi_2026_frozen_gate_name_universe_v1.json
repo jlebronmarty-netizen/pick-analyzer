@@ -8,15 +8,18 @@
     "eligible_rows_expected": 25778,
     "eligible_players_pre_identity_expected": 522
   },
-  "usage": "identity discovery only; all evaluated outcomes/features come from MLB Official StatsAPI",
+  "usage": "identity discovery only; evaluated outcomes/features come from MLB Official StatsAPI",
   "no_fuzzy_matching": true,
-  "expected_unique_exact_mlbam_players": 516,
+  "expected_frozen_mlbam_players": 516,
   "players": [
     {
       "player_id": "baseball_mlb:mlb:sportsdataio:player:10015666",
       "player_name": "A.J. Ewing",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -32,6 +35,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -44,6 +50,9 @@
       "player_name": "Adam Frazier",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "DH",
@@ -61,6 +70,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
       ],
+      "team_abbreviations": [
+        "BAL"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -74,6 +86,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -85,6 +100,9 @@
       "player_name": "Adrian Del Castillo",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "team_abbreviations": [
+        "ARI"
       ],
       "position_categories": [
         "DH",
@@ -101,6 +119,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -115,6 +136,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -127,6 +151,9 @@
       "player_name": "Alec Burleson",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "team_abbreviations": [
+        "STL"
       ],
       "position_categories": [
         "DH",
@@ -142,6 +169,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -154,6 +184,9 @@
       "player_name": "Alejandro Osuna",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "OF",
@@ -168,6 +201,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -179,6 +215,9 @@
       "player_name": "Alex Bregman",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -192,6 +231,9 @@
       "player_name": "Alex Call",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "team_abbreviations": [
+        "LAD"
       ],
       "position_categories": [
         "DH",
@@ -208,6 +250,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "IF",
         "PH",
@@ -221,6 +266,9 @@
       "player_name": "Alex Jackson",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "IF",
@@ -236,6 +284,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -248,6 +299,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -259,6 +313,9 @@
       "player_name": "Amed Rosario",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -275,6 +332,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -289,6 +349,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -300,6 +363,9 @@
       "player_name": "Andrew Benintendi",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "DH",
@@ -315,6 +381,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -329,6 +398,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -342,6 +414,9 @@
       "player_name": "Andruw Monasterio",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "team_abbreviations": [
+        "BOS"
       ],
       "position_categories": [
         "DH",
@@ -359,6 +434,10 @@
         "baseball_mlb:mlb:sportsdataio:team:18",
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH",
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -374,6 +453,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -388,6 +470,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -401,6 +486,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -413,6 +501,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -424,6 +515,9 @@
       "player_name": "Austin Hays",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "DH",
@@ -438,6 +532,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -449,6 +546,9 @@
       "player_name": "Austin Martin",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "OF",
@@ -462,6 +562,9 @@
       "player_name": "Austin Riley",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "IF",
@@ -478,6 +581,11 @@
         "baseball_mlb:mlb:sportsdataio:team:18",
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA",
+        "NYM",
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -492,6 +600,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -505,6 +616,10 @@
         "baseball_mlb:mlb:sportsdataio:team:24",
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATH",
+        "ATL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -517,6 +632,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -528,6 +646,9 @@
       "player_name": "Ben Rice",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -543,6 +664,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -556,6 +680,9 @@
       "player_name": "Billy Cook",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -573,6 +700,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -586,6 +716,9 @@
       "player_name": "Blake Perkins",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "team_abbreviations": [
+        "MIL"
       ],
       "position_categories": [
         "DH",
@@ -602,6 +735,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
       ],
+      "team_abbreviations": [
+        "BAL"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -615,6 +751,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -627,6 +766,9 @@
       "player_name": "Bo Bichette",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -642,6 +784,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -654,6 +799,9 @@
       "player_name": "Bobby Witt Jr.",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -668,6 +816,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -681,6 +832,10 @@
         "baseball_mlb:mlb:sportsdataio:team:30",
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "HOU",
+        "MIL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -692,6 +847,9 @@
       "player_name": "Brady House",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -706,6 +864,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -718,6 +879,9 @@
       "player_name": "Brandon Lowe",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -733,6 +897,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -746,6 +913,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -758,6 +928,9 @@
       "player_name": "Brandon Valenzuela",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "team_abbreviations": [
+        "TOR"
       ],
       "position_categories": [
         "DH",
@@ -773,6 +946,9 @@
       "player_name": "Braxton Fulford",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "DH",
@@ -790,6 +966,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -803,6 +982,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -815,6 +997,9 @@
       "player_name": "Brent Rooker",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "DH",
@@ -830,6 +1015,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "OF",
         "PH",
@@ -843,6 +1031,9 @@
       "player_name": "Brett Baty",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -859,6 +1050,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -874,6 +1068,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -887,6 +1084,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -898,6 +1098,9 @@
       "player_name": "Brooks Lee",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "IF",
@@ -912,6 +1115,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
       ],
+      "team_abbreviations": [
+        "PIT"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -925,6 +1131,9 @@
       "player_name": "Bryan Torres",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "team_abbreviations": [
+        "STL"
       ],
       "position_categories": [
         "DH",
@@ -942,6 +1151,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -955,6 +1167,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -967,6 +1182,9 @@
       "player_name": "Bryce Johnson",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "DH",
@@ -983,6 +1201,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "OF",
         "PR"
@@ -996,6 +1217,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1007,6 +1231,9 @@
       "player_name": "Byron Buxton",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "DH",
@@ -1021,6 +1248,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -1034,6 +1264,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "IF",
         "PR"
@@ -1046,6 +1279,9 @@
       "player_name": "Cam Cauley",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "IF",
@@ -1061,6 +1297,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -1073,6 +1312,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1084,6 +1326,9 @@
       "player_name": "Carlos Cortes",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "DH",
@@ -1099,6 +1344,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -1112,6 +1360,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -1124,6 +1375,9 @@
       "player_name": "Carson Kelly",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -1139,6 +1393,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -1151,6 +1408,9 @@
       "player_name": "Carter Jensen",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -1166,6 +1426,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1180,6 +1443,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -1192,6 +1458,9 @@
       "player_name": "Cedric Mullins",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "team_abbreviations": [
+        "TB"
       ],
       "position_categories": [
         "OF",
@@ -1207,6 +1476,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -1221,6 +1493,10 @@
         "baseball_mlb:mlb:sportsdataio:team:19",
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL",
+        "BAL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1232,6 +1508,9 @@
       "player_name": "Chandler Simpson",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "team_abbreviations": [
+        "TB"
       ],
       "position_categories": [
         "OF",
@@ -1245,6 +1524,9 @@
       "player_name": "Chase DeLauter",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "DH",
@@ -1260,6 +1542,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1271,6 +1556,9 @@
       "player_name": "Christian Koss",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "DH",
@@ -1287,6 +1575,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1301,6 +1592,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -1313,6 +1607,9 @@
       "player_name": "Christian Yelich",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
+      ],
+      "team_abbreviations": [
+        "MIL"
       ],
       "position_categories": [
         "DH",
@@ -1328,6 +1625,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1341,6 +1641,9 @@
       "player_name": "CJ Abrams",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -1356,6 +1659,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
       ],
+      "team_abbreviations": [
+        "BAL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1370,6 +1676,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1383,6 +1692,9 @@
       "player_name": "Colby Thomas",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "DH",
@@ -1399,6 +1711,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -1413,6 +1728,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1424,6 +1742,9 @@
       "player_name": "Colson Montgomery",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "DH",
@@ -1438,6 +1759,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -1450,6 +1774,9 @@
       "player_name": "Colt Keith",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "team_abbreviations": [
+        "DET"
       ],
       "position_categories": [
         "DH",
@@ -1464,6 +1791,9 @@
       "player_name": "Colton Cowser",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -1480,6 +1810,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -1493,6 +1826,9 @@
       "player_name": "Connor Norby",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "DH",
@@ -1508,6 +1844,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1522,6 +1861,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1533,6 +1875,9 @@
       "player_name": "Corbin Carroll",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "team_abbreviations": [
+        "ARI"
       ],
       "position_categories": [
         "DH",
@@ -1547,6 +1892,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1558,6 +1906,9 @@
       "player_name": "Curtis Mead",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -1573,6 +1924,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1587,6 +1941,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -1600,6 +1957,9 @@
       "player_name": "Daniel Schneemann",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "IF",
@@ -1616,6 +1976,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -1628,6 +1991,9 @@
       "player_name": "Danny Jansen",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "DH",
@@ -1643,6 +2009,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1656,6 +2025,9 @@
       "player_name": "Darell Hernaiz",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "IF",
@@ -1672,6 +2044,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -1686,6 +2061,9 @@
       "player_name": "David Fry",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "DH",
@@ -1703,6 +2081,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "IF",
         "PR"
@@ -1715,6 +2096,9 @@
       "player_name": "Davis Schneider",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "team_abbreviations": [
+        "TOR"
       ],
       "position_categories": [
         "DH",
@@ -1732,6 +2116,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -1746,6 +2133,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -1757,6 +2147,9 @@
       "player_name": "Denzer Guzman",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "IF"
@@ -1770,6 +2163,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12",
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW",
+        "PHI"
       ],
       "position_categories": [
         "DH",
@@ -1786,6 +2183,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1800,6 +2200,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -1813,6 +2216,9 @@
       "player_name": "Dominic Smith",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -1830,6 +2236,10 @@
         "baseball_mlb:mlb:sportsdataio:team:21",
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH",
+        "LAA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1845,6 +2255,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -1857,6 +2270,9 @@
       "player_name": "Drew Cavanaugh",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "IF",
@@ -1871,6 +2287,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -1884,6 +2303,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1896,6 +2318,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -1907,6 +2332,9 @@
       "player_name": "Dylan Beavers",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -1921,6 +2349,9 @@
       "player_name": "Dylan Crews",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -1937,6 +2368,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1952,6 +2386,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1965,6 +2402,9 @@
       "player_name": "Edmundo Sosa",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "team_abbreviations": [
+        "PHI"
       ],
       "position_categories": [
         "IF",
@@ -1980,6 +2420,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -1994,6 +2437,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -2006,6 +2452,9 @@
       "player_name": "Eli White",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -2023,6 +2472,10 @@
         "baseball_mlb:mlb:sportsdataio:team:28",
         "baseball_mlb:mlb:sportsdataio:team:5"
       ],
+      "team_abbreviations": [
+        "KC",
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2035,6 +2488,9 @@
       "player_name": "Elly De La Cruz",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "team_abbreviations": [
+        "CIN"
       ],
       "position_categories": [
         "DH",
@@ -2049,6 +2505,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "PH"
@@ -2062,6 +2521,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
       ],
+      "team_abbreviations": [
+        "PIT"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -2074,6 +2536,9 @@
       "player_name": "Eric Haase",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "IF",
@@ -2090,6 +2555,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -2105,6 +2573,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -2119,6 +2590,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
       ],
+      "team_abbreviations": [
+        "PIT"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -2131,6 +2605,9 @@
       "player_name": "Esteury Ruiz",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "OF",
@@ -2146,6 +2623,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2159,6 +2639,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -2170,6 +2653,9 @@
       "player_name": "Everson Pereira",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "DH",
@@ -2184,6 +2670,9 @@
       "player_name": "Ezequiel Duran",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "IF",
@@ -2200,6 +2689,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2211,6 +2703,9 @@
       "player_name": "Felix Reyes",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "team_abbreviations": [
+        "PHI"
       ],
       "position_categories": [
         "IF",
@@ -2224,6 +2719,9 @@
       "player_name": "Fernando Tatis Jr.",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "IF",
@@ -2239,6 +2737,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -2253,6 +2754,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2266,6 +2770,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2278,6 +2785,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2289,6 +2799,9 @@
       "player_name": "Gabriel Arias",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "IF",
@@ -2303,6 +2816,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2316,6 +2832,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -2328,6 +2847,9 @@
       "player_name": "Gage Workman",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "team_abbreviations": [
+        "DET"
       ],
       "position_categories": [
         "DH",
@@ -2343,6 +2865,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -2356,6 +2881,9 @@
       "player_name": "Garrett Stubbs",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "team_abbreviations": [
+        "PHI"
       ],
       "position_categories": [
         "DH",
@@ -2372,6 +2900,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -2385,6 +2916,9 @@
       "player_name": "Gavin Sheets",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "DH",
@@ -2401,6 +2935,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -2413,6 +2950,9 @@
       "player_name": "George Valera",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "OF",
@@ -2427,6 +2967,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2438,6 +2981,9 @@
       "player_name": "Giancarlo Stanton",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -2452,6 +2998,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2465,6 +3014,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2476,6 +3028,9 @@
       "player_name": "Griffin Conine",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "DH",
@@ -2492,6 +3047,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
       ],
+      "team_abbreviations": [
+        "BAL"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2505,6 +3063,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "IF",
         "PR"
@@ -2517,6 +3078,9 @@
       "player_name": "Hao-Yu Lee",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "team_abbreviations": [
+        "DET"
       ],
       "position_categories": [
         "DH",
@@ -2532,6 +3096,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -2543,6 +3110,9 @@
       "player_name": "Heliot Ramos",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "DH",
@@ -2557,6 +3127,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -2568,6 +3141,9 @@
       "player_name": "Henry Davis",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -2583,6 +3159,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -2597,6 +3176,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2609,6 +3191,9 @@
       "player_name": "Hunter Goodman",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "DH",
@@ -2624,6 +3209,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -2637,6 +3225,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -2649,6 +3240,9 @@
       "player_name": "Ildemaro Vargas",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "team_abbreviations": [
+        "ARI"
       ],
       "position_categories": [
         "DH",
@@ -2665,6 +3259,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
       ],
+      "team_abbreviations": [
+        "KC"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -2678,6 +3275,9 @@
       "player_name": "Isaac Paredes",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "DH",
@@ -2693,6 +3293,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -2707,6 +3310,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2720,6 +3326,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -2732,6 +3341,9 @@
       "player_name": "J.P. Crawford",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "team_abbreviations": [
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -2747,6 +3359,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2758,6 +3373,9 @@
       "player_name": "Jac Caglianone",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -2774,6 +3392,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -2786,6 +3407,9 @@
       "player_name": "Jackson Holliday",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -2801,6 +3425,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -2813,6 +3440,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16",
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "CHW",
+        "PIT"
       ],
       "position_categories": [
         "IF",
@@ -2827,6 +3458,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -2838,6 +3472,9 @@
       "player_name": "Jacob Young",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "OF",
@@ -2854,6 +3491,10 @@
         "baseball_mlb:mlb:sportsdataio:team:17",
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS",
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -2869,6 +3510,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -2883,6 +3527,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -2895,6 +3542,9 @@
       "player_name": "Jake Cronenworth",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "DH",
@@ -2910,6 +3560,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -2923,6 +3576,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
       ],
+      "team_abbreviations": [
+        "PIT"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -2935,6 +3591,9 @@
       "player_name": "Jake McCarthy",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "DH",
@@ -2950,6 +3609,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -2963,6 +3625,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -2975,6 +3640,9 @@
       "player_name": "Jakob Marsee",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "DH",
@@ -2990,6 +3658,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3002,6 +3673,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17",
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "DET",
+        "MIN"
       ],
       "position_categories": [
         "DH",
@@ -3018,6 +3693,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -3030,6 +3708,9 @@
       "player_name": "Jared Triolo",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -3044,6 +3725,9 @@
       "player_name": "Jared Young",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -3061,6 +3745,10 @@
         "baseball_mlb:mlb:sportsdataio:team:16",
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "CHW",
+        "TEX"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -3072,6 +3760,9 @@
       "player_name": "Jarren Duran",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "team_abbreviations": [
+        "BOS"
       ],
       "position_categories": [
         "DH",
@@ -3086,6 +3777,9 @@
       "player_name": "Jase Bowen",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "DH",
@@ -3102,6 +3796,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -3115,6 +3812,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -3127,6 +3827,9 @@
       "player_name": "Javier Sanoja",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "IF",
@@ -3142,6 +3845,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3153,6 +3859,9 @@
       "player_name": "Jeff McNeil",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "IF",
@@ -3167,6 +3876,9 @@
       "player_name": "Jeremiah Jackson",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -3184,6 +3896,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3195,6 +3910,9 @@
       "player_name": "Jesus Rodriguez",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "IF",
@@ -3208,6 +3926,9 @@
       "player_name": "Jesús Sánchez",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "team_abbreviations": [
+        "TOR"
       ],
       "position_categories": [
         "DH",
@@ -3223,6 +3944,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3234,6 +3958,9 @@
       "player_name": "Jhostynxon Garcia",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "OF",
@@ -3248,6 +3975,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3259,6 +3989,9 @@
       "player_name": "Jimmy Crooks",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "team_abbreviations": [
+        "STL"
       ],
       "position_categories": [
         "DH",
@@ -3272,6 +4005,9 @@
       "player_name": "JJ Bleday",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "team_abbreviations": [
+        "CIN"
       ],
       "position_categories": [
         "DH",
@@ -3287,6 +4023,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3298,6 +4037,9 @@
       "player_name": "Jo Adell",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "DH",
@@ -3311,6 +4053,9 @@
       "player_name": "Joc Pederson",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "DH",
@@ -3327,6 +4072,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3339,6 +4087,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26",
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "ATL",
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -3354,6 +4106,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -3367,6 +4122,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3378,6 +4136,9 @@
       "player_name": "Joey Wiemer",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -3394,6 +4155,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -3409,6 +4173,10 @@
         "baseball_mlb:mlb:sportsdataio:team:24",
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATH",
+        "ATL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -3423,6 +4191,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -3436,6 +4207,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
       ],
+      "team_abbreviations": [
+        "KC"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3447,6 +4221,9 @@
       "player_name": "Jonny DeLuca",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
+      ],
+      "team_abbreviations": [
+        "TB"
       ],
       "position_categories": [
         "DH",
@@ -3463,6 +4240,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -3477,6 +4257,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -3490,6 +4273,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -3501,6 +4287,9 @@
       "player_name": "Jordan Walker",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "team_abbreviations": [
+        "STL"
       ],
       "position_categories": [
         "DH",
@@ -3515,6 +4304,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "OF",
         "PH",
@@ -3528,6 +4320,9 @@
       "player_name": "Jorge Mateo",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -3545,6 +4340,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -3558,6 +4356,9 @@
       "player_name": "Jorge Soler",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "DH",
@@ -3573,6 +4374,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -3586,6 +4390,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "OF",
         "PR"
@@ -3598,6 +4405,9 @@
       "player_name": "José Caballero",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -3615,6 +4425,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -3631,6 +4444,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -3646,6 +4462,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -3658,6 +4477,9 @@
       "player_name": "Jose Siri",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "OF",
@@ -3672,6 +4494,9 @@
       "player_name": "José Tena",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -3689,6 +4514,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3700,6 +4528,9 @@
       "player_name": "Josh Bell",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "DH",
@@ -3715,6 +4546,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3726,6 +4560,9 @@
       "player_name": "Josh Lowe",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "OF",
@@ -3740,6 +4577,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3751,6 +4591,9 @@
       "player_name": "Josh Rojas",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "IF",
@@ -3764,6 +4607,9 @@
       "player_name": "Josh Smith",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "DH",
@@ -3780,6 +4626,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3792,6 +4641,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3803,6 +4655,9 @@
       "player_name": "Juan Soto",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -3817,6 +4672,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -3829,6 +4687,9 @@
       "player_name": "Jung Hoo Lee",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "OF",
@@ -3843,6 +4704,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3854,6 +4718,9 @@
       "player_name": "Junior Perez",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "OF",
@@ -3868,6 +4735,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -3881,6 +4751,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -3892,6 +4765,9 @@
       "player_name": "Justin Foscue",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "DH",
@@ -3907,6 +4783,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -3919,6 +4798,9 @@
       "player_name": "Kameron Misner",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -3935,6 +4817,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -3948,6 +4833,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3960,6 +4848,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -3971,6 +4862,9 @@
       "player_name": "Kerry Carpenter",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "team_abbreviations": [
+        "DET"
       ],
       "position_categories": [
         "DH",
@@ -3986,6 +4880,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -3999,6 +4896,9 @@
       "player_name": "Kevin Alcántara",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -4014,6 +4914,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4026,6 +4929,9 @@
       "player_name": "Kody Clemens",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "IF",
@@ -4040,6 +4946,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
       ],
+      "team_abbreviations": [
+        "PIT"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4052,6 +4961,9 @@
       "player_name": "Kyle Farmer",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -4067,6 +4979,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4081,6 +4996,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
       ],
+      "team_abbreviations": [
+        "KC"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -4092,6 +5010,9 @@
       "player_name": "Kyle Karros",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "IF",
@@ -4106,6 +5027,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4119,6 +5043,9 @@
       "player_name": "Kyle Schwarber",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "team_abbreviations": [
+        "PHI"
       ],
       "position_categories": [
         "DH",
@@ -4135,6 +5062,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4150,6 +5080,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4163,6 +5096,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -4175,6 +5111,9 @@
       "player_name": "Kyler Fedko",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "DH",
@@ -4190,6 +5129,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -4202,6 +5144,9 @@
       "player_name": "Lane Thomas",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -4217,6 +5162,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -4229,6 +5177,9 @@
       "player_name": "Lawrence Butler",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "OF",
@@ -4243,6 +5194,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16",
         "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "team_abbreviations": [
+        "CHW",
+        "TOR"
       ],
       "position_categories": [
         "DH",
@@ -4259,6 +5214,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4272,6 +5230,9 @@
       "player_name": "Leo Rivas",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "team_abbreviations": [
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -4287,6 +5248,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
       ],
+      "team_abbreviations": [
+        "BAL"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -4299,6 +5263,9 @@
       "player_name": "Liam Hicks",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "DH",
@@ -4314,6 +5281,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -4326,6 +5296,9 @@
       "player_name": "Lourdes Gurriel Jr.",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
+      ],
+      "team_abbreviations": [
+        "ARI"
       ],
       "position_categories": [
         "DH",
@@ -4341,6 +5314,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4355,6 +5331,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -4367,6 +5346,9 @@
       "player_name": "Luis García Jr.",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
+      ],
+      "team_abbreviations": [
+        "WSH"
       ],
       "position_categories": [
         "DH",
@@ -4383,6 +5365,10 @@
         "baseball_mlb:mlb:sportsdataio:team:32",
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "MIL",
+        "SD"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -4396,6 +5382,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -4407,6 +5396,9 @@
       "player_name": "Luis Torrens",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -4422,6 +5414,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -4434,6 +5429,9 @@
       "player_name": "Luisangel Acuña",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "DH",
@@ -4450,6 +5448,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4462,6 +5463,9 @@
       "player_name": "Luke Keaschall",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "IF",
@@ -4477,6 +5481,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -4490,6 +5497,9 @@
       "player_name": "Maikel Garcia",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -4505,6 +5515,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4517,6 +5530,9 @@
       "player_name": "Marcell Ozuna",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -4531,6 +5547,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -4544,6 +5563,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -4555,6 +5577,9 @@
       "player_name": "Mark Vientos",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -4570,6 +5595,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -4584,6 +5612,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "IF",
         "PR"
@@ -4597,6 +5628,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4609,6 +5643,9 @@
       "player_name": "Matt McLain",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "team_abbreviations": [
+        "CIN"
       ],
       "position_categories": [
         "IF",
@@ -4624,6 +5661,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -4636,6 +5676,9 @@
       "player_name": "Matt Shaw",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -4653,6 +5696,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -4666,6 +5712,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
       ],
+      "team_abbreviations": [
+        "MIN"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -4678,6 +5727,9 @@
       "player_name": "Mauricio Dubón",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -4693,6 +5745,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -4706,6 +5761,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -4717,6 +5775,9 @@
       "player_name": "Max Muncy",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "DH",
@@ -4730,6 +5791,9 @@
       "player_name": "Max Schuemann",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -4747,6 +5811,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -4758,6 +5825,9 @@
       "player_name": "Michael Conforto",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -4773,6 +5843,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -4786,6 +5859,9 @@
       "player_name": "Michael Helman",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
+      ],
+      "team_abbreviations": [
+        "TEX"
       ],
       "position_categories": [
         "IF",
@@ -4801,6 +5877,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
       ],
+      "team_abbreviations": [
+        "KC"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4814,6 +5893,9 @@
       "player_name": "Mickey Gasper",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "team_abbreviations": [
+        "BOS"
       ],
       "position_categories": [
         "DH",
@@ -4829,6 +5911,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -4842,6 +5927,9 @@
       "player_name": "Miguel Amaya",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -4857,6 +5945,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -4870,6 +5961,9 @@
       "player_name": "Miguel Rojas",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "team_abbreviations": [
+        "LAD"
       ],
       "position_categories": [
         "DH",
@@ -4885,6 +5979,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -4898,6 +5995,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -4910,6 +6010,9 @@
       "player_name": "Mike Yastrzemski",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -4925,6 +6028,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -4938,6 +6044,9 @@
       "player_name": "Mitch Garver",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "team_abbreviations": [
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -4953,6 +6062,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -4966,6 +6078,9 @@
       "player_name": "Moisés Ballesteros",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -4981,6 +6096,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -4992,6 +6110,9 @@
       "player_name": "Munetaka Murakami",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "DH",
@@ -5006,6 +6127,9 @@
       "player_name": "Myles Straw",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "team_abbreviations": [
+        "TOR"
       ],
       "position_categories": [
         "DH",
@@ -5022,6 +6146,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:35"
       ],
+      "team_abbreviations": [
+        "WSH"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5035,6 +6162,9 @@
       "player_name": "Nate Eaton",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "team_abbreviations": [
+        "BOS"
       ],
       "position_categories": [
         "DH",
@@ -5050,6 +6180,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -5063,6 +6196,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "OF",
         "PR"
@@ -5075,6 +6211,9 @@
       "player_name": "Nathaniel Lowe",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "team_abbreviations": [
+        "CIN"
       ],
       "position_categories": [
         "DH",
@@ -5090,6 +6229,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -5103,6 +6245,9 @@
       "player_name": "Nick Allen",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "IF",
@@ -5118,6 +6263,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5132,6 +6280,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
       ],
+      "team_abbreviations": [
+        "PIT"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -5144,6 +6295,9 @@
       "player_name": "Nick Kurtz",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "DH",
@@ -5158,6 +6312,9 @@
       "player_name": "Nick Loftin",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -5174,6 +6331,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5188,6 +6348,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5199,6 +6362,9 @@
       "player_name": "Nick Yorke",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -5216,6 +6382,10 @@
         "baseball_mlb:mlb:sportsdataio:team:28",
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC",
+        "TEX"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -5230,6 +6400,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -5242,6 +6415,9 @@
       "player_name": "Noelvi Marte",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
+      ],
+      "team_abbreviations": [
+        "CIN"
       ],
       "position_categories": [
         "DH",
@@ -5258,6 +6434,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5270,6 +6449,9 @@
       "player_name": "Nolan Gorman",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "team_abbreviations": [
+        "STL"
       ],
       "position_categories": [
         "DH",
@@ -5285,6 +6467,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5298,6 +6483,9 @@
       "player_name": "Oneil Cruz",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -5314,6 +6502,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
       ],
+      "team_abbreviations": [
+        "MIN"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5325,6 +6516,9 @@
       "player_name": "Oswald Peraza",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "DH",
@@ -5341,6 +6535,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -5355,6 +6552,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5367,6 +6567,9 @@
       "player_name": "Owen Caissie",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "DH",
@@ -5382,6 +6585,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5394,6 +6600,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5405,6 +6614,9 @@
       "player_name": "Parker Meadows",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
+      ],
+      "team_abbreviations": [
+        "DET"
       ],
       "position_categories": [
         "OF"
@@ -5419,6 +6631,10 @@
         "baseball_mlb:mlb:sportsdataio:team:10",
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "CLE",
+        "SF"
+      ],
       "position_categories": [
         "IF",
         "PR"
@@ -5431,6 +6647,9 @@
       "player_name": "Patrick Wisdom",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "team_abbreviations": [
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -5446,6 +6665,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5460,6 +6682,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5473,6 +6698,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5484,6 +6712,9 @@
       "player_name": "Pedro Ramírez",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -5499,6 +6730,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
       ],
+      "team_abbreviations": [
+        "BAL"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5512,6 +6746,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
       ],
+      "team_abbreviations": [
+        "CHC"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -5523,6 +6760,9 @@
       "player_name": "Petey Halpin",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "OF",
@@ -5537,6 +6777,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5550,6 +6793,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
       ],
+      "team_abbreviations": [
+        "PHI"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5561,6 +6807,9 @@
       "player_name": "Ramón Laureano",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "DH",
@@ -5576,6 +6825,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -5589,6 +6841,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16",
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "CHW",
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -5604,6 +6860,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
       ],
+      "team_abbreviations": [
+        "SEA"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -5616,6 +6875,9 @@
       "player_name": "Raynel Delgado",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "IF"
@@ -5630,6 +6892,10 @@
         "baseball_mlb:mlb:sportsdataio:team:2",
         "baseball_mlb:mlb:sportsdataio:team:22"
       ],
+      "team_abbreviations": [
+        "CIN",
+        "MIA"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -5643,6 +6909,9 @@
       "player_name": "Rhys Hoskins",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "DH",
@@ -5659,6 +6928,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5674,6 +6946,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -5687,6 +6962,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -5699,6 +6977,9 @@
       "player_name": "Rob Refsnyder",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "team_abbreviations": [
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -5714,6 +6995,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5725,6 +7009,9 @@
       "player_name": "Roman Anthony",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "team_abbreviations": [
+        "BOS"
       ],
       "position_categories": [
         "DH",
@@ -5740,6 +7027,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5752,6 +7042,9 @@
       "player_name": "Ronald Acuña Jr.",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
+      ],
+      "team_abbreviations": [
+        "ATL"
       ],
       "position_categories": [
         "DH",
@@ -5766,6 +7059,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
       ],
+      "team_abbreviations": [
+        "NYM"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -5779,6 +7075,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
       ],
+      "team_abbreviations": [
+        "MIN"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5790,6 +7089,9 @@
       "player_name": "Ryan Jeffers",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "DH",
@@ -5805,6 +7107,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
       ],
+      "team_abbreviations": [
+        "MIN"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -5819,6 +7124,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5830,6 +7138,9 @@
       "player_name": "Ryan O'Hearn",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -5846,6 +7157,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -5861,6 +7175,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -5873,6 +7190,9 @@
       "player_name": "Ryan Ward",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "team_abbreviations": [
+        "LAD"
       ],
       "position_categories": [
         "DH",
@@ -5889,6 +7209,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -5903,6 +7226,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5916,6 +7242,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
       ],
+      "team_abbreviations": [
+        "KC"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -5928,6 +7257,9 @@
       "player_name": "Sam Antonacci",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
+      ],
+      "team_abbreviations": [
+        "CHW"
       ],
       "position_categories": [
         "IF",
@@ -5943,6 +7275,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -5957,6 +7292,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -5969,6 +7307,9 @@
       "player_name": "Samuel Basallo",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -5984,6 +7325,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:26"
       ],
+      "team_abbreviations": [
+        "ATL"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -5995,6 +7339,9 @@
       "player_name": "Santiago Espinal",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "team_abbreviations": [
+        "LAD"
       ],
       "position_categories": [
         "DH",
@@ -6011,6 +7358,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -6024,6 +7374,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -6035,6 +7388,9 @@
       "player_name": "Seiya Suzuki",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:9"
+      ],
+      "team_abbreviations": [
+        "CHC"
       ],
       "position_categories": [
         "DH",
@@ -6049,6 +7405,9 @@
       "player_name": "Shay Whitcomb",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "DH",
@@ -6065,6 +7424,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -6078,6 +7440,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "DH"
       ],
@@ -6089,6 +7454,9 @@
       "player_name": "Spencer Horwitz",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "DH",
@@ -6103,6 +7471,9 @@
       "player_name": "Spencer Jones",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
+      ],
+      "team_abbreviations": [
+        "NYY"
       ],
       "position_categories": [
         "DH",
@@ -6119,6 +7490,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6133,6 +7507,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -6145,6 +7522,9 @@
       "player_name": "Starling Marte",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -6161,6 +7541,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -6175,6 +7558,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
       ],
+      "team_abbreviations": [
+        "CLE"
+      ],
       "position_categories": [
         "OF"
       ],
@@ -6186,6 +7572,9 @@
       "player_name": "Stuart Fairchild",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "DH",
@@ -6201,6 +7590,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "IF",
         "PH",
@@ -6215,6 +7607,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -6227,6 +7622,9 @@
       "player_name": "Taylor Trammell",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "DH",
@@ -6242,6 +7640,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "IF",
         "PR"
@@ -6254,6 +7655,9 @@
       "player_name": "Taylor Ward",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -6268,6 +7672,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -6281,6 +7688,9 @@
       "player_name": "Thomas Saggese",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
+      ],
+      "team_abbreviations": [
+        "STL"
       ],
       "position_categories": [
         "DH",
@@ -6297,6 +7707,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6312,6 +7725,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -6324,6 +7740,9 @@
       "player_name": "TJ Rumfield",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "DH",
@@ -6339,6 +7758,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
       ],
+      "team_abbreviations": [
+        "LAD"
+      ],
       "position_categories": [
         "IF",
         "OF",
@@ -6353,6 +7775,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:14"
       ],
+      "team_abbreviations": [
+        "ARI"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -6365,6 +7790,9 @@
       "player_name": "Travis Bazzana",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:10"
+      ],
+      "team_abbreviations": [
+        "CLE"
       ],
       "position_categories": [
         "DH",
@@ -6379,6 +7807,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -6390,6 +7821,9 @@
       "player_name": "Trea Turner",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:12"
+      ],
+      "team_abbreviations": [
+        "PHI"
       ],
       "position_categories": [
         "DH",
@@ -6405,6 +7839,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:29"
       ],
+      "team_abbreviations": [
+        "NYY"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -6418,6 +7855,9 @@
       "player_name": "Trevor Larnach",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "DH",
@@ -6433,6 +7873,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -6445,6 +7888,9 @@
       "player_name": "Tristan Gray",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
+      ],
+      "team_abbreviations": [
+        "MIN"
       ],
       "position_categories": [
         "IF",
@@ -6459,6 +7905,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:16"
       ],
+      "team_abbreviations": [
+        "CHW"
+      ],
       "position_categories": [
         "OF",
         "PH"
@@ -6471,6 +7920,9 @@
       "player_name": "Troy Johnston",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "DH",
@@ -6487,6 +7939,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -6498,6 +7953,9 @@
       "player_name": "Ty France",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
+      ],
+      "team_abbreviations": [
+        "SD"
       ],
       "position_categories": [
         "DH",
@@ -6512,6 +7970,9 @@
       "player_name": "Tyler Callihan",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:4"
+      ],
+      "team_abbreviations": [
+        "PIT"
       ],
       "position_categories": [
         "IF",
@@ -6528,6 +7989,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
       ],
+      "team_abbreviations": [
+        "COL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6543,6 +8007,10 @@
         "baseball_mlb:mlb:sportsdataio:team:21",
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "LAA",
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6556,6 +8024,9 @@
       "player_name": "Tyler O'Neill",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL"
       ],
       "position_categories": [
         "DH",
@@ -6571,6 +8042,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
       ],
+      "team_abbreviations": [
+        "ATH"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -6585,6 +8059,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -6597,6 +8074,9 @@
       "player_name": "Tyler Tolbert",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "IF",
@@ -6611,6 +8091,9 @@
       "player_name": "Tyrone Taylor",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "NYM"
       ],
       "position_categories": [
         "DH",
@@ -6627,6 +8110,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6640,6 +8126,9 @@
       "player_name": "Victor Bericoto",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
+      ],
+      "team_abbreviations": [
+        "SF"
       ],
       "position_categories": [
         "IF",
@@ -6655,6 +8144,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:20"
       ],
+      "team_abbreviations": [
+        "MIN"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6669,6 +8161,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "OF",
         "PH",
@@ -6682,6 +8177,9 @@
       "player_name": "Victor Robles",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13"
+      ],
+      "team_abbreviations": [
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -6698,6 +8196,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -6710,6 +8211,9 @@
       "player_name": "Vinnie Pasquantino",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:5"
+      ],
+      "team_abbreviations": [
+        "KC"
       ],
       "position_categories": [
         "DH",
@@ -6725,6 +8229,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
       ],
+      "team_abbreviations": [
+        "TOR"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -6737,6 +8244,9 @@
       "player_name": "Wade Meckler",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "DH",
@@ -6753,6 +8263,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -6766,6 +8279,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:13",
         "baseball_mlb:mlb:sportsdataio:team:19"
+      ],
+      "team_abbreviations": [
+        "BAL",
+        "SEA"
       ],
       "position_categories": [
         "DH",
@@ -6783,6 +8300,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:2"
       ],
+      "team_abbreviations": [
+        "CIN"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -6798,6 +8318,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "DH",
         "OF",
@@ -6811,6 +8334,9 @@
       "player_name": "Will Smith",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:1"
+      ],
+      "team_abbreviations": [
+        "LAD"
       ],
       "position_categories": [
         "DH",
@@ -6826,6 +8352,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6839,6 +8368,9 @@
       "player_name": "Willi Castro",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:23"
+      ],
+      "team_abbreviations": [
+        "COL"
       ],
       "position_categories": [
         "IF",
@@ -6854,6 +8386,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:32"
       ],
+      "team_abbreviations": [
+        "MIL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6868,6 +8403,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
       ],
+      "team_abbreviations": [
+        "BOS"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -6881,6 +8419,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:15"
       ],
+      "team_abbreviations": [
+        "SF"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -6892,6 +8433,9 @@
       "player_name": "Wilyer Abreu",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:25"
+      ],
+      "team_abbreviations": [
+        "BOS"
       ],
       "position_categories": [
         "DH",
@@ -6906,6 +8450,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:28"
       ],
+      "team_abbreviations": [
+        "TEX"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -6919,6 +8466,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:33"
       ],
+      "team_abbreviations": [
+        "SD"
+      ],
       "position_categories": [
         "IF"
       ],
@@ -6930,6 +8480,9 @@
       "player_name": "Xavier Edwards",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:22"
+      ],
+      "team_abbreviations": [
+        "MIA"
       ],
       "position_categories": [
         "DH",
@@ -6945,6 +8498,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "DH",
         "IF"
@@ -6958,6 +8514,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:11"
       ],
+      "team_abbreviations": [
+        "TB"
+      ],
       "position_categories": [
         "DH"
       ],
@@ -6969,6 +8528,9 @@
       "player_name": "Yoán Moncada",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
+      ],
+      "team_abbreviations": [
+        "LAA"
       ],
       "position_categories": [
         "DH",
@@ -6984,6 +8546,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:31"
       ],
+      "team_abbreviations": [
+        "STL"
+      ],
       "position_categories": [
         "DH",
         "IF",
@@ -6997,6 +8562,9 @@
       "player_name": "Yohendrick Piñango",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:3"
+      ],
+      "team_abbreviations": [
+        "TOR"
       ],
       "position_categories": [
         "DH",
@@ -7012,6 +8580,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
       ],
+      "team_abbreviations": [
+        "HOU"
+      ],
       "position_categories": [
         "DH",
         "OF"
@@ -7024,6 +8595,9 @@
       "player_name": "Zach Cole",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "DH",
@@ -7038,6 +8612,9 @@
       "player_name": "Zach Dezenzo",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:30"
+      ],
+      "team_abbreviations": [
+        "HOU"
       ],
       "position_categories": [
         "DH",
@@ -7054,6 +8631,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17"
       ],
+      "team_abbreviations": [
+        "DET"
+      ],
       "position_categories": [
         "IF",
         "OF"
@@ -7067,6 +8647,9 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:21"
       ],
+      "team_abbreviations": [
+        "LAA"
+      ],
       "position_categories": [
         "IF",
         "PH"
@@ -7079,6 +8662,9 @@
       "player_name": "Zack Gelof",
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:24"
+      ],
+      "team_abbreviations": [
+        "ATH"
       ],
       "position_categories": [
         "IF",
@@ -7094,6 +8680,10 @@
       "team_ids": [
         "baseball_mlb:mlb:sportsdataio:team:17",
         "baseball_mlb:mlb:sportsdataio:team:18"
+      ],
+      "team_abbreviations": [
+        "DET",
+        "NYM"
       ],
       "position_categories": [
         "IF",
