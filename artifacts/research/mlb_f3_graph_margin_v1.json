@@ -1,0 +1,65 @@
+{
+  "contract": "MLB_F3_GRAPH_MARGIN_V1/1.0.0",
+  "architecture": "ridge_graph_laplacian_team_margin_ratings",
+  "research_only": true,
+  "source": {
+    "table": "public.mlb_f3_ml_revisit_base_v1",
+    "source_rows": 4680,
+    "development_class": "HISTORICAL_SEEN_DEVELOPMENT"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "ffde421326f5c9f17c238cfd55aea7989df86e6e",
+    "evaluator_commit": "5a051dd4a7143d366bfd7396b6b6f044f320ae55",
+    "ridge_lambda": 12,
+    "confidence_threshold": 0.75,
+    "min_prior_league_games": 300,
+    "min_team_games": 10
+  },
+  "result": {
+    "eligible": 3756,
+    "selected": 12,
+    "nonpush_n": 10,
+    "wins": 6,
+    "losses": 4,
+    "pushes": 2,
+    "accuracy": 0.6,
+    "coverage": 0.003194888178913738,
+    "selected_months": 3,
+    "worst_month_accuracy": 0.5,
+    "max_side_confidence": 0.8191123085494805,
+    "monthly": {
+      "2025-05": {
+        "n": 3,
+        "wins": 2,
+        "accuracy": 0.6666666666666666
+      },
+      "2025-06": {
+        "n": 4,
+        "wins": 2,
+        "accuracy": 0.5
+      },
+      "2026-07": {
+        "n": 3,
+        "wins": 2,
+        "accuracy": 0.6666666666666666
+      }
+    },
+    "development_gate_pass": false,
+    "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL",
+    "external_opened": false
+  },
+  "interpretation": {
+    "failure": "sample, months, accuracy, monthly stability",
+    "retuned": false,
+    "threshold_rescue": false,
+    "note": "The frozen graph-margin model generated only 12 selected games at 0.75 confidence. Ten settled non-push decisions were 6-4. No alternate ridge, confidence or residual specification was tried."
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
