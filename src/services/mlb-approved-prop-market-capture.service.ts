@@ -4,6 +4,10 @@ import { createHash, randomUUID } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { normalizeOddsAuthorityTeam } from '@/services/odds-primary-authority.service'
+import {
+  captureApprovedPropsFromBallDontLie,
+  type BdlCapturePlannedEvent,
+} from '@/services/mlb-approved-prop-balldontlie-capture.service'
 
 const PROVIDER = 'the-odds-api'
 const SPORT_KEY = 'baseball_mlb'
@@ -304,6 +308,25 @@ async function loadPlayerDirectory(slate: OfficialGame[]) {
   return map
 }
 
+async function latestKnownRequestsRemaining(targetDate: string) {
+  const range = puertoRicoUtcRange(targetDate)
+  const result = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .select('completed_at,metadata')
+    .eq('provider', PROVIDER)
+    .eq('sport_key', SPORT_KEY)
+    .gte('completed_at', range.utcStart)
+    .lt('completed_at', range.utcEndExclusive)
+    .order('completed_at', { ascending: false })
+    .limit(20)
+  if (result.error) throw new Error('MLB_APPROVED_PROP_QUOTA_READ_FAILED:' + result.error.message)
+  for (const row of result.data ?? []) {
+    const remaining = Number(asRecord(row.metadata).requestsRemainingAfter)
+    if (Number.isFinite(remaining)) return remaining
+  }
+  return null
+}
+
 async function existingCheckpoint(targetDate: string, checkpoint: string) {
   const range = puertoRicoUtcRange(targetDate)
   const result = await supabaseAdmin
@@ -320,7 +343,9 @@ async function existingCheckpoint(targetDate: string, checkpoint: string) {
   if (result.error) throw new Error('MLB_APPROVED_PROP_CHECKPOINT_READ_FAILED:' + result.error.message)
   return (result.data ?? []).find((row) => {
     const metadata = asRecord(row.metadata)
-    return metadata.targetDate === targetDate && metadata.checkpoint === checkpoint
+    return metadata.targetDate === targetDate &&
+      metadata.checkpoint === checkpoint &&
+      metadata.coverageComplete === true
   }) ?? null
 }
 
@@ -459,8 +484,10 @@ export async function captureMlbApprovedPropMarkets(input: {
 
   const calls: CaptureCall[] = []
   const rows: Array<Record<string, unknown>> = []
-  let remaining: number | null = null
-  for (const item of planned) {
+  const knownRemainingBefore = await latestKnownRequestsRemaining(targetDate)
+  let remaining: number | null = knownRemainingBefore
+  const oddsApiAllowed = knownRemainingBefore === null || knownRemainingBefore > CREDIT_RESERVE
+  if (oddsApiAllowed) for (const item of planned) {
     if (remaining !== null && remaining <= CREDIT_RESERVE) break
     const url = new URL('https://api.the-odds-api.com/v4/sports/' + SPORT_KEY + '/events/' + encodeURIComponent(item.providerEventId) + '/odds')
     url.searchParams.set('apiKey', apiKey())
@@ -514,6 +541,29 @@ export async function captureMlbApprovedPropMarkets(input: {
     if (call.requestsRemaining === null) break
   }
 
+  const bdlPlannedEvents: BdlCapturePlannedEvent[] = planned.map((item) => ({
+    eventId: item.event.id,
+    startTime: item.event.start_time,
+    homeTeam: item.game?.homeTeam ?? normalizeOddsAuthorityTeam(String(item.event.home_team ?? '')),
+    awayTeam: item.game?.awayTeam ?? normalizeOddsAuthorityTeam(String(item.event.away_team ?? '')),
+    gamePk: item.game?.gamePk ?? null,
+    probablePitchers: [item.game?.homePitcher, item.game?.awayPitcher]
+      .filter(Boolean)
+      .map((pitcher) => pitcher!) ,
+  }))
+  const oddsCapturedEvents = new Set(calls.filter((call) => call.rowsAccepted > 0).map((call) => call.eventId))
+  const oddsCoverageComplete = planned.every((item) => oddsCapturedEvents.has(item.event.id))
+  const bdlFallback = oddsCoverageComplete
+    ? null
+    : await captureApprovedPropsFromBallDontLie({
+        targetDate,
+        checkpoint,
+        plannedEvents: bdlPlannedEvents,
+        playerDirectory,
+        requestId: input.requestId ?? null,
+        now,
+      })
+
   const uniqueRowsById = new Map<string, Record<string, unknown>>()
   for (const row of rows) {
     const id = String(row.id)
@@ -545,7 +595,8 @@ export async function captureMlbApprovedPropMarkets(input: {
   const creditsKnown = calls.every((call) => typeof call.requestsLast === 'number')
   const credits = creditsKnown ? calls.reduce((sum, call) => sum + Number(call.requestsLast ?? 0), 0) : null
   const failedCalls = calls.filter((call) => !call.ok).length
-  const status = failedCalls ? 'partial' : 'completed'
+  const combinedCoverageComplete = oddsCoverageComplete || Boolean(bdlFallback?.coverageComplete)
+  const status = failedCalls || !combinedCoverageComplete ? 'partial' : 'completed'
   const jobId = randomUUID()
   const job = await supabaseAdmin.from('sports_sync_jobs').insert({
     id: jobId,
@@ -574,8 +625,14 @@ export async function captureMlbApprovedPropMarkets(input: {
       requestedMarkets: REQUEST_MARKETS,
       providerCallsMade: calls.length,
       providerCreditsConsumed: credits,
+      requestsRemainingBefore: knownRemainingBefore,
       requestsRemainingAfter: remaining,
       creditReserve: CREDIT_RESERVE,
+      oddsApiAllowed,
+      oddsCoverageComplete,
+      bdlFallbackUsed: Boolean(bdlFallback),
+      bdlFallback,
+      coverageComplete: combinedCoverageComplete,
       plannedEvents: planned.length,
       calls,
     },
@@ -585,8 +642,12 @@ export async function captureMlbApprovedPropMarkets(input: {
 
   return {
     ...base,
-    success: failedCalls === 0,
-    status: status === 'completed' ? 'APPROVED_PROP_CAPTURE_PERSISTED' : 'APPROVED_PROP_CAPTURE_PARTIAL',
+    success: failedCalls === 0 && combinedCoverageComplete,
+    status: status === 'completed'
+      ? 'APPROVED_PROP_CAPTURE_PERSISTED'
+      : oddsApiAllowed
+        ? 'APPROVED_PROP_CAPTURE_PARTIAL'
+        : 'APPROVED_PROP_ODDS_API_RESERVE_BDL_FALLBACK_PARTIAL',
     checkpoint,
     jobId,
     providerCallsMade: calls.length,
@@ -594,7 +655,12 @@ export async function captureMlbApprovedPropMarkets(input: {
     rowsAccepted: uniqueRows.length,
     rowsInserted: Math.max(0, uniqueRows.length - existingRows),
     rowsUpdated: Math.min(existingRows, uniqueRows.length),
+    requestsRemainingBefore: knownRemainingBefore,
     requestsRemainingAfter: remaining,
+    oddsApiAllowed,
+    oddsCoverageComplete,
+    bdlFallback,
+    coverageComplete: combinedCoverageComplete,
     calls,
   }
 }

@@ -26,6 +26,8 @@ import {
 } from '@/services/mlb-approved-new-prop-runtime.service'
 
 const CAPTURE_SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_V1'
+const BDL_CAPTURE_SOURCE = 'MLB_APPROVED_PROP_MARKET_CAPTURE_BDL_FALLBACK_V1'
+const CAPTURE_SOURCES = new Set([CAPTURE_SOURCE, BDL_CAPTURE_SOURCE])
 const JOB_TYPE = 'mlb_approved_prop_daily_freeze_v1'
 const PAGE_SIZE = 1000
 
@@ -385,9 +387,9 @@ async function loadQuotes(targetDate: string): Promise<Quote[]> {
   const rows = await pagedRead<Quote>(
     'sports_odds_snapshots',
     'id,event_id,sportsbook,market,outcome,price,line,snapshot_time,metadata',
-    (query) => query.eq('provider', 'the-odds-api').gte('snapshot_time', range.utcStart).lt('snapshot_time', range.utcEndExclusive).order('snapshot_time', { ascending: true }),
+    (query) => query.in('provider', ['the-odds-api', 'balldontlie']).gte('snapshot_time', range.utcStart).lt('snapshot_time', range.utcEndExclusive).order('snapshot_time', { ascending: true }),
   )
-  return rows.filter((row) => asRecord(row.metadata).source === CAPTURE_SOURCE)
+  return rows.filter((row) => CAPTURE_SOURCES.has(String(asRecord(row.metadata).source ?? '')))
 }
 
 async function loadPitcherFeatures(targetDate: string) {
