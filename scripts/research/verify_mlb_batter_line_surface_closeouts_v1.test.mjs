@@ -51,3 +51,9 @@ test('Total Bases exact replay and frozen external failures are preserved', () =
   assert.equal(surface('batter_total_bases','U2.5').state,'EXTERNAL_LIFT_BELOW_5PP_DO_NOT_REPLACE_EXISTING')
   assert.equal(surface('batter_total_bases','U3.5').state,'EXTERNAL_75_PLUS_LIFT_BELOW_5PP_NO_PROMOTE')
 })
+
+test('RBI and HRRBI admission remains fail-closed where appropriate', () => {
+  assert.equal(artifact.rbi_hrrbi_line_surface_admission.batter_rbis.state,'NO_NEW_EXACT_LINE_TO_EXPAND')
+  assert.equal(artifact.rbi_hrrbi_line_surface_admission.batter_hits_runs_rbis.approximate_supabase_reconstruction.parity,false)
+  assert.equal(artifact.rbi_hrrbi_line_surface_admission.batter_hits_runs_rbis.state,'LINE_SURFACE_BLOCKED_EXACT_REPLAY')
+})
