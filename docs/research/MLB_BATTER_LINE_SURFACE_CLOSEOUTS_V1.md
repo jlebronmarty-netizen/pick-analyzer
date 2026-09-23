@@ -236,17 +236,28 @@ No approximate corpus is authorized for alternate-line search.
 
 ### RBI / H+R+RBI current-board audit
 
-Batter RBI has only line **0.5** on the captured 2026-09-22 board, the same line as its existing
-certified U0.5 control. There is no alternate exact line to expand today.
+Batter RBI still has only exact line **0.5** on the captured 2026-09-22 board, so there is no new RBI exact line to expand.
 
-Batter H+R+RBI has real **0.5 and 1.5** lines today, but its frozen 2025 development control
-(2,278/2,582 = 88.23% on U2.5 <=0.70) came from Retrosheet `2025batting.csv` inside the frozen
-2025 CSV archive. That exact player-game source is not preserved in the repository or current
-Supabase normalized tables. The normalized event-derived tables do not reproduce the frozen
-player-run/RBI totals exactly, so they are not substituted.
+Batter H+R+RBI has real **0.5 and 1.5** lines. The previously missing exact 2025 source has now been recovered from the public Retrosheet archive and verified against the frozen SHA-256:
+
+`3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753`
+
+Exact replay now reproduces:
+- RBI U0.5 <=0.10: **2053/2402**
+- HRRBI U2.5 <=0.70: **2278/2582**
+- every frozen monthly count
+
+The exact 2025 line-surface search then froze two new development candidates:
+- HRRBI U0.5 <=0.05: **117/118 = 99.15%**, lift **+46.98 pp**, worst month **96.00%**
+- HRRBI U1.5 <=0.90: **3607/4795 = 75.22%**, lift **+7.12 pp**, worst month **71.77%**
+
+OVER 0.5 and OVER 1.5 produced no 75% stable signal candidate.
 
 State:
-`LINE_SURFACE_BLOCKED_EXACT_SOURCE_CORPUS_NOT_RECOVERED`.
+`DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED`
+
+Authoritative detail:
+`docs/research/MLB_BATTER_HRRBI_LINE_SURFACE_V1.md`
 
 ## Concurrent replay reconciliation
 
@@ -255,7 +266,7 @@ Two earlier generic replay blocks in this closeout were superseded by later exac
 - **Batter Hits** — PR #194 recovered the exact U1.5 <=0.75 control at **6123/7011** by using the canonical target-game pregame feature-key gate. The earlier block here is no longer authoritative.
 - **Batter Strikeouts** — PR #193 recovered the exact U1.5 <=0.50 control at **564/592** using the same canonical target-game pregame lineage gate. The earlier block here is no longer authoritative.
 
-Active traditional replay blocker is now limited to **Pitcher Hits Allowed**. Batter Total Bases, Walks and Home Runs were recovered to exact parity in this PR. H+R+RBI is separately blocked on recovery of its exact frozen 2025 CSV source corpus.
+Active traditional replay blocker is now limited to **Pitcher Hits Allowed**. Batter Total Bases, Walks, Home Runs and H+R+RBI were recovered to exact parity in this PR. HRRBI 0.5/1.5 now has frozen 2025 development candidates, but its external/forward gate remains closed.
 
 ## Boundaries
 
@@ -277,8 +288,7 @@ Certified control:
 Frozen 2025 evidence:
 - **2,053/2,402 = 85.47%**
 
-The persisted 2026-09-22 board contains only the exact **0.5** RBI line. There is therefore no new
-exact RBI line to expand today. The certified U0.5 rule remains unchanged.
+The persisted 2026-09-22 board contains only exact line **0.5**. There is no alternate RBI exact line to expand.
 
 State:
 `NO_NEW_EXACT_LINE_TO_EXPAND`
@@ -288,26 +298,43 @@ State:
 Certified control:
 `batter_hrrbi_under_2p5_proj_0p70_v1`
 
-Frozen 2025 evidence:
+The exact public Retrosheet archive was recovered and SHA-verified. The unique replay lineage is sequential strictly prior player games, minimum 10 prior games, exact Retrosheet `b_pa`, and the frozen component formula.
+
+Control parity:
 - **2,278/2,582 = 88.23%**
+- exact monthly parity: PASS
 
-Current 2026-09-22 captured lines include **0.5** and **1.5**, so alternate-line research would be
-relevant if the exact frozen 2025 replay corpus were available.
+Threshold grid was frozen at 0.00..5.00 by 0.05 before development search.
 
-The authoritative 2025 source was the frozen Retrosheet player-game batting CSV used by PR #155,
-digest:
+New frozen development candidates:
 
-`3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753`
+1. `batter_hrrbi_under_0p5_proj_0p05_v1`
+   - projection <=0.05
+   - 117/118 = **99.15%**
+   - baseline 52.17%
+   - lift **+46.98 pp**
+   - 5 months
+   - worst month **96.00%**
+   - Wilson lower **95.36%**
 
-The currently available Supabase event-derived reconstruction is **not** exact. As a parity test,
-replaying the RBI U0.5 control on that reconstruction produced **930/1,167** versus the frozen
-**2,053/2,402**, with a materially different baseline. Therefore it cannot be substituted for the
-frozen player-game corpus.
+2. `batter_hrrbi_under_1p5_proj_0p90_v1`
+   - projection <=0.90
+   - 3607/4795 = **75.22%**
+   - baseline 68.11%
+   - lift **+7.12 pp**
+   - 6 months
+   - worst month **71.77%**
+   - Wilson lower **73.98%**
+
+OVER 0.5 and OVER 1.5 have no passing stable signal candidate.
+
+No 2026 outcomes were opened for these newly frozen thresholds. Prior 2026 HRRBI-family evidence exists for the certified U2.5 family, so any next validation must be labeled according to the actual evidence state and must not be represented as pristine external without justification.
 
 State:
-`LINE_SURFACE_BLOCKED_EXACT_REPLAY`
+`DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED`
 
-No HRRBI 0.5/1.5 threshold search was performed on the approximate corpus.
+Authoritative artifact:
+`artifacts/research/mlb_batter_hrrbi_line_surface_v1.json`
 
 ## Pitcher Hits Allowed blocker detail
 
