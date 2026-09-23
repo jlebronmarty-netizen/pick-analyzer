@@ -6,6 +6,10 @@ on:
       - research/batter-line-surface-closeouts-v1-20260922
     paths:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
+      - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
+      - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
       - scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs
       - scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
       - artifacts/research/mlb_batter_hrrbi_line_surface_v1.json
@@ -18,6 +22,10 @@ on:
       - main
     paths:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
+      - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
+      - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
       - scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs
       - scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
       - artifacts/research/mlb_batter_hrrbi_line_surface_v1.json
@@ -39,6 +47,10 @@ jobs:
         env:
           HRRBI_RESULT_PATH: /tmp/mlb_hrrbi_line_surface_v1_result.json
         run: python3 scripts/research/mlb_hrrbi_line_surface_v1.py
+      - name: Run authorized 2026 frozen-threshold diagnostic gate
+        env:
+          HRRBI_2026_RESULT_PATH: /tmp/mlb_hrrbi_2026_frozen_gate_v1.json
+        run: python3 scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
       - name: Verify frozen HRRBI artifacts and closeout
         run: node --test scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
       - name: Upload research result
@@ -46,7 +58,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mlb-hrrbi-line-surface-v1-result
-          path: /tmp/mlb_hrrbi_line_surface_v1_result.json
+          path: |
+            /tmp/mlb_hrrbi_line_surface_v1_result.json
+            /tmp/mlb_hrrbi_2026_frozen_gate_v1.json
           if-no-files-found: ignore
           retention-days: 7
 # Exact replay + frozen artifact verification only; no external gate.
