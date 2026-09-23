@@ -35,7 +35,7 @@ test('only Pitcher Hits Allowed remains an active traditional replay blocker', (
   assert.deepEqual(artifact.blocked_exact_replay.map((row) => row.market),['pitcher_hits_allowed'])
   assert.equal(
     artifact.additional_market_audit_2026_09_22.batter_hits_runs_rbis.state,
-    'EXACT_REPLAY_RECOVERED_DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED'
+    'EXACT_REPLAY_RECOVERED_DEVELOPMENT_GATE_PASS_2026_ATTEMPT_BLOCKED_SOURCE_SNAPSHOT_DRIFT'
   )
 })
 
