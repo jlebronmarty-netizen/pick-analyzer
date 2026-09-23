@@ -73,22 +73,27 @@ def official_directory():
 
 def resolve_players():
     source = json.loads(NAME_UNIVERSE_PATH.read_text(encoding="utf-8"))
-    raw_names = source["names"]
-    # Preserve the name universe, but identity resolution works on unique normalized names.
-    unique = {}
-    for name in raw_names:
-        key = normalize_person(name)
-        unique.setdefault(key, []).append(name)
+    source_players = source["players"]
     official_people, directory = official_directory()
     resolved = []
     unresolved = []
-    for key, aliases in sorted(unique.items()):
+    for item in source_players:
+        name = item["player_name"]
+        key = normalize_person(name)
         matches = directory.get(key, [])
         if len(matches) == 1:
-            resolved.append({"source_names":aliases,"key":key,**matches[0]})
+            resolved.append({
+                "source_player_id": item["player_id"],
+                "source_name": name,
+                "source_team_ids": item.get("team_ids") or [],
+                "key": key,
+                **matches[0],
+            })
         else:
             unresolved.append({
-                "source_names":aliases,
+                "source_player_id": item["player_id"],
+                "source_name": name,
+                "source_team_ids": item.get("team_ids") or [],
                 "key":key,
                 "match_count":len(matches),
                 "matches":matches,
@@ -98,12 +103,12 @@ def resolve_players():
             "EXACT_IDENTITY_UNIVERSE_MISMATCH",
             expected_resolved=EXPECTED_RESOLVED_PLAYERS,
             observed_resolved=len(resolved),
-            input_rows=len(raw_names),
-            unique_normalized_names=len(unique),
+            source_players=len(source_players),
             official_directory_rows=len(official_people),
             unresolved=unresolved,
         )
     return source, resolved, unresolved, len(official_people)
+
 
 def batter_game_log(player):
     pid = player["id"]
