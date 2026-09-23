@@ -308,3 +308,26 @@ State:
 `LINE_SURFACE_BLOCKED_EXACT_REPLAY`
 
 No HRRBI 0.5/1.5 threshold search was performed on the approximate corpus.
+
+## Pitcher Hits Allowed blocker detail
+
+Frozen source contract:
+- MLB Official gameLog pitching
+- minimum 5 prior starts
+- raw = L5 BF/start × cumulative hits allowed / cumulative BF
+- all-2025 frozen refit: n=3,099, intercept 2.97876810879942, slope 0.415326852941172
+- certified control: U6.5 when projection <=5.0, 634/761 = 83.31%
+
+A zero-provider-call reconstruction using `mlb_ml_xyear_pitcher_game_v1` plus the canonical pregame
+pitcher target-key gate still produced a different universe and fit:
+- eligible n = **3,334**
+- intercept = **2.9146649671004927**
+- slope = **0.4302550256495246**
+
+Therefore the xyear surface is not a substitute for the frozen MLB Official gameLog corpus.
+
+Current 2026-09-22 captured exact lines include 3.5, 4.5, 5.5, 6.5, 7.5, 8.5 and 9.5, so
+line-surface expansion is materially relevant once exact replay is recoverable.
+
+State:
+`LINE_SURFACE_BLOCKED_EXACT_REPLAY_MLB_OFFICIAL_GAMELOG_CORPUS_NOT_PERSISTED`
