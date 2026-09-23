@@ -176,16 +176,13 @@ def build_eligible(rows):
                 ph = component(history, "h")
                 pr = component(history, "r")
                 pi = component(history, "rbi")
-                if ph is None or pr is None or pi is None:
-                    fail("NONPOSITIVE_PRIOR_PA_AFTER_MIN_HISTORY",
-                         player_id=player_id, gid=game["gid"])
                 eligible.append({
                     "id": player_id,
                     "gid": game["gid"],
                     "date": game["date"],
                     "month": game["date"][:7],
                     "rbi_proj": pi,
-                    "hrrbi_proj": ph + pr + pi,
+                    "hrrbi_proj": None if ph is None or pr is None or pi is None else ph + pr + pi,
                     "rbi": game["rbi"],
                     "hrrbi": game["h"] + game["r"] + game["rbi"],
                 })
@@ -205,10 +202,11 @@ def baseline(rows, outcome_key, direction, line):
 
 
 def evaluate(rows, projection_key, outcome_key, direction, line, threshold):
+    projected = [r for r in rows if r[projection_key] is not None]
     if direction == "UNDER":
-        selected = [r for r in rows if r[projection_key] <= threshold + 1e-12]
+        selected = [r for r in projected if r[projection_key] <= threshold + 1e-12]
     else:
-        selected = [r for r in rows if r[projection_key] >= threshold - 1e-12]
+        selected = [r for r in projected if r[projection_key] >= threshold - 1e-12]
 
     by_month = defaultdict(list)
     for r in selected:
