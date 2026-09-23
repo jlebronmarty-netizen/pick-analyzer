@@ -1,0 +1,84 @@
+{
+  "contract": "MLB_XYEAR_UNUSED_PREGAME_FEATURE_AUDIT_V1/1.0.0",
+  "research_only": true,
+  "source": "public.mlb_ml_xyear_features_v1 / xyear_raw_v1 / A_XYEAR_RAW / feature_cutoff_date < game_date",
+  "empty_or_unusable_for_historical_modeling": {
+    "starter_kbb_ip": [
+      "home/away sp_k9",
+      "sp_bb9",
+      "sp_avg_ip_per_start"
+    ],
+    "offense_discipline_power": [
+      "off_bb_pct",
+      "off_iso",
+      "off_k_pct joint requirement"
+    ],
+    "handedness_matchup": [
+      "vs_sp_hand PA/hit/K/BB"
+    ],
+    "statcast_matchup": [
+      "offense whiff/chase/contact + starter L5 whiff/chase"
+    ],
+    "park_prior": [
+      "park_games_prior",
+      "park_runs_pg_prior"
+    ]
+  },
+  "high_coverage_unused_groups": {
+    "defense_errors": {
+      "coverage_2025": 2414,
+      "coverage_2026": 2270,
+      "variation_2025": {
+        "home_range": [
+          0,
+          2
+        ],
+        "away_range": [
+          0,
+          1
+        ]
+      },
+      "variation_2026": {
+        "home_range": [
+          0,
+          1
+        ],
+        "away_range": [
+          0,
+          2
+        ]
+      }
+    },
+    "schedule_fatigue": {
+      "coverage_2025": 2408,
+      "coverage_2026": 2023,
+      "rest_days_range_2025": [
+        0,
+        7
+      ],
+      "rest_days_range_2026": [
+        0,
+        5
+      ],
+      "travel_miles_max_2025": 2729.27559137386,
+      "travel_miles_max_2026": 2729.27559137386,
+      "timezone_change_distinct": 4
+    },
+    "bullpen_pitches_2d": {
+      "coverage_2025": 2430,
+      "coverage_2026": 2285,
+      "max_2025": 309,
+      "max_2026": 295
+    }
+  },
+  "decision": "PRESERVE_AS_NEW_INFORMATION_CANDIDATE_DO_NOT_APPEND_TO_FAILED_MODELS",
+  "note": "These variables are not added to the already-evaluated F1 logit or NRFI Poisson. Any future use requires a separately motivated and frozen architecture before outcome evaluation.",
+  "boundaries": {
+    "provider_calls": 0,
+    "odds_api_historical_credits": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
