@@ -166,14 +166,32 @@
         "wins": 1081,
         "accuracy": 0.910699241786015
       },
-      "external_2026_control": {
-        "eligible": 35558,
-        "n": 2336,
-        "wins": 2021,
-        "accuracy": 0.865154109589041,
-        "baseline": 0.8073851172731875,
-        "lift_pp": 5.776899231585353,
-        "worst_month": 0.8333333333333334
+      "monthly": {
+        "2025-05": {
+          "n": 56,
+          "wins": 52,
+          "accuracy": 0.9285714285714286
+        },
+        "2025-06": {
+          "n": 214,
+          "wins": 193,
+          "accuracy": 0.9018691588785047
+        },
+        "2025-07": {
+          "n": 280,
+          "wins": 260,
+          "accuracy": 0.9285714285714286
+        },
+        "2025-08": {
+          "n": 309,
+          "wins": 279,
+          "accuracy": 0.9029126213592233
+        },
+        "2025-09": {
+          "n": 328,
+          "wins": 297,
+          "accuracy": 0.9054878048780488
+        }
       },
       "status": "EXACT_REPLAY_PASS"
     }
@@ -328,7 +346,7 @@
     {
       "market": "batter_total_bases",
       "target": "U1.5",
-      "threshold": 1.2,
+      "frozen_2025_threshold": 1.2,
       "development_2025": {
         "n": 6843,
         "wins": 5217,
@@ -339,22 +357,23 @@
         "worst_month": 0.7505183137525916,
         "wilson_lower": 0.7521548957335716
       },
-      "diagnostic_2026": {
+      "external_2026": {
         "n": 9471,
         "wins": 7081,
         "accuracy": 0.7476507232604793,
         "baseline": 0.6718881826874402,
-        "lift_pp": 7.5762540573039105,
+        "lift_pp": 7.57625405730391,
         "coverage": 0.2663535631925305,
         "worst_month": 0.7214786488209051,
         "wilson_lower": 0.7388035141119461
       },
-      "state": "DIAGNOSTIC_BELOW_75_NO_RETUNE"
+      "state": "EXTERNAL_BELOW_75_NO_RETUNE"
     },
     {
       "market": "batter_total_bases",
       "target": "U2.5",
-      "threshold": 1.3,
+      "frozen_2025_threshold": 1.3,
+      "note": "Development-only broader threshold; existing certified U2.5 <=1.00 remains authoritative and is not replaced.",
       "development_2025": {
         "n": 12280,
         "wins": 10557,
@@ -365,7 +384,7 @@
         "worst_month": 0.8533444121312838,
         "wilson_lower": 0.8534351247942531
       },
-      "diagnostic_2026": {
+      "external_2026": {
         "n": 14405,
         "wins": 12193,
         "accuracy": 0.8464422075668171,
@@ -375,12 +394,12 @@
         "worst_month": 0.8310542567269519,
         "wilson_lower": 0.8404623594064208
       },
-      "state": "DIAGNOSTIC_LIFT_BELOW_5PP_DO_NOT_REPLACE_EXISTING"
+      "state": "EXTERNAL_LIFT_BELOW_5PP_DO_NOT_REPLACE_EXISTING"
     },
     {
       "market": "batter_total_bases",
       "target": "U3.5",
-      "threshold": 1.2,
+      "frozen_2025_threshold": 1.2,
       "development_2025": {
         "n": 6843,
         "wins": 6264,
@@ -391,7 +410,7 @@
         "worst_month": 0.9011748445058743,
         "wilson_lower": 0.9085586172991964
       },
-      "diagnostic_2026": {
+      "external_2026": {
         "n": 9471,
         "wins": 8583,
         "accuracy": 0.9062401013620526,
@@ -401,18 +420,7 @@
         "worst_month": 0.8916507329509241,
         "wilson_lower": 0.9002035905681897
       },
-      "state": "DIAGNOSTIC_LIFT_BELOW_5PP"
-    },
-    {
-      "market": "batter_total_bases",
-      "target": "OTHER_CURRENT_LINES",
-      "current_lines": [
-        0.5,
-        4.5,
-        5.5,
-        6.5
-      ],
-      "state": "NO_2025_SIGNAL_GATE_CANDIDATE"
+      "state": "EXTERNAL_75_PLUS_LIFT_BELOW_5PP_NO_PROMOTE"
     }
   ],
   "blocked_exact_replay": [
