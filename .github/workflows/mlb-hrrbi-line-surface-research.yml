@@ -8,14 +8,11 @@ on:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
       - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
       - scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
-      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
-      - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
-      - scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
-      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
       - scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs
       - scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
       - artifacts/research/mlb_batter_hrrbi_line_surface_v1.json
       - artifacts/research/mlb_batter_line_surface_closeouts_v1.json
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
       - docs/research/MLB_BATTER_HRRBI_LINE_SURFACE_V1.md
       - docs/research/MLB_BATTER_LINE_SURFACE_CLOSEOUTS_V1.md
       - .github/workflows/mlb-hrrbi-line-surface-research.yml
@@ -26,14 +23,11 @@ on:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
       - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
       - scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
-      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
-      - scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
-      - scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
-      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
       - scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs
       - scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
       - artifacts/research/mlb_batter_hrrbi_line_surface_v1.json
       - artifacts/research/mlb_batter_line_surface_closeouts_v1.json
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
       - docs/research/MLB_BATTER_HRRBI_LINE_SURFACE_V1.md
       - docs/research/MLB_BATTER_LINE_SURFACE_CLOSEOUTS_V1.md
       - .github/workflows/mlb-hrrbi-line-surface-research.yml
@@ -42,32 +36,21 @@ permissions:
   contents: read
 
 jobs:
-  exact-source-replay:
+  verify-frozen-research:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Run exact-source HRRBI development research
+      - name: Reproduce exact 2025 HRRBI development replay
         env:
           HRRBI_RESULT_PATH: /tmp/mlb_hrrbi_line_surface_v1_result.json
         run: python3 scripts/research/mlb_hrrbi_line_surface_v1.py
-      - name: Recover exact frozen 516-player lineage
-        run: python3 scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
-      - name: Run authorized 2026 frozen-threshold diagnostic gate
-        env:
-          HRRBI_2026_RESULT_PATH: /tmp/mlb_hrrbi_2026_frozen_gate_v1.json
-        run: python3 scripts/research/mlb_hrrbi_2026_frozen_gate_v1.py
-      - name: Verify frozen HRRBI artifacts and closeout
+      - name: Verify frozen HRRBI artifacts and fail-closed 2026 blocker
         run: node --test scripts/research/verify_mlb_batter_hrrbi_line_surface_v1.test.mjs scripts/research/verify_mlb_batter_line_surface_closeouts_v1.test.mjs
-      - name: Upload research result
-        if: always()
+      - name: Upload 2025 replay result
         uses: actions/upload-artifact@v4
         with:
           name: mlb-hrrbi-line-surface-v1-result
-          path: |
-            /tmp/mlb_hrrbi_line_surface_v1_result.json
-            /tmp/mlb_hrrbi_2026_frozen_gate_v1.json
-            /tmp/mlb_hrrbi_2026_lineage_recovery_v1.json
-          if-no-files-found: ignore
+          path: /tmp/mlb_hrrbi_line_surface_v1_result.json
+          if-no-files-found: error
           retention-days: 7
-# Exact replay + frozen artifact verification only; no external gate.
