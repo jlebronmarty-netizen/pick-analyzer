@@ -208,9 +208,9 @@ def baseline(rows, outcome_key, direction, line):
 def evaluate(rows, projection_key, outcome_key, direction, line, threshold):
     projected = [r for r in rows if r[projection_key] is not None]
     if direction == "UNDER":
-        selected = [r for r in projected if r[projection_key] <= threshold + 1e-12]
+        selected = [r for r in projected if r[projection_key] <= threshold]
     else:
-        selected = [r for r in projected if r[projection_key] >= threshold - 1e-12]
+        selected = [r for r in projected if r[projection_key] >= threshold]
 
     by_month = defaultdict(list)
     for r in selected:
