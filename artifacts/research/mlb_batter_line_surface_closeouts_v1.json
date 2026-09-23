@@ -694,7 +694,7 @@
         "batter_hrrbi_under_0p5_proj_0p05_v1",
         "batter_hrrbi_under_1p5_proj_0p90_v1"
       ],
-      "state": "EXACT_REPLAY_RECOVERED_DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED"
+      "state": "EXACT_REPLAY_RECOVERED_DEVELOPMENT_GATE_PASS_2026_ATTEMPT_BLOCKED_SOURCE_SNAPSHOT_DRIFT"
     }
   },
   "rbi_hrrbi_line_surface_admission": {
@@ -776,9 +776,36 @@
           "worst_month": 0.7177121771217713
         }
       ],
-      "external_2026_opened": false,
-      "state": "DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED",
-      "authoritative_artifact": "artifacts/research/mlb_batter_hrrbi_line_surface_v1.json"
+      "external_2026_opened": true,
+      "state": "DEVELOPMENT_GATE_PASS_2026_ATTEMPT_BLOCKED_SOURCE_SNAPSHOT_DRIFT",
+      "authoritative_artifact": "artifacts/research/mlb_batter_hrrbi_line_surface_v1.json",
+      "external_2026": {
+        "authorized": true,
+        "attempted": true,
+        "evaluation_completed": false,
+        "status": "BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT",
+        "frozen_reference": {
+          "requested_players": 516,
+          "raw_game_log_rows": 30889,
+          "eligible_rows": 25729,
+          "hrrbi_u2p5_control": {
+            "n": 1255,
+            "wins": 1073
+          }
+        },
+        "current_source_recovery": {
+          "raw_game_log_rows": 30927,
+          "eligible_rows": 25707,
+          "hrrbi_u2p5_control": {
+            "n": 1263,
+            "wins": 1079
+          },
+          "parity": false
+        },
+        "decision": "FAIL_CLOSED_NO_U0P5_OR_U1P5_2026_SCORE",
+        "retuned": false,
+        "threshold_rescue": false
+      }
     }
   }
 }
