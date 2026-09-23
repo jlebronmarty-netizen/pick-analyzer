@@ -49,3 +49,4 @@ jobs:
           path: /tmp/mlb_hrrbi_line_surface_v1_result.json
           if-no-files-found: ignore
           retention-days: 7
+# Exact replay + frozen artifact verification only; no external gate.
