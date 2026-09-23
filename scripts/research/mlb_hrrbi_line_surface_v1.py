@@ -125,7 +125,15 @@ def load_regular_batting(archive_bytes):
             "id": (r.get("id") or "").strip(),
             "date": (r.get("date") or "").strip(),
             "number": to_int(r.get("number")),
-            "pa": to_int(r.get("b_pa")),
+            "pa_exact": to_int(r.get("b_pa")),
+            "pa": (
+                to_int(r.get("b_ab"))
+                + to_int(r.get("b_w"))
+                + to_int(r.get("b_hbp"))
+                + to_int(r.get("b_sf"))
+                + to_int(r.get("b_sh"))
+            ),
+            "xi": to_int(r.get("b_xi")),
             "h": to_int(r.get("b_h")),
             "r": to_int(r.get("b_r")),
             "rbi": to_int(r.get("b_rbi")),
