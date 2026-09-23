@@ -1,0 +1,92 @@
+{
+  "contract": "MLB_F1_NRFI_STRICT_PREGAME_POISSON_V1/1.0.0",
+  "architecture": "shared_half_inning_poisson_glm_offense_vs_opposing_starter",
+  "research_only": true,
+  "source": {
+    "admission": "MLB_F1_STRICT_PREGAME_SUBSET_ADMISSION_V1/1.0.0",
+    "rows": 4099,
+    "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+    "evidence_label": "HISTORICAL_RECONSTRUCTED_STRICT_PRIOR_RESEARCH_ONLY"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "228f53e15cead8bff4f39cca3e2ce84df9168a60",
+    "evaluator_commit": "f538957a91b750074f82aceb65c08281c1ea8aee",
+    "l2_lambda": 8,
+    "probability_threshold": 0.75,
+    "min_training_games": 300,
+    "predictors": [
+      "off_ops_proxy",
+      "off_k_pct",
+      "opposing_sp_l5_ra9",
+      "opposing_sp_l5_whip",
+      "is_home_half"
+    ]
+  },
+  "result": {
+    "eligible": 3438,
+    "selected": 15,
+    "wins": 9,
+    "losses": 6,
+    "accuracy": 0.6,
+    "coverage": 0.004363001745200698,
+    "selected_months": 5,
+    "worst_month_accuracy": 0,
+    "probability_nrfi_range": [
+      0.04966475417840595,
+      0.45735972431598265
+    ],
+    "lambda_home_range": [
+      0.362079129853424,
+      1.829286774388196
+    ],
+    "lambda_away_range": [
+      0.28662006546338115,
+      2.4188333634138237
+    ],
+    "monthly": {
+      "2026-05": {
+        "n": 8,
+        "wins": 5,
+        "accuracy": 0.625
+      },
+      "2026-06": {
+        "n": 1,
+        "wins": 1,
+        "accuracy": 1
+      },
+      "2026-07": {
+        "n": 3,
+        "wins": 2,
+        "accuracy": 0.6666666666666666
+      },
+      "2026-08": {
+        "n": 2,
+        "wins": 1,
+        "accuracy": 0.5
+      },
+      "2026-09": {
+        "n": 1,
+        "wins": 0,
+        "accuracy": 0
+      }
+    },
+    "development_gate_pass": false,
+    "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL",
+    "external_opened": false
+  },
+  "interpretation": {
+    "nrfi_threshold_crossings": 0,
+    "note": "Maximum P(NRFI)=0.4574, below frozen 0.75. Selected rows came only from the symmetric YRFI tail and finished 9-6; pooled, sample and worst-month gates fail.",
+    "retuned": false,
+    "threshold_rescue": false,
+    "feature_rescue": false
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
