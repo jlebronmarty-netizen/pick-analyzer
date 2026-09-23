@@ -1,0 +1,1 @@
+Deno.serve(() => new Response(JSON.stringify({status:"GONE",contract:"MLB_PERIOD_TEAM_THRESHOLD_GITHUB_EXPORT_V1/1.0.0",researchOnly:true,reason:"Threshold classifier historical diagnostic completed; no candidate passed development gates",dataExportEnabled:false}),{status:410,headers:{"Content-Type":"application/json","Cache-Control":"no-store"}}));

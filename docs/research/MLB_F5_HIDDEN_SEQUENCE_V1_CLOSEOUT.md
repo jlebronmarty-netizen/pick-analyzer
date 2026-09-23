@@ -1,0 +1,13 @@
+# F5 three-way hidden-state sequence V1 closeout
+
+Research-only. Frozen **b9a32586 before outcome evaluation** after F1 kernel and F3 ordinal failures. **FAIL**; no retuning, external closed.
+
+This family learns latent sequence-state transition and emission matrices from separate team-season W/L/D histories, using a shared three-state HMM and20fixed Baum-Welch steps with fixed smoothing priors. It is not a mixture of prior candidate experts: every state likelihood and transition comes from earlier team sequences. Monthly fitting requires600previous games; both teams need20prior observations. Teams/seasons never share sequence transitions. Current-month filtering uses earlier games under frozen monthly parameters; complete dates predict before any same-date update. Opposite home/away forecasts are combined under the contract's explicit modeling assumption; independence is not claimed as fact.
+
+4,678 certified exact F5 outcome rows;2,926 eligible forecasts;1,752 no-fit burn-in exclusions,0 team-history exclusions. **0 selections,n0,W-L-P0-0-0,coverage0%** at unconditional three-way probability0.75. No selected months; accuracy/worst-month/selected-baseline/lift/intervals undefined. Eligible prior-league modal three-way baseline45.15%. All June–September2025/2026 eligible months remain visible with0selections. All original gates fail. Draws are three-way outcomes, never ML pushes; synthetic all-draw tests independently verify this distinction.
+
+Artifacts `mlb_f5_hidden_sequence_v1.json` and `.json.gz` retain contract/source hashes, all matrices/likelihood diagnostics, forecasts and monthly metrics. Reproduce offline with `node scripts/research/evaluate_mlb_f5_hidden_sequence_v1.mjs`. Tests compare scaled forward-backward likelihood to exhaustive latent paths, verify normalization, date/season isolation, exact decisions and1e-10 probability replay. No claim that20iterations proves optimizer convergence.
+
+Prior F5 three-way53/84=63.10% and the insufficient2/2 result remain unchanged. This HMM is closed without state-count, persistence, emission-prior, fusion or confidence variations. Next action is read-only admission of stored Game Totals inputs; its richer archived surface mixes consensus line sources and cannot be silently treated as an exact-book pregame corpus. F7 remains frozen; no lineup/odds/external features, provider calls, Odds API credits, tracker/Official Picks/APOSTAR/production writes.
+
+Validation: 72 combined offline tests PASS; this module build PASS (400 pages). Exporter HTTP 410 verified. See MLB_NEXT_MARKET_BLOCK_V1_CLOSEOUT.md for subsequent-market admission and remaining limits.

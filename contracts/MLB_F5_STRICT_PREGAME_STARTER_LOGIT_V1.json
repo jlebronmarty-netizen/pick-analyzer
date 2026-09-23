@@ -1,0 +1,60 @@
+{
+  "contract": "MLB_F5_STRICT_PREGAME_STARTER_LOGIT_V1/1.0.0",
+  "research_only": true,
+  "source_admission": "MLB_F1_STARTER_L5_PREGAME_ADMISSION_V1/1.0.0",
+  "target_surface": "public.mlb_f5_ml_revisit_base_v1",
+  "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+  "max_development_date": "2026-09-14",
+  "architecture": "monthly_rolling_l2_logistic_f5_ml_team_strength_plus_starter_l5",
+  "target": "F5 ML non-push HOME vs AWAY",
+  "features": [
+    "home_win_pct-away_win_pct",
+    "home_run_diff_pg-away_run_diff_pg",
+    "home_pyth_win_pct-away_pyth_win_pct",
+    "home_off_ops_proxy-away_off_ops_proxy",
+    "away_bullpen_ra9-home_bullpen_ra9",
+    "home_starter_l5_k_per_bf-away_starter_l5_k_per_bf",
+    "away_starter_l5_bb_per_bf-home_starter_l5_bb_per_bf",
+    "away_starter_l5_hits_per_bf-home_starter_l5_hits_per_bf",
+    "home_starter_l5_ip_per_start-away_starter_l5_ip_per_start",
+    "home_starter_l5_whiff_per_swing-away_starter_l5_whiff_per_swing",
+    "home_starter_l5_chase_per_outside_zone-away_starter_l5_chase_per_outside_zone",
+    "away_starter_l5_hard_hit_per_bip-home_starter_l5_hard_hit_per_bip"
+  ],
+  "fitting": {
+    "schedule": "refit once per calendar month using strictly earlier same-season complete games only; target-date games scored before update",
+    "standardization": "training mean/std only; std floor 1e-9",
+    "training_target": "exclude F5 ties; HOME=1 AWAY=0",
+    "l2_lambda": 8,
+    "penalize_intercept": false,
+    "optimizer": "IRLS Newton exact dense Hessian",
+    "max_iterations": 30,
+    "convergence_tolerance": 1e-8,
+    "coefficient_clip": 8
+  },
+  "eligibility": {
+    "min_training_nonpush": 300,
+    "complete_feature_row_required": true,
+    "both_starters_exact_l5_required": true
+  },
+  "selection": {
+    "confidence_threshold": 0.75,
+    "home_rule": "p_home>=0.75",
+    "away_rule": "p_home<=0.25"
+  },
+  "settlement": "F5 tie is push; pushes excluded from accuracy denominator but reported",
+  "gates": {
+    "accuracy": 0.75,
+    "min_nonpush_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65
+  },
+  "tuning": "single frozen configuration; no feature grid, lambda search, threshold search or post-result rescue",
+  "external": "historical-seen development only; no pristine external claim; future external remains closed unless gate passes",
+  "provider_calls_budget": 0,
+  "odds_api_credits_budget": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false
+}

@@ -1,0 +1,44 @@
+{
+  "contract": "MLB_F1_NRFI_RANDOM_EFFECTS_V1/1.0.0",
+  "research_only": true,
+  "source_artifact": "artifacts/research/mlb_new_families_v1_source.json.gz",
+  "source_table_lineage": "mlb_f1_nrfi_revisit_base_v1",
+  "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+  "max_development_date": "2026-09-18",
+  "architecture": "joint_nrfi_logistic_random_effects_pitchers_offenses",
+  "model": "logit P(NRFI)=intercept + effect(homeStarter)+effect(awayStarter)+effect(homeOffense)+effect(awayOffense)",
+  "fitting": {
+    "schedule": "refit once per calendar month using only strictly earlier same-season games; entire target date scored before any outcome update",
+    "optimizer": "batch Newton-style diagonal IRLS coordinate updates",
+    "iterations": 30,
+    "l2_pitcher": 20,
+    "l2_offense": 20,
+    "l2_intercept": 0.000001,
+    "coefficient_clip": 4,
+    "convergence_tolerance": 1e-8
+  },
+  "eligibility": {
+    "min_prior_league_games": 300,
+    "min_pitcher_starts": 3,
+    "min_offense_games": 10
+  },
+  "selection": {
+    "probability_threshold": 0.75,
+    "side_rule": "NRFI if p>=0.75; YRFI if p<=0.25; otherwise abstain"
+  },
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65
+  },
+  "novelty": "joint penalized entity-effect likelihood; not marginal-probability factorization, nearest-neighbor analog, boosting, tree, kernel, Davidson, QDA, Poisson or hidden-state model",
+  "tuning": "single frozen configuration; no parameter grid, no threshold search, no result-driven rescue",
+  "external": "closed unless development gate passes; repeated historical-seen development is not pristine external evidence",
+  "provider_calls_budget": 0,
+  "odds_api_credits_budget": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false
+}

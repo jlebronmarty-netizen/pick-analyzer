@@ -1,0 +1,15 @@
+{
+  "architecture": "f3_proportional_odds_ordered_margin_v1",
+  "research_only": true,
+  "external_opened": false,
+  "market": "F3_ML",
+  "source": "Existing certified exact F3 historical-development prior-game outcomes; exact source hash. No F7 evaluation, lineup, starter, odds or external outcomes.",
+  "features": "Last30 prior same-season team games, minimum20 per team and300 league games. Smooth all rates/means with10 prior-league pseudo-games. Eight fixed contrasts: log1p home-vs-away scoring mean; log1p away-vs-home allowed mean; home-vs-away win rate; home-vs-away loss rate; home-vs-away scoreless rate; away-vs-home zero-allowed rate; home-vs-away scored>=3 rate; away-vs-home allowed>=3 rate. Entire date predicted before histories update.",
+  "target": "Ordered five-way run-margin category: <=-2,-1,0,+1,>=+2. Proportional odds CDF sigmoid(cutpoint - beta*x). Four ordered cutpoints parameterized by first free value and positive softplus increments plus0.05 gaps; eight shared slope coefficients, no separate intercept. This is a joint ordinal likelihood, not independent binary threshold classifiers, Davidson/QDA or a retuned count model.",
+  "fit": "Monthly expanding prior feature contexts, same-season reset, minimum600 training contexts including draws. Initialize cutpoints from Laplace-smoothed cumulative class counts; slopes zero.500 full-batch Adam steps, learning_rate0.03,beta1=.9,beta2=.999,epsilon1e-8; L2=.01 slopes only; gradient components clipped[-10,10]. Stable logits[-30,30], probability floor1e-12 for numerical loss. Fixed optimization budget; preserve terminal gradient diagnostics, do not claim convergence from epoch count. No validation tuning or outcome-driven feature changes.",
+  "selection": "HOME probability=sum last2 categories; AWAY=sum first2; DRAW=middle. Conditional HOME/(HOME+AWAY)>=0.75 selects HOME; <=0.25 selects AWAY; exact draws push.",
+  "gates": {"accuracy": 0.75, "min_n": 60, "min_months": 5, "worst_month": 0.65},
+  "max_date": "2026-09-18",
+  "odds_api_credits": 0,
+  "rule": "One frozen design. Preserve any failure without trying other cutpoints, optimizer budgets, features or thresholds. Historical pass stops before external."
+}

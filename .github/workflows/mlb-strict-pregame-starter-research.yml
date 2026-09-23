@@ -1,0 +1,55 @@
+name: MLB strict-pregame starter research
+
+on:
+  push:
+    branches:
+      - research/period-team-threshold-classifier-v1-20260921
+    paths:
+      - artifacts/research/mlb_f1_nrfi_starter_l5_zero_logit_v1.json
+      - artifacts/research/mlb_f1_strict_pregame_logit_v1.json
+      - artifacts/research/mlb_f1_nrfi_strict_pregame_poisson_v1.json
+      - artifacts/research/mlb_f5_strict_pregame_starter_logit_v1.json
+      - artifacts/research/mlb_f5_strict_pregame_count_v1.json
+      - artifacts/research/mlb_f7_strict_pregame_fatigue_count_v1.json
+      - artifacts/research/mlb_f5_strict_pregame_count_v1.json
+      - artifacts/research/mlb_f7_strict_pregame_fatigue_count_v1.json
+      - scripts/research/verify_mlb_f1_nrfi_starter_l5_zero_logit_v1.test.mjs
+      - scripts/research/verify_mlb_f1_strict_pregame_logit_v1.test.mjs
+      - scripts/research/verify_mlb_f1_nrfi_strict_pregame_poisson_v1.test.mjs
+      - scripts/research/verify_mlb_f5_strict_pregame_starter_logit_v1.test.mjs
+      - scripts/research/verify_mlb_f5_strict_pregame_count_v1.test.mjs
+      - scripts/research/verify_mlb_f7_strict_pregame_fatigue_count_v1.test.mjs
+      - scripts/research/verify_mlb_f5_strict_pregame_count_v1.test.mjs
+      - scripts/research/verify_mlb_f7_strict_pregame_fatigue_count_v1.test.mjs
+      - .github/workflows/mlb-strict-pregame-starter-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - artifacts/research/mlb_f1_nrfi_starter_l5_zero_logit_v1.json
+      - artifacts/research/mlb_f1_strict_pregame_logit_v1.json
+      - artifacts/research/mlb_f1_nrfi_strict_pregame_poisson_v1.json
+      - artifacts/research/mlb_f5_strict_pregame_starter_logit_v1.json
+      - scripts/research/verify_mlb_f1_nrfi_starter_l5_zero_logit_v1.test.mjs
+      - scripts/research/verify_mlb_f1_strict_pregame_logit_v1.test.mjs
+      - scripts/research/verify_mlb_f1_nrfi_strict_pregame_poisson_v1.test.mjs
+      - scripts/research/verify_mlb_f5_strict_pregame_starter_logit_v1.test.mjs
+      - .github/workflows/mlb-strict-pregame-starter-research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify strict-pregame starter research closeouts
+        run: |
+          node --test scripts/research/verify_mlb_f1_nrfi_starter_l5_zero_logit_v1.test.mjs
+          node --test scripts/research/verify_mlb_f1_strict_pregame_logit_v1.test.mjs
+          node --test scripts/research/verify_mlb_f1_nrfi_strict_pregame_poisson_v1.test.mjs
+          node --test scripts/research/verify_mlb_f5_strict_pregame_starter_logit_v1.test.mjs
+          node --test scripts/research/verify_mlb_f5_strict_pregame_count_v1.test.mjs
+          node --test scripts/research/verify_mlb_f7_strict_pregame_fatigue_count_v1.test.mjs

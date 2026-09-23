@@ -1,0 +1,182 @@
+{
+  "architecture": "archetype",
+  "contract_sha256": "1f1c50b54f337aa4a823b464b774ae9e52f0b7808d6e4770a8c2e63daa38f26e",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "periods": {
+    "1": {
+      "source_rows": 4683,
+      "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+      "eligible": 3572,
+      "excluded_history": 626,
+      "excluded_fit": 485,
+      "markets": {
+        "ML": {
+          "selected": 3,
+          "n": 2,
+          "wins": 1,
+          "losses": 1,
+          "pushes": 1,
+          "accuracy": 0.5,
+          "coverage": 0.0008398656215005599,
+          "monthly": {
+            "2026-05": {
+              "n": 2,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 0.5,
+              "baseline_accuracy": 0.5
+            }
+          },
+          "selected_months": 1,
+          "worst_month_accuracy": 0.5,
+          "baseline_selected_accuracy": 0.5,
+          "baseline_eligible_accuracy": 0.5526004728132388,
+          "lift_percentage_points": 0,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5263157894736842,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "3": {
+      "source_rows": 4680,
+      "input_sha256": "1dfeb60f740238940128edb3df05f671148f1350e00ca40ee34360f75be41d6c",
+      "eligible": 3564,
+      "excluded_history": 625,
+      "excluded_fit": 491,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5477349307375515,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.4104938271604938,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "5": {
+      "source_rows": 4678,
+      "input_sha256": "205b0db939d9e3623fd4934a70d361b0a06b65b460774309ced8924f567b140b",
+      "eligible": 3560,
+      "excluded_history": 625,
+      "excluded_fit": 493,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5321345321345321,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.44887640449438204,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "7": {
+      "source_rows": 4673,
+      "input_sha256": "97ffba441a043a4d082012c81a7b2e165f31242a8c7a96913f20c5339b86d93b",
+      "eligible": 3550,
+      "excluded_history": 625,
+      "excluded_fit": 498,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5251502689022461,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.4676056338028169,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    }
+  },
+  "full_result_sha256": "1f1d0b8c66c3e350367780d8d19da31514229a0f082dabcd306c4b4de606d097"
+}

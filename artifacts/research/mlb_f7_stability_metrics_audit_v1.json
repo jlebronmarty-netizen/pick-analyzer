@@ -1,0 +1,169 @@
+{
+  "research_only": true,
+  "source_full_result_sha256": "14ecd413cfb68309dd8aa0e932e646a04b480b52fbb688b61cfce1b34570f614",
+  "note": "Reporting-only expansion of leave-month-out sensitivity to every eligible month, including zero-selection months. No refitting, decision change or gate change.",
+  "rules": {
+    "consensus": {
+      "exclusion_of_each_eligible_month": {
+        "2025-05": {
+          "wins": 35,
+          "n": 40,
+          "accuracy": 0.875
+        },
+        "2025-06": {
+          "wins": 38,
+          "n": 45,
+          "accuracy": 0.8444444444444444
+        },
+        "2025-07": {
+          "wins": 39,
+          "n": 47,
+          "accuracy": 0.8297872340425532
+        },
+        "2025-08": {
+          "wins": 31,
+          "n": 37,
+          "accuracy": 0.8378378378378378
+        },
+        "2025-09": {
+          "wins": 34,
+          "n": 40,
+          "accuracy": 0.85
+        },
+        "2026-05": {
+          "wins": 43,
+          "n": 51,
+          "accuracy": 0.8431372549019608
+        },
+        "2026-06": {
+          "wins": 44,
+          "n": 52,
+          "accuracy": 0.8461538461538461
+        },
+        "2026-07": {
+          "wins": 44,
+          "n": 52,
+          "accuracy": 0.8461538461538461
+        },
+        "2026-08": {
+          "wins": 44,
+          "n": 52,
+          "accuracy": 0.8461538461538461
+        },
+        "2026-09": {
+          "wins": 44,
+          "n": 52,
+          "accuracy": 0.8461538461538461
+        }
+      }
+    },
+    "conformal": {
+      "exclusion_of_each_eligible_month": {
+        "2025-05": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2025-06": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2025-07": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2025-08": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2025-09": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2026-05": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2026-06": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2026-07": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2026-08": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        },
+        "2026-09": {
+          "wins": 2,
+          "n": 3,
+          "accuracy": 0.6666666666666666
+        }
+      }
+    },
+    "month_bootstrap": {
+      "exclusion_of_each_eligible_month": {
+        "2025-05": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2025-06": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2025-07": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2025-08": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2025-09": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2026-05": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2026-06": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2026-07": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2026-08": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        },
+        "2026-09": {
+          "wins": 0,
+          "n": 0,
+          "accuracy": null
+        }
+      }
+    }
+  }
+}

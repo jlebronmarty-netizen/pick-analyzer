@@ -1,0 +1,94 @@
+{
+  "architecture": "f3_proportional_odds_ordered_margin_v1",
+  "contract_sha256": "385285ac8ad900969dc1f0e9b21bd6023f2cd010db87e4aef1b3e17c547604c7",
+  "input_sha256": "1dfeb60f740238940128edb3df05f671148f1350e00ca40ee34360f75be41d6c",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "source_rows": 4680,
+  "feature_contexts": 4052,
+  "eligible": 2136,
+  "excluded_fit": 1916,
+  "metrics": {
+    "selected": 0,
+    "n": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "accuracy": null,
+    "coverage": 0,
+    "monthly": {},
+    "selected_months": 0,
+    "worst_month_accuracy": null,
+    "baseline_selected_accuracy": null,
+    "baseline_eligible_accuracy": 0.5620347394540943,
+    "lift_percentage_points": null,
+    "development_gate_pass": false,
+    "monthly_all": {
+      "2025-07": {
+        "eligible": 369,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2025-08": {
+        "eligible": 420,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2025-09": {
+        "eligible": 373,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-07": {
+        "eligible": 371,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-08": {
+        "eligible": 417,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-09": {
+        "eligible": 186,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      }
+    },
+    "minimum_month_n": null,
+    "represented_months": 0,
+    "leave_one_month_out": {},
+    "leave_one_month_out_min_accuracy": null,
+    "wilson_95_lower": null,
+    "beta_uniform_95_lower": null,
+    "top_two_month_selected_share": null,
+    "robust_gate_pass": false
+  },
+  "full_result_sha256": "c28bac3e221edc4a9c1810f4930ba1f68d00d8b742487e0159636f94d3b629ea",
+  "status": "FAIL"
+}

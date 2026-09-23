@@ -1,0 +1,96 @@
+{
+  "contract": "MLB_F1_NRFI_RANDOM_EFFECTS_V1/1.0.0",
+  "architecture": "joint_nrfi_logistic_random_effects_pitchers_offenses",
+  "research_only": true,
+  "source": {
+    "table": "public.mlb_f1_nrfi_revisit_base_v1",
+    "source_rows": 4683,
+    "prior_certified_input_sha256": "740ccad6ec6b0a93298165465269435e256e2c81e335f572bf9acc250174f513",
+    "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+    "note": "same certified source contract used by prior NRFI analog/factorized research; this run did not recompute the canonical JSON hash"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "6f7698c648a602d32f3bbc696a70b18d2747051c",
+    "evaluator_commit": "c9adb945618dad4f2fe7648cefc7f1e6b0da4646",
+    "probability_threshold": 0.75,
+    "l2_pitcher": 20,
+    "l2_offense": 20,
+    "iterations": 30,
+    "min_prior_league_games": 300,
+    "min_pitcher_starts": 3,
+    "min_offense_games": 10
+  },
+  "result": {
+    "eligible": 2977,
+    "selected": 2373,
+    "wins": 1189,
+    "losses": 1184,
+    "accuracy": 0.5010535187526338,
+    "coverage": 0.797111185757474,
+    "selected_months": 8,
+    "worst_month_accuracy": 0.47019867549668876,
+    "probability_range": {
+      "min": 0.000001442196691286934,
+      "max": 0.6242152161890255
+    },
+    "monthly": {
+      "2025-06": {
+        "n": 307,
+        "wins": 149,
+        "accuracy": 0.48534201954397393
+      },
+      "2025-07": {
+        "n": 307,
+        "wins": 145,
+        "accuracy": 0.4723127035830619
+      },
+      "2025-08": {
+        "n": 337,
+        "wins": 170,
+        "accuracy": 0.5044510385756676
+      },
+      "2025-09": {
+        "n": 303,
+        "wins": 173,
+        "accuracy": 0.570957095709571
+      },
+      "2026-06": {
+        "n": 305,
+        "wins": 157,
+        "accuracy": 0.5147540983606558
+      },
+      "2026-07": {
+        "n": 302,
+        "wins": 142,
+        "accuracy": 0.47019867549668876
+      },
+      "2026-08": {
+        "n": 353,
+        "wins": 166,
+        "accuracy": 0.4702549575070821
+      },
+      "2026-09": {
+        "n": 159,
+        "wins": 87,
+        "accuracy": 0.5471698113207547
+      }
+    },
+    "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL",
+    "development_gate_pass": false,
+    "external_opened": false
+  },
+  "interpretation": {
+    "nrfi_threshold_crossings": 0,
+    "note": "maximum modeled p(NRFI) was 0.6242, below the frozen 0.75 NRFI threshold. Selected rows came from the frozen YRFI side rule p(NRFI)<=0.25 and performed near chance.",
+    "retuned": false,
+    "threshold_rescue": false
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}

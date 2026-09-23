@@ -1,0 +1,323 @@
+{
+  "baseline": "a37fe5a7",
+  "main": "c8aac46648b38935a6dd00f17e0987b90b042033",
+  "git": {
+    "root": "26a4493a08fbe6ee2217298c87a66b53843c3e62",
+    "root_timestamp": "2026-06-21T15:12:47-04:00",
+    "shallow": false,
+    "original_projected_population_found": false,
+    "pre_2025_09_actions": {
+      "total_count": 0,
+      "workflow_runs": []
+    },
+    "global_artifact_and_cache_listing": "connector endpoint unsupported; not counted as zero",
+    "selected_run_artifacts": [
+      {
+        "run_id": 35287568950,
+        "artifacts": []
+      },
+      {
+        "run_id": 35300352645,
+        "artifacts": []
+      },
+      {
+        "run_id": 35344086990,
+        "artifacts": []
+      }
+    ]
+  },
+  "supabase": {
+    "snapshot_inventory": [
+      {
+        "t": "historical_feature_snapshots",
+        "n": 131426,
+        "first_created": "2026-07-14 17:43:42.49593+00",
+        "last_created": "2026-09-10 04:54:38.622773+00",
+        "min_asof": "2025-03-18 00:00:00+00"
+      },
+      {
+        "t": "pick2_feature_snapshots",
+        "n": 127208,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "last_created": "2026-09-21 21:03:31.681432+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      },
+      {
+        "t": "mlb_context_snapshots",
+        "n": 10,
+        "first_created": "2026-08-20 20:08:43.230269+00",
+        "last_created": "2026-09-15 04:07:01.123515+00",
+        "min_asof": "2026-08-20 20:08:37.889+00"
+      },
+      {
+        "t": "sport_lineups",
+        "n": 27,
+        "first_created": "2026-07-22 02:15:31.857673+00",
+        "last_created": "2026-07-22 02:15:31.857673+00",
+        "min_asof": "2026-07-22 02:00:08.986+00"
+      },
+      {
+        "t": "historical_baseball_lineups",
+        "n": 76135,
+        "first_created": "2026-07-22 21:00:33.985066+00",
+        "last_created": "2026-07-22 21:19:50.036921+00",
+        "min_asof": null
+      }
+    ],
+    "raw_inventory": [
+      {
+        "source": "public_web_pregame_runline",
+        "record_type": "market_open_close",
+        "n": 12,
+        "min_imported": "2026-09-16 15:38:41.134341+00",
+        "max_imported": "2026-09-16 15:38:41.134341+00",
+        "any_pregame": true,
+        "any_postgame": false
+      },
+      {
+        "source": "public_web_pregame_runline_zero_fix",
+        "record_type": "market_open_close",
+        "n": 4,
+        "min_imported": "2026-09-16 15:48:42.666084+00",
+        "max_imported": "2026-09-16 15:48:42.666084+00",
+        "any_pregame": true,
+        "any_postgame": false
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "badj",
+        "n": 25,
+        "min_imported": "2026-07-22 21:00:26.6074+00",
+        "max_imported": "2026-07-22 21:17:21.316614+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "com",
+        "n": 2398,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "data",
+        "n": 20868,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "id",
+        "n": 2430,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "info",
+        "n": 77760,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "padj",
+        "n": 4,
+        "min_imported": "2026-07-22 21:11:06.558857+00",
+        "max_imported": "2026-07-22 21:11:06.558857+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "play",
+        "n": 216845,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "radj",
+        "n": 602,
+        "min_imported": "2026-07-22 21:00:24.646915+00",
+        "max_imported": "2026-07-22 21:19:46.987785+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "start",
+        "n": 48600,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "sub",
+        "n": 27535,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "retrosheet",
+        "record_type": "version",
+        "n": 2430,
+        "min_imported": "2026-07-22 21:00:18.230922+00",
+        "max_imported": "2026-07-22 21:19:47.366811+00",
+        "any_pregame": false,
+        "any_postgame": true
+      },
+      {
+        "source": "sportsbookreview_athletics_runline_v2",
+        "record_type": "market_open_close",
+        "n": 4016,
+        "min_imported": "2026-09-16 15:33:42.19+00",
+        "max_imported": "2026-09-16 15:33:42.588+00",
+        "any_pregame": true,
+        "any_postgame": false
+      },
+      {
+        "source": "sportsbookreview_direct_scrape",
+        "record_type": "market_open_close",
+        "n": 55108,
+        "min_imported": "2026-09-16 15:08:53.692+00",
+        "max_imported": "2026-09-16 15:15:47.904+00",
+        "any_pregame": true,
+        "any_postgame": false
+      },
+      {
+        "source": "sportsbookreview_multigame_retry",
+        "record_type": "market_open_close",
+        "n": 8412,
+        "min_imported": "2026-09-16 15:26:35.444+00",
+        "max_imported": "2026-09-16 15:27:39.823+00",
+        "any_pregame": true,
+        "any_postgame": false
+      },
+      {
+        "source": "sportsbookreview_via_arnavsaraogi_dataset",
+        "record_type": "market_open_close",
+        "n": 40604,
+        "min_imported": "2026-09-16 14:48:57.986+00",
+        "max_imported": "2026-09-16 14:54:04.336+00",
+        "any_pregame": true,
+        "any_postgame": false
+      }
+    ],
+    "storage_schedule": [
+      {
+        "evidence": {
+          "storage": {
+            "count": 219,
+            "max_created": "2026-09-22T03:45:13.488905+00:00",
+            "min_created": "2026-09-10T14:15:14.464889+00:00"
+          },
+          "schedule": {
+            "count": 1991,
+            "max_fetched": "2026-09-17T22:14:21.354491+00:00",
+            "min_fetched": "2026-09-17T22:13:52.381096+00:00"
+          }
+        }
+      }
+    ],
+    "historical_snapshot_versions": [
+      {
+        "feature_set_version": "retrosheet_mlb_historical_feature_set_v1",
+        "snapshot_version": 1,
+        "n": 59624,
+        "first_created": "2026-07-24 00:33:28.833754+00",
+        "min_asof": "2025-03-18 00:00:00+00",
+        "example_source_timestamps": "{\"targetGameDate\": \"2025-03-18\", \"cutoffTimestamp\": \"2025-03-18T00:00:00.000Z\", \"maximumAllowedSourceDate\": \"strictly_before_target_game_date\"}"
+      }
+    ],
+    "pick2_snapshot_versions": [
+      {
+        "feature_domain": "batter",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "n": 37486,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      },
+      {
+        "feature_domain": "bullpen",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "n": 3770,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      },
+      {
+        "feature_domain": "first_inning",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "n": 1885,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      },
+      {
+        "feature_domain": "matchup",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "n": 1885,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      },
+      {
+        "feature_domain": "pitcher",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "n": 3770,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      },
+      {
+        "feature_domain": "team",
+        "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+        "n": 7540,
+        "first_created": "2026-08-30 00:00:21.74124+00",
+        "min_asof": "2025-03-31 23:59:59+00"
+      }
+    ],
+    "storage_name_hits": [],
+    "raw_custom_triggers": [],
+    "raw_timestamp_key_sample": [
+      {
+        "n": 1000,
+        "sv_id_present": 0,
+        "tfs_present": 0,
+        "publication_key_present": 0
+      }
+    ],
+    "late_lineup_source_inventory": [
+      {
+        "season": "2026",
+        "provider": "sportsdataio",
+        "lineup_type": "starting_lineup",
+        "lineup_status": "probable",
+        "confirmation_level": "expected",
+        "n": 27,
+        "first_source": "2026-07-22 02:00:08.986+00",
+        "last_source": "2026-07-22 02:00:08.986+00"
+      }
+    ]
+  },
+  "vercel": {
+    "pre_2025_09_deployments": [],
+    "runtime_logs": "UNAVAILABLE: historical query returns ExceedsBillingLimitError; not evidence of zero logs; no paid access attempted"
+  },
+  "research_only": true,
+  "external_opened": false,
+  "provider_calls": 0,
+  "odds_credits": 0
+}

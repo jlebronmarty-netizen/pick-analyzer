@@ -1,0 +1,205 @@
+{
+  "schema": "MLB_PUBLIC_SNAPSHOT_AUDIT_V1",
+  "research_only": true,
+  "total_rows": 3673,
+  "books": {
+    "ballybet": 172,
+    "betmgm": 738,
+    "betonline": 29,
+    "bookmaker": 31,
+    "bovada": 8,
+    "bwin": 10,
+    "caesars": 46,
+    "circa": 40,
+    "fanduel": 1370,
+    "hardrock": 86,
+    "kalshi": 752,
+    "ladbrokes": 145,
+    "polymarket": 134,
+    "saba": 112
+  },
+  "market_counts": {
+    "1st_3_innings_run_line": 4,
+    "1st_3_innings_total_runs": 4,
+    "1st_5_innings_moneyline": 2,
+    "1st_5_innings_run_line": 6,
+    "1st_5_innings_total_runs": 10,
+    "1st_7_innings_run_line": 2,
+    "1st_7_innings_total_runs": 2,
+    "1st_inning_moneyline": 6,
+    "2nd_half_moneyline": 2,
+    "2nd_half_point_spread": 2,
+    "2nd_inning_moneyline": 6,
+    "3rd_inning_moneyline": 6,
+    "4th_inning_moneyline": 6,
+    "5th_inning_moneyline": 6,
+    "6th_inning_moneyline": 6,
+    "7th_inning_moneyline": 6,
+    "8th_inning_moneyline": 6,
+    "9th_inning_moneyline": 4,
+    "binary": 41,
+    "championship_winner": 621,
+    "conference_winner": 599,
+    "correct_score": 74,
+    "cy_young": 109,
+    "division_winner": 53,
+    "exact_seed": 316,
+    "futures": 112,
+    "game_prop": 22,
+    "make_playoffs": 57,
+    "moneyline": 10,
+    "mvp": 183,
+    "outright": 1000,
+    "player_rbis": 4,
+    "player_total_bases": 3,
+    "rookie_of_the_year": 86,
+    "season_leader": 5,
+    "total_runs_odd_even": 2,
+    "total_strikeouts": 6,
+    "tournament_winner": 276,
+    "winning_margin": 8
+  },
+  "target_rows": 28,
+  "target_source_events": [
+    "mlb_giants_rockies_2026-07-12_b2",
+    "mlb_americanleague_nationalleague_2026-07-14_b3"
+  ],
+  "target_capture_dates": [
+    "2026-07-13"
+  ],
+  "target_start_dates": [
+    "2026-07-12",
+    "2026-07-15"
+  ],
+  "groups": {
+    "1st_3_innings_run_line": {
+      "rows": 4,
+      "events": 1,
+      "books": {
+        "caesars": 2,
+        "fanduel": 2
+      },
+      "pregame_rows": 4,
+      "post_start_rows": 0,
+      "missing_or_invalid_timestamps": 0,
+      "lines": [
+        "-0.5",
+        "0.5"
+      ],
+      "non_finite_lines": 0,
+      "pregame_exhibition_rows": 4
+    },
+    "1st_5_innings_run_line": {
+      "rows": 6,
+      "events": 1,
+      "books": {
+        "bookmaker": 6
+      },
+      "pregame_rows": 0,
+      "post_start_rows": 6,
+      "missing_or_invalid_timestamps": 0,
+      "lines": [
+        "-0.5",
+        "-1",
+        "0.5",
+        "1"
+      ],
+      "non_finite_lines": 0,
+      "pregame_exhibition_rows": 0
+    },
+    "1st_7_innings_run_line": {
+      "rows": 2,
+      "events": 1,
+      "books": {
+        "fanduel": 2
+      },
+      "pregame_rows": 2,
+      "post_start_rows": 0,
+      "missing_or_invalid_timestamps": 0,
+      "lines": [
+        "-0.5",
+        "0.5"
+      ],
+      "non_finite_lines": 0,
+      "pregame_exhibition_rows": 2
+    },
+    "1st_3_innings_total_runs": {
+      "rows": 4,
+      "events": 1,
+      "books": {
+        "caesars": 2,
+        "fanduel": 2
+      },
+      "pregame_rows": 4,
+      "post_start_rows": 0,
+      "missing_or_invalid_timestamps": 0,
+      "lines": [
+        "1.5",
+        "2.5"
+      ],
+      "non_finite_lines": 0,
+      "pregame_exhibition_rows": 4
+    },
+    "1st_5_innings_total_runs": {
+      "rows": 10,
+      "events": 2,
+      "books": {
+        "bookmaker": 8,
+        "fanduel": 2
+      },
+      "pregame_rows": 2,
+      "post_start_rows": 8,
+      "missing_or_invalid_timestamps": 0,
+      "lines": [
+        "2",
+        "3.5",
+        "4.5",
+        "5",
+        "5.5"
+      ],
+      "non_finite_lines": 0,
+      "pregame_exhibition_rows": 2
+    },
+    "1st_7_innings_total_runs": {
+      "rows": 2,
+      "events": 1,
+      "books": {
+        "fanduel": 2
+      },
+      "pregame_rows": 2,
+      "post_start_rows": 0,
+      "missing_or_invalid_timestamps": 0,
+      "lines": [
+        "5.5"
+      ],
+      "non_finite_lines": 0,
+      "pregame_exhibition_rows": 2
+    }
+  },
+  "team_total_explicit_market_rows": 0,
+  "admitted_rows": 0,
+  "status": "REJECTED_FOR_PREGAME_RESEARCH",
+  "reasons": [
+    "14 regular-game target rows captured after start despite is_live=False; 14 pre-start target rows concern the All-Star exhibition",
+    "Two source events (one regular game, one exhibition) and one capture day cannot satisfy multi-month gates",
+    "No authoritative MLBAM game mapping or independent original-book quote verification",
+    "Ordinal inning moneylines are not cumulative first-N innings; generic game_prop not silently mapped",
+    "Run-line ladders lack main/alternate designation; no inferred designation"
+  ],
+  "training_performed": false,
+  "provider_calls": 0,
+  "odds_api_credits_consumed": 0,
+  "provenance": {
+    "publisher": "SharpAPI",
+    "repository": "https://github.com/Sharp-API/SharpAPI-Sample-Data",
+    "commit": "cddb647cc9d06bd244cb8b72111cb39bd5587478",
+    "path": "data/mlb_odds_snapshot.csv",
+    "upstream_git_blob_sha": "69ca871bcd510b11c2c6679af169f022a5bbbc82",
+    "audited_local_bytes_sha256": "7180ca95aef053e1dfdd6faf98b4508f0db1e01f237ebdd8dcc39ba9a636221c",
+    "license": "CC BY 4.0 (publisher declaration; not independent certification of upstream collection)",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Odds data from SharpAPI (sharpapi.io), Sports Betting Odds Sample Dataset, 2026.",
+    "modification": "Aggregate audit only; original rows not redistributed; supplied without warranties",
+    "scope": "Quarantined structural audit only; no import into model datasets or Supabase"
+  }
+}

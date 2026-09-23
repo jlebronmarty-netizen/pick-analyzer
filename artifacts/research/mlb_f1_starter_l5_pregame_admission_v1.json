@@ -1,0 +1,105 @@
+{
+  "contract": "MLB_F1_STARTER_L5_PREGAME_ADMISSION_V1/1.0.0",
+  "research_only": true,
+  "sources": {
+    "target_games": "public.mlb_ml_xyear_features_v1 / xyear_raw_v1 / A_XYEAR_RAW",
+    "starter_history": "public.mlb_ml_xyear_pitcher_game_v1",
+    "outcomes": "public.mlb_f1_nrfi_revisit_base_v1"
+  },
+  "identity_audit": {
+    "2025": {
+      "target_games": 2430,
+      "exact_home_away_starter_identity": 2430,
+      "mismatches": 0
+    },
+    "2026": {
+      "target_games": 2285,
+      "exact_home_away_starter_identity": 2285,
+      "mismatches": 0
+    }
+  },
+  "history_rule": "same-season starter=true AND prior game_date < target game_date; rank descending by prior date/game_pk; exactly last 5 starts; same-date earlier game excluded",
+  "admitted_starter_features": [
+    "L5 strikeouts / batters faced",
+    "L5 walks / batters faced",
+    "L5 hits / batters faced",
+    "L5 whiffs / swings",
+    "L5 chases / outside-zone pitches",
+    "L5 hard hits / batted balls"
+  ],
+  "admitted_offense_features": [
+    "strict-prior team off OPS proxy",
+    "strict-prior team off K pct"
+  ],
+  "coverage": {
+    "starter_target_sides": {
+      "2025": {
+        "target_sides": 4860,
+        "l5_eligible": 3404,
+        "complete_rates": 3404
+      },
+      "2026": {
+        "target_sides": 4570,
+        "l5_eligible": 3144,
+        "complete_rates": 3144
+      }
+    },
+    "game_level_join": {
+      "2025": {
+        "joined_f1_games": 2428,
+        "both_starters_l5": 1402,
+        "complete_new_surface": 1402
+      },
+      "2026": {
+        "joined_f1_games": 2255,
+        "both_starters_l5": 1261,
+        "complete_new_surface": 1261
+      }
+    }
+  },
+  "observed_ranges": {
+    "2025": {
+      "k_rate": [
+        0.0571428571428571,
+        0.423728813559322
+      ],
+      "bb_rate": [
+        0,
+        0.186046511627907
+      ],
+      "whiff_rate": [
+        0.0851063829787234,
+        0.384937238493724
+      ]
+    },
+    "2026": {
+      "k_rate": [
+        0.0357142857142857,
+        0.471153846153846
+      ],
+      "bb_rate": [
+        0,
+        0.291666666666667
+      ],
+      "whiff_rate": [
+        0.0730337078651685,
+        0.393203883495146
+      ]
+    }
+  },
+  "state": "ADMITTED_HISTORICAL_RECONSTRUCTED_STRICT_PRIOR_STARTER_L5_RESEARCH_ONLY",
+  "limitations": [
+    "historical reconstructed research surface, not proof of as-published live capture",
+    "requires exact target starter MLBAM identity already present in xyear feature row",
+    "no target-game pitcher stats used",
+    "no same-date prior start used"
+  ],
+  "boundaries": {
+    "provider_calls": 0,
+    "odds_api_historical_credits": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}

@@ -1,0 +1,76 @@
+name: MLB frozen architecture evidence V1
+on:
+  push:
+    branches: [research/period-team-threshold-classifier-v1-20260921]
+    paths:
+      - 'scripts/research/*factorized*'
+      - 'scripts/research/*poisson*'
+      - 'scripts/research/*davidson*'
+      - 'scripts/research/*qda*'
+      - 'scripts/research/*nrfi_analog*'
+      - 'scripts/research/*lineup*'
+      - 'scripts/research/*empirical_convolution*'
+      - 'scripts/research/*bayesian_mixture*'
+      - 'scripts/research/*new_families*'
+      - 'scripts/research/*multiperiod_bilinear*'
+      - 'scripts/research/*honest_regime_tree*'
+      - 'scripts/research/*nrfi_boosting*'
+      - 'scripts/research/*f7_stability*'
+      - 'scripts/research/*f5_opponent_count*'
+      - 'scripts/research/*closed_market_inventory*'
+      - 'scripts/research/*f1_kernel_distribution*'
+      - 'scripts/research/*f3_ordinal_margin*'
+      - 'scripts/research/*f5_hidden_sequence*'
+      - 'scripts/research/audit_mlb_public_snapshot_v1.mjs'
+      - 'scripts/research/verify_mlb_frozen_architectures_v1.test.mjs'
+      - 'artifacts/research/*factorized*'
+      - 'artifacts/research/*poisson*'
+      - 'artifacts/research/*davidson*'
+      - 'artifacts/research/*qda*'
+      - 'artifacts/research/*nrfi_analog*'
+      - 'artifacts/research/*lineup*'
+      - 'artifacts/research/*empirical_convolution*'
+      - 'artifacts/research/*bayesian_mixture*'
+      - 'artifacts/research/*new_families*'
+      - 'artifacts/research/*multiperiod_bilinear*'
+      - 'artifacts/research/*honest_regime_tree*'
+      - 'artifacts/research/*nrfi_boosting*'
+      - 'artifacts/research/*f7_stability*'
+      - 'artifacts/research/*f5_opponent_count*'
+      - 'artifacts/research/*closed_market_inventory*'
+      - 'artifacts/research/*f1_kernel_distribution*'
+      - 'artifacts/research/*f3_ordinal_margin*'
+      - 'artifacts/research/*f5_hidden_sequence*'
+      - 'contracts/MLB_F1_KERNEL_DISTRIBUTION_V1.json'
+      - 'contracts/MLB_F3_ORDINAL_MARGIN_V1.json'
+      - 'contracts/MLB_F5_HIDDEN_SEQUENCE_V1.json'
+      - 'contracts/MLB_F7_STABILITY_BLOCK_V1.json'
+      - 'contracts/MLB_F5_OPPONENT_COUNT_V1.json'
+      - 'contracts/MLB_NEW_FAMILIES_V1.json'
+      - 'contracts/MLB_MULTIPERIOD_BILINEAR_V1.json'
+      - 'contracts/MLB_HONEST_REGIME_TREE_V1.json'
+      - 'contracts/MLB_NRFI_BOOSTING_V1.json'
+      - 'artifacts/research/mlb_public_snapshot_audit_20260922.json'
+      - '.github/workflows/mlb-frozen-architecture-evidence-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Match the runtime used to freeze the numerical research artifacts.
+          node-version: '24.17.0'
+      - run: node --test scripts/research/verify_mlb_frozen_architectures_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_period_davidson_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_period_qda_v1.test.mjs scripts/research/verify_mlb_nrfi_analog_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_lineup_integrity_v1.test.mjs scripts/research/verify_mlb_period_empirical_convolution_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_lineup_temporal_sample_v1.test.mjs scripts/research/verify_mlb_period_bayesian_mixture_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_new_families_v1.test.mjs scripts/research/verify_mlb_multiperiod_bilinear_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_honest_regime_tree_v1.test.mjs scripts/research/verify_mlb_nrfi_boosting_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_f7_stability_block_v1.test.mjs scripts/research/verify_mlb_f5_opponent_count_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_closed_market_inventory_v1.test.mjs scripts/research/verify_mlb_f1_kernel_distribution_v1.test.mjs scripts/research/verify_mlb_f3_ordinal_margin_v1.test.mjs scripts/research/verify_mlb_f5_hidden_sequence_v1.test.mjs

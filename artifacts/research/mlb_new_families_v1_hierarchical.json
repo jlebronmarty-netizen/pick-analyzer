@@ -1,0 +1,545 @@
+{
+  "architecture": "hierarchical",
+  "contract_sha256": "1f1c50b54f337aa4a823b464b774ae9e52f0b7808d6e4770a8c2e63daa38f26e",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "periods": {
+    "1": {
+      "source_rows": 4683,
+      "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+      "eligible": 4057,
+      "excluded_history": 626,
+      "excluded_fit": 0,
+      "markets": {
+        "ML": {
+          "selected": 234,
+          "n": 123,
+          "wins": 68,
+          "losses": 55,
+          "pushes": 111,
+          "accuracy": 0.5528455284552846,
+          "coverage": 0.05767808725659354,
+          "monthly": {
+            "2025-04": {
+              "n": 9,
+              "wins": 7,
+              "baseline_wins": 2,
+              "accuracy": 0.7777777777777778,
+              "baseline_accuracy": 0.2222222222222222
+            },
+            "2025-05": {
+              "n": 23,
+              "wins": 13,
+              "baseline_wins": 17,
+              "accuracy": 0.5652173913043478,
+              "baseline_accuracy": 0.7391304347826086
+            },
+            "2025-06": {
+              "n": 11,
+              "wins": 5,
+              "baseline_wins": 5,
+              "accuracy": 0.45454545454545453,
+              "baseline_accuracy": 0.45454545454545453
+            },
+            "2025-07": {
+              "n": 8,
+              "wins": 5,
+              "baseline_wins": 6,
+              "accuracy": 0.625,
+              "baseline_accuracy": 0.75
+            },
+            "2025-08": {
+              "n": 12,
+              "wins": 8,
+              "baseline_wins": 7,
+              "accuracy": 0.6666666666666666,
+              "baseline_accuracy": 0.5833333333333334
+            },
+            "2025-09": {
+              "n": 11,
+              "wins": 9,
+              "baseline_wins": 6,
+              "accuracy": 0.8181818181818182,
+              "baseline_accuracy": 0.5454545454545454
+            },
+            "2026-04": {
+              "n": 9,
+              "wins": 6,
+              "baseline_wins": 3,
+              "accuracy": 0.6666666666666666,
+              "baseline_accuracy": 0.3333333333333333
+            },
+            "2026-05": {
+              "n": 22,
+              "wins": 9,
+              "baseline_wins": 14,
+              "accuracy": 0.4090909090909091,
+              "baseline_accuracy": 0.6363636363636364
+            },
+            "2026-06": {
+              "n": 11,
+              "wins": 4,
+              "baseline_wins": 8,
+              "accuracy": 0.36363636363636365,
+              "baseline_accuracy": 0.7272727272727273
+            },
+            "2026-07": {
+              "n": 5,
+              "wins": 2,
+              "baseline_wins": 3,
+              "accuracy": 0.4,
+              "baseline_accuracy": 0.6
+            },
+            "2026-08": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            },
+            "2026-09": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 1,
+              "accuracy": 0,
+              "baseline_accuracy": 1
+            }
+          },
+          "selected_months": 12,
+          "worst_month_accuracy": 0,
+          "baseline_selected_accuracy": 0.5853658536585366,
+          "baseline_eligible_accuracy": 0.5525494276795005,
+          "lift_percentage_points": -3.2520325203251987,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 24,
+          "n": 24,
+          "wins": 12,
+          "losses": 12,
+          "pushes": 0,
+          "accuracy": 0.5,
+          "coverage": 0.005915701257086517,
+          "monthly": {
+            "2025-04": {
+              "n": 2,
+              "wins": 2,
+              "baseline_wins": 2,
+              "accuracy": 1,
+              "baseline_accuracy": 1
+            },
+            "2025-05": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            },
+            "2025-06": {
+              "n": 2,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 0.5,
+              "baseline_accuracy": 0.5
+            },
+            "2025-07": {
+              "n": 7,
+              "wins": 4,
+              "baseline_wins": 4,
+              "accuracy": 0.5714285714285714,
+              "baseline_accuracy": 0.5714285714285714
+            },
+            "2026-04": {
+              "n": 4,
+              "wins": 3,
+              "baseline_wins": 3,
+              "accuracy": 0.75,
+              "baseline_accuracy": 0.75
+            },
+            "2026-05": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            },
+            "2026-06": {
+              "n": 5,
+              "wins": 2,
+              "baseline_wins": 2,
+              "accuracy": 0.4,
+              "baseline_accuracy": 0.4
+            },
+            "2026-07": {
+              "n": 2,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            }
+          },
+          "selected_months": 8,
+          "worst_month_accuracy": 0,
+          "baseline_selected_accuracy": 0.5,
+          "baseline_eligible_accuracy": 0.5262509243283214,
+          "lift_percentage_points": 0,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "3": {
+      "source_rows": 4680,
+      "input_sha256": "1dfeb60f740238940128edb3df05f671148f1350e00ca40ee34360f75be41d6c",
+      "eligible": 4055,
+      "excluded_history": 625,
+      "excluded_fit": 0,
+      "markets": {
+        "ML": {
+          "selected": 38,
+          "n": 25,
+          "wins": 13,
+          "losses": 12,
+          "pushes": 13,
+          "accuracy": 0.52,
+          "coverage": 0.0093711467324291,
+          "monthly": {
+            "2025-04": {
+              "n": 2,
+              "wins": 0,
+              "baseline_wins": 1,
+              "accuracy": 0,
+              "baseline_accuracy": 0.5
+            },
+            "2025-05": {
+              "n": 10,
+              "wins": 7,
+              "baseline_wins": 8,
+              "accuracy": 0.7,
+              "baseline_accuracy": 0.8
+            },
+            "2025-06": {
+              "n": 2,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 0.5,
+              "baseline_accuracy": 0.5
+            },
+            "2025-09": {
+              "n": 3,
+              "wins": 2,
+              "baseline_wins": 2,
+              "accuracy": 0.6666666666666666,
+              "baseline_accuracy": 0.6666666666666666
+            },
+            "2026-04": {
+              "n": 2,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 0.5,
+              "baseline_accuracy": 0.5
+            },
+            "2026-05": {
+              "n": 3,
+              "wins": 1,
+              "baseline_wins": 3,
+              "accuracy": 0.3333333333333333,
+              "baseline_accuracy": 1
+            },
+            "2026-07": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            },
+            "2026-08": {
+              "n": 2,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 0.5,
+              "baseline_accuracy": 0.5
+            }
+          },
+          "selected_months": 8,
+          "worst_month_accuracy": 0,
+          "baseline_selected_accuracy": 0.68,
+          "baseline_eligible_accuracy": 0.5497382198952879,
+          "lift_percentage_points": -16.000000000000004,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.41430332922318125,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "5": {
+      "source_rows": 4678,
+      "input_sha256": "205b0db939d9e3623fd4934a70d361b0a06b65b460774309ced8924f567b140b",
+      "eligible": 4053,
+      "excluded_history": 625,
+      "excluded_fit": 0,
+      "markets": {
+        "ML": {
+          "selected": 43,
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "pushes": 9,
+          "accuracy": 0.6764705882352942,
+          "coverage": 0.010609425117197138,
+          "monthly": {
+            "2025-04": {
+              "n": 1,
+              "wins": 1,
+              "baseline_wins": 0,
+              "accuracy": 1,
+              "baseline_accuracy": 0
+            },
+            "2025-05": {
+              "n": 15,
+              "wins": 10,
+              "baseline_wins": 9,
+              "accuracy": 0.6666666666666666,
+              "baseline_accuracy": 0.6
+            },
+            "2025-06": {
+              "n": 6,
+              "wins": 3,
+              "baseline_wins": 6,
+              "accuracy": 0.5,
+              "baseline_accuracy": 1
+            },
+            "2025-07": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            },
+            "2025-08": {
+              "n": 3,
+              "wins": 3,
+              "baseline_wins": 3,
+              "accuracy": 1,
+              "baseline_accuracy": 1
+            },
+            "2025-09": {
+              "n": 5,
+              "wins": 4,
+              "baseline_wins": 4,
+              "accuracy": 0.8,
+              "baseline_accuracy": 0.8
+            },
+            "2026-04": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 1,
+              "accuracy": 0,
+              "baseline_accuracy": 1
+            },
+            "2026-05": {
+              "n": 1,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 1,
+              "baseline_accuracy": 1
+            },
+            "2026-09": {
+              "n": 1,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 1,
+              "baseline_accuracy": 1
+            }
+          },
+          "selected_months": 9,
+          "worst_month_accuracy": 0,
+          "baseline_selected_accuracy": 0.7352941176470589,
+          "baseline_eligible_accuracy": 0.533196841181632,
+          "lift_percentage_points": -5.882352941176472,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 2,
+          "n": 2,
+          "wins": 2,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": 1,
+          "coverage": 0.0004934616333580064,
+          "monthly": {
+            "2025-05": {
+              "n": 1,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 1,
+              "baseline_accuracy": 1
+            },
+            "2025-06": {
+              "n": 1,
+              "wins": 1,
+              "baseline_wins": 1,
+              "accuracy": 1,
+              "baseline_accuracy": 1
+            }
+          },
+          "selected_months": 2,
+          "worst_month_accuracy": 1,
+          "baseline_selected_accuracy": 1,
+          "baseline_eligible_accuracy": 0.44979027880582284,
+          "lift_percentage_points": 0,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "7": {
+      "source_rows": 4673,
+      "input_sha256": "97ffba441a043a4d082012c81a7b2e165f31242a8c7a96913f20c5339b86d93b",
+      "eligible": 4048,
+      "excluded_history": 625,
+      "excluded_fit": 0,
+      "markets": {
+        "ML": {
+          "selected": 96,
+          "n": 84,
+          "wins": 66,
+          "losses": 18,
+          "pushes": 12,
+          "accuracy": 0.7857142857142857,
+          "coverage": 0.023715415019762844,
+          "monthly": {
+            "2025-04": {
+              "n": 2,
+              "wins": 2,
+              "baseline_wins": 0,
+              "accuracy": 1,
+              "baseline_accuracy": 0
+            },
+            "2025-05": {
+              "n": 29,
+              "wins": 23,
+              "baseline_wins": 14,
+              "accuracy": 0.7931034482758621,
+              "baseline_accuracy": 0.4827586206896552
+            },
+            "2025-06": {
+              "n": 15,
+              "wins": 13,
+              "baseline_wins": 9,
+              "accuracy": 0.8666666666666667,
+              "baseline_accuracy": 0.6
+            },
+            "2025-07": {
+              "n": 10,
+              "wins": 8,
+              "baseline_wins": 8,
+              "accuracy": 0.8,
+              "baseline_accuracy": 0.8
+            },
+            "2025-08": {
+              "n": 16,
+              "wins": 11,
+              "baseline_wins": 8,
+              "accuracy": 0.6875,
+              "baseline_accuracy": 0.5
+            },
+            "2025-09": {
+              "n": 11,
+              "wins": 9,
+              "baseline_wins": 9,
+              "accuracy": 0.8181818181818182,
+              "baseline_accuracy": 0.8181818181818182
+            },
+            "2026-07": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 1,
+              "accuracy": 0,
+              "baseline_accuracy": 1
+            }
+          },
+          "selected_months": 7,
+          "worst_month_accuracy": 0,
+          "baseline_selected_accuracy": 0.5833333333333334,
+          "baseline_eligible_accuracy": 0.5278624896035486,
+          "lift_percentage_points": 20.238095238095234,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 33,
+          "n": 33,
+          "wins": 24,
+          "losses": 9,
+          "pushes": 0,
+          "accuracy": 0.7272727272727273,
+          "coverage": 0.008152173913043478,
+          "monthly": {
+            "2025-04": {
+              "n": 1,
+              "wins": 1,
+              "baseline_wins": 0,
+              "accuracy": 1,
+              "baseline_accuracy": 0
+            },
+            "2025-05": {
+              "n": 15,
+              "wins": 11,
+              "baseline_wins": 10,
+              "accuracy": 0.7333333333333333,
+              "baseline_accuracy": 0.6666666666666666
+            },
+            "2025-06": {
+              "n": 6,
+              "wins": 5,
+              "baseline_wins": 1,
+              "accuracy": 0.8333333333333334,
+              "baseline_accuracy": 0.16666666666666666
+            },
+            "2025-07": {
+              "n": 1,
+              "wins": 0,
+              "baseline_wins": 0,
+              "accuracy": 0,
+              "baseline_accuracy": 0
+            },
+            "2025-08": {
+              "n": 4,
+              "wins": 2,
+              "baseline_wins": 2,
+              "accuracy": 0.5,
+              "baseline_accuracy": 0.5
+            },
+            "2025-09": {
+              "n": 6,
+              "wins": 5,
+              "baseline_wins": 5,
+              "accuracy": 0.8333333333333334,
+              "baseline_accuracy": 0.8333333333333334
+            }
+          },
+          "selected_months": 6,
+          "worst_month_accuracy": 0,
+          "baseline_selected_accuracy": 0.5454545454545454,
+          "baseline_eligible_accuracy": 0.47035573122529645,
+          "lift_percentage_points": 18.181818181818187,
+          "development_gate_pass": false
+        }
+      }
+    }
+  },
+  "full_result_sha256": "15d671e6bbe9fcdcf4f7cf113db67ecaf3b36b084dd55f52ee24c8a8a1ae4b84"
+}

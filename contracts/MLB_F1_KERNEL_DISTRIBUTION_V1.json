@@ -1,0 +1,16 @@
+{
+  "architecture": "f1_joint_distribution_random_fourier_logistic_v1",
+  "research_only": true,
+  "external_opened": false,
+  "market": "F1_ML",
+  "source": "Previously certified exact historical-development F1 outcome bundle; source SHA must equal prior Poisson manifest. Only exact team IDs, dates and strictly prior same-season F1 scores. No lineups, starter identities, historical lines, candidate predictions or external outcomes.",
+  "representation": "For each team retain last30 prior calendar-date games in team-scored/team-allowed orientation. Joint9cell histogram for scored and allowed categories0,1,2+; smooth with10 pseudo-games at pooled strictly prior league team-oriented9cell frequencies. Concatenate square roots of home-team and away-team cell probabilities:18dimensional Hellinger representation. Minimum300 league games and20 each team. Predict whole date before updating any histories; reset by season.",
+  "kernel": "Gaussian RBF approximation:64 random Fourier components sqrt(2/64)*cos(Wx+b), W entries standard Normal with bandwidth1, b uniform[0,2pi). Fixed LCG seed0x7135A91, Box-Muller normals. Frequencies independent of data/outcomes and shared for all fits. Append intercept.",
+  "fit": "Conditional HOME-vs-AWAY logistic regression; prior draws excluded from training, retained as pushes in evaluation. Refit on first available date of each month using all earlier same-season feature contexts; require250 nonpush training examples. L2 penalty1 on Fourier weights,0.01 intercept; initial intercept log smoothed training HOME/AWAY odds.50 maximum Newton IRLS iterations, component step clipped[-.5,.5], stop max raw step<1e-8; abstain entire fit if final maxstep>1e-6. Stable logits clipped[-30,30]. No hyperparameter search, calibration on future folds or post-result feature changes.",
+  "selection": "HOME if conditional p>=0.75, AWAY if p<=0.25, otherwise abstain. Old F1 candidate threshold0.625 remains unchanged and unused.",
+  "gates": {"accuracy": 0.75, "min_n": 60, "min_months": 5, "worst_month": 0.65},
+  "baseline": "Strict-prior same-season F1 modal HOME/AWAY, same selected nonpush cohort and eligible population. Report pushes, all months, LOMO, Wilson/Beta and concentration; only original market gates govern historical pass.",
+  "max_date": "2026-09-18",
+  "next_if_fail": "Close this family without retuning; next predeclared market F3 ML, with separate ordinal-margin family contract before evaluation.",
+  "odds_api_credits": 0
+}

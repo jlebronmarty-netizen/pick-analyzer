@@ -1,0 +1,194 @@
+{
+  "status": "BLOCKED_LINEUP_FEATURE_LINEAGE",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits_consumed": 0,
+  "projected_rows": 35802,
+  "games": 1989,
+  "raw_batter_game_rows": 40890,
+  "raw_pitch_rows": 597796,
+  "stats": [
+    "pa",
+    "ab",
+    "hits",
+    "singles",
+    "doubles",
+    "triples",
+    "hr",
+    "walks",
+    "strikeouts",
+    "batted_balls",
+    "hard_hits",
+    "barrels",
+    "ev_sum",
+    "ev_n"
+  ],
+  "raw_canonical_feature_matches": {
+    "pa": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "ab": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "hits": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "singles": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "doubles": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "triples": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "hr": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "walks": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "strikeouts": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "batted_balls": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "hard_hits": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "barrels": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "ev_sum": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    },
+    "ev_n": {
+      "exact": 40890,
+      "within_tolerance": 40890
+    }
+  },
+  "projected_feature_matches": {
+    "pa": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "ab": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "hits": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "singles": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "doubles": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "triples": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "hr": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "walks": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "strikeouts": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "batted_balls": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "hard_hits": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "barrels": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    },
+    "ev_sum": {
+      "canonical_exact": 35801,
+      "raw_exact": 16776,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 7.275957614183426e-12
+    },
+    "ev_n": {
+      "canonical_exact": 35802,
+      "raw_exact": 35802,
+      "raw_within_tolerance": 35802,
+      "max_absolute_raw_difference": 0
+    }
+  },
+  "raw_integrity": {
+    "missing_raw": 0,
+    "missing_canonical": 0,
+    "duplicate_terminal": 0,
+    "empty_events": 0,
+    "bad_half": 0,
+    "id_disagreement": 0
+  },
+  "original_all_team_mismatches": {
+    "pa": 372,
+    "hits": 334,
+    "walks": 259,
+    "hr": 175
+  },
+  "affected_unique_records": 372,
+  "unexplained_rebuilt_records": 0,
+  "ev_absolute_tolerance": 1e-8,
+  "as_published_certificate": false,
+  "blocker": "Original projected builder snapshot unavailable; raw 2025 data was ingested in 2026 and has no verified per-cutoff as-published correction history.",
+  "input_sha256": {
+    "projected": "4dfbd89bb8e0ff7034461c1d73aa8c5ae376454cab3794d6ee79029e2d9e0779",
+    "raw": "fd385e9bc92a77138fd8eab4746ddc75b4e4661a14f950edd746f19e43d67c1e"
+  },
+  "full_result_sha256": "6709d2193782af0de43c34d9e21ca71f356f876b357fec7f8a2099205c2cb870"
+}

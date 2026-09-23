@@ -1,0 +1,47 @@
+{
+  "contract": "MLB_BALLDONTLIE_EXISTING_STORAGE_AUDIT_V1/1.0.0",
+  "research_only": true,
+  "canonical_supabase": "ynuocvexviorgdjrfthw",
+  "findings": {
+    "sport_player_stats_balldontlie_rows": 0,
+    "sports_odds_snapshots_balldontlie_rows": 1,
+    "stored_quote": {
+      "event_id": "mlb:game:824465",
+      "provider": "balldontlie",
+      "sportsbook": "fanduel",
+      "market": "pitcher_strikeouts",
+      "side": "OVER",
+      "line": 7.5,
+      "price": -113,
+      "pitcher": "Tarik Skubal",
+      "pitcher_mlbam_id": 669373,
+      "provider_timestamp": "2026-09-14T02:23:14.168Z",
+      "target_start": "2026-09-14T22:40:00Z",
+      "identity_classification": "CROSS_SOURCE_CORROBORATED",
+      "contract": "SHARED_MLB_PLAYER_PROP_QUOTE_V1"
+    },
+    "matching_sync_job_found": false,
+    "public_supabase_function_mentions_balldontlie": false,
+    "github_code_search_mentions_balldontlie": 0
+  },
+  "interpretation": "BALLDONTLIE schema/identity/timestamp capability is proven by one persisted pregame player-prop quote, but no historical corpus or reusable persisted ingestion pipeline is currently present in canonical storage/repo search.",
+  "decision": "CAPABILITY_PROVEN_BUT_PRODUCTION_RUNTIME_KEY_MISSING_AND_NO_HISTORICAL_CORPUS",
+  "next_gate": "Configure BALLDONTLIE_API_KEY in Vercel production from the user's existing subscription, then run a separately bounded research-only capability/capture gate. No provider call is authorized by this audit itself.",
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  },
+  "runtime_key_audit": {
+    "audited_at": "2026-09-23T03:16:23Z",
+    "environment": "production",
+    "configured": false,
+    "provider_calls_made": 0,
+    "secret_value_exposed": false,
+    "workflow_run_id": 35813665015,
+    "state": "BLOCKED_BALLDONTLIE_KEY_NOT_CONFIGURED_IN_VERCEL_PRODUCTION"
+  }
+}

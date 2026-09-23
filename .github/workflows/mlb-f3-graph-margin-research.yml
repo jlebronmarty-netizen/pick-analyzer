@@ -1,0 +1,32 @@
+name: MLB F3 graph-margin research
+
+on:
+  push:
+    branches:
+      - research/period-team-threshold-classifier-v1-20260921
+    paths:
+      - contracts/MLB_F3_GRAPH_MARGIN_V1.json
+      - artifacts/research/mlb_f3_graph_margin_v1.json
+      - docs/research/MLB_F3_GRAPH_MARGIN_V1_CLOSEOUT.md
+      - scripts/research/verify_mlb_f3_graph_margin_v1.test.mjs
+      - .github/workflows/mlb-f3-graph-margin-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - contracts/MLB_F3_GRAPH_MARGIN_V1.json
+      - artifacts/research/mlb_f3_graph_margin_v1.json
+      - docs/research/MLB_F3_GRAPH_MARGIN_V1_CLOSEOUT.md
+      - scripts/research/verify_mlb_f3_graph_margin_v1.test.mjs
+      - .github/workflows/mlb-f3-graph-margin-research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --test scripts/research/verify_mlb_f3_graph_margin_v1.test.mjs

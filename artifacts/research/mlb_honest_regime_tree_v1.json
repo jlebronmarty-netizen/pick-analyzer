@@ -1,0 +1,167 @@
+{
+  "architecture": "honest_pregame_regime_tree_v1",
+  "contract_sha256": "94452113e493c99fddcfd1b2a106abb02bbff7d4f5084e255321f49b69ccb631",
+  "feature_artifact_sha256": "d2fd1869f46dd743f4198f84e3d2aab4ee615a73c7076d100da2cc7d0115bc12",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "periods": {
+    "1": {
+      "source_contexts": 3445,
+      "eligible": 2132,
+      "excluded": 1313,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5793103448275863,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.523921200750469,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "3": {
+      "source_contexts": 3445,
+      "eligible": 2132,
+      "excluded": 1313,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.562111801242236,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.424484052532833,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "5": {
+      "source_contexts": 3445,
+      "eligible": 2093,
+      "excluded": 1352,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5393258426966292,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.4586717630195891,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "7": {
+      "source_contexts": 3445,
+      "eligible": 2132,
+      "excluded": 1313,
+      "markets": {
+        "ML": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.5304942166140905,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "n": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "selected_months": 0,
+          "worst_month_accuracy": null,
+          "baseline_selected_accuracy": null,
+          "baseline_eligible_accuracy": 0.4732645403377111,
+          "lift_percentage_points": null,
+          "development_gate_pass": false
+        }
+      }
+    }
+  },
+  "full_result_sha256": "f022f0aa73b56c261c592a461b74591ec7c7d2c0e9a4e12b897f7bdc199b1d82"
+}

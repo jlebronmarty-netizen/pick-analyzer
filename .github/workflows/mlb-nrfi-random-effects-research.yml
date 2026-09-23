@@ -1,0 +1,32 @@
+name: MLB NRFI random-effects research
+
+on:
+  push:
+    branches:
+      - research/period-team-threshold-classifier-v1-20260921
+    paths:
+      - contracts/MLB_F1_NRFI_RANDOM_EFFECTS_V1.json
+      - artifacts/research/mlb_f1_nrfi_random_effects_v1.json
+      - docs/research/MLB_F1_NRFI_RANDOM_EFFECTS_V1_CLOSEOUT.md
+      - scripts/research/verify_mlb_f1_nrfi_random_effects_v1.test.mjs
+      - .github/workflows/mlb-nrfi-random-effects-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - contracts/MLB_F1_NRFI_RANDOM_EFFECTS_V1.json
+      - artifacts/research/mlb_f1_nrfi_random_effects_v1.json
+      - docs/research/MLB_F1_NRFI_RANDOM_EFFECTS_V1_CLOSEOUT.md
+      - scripts/research/verify_mlb_f1_nrfi_random_effects_v1.test.mjs
+      - .github/workflows/mlb-nrfi-random-effects-research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --test scripts/research/verify_mlb_f1_nrfi_random_effects_v1.test.mjs

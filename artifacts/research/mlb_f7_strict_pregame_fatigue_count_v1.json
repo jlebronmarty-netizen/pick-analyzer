@@ -1,0 +1,79 @@
+{
+  "contract": "MLB_F7_STRICT_PREGAME_FATIGUE_COUNT_V1/1.0.0",
+  "architecture": "shared_team_f7_poisson_glm_with_starter_l5_bullpen_fatigue_and_schedule",
+  "research_only": true,
+  "source": {
+    "source_rows": 2522,
+    "admission": "MLB_F7_NEW_INFO_ADMISSION_V1/1.0.0"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "fe4e05b68c4a8d643a5f1f80cd3413b4af598e71",
+    "evaluator_commit": "ca16e574f45c80e44a4e1a3627c73c790a3824c2",
+    "l2_lambda": 8,
+    "confidence_threshold": 0.75,
+    "min_training_games": 300
+  },
+  "result": {
+    "eligible": 1480,
+    "selected": 54,
+    "nonpush_n": 45,
+    "wins": 32,
+    "losses": 13,
+    "pushes": 9,
+    "accuracy": 0.7111111111111111,
+    "coverage": 0.03648648648648649,
+    "selected_months": 6,
+    "worst_month_accuracy": 0.5,
+    "max_side_confidence": 0.8947195563579571,
+    "monthly": {
+      "2025-07": {
+        "n": 10,
+        "wins": 7,
+        "accuracy": 0.7
+      },
+      "2025-08": {
+        "n": 8,
+        "wins": 4,
+        "accuracy": 0.5
+      },
+      "2025-09": {
+        "n": 6,
+        "wins": 6,
+        "accuracy": 1
+      },
+      "2026-07": {
+        "n": 14,
+        "wins": 8,
+        "accuracy": 0.5714285714285714
+      },
+      "2026-08": {
+        "n": 4,
+        "wins": 4,
+        "accuracy": 1
+      },
+      "2026-09": {
+        "n": 3,
+        "wins": 3,
+        "accuracy": 1
+      }
+    },
+    "development_gate_pass": false,
+    "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL",
+    "external_opened": false
+  },
+  "interpretation": {
+    "note": "F7 was legitimately reopened because genuinely new strict-prior starter/fatigue information was admitted. The first frozen new-information architecture fails pooled accuracy, n and monthly stability.",
+    "retuned": false,
+    "threshold_rescue": false,
+    "feature_rescue": false,
+    "prior_f7_models_modified": false
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}

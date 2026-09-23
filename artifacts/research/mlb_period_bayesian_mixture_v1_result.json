@@ -1,0 +1,186 @@
+{
+  "architecture": "sequential_bayesian_expert_mixture_v1",
+  "contract_sha256": "93b55aa8204c3a81b966b6b6be7157d3c672e4a01ebf5e0b8970e26382b39a8d",
+  "expert_artifact_sha256": [
+    "41864a914e742520d94dad68eae01272024cf9e726fa07de84f8bf9280077f3e",
+    "8140399012819888210dfca1e98ec3325d01c49863c5c8586345a8742fa2d6fe",
+    "597a8e433f31825c678c9cb7df4993194318622a56c692b43ba11c817cedd7fc"
+  ],
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "periods": {
+    "1": {
+      "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+      "eligible": 3452,
+      "expert_eligible": [
+        4057,
+        3452,
+        4069
+      ],
+      "markets": {
+        "ML": {
+          "selected": 8,
+          "wins": 1,
+          "losses": 3,
+          "pushes": 4,
+          "accuracy": 0.25,
+          "coverage": 0.002317497103128621,
+          "monthly": {
+            "2025-05": {
+              "n": 2,
+              "wins": 0,
+              "accuracy": 0
+            },
+            "2025-09": {
+              "n": 2,
+              "wins": 1,
+              "accuracy": 0.5
+            }
+          },
+          "worst_month_accuracy": 0,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "3": {
+      "input_sha256": "1dfeb60f740238940128edb3df05f671148f1350e00ca40ee34360f75be41d6c",
+      "eligible": 3451,
+      "expert_eligible": [
+        4055,
+        3451,
+        4066
+      ],
+      "markets": {
+        "ML": {
+          "selected": 9,
+          "wins": 1,
+          "losses": 5,
+          "pushes": 3,
+          "accuracy": 0.16666666666666666,
+          "coverage": 0.002607939727615184,
+          "monthly": {
+            "2025-05": {
+              "n": 3,
+              "wins": 0,
+              "accuracy": 0
+            },
+            "2026-05": {
+              "n": 1,
+              "wins": 0,
+              "accuracy": 0
+            },
+            "2026-09": {
+              "n": 2,
+              "wins": 1,
+              "accuracy": 0.5
+            }
+          },
+          "worst_month_accuracy": 0,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "5": {
+      "input_sha256": "205b0db939d9e3623fd4934a70d361b0a06b65b460774309ced8924f567b140b",
+      "eligible": 3450,
+      "expert_eligible": [
+        4053,
+        3450,
+        4064
+      ],
+      "markets": {
+        "ML": {
+          "selected": 4,
+          "wins": 2,
+          "losses": 1,
+          "pushes": 1,
+          "accuracy": 0.6666666666666666,
+          "coverage": 0.0011594202898550724,
+          "monthly": {
+            "2025-05": {
+              "n": 3,
+              "wins": 2,
+              "accuracy": 0.6666666666666666
+            }
+          },
+          "worst_month_accuracy": 0.6666666666666666,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false
+        }
+      }
+    },
+    "7": {
+      "input_sha256": "97ffba441a043a4d082012c81a7b2e165f31242a8c7a96913f20c5339b86d93b",
+      "eligible": 3445,
+      "expert_eligible": [
+        4048,
+        3445,
+        4059
+      ],
+      "markets": {
+        "ML": {
+          "selected": 2,
+          "wins": 1,
+          "losses": 1,
+          "pushes": 0,
+          "accuracy": 0.5,
+          "coverage": 0.0005805515239477503,
+          "monthly": {
+            "2025-05": {
+              "n": 2,
+              "wins": 1,
+              "accuracy": 0.5
+            }
+          },
+          "worst_month_accuracy": 0.5,
+          "development_gate_pass": false
+        },
+        "3WAY": {
+          "selected": 0,
+          "wins": 0,
+          "losses": 0,
+          "pushes": 0,
+          "accuracy": null,
+          "coverage": 0,
+          "monthly": {},
+          "worst_month_accuracy": null,
+          "development_gate_pass": false
+        }
+      }
+    }
+  },
+  "full_result_sha256": "68572a8e670829a7f5861a63251bd4535a0159bbb957b366909f4dd9b48e0151"
+}

@@ -1,0 +1,116 @@
+{
+  "architecture": "f1_joint_distribution_random_fourier_logistic_v1",
+  "contract_sha256": "2d245bb854c49f1d0bbc9bc26b82e621800a15750eb91f55304a5a30e8f303c2",
+  "frequencies_sha256": "57e4e62781bff18a03a077a1ec89941dd044cc395230ad0cf80e684d9ad08358",
+  "input_sha256": "bfdd2216cfb93f9be745686a2a15c0fdd44679424058525e389af22e3ee016e3",
+  "research_only": true,
+  "external_opened": false,
+  "odds_api_credits": 0,
+  "source_rows": 4683,
+  "feature_contexts": 4055,
+  "eligible": 2927,
+  "exclusions": {
+    "no_fit": 1128,
+    "nonconvergence": 0
+  },
+  "metrics": {
+    "selected": 0,
+    "n": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "accuracy": null,
+    "coverage": 0,
+    "monthly": {},
+    "selected_months": 0,
+    "worst_month_accuracy": null,
+    "baseline_selected_accuracy": null,
+    "baseline_eligible_accuracy": 0.558695652173913,
+    "lift_percentage_points": null,
+    "development_gate_pass": false,
+    "monthly_all": {
+      "2025-06": {
+        "eligible": 397,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2025-07": {
+        "eligible": 369,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2025-08": {
+        "eligible": 420,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2025-09": {
+        "eligible": 373,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-06": {
+        "eligible": 394,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-07": {
+        "eligible": 371,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-08": {
+        "eligible": 417,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      },
+      "2026-09": {
+        "eligible": 186,
+        "selected": 0,
+        "n": 0,
+        "wins": 0,
+        "losses": 0,
+        "pushes": 0,
+        "accuracy": null
+      }
+    },
+    "minimum_month_n": null,
+    "represented_months": 0,
+    "leave_one_month_out": {},
+    "leave_one_month_out_min_accuracy": null,
+    "wilson_95_lower": null,
+    "beta_uniform_95_lower": null,
+    "top_two_month_selected_share": null,
+    "robust_gate_pass": false
+  },
+  "full_result_sha256": "5729f8977e09a69dda171e97013a79c8635cd2de11fcbd8c8e7feac8456cfcf1",
+  "status": "FAIL"
+}

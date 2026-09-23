@@ -1,0 +1,564 @@
+{
+  "history_ref_inspected": "49ee84a8e297660e2e566a325eed3b84c8d738c5",
+  "ref_author_time": "2026-09-17T19:36:06-04:00",
+  "historical_ref_projected_builder_grep_hits": 0,
+  "run_inventory_total": 91,
+  "runs": [
+    {
+      "id": 35407696638,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:58:29Z",
+      "head_sha": "2fcf13cd7725ece053404b7a1d87a947facaf00f"
+    },
+    {
+      "id": 35407459937,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:54:22Z",
+      "head_sha": "0dc8925a6c8dd5c74b476bf4ece4fe3cfb5dd6f5"
+    },
+    {
+      "id": 35406944994,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:46:02Z",
+      "head_sha": "22fefd012d7a7596be40ca8e767378774cd6d3df"
+    },
+    {
+      "id": 35406673070,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:41:29Z",
+      "head_sha": "12097baa54e3f521688292203f70bc78b4d663ab"
+    },
+    {
+      "id": 35406356200,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:36:26Z",
+      "head_sha": "66f5d48d2263b63e5540f718a2c78a8aae862a76"
+    },
+    {
+      "id": 35406028063,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:31:27Z",
+      "head_sha": "899f6359c74d310b988b547915a63a733691981d"
+    },
+    {
+      "id": 35405759296,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:27:25Z",
+      "head_sha": "b25994d4d84aa0ad6f2d3009f5a96b94c66df2be"
+    },
+    {
+      "id": 35405494052,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:23:24Z",
+      "head_sha": "26693f0dc1ffe754d1645b0409bd968266397a7f"
+    },
+    {
+      "id": 35405263110,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:19:56Z",
+      "head_sha": "b3c4b69f5d5de3c4c498a1cb91e220542348de2e"
+    },
+    {
+      "id": 35405118001,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:17:33Z",
+      "head_sha": "0df0d50d980b3201ec810652f06f9d3b2fb81141"
+    },
+    {
+      "id": 35404338801,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T23:06:04Z",
+      "head_sha": "2b25cfd1672aea30f7fea3e21411f8aa8bc19f3b"
+    },
+    {
+      "id": 35404338733,
+      "name": "MLB Decision Board Validate",
+      "created_at": "2026-09-18T23:06:03Z",
+      "head_sha": "2b25cfd1672aea30f7fea3e21411f8aa8bc19f3b"
+    },
+    {
+      "id": 35403357596,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T22:51:39Z",
+      "head_sha": "d2411411b9c23cf8395bb6df72cddb2319c72126"
+    },
+    {
+      "id": 35403222366,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T22:49:42Z",
+      "head_sha": "2b72579ba955e63316210cf26fc685870be82481"
+    },
+    {
+      "id": 35403022864,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T22:46:42Z",
+      "head_sha": "ef8aa026329851f9613f02320f8be990dde8ecdd"
+    },
+    {
+      "id": 35402662513,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T22:41:36Z",
+      "head_sha": "21a0f5fb7d85f1dfda601e8eb21581da59f137ba"
+    },
+    {
+      "id": 35402007184,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T22:32:37Z",
+      "head_sha": "75667327bd3669e72d882c76712fe6eea58b8806"
+    },
+    {
+      "id": 35401795760,
+      "name": "MLB Totals V37 External 2026",
+      "created_at": "2026-09-18T22:29:55Z",
+      "head_sha": "6ca11127e882b0c8bc88cac8d5df222b691c8dd3"
+    },
+    {
+      "id": 35401754569,
+      "name": "MLB Totals V37 External 2026",
+      "created_at": "2026-09-18T22:29:21Z",
+      "head_sha": "cae8329cdca8318184ac80c57074ddf458a6939f"
+    },
+    {
+      "id": 35401519361,
+      "name": "MLB Totals V37 Cross-Year Rolling 2025",
+      "created_at": "2026-09-18T22:26:02Z",
+      "head_sha": "2d7b5c3f3756c264a59b53cf5a3310ac7d9e1d82"
+    },
+    {
+      "id": 35401185955,
+      "name": "MLB Totals V36 Rolling 2025",
+      "created_at": "2026-09-18T22:21:33Z",
+      "head_sha": "fa1f08a698fb27eea15af829678097e688db3e46"
+    },
+    {
+      "id": 35400960599,
+      "name": "MLB Totals V36 Rolling 2025",
+      "created_at": "2026-09-18T22:18:30Z",
+      "head_sha": "e434ca24b0078257e96a3c34e985c257fffca345"
+    },
+    {
+      "id": 35400699557,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T22:15:04Z",
+      "head_sha": "51cc21469d7960c5bb17292f0690eecd9e5fab53"
+    },
+    {
+      "id": 35397490009,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-18T21:34:57Z",
+      "head_sha": "9a27c1d5d79ffad28eb5e1cbed0edab4f8da54a4"
+    },
+    {
+      "id": 35390451575,
+      "name": "MLB Totals V35 Close Margin CatBoost",
+      "created_at": "2026-09-18T20:15:26Z",
+      "head_sha": "a6cd2a2f1a5cf810e6501bfc6fe5bf404662d496"
+    },
+    {
+      "id": 35381548394,
+      "name": "MLB Totals V34 Side Poisson CatBoost",
+      "created_at": "2026-09-18T18:40:27Z",
+      "head_sha": "f6f441b516c5c9b9f9c27fbfe959ad6a5b392f08"
+    },
+    {
+      "id": 35381186512,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-18T18:36:40Z",
+      "head_sha": "9a27c1d5d79ffad28eb5e1cbed0edab4f8da54a4"
+    },
+    {
+      "id": 35381141118,
+      "name": "MLB Totals V33 Categorical CatBoost",
+      "created_at": "2026-09-18T18:36:12Z",
+      "head_sha": "05c53e465736e1004d94590ea02ad302f39bea7b"
+    },
+    {
+      "id": 35380732709,
+      "name": "MLB Totals V32 PVP + Pitch-Type ExtraTrees",
+      "created_at": "2026-09-18T18:32:01Z",
+      "head_sha": "a7e7876540dec6a20b720d0de82aefb5f721a641"
+    },
+    {
+      "id": 35380628999,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T18:30:57Z",
+      "head_sha": "26c9b35d673870a8c3dc721830a09d0bbd411693"
+    },
+    {
+      "id": 35380337007,
+      "name": "MLB Totals V31 Pitch-Type Matchup ExtraTrees",
+      "created_at": "2026-09-18T18:28:00Z",
+      "head_sha": "5180d5323f48052e78884440eac121e73bb824a7"
+    },
+    {
+      "id": 35380133545,
+      "name": "MLB Totals V28 Individual Handedness ExtraTrees",
+      "created_at": "2026-09-18T18:25:53Z",
+      "head_sha": "35bdb364c4db32587cf2a7068641754efcb1329b"
+    },
+    {
+      "id": 35380082735,
+      "name": "MLB Moneyline Daily Freeze V1",
+      "created_at": "2026-09-18T18:25:22Z",
+      "head_sha": "8a0e93c74ee57d48ad1a5cf76429d913d48f0a45"
+    },
+    {
+      "id": 35380082677,
+      "name": "MLB Decision Board Validate",
+      "created_at": "2026-09-18T18:25:22Z",
+      "head_sha": "8a0e93c74ee57d48ad1a5cf76429d913d48f0a45"
+    },
+    {
+      "id": 35380082795,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T18:25:22Z",
+      "head_sha": "8a0e93c74ee57d48ad1a5cf76429d913d48f0a45"
+    },
+    {
+      "id": 35379941746,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T18:23:55Z",
+      "head_sha": "d1b7b83060035a513d755e051b9ef85fa4950649"
+    },
+    {
+      "id": 35379941427,
+      "name": "MLB Moneyline Daily Freeze V1",
+      "created_at": "2026-09-18T18:23:55Z",
+      "head_sha": "d1b7b83060035a513d755e051b9ef85fa4950649"
+    },
+    {
+      "id": 35379941448,
+      "name": "MLB Decision Board Validate",
+      "created_at": "2026-09-18T18:23:55Z",
+      "head_sha": "d1b7b83060035a513d755e051b9ef85fa4950649"
+    },
+    {
+      "id": 35379625154,
+      "name": "MLB Totals V26 Direct Supabase ExtraTrees",
+      "created_at": "2026-09-18T18:20:40Z",
+      "head_sha": "f427719ab400bf72169125cde1537075b41837fc"
+    },
+    {
+      "id": 35379522157,
+      "name": "MLB Totals V26 Direct Supabase ExtraTrees",
+      "created_at": "2026-09-18T18:19:37Z",
+      "head_sha": "3b479c167640b23562c0ca977f6359c67a1a20d8"
+    },
+    {
+      "id": 35379422292,
+      "name": "MLB Totals V26 Direct Supabase ExtraTrees",
+      "created_at": "2026-09-18T18:18:35Z",
+      "head_sha": "a163035adc94e0f5d00591f7fd8543d3a57da852"
+    },
+    {
+      "id": 35378625984,
+      "name": "MLB Totals V26 Direct Supabase ExtraTrees",
+      "created_at": "2026-09-18T18:10:32Z",
+      "head_sha": "9e401406a8f2a5e02b04521ea2f8602e4fb1131f"
+    },
+    {
+      "id": 35378491930,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T18:09:12Z",
+      "head_sha": "24cfc12c9ee1c86722e01481445c878e7e95de6e"
+    },
+    {
+      "id": 35378270209,
+      "name": "MLB Totals V26 Direct Supabase ExtraTrees",
+      "created_at": "2026-09-18T18:06:55Z",
+      "head_sha": "198dbbaa7eeb22c7f9cc10bd1433ccb6401ac194"
+    },
+    {
+      "id": 35376858630,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T17:52:11Z",
+      "head_sha": "75ecd07c716270d856f9a52c0417082501398632"
+    },
+    {
+      "id": 35376773192,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T17:51:18Z",
+      "head_sha": "dd47ef39e8cb734b02d031097e0c26922a255f96"
+    },
+    {
+      "id": 35376773050,
+      "name": "MLB Decision Board Validate",
+      "created_at": "2026-09-18T17:51:18Z",
+      "head_sha": "dd47ef39e8cb734b02d031097e0c26922a255f96"
+    },
+    {
+      "id": 35361402265,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T15:16:24Z",
+      "head_sha": "fac55bc59dd98a7346fe8e55449763c2018083c1"
+    },
+    {
+      "id": 35361402278,
+      "name": "MLB Moneyline Daily Freeze V1",
+      "created_at": "2026-09-18T15:16:24Z",
+      "head_sha": "fac55bc59dd98a7346fe8e55449763c2018083c1"
+    },
+    {
+      "id": 35360352007,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-18T15:06:13Z",
+      "head_sha": "daebdd2651f0092bbae32161b619079a195bbf77"
+    },
+    {
+      "id": 35344405873,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T12:23:29Z",
+      "head_sha": "eebbdcd2f9fe8ce7a7e87a863d09585ee44741f5"
+    },
+    {
+      "id": 35344086990,
+      "name": "MLB Totals V24 Real ML Research",
+      "created_at": "2026-09-18T12:19:53Z",
+      "head_sha": "f607012be2f9ab0228456abb2ebfbe00c509a354"
+    },
+    {
+      "id": 35337726739,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-18T11:03:23Z",
+      "head_sha": "6b21ebd14853da8c5f508d5d3a08c77a4ff0c6c5"
+    },
+    {
+      "id": 35312222755,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-18T05:47:55Z",
+      "head_sha": "6b21ebd14853da8c5f508d5d3a08c77a4ff0c6c5"
+    },
+    {
+      "id": 35300589873,
+      "name": "MLB Totals V24 Real ML Research",
+      "created_at": "2026-09-18T02:45:16Z",
+      "head_sha": "b87498e0ce7bce64153994fee0126f5381ba0719"
+    },
+    {
+      "id": 35300352645,
+      "name": "MLB Totals V24 Real ML Research",
+      "created_at": "2026-09-18T02:41:39Z",
+      "head_sha": "d542c892be1c7c53a67a33513793c083c5eaa195"
+    },
+    {
+      "id": 35300211868,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T02:39:32Z",
+      "head_sha": "efddd591be7c086ffceded146b710bbb49668526"
+    },
+    {
+      "id": 35299218457,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T02:24:53Z",
+      "head_sha": "d1c495257109feb3ebd98028c0dd8191b7cafaec"
+    },
+    {
+      "id": 35292390770,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-18T00:43:40Z",
+      "head_sha": "eeb1595ccca2d344e2aa917a03c012c7e653b662"
+    },
+    {
+      "id": 35290447156,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T00:15:57Z",
+      "head_sha": "d0d55a36e5a8ffff94b2f381605827cb4a341012"
+    },
+    {
+      "id": 35289680847,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-18T00:05:19Z",
+      "head_sha": "662e868ae42604936dfb9e5448bc591d8d861f32"
+    },
+    {
+      "id": 35287735802,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-17T23:38:25Z",
+      "head_sha": "dfdaac22f72c3c38baf77c08be150ef0af86fc19"
+    },
+    {
+      "id": 35287735772,
+      "name": "MLB Moneyline Daily Freeze V1",
+      "created_at": "2026-09-17T23:38:25Z",
+      "head_sha": "dfdaac22f72c3c38baf77c08be150ef0af86fc19"
+    },
+    {
+      "id": 35287568950,
+      "name": "MLB 2025 Totals Microstructure V17",
+      "created_at": "2026-09-17T23:36:08Z",
+      "head_sha": "49ee84a8e297660e2e566a325eed3b84c8d738c5"
+    },
+    {
+      "id": 35285432576,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-17T23:08:17Z",
+      "head_sha": "dcd655cfc1df50966ec8a65368e04419b96e8476"
+    },
+    {
+      "id": 35285352763,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-17T23:07:16Z",
+      "head_sha": "d35ca834836a9267e174f2e01d127d7ca84e50e7"
+    },
+    {
+      "id": 35285012358,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-17T23:03:07Z",
+      "head_sha": "c46c655af022b41f6a55c65cfc2169a72e81644e"
+    },
+    {
+      "id": 35285006546,
+      "name": "PA14 V2 Historical Starter Authority Audit",
+      "created_at": "2026-09-17T23:03:03Z",
+      "head_sha": "c46c655af022b41f6a55c65cfc2169a72e81644e"
+    },
+    {
+      "id": 35284965437,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-17T23:02:33Z",
+      "head_sha": "3b29d8e28e12862a4067cec1e2d2956905330f65"
+    },
+    {
+      "id": 35284838912,
+      "name": "PA14 V2 Historical Starter Authority Audit",
+      "created_at": "2026-09-17T23:00:56Z",
+      "head_sha": "502bd7b072c0fda425863047f7d57f4418d31a13"
+    },
+    {
+      "id": 35281801416,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-17T22:23:44Z",
+      "head_sha": "f0a84f3dba5b10b003ce60befb497b09b254e2f1"
+    },
+    {
+      "id": 35276536649,
+      "name": "PA13 Pitcher ER Current Provider Probe 20260917",
+      "created_at": "2026-09-17T21:25:02Z",
+      "head_sha": "d2599283f3bb936d668467b134964e652c259152"
+    },
+    {
+      "id": 35276333680,
+      "name": "PA13 Pitcher ER Current Provider Probe 20260917",
+      "created_at": "2026-09-17T21:22:52Z",
+      "head_sha": "f6c856e9dff4ad61f0658a29f88ef16a5c7bf7e0"
+    },
+    {
+      "id": 35275751824,
+      "name": "MLB Odds API Credential Contract Audit",
+      "created_at": "2026-09-17T21:16:42Z",
+      "head_sha": "f0c46a7fe2ee19938482a52a5c3b85c6944919f4"
+    },
+    {
+      "id": 35275751854,
+      "name": "MLB Moneyline Daily Freeze V1",
+      "created_at": "2026-09-17T21:16:42Z",
+      "head_sha": "f0c46a7fe2ee19938482a52a5c3b85c6944919f4"
+    },
+    {
+      "id": 35267136273,
+      "name": "MLB Totals V6 Nonlinear Research",
+      "created_at": "2026-09-17T19:49:17Z",
+      "head_sha": "fc8e35ab293814c536fc62a1bf04bbbdfbb55658"
+    },
+    {
+      "id": 35266945603,
+      "name": "MLB Totals V6 Nonlinear Research",
+      "created_at": "2026-09-17T19:47:19Z",
+      "head_sha": "7569db10214cabb4caa5c18a036111fbe8a8b809"
+    },
+    {
+      "id": 35263557873,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-17T19:13:09Z",
+      "head_sha": "dfd90b65003dbe0950fb3378887e7c0b67878d4b"
+    },
+    {
+      "id": 35241676905,
+      "name": "MLB 2025 Totals Market V1 Build",
+      "created_at": "2026-09-17T15:39:39Z",
+      "head_sha": "3475d51bd25230b1131d2c82ef13500a3cc3e981"
+    },
+    {
+      "id": 35241570175,
+      "name": "MLB 2025 Totals Market V1 Build",
+      "created_at": "2026-09-17T15:38:38Z",
+      "head_sha": "4c4138c47680a224d336c27a20c7304696b9df76"
+    },
+    {
+      "id": 35241377376,
+      "name": "MLB 2025 Totals Market V1 Build",
+      "created_at": "2026-09-17T15:36:48Z",
+      "head_sha": "60339b2657789936a8eab9c28bf89bee8e34eea9"
+    },
+    {
+      "id": 35240561520,
+      "name": "Excel V2 Sep17 Daily Export",
+      "created_at": "2026-09-17T15:29:20Z",
+      "head_sha": "8f52a41f1aa5e3611cb049036e1cfd21a42fd9a4"
+    },
+    {
+      "id": 35239827113,
+      "name": "MLB 2025 Totals Coverage Audit",
+      "created_at": "2026-09-17T15:22:39Z",
+      "head_sha": "f71eb893e880a44e3f1e04ae1910d3c85a3bbd61"
+    },
+    {
+      "id": 35239122157,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-17T15:16:13Z",
+      "head_sha": "dfd90b65003dbe0950fb3378887e7c0b67878d4b"
+    },
+    {
+      "id": 35238278424,
+      "name": "MLB 2025 Totals Coverage Audit",
+      "created_at": "2026-09-17T15:08:36Z",
+      "head_sha": "db0e56ec3dd2a23d0e87710c7584f648d015cd27"
+    },
+    {
+      "id": 35237643018,
+      "name": "MLB 2025 Totals GamePk Audit",
+      "created_at": "2026-09-17T15:02:50Z",
+      "head_sha": "5321d0eb04c344c0087c1d779677eb5ccf8dacad"
+    },
+    {
+      "id": 35209992874,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-17T10:20:49Z",
+      "head_sha": "dfd90b65003dbe0950fb3378887e7c0b67878d4b"
+    },
+    {
+      "id": 35184938939,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-17T05:14:09Z",
+      "head_sha": "dfd90b65003dbe0950fb3378887e7c0b67878d4b"
+    },
+    {
+      "id": 35176445326,
+      "name": "MLB 2025 Totals Coverage Diagnostic",
+      "created_at": "2026-09-17T02:59:04Z",
+      "head_sha": "194759bed2a8abd0304618f832ded903ab907984"
+    },
+    {
+      "id": 35175791256,
+      "name": "MLB 2025 Totals Coverage Audit",
+      "created_at": "2026-09-17T02:48:18Z",
+      "head_sha": "4c4389f7a98dab13c40e078dfbd4144269cf17c5"
+    },
+    {
+      "id": 35166475209,
+      "name": "Production Operating Day Heartbeat",
+      "created_at": "2026-09-17T00:25:07Z",
+      "head_sha": "dfd90b65003dbe0950fb3378887e7c0b67878d4b"
+    }
+  ],
+  "selected_job": {
+    "id": 105423190567,
+    "run_id": 35287568950,
+    "observed_execution": "2026-09-17T23:36:15Z",
+    "generated_output_path": "data/research/totals_2025_microstructure_v1",
+    "generated_commit": "7aadc1f",
+    "purpose": "sportsbook V17 microstructure; not lineup snapshot"
+  },
+  "cache_listing_status": "UNAVAILABLE_CONNECTOR_ROUTE",
+  "local_workflow_cache_action_matches": 0
+}

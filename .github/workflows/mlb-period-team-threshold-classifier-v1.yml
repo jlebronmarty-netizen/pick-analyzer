@@ -1,0 +1,61 @@
+name: MLB Period Team Threshold Classifier V1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: mlb-period-team-threshold-classifier-v1
+  cancel-in-progress: false
+
+jobs:
+  research:
+    # Archived after successful run 35674048891; no post-result retuning.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/period-team-threshold-classifier-v1-20260921
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check --no-cache-dir 'catboost==1.2.10' 'numpy>=2.0,<3' 'pandas>=2.2,<3' 'requests>=2.32,<3'
+      - name: Mint GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token=await core.getIDToken('supabase-period-team-threshold');
+            core.setSecret(token); core.setOutput('token',token);
+      - name: Run threshold-distribution research
+        env:
+          GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: python scripts/research/train_mlb_period_team_threshold_classifier_v1.py
+      - name: Enforce boundaries
+        run: |
+          node <<'NODE'
+          const fs=require('fs'); const p=JSON.parse(fs.readFileSync('artifacts/research/mlb_period_team_threshold_classifier_v1.json','utf8'))
+          const bad=[]
+          if(p.provider_calls_made!==0)bad.push('provider')
+          if(p.odds_api_historical_credits_consumed!==0)bad.push('credits')
+          if(p.official_picks_writes!==0)bad.push('official')
+          if(p.apostar_activation!==false)bad.push('apostar')
+          if(p.production_promotion!==false)bad.push('production')
+          if(p.real_line_backtest_performed!==false)bad.push('real-line')
+          if(bad.length)throw new Error('BOUNDARY:'+bad.join(','))
+          console.log(JSON.stringify({
+            f5:Object.fromEntries(Object.entries(p.f5.targets).map(([k,v])=>[k,{champion:v.champion,dev_target:v.development_target_met,external:v.external_2026}])),
+            team:Object.fromEntries(Object.entries(p.team_totals.targets).map(([k,v])=>[k,{champion:v.champion,dev_target:v.development_target_met,external:v.external_2026}]))
+          },null,2))
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-period-team-threshold-classifier-v1
+          path: artifacts/research/mlb_period_team_threshold_classifier_v1.json
+          retention-days: 14
+          if-no-files-found: error
