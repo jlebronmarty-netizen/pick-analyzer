@@ -1,0 +1,49 @@
+{
+  "contract": "MLB_F1_NRFI_STARTER_L5_ZERO_LOGIT_V1/1.0.0",
+  "architecture": "shared_half_inning_zero_run_logistic_with_strict_prior_starter_l5",
+  "research_only": true,
+  "source": {
+    "admission": "MLB_F1_STARTER_L5_PREGAME_ADMISSION_V1/1.0.0",
+    "source_rows": 2663,
+    "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+    "evidence_label": "HISTORICAL_RECONSTRUCTED_STRICT_PRIOR_STARTER_L5_RESEARCH_ONLY"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "826223f6defac709b28929473c25d28c56c620d9",
+    "evaluator_commit": "2e468eca34c3ac99fadfc6eaa4c0b1da9e79170c",
+    "l2_lambda": 8,
+    "probability_threshold": 0.75,
+    "min_training_games": 300
+  },
+  "result": {
+    "eligible": 1563,
+    "selected": 0,
+    "wins": 0,
+    "losses": 0,
+    "accuracy": null,
+    "coverage": 0,
+    "selected_months": 0,
+    "worst_month_accuracy": null,
+    "probability_nrfi_range": [
+      0.3464577096154221,
+      0.677520794034733
+    ],
+    "development_gate_pass": false,
+    "state": "DEVELOPMENT_GATE_FAILED_NO_EXTERNAL",
+    "external_opened": false
+  },
+  "interpretation": {
+    "note": "Maximum P(NRFI)=0.6775, below the frozen 0.75 threshold. No NRFI or YRFI decision crossed the symmetric 0.75/0.25 selection boundary.",
+    "retuned": false,
+    "threshold_rescue": false,
+    "feature_rescue": false
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
