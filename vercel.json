@@ -89,5 +89,9 @@
       "schedule": "12 * * * *"
     }
   ],
-  "ignoreCommand": "bash scripts/vercel-ignore-build.sh"
+  "git": {
+    "deploymentEnabled": {
+      "research/*": false
+    }
+  }
 }
