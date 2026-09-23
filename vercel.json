@@ -88,5 +88,6 @@
       "path": "/api/cron/mlb-official-settlement",
       "schedule": "12 * * * *"
     }
-  ]
+  ],
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = \"main\" ]; then exit 1; fi; if [ -z \"$VERCEL_GIT_PREVIOUS_SHA\" ] || [ -z \"$VERCEL_GIT_COMMIT_SHA\" ]; then exit 1; fi; CHANGED=\"$(git diff --name-only \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" 2>/dev/null)\" || exit 1; [ -z \"$CHANGED\" ] && exit 1; if printf '%s\\n' \"$CHANGED\" | grep -Ev '^(\\.github/|docs/research/|artifacts/research/|scripts/research/)' >/dev/null; then exit 1; else exit 0; fi"
 }
