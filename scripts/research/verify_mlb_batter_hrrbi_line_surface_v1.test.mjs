@@ -50,9 +50,17 @@ test('HRRBI OVER 0.5 and OVER 1.5 remain closed', () => {
   assert.equal(result(1.5,'OVER').state,'NO_75_PLUS_STABLE_SIGNAL_CANDIDATE')
 })
 
-test('external and production gates remain closed', () => {
-  assert.equal(artifact.external_2026.opened,false)
-  assert.equal(artifact.external_2026.status,'AUTHORIZATION_REQUIRED')
+test('authorized 2026 gate fails closed on exact-source snapshot drift', () => {
+  assert.equal(artifact.external_2026.authorized,true)
+  assert.equal(artifact.external_2026.attempted,true)
+  assert.equal(artifact.external_2026.evaluation_completed,false)
+  assert.equal(artifact.external_2026.status,'BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT')
+  assert.deepEqual(artifact.external_2026.frozen_reference.control_u2p5.n,1255)
+  assert.deepEqual(artifact.external_2026.frozen_reference.control_u2p5.wins,1073)
+  assert.equal(artifact.external_2026.current_source_recovery.hrrbi_u2p5_control.n,1263)
+  assert.equal(artifact.external_2026.current_source_recovery.hrrbi_u2p5_control.wins,1079)
+  assert.equal(artifact.external_2026.current_source_recovery.parity,false)
+  assert.equal(artifact.external_2026.decision,'FAIL_CLOSED_NO_U0P5_OR_U1P5_2026_SCORE')
   assert.equal(artifact.boundaries.official_picks_writes,0)
   assert.equal(artifact.boundaries.apostar_activation,false)
   assert.equal(artifact.boundaries.production_promotion,false)
