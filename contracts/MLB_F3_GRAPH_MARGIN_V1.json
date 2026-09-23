@@ -1,0 +1,49 @@
+{
+  "contract": "MLB_F3_GRAPH_MARGIN_V1/1.0.0",
+  "research_only": true,
+  "source_table": "public.mlb_f3_ml_revisit_base_v1",
+  "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+  "max_development_date": "2026-09-18",
+  "architecture": "ridge_graph_laplacian_team_margin_ratings",
+  "target": "F3 home_runs_minus_away_runs",
+  "model": "margin = home_advantage + rating(home_team) - rating(away_team) + error",
+  "fitting": {
+    "schedule": "refit once per calendar month using only strictly earlier same-season games; entire date scored before updates",
+    "ridge_lambda": 12,
+    "home_advantage_ridge": 0.000001,
+    "coordinate_sweeps": 40,
+    "coefficient_clip": 6,
+    "convergence_tolerance": 1e-9,
+    "residual_distribution": "Normal(0, training residual RMS), frozen from same monthly training fit"
+  },
+  "eligibility": {
+    "min_prior_league_games": 300,
+    "min_team_games": 10
+  },
+  "probability": {
+    "home_win": "1-Phi((0.5-mu)/sigma)",
+    "away_win": "Phi((-0.5-mu)/sigma)",
+    "push": "remaining mass between -0.5 and 0.5",
+    "side_confidence": "conditional non-push side probability = P(side)/(P(home)+P(away))"
+  },
+  "selection": {
+    "confidence_threshold": 0.75,
+    "side_rule": "HOME if conditional home>=0.75; AWAY if conditional away>=0.75; otherwise abstain"
+  },
+  "settlement": "F3 tie is push; pushes excluded from accuracy denominator but reported",
+  "gates": {
+    "accuracy": 0.75,
+    "min_nonpush_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65
+  },
+  "novelty": "continuous graph/ridge margin ratings; not ordinal likelihood, Davidson, Poisson count model, QDA, tree, kernel, hidden-state, random-effects NRFI or threshold transfer",
+  "tuning": "single frozen configuration; no lambda grid, threshold search, calibration rescue or post-result retuning",
+  "external": "historical-seen development only; no pristine external claim; future external remains closed unless gate passes",
+  "provider_calls_budget": 0,
+  "odds_api_credits_budget": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false
+}
