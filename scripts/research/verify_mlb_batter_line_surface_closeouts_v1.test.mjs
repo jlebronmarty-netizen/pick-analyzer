@@ -61,9 +61,12 @@ test('RBI remains closed and HRRBI development gate is frozen', () => {
   assert.equal(artifact.rbi_hrrbi_line_surface_admission.batter_hits_runs_rbis.exact_replay.parity,true)
   assert.equal(
     artifact.rbi_hrrbi_line_surface_admission.batter_hits_runs_rbis.state,
-    'DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED'
+    'DEVELOPMENT_GATE_PASS_2026_ATTEMPT_BLOCKED_SOURCE_SNAPSHOT_DRIFT'
   )
-  assert.equal(hrrbi.external_2026.opened,false)
+  assert.equal(hrrbi.external_2026.authorized,true)
+  assert.equal(hrrbi.external_2026.attempted,true)
+  assert.equal(hrrbi.external_2026.evaluation_completed,false)
+  assert.equal(hrrbi.external_2026.status,'BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT')
   assert.equal(hrrbi.results.find((x) => x.line === 0.5 && x.direction === 'UNDER').projection_max,0.05)
   assert.equal(hrrbi.results.find((x) => x.line === 1.5 && x.direction === 'UNDER').projection_max,0.9)
 })
