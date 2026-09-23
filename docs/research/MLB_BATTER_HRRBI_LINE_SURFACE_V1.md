@@ -118,15 +118,36 @@ The persisted 2026-09-22 board already showed:
 
 No provider call was made for this research.
 
-## Gate
+## 2026 authorized gate attempt
 
-**Do not open 2026 yet.**
+Authorization was received to evaluate the two frozen UNDER candidates one-shot on 2026 without
+retuning or threshold rescue.
 
-Both UNDER candidates passed the 2025 development gate and their thresholds are now frozen. The next step requires an explicitly authorized validation/forward gate.
+The evaluation did **not** proceed to candidate scoring because the exact PR #158 MLB Official
+row-level snapshot could not be reproduced:
 
-Prior 2026 HRRBI-family outcomes have already been seen for the existing U2.5 candidate family, so any later 2026 evaluation must be labeled according to the actual evidence status and must not be described as pristine external unless justified.
+- frozen PR #158: **516 players**, **30,889 raw game-log rows**, **25,729 eligible rows**;
+- frozen HRRBI U2.5 control: **1,073/1,255**;
+- current exact-identity source recovery: **30,927 raw rows**, **25,707 eligible rows**;
+- current HRRBI U2.5 control: **1,079/1,263**;
+- current Runs checksum: **773/1,029** vs frozen **779/1,036**;
+- current RBI checksum: **1,140/1,373** vs frozen **1,133/1,367**.
 
-No threshold rescue or retuning is authorized after any 2026 read.
+Because the current MLB Official source no longer reproduces the frozen checksums and the frozen
+row-level snapshot was not persisted, the gate fails closed.
+
+State:
+
+`BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT`
+
+The frozen development thresholds remain unchanged:
+
+- U0.5: projection <= **0.05**
+- U1.5: projection <= **0.90**
+
+No 2026 score is reported for either candidate. No threshold rescue or retuning was performed.
+Any future continuation requires recovery of the exact frozen PR #158 row-level source or a genuinely
+new prospective/forward validation window.
 
 ## Boundaries
 
