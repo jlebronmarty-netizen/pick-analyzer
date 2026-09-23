@@ -182,6 +182,40 @@ Therefore no new Total Bases line survives the full cross-year signal gate. The 
 
 State: `NO_NEW_CROSS_YEAR_LINE_SURFACE_CANDIDATE`.
 
+
+### Batter Total Bases
+
+Certified control:
+`batter_total_bases_under_2p5_edge_1p5_v1`
+
+Exact runtime lineage was recovered with the canonical target-game pregame feature-key gate and the
+same strict-prior raw feature used by the approved runtime:
+
+`raw = L10 PA/game × all-prior total_bases/PA`
+
+All-2025 refit reproduced exactly:
+- n = **40,886**
+- intercept = **0.599532796678854**
+- slope = **0.563175501776575**
+
+Control U2.5 <=1.00:
+- **1,081/1,187 = 91.07%**
+- exact parity: **PASS**
+
+2025 development-only line surface froze three candidates before opening 2026:
+
+- U1.5 @ projection <=1.20: 5,217/6,843 = **76.24%**, lift **+9.70 pp**
+- broader U2.5 @ projection <=1.30: 10,557/12,280 = **85.97%**, lift **+5.56 pp**
+- U3.5 @ projection <=1.20: 6,264/6,843 = **91.54%**, lift **+5.46 pp**
+
+One-shot 2026 through 2026-09-21, using the frozen all-2025 refit and no threshold changes:
+
+- U1.5 <=1.20: 7,081/9,471 = **74.77%**, lift +7.58 pp -> `EXTERNAL_BELOW_75_NO_RETUNE`
+- U2.5 <=1.30: 12,193/14,405 = **84.64%**, lift +3.91 pp -> do not replace the existing U2.5 <=1.00 rule
+- U3.5 <=1.20: 8,583/9,471 = **90.62%**, lift +4.12 pp -> `EXTERNAL_75_PLUS_LIFT_BELOW_5PP_NO_PROMOTE`
+
+The existing certified U2.5 <=1.00 control remains unchanged and authoritative.
+
 ## Exact replay blocks
 
 ### Pitcher Hits Allowed
