@@ -1,0 +1,63 @@
+{
+  "contract": "MLB_F1_STRICT_PREGAME_LOGIT_V1/1.0.0",
+  "architecture": "monthly_rolling_standardized_l2_logistic_on_strict_pregame_subset",
+  "research_only": true,
+  "source": {
+    "admission": "MLB_F1_STRICT_PREGAME_SUBSET_ADMISSION_V1/1.0.0",
+    "rows": 4099,
+    "development_class": "HISTORICAL_SEEN_DEVELOPMENT",
+    "evidence_label": "HISTORICAL_RECONSTRUCTED_STRICT_PRIOR_RESEARCH_ONLY"
+  },
+  "frozen_before_evaluation": {
+    "contract_commit": "6ee07da1503f068d163eb0f1e9b59c80895fbe7b",
+    "evaluator_commit": "4e0d79ee27be4d2bb138017ec7c311e32b86b1b2",
+    "l2_lambda": 8,
+    "confidence_threshold": 0.75,
+    "min_training_nonpush": 300,
+    "features": 10
+  },
+  "result": {
+    "eligible": 2702,
+    "selected": 2,
+    "nonpush_n": 2,
+    "wins": 2,
+    "losses": 0,
+    "pushes": 0,
+    "accuracy": 1,
+    "coverage": 0.0007401924500370096,
+    "selected_months": 2,
+    "worst_month_accuracy": 1,
+    "probability_range": {
+      "min": 0.373352405297605,
+      "max": 0.784242704269909
+    },
+    "monthly": {
+      "2026-06": {
+        "n": 1,
+        "wins": 1,
+        "accuracy": 1
+      },
+      "2026-07": {
+        "n": 1,
+        "wins": 1,
+        "accuracy": 1
+      }
+    },
+    "development_gate_pass": false,
+    "state": "INSUFFICIENT_SAMPLE_NO_PROMOTION",
+    "external_opened": false
+  },
+  "interpretation": {
+    "note": "Pooled accuracy is not decision-useful because only two non-push decisions were selected across two months. The frozen n>=60 and >=5-month gates fail.",
+    "retuned": false,
+    "threshold_rescue": false
+  },
+  "boundaries": {
+    "provider_calls_made": 0,
+    "odds_api_historical_credits_consumed": 0,
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "tracker_modified": false
+  }
+}
