@@ -7,6 +7,12 @@ on:
     paths:
       - scripts/research/mlb_hrrbi_line_surface_v1.py
       - .github/workflows/mlb-hrrbi-line-surface-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/research/mlb_hrrbi_line_surface_v1.py
+      - .github/workflows/mlb-hrrbi-line-surface-research.yml
 
 permissions:
   contents: read
