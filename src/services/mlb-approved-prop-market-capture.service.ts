@@ -321,7 +321,9 @@ async function latestKnownRequestsRemaining() {
     .limit(100)
   if (result.error) throw new Error('MLB_APPROVED_PROP_QUOTA_READ_FAILED:' + result.error.message)
   for (const row of result.data ?? []) {
-    const remaining = Number(asRecord(row.metadata).requestsRemainingAfter)
+    const metadata = asRecord(row.metadata)
+    const candidate = metadata.requestsRemainingAfter ?? metadata.requestsRemaining
+    const remaining = Number(candidate)
     if (Number.isFinite(remaining)) return remaining
   }
   return null
