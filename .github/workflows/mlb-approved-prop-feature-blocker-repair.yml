@@ -1,0 +1,35 @@
+name: MLB approved prop feature blocker repair
+
+on:
+  push:
+    branches:
+      - research/prop-feature-blocker-repair-v1-20260924
+    paths:
+      - src/services/mlb-approved-prop-pitcher-feature-materializer.service.ts
+      - src/app/api/cron/mlb-statcast-daily/route.ts
+      - src/app/api/cron/mlb-runline-v2-forward/route.ts
+      - src/services/mlb-approved-prop-daily-evaluation.service.ts
+      - docs/research/MLB_APPROVED_PROP_FEATURE_BLOCKER_REPAIR_V1.md
+      - scripts/research/verify_mlb_approved_prop_feature_blocker_repair_v1.test.mjs
+      - .github/workflows/mlb-approved-prop-feature-blocker-repair.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node scripts/research/verify_mlb_approved_prop_feature_blocker_repair_v1.test.mjs
+      - run: npm ci
+      - run: npm run build
