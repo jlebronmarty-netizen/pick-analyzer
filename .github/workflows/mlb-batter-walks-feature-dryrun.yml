@@ -1,0 +1,25 @@
+name: MLB Batter Walks feature dryrun
+
+on:
+  push:
+    branches:
+      - research/batter-walks-feature-dryrun-20260924
+    paths:
+      - scripts/research/mlb_batter_walks_feature_dryrun_v1.sql
+      - docs/research/MLB_BATTER_WALKS_FEATURE_DRYRUN_V1.md
+      - scripts/research/verify_mlb_batter_walks_feature_dryrun_v1.test.mjs
+      - .github/workflows/mlb-batter-walks-feature-dryrun.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/research/verify_mlb_batter_walks_feature_dryrun_v1.test.mjs
