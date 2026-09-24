@@ -674,7 +674,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 0.75,
       intercept: 0.362037519693316,
       slope: 0.562031288216736,
-      source: 'statcast',,
+      source: 'statcast',
       requireTargetFeature: true
     },
     {
@@ -686,7 +686,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 1.0,
       intercept: 0.599532796678854,
       slope: 0.563175501776575,
-      source: 'total_bases',,
+      source: 'total_bases',
       requireTargetFeature: true
     },
     {
@@ -698,7 +698,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 0.10,
       intercept: 0.0562641814171271,
       slope: 0.536870614141035,
-      source: 'statcast',,
+      source: 'statcast',
       requireTargetFeature: true
     },
     {
@@ -710,7 +710,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 0.50,
       intercept: 0.243436273584974,
       slope: 0.713440597820141,
-      source: 'statcast',,
+      source: 'statcast',
       requireTargetFeature: true
     },
     {
