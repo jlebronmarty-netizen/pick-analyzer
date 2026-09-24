@@ -36,3 +36,5 @@ The core ML / Run Line / Totals acquisition is currently product-authoritative (
 - no historical Odds API calls;
 - no production eligibility change for research models;
 - no line or identity changes.
+
+Validation gate: branch workflow must pass the reserve regression test and full Next.js build before merge consideration.
