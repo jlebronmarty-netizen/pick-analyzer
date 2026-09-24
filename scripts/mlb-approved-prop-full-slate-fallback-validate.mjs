@@ -22,6 +22,7 @@ test('quota preflight carries latest known remaining across date boundaries',()=
   assert.doesNotMatch(quotaFn,/puertoRicoUtcRange|\.gte\('completed_at'|\.lt\('completed_at'/)
   assert.match(quotaFn,/\.order\('completed_at', \{ ascending: false \}\)/)
   assert.match(quotaFn,/\.limit\(100\)/)
+  assert.match(quotaFn,/requestsRemainingAfter \?\? metadata\.requestsRemaining/)
 })
 
 test('capture completion is coverage-aware and can use BDL fallback',()=>{
