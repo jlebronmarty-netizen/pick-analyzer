@@ -1,0 +1,34 @@
+name: MLB approved prop full-slate fallback
+
+on:
+  push:
+    branches:
+      - research/approved-prop-full-slate-fallback-20260923
+    paths:
+      - src/services/mlb-approved-prop-market-capture.service.ts
+      - src/services/mlb-approved-prop-balldontlie-capture.service.ts
+      - src/services/mlb-approved-prop-daily-evaluation.service.ts
+      - scripts/mlb-approved-prop-full-slate-fallback-validate.mjs
+      - docs/research/MLB_APPROVED_PROP_FULL_SLATE_FALLBACK_V1.md
+      - .github/workflows/mlb-approved-prop-full-slate-fallback.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node scripts/mlb-approved-prop-full-slate-fallback-validate.mjs
+      - run: npm ci
+      - run: npm run build
