@@ -39,6 +39,26 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {}
 }
 
+
+async function latestKnownRequestsRemaining() {
+  const { data, error } = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .select('completed_at,metadata')
+    .eq('provider', PROVIDER)
+    .eq('sport_key', SPORT_KEY)
+    .order('completed_at', { ascending: false })
+    .limit(100)
+  if (error) throw new Error(`RUNLINE_ALT_QUOTA_PREFLIGHT_READ_FAILED:${error.message}`)
+
+  for (const row of data ?? []) {
+    const metadata = asRecord(row.metadata)
+    const candidate = metadata.requestsRemainingAfter ?? metadata.requestsRemaining
+    const remaining = Number(candidate)
+    if (Number.isFinite(remaining)) return remaining
+  }
+  return null
+}
+
 function validIso(value: unknown) {
   const parsed = new Date(String(value ?? ''))
   return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
@@ -310,6 +330,16 @@ export async function captureRunlineV2HomeP15AlternateShadow({
 
   if (!apiKey()) return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY' }
 
+  const knownRemainingBefore = await latestKnownRequestsRemaining()
+  if (knownRemainingBefore !== null && knownRemainingBefore <= CREDIT_RESERVE) {
+    return {
+      ...base,
+      status: 'BLOCKED_CREDIT_RESERVE',
+      requestsRemainingBefore: knownRemainingBefore,
+      creditReserve: CREDIT_RESERVE,
+    }
+  }
+
   const range = puertoRicoUtcRange(operatingDate)
   const eventsResult = await supabaseAdmin
     .from('sport_events')
@@ -363,7 +393,7 @@ export async function captureRunlineV2HomeP15AlternateShadow({
 
   const calls: ProviderCall[] = []
   const rows: AltOddsRow[] = []
-  let remaining: number | null = null
+  let remaining: number | null = knownRemainingBefore
 
   for (const item of pending) {
     if (remaining !== null && remaining <= CREDIT_RESERVE) break
@@ -457,6 +487,7 @@ export async function captureRunlineV2HomeP15AlternateShadow({
       apostarActivated: false,
       providerCallsMade: calls.length,
       providerCreditsConsumed: credits,
+      requestsRemainingBefore: knownRemainingBefore,
       requestsRemainingAfter: remaining,
       marketRequested: ALT_MARKET,
       regionRequested: 'us',
@@ -484,6 +515,7 @@ export async function captureRunlineV2HomeP15AlternateShadow({
     rowsInserted: Math.max(0, rows.length - existingIds),
     rowsUpdated: Math.min(existingIds, rows.length),
     capturedHomeEvents,
+    requestsRemainingBefore: knownRemainingBefore,
     requestsRemainingAfter: remaining,
     calls,
   }
