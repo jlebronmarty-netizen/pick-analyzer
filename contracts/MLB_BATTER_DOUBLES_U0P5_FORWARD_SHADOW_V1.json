@@ -1,0 +1,35 @@
+{
+  "contract": "MLB_BATTER_DOUBLES_U0P5_FORWARD_SHADOW_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "batter_doubles",
+  "exact_line": 0.5,
+  "side": "UNDER",
+  "candidate_id": "batter_doubles_under_0p5_proj_0p16_v1",
+  "projection_formula": {
+    "intercept": 0.126877618354346,
+    "slope": 0.210234641434428,
+    "raw": "(recent_PA_per_game)*(prior_doubles/prior_PA)",
+    "prediction": "max(0, intercept + slope*raw)"
+  },
+  "minimum_prior_games": 10,
+  "threshold": 0.16,
+  "historical_accuracy": 0.869342273937482,
+  "forward_start": "2026-09-24",
+  "source": "mlb_statcast_batter_sdt_game_mv",
+  "price_policy": {
+    "collect_price": true,
+    "calculate_ev": false,
+    "reason": "no calibrated per-play probability; historical accuracy must not be substituted"
+  },
+  "boundaries": {
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_threshold_retuning": true,
+    "no_fuzzy_identity": true,
+    "strict_pregame_only": true,
+    "no_historical_odds_api_spend": true
+  }
+}
