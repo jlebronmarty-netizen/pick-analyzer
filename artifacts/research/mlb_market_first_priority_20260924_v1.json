@@ -1,0 +1,54 @@
+{
+  "artifact": "MLB_MARKET_FIRST_PRIORITY_20260924_V1",
+  "as_of_date": "2026-09-24",
+  "research_only": true,
+  "priority_order": [
+    {
+      "rank": 1,
+      "market": "pitcher_record_a_win",
+      "contract": "NO",
+      "reason": "87.07% rolling OOF, active forward runtime, real NO market observed",
+      "blocker": "price often too expensive; require price gate"
+    },
+    {
+      "rank": 2,
+      "market": "pitcher_earned_runs",
+      "contract": "OVER 1.5",
+      "reason": "80.22% frozen accuracy and frequent multi-book availability",
+      "blocker": "target-day strict k_rate feature coverage incomplete"
+    },
+    {
+      "rank": 3,
+      "market": "pitcher_strikeouts",
+      "contract": "OVER 3.5 when projection >=4.25",
+      "reason": "75.94% 2025 / 76.03% 2026 diagnostic and exact line repeatedly offered",
+      "blocker": "untouched forward evidence required"
+    },
+    {
+      "rank": 4,
+      "market": "pitcher_outs",
+      "contract": "OVER 14.5 when projection >=15.75",
+      "reason": "77.11% 2025 / 78.96% 2026 diagnostic and exact line offered across multiple books",
+      "blocker": "untouched forward evidence required"
+    }
+  ],
+  "do_not_rescue": [
+    "Pitcher K O4.5",
+    "Pitcher K O5.5",
+    "Pitcher K U5.5",
+    "Pitcher Outs U17.5",
+    "Pitcher Outs lines that failed development signal gates"
+  ],
+  "price_example": {
+    "player": "DJ Herz",
+    "market": "pitcher_record_a_win",
+    "side": "NO",
+    "sportsbook": "DraftKings",
+    "price": -830,
+    "model_probability": 0.880456525045466,
+    "market_implied_probability": 0.8924731182795699,
+    "model_probability_edge": -0.0120165932341039,
+    "price_gate": "FAIL_NO_PRICE_EDGE",
+    "settlement": "WIN"
+  }
+}
