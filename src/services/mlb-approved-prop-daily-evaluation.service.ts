@@ -674,7 +674,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 0.75,
       intercept: 0.362037519693316,
       slope: 0.562031288216736,
-      source: 'statcast',
+      source: 'statcast',,
+      requireTargetFeature: true
     },
     {
       market: 'batter_total_bases',
@@ -685,7 +686,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 1.0,
       intercept: 0.599532796678854,
       slope: 0.563175501776575,
-      source: 'total_bases',
+      source: 'total_bases',,
+      requireTargetFeature: true
     },
     {
       market: 'batter_home_runs',
@@ -696,7 +698,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 0.10,
       intercept: 0.0562641814171271,
       slope: 0.536870614141035,
-      source: 'statcast',
+      source: 'statcast',,
+      requireTargetFeature: true
     },
     {
       market: 'batter_strikeouts',
@@ -707,7 +710,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       maxProjection: 0.50,
       intercept: 0.243436273584974,
       slope: 0.713440597820141,
-      source: 'statcast',
+      source: 'statcast',,
+      requireTargetFeature: true
     },
     {
       market: 'batter_walks',
@@ -719,6 +723,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
       intercept: 0.117815177785939,
       slope: 0.593708345578887,
       source: 'statcast',
+      requireTargetFeature: false,
     },
   ] as const
 
@@ -826,7 +831,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         continue
       }
 
-      if (!batterTargetFeatureKeys.has(String(target.gamePk) + ':' + String(target.playerId))) {
+      const strictTargetFeature = batterTargetFeatureKeys.has(String(target.gamePk) + ':' + String(target.playerId))
+      if (def.requireTargetFeature && !strictTargetFeature) {
         rows.push(ledgerRow({
           date: targetDate,
           game,
@@ -876,7 +882,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
           quote,
           status: 'NO_EVALUABLE',
           blocker: 'MINIMUM_10_PRIOR_GAMES_NOT_MET',
-          featureSnapshot: { parityContract: parity.contract, strictTargetFeature: true },
+          featureSnapshot: { parityContract: parity.contract, strictTargetFeature },
           marketSnapshot: marketSnapshotFromState(batterMarketState, {
             exactMlbamIdentity: true,
             fuzzyMatchingUsed: false,
@@ -903,7 +909,8 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
         status: statusFor(qualifies, Boolean(quote), batterMarketState, def.line),
         featureSnapshot: {
           parityContract: parity.contract,
-          strictTargetFeature: true,
+          strictTargetFeature,
+          targetFeatureRequirement: def.requireTargetFeature ? 'REQUIRED' : 'NOT_REQUIRED_STRICT_HISTORY_IS_MODEL_INPUT',
           requiredSourceRule: 'source_game_date < target_game_date',
           rawFormulaAlpha: 0,
           priorGames: projection.priorGames,

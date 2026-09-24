@@ -15,6 +15,18 @@ function cronSecret() {
   return process.env.CRON_SECRET?.trim() ?? ''
 }
 
+function puertoRicoDate(now = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Puerto_Rico',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(now).map((part) => [part.type, part.value])
+  )
+  return `${parts.year}-${parts.month}-${parts.day}`
+}
+
 function authorized(request: NextRequest) {
   const secret = cronSecret()
   if (!secret) return false
@@ -88,12 +100,40 @@ export async function GET(request: NextRequest) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized Run Line V2 forward research request.', status: 401 })
   }
 
-  // Freeze both Run Line research tracks independently before settlement.
+  const targetDate = puertoRicoDate()
+  let canonicalSlateReconcile: Awaited<ReturnType<typeof reconcileMlbCanonicalSlateFromOfficial>> | {
+    success: false
+    status: string
+    targetDate: string
+    insertedGames: number
+    providerCallsMade: number
+    officialPicksModified: false
+    apostarActivated: false
+    error: string
+  }
+  try {
+    canonicalSlateReconcile = await reconcileMlbCanonicalSlateFromOfficial(targetDate)
+  } catch (error) {
+    canonicalSlateReconcile = {
+      success: false,
+      status: 'CANONICAL_SLATE_RECONCILE_FAILED_NON_BLOCKING',
+      targetDate,
+      insertedGames: 0,
+      providerCallsMade: 0,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown canonical slate reconciliation error'),
+    }
+  }
+
+  // Freeze both Run Line research tracks only after canonical slate preflight.
   // Neither track may abort the other, and neither touches Official Picks/APOSTAR.
-  const [standardFreeze, freeze] = await Promise.all([
-    safeStandardFreeze(),
-    safeFreeze(),
-  ])
+  const [standardFreeze, freeze] = canonicalSlateReconcile.success !== false
+    ? await Promise.all([safeStandardFreeze(), safeFreeze()])
+    : [
+        { success: false, status: 'BLOCK_CANONICAL_SLATE_RECONCILE', researchOnly: true, productionEligible: false, officialPicksModified: false, apostarActivated: false, writes: 0 },
+        { success: false, status: 'BLOCK_CANONICAL_SLATE_RECONCILE', researchOnly: true, productionEligible: false, officialPicksModified: false, apostarActivated: false, writes: 0 },
+      ]
 
   let readiness: Awaited<ReturnType<typeof getMlbDailyHistoryReadiness>> | null = null
   let settlement: Awaited<ReturnType<typeof safeSettlement>> | null = null
@@ -129,6 +169,7 @@ export async function GET(request: NextRequest) {
     apostarActivated: false,
     roiCertified: false,
     pricingPolicyCertified: false,
+    canonicalSlateReconcile,
     standardFreeze,
     freeze,
     dailyHistoryReadiness: readiness,

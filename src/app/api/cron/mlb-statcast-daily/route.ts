@@ -5,6 +5,8 @@ import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { refreshMlbStatcastDaily } from '@/services/mlb-statcast-daily-refresh.service'
 import { refreshMlbStatcastDailyAnalytics } from '@/services/mlb-statcast-daily-analytics.service'
 import { getMlbDailyHistoryReadiness } from '@/services/mlb-daily-history-readiness.service'
+import { reconcileMlbCanonicalSlateFromOfficial } from '@/services/mlb-canonical-slate-preflight.service'
+import { materializeApprovedPropPitcherFeatures } from '@/services/mlb-approved-prop-pitcher-feature-materializer.service'
 import { runMlbMoneylineForwardFreeze } from '@/services/mlb-moneyline-forward-freeze-runtime.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 import { captureRunlineV2HomeP15AlternateShadow } from '@/services/mlb-runline-home-p15-alt-shadow.service'
@@ -312,6 +314,41 @@ async function safeMoneylineForwardFreeze(historyReadiness: { ready: boolean; ta
 }
 
 
+async function safeCanonicalSlateReconcile(targetDate: string) {
+  try {
+    return await reconcileMlbCanonicalSlateFromOfficial(targetDate)
+  } catch (error) {
+    return {
+      success: false,
+      status: 'CANONICAL_SLATE_RECONCILE_FAILED_NON_BLOCKING',
+      targetDate,
+      insertedGames: 0,
+      providerCallsMade: 0,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown canonical slate reconciliation error'),
+    }
+  }
+}
+
+async function safeApprovedPropPitcherFeatures(targetDate: string) {
+  try {
+    return await materializeApprovedPropPitcherFeatures({ targetDate })
+  } catch (error) {
+    return {
+      success: false,
+      status: 'APPROVED_PROP_PITCHER_FEATURE_MATERIALIZATION_FAILED_NON_BLOCKING',
+      targetDate,
+      writes: 0,
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: errorMessage(error, 'Unknown approved-prop pitcher feature materialization error'),
+    }
+  }
+}
+
 async function safeApprovedPropMarketCapture(id: string) {
   try {
     const clock = puertoRicoClock()
@@ -559,13 +596,17 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
     // multi-market evidence capture. Core ML/Run Line/Total prices are stored
     // first; then alternate HOME +1.5 is queried only for games whose standard
     // paired modal Run Line establishes HOME -1.5. All evidence is research-only.
+    const operatingClock = puertoRicoClock()
+    const canonicalSlateReconcile = await safeCanonicalSlateReconcile(operatingClock.date)
+    const approvedPropPitcherFeatures = canonicalSlateReconcile.success !== false
+      ? await safeApprovedPropPitcherFeatures(operatingClock.date)
+      : null
     const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
     const approvedPropMarketCapture = await safeApprovedPropMarketCapture(id)
 
     // Independent research-only Pitcher ER V2 freeze/settlement run before
     // Statcast catch-up. This preserves fixed-clock evidence even if a separate
     // ingestion/readiness stage fails later in the request.
-    const operatingClock = puertoRicoClock()
     const moneylinePregameStarterEvidence = await safeMoneylinePregameStarterEvidence(operatingClock.date)
     const pa12ErForwardShadowFreeze = await safePa12ErForwardShadowFreeze()
     const pa12ErForwardShadowSettlement = await safePa12ErForwardShadowSettlement(addDays(operatingClock.date, -1))
@@ -587,6 +628,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
           dailyHistoryReadiness: readiness,
           prospectiveMarketCapture,
           approvedPropMarketCapture,
+          canonicalSlateReconcile,
+          approvedPropPitcherFeatures,
           pa12ErForwardShadowFreeze,
           pa12ErForwardShadowSettlement,
           moneylinePregameStarterEvidence,
@@ -614,6 +657,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
         dailyHistoryReadiness: readiness,
         prospectiveMarketCapture,
         approvedPropMarketCapture,
+        canonicalSlateReconcile,
+        approvedPropPitcherFeatures,
         pa12ErForwardShadowFreeze,
         pa12ErForwardShadowSettlement,
       }, id, {
@@ -698,6 +743,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       approvedPropFutureRecovery,
       prospectiveMarketCapture,
       approvedPropMarketCapture,
+      canonicalSlateReconcile,
+      approvedPropPitcherFeatures,
       pa12ErForwardShadowFreeze,
       pa12ErForwardShadowSettlement,
       moneylinePregameStarterEvidence,
