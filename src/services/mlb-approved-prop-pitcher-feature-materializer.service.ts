@@ -178,21 +178,31 @@ function probableTargets(game: GameRow): PitcherTarget[] {
 async function pagedRawRead(pitcherIds: number[], targetDate: string) {
   if (!pitcherIds.length) return [] as RawRow[]
   const rows: RawRow[] = []
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const result = await supabaseAdmin
-      .from('pick2_raw_mlb_statcast_pitches')
-      .select('game_pk,game_date,mlbam_pitcher_id,events,description,type,inning,release_speed,launch_speed,estimated_woba_using_speedangle')
-      .in('mlbam_pitcher_id', pitcherIds)
-      .lt('game_date', targetDate)
-      .order('game_date', { ascending: true })
-      .order('game_pk', { ascending: true })
-      .order('at_bat_number', { ascending: true })
-      .order('pitch_number', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1)
-    if (result.error) throw new Error('MLB_PROP_PITCHER_FEATURE_RAW_READ_FAILED:' + result.error.message)
-    rows.push(...((result.data ?? []) as RawRow[]))
-    if (!result.data || result.data.length < PAGE_SIZE) break
+
+  // Read each pitcher independently so Postgres can use the existing
+  // (game_year, mlbam_pitcher_id, game_date) index. The previous multi-pitcher
+  // IN query timed out on the ~700k-row current-season Statcast table.
+  for (const pitcherId of pitcherIds) {
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const result = await supabaseAdmin
+        .from('pick2_raw_mlb_statcast_pitches')
+        .select('game_pk,game_date,mlbam_pitcher_id,events,description,type,inning,release_speed,launch_speed,estimated_woba_using_speedangle,at_bat_number,pitch_number')
+        .eq('game_year', 2026)
+        .eq('mlbam_pitcher_id', pitcherId)
+        .lt('game_date', targetDate)
+        .order('game_date', { ascending: true })
+        .order('game_pk', { ascending: true })
+        .order('at_bat_number', { ascending: true })
+        .order('pitch_number', { ascending: true })
+        .range(from, from + PAGE_SIZE - 1)
+      if (result.error) {
+        throw new Error('MLB_PROP_PITCHER_FEATURE_RAW_READ_FAILED:' + pitcherId + ':' + result.error.message)
+      }
+      rows.push(...((result.data ?? []) as RawRow[]))
+      if (!result.data || result.data.length < PAGE_SIZE) break
+    }
   }
+
   return rows
 }
 
