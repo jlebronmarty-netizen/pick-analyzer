@@ -1,0 +1,45 @@
+name: Diagnose pitcher feature runtime
+
+on:
+  push:
+    branches:
+      - research/diagnose-pitcher-feature-runtime-20260924
+    paths:
+      - .github/workflows/diagnose-pitcher-feature-runtime.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check secret presence
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -n "$CRON_SECRET" ]; then echo "cronSecretConfigured=true"; else echo "cronSecretConfigured=false"; fi
+      - name: Invoke production cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          test -n "$CRON_SECRET"
+          curl -sS --fail-with-body \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "https://pick-analyzer.vercel.app/api/cron/mlb-statcast-daily" \
+            -o response.json || true
+          python - <<'PY'
+          import json
+          p=json.load(open("response.json"))
+          d=p.get("data",p)
+          keep={
+            "success":d.get("success"),
+            "status":d.get("status"),
+            "canonicalSlateReconcile":d.get("canonicalSlateReconcile"),
+            "approvedPropPitcherFeatures":d.get("approvedPropPitcherFeatures"),
+            "approvedPropDailyFreeze":d.get("approvedPropDailyFreeze"),
+          }
+          print(json.dumps(keep,indent=2))
+          PY
