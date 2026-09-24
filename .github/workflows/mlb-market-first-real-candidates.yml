@@ -1,0 +1,27 @@
+name: MLB market-first real candidates
+
+on:
+  push:
+    branches:
+      - research/market-first-real-candidate-v1-20260924
+    paths:
+      - contracts/MLB_REAL_BET_CANDIDATE_SHADOW_V1.json
+      - scripts/research/mlb_market_availability_tracker_v1.sql
+      - docs/research/MLB_MARKET_FIRST_REAL_CANDIDATES_V1.md
+      - artifacts/research/mlb_market_first_priority_20260924_v1.json
+      - scripts/research/verify_mlb_market_first_real_candidates_v1.test.mjs
+      - .github/workflows/mlb-market-first-real-candidates.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/research/verify_mlb_market_first_real_candidates_v1.test.mjs
