@@ -33,6 +33,9 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
     game.officialDate === targetDate
     && game.sourceMetadata?.gamePk != null
   ))
+  if (regular.length === 0) {
+    throw new Error(`MLB_CANONICAL_SLATE_OFFICIAL_EMPTY:${targetDate}:${official.endpoint}`)
+  }
 
   const { data: teams, error: teamError } = await supabaseAdmin
     .from('sports_teams')
@@ -49,6 +52,9 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
   if (teamByAbbr.size < 30) throw new Error(`MLB_CANONICAL_SLATE_TEAM_MAP_INCOMPLETE:${teamByAbbr.size}`)
 
   const gamePks = regular.map((game) => Number(game.gamePk)).filter(Number.isSafeInteger)
+  if (gamePks.length !== regular.length) {
+    throw new Error(`MLB_CANONICAL_SLATE_INVALID_GAME_PK:${gamePks.length}/${regular.length}`)
+  }
   const { data: existing, error: existingError } = await supabaseAdmin
     .from('pick2_mlb_games')
     .select('game_pk')
@@ -130,6 +136,16 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
   const readbackSet = new Set((readback ?? []).map((row) => Number(row.game_pk)))
   const missingAfter = gamePks.filter((gamePk) => !readbackSet.has(gamePk))
   if (missingAfter.length) throw new Error(`MLB_CANONICAL_SLATE_READBACK_INCOMPLETE:${missingAfter.join(',')}`)
+
+  console.info('MLB_CANONICAL_SLATE_PREFLIGHT', {
+    targetDate,
+    endpoint: official.endpoint,
+    officialRows: official.rows.length,
+    regularGames: regular.length,
+    existingGames: existingSet.size,
+    insertedGames: inserts.length,
+    readbackGames: readbackSet.size,
+  })
 
   return {
     success: true,

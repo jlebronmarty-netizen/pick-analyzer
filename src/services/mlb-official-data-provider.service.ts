@@ -266,7 +266,7 @@ async function fetchJson(endpoint: string, timeoutMs = DEFAULT_TIMEOUT_MS) {
 
 export async function fetchMlbOfficialSchedule(date: string, options: { timeoutMs?: number } = {}): Promise<MlbOfficialProviderResponse<MlbOfficialScheduleGame>> {
   const requestedAt = nowIso()
-  const endpoint = `/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher,team,venue`
+  const endpoint = `/api/v1/schedule?sportId=1&date=${date}&gameType=R&hydrate=probablePitcher,team,venue`
   const payload = await fetchJson(endpoint, options.timeoutMs ?? DEFAULT_TIMEOUT_MS)
   const capturedAt = nowIso()
   return {
