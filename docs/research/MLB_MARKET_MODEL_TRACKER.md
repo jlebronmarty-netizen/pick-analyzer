@@ -3,9 +3,425 @@
 Repository: `jlebronmarty-netizen/pick-analyzer`  
 Canonical Supabase: `ynuocvexviorgdjrfthw`  
 Tracker status: `ACTIVE / RESEARCH-ONLY`  
+Last authoritative update: **2026-09-25**  
 Target benchmark: **>= 75% predictive accuracy on a sufficiently stable selective sample**  
 Official Picks: unchanged  
 APOSTAR: disabled
+
+
+## 2026-09-25 current authoritative state — supersedes stale operational statuses below
+
+This section is the current tracker readback as of 2026-09-25. Older dated sections remain preserved as historical evidence, but any conflicting operational status below is superseded by this section.
+
+Permanent rules remain unchanged:
+
+- research/shadow only unless an explicit operational repair is separately authorized;
+- no Official Picks writes;
+- APOSTAR disabled;
+- exact market + exact line + exact side are independent contracts;
+- no line extrapolation;
+- no YES/OVER aliasing;
+- exact MLBAM identity only;
+- strict pregame lineage only;
+- same-date Game 1 must never enter Game 2 features;
+- no threshold rescue after external / forward evidence is opened;
+- no historical Odds API spend.
+
+### Current market-first coverage
+
+Frozen coverage baseline from PR #215:
+
+- 11,550 unique exact quote rows;
+- 1,007 exact-contract-compatible rows;
+- row coverage: **8.72%**;
+- 99 exact `market + line + side` surfaces;
+- 9 covered surfaces;
+- surface coverage: **9.09%**.
+
+Latest live readback during Phase D:
+
+- 11,586 unique rows;
+- 1,009 baseline-compatible rows;
+- live baseline row coverage: **8.71%**.
+
+Three new research contracts survived the Phase D gate:
+
+1. Batter Total Bases U1.5 — PR #216 / independently revalidated in #221;
+2. Batter HRRBI U1.5 — PR #217 / independently revalidated in #222;
+3. Batter HRRBI U0.5 — PR #218 / independently revalidated in #223.
+
+Counting those exact research contracts on the latest live board:
+
+- 1,591 / 11,586 exact-compatible rows;
+- row coverage: **13.73%**;
+- 12 / 99 covered surfaces;
+- surface coverage: **12.12%**;
+- gain versus live baseline: **+582 exact rows / +5.02 percentage points / +3 surfaces**.
+
+Coverage means exact contract compatibility, not number of plays.
+
+### New cross-year contract — Batter Total Bases U1.5
+
+Canonical research contract:
+
+`batter_total_bases UNDER 1.5 when prior_PA_per_game <= 3.50`
+
+Architecture:
+
+- materially different from the previously failed projection-threshold U1.5 architecture;
+- minimum 10 prior games;
+- `source_game_date < target_game_date`;
+- same-date history forbidden.
+
+2025 development:
+
+- 7,406 / 9,813 = **75.47%**;
+- baseline = 66.55%;
+- lift = **+8.92 pp**;
+- worst month = **74.27%**.
+
+Untouched 2026 external:
+
+- 9,145 / 12,142 = **75.32%**;
+- baseline = 68.07%;
+- lift = **+7.25 pp**;
+- worst month = **72.69%**;
+- retuned after external: **NO**.
+
+State:
+
+`CROSS_YEAR_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED`
+
+Earliest frozen Sep25 forward candidates from PR #216:
+
+- Carlos Jorge — CIN @ TOR — Caesars **-195** — prior PA/game 2.769;
+- Hao-Yu Lee — PIT @ DET — BetMGM **-185** — prior PA/game 3.302.
+
+No EV claim is authorized because aggregate historical accuracy is not a calibrated per-play probability.
+
+### New forward-only contracts — Batter HRRBI
+
+#### HRRBI U1.5
+
+Frozen rule:
+
+`batter_hrrbi_under_1p5_proj_0p90_v1`
+
+2025 development:
+
+- 3,607 / 4,795 = **75.22%**;
+- lift = **+7.12 pp**;
+- worst month = **71.77%**.
+
+Historical 2026 retrospective certification remains:
+
+`BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT`
+
+The revised MLB Official history is not relabeled as the frozen external set.
+
+Prospective Sep25 freeze:
+
+- 119 exact player-game targets;
+- 119 evaluable;
+- 3 threshold crossings.
+
+Earliest frozen candidates from PR #217:
+
+- Carlos Jorge — CIN @ TOR — projection 0.6375 — DraftKings **-131**;
+- Charles McAdoo — CIN @ TOR — projection 0.872222 — BetMGM **-130**;
+- Nick Fortes — TB @ PHI — projection 0.855714 — BetMGM **-190**.
+
+State:
+
+`DEVELOPMENT_GATE_PASS_FORWARD_ONLY`
+
+#### HRRBI U0.5
+
+Frozen rule:
+
+`batter_hrrbi_under_0p5_proj_0p05_v1`
+
+2025 development:
+
+- 117 / 118 = **99.15%**;
+- lift = **+46.98 pp**;
+- worst month = **96.00%**.
+
+Historical 2026 retrospective certification remains blocked by exact-source snapshot drift.
+
+Sep25 forward freeze:
+
+- 50 exact targets;
+- 50 evaluable;
+- **0 threshold crossings**.
+
+State:
+
+`DEVELOPMENT_GATE_PASS_FORWARD_ONLY_NO_CROSSING_TODAY`
+
+### Unified Sep25 forward evidence ledger
+
+PR #227 freezes the earliest pregame evidence from #216 / #217 / #218.
+
+Five candidate rows are frozen:
+
+| Player | Exact market | Matchup | Frozen model value | Book | Price | Current settlement |
+|---|---|---|---:|---|---:|---|
+| Carlos Jorge | TB U1.5 | CIN @ TOR | prior PA/game 2.769 | Caesars | -195 | PENDING |
+| Hao-Yu Lee | TB U1.5 | PIT @ DET | prior PA/game 3.302 | BetMGM | -185 | PENDING |
+| Nick Fortes | HRRBI U1.5 | TB @ PHI | projection 0.8557 | BetMGM | -190 | PENDING |
+| Carlos Jorge | HRRBI U1.5 | CIN @ TOR | projection 0.6375 | DraftKings | -131 | PENDING |
+| Charles McAdoo | HRRBI U1.5 | CIN @ TOR | projection 0.8722 | BetMGM | -130 | PENDING |
+
+First settlement readback:
+
+- candidateCount = 5;
+- settledCount = 0;
+- pendingCount = 5;
+- wins = 0;
+- losses = 0;
+- all five correctly returned `PENDING_GAME_NOT_FINAL`.
+
+Settlement contract:
+
+- exact `gamePk + MLBAM`;
+- MLB Official final boxscore only;
+- Total Bases = singles + 2*doubles + 3*triples + 4*HR;
+- HRRBI = hits + runs + RBI;
+- no postgame model recomputation;
+- frozen pregame prices are never replaced.
+
+### Existing forward evidence now preserved
+
+Batter Walks U0.5:
+
+- exact frozen 24-Sep candidate: Ronny Simon U0.5, DraftKings -309;
+- final: 1 walk;
+- forward result: **LOSS**;
+- no EV claim.
+
+Batter Doubles U0.5:
+
+- 12 exact frozen qualifiers on 24-Sep;
+- final forward settlement: **10/12 = 83.33%**;
+- losses: JJ Wetherholt and Oneil Cruz;
+- no EV claim.
+
+These results are forward evidence only and do not authorize threshold changes.
+
+### Pitcher line-surface forward candidates
+
+Pitcher K O3.5:
+
+- frozen rule: projection >=4.25;
+- 2025: 1,771 / 2,332 = **75.94%**;
+- 2026 diagnostic: 1,741 / 2,290 = **76.03%**;
+- exact line only;
+- PR #202 forward evaluator;
+- Sep24 exact quote Kyle Leahy +130 did not qualify (projection 3.309).
+
+State:
+
+`FORWARD_RESEARCH_EXACT_LINE_ONLY`
+
+Pitcher Outs O14.5:
+
+- frozen rule: projection >=15.75;
+- 2025: 1,550 / 2,010 = **77.11%**;
+- 2026 diagnostic: 1,430 / 1,811 = **78.96%**;
+- exact line only;
+- PR #203 forward evaluator;
+- prior observed crossing: Nick Martinez O14.5 -189, 18 outs, WIN;
+- Sep24 had no exact persisted O14.5 quote.
+
+State:
+
+`FORWARD_RESEARCH_EXACT_LINE_ONLY`
+
+Important: the old Pitcher Outs U18.5 runtime remains separately blocked by exact lineage mismatch. The new O14.5 research contract does not repair or replace U18.5.
+
+### Pitcher ER O1.5 runtime repair and current state
+
+Frozen model:
+
+`pitcher_er_over_1p5_p70_v1`
+
+2025 development:
+
+- 73 / 91 = **80.22%**.
+
+PR #209 repaired pitcher-feature performance without changing the model or threshold.
+
+Sep24 materialization:
+
+- 21 pitcher feature rows;
+- 11 games;
+- 21/21 strict `as_of_date < target_date`;
+- 21/21 source rule = `source_game_date < target_game_date`;
+- 21/21 K-rate available;
+- zero duplicate `gamePk + MLBAM` rows.
+
+Exact O1.5 persisted quotes evaluated with frozen math:
+
+- Paul Skenes: 60.57%;
+- David Sandlin: 64.54%;
+- Tyler Phillips: 63.22%;
+- Matthew Boyd: 65.36%.
+
+All were below the frozen 70% gate.
+
+Current state:
+
+`RUNTIME_REPAIRED / 0 CURRENT QUALIFIERS / NO_RETUNE`
+
+### Pitcher Record a Win — NO remains price-gated
+
+Forward model:
+
+`pitcher_win_forward_numeric_p015_v1`
+
+Rolling OOF:
+
+- 128 / 147 = **87.07%**;
+- worst selected month = 75.00%.
+
+Observed Sep20-Sep21 model selections:
+
+- 6/6 correct.
+
+Exact market-price lesson remains authoritative:
+
+DJ Herz NO:
+- DraftKings -830;
+- model P(NO) = 88.05%;
+- implied probability approximately 89.25%;
+- result WIN;
+- `PRICE_GATE = FAIL_NO_PRICE_EDGE`.
+
+Accuracy alone is not sufficient for a real-bet candidate.
+
+### Phase D failed / closed architectures
+
+No failed surface may be threshold-rescued from these results.
+
+Closed without opening 2026 because 2025 did not pass:
+
+- Batter Singles U0.5 — strict-prior PA-volume;
+- Batter Singles U0.5 — contact-scarcity;
+- Batter Singles O0.5 — contact-opportunity;
+- Batter Total Bases 1.5 YES — production / hard-hit architecture;
+- Batter Home Runs 0.5 YES — Statcast power;
+- Batter Home Runs 1.5 YES — Statcast power;
+- Batter RBI O0.5 — RBI opportunity;
+- Batter RBI 1.5 YES — RBI opportunity;
+- Batter Hits 1.5 YES — hit opportunity;
+- Batter Hits 2.5 YES — hit opportunity;
+- HRRBI 2.5 YES — strict-date Retrosheet replay;
+- HRRBI 3.5 YES — strict-date Retrosheet replay;
+- Batter K 1.5 YES — opportunity architecture.
+
+Batter K 0.5 YES:
+
+2025 frozen architecture:
+- prior K/PA >=0.30;
+- prior PA/game >=3.75;
+- 958 / 1,270 = **75.43%**;
+- lift = +16.62 pp;
+- worst month = 72.43%.
+
+Untouched 2026:
+- 1,304 / 1,732 = **75.29%**;
+- lift = +18.72 pp;
+- September = **63.57%**.
+
+Final state:
+
+`EXTERNAL_75_PLUS_STABILITY_FAIL_NO_RETUNE`
+
+The pooled 75% result does not override the permanent worst-month stability gate.
+
+### New market families — BALLDONTLIE prospective capture
+
+PR #228 is:
+
+`CAPTURE_READY_PENDING_MERGE`
+
+Validation status:
+
+- new-family contract tests: PASS;
+- full Next.js build: PASS;
+- Odds credential audit: PASS;
+- Official Pick write boundary: PASS;
+- target-local history block: PASS;
+- approved-prop roster identity: PASS;
+- recovery idempotency: PASS;
+- Decision Board validation: PASS.
+
+The BALLDONTLIE fallback already receives player-prop payloads. PR #228 extends only the local research mapping; it does **not** add these markets to The Odds API request catalog.
+
+New provider mappings:
+
+- `stolen_bases -> batter_stolen_bases`;
+- `runs_scored -> batter_runs`;
+- `runs_rbis -> batter_runs_rbis`;
+- `hits_runs_stolen_bases -> batter_hits_runs_stolen_bases`;
+- `hits_stolen_bases -> batter_hits_stolen_bases`;
+- `hits_walks_stolen_bases -> batter_hits_walks_stolen_bases`;
+- `extra_base_hits -> batter_extra_base_hits`;
+- `first_home_run -> batter_first_home_run`.
+
+The capture also records `observedPropTypes` and `unmappedPropTypes`, so future provider families do not disappear silently.
+
+Historical 2025 unconditional baselines, before any model selection:
+
+- Extra-Base Hits U0.5: **74.62%**;
+- Runs + RBI U0.5: **71.06%**;
+- Hits + Runs + SB U1.5: **72.56%**;
+- Hits + Walks + SB U1.5: **63.85%**;
+- Runs U0.5: **89.19%**;
+- Stolen Bases U0.5: **93.62%**.
+
+Research priority after the first real captured rows:
+
+1. Extra-Base Hits;
+2. Runs + RBI;
+3. Hits + Runs + SB;
+4. Hits + Walks + SB;
+5. Stolen Bases / Hits + SB where real market availability justifies them;
+6. Runs scored only if a model can demonstrate meaningful lift over its already-high baseline;
+7. First Home Run only after exact play-by-play settlement ordering is frozen.
+
+No 75% model is claimed for these new families yet.
+
+### Current methodological gate
+
+Phase D closeout PR #226 records:
+
+`HIGH_VOLUME_SURFACES_EXHAUSTED_WITH_CURRENT_FEATURE_FAMILIES`
+
+Meaning:
+
+- high-volume existing families have either passed and moved to forward evidence;
+- failed materially different architectures;
+- failed untouched cross-year stability;
+- are baseline-dominated;
+- or remain lineage-blocked.
+
+The next valid research paths are:
+
+- accumulate untouched forward evidence for TB U1.5 and HRRBI U1.5/U0.5;
+- capture genuinely new sportsbook families through the BDL prospective path;
+- develop models only after exact current market + line + side availability is observed;
+- recover exact frozen lineage only when provenance can be proven.
+
+Do not continue by:
+
+- lowering failed thresholds;
+- treating YES as OVER;
+- extrapolating between lines;
+- choosing a rule after inspecting 2026 outcomes;
+- spending historical Odds API credits.
+
 
 
 
