@@ -26,3 +26,5 @@ Projection is the frozen component formula:
 summed across hits, runs and RBI.
 
 No threshold retuning, fuzzy matching, EV substitution, Official Picks, APOSTAR, production promotion, or Odds API historical spend.
+
+Validation note: this branch must reproduce the frozen contract and evaluate all 119 targets without using same-date history before merge consideration.
