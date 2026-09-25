@@ -50,3 +50,10 @@ test('research boundaries remain closed',()=>{
   assert.equal(c.official_picks_eligible,false)
   assert.equal(c.apostar_enabled,false)
 })
+
+test('checkpoint statuses match sports_sync_jobs constraint vocabulary',()=>{
+  assert.match(service,/\.eq\('status', 'completed'\)/)
+  assert.match(service,/status: 'completed'/)
+  assert.match(service,/status: 'failed'/)
+  assert.doesNotMatch(service,/status: 'COMPLETE'|status: 'FAILED'/)
+})
