@@ -1,0 +1,33 @@
+name: MLB research-only Odds reserve guard
+
+on:
+  push:
+    branches:
+      - research/research-only-odds-reserve-guard-20260924
+    paths:
+      - src/services/pa13-pitcher-er-forward-capture.service.ts
+      - src/services/mlb-runline-home-p15-alt-shadow.service.ts
+      - scripts/mlb-research-only-odds-reserve-validate.mjs
+      - docs/research/MLB_RESEARCH_ONLY_ODDS_RESERVE_GUARD_V1.md
+      - .github/workflows/mlb-research-only-odds-reserve.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node scripts/mlb-research-only-odds-reserve-validate.mjs
+      - run: npm ci
+      - run: npm run build

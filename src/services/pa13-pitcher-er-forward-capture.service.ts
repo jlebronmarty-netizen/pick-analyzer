@@ -128,6 +128,26 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {}
 }
 
+
+async function latestKnownRequestsRemaining() {
+  const { data, error } = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .select('completed_at,metadata')
+    .eq('provider', PROVIDER)
+    .eq('sport_key', SPORT_KEY)
+    .order('completed_at', { ascending: false })
+    .limit(100)
+  if (error) throw new Error(`PA13_QUOTA_PREFLIGHT_READ_FAILED:${error.message}`)
+
+  for (const row of data ?? []) {
+    const metadata = asRecord(row.metadata)
+    const candidate = metadata.requestsRemainingAfter ?? metadata.requestsRemaining
+    const remaining = Number(candidate)
+    if (Number.isFinite(remaining)) return remaining
+  }
+  return null
+}
+
 function validIso(value: unknown) {
   const parsed = new Date(String(value ?? ''))
   return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
@@ -468,6 +488,16 @@ export async function capturePa13PitcherErForward({
   // Capture once in that hour to maximize starter certainty while staying pregame.
   if (clock.hour !== 10) return base
 
+  const knownRemainingBefore = await latestKnownRequestsRemaining()
+  if (knownRemainingBefore !== null && knownRemainingBefore <= CREDIT_RESERVE) {
+    return {
+      ...base,
+      status: 'BLOCKED_CREDIT_RESERVE',
+      requestsRemainingBefore: knownRemainingBefore,
+      creditReserve: CREDIT_RESERVE,
+    }
+  }
+
   const [events, slate, attempted] = await Promise.all([
     loadLifecycleEvents(targetDate, now),
     officialSlate(targetDate),
@@ -496,7 +526,7 @@ export async function capturePa13PitcherErForward({
 
   const calls: ProviderCall[] = []
   const rows: CapturedRow[] = []
-  let remaining: number | null = null
+  let remaining: number | null = knownRemainingBefore
 
   for (const item of planned) {
     if (remaining !== null && remaining <= CREDIT_RESERVE) break
@@ -629,6 +659,7 @@ export async function capturePa13PitcherErForward({
       apostarActivated: false,
       providerCallsMade: calls.length,
       providerCreditsConsumed: credits,
+      requestsRemainingBefore: knownRemainingBefore,
       requestsRemainingAfter: remaining,
       creditReserve: CREDIT_RESERVE,
       attemptedProviderEventIds: calls.map((call) => call.providerEventId),
@@ -649,6 +680,7 @@ export async function capturePa13PitcherErForward({
     rowsUpdated: Math.min(existing, rows.length),
     rowsRejected: calls.reduce((sum, call) => sum + call.rowsRejected, 0),
     attemptedProviderEvents: calls.length,
+    requestsRemainingBefore: knownRemainingBefore,
     requestsRemainingAfter: remaining,
     calls,
   }
