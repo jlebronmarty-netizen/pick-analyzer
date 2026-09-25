@@ -129,3 +129,70 @@ Current order of opportunity:
 3. **Totals** — current V1-V37 feature families are exhausted. Further threshold search is not justified. A future attempt requires new information such as exact lineup, umpire/weather, bullpen availability, or market movement.
 
 No Official Picks changes, APOSTAR activation, historical Odds API spend, or threshold rescue occurred.
+
+## New-information follow-up — strict-prior bullpen workload
+
+The original persisted bullpen workload fields were audited before use:
+
+- 3,806 rows from May-Sep 2025;
+- 0 nonzero rows for persisted 24h pitches;
+- 0 nonzero rows for persisted 72h pitches;
+- 0 nonzero high-workload-reliever counts.
+
+Therefore those persisted aggregate fields were rejected as placeholders.
+
+A valid workload family was reconstructed instead from `mlb_ml_xyear_pitcher_game_v1`, which contains team, date, `starter` boolean and pitch count. Bullpen = rows with `starter=false`; only dates strictly before the target date are used.
+
+Observed 2025 team-day bullpen pitch distribution:
+- median 58;
+- P75 77.25;
+- P90 100;
+- max 216.
+
+### Moneyline
+
+Bounded freshness rules used fixed 1-day / 3-day differences and same-direction combinations.
+
+Best:
+- D1 difference >=45 pitches;
+- 227/414 = **54.83%**;
+- worst month 48.68%.
+
+FAIL.
+
+### Totals
+
+The workload cutoffs were frozen from the feature distribution before outcome scoring:
+- 1-day P20/P80 = 68 / 148;
+- 1-day P10/P90 = 0 / 174.4;
+- 3-day P20/P80 = 248 / 392;
+- 3-day P10/P90 = 211 / 430.
+
+Best directional rule:
+- D1 P20/P80;
+- 360/773 = **46.57%**;
+- worst month 41.18%.
+
+FAIL.
+
+No sign reversal was attempted after seeing outcomes.
+
+### Run Line DOG +1.5
+
+The DOG was selected only when its bullpen was materially fresher than the favorite.
+
+Best with n>=60:
+- D1 difference >=45;
+- 116/179 = **64.80%**;
+- worst month 48.00%.
+
+Highest pooled accuracy:
+- BOTH 60/120;
+- 17/23 = 73.91%;
+- n<60 and worst month 50.00%.
+
+FAIL.
+
+Final state:
+
+`BULLPEN_WORKLOAD_CLOSED_FOR_MAIN_3_MARKETS_NO_SIGN_OR_THRESHOLD_REVERSAL`
