@@ -1,0 +1,41 @@
+{
+  "artifact": "MLB_BATTER_HRRBI_U0P5_FORWARD_RESULT_20260925",
+  "research_only": true,
+  "target_date": "2026-09-25",
+  "workflow_run_id": 36163633194,
+  "workflow_artifact_id": 10876687571,
+  "workflow_artifact_digest": "sha256:cd6a0976730e8b34c66b10969005de22ff995b9c8b0d0b07bf2ad697acc22cd1",
+  "exact_contract": {
+    "market": "batter_hits_runs_rbis",
+    "line": 0.5,
+    "side": "UNDER",
+    "projection_max": 0.05
+  },
+  "target_rows": 50,
+  "evaluable_rows": 50,
+  "qualifier_rows": 0,
+  "qualifiers": [],
+  "coverage_live_20260925": {
+    "baseline": {
+      "rows": 11586,
+      "covered_rows": 1009,
+      "row_coverage_pct": 8.71,
+      "covered_surfaces": 9,
+      "total_surfaces": 99,
+      "surface_coverage_pct": 9.09
+    },
+    "with_tb_hrrbi_u1p5_hrrbi_u0p5": {
+      "covered_rows": 1591,
+      "row_coverage_pct": 13.73,
+      "covered_surfaces": 12,
+      "surface_coverage_pct": 12.12
+    }
+  },
+  "boundaries": {
+    "no_ev_claim": true,
+    "no_threshold_retuning": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  }
+}
