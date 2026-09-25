@@ -1,0 +1,37 @@
+{
+  "contract": "MLB_BATTER_HRRBI_YES_MILESTONES_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "batter_hits_runs_rbis",
+  "exact_sides": [
+    "YES"
+  ],
+  "exact_lines": [
+    2.5,
+    3.5
+  ],
+  "selection_architecture": "frozen HRRBI projection threshold, 2025 development only",
+  "source_rule": "source_game_date < target_game_date",
+  "same_date_history_allowed": false,
+  "threshold_grid": {
+    "min": 0,
+    "max": 5,
+    "step": 0.05,
+    "frozen_before_search": true
+  },
+  "gate": {
+    "min_n": 60,
+    "min_accuracy": 0.75,
+    "min_months": 5,
+    "min_worst_month": 0.65,
+    "min_lift_pp": 5
+  },
+  "boundaries": {
+    "no_yes_over_aliasing": true,
+    "no_threshold_retuning": true,
+    "no_2026_selection_use": true,
+    "no_historical_odds_api_spend": true
+  }
+}
