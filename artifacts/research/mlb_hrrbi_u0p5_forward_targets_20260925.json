@@ -1,0 +1,512 @@
+{
+  "artifact": "MLB_BATTER_HRRBI_U0P5_FORWARD_TARGETS_20260925",
+  "research_only": true,
+  "target_date": "2026-09-25",
+  "market": "batter_hits_runs_rbis",
+  "exact_line": 0.5,
+  "side": "UNDER",
+  "source": "persisted strict-pregame approved-prop snapshots",
+  "target_count": 50,
+  "targets": [
+    {
+      "line": 0.5,
+      "price": 130,
+      "gamePk": 824220,
+      "playerId": 701162,
+      "playerName": "Ben Malgeri",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 123,
+      "gamePk": 823409,
+      "playerId": 669016,
+      "playerName": "Brandon Marsh",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 118,
+      "gamePk": 824220,
+      "playerId": 814430,
+      "playerName": "Brett Callahan",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:41.966+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 121,
+      "gamePk": 823409,
+      "playerId": 624641,
+      "playerName": "Edmundo Sosa",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 123,
+      "gamePk": 823409,
+      "playerId": 592663,
+      "playerName": "J.T. Realmuto",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:43.418+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 128,
+      "gamePk": 824220,
+      "playerId": 807726,
+      "playerName": "John Peck",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:41.966+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 139,
+      "gamePk": 823409,
+      "playerId": 666018,
+      "playerName": "Jonathan Aranda",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:43.418+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 152,
+      "gamePk": 823409,
+      "playerId": 702222,
+      "playerName": "Justin Crawford",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:43.418+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 133,
+      "gamePk": 823409,
+      "playerId": 663743,
+      "playerName": "Nick Fortes",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": -111,
+      "gamePk": 823409,
+      "playerId": 680700,
+      "playerName": "Richie Palacios",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:43.418+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 145,
+      "gamePk": 823409,
+      "playerId": 668723,
+      "playerName": "Ryan Vilade",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T14:37:25.315+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 133,
+      "gamePk": 824220,
+      "playerId": 687462,
+      "playerName": "Spencer Horwitz",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 135,
+      "gamePk": 824220,
+      "playerId": 679529,
+      "playerName": "Spencer Torkelson",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 110,
+      "gamePk": 823409,
+      "playerId": 670764,
+      "playerName": "Taylor Walls",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 130,
+      "gamePk": 823409,
+      "playerId": 683748,
+      "playerName": "Victor Mesa Jr.",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 132,
+      "gamePk": 822681,
+      "playerId": 694673,
+      "playerName": "Abimelec Ortiz",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:45:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:44.708+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 135,
+      "gamePk": 822681,
+      "playerId": 691781,
+      "playerName": "Brady House",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:45:00+00:00",
+      "snapshotTime": "2026-09-25T15:14:49.182+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 130,
+      "gamePk": 822681,
+      "playerId": 696285,
+      "playerName": "Jacob Young",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:45:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 130,
+      "gamePk": 822681,
+      "playerId": 678391,
+      "playerName": "Jorbit Vivas",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:45:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 127,
+      "gamePk": 822681,
+      "playerId": 660688,
+      "playerName": "Keibert Ruiz",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T22:45:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:44.708+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 135,
+      "gamePk": 822681,
+      "playerId": 703492,
+      "playerName": "Nick Morabito",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T22:45:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 115,
+      "gamePk": 822760,
+      "playerId": 676914,
+      "playerName": "Davis Schneider",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:07:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 121,
+      "gamePk": 822760,
+      "playerId": 553993,
+      "playerName": "Eugenio Suárez",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:07:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:46.041+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 135,
+      "gamePk": 822760,
+      "playerId": 699302,
+      "playerName": "Héctor Rodríguez",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:07:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:46.041+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 110,
+      "gamePk": 822760,
+      "playerId": 663647,
+      "playerName": "Ke'Bryan Hayes",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:07:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 120,
+      "gamePk": 822760,
+      "playerId": 680574,
+      "playerName": "Matt McLain",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:07:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 140,
+      "gamePk": 822760,
+      "playerId": 664702,
+      "playerName": "Myles Straw",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:07:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 119,
+      "gamePk": 823816,
+      "playerId": 682663,
+      "playerName": "Agustín Ramírez",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:47.379+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": -125,
+      "gamePk": 823816,
+      "playerId": 691277,
+      "playerName": "Deyvison De Los Santos",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 110,
+      "gamePk": 823816,
+      "playerId": 665923,
+      "playerName": "Esteury Ruiz",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 133,
+      "gamePk": 823816,
+      "playerId": 805300,
+      "playerName": "Jakob Marsee",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:47.379+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": -110,
+      "gamePk": 823816,
+      "playerId": 691858,
+      "playerName": "Jared Serna",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 110,
+      "gamePk": 823816,
+      "playerId": 691788,
+      "playerName": "Joe Mack",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:47.379+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 125,
+      "gamePk": 823816,
+      "playerId": 573262,
+      "playerName": "Mike Yastrzemski",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 125,
+      "gamePk": 823816,
+      "playerId": 669221,
+      "playerName": "Sean Murphy",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:10:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 123,
+      "gamePk": 824058,
+      "playerId": 595978,
+      "playerName": "Austin Hedges",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 135,
+      "gamePk": 824544,
+      "playerId": 694249,
+      "playerName": "Cole Carrigg",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:48.709+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 130,
+      "gamePk": 824058,
+      "playerId": 681807,
+      "playerName": "David Fry",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": -105,
+      "gamePk": 824544,
+      "playerId": 678662,
+      "playerName": "Ezequiel Tovar",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 111,
+      "gamePk": 824058,
+      "playerId": 686555,
+      "playerName": "Isaac Collins",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 110,
+      "gamePk": 824058,
+      "playerId": 664728,
+      "playerName": "Kyle Isbel",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 140,
+      "gamePk": 824544,
+      "playerId": 691720,
+      "playerName": "Kyle Karros",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 131,
+      "gamePk": 823735,
+      "playerId": 691026,
+      "playerName": "Masyn Winn",
+      "sportsbook": "caesars",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:24.198+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 131,
+      "gamePk": 824058,
+      "playerId": 686681,
+      "playerName": "Michael Massey",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:50.017+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": -105,
+      "gamePk": 824544,
+      "playerId": 666160,
+      "playerName": "Mickey Moniak",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 132,
+      "gamePk": 823735,
+      "playerId": 701675,
+      "playerName": "Nathan Church",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:51.435+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 100,
+      "gamePk": 823735,
+      "playerId": 686780,
+      "playerName": "Pedro Pagés",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 128,
+      "gamePk": 823735,
+      "playerId": 695336,
+      "playerName": "Thomas Saggese",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:51.435+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": 136,
+      "gamePk": 824544,
+      "playerId": 681198,
+      "playerName": "TJ Rumfield",
+      "sportsbook": "draftkings",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:34:48.709+00:00"
+    },
+    {
+      "line": 0.5,
+      "price": -125,
+      "gamePk": 824544,
+      "playerId": 691728,
+      "playerName": "Zac Veen",
+      "sportsbook": "betmgm",
+      "targetStart": "2026-09-25T23:40:00+00:00",
+      "snapshotTime": "2026-09-25T15:50:30.412+00:00"
+    }
+  ]
+}
