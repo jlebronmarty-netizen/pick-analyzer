@@ -1,0 +1,41 @@
+{
+  "artifact":"MLB_PHASE_B_MARKET_FIRST_SURFACE_AUDIT_20260925",
+  "research_only":true,
+  "as_of_date":"2026-09-25",
+  "objective":"Prioritize Batter Hits, Total Bases, RBI, and Hits+Runs+RBIs by real sportsbook availability before new formula research.",
+  "existing_strong_contracts":[
+    {"market":"batter_hits","line":1.5,"side":"UNDER","model":"batter_hits_under_1p5_edge_0p75_v1","accuracy_2026":0.8640},
+    {"market":"batter_total_bases","line":2.5,"side":"UNDER","model":"batter_total_bases_under_2p5_edge_1p5_v1","accuracy_2026":0.8652},
+    {"market":"batter_rbis","line":0.5,"side":"UNDER","model":"batter_rbi_under_0p5_proj_0p10_v1","accuracy_2026_exact":0.8288},
+    {"market":"batter_hits_runs_rbis","line":2.5,"side":"UNDER","model":"batter_hrrbi_under_2p5_proj_0p70_v1","accuracy_2026_exact":0.8550}
+  ],
+  "observed_availability_last_30d":[
+    {"market":"batter_hits","line":0.5,"side":"OVER","quote_rows":5856,"days_seen":5,"games_seen":19,"players_seen":101,"books_seen":9},
+    {"market":"batter_hits","line":0.5,"side":"UNDER","quote_rows":1352,"days_seen":5,"games_seen":19,"players_seen":99,"books_seen":4},
+    {"market":"batter_hits","line":1.5,"side":"OVER","quote_rows":4152,"days_seen":5,"games_seen":19,"players_seen":101,"books_seen":9},
+    {"market":"batter_hits","line":1.5,"side":"UNDER","quote_rows":76,"days_seen":2,"games_seen":10,"players_seen":3,"books_seen":4},
+    {"market":"batter_total_bases","line":0.5,"side":"OVER","quote_rows":2852,"days_seen":5,"games_seen":19,"players_seen":100,"books_seen":5},
+    {"market":"batter_total_bases","line":0.5,"side":"UNDER","quote_rows":995,"days_seen":5,"games_seen":19,"players_seen":72,"books_seen":5},
+    {"market":"batter_total_bases","line":1.5,"side":"OVER","quote_rows":4808,"days_seen":5,"games_seen":19,"players_seen":101,"books_seen":9},
+    {"market":"batter_total_bases","line":1.5,"side":"UNDER","quote_rows":1115,"days_seen":5,"games_seen":19,"players_seen":41,"books_seen":7},
+    {"market":"batter_total_bases","line":2.5,"side":"OVER","quote_rows":3131,"days_seen":5,"games_seen":19,"players_seen":100,"books_seen":7},
+    {"market":"batter_total_bases","line":2.5,"side":"UNDER","quote_rows":3,"days_seen":1,"games_seen":1,"players_seen":0,"books_seen":3},
+    {"market":"batter_total_bases","line":3.5,"side":"OVER","quote_rows":2799,"days_seen":5,"games_seen":19,"players_seen":100,"books_seen":7},
+    {"market":"batter_total_bases","line":4.5,"side":"OVER","quote_rows":2623,"days_seen":5,"games_seen":19,"players_seen":100,"books_seen":6},
+    {"market":"batter_rbis","line":0.5,"side":"OVER","quote_rows":651,"days_seen":4,"games_seen":6,"players_seen":100,"books_seen":4},
+    {"market":"batter_rbis","line":0.5,"side":"UNDER","quote_rows":442,"days_seen":4,"games_seen":6,"players_seen":97,"books_seen":3},
+    {"market":"batter_hits_runs_rbis","line":0.5,"side":"OVER","quote_rows":188,"days_seen":4,"games_seen":6,"players_seen":29,"books_seen":5},
+    {"market":"batter_hits_runs_rbis","line":0.5,"side":"UNDER","quote_rows":188,"days_seen":4,"games_seen":6,"players_seen":29,"books_seen":5},
+    {"market":"batter_hits_runs_rbis","line":1.5,"side":"OVER","quote_rows":724,"days_seen":4,"games_seen":6,"players_seen":79,"books_seen":6},
+    {"market":"batter_hits_runs_rbis","line":1.5,"side":"UNDER","quote_rows":724,"days_seen":4,"games_seen":6,"players_seen":79,"books_seen":6}
+  ],
+  "priority_queue":[
+    {"rank":1,"market":"batter_hits","line":0.5,"reason":"highest practical availability and current certified model is U1.5, which is rarely quoted on UNDER side"},
+    {"rank":2,"market":"batter_total_bases","line":1.5,"reason":"very frequent across books; current U2.5 contract rarely has an UNDER quote"},
+    {"rank":3,"market":"batter_hits_runs_rbis","line":1.5,"reason":"current strong U2.5 contract does not match observed real-line surface"},
+    {"rank":4,"market":"batter_total_bases","line":3.5,"reason":"high-frequency ladder line; evaluate independently"},
+    {"rank":5,"market":"batter_rbis","line":0.5,"reason":"already matched by strong U0.5 contract; forward price/availability validation rather than new formula search"}
+  ],
+  "blocked_method_note":"Direct full-grid recalculation in interactive Supabase timed out. Do not approximate strict-prior history or allow same-day Game 1 into Game 2. A dedicated offline/repository backtest should reuse the certified strict-prior builder.",
+  "boundaries":{"no_line_extrapolation":true,"no_threshold_rescue":true,"no_official_picks":true,"apostar_disabled":true,"no_historical_odds_api_spend":true}
+}
