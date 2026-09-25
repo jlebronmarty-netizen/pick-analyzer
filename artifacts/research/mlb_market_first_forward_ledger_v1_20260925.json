@@ -1,0 +1,146 @@
+{
+  "contract": "MLB_MARKET_FIRST_FORWARD_LEDGER_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "tracking_date": "2026-09-25",
+  "frozen_at": "2026-09-25T16:00:00Z",
+  "freeze_sources": [
+    {
+      "pr": 216,
+      "role": "canonical earliest TB U1.5 freeze"
+    },
+    {
+      "pr": 217,
+      "role": "canonical earliest HRRBI U1.5 freeze"
+    },
+    {
+      "pr": 218,
+      "role": "canonical earliest HRRBI U0.5 freeze/no crossing"
+    }
+  ],
+  "price_policy": {
+    "use_frozen_pregame_price": true,
+    "calculate_ev": false,
+    "reason": "aggregate historical accuracy is not calibrated per-play probability"
+  },
+  "candidates": [
+    {
+      "evidence_id": "20260925_tb_u1p5_carlos_jorge",
+      "source_pr": 216,
+      "game_pk": 822760,
+      "player_mlbam_id": 699115,
+      "player_name": "Carlos Jorge",
+      "matchup": "CIN @ TOR",
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "tb_u1p5_prior_pa_per_game_le_3p50_v1",
+      "model_value": 2.76923076923077,
+      "model_value_name": "prior_pa_per_game",
+      "sportsbook": "caesars",
+      "price": -195,
+      "status": "PENDING"
+    },
+    {
+      "evidence_id": "20260925_tb_u1p5_haoyu_lee",
+      "source_pr": 216,
+      "game_pk": 824220,
+      "player_mlbam_id": 701678,
+      "player_name": "Hao-Yu Lee",
+      "matchup": "PIT @ DET",
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "tb_u1p5_prior_pa_per_game_le_3p50_v1",
+      "model_value": 3.30188679245283,
+      "model_value_name": "prior_pa_per_game",
+      "sportsbook": "betmgm",
+      "price": -185,
+      "status": "PENDING"
+    },
+    {
+      "evidence_id": "20260925_hrrbi_u1p5_nick_fortes",
+      "source_pr": 217,
+      "game_pk": 823409,
+      "player_mlbam_id": 663743,
+      "player_name": "Nick Fortes",
+      "matchup": "TB @ PHI",
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_1p5_proj_0p90_v1",
+      "model_value": 0.8557142857142856,
+      "model_value_name": "projection",
+      "sportsbook": "betmgm",
+      "price": -190,
+      "status": "PENDING"
+    },
+    {
+      "evidence_id": "20260925_hrrbi_u1p5_carlos_jorge",
+      "source_pr": 217,
+      "game_pk": 822760,
+      "player_mlbam_id": 699115,
+      "player_name": "Carlos Jorge",
+      "matchup": "CIN @ TOR",
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_1p5_proj_0p90_v1",
+      "model_value": 0.6375,
+      "model_value_name": "projection",
+      "sportsbook": "draftkings",
+      "price": -131,
+      "status": "PENDING"
+    },
+    {
+      "evidence_id": "20260925_hrrbi_u1p5_charles_mcadoo",
+      "source_pr": 217,
+      "game_pk": 822760,
+      "player_mlbam_id": 807727,
+      "player_name": "Charles McAdoo",
+      "matchup": "CIN @ TOR",
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_1p5_proj_0p90_v1",
+      "model_value": 0.8722222222222222,
+      "model_value_name": "projection",
+      "sportsbook": "betmgm",
+      "price": -130,
+      "status": "PENDING"
+    }
+  ],
+  "non_crossing_surfaces": [
+    {
+      "source_pr": 218,
+      "market": "batter_hits_runs_rbis",
+      "line": 0.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_0p5_proj_0p05_v1",
+      "exact_targets": 50,
+      "evaluable_targets": 50,
+      "qualifiers": 0
+    }
+  ],
+  "settlement_contract": {
+    "source": "MLB Official live game feed / final boxscore",
+    "require_final_game": true,
+    "exact_game_pk": true,
+    "exact_mlbam_identity": true,
+    "total_bases_formula": "singles + 2*doubles + 3*triples + 4*home_runs",
+    "hrrbi_formula": "hits + runs + rbi",
+    "under_win_rule": "actual_stat < exact_line",
+    "no_postgame_model_recompute": true
+  },
+  "boundaries": {
+    "no_model_recompute_after_game": true,
+    "no_threshold_retune": true,
+    "no_price_replacement": true,
+    "no_fuzzy_identity": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  }
+}
