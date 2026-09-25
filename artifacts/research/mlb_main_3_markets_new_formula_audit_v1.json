@@ -1,0 +1,244 @@
+{
+  "contract": "MLB_MAIN_3_MARKETS_NEW_FORMULA_AUDIT_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "audit_date": "2026-09-25",
+  "target_markets": [
+    "moneyline",
+    "run_line",
+    "total"
+  ],
+  "permanent_gate": {
+    "min_accuracy": 0.75,
+    "min_selected_n": 60,
+    "min_months": 5,
+    "min_worst_month_accuracy": 0.65,
+    "no_threshold_rescue_after_external": true
+  },
+  "moneyline": {
+    "current_forward_tracker": {
+      "picks": 4,
+      "wins": 0,
+      "losses": 3,
+      "pending": 1,
+      "accuracy_settled": 0,
+      "coverage_pct": 3.03
+    },
+    "new_architecture": "six-signal symmetric fundamentals consensus",
+    "signals": [
+      "season_win_pct",
+      "run_diff_pg",
+      "pyth_win_pct",
+      "L5_win_pct",
+      "starter_RA9_advantage",
+      "bullpen_RA9_advantage"
+    ],
+    "bounded_search": {
+      "profiles": [
+        {
+          "id": "A",
+          "cuts": {
+            "win_pct": 0.08,
+            "run_diff_pg": 0.5,
+            "pyth": 0.08,
+            "l5": 0.2,
+            "starter_ra9": 1,
+            "bullpen_ra9": 0.75
+          }
+        },
+        {
+          "id": "B",
+          "cuts": {
+            "win_pct": 0.12,
+            "run_diff_pg": 0.8,
+            "pyth": 0.12,
+            "l5": 0.3,
+            "starter_ra9": 1.5,
+            "bullpen_ra9": 1
+          }
+        },
+        {
+          "id": "C",
+          "cuts": {
+            "win_pct": 0.15,
+            "run_diff_pg": 1,
+            "pyth": 0.15,
+            "l5": 0.4,
+            "starter_ra9": 2,
+            "bullpen_ra9": 1.5
+          }
+        }
+      ],
+      "vote_thresholds": [
+        4,
+        5,
+        6
+      ]
+    },
+    "best_pooled": {
+      "profile": "C",
+      "min_votes": 6,
+      "n": 39,
+      "wins": 31,
+      "accuracy": 0.7948717948717948,
+      "worst_month": 0.3333333333333333,
+      "state": "FAIL_N_AND_STABILITY"
+    },
+    "best_n_ge_60": {
+      "profile": "B",
+      "min_votes": 6,
+      "n": 69,
+      "wins": 51,
+      "accuracy": 0.7391304347826086,
+      "worst_month": 0.4444444444444444,
+      "state": "FAIL_ACCURACY_AND_STABILITY"
+    },
+    "market_residual_followup": {
+      "state": "BLOCKED_2025_MARKET_PROBABILITY_COVERAGE",
+      "historical_2025_open_prob_rows": 0,
+      "historical_2025_close_prob_rows": 0,
+      "note": "No clean 2025 no-vig moneyline probability surface exists in mlb_ml_xyear_features_v1."
+    },
+    "disposition": "NO_NEW_75_PLUS_STABLE_FORMULA_WITH_CURRENT_CLEAN_2025_FEATURES"
+  },
+  "run_line": {
+    "exact_standard_market": {
+      "dog_line": 1.5,
+      "favorite_line": -1.5,
+      "rows_2025": 2430
+    },
+    "new_architecture": "favorite -1.5 fundamentals domination",
+    "favorite_oriented_signals": [
+      "team_strength",
+      "recent_form",
+      "offense",
+      "starter",
+      "bullpen"
+    ],
+    "bounded_search": {
+      "component_cuts": [
+        0,
+        0.5,
+        1
+      ],
+      "vote_thresholds": [
+        3,
+        4,
+        5
+      ]
+    },
+    "best_result": {
+      "component_cut": 1,
+      "min_votes": 5,
+      "n": 7,
+      "wins": 5,
+      "accuracy": 0.7142857142857143,
+      "months": 1,
+      "state": "FAIL"
+    },
+    "best_n_ge_60": {
+      "component_cut": 1,
+      "min_votes": 3,
+      "n": 103,
+      "wins": 56,
+      "accuracy": 0.5436893203883495,
+      "worst_month": 0.2857142857142857,
+      "state": "FAIL"
+    },
+    "surviving_existing_research": [
+      {
+        "id": "rl_v2_core_fixed_v1",
+        "side": "DOG +1.5",
+        "development_n": 70,
+        "development_accuracy": 0.757142857142857,
+        "note": "2025+already-opened 2026 are development, not external certification."
+      },
+      {
+        "id": "rl_v2_transfer_fixed_v1",
+        "side": "DOG +1.5",
+        "development_n": 79,
+        "development_accuracy": 0.784810126582278,
+        "note": "2025+already-opened 2026 are development, not external certification."
+      },
+      {
+        "id": "rl_v2_broad_union_fixed_v1",
+        "side": "DOG +1.5",
+        "development_n": 143,
+        "development_accuracy": 0.769230769230769,
+        "note": "Prospective-only certification required."
+      },
+      {
+        "id": "rl_v2_home_p15_alt_favorite_tsh_q92_v1",
+        "side": "HOME +1.5 ALT conditional on HOME -1.5 standard favorite",
+        "accuracy_2025": 0.85981308411215,
+        "n_2025": 107,
+        "accuracy_2026_seen": 0.790322580645161,
+        "n_2026_seen": 62,
+        "forward_selected_games_sep19_sep25": 0,
+        "state": "FROZEN_RESEARCH_ONLY_AWAITING_VERIFIED_FORWARD"
+      }
+    ],
+    "disposition": "STANDARD_FAVORITE_MINUS_1P5_NEW_ARCHITECTURE_FAILED; DOG_PLUS_1P5_V2_REMAINS_THE_ONLY_75_PLUS_RESEARCH_PATH"
+  },
+  "totals": {
+    "historical_exact_line_rows_2025": 2425,
+    "nonpush_rows_2025": 2321,
+    "prior_research_depth": "V1 through V37 plus multiple selective/predicate/tree/catboost/poisson/distillation architectures",
+    "latest_v37": {
+      "id": "totals_v37_xyear_under_catboost_v1",
+      "oof_n": 479,
+      "oof_accuracy": 0.5532359081419624,
+      "external_2026_selected_n": 310,
+      "external_2026_accuracy": 0.4612903225806452,
+      "state": "REVISIT_AFTER_FIRST_PASS"
+    },
+    "new_architecture": "starter + bullpen run-prevention projection versus exact closing total",
+    "formula": "0.5*(home_sp_ra9+home_bullpen_ra9)+0.5*(away_sp_ra9+away_bullpen_ra9)",
+    "edge_thresholds_runs": [
+      1.5,
+      2,
+      2.5
+    ],
+    "results": [
+      {
+        "edge": 1.5,
+        "n": 403,
+        "wins": 195,
+        "accuracy": 0.4838709677419355,
+        "worst_month": 0.43157894736842106
+      },
+      {
+        "edge": 2,
+        "n": 210,
+        "wins": 95,
+        "accuracy": 0.4523809523809524,
+        "worst_month": 0.44
+      },
+      {
+        "edge": 2.5,
+        "n": 126,
+        "wins": 57,
+        "accuracy": 0.4523809523809524,
+        "worst_month": 0.3684210526315789
+      }
+    ],
+    "disposition": "NO_75_PLUS_PREGAME_FORMULA_WITH_CURRENT_INFORMATION; NEW_INFORMATION_REQUIRED"
+  },
+  "conclusion": {
+    "absolute_limit_reached": false,
+    "current_feature_family_limit_reached": true,
+    "strongest_main_market_path": "Run Line DOG +1.5 V2 prospective shadow",
+    "moneyline_next_requirement": "new information surface: timestamped lineup / prospective market probability / market-fundamental residual; do not retune current model",
+    "runline_next_requirement": "accumulate untouched prospective outcomes for V2; do not lower frozen thresholds",
+    "totals_next_requirement": "genuinely new pregame information such as timestamped lineup, umpire/weather, bullpen availability or market movement; current V1-V37 families are exhausted"
+  },
+  "boundaries": {
+    "official_picks_modified": false,
+    "apostar_activated": false,
+    "historical_odds_api_spend": 0,
+    "tracker_modified": false,
+    "no_2026_threshold_rescue": true
+  }
+}
