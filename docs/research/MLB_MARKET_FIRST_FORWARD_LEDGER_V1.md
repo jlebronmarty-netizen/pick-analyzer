@@ -42,3 +42,5 @@ The settlement script is safe to run before games finish: unfinished games remai
 - no threshold retuning
 - no fuzzy identity
 - no historical Odds API spend
+
+Validation note: first branch run is expected to remain pending until final game status; no settlement is inferred early.
