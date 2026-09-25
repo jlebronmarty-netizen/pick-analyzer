@@ -85,7 +85,13 @@ export function GameCard({ game, rows }: { game: MlbGame; rows: Pick2MlbValueBoa
 
         {selectedBook && <p className="mt-2 break-words text-xs text-slate-400">{selectedBook}</p>}
 
-        <div className="mt-3">{status ? <Classification status={status} /> : <span className="text-xs text-slate-300">Analysis pending</span>}</div>
+        <div className="mt-3">{status ? <Classification status={status} /> : game.analysisAvailable ? (
+          <span className="text-xs font-medium text-slate-200">
+            {game.forwardPickStatus === 'PICK' && game.forwardRecommendedSide === side
+              ? `Forward model signal${game.forwardRouteId ? ` · Route ${game.forwardRouteId}` : ''} · not an Official Pick`
+              : 'Model evaluated · no certified market classification'}
+          </span>
+        ) : <span className="text-xs text-slate-300">Analysis pending</span>}</div>
 
         {status === 'OFFICIAL_PICK' && row?.decision_at ? (
           <p className="mt-2 text-xs font-semibold leading-5 text-teal-200">Certified {prTime(row.decision_at, true)} at {selectedBook ?? 'selected book'} {price(row.american_odds)}</p>
