@@ -46,6 +46,54 @@ export async function readMlbOperationalInputs(at = new Date().toISOString()) {
 export async function getMlbOperationalView(at = new Date().toISOString()) {
   const { input, warnings } = await readMlbOperationalInputs(at)
   const projected = projectMlbOperations(input)
+  const date = mlbOperatingDate(at)
+  let trackerRows: StoredRow[] = []
+  try {
+    trackerRows = await rows(
+      supabaseAdmin
+        .from('mlb_ml_forward_tracker_v1')
+        .select('game_pk,start_time,home_team,away_team,model_version,snapshot_ts,data_status,standard_score,pick_status,recommended_side,route_id')
+        .eq('tracking_date', date)
+        .lte('snapshot_ts', at)
+        .order('snapshot_ts', { ascending: false })
+        .limit(101),
+      100,
+    )
+  } catch {
+    warnings.push('Forward ML tracker analysis is unavailable; canonical Official Pick state is unchanged.')
+  }
+
+  const trackerForGame = (game: (typeof projected.games)[number]) => trackerRows.find((row) => {
+    if (row.game_pk != null && Number(row.game_pk) === game.gamePk) return true
+    const sameTeams = String(row.home_team ?? '') === game.home && String(row.away_team ?? '') === game.away
+    const trackerStart = Date.parse(String(row.start_time ?? ''))
+    const gameStart = Date.parse(game.scheduledAt)
+    return sameTeams && Number.isFinite(trackerStart) && Number.isFinite(gameStart) && Math.abs(trackerStart - gameStart) <= 10 * 60_000
+  })
+
+  const games = projected.games.map((game) => {
+    const tracker = trackerForGame(game)
+    const championProbabilityAvailable = Number.isFinite(game.homeProbability) && Number.isFinite(game.awayProbability)
+    const analysisAvailable = championProbabilityAvailable || Boolean(tracker)
+    const forwardPickStatus = tracker ? String(tracker.pick_status ?? '') || null : null
+    const forwardRecommendedSide = tracker ? String(tracker.recommended_side ?? '') || null : null
+    const forwardRouteId = tracker ? String(tracker.route_id ?? '') || null : null
+    const forwardStandardScore = tracker?.standard_score == null ? null : Number(tracker.standard_score)
+    const forwardDataStatus = tracker ? String(tracker.data_status ?? '') || null : null
+    const trackerSnapshot = tracker ? String(tracker.snapshot_ts ?? '') || null : null
+    return {
+      ...game,
+      predictionAt: game.predictionAt ?? trackerSnapshot,
+      analysisAvailable,
+      analysisSource: championProbabilityAvailable ? 'CHAMPION_V1' : tracker ? 'ML_FORWARD_TRACKER_V2' : null,
+      forwardPickStatus,
+      forwardRecommendedSide,
+      forwardRouteId,
+      forwardStandardScore: typeof forwardStandardScore === 'number' && Number.isFinite(forwardStandardScore) ? forwardStandardScore : null,
+      forwardDataStatus,
+    }
+  })
+
   const board: Pick2MlbValueBoardContract = { policy_version: PICK2_MLB_VALUE_BOARD_POLICY_VERSION, statuses: PICK2_MLB_VALUE_BOARD_STATUSES, rows: buildPick2MlbValueBoardRows(projected.sources), filters: { statuses: PICK2_MLB_VALUE_BOARD_STATUSES }, default_sort: { key: 'board_priority', direction: 'asc' }, publication_state: 'CANONICAL_READ_ONLY', feature_gate: 'ENABLED', model_limitation_note: 'Champion V1 has modest predictive discrimination. Official Picks are not guaranteed winners; zero picks is valid.', profitability_claim_state: 'NO_HISTORICAL_PROFITABILITY_CLAIM' }
-  return { ...projected, sources: undefined, board, warnings, providerCalls: 0, productionDml: 0 }
+  return { ...projected, games, sources: undefined, board, warnings, providerCalls: 0, productionDml: 0 }
 }

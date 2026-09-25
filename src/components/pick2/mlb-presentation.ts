@@ -15,7 +15,10 @@ export function matchesSlateFilter(game: MlbGame, rows: Pick2MlbValueBoardRow[],
   const statuses = rows.filter(row => row.game_pk === game.gamePk).map(presentationStatus)
   if (filter === 'All') return true
   if (filter === 'Started') return isStarted(game)
-  if (filter === 'Waiting') return !isStarted(game) && (Boolean(game.reason) || !game.predictionAt || statuses.includes('BLOCKED'))
+  if (filter === 'Waiting') {
+    const hardWaitingReason = /STARTER|STATUS_UNCONFIRMED|CANONICAL_EVIDENCE_READ_UNAVAILABLE|PREDICTION_EVIDENCE_MISMATCH|INVALID_PERSISTED_VALUE_EVIDENCE/.test(game.reason ?? '')
+    return !isStarted(game) && (hardWaitingReason || !game.analysisAvailable || statuses.includes('BLOCKED'))
+  }
   return statuses.includes(filter === 'Picks' ? 'OFFICIAL_PICK' : filter === 'Value' ? 'VALUE_CANDIDATE' : 'NO_EDGE')
 }
 export const labels: Record<DisplayStatus, string> = { OFFICIAL_PICK: 'Official Pick', VALUE_CANDIDATE: 'Value Candidate', WATCHLIST: 'Watchlist', NO_EDGE: 'No Edge', BLOCKED: 'Currently Blocked' }
@@ -42,9 +45,10 @@ export function friendlyReason(code: string | null | undefined): string {
 }
 export function gameMessage(game: MlbGame) {
   if (/final|completed/i.test(game.status)) return 'Final'
+  if (game.analysisAvailable && /NO_CURRENT_PREDICTION|NO_OBSERVED_GAME_EVIDENCE|STALE_GAME_EVIDENCE/.test(game.reason ?? '')) return 'Model evaluated'
   if (game.reason) return friendlyReason(game.reason)
   if (/live|progress|warmup|delayed/i.test(game.status)) return game.status
-  return game.status || 'Scheduled'
+  return game.analysisAvailable ? 'Model evaluated' : game.status || 'Scheduled'
 }
 export function freshness(code: string | null | undefined) {
   if (code === 'FRESH') return 'Odds current'
