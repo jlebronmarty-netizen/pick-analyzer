@@ -9,7 +9,8 @@ test('exact YES contract frozen before OOS',()=>{
   assert.equal(a.side,'YES')
   assert.equal(a.rule.prior_k_per_pa_min,0.30)
   assert.equal(a.rule.prior_pa_per_game_min,3.75)
-  assert.equal(a.external_2026.opened,false)
+  assert.equal(a.external_2026.opened,true)
+  assert.equal(a.external_2026.threshold_retuned,false)
 })
 test('development gate passes',()=>{
   assert.equal(a.development_2025.n,1270)
@@ -27,4 +28,11 @@ test('strict-date and research boundaries',()=>{
   assert.match(sql,/season=2025/)
   assert.doesNotMatch(sql,/2026/)
   assert.doesNotMatch(sql,/\b(insert|update|delete|merge|create|alter|drop|truncate)\b/i)
+})
+
+test('untouched 2026 OOS fails stability and remains closed',()=>{
+  assert(a.external_2026.accuracy>=0.75)
+  assert(a.external_2026.lift_pp>=5)
+  assert(a.external_2026.worst_month<0.65)
+  assert.equal(a.external_2026.state,'EXTERNAL_75_PLUS_STABILITY_FAIL_NO_RETUNE')
 })
