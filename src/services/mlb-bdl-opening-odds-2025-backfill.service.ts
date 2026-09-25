@@ -222,7 +222,7 @@ async function completedDates() {
     .eq('sport_key', SPORT_KEY)
     .eq('provider', PROVIDER)
     .eq('season', SEASON)
-    .eq('status', 'COMPLETE')
+    .eq('status', 'completed')
     .order('completed_at', { ascending: false })
     .limit(1000)
 
@@ -507,7 +507,7 @@ async function existingIds(ids: string[]) {
 
 async function recordJob(input: {
   targetDate: string
-  status: 'COMPLETE' | 'FAILED'
+  status: 'completed' | 'failed'
   startedAt: string
   completedAt: string
   fetched: number
@@ -580,7 +580,7 @@ async function processDate(date: string) {
     const skipped = existing.size + normalized.blockedContracts.length + normalized.unmatchedOpeningRows
     await recordJob({
       targetDate: date,
-      status: 'COMPLETE',
+      status: 'completed',
       startedAt,
       completedAt,
       fetched: games.length + opening.length,
@@ -622,7 +622,7 @@ async function processDate(date: string) {
     const message = error instanceof Error ? error.message : 'UNKNOWN_BACKFILL_ERROR'
     await recordJob({
       targetDate: date,
-      status: 'FAILED',
+      status: 'failed',
       startedAt,
       completedAt,
       fetched: 0,
