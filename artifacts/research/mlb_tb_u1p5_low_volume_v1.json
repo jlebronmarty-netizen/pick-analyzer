@@ -1,0 +1,104 @@
+{
+  "contract": "MLB_BATTER_TOTAL_BASES_U1P5_LOW_VOLUME_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "batter_total_bases",
+  "exact_line": 1.5,
+  "side": "UNDER",
+  "architecture": "strict_prior_playing_time_volume",
+  "rule": {
+    "metric": "prior_PA_per_game",
+    "operator": "<=",
+    "threshold": 3.5,
+    "formula": "sum(strict-prior plate appearances) / count(strict-prior games)",
+    "minimum_prior_games": 10,
+    "same_date_history_allowed": false,
+    "source_game_date_rule": "source_game_date < target_game_date"
+  },
+  "development_selection": {
+    "season": 2025,
+    "target_window": "2025-05-01 through 2025-09-28",
+    "threshold_grid": {
+      "min": 2.5,
+      "max": 4.5,
+      "step": 0.05
+    },
+    "gate": {
+      "min_n": 60,
+      "min_accuracy": 0.75,
+      "min_months": 5,
+      "min_worst_month": 0.65,
+      "min_lift_pp": 5
+    },
+    "champion_policy": "maximum n among passing thresholds; threshold frozen before opening 2026"
+  },
+  "development_2025": {
+    "eligible_unfiltered_rows": 37744,
+    "baseline_accuracy": 0.665536244171259,
+    "n": 9813,
+    "wins": 7406,
+    "accuracy": 0.7547131356364007,
+    "lift_pp": 8.91768914651417,
+    "months": 5,
+    "worst_month": 0.7427184466019418,
+    "min_month_n": 1761
+  },
+  "prior_failed_architecture": {
+    "rule": "projection <= 1.20",
+    "external_2026_accuracy": 0.7476507232604793,
+    "state": "EXTERNAL_BELOW_75_NO_RETUNE",
+    "relation": "not reused; this is a distinct playing-time-volume architecture"
+  },
+  "external_2026": {
+    "opened": true,
+    "threshold_retuned": false,
+    "target_window": "2026-05-01 through 2026-09-24",
+    "eligible_unfiltered_rows": 37183,
+    "n": 12142,
+    "wins": 9145,
+    "accuracy": 0.7531708120573225,
+    "baseline_accuracy": 0.6806874109135895,
+    "lift_pp": 7.2483401143733,
+    "months": 5,
+    "worst_month": 0.7268722466960352,
+    "monthly": {
+      "2026-05": {
+        "n": 2406,
+        "wins": 1835,
+        "accuracy": 0.7626766417290108
+      },
+      "2026-06": {
+        "n": 2497,
+        "wins": 1815,
+        "accuracy": 0.7268722466960352
+      },
+      "2026-07": {
+        "n": 2406,
+        "wins": 1776,
+        "accuracy": 0.7381546134663342
+      },
+      "2026-08": {
+        "n": 2778,
+        "wins": 2085,
+        "accuracy": 0.7505399568034558
+      },
+      "2026-09": {
+        "n": 2055,
+        "wins": 1634,
+        "accuracy": 0.7951338199513382
+      }
+    },
+    "state": "CROSS_YEAR_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED"
+  },
+  "boundaries": {
+    "no_line_extrapolation": true,
+    "no_threshold_rescue": true,
+    "no_2026_outcomes_used_for_selection": true,
+    "no_historical_odds_api_spend": true,
+    "official_picks_unchanged": true,
+    "apostar_disabled": true
+  },
+  "state": "CROSS_YEAR_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED"
+}
