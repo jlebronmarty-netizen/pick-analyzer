@@ -56,12 +56,20 @@ const PROP_MARKET_MAP: Record<string, string> = {
   home_runs: 'batter_home_runs',
   total_bases: 'batter_total_bases',
   rbis: 'batter_rbis',
+  stolen_bases: 'batter_stolen_bases',
   singles: 'batter_singles',
   doubles: 'batter_doubles',
   triples: 'batter_triples',
   walks: 'batter_walks',
   strikeouts: 'batter_strikeouts',
+  runs_scored: 'batter_runs',
   hits_runs_rbis: 'batter_hits_runs_rbis',
+  runs_rbis: 'batter_runs_rbis',
+  hits_runs_stolen_bases: 'batter_hits_runs_stolen_bases',
+  hits_stolen_bases: 'batter_hits_stolen_bases',
+  hits_walks_stolen_bases: 'batter_hits_walks_stolen_bases',
+  extra_base_hits: 'batter_extra_base_hits',
+  first_home_run: 'batter_first_home_run',
   pitcher_strikeouts: 'pitcher_strikeouts',
   pitcher_outs: 'pitcher_outs',
   pitcher_hits_allowed: 'pitcher_hits_allowed',
@@ -249,6 +257,8 @@ function rowsForProp(input: {
       bdlGameId: input.bdlGameId,
       bdlPlayerId: input.prop.player_id ?? null,
       bdlPropId: input.prop.id ?? null,
+      providerPropType: input.prop.prop_type ?? null,
+      providerMarketType: marketType,
       providerPlayerName: input.playerName,
       playerMlbamId: input.exactPlayer?.id ?? null,
       canonicalPlayerName: input.exactPlayer?.name ?? null,
@@ -326,8 +336,14 @@ export async function captureApprovedPropsFromBallDontLie(input: {
     }
   }
 
+  const allProps = [...propsByGame.values()].flat()
+  const observedPropTypes = Array.from(new Set(
+    allProps.map((prop) => String(prop.prop_type ?? '').trim()).filter(Boolean),
+  )).sort()
+  const unmappedPropTypes = observedPropTypes.filter((propType) => !PROP_MARKET_MAP[propType])
+
   const bdlPlayerIds = Array.from(new Set(
-    [...propsByGame.values()].flat()
+    allProps
       .map((prop) => finiteNumber(prop.player_id))
       .filter((id): id is number => id !== null && Number.isSafeInteger(id) && id > 0),
   ))
@@ -420,6 +436,8 @@ export async function captureApprovedPropsFromBallDontLie(input: {
       matchedGames: matched.length,
       capturedEvents: capturedEventIds.size,
       coverageComplete,
+      observedPropTypes,
+      unmappedPropTypes,
       callErrors,
     },
     updated_at: completedAt,
@@ -439,6 +457,8 @@ export async function captureApprovedPropsFromBallDontLie(input: {
     matchedGames: matched.length,
     capturedEvents: capturedEventIds.size,
     coverageComplete,
+    observedPropTypes,
+    unmappedPropTypes,
     callErrors,
   }
 }

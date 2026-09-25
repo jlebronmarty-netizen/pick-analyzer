@@ -1,0 +1,33 @@
+name: MLB BDL new prop families
+
+on:
+  push:
+    branches:
+      - research/bdl-new-mlb-prop-families-20260925
+    paths:
+      - src/services/mlb-approved-prop-balldontlie-capture.service.ts
+      - artifacts/research/mlb_bdl_new_prop_family_capture_v1.json
+      - docs/research/MLB_BDL_NEW_PROP_FAMILY_CAPTURE_V1.md
+      - scripts/research/verify_mlb_bdl_new_prop_family_capture_v1.test.mjs
+      - .github/workflows/mlb-bdl-new-prop-families.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: node --test scripts/research/verify_mlb_bdl_new_prop_family_capture_v1.test.mjs
+      - run: npm ci
+      - run: npm run build
