@@ -134,6 +134,24 @@ def vector(raw,eligible):
 
 def tup(v):return tuple(v[k] for k in DIMS)
 
+def evaluate(rows,line,threshold):
+ selected=[r for r in rows if r["proj_hrrbi"]<=threshold+1e-12]
+ wins=sum(1 for r in selected if r["actual_hrrbi"]<line)
+ baseline_wins=sum(1 for r in rows if r["actual_hrrbi"]<line)
+ by=defaultdict(list)
+ for r in selected:by[r["date"][:7]].append(r)
+ monthly={}
+ for m,vals in sorted(by.items()):
+  w=sum(1 for r in vals if r["actual_hrrbi"]<line)
+  monthly[m]={"n":len(vals),"wins":w,"accuracy":w/len(vals)}
+ acc=wins/len(selected) if selected else None
+ base=baseline_wins/len(rows) if rows else None
+ lift=None if acc is None or base is None else 100*(acc-base)
+ worst=min((v["accuracy"] for v in monthly.values()),default=None)
+ passes=bool(acc is not None and acc>=0.75 and len(selected)>=60 and len(monthly)>=5 and worst is not None and worst>=0.65 and lift is not None and lift>=5.0)
+ return {"n":len(selected),"wins":wins,"accuracy":acc,"baseline_accuracy":base,"lift_pp":lift,"months":len(monthly),"worst_month":worst,"monthly":monthly,"passes_full_gate":passes}
+
+
 def main():
  players,official_count=resolve_all522();by={p["id"]:p for p in players}
  allraw=fetch(players);raw_by=defaultdict(list)
@@ -168,6 +186,10 @@ def main():
  excluded=set(solutions[0]);fplayers=[p for p in players if p["id"] not in excluded];fraw=[r for r in allraw if r["player_id"] not in excluded];fel=[r for r in all_el if r["player_id"] not in excluded];final=vector(fraw,fel)
  if len(fplayers)!=516 or any(final[k]!=EXPECTED[k] for k in DIMS):
   fail("FROZEN_516_FINAL_PARITY_FAIL",players=len(fplayers),final=final,expected=EXPECTED)
- emit({"status":"EXACT_FROZEN_516_LINEAGE_RECOVERED","official_directory_rows":official_count,"all_522":observed,"target_removed":target,"excluded":[{"id":pid,"name":by[pid]["name"],"source":by[pid]["source"],"contribution":per[pid]} for pid in sorted(excluded)],"frozen_516":final,"frozen_player_ids":[p["id"] for p in fplayers],"identity_methods":{m:sum(1 for p in players if p["identity_method"]==m) for m in set(p["identity_method"] for p in players)}})
+ results=[
+  {"candidate_id":"batter_hrrbi_under_0p5_proj_0p05_v1","line":0.5,"threshold":0.05,"evaluation":evaluate(fel,0.5,0.05)},
+  {"candidate_id":"batter_hrrbi_under_1p5_proj_0p90_v1","line":1.5,"threshold":0.90,"evaluation":evaluate(fel,1.5,0.90)},
+ ]
+ emit({"status":"EXACT_FROZEN_516_LINEAGE_RECOVERED_AND_SCORED","official_directory_rows":official_count,"all_522":observed,"target_removed":target,"excluded":[{"id":pid,"name":by[pid]["name"],"source":by[pid]["source"],"contribution":per[pid]} for pid in sorted(excluded)],"frozen_516":final,"frozen_player_ids":[p["id"] for p in fplayers],"identity_methods":{m:sum(1 for p in players if p["identity_method"]==m) for m in set(p["identity_method"] for p in players)},"results":results,"retuned":False,"threshold_rescue":False})
 
 if __name__=="__main__":main()
