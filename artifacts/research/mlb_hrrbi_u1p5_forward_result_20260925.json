@@ -1,0 +1,72 @@
+{
+  "artifact": "MLB_BATTER_HRRBI_U1P5_FORWARD_RESULT_20260925",
+  "research_only": true,
+  "target_date": "2026-09-25",
+  "workflow_run_id": 36163092231,
+  "workflow_artifact_id": 10876512874,
+  "workflow_artifact_digest": "sha256:b9e20426eb75d92efde2e0615ae58fad6bcbe4f79e9e22249e827d6c148f382f",
+  "exact_contract": {
+    "market": "batter_hits_runs_rbis",
+    "line": 1.5,
+    "side": "UNDER",
+    "projection_max": 0.9
+  },
+  "target_rows": 119,
+  "evaluable_rows": 119,
+  "qualifier_rows": 3,
+  "qualifiers": [
+    {
+      "player_name": "Nick Fortes",
+      "game_pk": 823409,
+      "matchup": "TB @ PHI",
+      "projection": 0.8557142857142856,
+      "sportsbook": "betmgm",
+      "price": -190
+    },
+    {
+      "player_name": "Carlos Jorge",
+      "game_pk": 822760,
+      "matchup": "CIN @ TOR",
+      "projection": 0.6375000000000001,
+      "sportsbook": "draftkings",
+      "price": -131
+    },
+    {
+      "player_name": "Charles McAdoo",
+      "game_pk": 822760,
+      "matchup": "CIN @ TOR",
+      "projection": 0.8722222222222222,
+      "sportsbook": "betmgm",
+      "price": -130
+    }
+  ],
+  "coverage_live_20260925": {
+    "baseline": {
+      "rows": 11586,
+      "covered_rows": 1009,
+      "row_coverage_pct": 8.71,
+      "covered_surfaces": 9,
+      "total_surfaces": 99,
+      "surface_coverage_pct": 9.09
+    },
+    "with_tb_u1p5": {
+      "covered_rows": 1158,
+      "row_coverage_pct": 9.99,
+      "covered_surfaces": 10,
+      "surface_coverage_pct": 10.1
+    },
+    "with_tb_and_hrrbi_u1p5": {
+      "covered_rows": 1491,
+      "row_coverage_pct": 12.87,
+      "covered_surfaces": 11,
+      "surface_coverage_pct": 11.11
+    }
+  },
+  "boundaries": {
+    "no_ev_claim": true,
+    "no_threshold_retuning": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  }
+}
