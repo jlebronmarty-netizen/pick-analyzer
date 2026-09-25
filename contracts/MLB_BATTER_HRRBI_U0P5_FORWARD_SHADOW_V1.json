@@ -1,0 +1,41 @@
+{
+  "contract": "MLB_BATTER_HRRBI_U0P5_FORWARD_SHADOW_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "batter_hits_runs_rbis",
+  "exact_line": 0.5,
+  "side": "UNDER",
+  "candidate_id": "batter_hrrbi_under_0p5_proj_0p05_v1",
+  "frozen_threshold": 0.05,
+  "minimum_prior_games": 10,
+  "projection_formula": "sum over hits,runs,rbi of [0.50*(prior_event_per_PA*L10_PA_per_game)+0.50*L10_event_per_game]",
+  "lineage": {
+    "source": "MLB Official StatsAPI gameLog hitting",
+    "source_rule": "game_date < target_date",
+    "same_date_history_allowed": false,
+    "exact_mlbam_identity": true
+  },
+  "development_2025": {
+    "n": 118,
+    "wins": 117,
+    "accuracy": 0.9915254237288136,
+    "lift_pp": 46.981681218969364,
+    "worst_month": 0.96
+  },
+  "external_2026_status": "BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT",
+  "forward_policy": "prospective only; do not use current revised history to claim frozen retrospective OOS certification",
+  "price_policy": {
+    "collect_price": true,
+    "calculate_ev": false,
+    "reason": "no calibrated per-play probability"
+  },
+  "boundaries": {
+    "no_threshold_retuning": true,
+    "no_line_extrapolation": true,
+    "no_fuzzy_identity": true,
+    "strict_pregame_only": true,
+    "no_historical_odds_api_spend": true
+  }
+}
