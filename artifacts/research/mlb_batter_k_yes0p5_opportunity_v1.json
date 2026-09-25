@@ -57,8 +57,45 @@
     "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
   },
   "external_2026": {
-    "opened": false,
-    "state": "SEALED_PENDING_FROZEN_OOS"
+    "opened": true,
+    "threshold_retuned": false,
+    "target_window": "2026-05-01 through 2026-09-24",
+    "eligible_unfiltered_rows": 37183,
+    "n": 1732,
+    "wins": 1304,
+    "accuracy": 0.7528868360277136,
+    "baseline_accuracy": 0.5657155140784778,
+    "lift_pp": 18.71713219492358,
+    "months": 5,
+    "worst_month": 0.6357142857142857,
+    "monthly": {
+      "2026-05": {
+        "n": 407,
+        "wins": 306,
+        "accuracy": 0.7518427518427518
+      },
+      "2026-06": {
+        "n": 322,
+        "wins": 266,
+        "accuracy": 0.8260869565217391
+      },
+      "2026-07": {
+        "n": 344,
+        "wins": 268,
+        "accuracy": 0.7790697674418605
+      },
+      "2026-08": {
+        "n": 379,
+        "wins": 286,
+        "accuracy": 0.7546174142480211
+      },
+      "2026-09": {
+        "n": 280,
+        "wins": 178,
+        "accuracy": 0.6357142857142857
+      }
+    },
+    "state": "EXTERNAL_75_PLUS_STABILITY_FAIL_NO_RETUNE"
   },
   "boundaries": {
     "yes_side_not_aliased_to_over": true,
@@ -67,5 +104,6 @@
     "no_historical_odds_api_spend": true,
     "official_picks_unchanged": true,
     "apostar_disabled": true
-  }
+  },
+  "state": "EXTERNAL_75_PLUS_STABILITY_FAIL_NO_RETUNE"
 }
