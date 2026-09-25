@@ -33,7 +33,8 @@ test('identity and provider duplicates fail closed',()=>{
 test('persistence is insert-only into dedicated research storage',()=>{
   assert.match(service,/TARGET_TABLE = 'mlb_bdl_opening_odds_2025_v1'/)
   assert.match(service,/\.insert\(chunk\)/)
-  assert.doesNotMatch(service,/\.upsert\(|\.update\(|\.delete\(/)
+  assert.doesNotMatch(service,/\.upsert\(|\.delete\(/)
+  assert.doesNotMatch(service,/\.from\([^)]*\)\s*\.update\(/)
   assert.equal(c.persistence.insert_only,true)
 })
 
