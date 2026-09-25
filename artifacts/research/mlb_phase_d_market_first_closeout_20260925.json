@@ -1,0 +1,270 @@
+{
+  "artifact": "MLB_PHASE_D_MARKET_FIRST_COVERAGE_EXPANSION_CLOSEOUT_20260925",
+  "research_only": true,
+  "as_of_date": "2026-09-25",
+  "main_verified": "de43268aedf88da69d6022501f969714a56aa8dd",
+  "live_coverage_before_phase_d": {
+    "total_rows": 11586,
+    "exact_contract_rows": 1009,
+    "row_coverage_pct": 8.71,
+    "total_surfaces": 99,
+    "covered_surfaces": 9,
+    "surface_coverage_pct": 9.09
+  },
+  "successful_expansions": [
+    {
+      "pr": 221,
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "tb_u1p5_prior_pa_per_game_le_3p50_v1",
+      "development_2025": {
+        "n": 9813,
+        "wins": 7406,
+        "accuracy": 0.754713,
+        "lift_pp": 8.918,
+        "worst_month": 0.742718
+      },
+      "external_2026": {
+        "n": 12142,
+        "wins": 9145,
+        "accuracy": 0.753171,
+        "lift_pp": 7.248,
+        "worst_month": 0.726872,
+        "state": "CROSS_YEAR_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED"
+      },
+      "current_qualifiers": [
+        {
+          "player": "Hao-Yu Lee",
+          "matchup": "PIT @ DET",
+          "sportsbook": "betmgm",
+          "price": -175,
+          "feature_value": 3.30188679245283
+        },
+        {
+          "player": "Carlos Jorge",
+          "matchup": "CIN @ TOR",
+          "sportsbook": "draftkings",
+          "price": -199,
+          "feature_value": 2.76923076923077
+        }
+      ]
+    },
+    {
+      "pr": 222,
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_1p5_proj_0p90_v1",
+      "status": "FORWARD_ONLY_SOURCE_SNAPSHOT_DRIFT_RETROSPECTIVE_GATE",
+      "forward_targets": 119,
+      "evaluable_targets": 119,
+      "current_qualifiers": [
+        {
+          "player": "Nick Fortes",
+          "matchup": "TB @ PHI",
+          "projection": 0.8557142857142856,
+          "sportsbook": "betmgm",
+          "price": -190
+        },
+        {
+          "player": "Carlos Jorge",
+          "matchup": "CIN @ TOR",
+          "projection": 0.6375,
+          "sportsbook": "draftkings",
+          "price": -131
+        },
+        {
+          "player": "Charles McAdoo",
+          "matchup": "CIN @ TOR",
+          "projection": 0.8722222222222222,
+          "sportsbook": "betmgm",
+          "price": -130
+        }
+      ]
+    },
+    {
+      "pr": 223,
+      "market": "batter_hits_runs_rbis",
+      "line": 0.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_0p5_proj_0p05_v1",
+      "status": "FORWARD_ONLY_SOURCE_SNAPSHOT_DRIFT_RETROSPECTIVE_GATE",
+      "forward_targets": 50,
+      "evaluable_targets": 50,
+      "current_qualifiers": []
+    }
+  ],
+  "coverage_after_successes": {
+    "total_rows": 11586,
+    "exact_contract_rows": 1591,
+    "row_coverage_pct": 13.73,
+    "row_coverage_delta_pp": 5.02,
+    "covered_surfaces": 12,
+    "total_surfaces": 99,
+    "surface_coverage_pct": 12.12,
+    "surface_delta": 3
+  },
+  "failed_new_architectures": [
+    {
+      "market": "batter_singles",
+      "line": 0.5,
+      "side": "UNDER",
+      "architectures": [
+        "strict_prior_pa_volume",
+        "contact_scarcity"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_singles",
+      "line": 0.5,
+      "side": "OVER",
+      "architectures": [
+        "contact_opportunity"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "side": "YES",
+      "architectures": [
+        "high_output_hard_hit"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_home_runs",
+      "line": 0.5,
+      "side": "YES",
+      "architectures": [
+        "statcast_power"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_home_runs",
+      "line": 1.5,
+      "side": "YES",
+      "architectures": [
+        "statcast_power"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_rbis",
+      "line": 0.5,
+      "side": "OVER",
+      "architectures": [
+        "rbi_opportunity"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_rbis",
+      "line": 1.5,
+      "side": "YES",
+      "architectures": [
+        "rbi_opportunity"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_hits",
+      "line": 1.5,
+      "side": "YES",
+      "architectures": [
+        "hit_opportunity"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_hits",
+      "line": 2.5,
+      "side": "YES",
+      "architectures": [
+        "hit_opportunity"
+      ],
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL"
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 2.5,
+      "side": "YES",
+      "pr": 224,
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 3.5,
+      "side": "YES",
+      "pr": 224,
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "market": "batter_strikeouts",
+      "line": 0.5,
+      "side": "YES",
+      "pr": 225,
+      "development_2025": {
+        "n": 1270,
+        "wins": 958,
+        "accuracy": 0.754331,
+        "lift_pp": 16.618,
+        "worst_month": 0.72428
+      },
+      "external_2026": {
+        "n": 1732,
+        "wins": 1304,
+        "accuracy": 0.752887,
+        "lift_pp": 18.717,
+        "worst_month": 0.635714
+      },
+      "state": "EXTERNAL_75_PLUS_STABILITY_FAIL_NO_RETUNE"
+    },
+    {
+      "market": "batter_strikeouts",
+      "line": 1.5,
+      "side": "YES",
+      "pr": 225,
+      "external_2026_opened": false,
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    }
+  ],
+  "methodology_gate": {
+    "state": "HIGH_VOLUME_SURFACES_EXHAUSTED_WITH_CURRENT_FEATURE_FAMILIES",
+    "reason": "Remaining large uncovered surfaces either failed materially different 2025 architectures, failed untouched cross-year stability, are baseline-dominated, or require lineage/data not presently certified.",
+    "next_valid_paths": [
+      "forward validation and settlement of successful new contracts",
+      "new feature families with genuine incremental information",
+      "new market families not already exhaustively failed",
+      "lineage recovery only where exact frozen source can be proven"
+    ],
+    "prohibited_next_steps": [
+      "threshold rescue on failed surfaces",
+      "YES/OVER side aliasing",
+      "line extrapolation",
+      "opening 2026 to select thresholds",
+      "historical Odds API spend"
+    ]
+  },
+  "boundaries": {
+    "official_picks_modified": false,
+    "apostar_activated": false,
+    "production_promotions": 0,
+    "historical_odds_api_calls": 0,
+    "tracker_modified": false
+  }
+}
