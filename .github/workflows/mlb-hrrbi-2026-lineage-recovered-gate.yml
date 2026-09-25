@@ -1,0 +1,29 @@
+name: MLB HRRBI 2026 recovered lineage gate
+
+on:
+  push:
+    branches:
+      - research/hrrbi-2026-lineage-recovered-gate-20260925
+    paths:
+      - scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
+      - artifacts/research/mlb_hrrbi_2026_frozen_gate_name_universe_v1.json
+      - .github/workflows/mlb-hrrbi-2026-lineage-recovered-gate.yml
+
+permissions:
+  contents: read
+
+jobs:
+  recover-and-score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover exact frozen 516-player lineage and score frozen surfaces
+        run: python3 scripts/research/mlb_hrrbi_2026_lineage_recovery_v1.py
+      - name: Upload recovered result
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-hrrbi-2026-recovered-gate
+          path: /tmp/mlb_hrrbi_2026_lineage_recovery_v2.json
+          if-no-files-found: error
+          retention-days: 7
