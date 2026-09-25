@@ -1,0 +1,51 @@
+name: MLB BDL opening coverage probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/services/mlb-main-market-bdl-opening-probe.service.ts'
+      - 'src/app/api/research/mlb/main-markets-bdl-opening-probe/route.ts'
+      - 'contracts/MLB_MAIN_MARKETS_BDL_OPENING_COVERAGE_PROBE_V1.json'
+      - 'scripts/research/verify_mlb_main_markets_bdl_opening_probe_v1.test.mjs'
+      - '.github/workflows/mlb-main-markets-bdl-opening-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      ENDPOINT: https://pick-analyzer.vercel.app/api/research/mlb/main-markets-bdl-opening-probe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_main_markets_bdl_opening_probe_v1.test.mjs
+      - name: Wait for production route
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 60); do
+            code="$(curl -sS --connect-timeout 5 --max-time 10 -o /dev/null -w '%{http_code}' "${ENDPOINT}" || true)"
+            if [ "$code" = "401" ]; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+      - name: Execute bounded read-only probe
+        run: |
+          set -euo pipefail
+          test -n "${CRON_SECRET:-}"
+          curl -fsS --connect-timeout 10 --max-time 240 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${ENDPOINT}" -o bdl-opening-probe.json
+          cat bdl-opening-probe.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-main-markets-bdl-opening-probe
+          path: bdl-opening-probe.json
+          if-no-files-found: error
+          retention-days: 14
