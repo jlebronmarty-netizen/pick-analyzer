@@ -1,0 +1,31 @@
+name: MLB Pitcher ER line-surface research
+
+on:
+  push:
+    branches:
+      - research/pitcher-er-line-surface-v1-20260922
+    paths:
+      - artifacts/research/mlb_pitcher_er_line_surface_v1.json
+      - docs/research/MLB_PITCHER_ER_LINE_SURFACE_V1.md
+      - scripts/research/verify_mlb_pitcher_er_line_surface_v1.test.mjs
+      - .github/workflows/mlb-pitcher-er-line-surface-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - artifacts/research/mlb_pitcher_er_line_surface_v1.json
+      - docs/research/MLB_PITCHER_ER_LINE_SURFACE_V1.md
+      - scripts/research/verify_mlb_pitcher_er_line_surface_v1.test.mjs
+      - .github/workflows/mlb-pitcher-er-line-surface-research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-frozen-surface:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Pitcher ER frozen line-surface closeout
+        run: node --test scripts/research/verify_mlb_pitcher_er_line_surface_v1.test.mjs

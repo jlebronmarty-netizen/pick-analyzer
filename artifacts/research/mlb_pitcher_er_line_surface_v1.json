@@ -1,0 +1,212 @@
+{
+  "contract": "MLB_PITCHER_ER_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "source": "public.mlb_pitcher_er_frozen_2025_runtime_v1",
+  "frozen_model_version": "MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2",
+  "train_rows": 2194,
+  "validation_rows": 729,
+  "test_rows": 645,
+  "probability": "P(actual_ER > line) from frozen TRAIN residual empirical CDF",
+  "threshold_grid": {
+    "min": 0.55,
+    "max": 0.9,
+    "step": 0.025
+  },
+  "lines": [
+    0.5,
+    1.5,
+    2.5,
+    3.5,
+    4.5,
+    5.5
+  ],
+  "validation_gate": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_lift_pp": 5
+  },
+  "champion_policy": "select threshold on VALIDATION only; maximize n among gate passers; tiebreak lift, accuracy, lower threshold; TEST untouched",
+  "candidates": [
+    {
+      "line": 0.5,
+      "side": "OVER",
+      "threshold": 0.875,
+      "validation": {
+        "n": 106,
+        "wins": 99,
+        "accuracy": 0.93396,
+        "baseline": 0.8724,
+        "lift_pp": 6.15,
+        "coverage": 0.1454
+      },
+      "test": {
+        "n": 77,
+        "wins": 64,
+        "accuracy": 0.83117,
+        "baseline": 0.8155,
+        "lift_pp": 1.57,
+        "coverage": 0.1194
+      },
+      "state": "TEST_75_PLUS_BASELINE_DOMINATED_LIFT_FAIL"
+    },
+    {
+      "line": 2.5,
+      "side": "OVER",
+      "threshold": 0.55,
+      "validation": {
+        "n": 11,
+        "wins": 9,
+        "accuracy": 0.8182,
+        "baseline": 0.4856,
+        "lift_pp": 33.26,
+        "coverage": 0.0151
+      },
+      "state": "VALIDATION_SAMPLE_FAIL"
+    },
+    {
+      "line": 2.5,
+      "side": "UNDER",
+      "threshold": 0.55,
+      "validation": {
+        "n": 580,
+        "wins": 316,
+        "accuracy": 0.5448,
+        "baseline": 0.5144,
+        "lift_pp": 3.04,
+        "coverage": 0.7956
+      },
+      "state": "VALIDATION_ACCURACY_FAIL"
+    },
+    {
+      "line": 3.5,
+      "side": "UNDER",
+      "threshold": 0.775,
+      "validation": {
+        "n": 69,
+        "wins": 55,
+        "accuracy": 0.7971,
+        "baseline": 0.6557,
+        "lift_pp": 14.14,
+        "coverage": 0.0947
+      },
+      "test": {
+        "n": 72,
+        "wins": 58,
+        "accuracy": 0.8056,
+        "baseline": 0.7473,
+        "lift_pp": 5.83,
+        "coverage": 0.1116
+      },
+      "state": "CROSS_SPLIT_STABLE_75_PLUS"
+    },
+    {
+      "line": 4.5,
+      "side": "UNDER",
+      "threshold": 0.875,
+      "validation": {
+        "n": 69,
+        "wins": 59,
+        "accuracy": 0.855072463768116,
+        "baseline": 0.790123456790123,
+        "lift_pp": 6.49490069779926,
+        "coverage": 0.09465020576131687
+      },
+      "test": {
+        "n": 71,
+        "wins": 62,
+        "accuracy": 0.873239436619718,
+        "baseline": 0.857364341085271,
+        "lift_pp": 1.5875095534447,
+        "coverage": 0.11007751937984496
+      },
+      "state": "TEST_75_PLUS_BASELINE_DOMINATED_LIFT_FAIL"
+    },
+    {
+      "line": 5.5,
+      "side": "UNDER",
+      "threshold": 0.9,
+      "validation": {
+        "n": 685,
+        "wins": 609,
+        "accuracy": 0.889051094890511,
+        "baseline": 0.882030178326475,
+        "lift_pp": 0.702091656403636,
+        "coverage": 0.9396433470507545
+      },
+      "state": "VALIDATION_75_PLUS_BASELINE_DOMINATED_LIFT_FAIL"
+    }
+  ],
+  "certified_control": {
+    "line": 1.5,
+    "side": "OVER",
+    "threshold": 0.7,
+    "validation": {
+      "n": 59,
+      "wins": 47
+    },
+    "test": {
+      "n": 32,
+      "wins": 26,
+      "accuracy": 0.8125,
+      "baseline": 0.6295,
+      "coverage": 0.0496
+    }
+  },
+  "current_availability_2026_09_22": [
+    {
+      "line": 1.5,
+      "books": [
+        "betmgm",
+        "draftkings"
+      ],
+      "games": 1,
+      "pitchers": 2
+    },
+    {
+      "line": 2.5,
+      "books": [
+        "betmgm"
+      ],
+      "games": 1,
+      "pitchers": 1
+    },
+    {
+      "line": 0.5,
+      "books": [],
+      "games": 0,
+      "pitchers": 0
+    },
+    {
+      "line": 3.5,
+      "books": [],
+      "games": 0,
+      "pitchers": 0
+    },
+    {
+      "line": 4.5,
+      "books": [
+        "betonlineag"
+      ],
+      "games": 1,
+      "pitchers": 2
+    },
+    {
+      "line": 5.5,
+      "books": [
+        "betonlineag"
+      ],
+      "games": 1,
+      "pitchers": 1
+    }
+  ],
+  "provider_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false,
+  "failed_sides": [
+    "OVER 4.5: no selections at any threshold in the frozen 0.55-0.90 grid",
+    "OVER 5.5: no selections at any threshold in the frozen 0.55-0.90 grid"
+  ]
+}
