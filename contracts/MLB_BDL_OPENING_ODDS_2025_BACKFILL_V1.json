@@ -1,0 +1,51 @@
+{
+  "contract": "MLB_BDL_OPENING_ODDS_2025_BACKFILL_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "provider": {
+    "games_endpoint": "/mlb/v1/games",
+    "opening_endpoint": "/mlb/v1/odds/opening",
+    "page_size": 100,
+    "request_pause_ms": 120,
+    "historical_odds_api_calls": 0
+  },
+  "season": "2025",
+  "target_table": "public.mlb_bdl_opening_odds_2025_v1",
+  "target_markets": [
+    "moneyline",
+    "run_line",
+    "total"
+  ],
+  "universe": {
+    "games": 2430,
+    "game_dates": 184,
+    "min_date": "2025-03-18",
+    "max_date": "2025-09-28"
+  },
+  "batching": {
+    "dates_per_request": 8,
+    "checkpoint_table": "sports_sync_jobs",
+    "checkpoint_status": "COMPLETE",
+    "resumable": true
+  },
+  "identity": {
+    "team_aliases_deterministic": true,
+    "single_game_pair": "direct exact date/home/away pair",
+    "doubleheader_pair": "ordinal mapping by provider scheduled timestamp against historical local start order",
+    "duplicate_provider_game_ids": "collapsed only when they share the same provider scheduled timestamp",
+    "pair_count_mismatch": "fail closed",
+    "vendor_market_conflict": "fail closed",
+    "fuzzy_matching": false
+  },
+  "persistence": {
+    "insert_only": true,
+    "deterministic_row_id": "canonical_game + vendor + market + outcome + exact line",
+    "duplicate_contract_index": true,
+    "anon_access": false,
+    "authenticated_access": false,
+    "service_role_only": true
+  },
+  "execution_gate": "Authorized by user on 2026-09-25 to execute the full 2025 backfill."
+}
