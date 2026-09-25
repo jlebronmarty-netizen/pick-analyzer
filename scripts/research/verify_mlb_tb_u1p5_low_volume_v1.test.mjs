@@ -10,7 +10,8 @@ test('contract is exact and frozen before OOS',()=>{
   assert.equal(a.exact_line,1.5)
   assert.equal(a.side,'UNDER')
   assert.equal(a.rule.threshold,3.5)
-  assert.equal(a.external_2026.opened,false)
+  assert.equal(a.external_2026.opened,true)
+  assert.equal(a.external_2026.threshold_retuned,false)
 })
 
 test('2025 development gate passes',()=>{
@@ -34,4 +35,14 @@ test('failed projection architecture remains closed',()=>{
   assert.equal(a.prior_failed_architecture.state,'EXTERNAL_BELOW_75_NO_RETUNE')
   assert.equal(a.boundaries.no_threshold_rescue,true)
   assert.equal(a.boundaries.no_2026_outcomes_used_for_selection,true)
+})
+
+test('untouched 2026 OOS passes without retuning',()=>{
+  assert.equal(a.external_2026.n,12142)
+  assert.equal(a.external_2026.wins,9145)
+  assert(a.external_2026.accuracy>=0.75)
+  assert(a.external_2026.lift_pp>=5)
+  assert(a.external_2026.months>=5)
+  assert(a.external_2026.worst_month>=0.65)
+  assert.equal(a.external_2026.state,'CROSS_YEAR_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED')
 })
