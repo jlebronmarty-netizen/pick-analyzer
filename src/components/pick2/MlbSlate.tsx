@@ -10,7 +10,7 @@ export default function MlbSlate({ view }: { view: MlbView }) {
   const games = view.games.filter(game => matchesSlateFilter(game, rows, filter))
   const summary = [
     ['Games', view.games.length],
-    ['Analyzed', view.games.filter(game => hasMetric(game.homeProbability) && hasMetric(game.awayProbability)).length],
+    ['Analyzed', view.games.filter(game => game.analysisAvailable || (hasMetric(game.homeProbability) && hasMetric(game.awayProbability))).length],
     ['Official Picks', rows.filter(row => presentationStatus(row) === 'OFFICIAL_PICK').length],
     ['Value Candidates', rows.filter(row => presentationStatus(row) === 'VALUE_CANDIDATE').length],
     ['Waiting', view.games.filter(game => matchesSlateFilter(game, rows, 'Waiting')).length],
