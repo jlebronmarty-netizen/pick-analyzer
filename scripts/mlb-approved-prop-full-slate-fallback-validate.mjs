@@ -7,11 +7,22 @@ const bdl=fs.readFileSync('src/services/mlb-approved-prop-balldontlie-capture.se
 const evaluator=fs.readFileSync('src/services/mlb-approved-prop-daily-evaluation.service.ts','utf8')
 
 test('Odds API reserve is checked before the per-event loop',()=>{
-  const preflight=capture.indexOf('const knownRemainingBefore = await latestKnownRequestsRemaining(targetDate)')
+  const preflight=capture.indexOf('const knownRemainingBefore = await latestKnownRequestsRemaining()')
   const loop=capture.indexOf('if (oddsApiAllowed) for (const item of planned)')
   assert(preflight>=0)
   assert(loop>preflight)
   assert(capture.includes('knownRemainingBefore === null || knownRemainingBefore > CREDIT_RESERVE'))
+})
+
+test('quota preflight carries latest known remaining across date boundaries',()=>{
+  const start=capture.indexOf('async function latestKnownRequestsRemaining()')
+  const end=capture.indexOf('async function existingCheckpoint', start)
+  assert(start>=0 && end>start)
+  const quotaFn=capture.slice(start,end)
+  assert.doesNotMatch(quotaFn,/puertoRicoUtcRange|\.gte\('completed_at'|\.lt\('completed_at'/)
+  assert.match(quotaFn,/\.order\('completed_at', \{ ascending: false \}\)/)
+  assert.match(quotaFn,/\.limit\(100\)/)
+  assert.match(quotaFn,/requestsRemainingAfter \?\? metadata\.requestsRemaining/)
 })
 
 test('capture completion is coverage-aware and can use BDL fallback',()=>{

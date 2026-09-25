@@ -15,7 +15,7 @@ The previous implementation discovered the quota only after spending the first e
 
 ## Repair
 
-1. Preflight the latest persisted The Odds API remaining-credit count before any new provider call.
+1. Preflight the latest persisted The Odds API remaining-credit count before any new provider call, carrying that quota state across MLB date boundaries instead of scoping it to today's ledger.
 2. If the last known remaining count is at or below 2,000, make zero new Odds API calls.
 3. Completion is based on planned-event coverage, not merely HTTP success.
 4. Use BALLDONTLIE as a separate prospective fallback provider when Odds API cannot complete the slate.

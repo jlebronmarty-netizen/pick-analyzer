@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/approved-prop-full-slate-fallback-20260923
+      - research/approved-prop-global-quota-preflight-20260924
     paths:
       - src/services/mlb-approved-prop-market-capture.service.ts
       - src/services/mlb-approved-prop-balldontlie-capture.service.ts
