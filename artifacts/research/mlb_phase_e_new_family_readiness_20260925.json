@@ -1,0 +1,130 @@
+{
+  "artifact": "MLB_PHASE_E_NEW_FAMILY_READINESS_20260925",
+  "research_only": true,
+  "objective": "Prioritize newly capturable BALLDONTLIE MLB prop families before any formula search.",
+  "provider": "balldontlie",
+  "provider_capture_pr": 228,
+  "historical_label_source": "public.historical_baseball_games + public.historical_baseball_batter_appearances (Retrosheet 2025 exact postgame labels)",
+  "eligible_player_games_2025": 48858,
+  "families": [
+    {
+      "market": "batter_extra_base_hits",
+      "likely_first_line": 0.5,
+      "under_baseline_2025": 0.746244,
+      "over_baseline_2025": 0.253756,
+      "priority": 1,
+      "rationale": "U0.5 baseline is just below 75%, leaving room for a real >=5pp lift rather than pure baseline dominance.",
+      "outcome_components": [
+        "doubles",
+        "triples",
+        "home_runs"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_runs_rbis",
+      "likely_first_line": 0.5,
+      "under_baseline_2025": 0.71061,
+      "over_baseline_2025": 0.28939,
+      "priority": 2,
+      "rationale": "U0.5 baseline near 71% leaves meaningful headroom for a selective stable under model.",
+      "outcome_components": [
+        "runs",
+        "rbi"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_hits_runs_stolen_bases",
+      "likely_first_line": 1.5,
+      "under_baseline_2025": 0.725633,
+      "over_baseline_2025": 0.274367,
+      "priority": 3,
+      "rationale": "U1.5 baseline near 72.6% is close enough to 75% without already dominating the gate.",
+      "outcome_components": [
+        "hits",
+        "runs",
+        "stolen_bases"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_hits_walks_stolen_bases",
+      "likely_first_line": 1.5,
+      "under_baseline_2025": 0.638462,
+      "over_baseline_2025": 0.361538,
+      "priority": 4,
+      "rationale": "Lower U1.5 baseline creates substantial lift headroom if a strict-prior low-opportunity architecture exists.",
+      "outcome_components": [
+        "hits",
+        "walks",
+        "stolen_bases"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_hits_stolen_bases",
+      "likely_first_line": 1.5,
+      "under_baseline_2025": 0.773834,
+      "over_baseline_2025": 0.226166,
+      "priority": 5,
+      "rationale": "Already >75% unconditional at U1.5, so promotion would require >=5pp incremental signal; baseline-dominance risk.",
+      "outcome_components": [
+        "hits",
+        "stolen_bases"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_runs",
+      "likely_first_line": 0.5,
+      "under_baseline_2025": 0.891932,
+      "over_baseline_2025": 0.108068,
+      "priority": 6,
+      "rationale": "Very high U0.5 baseline means a model must exceed roughly 94.2% to satisfy a +5pp lift gate.",
+      "outcome_components": [
+        "runs"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_stolen_bases",
+      "likely_first_line": 0.5,
+      "under_baseline_2025": 0.936223,
+      "over_baseline_2025": 0.063777,
+      "priority": 7,
+      "rationale": "Extremely high U0.5 baseline; prior work already showed simple filters are baseline-dominated.",
+      "outcome_components": [
+        "stolen_bases"
+      ],
+      "prospective_outcome_ready": true
+    },
+    {
+      "market": "batter_first_home_run",
+      "likely_first_line": 0.5,
+      "priority": 8,
+      "rationale": "Capture is useful, but exact settlement requires identifying the first home run in game order; defer model research until play-by-play lineage is frozen.",
+      "outcome_components": [
+        "ordered_home_run_events"
+      ],
+      "prospective_outcome_ready": false
+    }
+  ],
+  "admission_policy": {
+    "market_first": true,
+    "require_real_quote_capture_before_formula_search": true,
+    "exact_market_line_side": true,
+    "minimum_accuracy": 0.75,
+    "minimum_lift_pp": 5,
+    "require_temporal_stability": true,
+    "no_threshold_rescue": true,
+    "no_2026_threshold_selection": true
+  },
+  "boundaries": {
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_production_promotion": true,
+    "no_historical_odds_api_spend": true,
+    "tracker_modified": false
+  }
+}
