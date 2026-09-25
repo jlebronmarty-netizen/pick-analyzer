@@ -1,0 +1,188 @@
+{
+  "contract": "MLB_BATTER_HRRBI_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "source": {
+    "provider": "Retrosheet",
+    "archive": "https://www.retrosheet.org/downloads/2025/2025csvs.zip",
+    "archive_sha256": "3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753",
+    "batting_file": "2025batting.csv",
+    "regular_season_games": 2430,
+    "regular_batting_rows": 71550
+  },
+  "exact_lineage": {
+    "eligible_rows": 58410,
+    "projected_rows": 44603,
+    "minimum_prior_games": 10,
+    "prior_rule": "sequential strictly prior player games within 2025",
+    "recent_window": 10,
+    "plate_appearances": "Retrosheet b_pa exact",
+    "component_projection": "0.50*(prior_event_per_PA*L10_PA_per_game)+0.50*L10_event_per_game",
+    "hrrbi_projection": "proj_hits+proj_runs+proj_rbi"
+  },
+  "parity_controls": {
+    "rbi_u0p5_proj_le_0p10": {
+      "n": 2402,
+      "wins": 2053,
+      "accuracy": 0.8547044129891757,
+      "worst_month": 0.8225806451612904,
+      "status": "EXACT_REPLAY_PASS"
+    },
+    "hrrbi_u2p5_proj_le_0p70": {
+      "n": 2582,
+      "wins": 2278,
+      "accuracy": 0.8822618125484121,
+      "worst_month": 0.8524173027989822,
+      "wilson_lower": 0.8692585883034429,
+      "status": "EXACT_REPLAY_PASS"
+    }
+  },
+  "development_gate": {
+    "accuracy_min": 0.75,
+    "n_min": 60,
+    "months_min": 5,
+    "worst_month_min": 0.65,
+    "lift_pp_min": 5,
+    "wilson_lower_reported": true,
+    "priority": "maximum n among passing thresholds"
+  },
+  "threshold_grid": {
+    "min": 0,
+    "max": 5,
+    "step": 0.05,
+    "frozen_before_search": true
+  },
+  "results": [
+    {
+      "candidate_id": "batter_hrrbi_under_0p5_proj_0p05_v1",
+      "line": 0.5,
+      "direction": "UNDER",
+      "projection_max": 0.05,
+      "baseline": {
+        "n": 58410,
+        "wins": 30473,
+        "accuracy": 0.52170861153912
+      },
+      "development_2025": {
+        "n": 118,
+        "wins": 117,
+        "accuracy": 0.9915254237288136,
+        "lift_pp": 46.981681218969364,
+        "months": 5,
+        "worst_month": 0.96,
+        "wilson_lower": 0.953554427584598
+      },
+      "state": "DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED"
+    },
+    {
+      "candidate_id": "batter_hrrbi_over_0p5_v1",
+      "line": 0.5,
+      "direction": "OVER",
+      "baseline": {
+        "n": 58410,
+        "wins": 27937,
+        "accuracy": 0.47829138846088
+      },
+      "development_2025": {
+        "passing_threshold_count": 0
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "candidate_id": "batter_hrrbi_under_1p5_proj_0p90_v1",
+      "line": 1.5,
+      "direction": "UNDER",
+      "projection_max": 0.9,
+      "baseline": {
+        "n": 58410,
+        "wins": 39781,
+        "accuracy": 0.6810648861496319
+      },
+      "development_2025": {
+        "n": 4795,
+        "wins": 3607,
+        "accuracy": 0.7522419186652763,
+        "lift_pp": 7.1177032515644445,
+        "months": 6,
+        "worst_month": 0.7177121771217713,
+        "wilson_lower": 0.7398239187264058
+      },
+      "state": "DEVELOPMENT_GATE_PASS_EXTERNAL_GATE_CLOSED"
+    },
+    {
+      "candidate_id": "batter_hrrbi_over_1p5_v1",
+      "line": 1.5,
+      "direction": "OVER",
+      "baseline": {
+        "n": 58410,
+        "wins": 18629,
+        "accuracy": 0.3189351138503681
+      },
+      "development_2025": {
+        "passing_threshold_count": 0
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    }
+  ],
+  "current_book_relevance_2026_09_22": {
+    "source": "persisted sportsbook snapshots; no provider call",
+    "0.5": [
+      "betmgm",
+      "bovada",
+      "draftkings",
+      "williamhill_us"
+    ],
+    "1.5": [
+      "betmgm",
+      "bovada",
+      "draftkings",
+      "fanatics",
+      "williamhill_us"
+    ]
+  },
+  "external_2026": {
+    "authorized": true,
+    "attempted": true,
+    "evaluation_completed": false,
+    "status": "BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT",
+    "evidence_label": "WOULD_BE_EXACT_MLB_OFFICIAL_2026_DIAGNOSTIC_AFTER_PRIOR_HRRBI_FAMILY_READ_NOT_PRISTINE_EXTERNAL",
+    "frozen_reference": {
+      "source": "PR #158 MLB Official StatsAPI reconciliation",
+      "requested_players": 516,
+      "raw_game_log_rows": 30889,
+      "eligible_rows": 25729,
+      "control_u2p5": {
+        "n": 1255,
+        "wins": 1073,
+        "accuracy": 0.8549800796812749
+      }
+    },
+    "current_source_recovery": {
+      "source": "current MLB Official StatsAPI season=2026 gameLog + exact 522-player SportsData source universe",
+      "raw_game_log_rows": 30927,
+      "eligible_rows": 25707,
+      "runs_control": {
+        "n": 1029,
+        "wins": 773
+      },
+      "rbi_control": {
+        "n": 1373,
+        "wins": 1140
+      },
+      "hrrbi_u2p5_control": {
+        "n": 1263,
+        "wins": 1079
+      },
+      "parity": false
+    },
+    "decision": "FAIL_CLOSED_NO_U0P5_OR_U1P5_2026_SCORE",
+    "note": "Authorization was received, but the frozen 2026 row-level snapshot from PR #158 was not persisted and the current MLB Official source no longer reproduces its checksums. Frozen U0.5<=0.05 and U1.5<=0.90 thresholds remain unchanged; no threshold rescue or retuning was performed."
+  },
+  "boundaries": {
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "odds_api_historical_credits_consumed": 0,
+    "provider_odds_calls": 0,
+    "tracker_modified": false
+  }
+}

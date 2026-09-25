@@ -1,0 +1,32 @@
+name: MLB Pitcher Hits Allowed line-surface recovery
+
+on:
+  push:
+    branches:
+      - research/batter-line-surface-closeouts-v1-20260922
+    paths:
+      - scripts/research/mlb_pitcher_hits_allowed_line_surface_v1.py
+      - scripts/research/verify_mlb_pitcher_hits_allowed_line_surface_recovery_v1.test.mjs
+      - artifacts/research/mlb_pitcher_hits_allowed_line_surface_recovery_v1.json
+      - docs/research/MLB_PITCHER_HITS_ALLOWED_LINE_SURFACE_RECOVERY_V1.md
+      - .github/workflows/mlb-pitcher-hits-allowed-line-surface-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/research/mlb_pitcher_hits_allowed_line_surface_v1.py
+      - scripts/research/verify_mlb_pitcher_hits_allowed_line_surface_recovery_v1.test.mjs
+      - artifacts/research/mlb_pitcher_hits_allowed_line_surface_recovery_v1.json
+      - docs/research/MLB_PITCHER_HITS_ALLOWED_LINE_SURFACE_RECOVERY_V1.md
+      - .github/workflows/mlb-pitcher-hits-allowed-line-surface-research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-blocker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify certified runtime remains frozen and recovery is fail-closed
+        run: node --test scripts/research/verify_mlb_pitcher_hits_allowed_line_surface_recovery_v1.test.mjs
