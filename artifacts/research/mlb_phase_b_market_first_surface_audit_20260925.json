@@ -1,0 +1,332 @@
+{
+  "artifact": "MLB_PHASE_B_MARKET_FIRST_SURFACE_AUDIT_20260925",
+  "research_only": true,
+  "as_of_date": "2026-09-25",
+  "objective": "Prioritize Batter Hits, Total Bases, RBI, and Hits+Runs+RBIs by real sportsbook availability before new formula research.",
+  "existing_strong_contracts": [
+    {
+      "market": "batter_hits",
+      "line": 1.5,
+      "side": "UNDER",
+      "model": "batter_hits_under_1p5_edge_0p75_v1",
+      "accuracy_2026": 0.864
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 2.5,
+      "side": "UNDER",
+      "model": "batter_total_bases_under_2p5_edge_1p5_v1",
+      "accuracy_2026": 0.8652
+    },
+    {
+      "market": "batter_rbis",
+      "line": 0.5,
+      "side": "UNDER",
+      "model": "batter_rbi_under_0p5_proj_0p10_v1",
+      "accuracy_2026_exact": 0.8288
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 2.5,
+      "side": "UNDER",
+      "model": "batter_hrrbi_under_2p5_proj_0p70_v1",
+      "accuracy_2026_exact": 0.855
+    }
+  ],
+  "observed_availability_last_30d": [
+    {
+      "market": "batter_hits",
+      "line": 0.5,
+      "side": "OVER",
+      "quote_rows": 5856,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 101,
+      "books_seen": 9
+    },
+    {
+      "market": "batter_hits",
+      "line": 0.5,
+      "side": "UNDER",
+      "quote_rows": 1352,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 99,
+      "books_seen": 4
+    },
+    {
+      "market": "batter_hits",
+      "line": 1.5,
+      "side": "OVER",
+      "quote_rows": 4152,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 101,
+      "books_seen": 9
+    },
+    {
+      "market": "batter_hits",
+      "line": 1.5,
+      "side": "UNDER",
+      "quote_rows": 76,
+      "days_seen": 2,
+      "games_seen": 10,
+      "players_seen": 3,
+      "books_seen": 4
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 0.5,
+      "side": "OVER",
+      "quote_rows": 2852,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 100,
+      "books_seen": 5
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 0.5,
+      "side": "UNDER",
+      "quote_rows": 995,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 72,
+      "books_seen": 5
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "side": "OVER",
+      "quote_rows": 4808,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 101,
+      "books_seen": 9
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "side": "UNDER",
+      "quote_rows": 1115,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 41,
+      "books_seen": 7
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 2.5,
+      "side": "OVER",
+      "quote_rows": 3131,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 100,
+      "books_seen": 7
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 2.5,
+      "side": "UNDER",
+      "quote_rows": 3,
+      "days_seen": 1,
+      "games_seen": 1,
+      "players_seen": 0,
+      "books_seen": 3
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 3.5,
+      "side": "OVER",
+      "quote_rows": 2799,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 100,
+      "books_seen": 7
+    },
+    {
+      "market": "batter_total_bases",
+      "line": 4.5,
+      "side": "OVER",
+      "quote_rows": 2623,
+      "days_seen": 5,
+      "games_seen": 19,
+      "players_seen": 100,
+      "books_seen": 6
+    },
+    {
+      "market": "batter_rbis",
+      "line": 0.5,
+      "side": "OVER",
+      "quote_rows": 651,
+      "days_seen": 4,
+      "games_seen": 6,
+      "players_seen": 100,
+      "books_seen": 4
+    },
+    {
+      "market": "batter_rbis",
+      "line": 0.5,
+      "side": "UNDER",
+      "quote_rows": 442,
+      "days_seen": 4,
+      "games_seen": 6,
+      "players_seen": 97,
+      "books_seen": 3
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 0.5,
+      "side": "OVER",
+      "quote_rows": 188,
+      "days_seen": 4,
+      "games_seen": 6,
+      "players_seen": 29,
+      "books_seen": 5
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 0.5,
+      "side": "UNDER",
+      "quote_rows": 188,
+      "days_seen": 4,
+      "games_seen": 6,
+      "players_seen": 29,
+      "books_seen": 5
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "side": "OVER",
+      "quote_rows": 724,
+      "days_seen": 4,
+      "games_seen": 6,
+      "players_seen": 79,
+      "books_seen": 6
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "side": "UNDER",
+      "quote_rows": 724,
+      "days_seen": 4,
+      "games_seen": 6,
+      "players_seen": 79,
+      "books_seen": 6
+    }
+  ],
+  "priority_queue": [
+    {
+      "rank": 1,
+      "market": "batter_hits",
+      "line": 0.5,
+      "reason": "highest practical availability and current certified model is U1.5, which is rarely quoted on UNDER side"
+    },
+    {
+      "rank": 2,
+      "market": "batter_total_bases",
+      "line": 1.5,
+      "reason": "very frequent across books; current U2.5 contract rarely has an UNDER quote"
+    },
+    {
+      "rank": 3,
+      "market": "batter_hits_runs_rbis",
+      "line": 1.5,
+      "reason": "current strong U2.5 contract does not match observed real-line surface"
+    },
+    {
+      "rank": 4,
+      "market": "batter_total_bases",
+      "line": 3.5,
+      "reason": "high-frequency ladder line; evaluate independently"
+    },
+    {
+      "rank": 5,
+      "market": "batter_rbis",
+      "line": 0.5,
+      "reason": "already matched by strong U0.5 contract; forward price/availability validation rather than new formula search"
+    }
+  ],
+  "blocked_method_note": "Direct full-grid recalculation in interactive Supabase timed out. Do not approximate strict-prior history or allow same-day Game 1 into Game 2. A dedicated offline/repository backtest should reuse the certified strict-prior builder.",
+  "boundaries": {
+    "no_line_extrapolation": true,
+    "no_threshold_rescue": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  },
+  "line_surface_closeout": {
+    "batter_hits_0p5": {
+      "state": "NO_75_PLUS_SIGNAL",
+      "source": "PR #194 exact replay",
+      "note": "0.5 produced no >=75% stable signal candidate; no retune authorized"
+    },
+    "batter_total_bases_1p5": {
+      "state": "EXTERNAL_BELOW_75_NO_RETUNE",
+      "rule": "UNDER 1.5 when projection <=1.20",
+      "development_2025": {
+        "accuracy": 0.7623849188952214,
+        "lift_pp": 9.699924774507041,
+        "worst_month": 0.7505183137525916
+      },
+      "external_2026": {
+        "n": 9471,
+        "wins": 7081,
+        "accuracy": 0.7476507232604793,
+        "lift_pp": 7.57625405730391
+      },
+      "note": "Fails 75% external gate by 0.235 percentage points; frozen failure"
+    },
+    "batter_total_bases_3p5": {
+      "state": "EXTERNAL_75_PLUS_LIFT_BELOW_5PP_NO_PROMOTE",
+      "rule": "UNDER 3.5 when projection <=1.20",
+      "development_2025": {
+        "accuracy": 0.9153879877246821,
+        "lift_pp": 5.458645053006228
+      },
+      "external_2026": {
+        "n": 9471,
+        "wins": 8583,
+        "accuracy": 0.9062401013620526,
+        "lift_pp": 4.123082075009465
+      },
+      "note": "Accuracy high but incremental signal fails 5pp gate"
+    },
+    "batter_hrrbi_1p5": {
+      "state": "DEVELOPMENT_GATE_PASS_EXTERNAL_BLOCKED_SOURCE_SNAPSHOT_DRIFT",
+      "rule": "UNDER 1.5 when projection <=0.90",
+      "development_2025": {
+        "n": 4795,
+        "wins": 3607,
+        "accuracy": 0.7522419186652763,
+        "lift_pp": 7.1177032515644445,
+        "worst_month": 0.7177121771217713
+      },
+      "external_2026": {
+        "scored": false,
+        "frozen_reference": {
+          "players": 516,
+          "raw_rows": 30889,
+          "eligible_rows": 25729,
+          "hrrbi_u2p5_n": 1255,
+          "hrrbi_u2p5_wins": 1073
+        },
+        "current_source": {
+          "raw_rows": 30927,
+          "eligible_rows": 25707,
+          "hrrbi_u2p5_n": 1263,
+          "hrrbi_u2p5_wins": 1079
+        },
+        "blocker": "MLB_OFFICIAL_HISTORICAL_SOURCE_SNAPSHOT_DRIFT"
+      },
+      "note": "Do not score U1.5 against revised current history as if it were the frozen 2026 external set"
+    },
+    "batter_rbi_0p5": {
+      "state": "EXISTING_STRONG_CONTRACT_FORWARD_MARKET_VALIDATION",
+      "rule": "UNDER 0.5 when projection <=0.10",
+      "accuracy_2025": 0.8547044129891757,
+      "accuracy_2026_exact": 0.8288222384784198
+    }
+  },
+  "phase_b_conclusion": "NO_NEW_EXTERNALLY_CLEARED_SURFACE_ADDED; preserve RBI U0.5, Hits U1.5, TB U2.5, HRRBI U2.5; HRRBI U1.5 remains forward-only candidate because frozen 2026 snapshot is unrecoverable"
+}
