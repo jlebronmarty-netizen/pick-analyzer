@@ -1,0 +1,57 @@
+{
+  "contract": "MLB_PITCHER_ER_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "source": "public.mlb_pitcher_er_frozen_2025_runtime_v1",
+  "base_model": "MLB_PITCHER_EARNED_RUNS_RESEARCH_V1_R2",
+  "architecture": "frozen_prediction_threshold_line_surface",
+  "selection_protocol": {
+    "development_split": "VALIDATION",
+    "confirmation_split": "TEST",
+    "threshold_grid": {"min": 0.5, "max": 5.0, "step": 0.1},
+    "development_gate": {"min_n": 30, "accuracy": 0.75, "lift_pp": 5},
+    "confirmation_gate": {"min_n": 30, "accuracy": 0.75, "lift_pp": 5},
+    "champion_policy": "maximize validation selected n among gate passers; tiebreak lift, accuracy, lower threshold"
+  },
+  "lines": [
+    {
+      "line": 1.5,
+      "existing_contract": "pitcher_er_over_1p5_p70_v1",
+      "line_surface_probe": {
+        "side": "OVER",
+        "threshold": 2.6,
+        "validation": {"n": 185, "wins": 139, "accuracy": 0.7514, "baseline": 0.6626, "lift_pp": 8.88},
+        "test": {"n": 164, "wins": 109, "accuracy": 0.6646, "baseline": 0.6295, "lift_pp": 3.52},
+        "state": "TEST_FAIL_DO_NOT_REPLACE_EXISTING_O1P5"
+      }
+    },
+    {
+      "line": 2.5,
+      "state": "NO_75_PLUS_CROSS_SPLIT_CANDIDATE",
+      "best_observed_min_split_candidate": {
+        "side": "UNDER",
+        "threshold": 2.1,
+        "validation": {"n": 74, "wins": 48, "accuracy": 0.6486, "lift_pp": 13.42},
+        "test": {"n": 75, "wins": 55, "accuracy": 0.7333, "lift_pp": 14.57}
+      }
+    },
+    {
+      "line": 3.5,
+      "side": "UNDER",
+      "threshold": 2.2,
+      "validation": {"n": 123, "wins": 98, "accuracy": 0.7967, "baseline": 0.6557, "lift_pp": 14.11},
+      "test": {"n": 115, "wins": 92, "accuracy": 0.8, "baseline": 0.7473, "lift_pp": 5.27},
+      "state": "CROSS_SPLIT_75_PLUS_RESEARCH_CANDIDATE_FORWARD_VALIDATION_REQUIRED"
+    }
+  ],
+  "boundaries": {
+    "no_2026_outcomes_opened": true,
+    "no_runs_allowed_substitution": true,
+    "no_change_to_o1p5_contract": true,
+    "no_historical_odds_api_spend": true,
+    "no_official_picks": true,
+    "apostar_disabled": true
+  }
+}
