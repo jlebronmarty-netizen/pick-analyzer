@@ -1,0 +1,263 @@
+{
+  "contract": "MLB_PITCHER_K_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "source_table": "public.mlb_ml_xyear_pitcher_game_v1",
+  "projection_formula": "0.60*(prior_K_per_BF*L5_BF_per_start)+0.40*L5_K_per_start",
+  "minimum_prior_starts": 5,
+  "development_season": 2025,
+  "threshold_grid": {
+    "min": 1.5,
+    "max": 10,
+    "step": 0.25
+  },
+  "exact_lines": [
+    3.5,
+    4.5,
+    5.5,
+    6.5,
+    7.5,
+    8.5
+  ],
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "signal_lift_pp": 5
+  },
+  "champion_policy": "maximize selected n among candidates passing event gates + >=5pp lift; tiebreak lift, accuracy, lower threshold",
+  "certified_control": {
+    "line": 6.5,
+    "side": "UNDER",
+    "threshold": 4.5,
+    "n2025": 1367,
+    "wins2025": 1189,
+    "accuracy2025": 0.869788,
+    "baseline2025": 0.75235,
+    "control_reproduced_exactly": true
+  },
+  "candidates": [
+    {
+      "line": 3.5,
+      "side": "OVER",
+      "threshold": 4.25,
+      "dev2025": {
+        "n": 2332,
+        "wins": 1771,
+        "accuracy": 0.7594,
+        "baseline": 0.7039,
+        "lift_pp": 5.56,
+        "coverage": 0.6851,
+        "worst_month": 0.7143,
+        "min_month_n": 84,
+        "wilson_lower": 0.7417
+      },
+      "eval2026": {
+        "n": 2290,
+        "wins": 1741,
+        "accuracy": 0.7603,
+        "baseline": 0.7021,
+        "lift_pp": 5.81,
+        "coverage": 0.7061,
+        "worst_month": 0.7485,
+        "min_month_n": 96,
+        "wilson_lower": 0.7423
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS"
+    },
+    {
+      "line": 4.5,
+      "side": "OVER",
+      "threshold": 6.25,
+      "dev2025": {
+        "n": 582,
+        "wins": 443,
+        "accuracy": 0.7612,
+        "baseline": 0.5476,
+        "lift_pp": 21.36,
+        "coverage": 0.171,
+        "worst_month": 0.6538,
+        "min_month_n": 26,
+        "wilson_lower": 0.7249
+      },
+      "eval2026": {
+        "n": 555,
+        "wins": 434,
+        "accuracy": 0.782,
+        "baseline": 0.5418,
+        "lift_pp": 24.02,
+        "coverage": 0.1711,
+        "worst_month": 0.64,
+        "min_month_n": 25,
+        "wilson_lower": 0.7458
+      },
+      "state": "POOLED_75_PLUS_2026_STABILITY_FAIL"
+    },
+    {
+      "line": 5.5,
+      "side": "OVER",
+      "threshold": 7.75,
+      "dev2025": {
+        "n": 89,
+        "wins": 73,
+        "accuracy": 0.8202,
+        "baseline": 0.3843,
+        "lift_pp": 43.6,
+        "coverage": 0.0261,
+        "worst_month": 0.7143,
+        "min_month_n": 7,
+        "wilson_lower": 0.7277
+      },
+      "eval2026": {
+        "n": 88,
+        "wins": 73,
+        "accuracy": 0.8295,
+        "baseline": 0.3861,
+        "lift_pp": 44.35,
+        "coverage": 0.0271,
+        "worst_month": 0.2,
+        "min_month_n": 5,
+        "wilson_lower": 0.7376
+      },
+      "state": "POOLED_75_PLUS_2026_STABILITY_FAIL"
+    },
+    {
+      "line": 5.5,
+      "side": "UNDER",
+      "threshold": 4.5,
+      "dev2025": {
+        "n": 1367,
+        "wins": 1038,
+        "accuracy": 0.7593,
+        "baseline": 0.6157,
+        "lift_pp": 14.36,
+        "coverage": 0.4016,
+        "worst_month": 0.696,
+        "min_month_n": 39,
+        "wilson_lower": 0.736
+      },
+      "eval2026": {
+        "n": 1176,
+        "wins": 908,
+        "accuracy": 0.7721,
+        "baseline": 0.6139,
+        "lift_pp": 15.82,
+        "coverage": 0.3626,
+        "worst_month": 0.6053,
+        "min_month_n": 38,
+        "wilson_lower": 0.7473
+      },
+      "state": "POOLED_75_PLUS_2026_STABILITY_FAIL"
+    },
+    {
+      "line": 7.5,
+      "side": "UNDER",
+      "threshold": 5.5,
+      "dev2025": {
+        "n": 2284,
+        "wins": 2060,
+        "accuracy": 0.9019,
+        "baseline": 0.8458,
+        "lift_pp": 5.62,
+        "coverage": 0.671,
+        "worst_month": 0.8773,
+        "min_month_n": 70,
+        "wilson_lower": 0.889
+      },
+      "eval2026": {
+        "n": 2167,
+        "wins": 1963,
+        "accuracy": 0.9059,
+        "baseline": 0.848,
+        "lift_pp": 5.79,
+        "coverage": 0.6682,
+        "worst_month": 0.8533,
+        "min_month_n": 75,
+        "wilson_lower": 0.8928
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS_BASELINE_HIGH"
+    },
+    {
+      "line": 8.5,
+      "side": "UNDER",
+      "threshold": 4.75,
+      "dev2025": {
+        "n": 1619,
+        "wins": 1563,
+        "accuracy": 0.9654,
+        "baseline": 0.9145,
+        "lift_pp": 5.09,
+        "coverage": 0.4756,
+        "worst_month": 0.9241,
+        "min_month_n": 47,
+        "wilson_lower": 0.9554
+      },
+      "eval2026": {
+        "n": 1424,
+        "wins": 1375,
+        "accuracy": 0.9656,
+        "baseline": 0.905,
+        "lift_pp": 6.06,
+        "coverage": 0.4391,
+        "worst_month": 0.8958,
+        "min_month_n": 48,
+        "wilson_lower": 0.9548
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS_BASELINE_HIGH"
+    }
+  ],
+  "current_availability_2026_09_22": [
+    {
+      "line": 3.5,
+      "books": [
+        "betmgm",
+        "draftkings",
+        "fanduel"
+      ],
+      "games": 1,
+      "players": 1
+    },
+    {
+      "line": 4.5,
+      "books": [
+        "draftkings",
+        "fanduel"
+      ],
+      "games": 1,
+      "players": 1
+    },
+    {
+      "line": 5.5,
+      "books": [
+        "betmgm"
+      ],
+      "games": 1,
+      "players": 1
+    },
+    {
+      "line": 6.5,
+      "books": [],
+      "games": 0,
+      "players": 0
+    },
+    {
+      "line": 7.5,
+      "books": [],
+      "games": 0,
+      "players": 0
+    },
+    {
+      "line": 8.5,
+      "books": [],
+      "games": 0,
+      "players": 0
+    }
+  ],
+  "external_note": "2026 line-rule evaluation is one-shot for these thresholds, but underlying pitcher-K projection/runtime had prior 2026 certification work; do not label pristine untouched model external.",
+  "provider_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false
+}
