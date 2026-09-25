@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { settleMlbOfficialPickBacklog } from '@/services/pick2-mlb-certified-settlement-cron.service'
 import { freezeBdlPregameLineups } from '@/services/mlb-bdl-pregame-lineup-freeze.service'
+import { captureBdlMainMarketMovement } from '@/services/mlb-bdl-main-market-movement-capture.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -22,6 +23,24 @@ export async function GET(request: NextRequest) {
   }
   if (!authorized(request)) {
     return NextResponse.json({ success: false, status: 'UNAUTHORIZED' }, { status: 401 })
+  }
+
+  let researchMainMarketMovement: unknown
+  try {
+    researchMainMarketMovement = await captureBdlMainMarketMovement()
+  } catch (error) {
+    researchMainMarketMovement = {
+      success: false,
+      status: 'BDL_MAIN_MARKET_MOVEMENT_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      historicalOddsApiCalls: 0,
+      providerCallsMade: 0,
+      rowsInserted: 0,
+      error: error instanceof Error ? error.message : 'UNKNOWN_BDL_MAIN_MARKET_CAPTURE_ERROR',
+    }
   }
 
   let researchLineupCapture: unknown
@@ -46,6 +65,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ...result,
       researchLineupCapture,
+      researchMainMarketMovement,
     }, {
       status: 200,
       headers: { 'Cache-Control': 'no-store' },
@@ -56,6 +76,7 @@ export async function GET(request: NextRequest) {
       status: 'MLB_OFFICIAL_SETTLEMENT_CRON_FAILED',
       error: error instanceof Error ? error.message : 'UNKNOWN_SETTLEMENT_CRON_ERROR',
       researchLineupCapture,
+      researchMainMarketMovement,
       officialPicksModified: false,
       apostarActivated: false,
     }, {
