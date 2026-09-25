@@ -59,3 +59,24 @@ The 0.5 YES threshold is frozen before opening 2026.
 - APOSTAR disabled
 - no historical Odds API spend
 - no production promotion
+
+## Untouched 2026 OOS
+
+The frozen 2025 rule was applied once with no threshold changes:
+
+- 1,304 / 1,732 = **75.29%**
+- baseline = 56.57%
+- lift = **+18.72 pp**
+- May 75.18%
+- Jun 82.61%
+- Jul 77.91%
+- Aug 75.46%
+- Sep **63.57%**
+
+The pooled accuracy passes 75%, but September is below the permanent 65% worst-month stability gate.
+
+State:
+
+`EXTERNAL_75_PLUS_STABILITY_FAIL_NO_RETUNE`
+
+No threshold rescue is authorized.
