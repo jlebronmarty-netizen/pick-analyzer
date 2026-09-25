@@ -1,0 +1,27 @@
+{
+  "contract": "MLB_MAIN_MARKETS_BDL_OPENING_COVERAGE_PROBE_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "provider": "balldontlie",
+  "endpoint": "/mlb/v1/odds/opening",
+  "sample_dates": [
+    "2025-04-15",
+    "2025-05-15",
+    "2025-06-15",
+    "2025-07-15",
+    "2025-08-15",
+    "2025-09-15"
+  ],
+  "target_markets": [
+    "moneyline",
+    "run_line",
+    "total"
+  ],
+  "identity_policy": "date + canonical home team + canonical away team; ambiguous doubleheaders fail closed",
+  "provider_call_bound": 24,
+  "writes": 0,
+  "historical_odds_api_calls": 0,
+  "next_gate": "Only authorize full 2025 backfill if sample coverage and exact mapping are materially sufficient."
+}
