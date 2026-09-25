@@ -89,7 +89,7 @@ export async function getMlbOperationalView(at = new Date().toISOString()) {
       forwardPickStatus,
       forwardRecommendedSide,
       forwardRouteId,
-      forwardStandardScore: Number.isFinite(forwardStandardScore) ? forwardStandardScore : null,
+      forwardStandardScore: typeof forwardStandardScore === 'number' && Number.isFinite(forwardStandardScore) ? forwardStandardScore : null,
       forwardDataStatus,
     }
   })
