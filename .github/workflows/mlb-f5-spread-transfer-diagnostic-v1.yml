@@ -1,0 +1,66 @@
+name: MLB F5 spread transfer diagnostic V1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  diagnose:
+    # Completed at run 35675057422 attempt 2. Reopening needs a new research gate.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned research dependencies
+        run: python -m pip install --disable-pip-version-check --no-cache-dir 'catboost==1.2.10' 'numpy>=2.0,<3' 'pandas>=2.2,<3' 'requests>=2.32,<3'
+
+      - name: Mint GitHub OIDC token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token=await core.getIDToken('supabase-f5-ml-revisit');
+            core.setSecret(token);
+            core.setOutput('token',token);
+
+      - name: Run frozen-candidate transfer diagnostic
+        env:
+          GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: python scripts/research/diagnose_mlb_f5_spread_transfer_v1.py
+
+      - name: Enforce boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p=json.load(open('artifacts/research/mlb_f5_spread_transfer_diagnostic_v1.json'))
+          assert p['research_only'] is True
+          assert p['source_candidate']['retuned_for_spread'] is False
+          assert p['odds_api_calls_made']==0
+          assert p['odds_api_historical_credits_consumed']==0
+          assert p['official_picks_writes']==0
+          assert p['apostar_activation'] is False
+          assert p['production_promotion'] is False
+          assert p['tracker_modified'] is False
+          print(json.dumps({
+            'selected':p['selected'],'wins':p['wins'],'losses':p['losses'],
+            'pushes':p['pushes'],'ats_accuracy':p['ats_accuracy'],
+            'selection_coverage':p['selection_coverage']
+          },indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-f5-spread-transfer-diagnostic-v1
+          path: artifacts/research/mlb_f5_spread_transfer_diagnostic_v1.json
+          retention-days: 14

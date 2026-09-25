@@ -3,7 +3,10 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 Deno.serve(() => new Response(
   JSON.stringify({
     status:"GONE",
-    reason:"F5 Moneyline revisit V1 exporter closed after bounded second-pass research run"
+    contract:"MLB_F5_ML_REVISIT_GITHUB_EXPORT/1.0.0",
+    researchOnly:true,
+    reason:"F5 spread transfer diagnostic completed; temporary exporter closed",
+    dataExportEnabled:false
   }),
   {
     status:410,
