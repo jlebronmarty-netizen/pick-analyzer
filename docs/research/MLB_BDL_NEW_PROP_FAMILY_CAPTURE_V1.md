@@ -51,3 +51,5 @@ Market availability decides the real order once rows are captured.
 - APOSTAR disabled
 - no production promotion
 - no historical Odds API spend
+
+Validation gate: branch test and full Next.js build must pass before merge consideration.
