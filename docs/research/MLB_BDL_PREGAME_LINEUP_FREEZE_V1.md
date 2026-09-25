@@ -53,3 +53,20 @@ The capture runs independently before settlement. A provider/capture failure is 
 - APOSTAR disabled;
 - no historical Odds API calls;
 - no new cron schedule.
+
+## Companion main-market movement capture
+
+The same hourly pregame window also reads BALLDONTLIE's simplified current betting-odds endpoint for eligible mapped games.
+
+It captures:
+- Moneyline HOME / AWAY;
+- standard Run Line HOME / AWAY, preserving exact line;
+- Full Game Total OVER / UNDER, preserving exact line.
+
+BALLDONTLIE supplies a sportsbook vendor and `updated_at` timestamp for these rows. That provider timestamp is stored as both `snapshot_time` and `provider_timestamp`.
+
+A deterministic snapshot ID includes provider odds ID, exact market, side, line, price and provider timestamp:
+- an unchanged provider row is REUSE/NO-OP;
+- a changed line, price or provider timestamp creates a new research snapshot.
+
+This creates prospective market-movement evidence without any The Odds API historical call. The capture remains limited to games inside the same T-180 pregame window and is non-blocking to settlement.
