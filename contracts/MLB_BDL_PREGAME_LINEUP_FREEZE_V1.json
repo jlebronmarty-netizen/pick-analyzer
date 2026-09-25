@@ -1,0 +1,17 @@
+{
+  "contract": "MLB_BDL_PREGAME_LINEUP_FREEZE_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "provider": "balldontlie",
+  "endpoint": "/mlb/v1/lineups",
+  "window_minutes_to_first_pitch": 180,
+  "freeze_rule": "persist only first complete 9+9 batting order observed pregame with all 18 players uniquely matched to MLBAM",
+  "identity_rule": "exact normalized full name -> exactly one pick2_mlb_players MLBAM row; fuzzy matching forbidden",
+  "provider_publication_timestamp_available": false,
+  "timestamp_semantics": "source_timestamp is first observation time by Pick Analyzer and must precede targetStart",
+  "scheduler": "reuse existing hourly /api/cron/mlb-official-settlement",
+  "new_cron": false,
+  "historical_odds_api_calls": 0
+}
