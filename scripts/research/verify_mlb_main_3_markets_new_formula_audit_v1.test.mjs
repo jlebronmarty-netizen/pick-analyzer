@@ -30,3 +30,14 @@ test('boundaries remain closed',()=>{
   assert.equal(a.boundaries.historical_odds_api_spend,0)
   assert.equal(a.boundaries.no_2026_threshold_rescue,true)
 })
+
+test('strict-prior bullpen workload follow-up fails all three main markets',()=>{
+  const x=a.new_information_followup
+  assert.equal(x.moneyline.state,'FAIL')
+  assert(x.moneyline.best.accuracy<0.75)
+  assert.equal(x.totals.state,'FAIL')
+  assert(x.totals.best.accuracy<0.75)
+  assert.equal(x.run_line_dog_p1p5.state,'FAIL')
+  assert(x.run_line_dog_p1p5.best_n_ge_60.accuracy<0.75)
+  assert.equal(x.disposition,'BULLPEN_WORKLOAD_CLOSED_FOR_MAIN_3_MARKETS_NO_SIGN_OR_THRESHOLD_REVERSAL')
+})
