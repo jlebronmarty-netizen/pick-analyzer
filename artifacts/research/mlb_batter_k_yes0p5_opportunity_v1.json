@@ -1,0 +1,71 @@
+{
+  "contract": "MLB_BATTER_K_YES0P5_OPPORTUNITY_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "batter_strikeouts",
+  "exact_line": 0.5,
+  "side": "YES",
+  "architecture": "strict_prior_strikeout_opportunity",
+  "rule": {
+    "prior_k_per_pa_min": 0.3,
+    "prior_pa_per_game_min": 3.75,
+    "minimum_prior_games": 10,
+    "source_rule": "source_game_date < target_game_date",
+    "same_date_history_allowed": false
+  },
+  "development_selection": {
+    "season": 2025,
+    "target_window": "2025-05-01 through 2025-09-28",
+    "k_per_pa_grid": [
+      0.18,
+      0.22,
+      0.26,
+      0.3,
+      0.34
+    ],
+    "pa_per_game_grid": [
+      3.25,
+      3.5,
+      3.75,
+      4,
+      4.25
+    ],
+    "gate": {
+      "min_n": 60,
+      "min_accuracy": 0.75,
+      "min_months": 5,
+      "min_worst_month": 0.65,
+      "min_lift_pp": 5
+    },
+    "champion_policy": "maximum n among passing thresholds; frozen before 2026"
+  },
+  "development_2025": {
+    "baseline_accuracy": 0.588146,
+    "passing_threshold_count": 6,
+    "n": 1270,
+    "wins": 958,
+    "accuracy": 0.7543307086614173,
+    "lift_pp": 16.618,
+    "months": 5,
+    "worst_month": 0.72428,
+    "min_month_n": 219
+  },
+  "line_1p5_closeout": {
+    "passing_threshold_count": 0,
+    "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+  },
+  "external_2026": {
+    "opened": false,
+    "state": "SEALED_PENDING_FROZEN_OOS"
+  },
+  "boundaries": {
+    "yes_side_not_aliased_to_over": true,
+    "no_threshold_retuning": true,
+    "no_2026_outcomes_used_for_selection": true,
+    "no_historical_odds_api_spend": true,
+    "official_picks_unchanged": true,
+    "apostar_disabled": true
+  }
+}
