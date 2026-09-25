@@ -1,0 +1,248 @@
+{
+  "contract": "MLB_MARKET_FIRST_PHASE_D_COVERAGE_EXPANSION/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "tracker_modified": false,
+  "baseline": {
+    "frozen_date": "2026-09-25",
+    "quote_rows": 11550,
+    "exact_contract_rows": 1007,
+    "row_coverage_pct": 8.72,
+    "surfaces": 99,
+    "covered_surfaces": 9,
+    "surface_coverage_pct": 9.09,
+    "source_pr": 215
+  },
+  "findings": [
+    {
+      "family": "batter_total_bases",
+      "surface": "U1.5",
+      "architecture": "strict_prior_role_volume",
+      "rule": "prior_pa_per_game <= 3.50",
+      "minimum_prior_games": 10,
+      "development_2025": {
+        "n": 9813,
+        "wins": 7406,
+        "accuracy": 0.754713,
+        "baseline": 0.665536244171259,
+        "lift_pp": 8.918,
+        "worst_month": 0.742718
+      },
+      "external_2026": {
+        "n": 12142,
+        "wins": 9145,
+        "accuracy": 0.753171,
+        "baseline": 0.680687,
+        "lift_pp": 7.248,
+        "worst_month": 0.726872
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS_RESEARCH_CONTRACT_FORWARD_SHADOW",
+      "pr": 216,
+      "sep25": {
+        "exact_rows": 147,
+        "target_player_games": 56,
+        "qualifying_player_games": 2,
+        "qualifying_quote_rows": 14,
+        "candidates": [
+          {
+            "player": "Carlos Jorge",
+            "game_pk": 822760,
+            "price": -195,
+            "sportsbook": "caesars",
+            "prior_pa_per_game": 2.76923076923077
+          },
+          {
+            "player": "Hao-Yu Lee",
+            "game_pk": 824220,
+            "price": -185,
+            "sportsbook": "betmgm",
+            "prior_pa_per_game": 3.30188679245283
+          }
+        ]
+      }
+    },
+    {
+      "family": "batter_hits_runs_rbis",
+      "surface": "U1.5",
+      "architecture": "frozen_2025_component_projection_forward_only",
+      "rule": "projection <= 0.90",
+      "development_2025": {
+        "n": 4795,
+        "wins": 3607,
+        "accuracy": 0.7522419186652763,
+        "lift_pp": 7.1177032515644445,
+        "worst_month": 0.7177121771217713
+      },
+      "historical_2026": "BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT",
+      "state": "DEVELOPMENT_GATE_PASS_FORWARD_ONLY",
+      "pr": 217,
+      "sep25": {
+        "exact_rows": 332,
+        "target_player_games": 119,
+        "evaluable": 119,
+        "blocked": 0,
+        "qualifying_player_games": 3,
+        "candidates": [
+          {
+            "player": "Carlos Jorge",
+            "game_pk": 822760,
+            "projection": 0.6375,
+            "price": -131,
+            "sportsbook": "draftkings"
+          },
+          {
+            "player": "Charles McAdoo",
+            "game_pk": 822760,
+            "projection": 0.8722222222222222,
+            "price": -130,
+            "sportsbook": "betmgm"
+          },
+          {
+            "player": "Nick Fortes",
+            "game_pk": 823409,
+            "projection": 0.8557142857142856,
+            "price": -190,
+            "sportsbook": "betmgm"
+          }
+        ]
+      }
+    },
+    {
+      "family": "batter_hits_runs_rbis",
+      "surface": "U0.5",
+      "architecture": "frozen_2025_component_projection_forward_only",
+      "rule": "projection <= 0.05",
+      "development_2025": {
+        "n": 118,
+        "wins": 117,
+        "accuracy": 0.9915254237288136,
+        "lift_pp": 46.981681218969364,
+        "worst_month": 0.96
+      },
+      "historical_2026": "BLOCKED_EXACT_SOURCE_SNAPSHOT_DRIFT",
+      "state": "DEVELOPMENT_GATE_PASS_FORWARD_ONLY_NO_CROSSING_TODAY",
+      "pr": 218,
+      "sep25": {
+        "exact_rows": 100,
+        "target_player_games": 50,
+        "evaluable": 50,
+        "blocked": 0,
+        "qualifying_player_games": 0
+      }
+    },
+    {
+      "family": "batter_singles",
+      "surface": "U0.5",
+      "architecture": "strict_prior_role_volume",
+      "development_only": true,
+      "best_attempt": {
+        "prior_pa_per_game_max": 2.6,
+        "n": 1059,
+        "wins": 745,
+        "accuracy": 0.703494,
+        "lift_pp": 13.047,
+        "worst_month": 0.681102
+      },
+      "state": "NO_75_PLUS_STABLE_CANDIDATE_NO_EXTERNAL_OPEN"
+    },
+    {
+      "family": "batter_hits",
+      "surface": "U0.5",
+      "architecture": "strict_prior_role_volume",
+      "development_only": true,
+      "best_attempt": {
+        "prior_pa_per_game_max": 2,
+        "n": 123,
+        "wins": 78,
+        "accuracy": 0.634146,
+        "lift_pp": 21.511,
+        "worst_month": 0.545455
+      },
+      "state": "NO_75_PLUS_STABLE_CANDIDATE_NO_EXTERNAL_OPEN",
+      "equivalent_note": "Total Bases U0.5 UNDER shares the same zero-hit outcome; no duplicate threshold search performed."
+    },
+    {
+      "family": "batter_walks",
+      "surface": "O0.5",
+      "architecture": "batter_recent_bb_rate_x_opposing_starter_bb_rate",
+      "development_only": true,
+      "eligible_rows": 37906,
+      "baseline_accuracy": 0.264707,
+      "best_attempt": {
+        "batter_recent_bb_rate_min": 0.16,
+        "opposing_starter_bb_rate_min": 0.12,
+        "n": 92,
+        "wins": 46,
+        "accuracy": 0.5,
+        "lift_pp": 23.529,
+        "worst_month": 0.416667
+      },
+      "state": "NO_75_PLUS_STABLE_CANDIDATE_NO_EXTERNAL_OPEN"
+    },
+    {
+      "family": "batter_strikeouts",
+      "surface": "0.5 YES",
+      "side_semantics": "YES contract independent; not aliased to OVER",
+      "architecture": "batter_recent_k_rate_x_opposing_starter_k_rate",
+      "frozen_rule_before_external": {
+        "batter_recent_k_rate_min": 0.33,
+        "opposing_starter_k_rate_min": 0.27
+      },
+      "development_2025": {
+        "n": 359,
+        "wins": 273,
+        "accuracy": 0.760446,
+        "lift_pp": 17.223,
+        "worst_month": 0.717949
+      },
+      "external_2026_through_feature_coverage_2026_09_03": {
+        "n": 295,
+        "wins": 200,
+        "accuracy": 0.677966,
+        "baseline": 0.578676,
+        "lift_pp": 9.929,
+        "worst_month": 0.635417
+      },
+      "state": "EXTERNAL_BELOW_75_NO_RETUNE"
+    }
+  ],
+  "expanded_research_contract_coverage": {
+    "added_surfaces": [
+      "batter_total_bases|1.5|under",
+      "batter_hits_runs_rbis|1.5|under",
+      "batter_hits_runs_rbis|0.5|under"
+    ],
+    "added_exact_quote_rows": 579,
+    "current_readback_total_rows": 11551,
+    "exact_contract_rows": 1586,
+    "row_coverage_pct": 13.73,
+    "row_coverage_gain_vs_frozen_baseline_pp": 5.01,
+    "covered_surfaces": 12,
+    "total_surfaces": 99,
+    "surface_coverage_pct": 12.12,
+    "surface_coverage_gain_vs_frozen_baseline_pp": 3.03,
+    "note": "Contract coverage is compatibility only; Sep25 qualifying player-games across these new surfaces = 5 (2 TB U1.5 + 3 HRRBI U1.5 + 0 HRRBI U0.5)."
+  },
+  "closed_or_not_reopened": [
+    "Batter Home Runs 0.5/1.5 positive surfaces: prior O0.5/O1.5 architecture already failed; no rescue.",
+    "Singles U0.5 low-volume architecture failed development.",
+    "Hits U0.5 low-volume architecture failed development.",
+    "TB U0.5 not duplicated because zero-TB outcome equals zero-hit outcome for this architecture.",
+    "Walks O0.5 batter/pitcher BB interaction failed development.",
+    "Batter K 0.5 YES interaction passed development but failed untouched 2026; no retune."
+  ],
+  "boundaries": {
+    "no_threshold_fishing_after_external": true,
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_yes_to_over_alias": true,
+    "exact_mlbam_identity": true,
+    "strict_prior_only": true,
+    "same_date_history_allowed": false,
+    "no_historical_odds_api_spend": true,
+    "official_picks_writes": 0,
+    "apostar_activation": false
+  }
+}
