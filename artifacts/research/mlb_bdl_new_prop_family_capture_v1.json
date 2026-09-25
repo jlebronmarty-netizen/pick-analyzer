@@ -1,0 +1,74 @@
+{
+  "contract": "MLB_BDL_NEW_PROP_FAMILY_CAPTURE_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "provider": "balldontlie",
+  "provider_endpoint": "/mlb/v1/odds/player_props",
+  "scope": "prospective current player props only",
+  "new_family_map": [
+    {
+      "provider_prop_type": "stolen_bases",
+      "canonical_market": "batter_stolen_bases",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "runs_scored",
+      "canonical_market": "batter_runs",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "runs_rbis",
+      "canonical_market": "batter_runs_rbis",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "hits_runs_stolen_bases",
+      "canonical_market": "batter_hits_runs_stolen_bases",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "hits_stolen_bases",
+      "canonical_market": "batter_hits_stolen_bases",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "hits_walks_stolen_bases",
+      "canonical_market": "batter_hits_walks_stolen_bases",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "extra_base_hits",
+      "canonical_market": "batter_extra_base_hits",
+      "outcome_data_readiness": "READY_RETROSHEET_AND_MLB_OFFICIAL"
+    },
+    {
+      "provider_prop_type": "first_home_run",
+      "canonical_market": "batter_first_home_run",
+      "outcome_data_readiness": "REQUIRES_PLAY_BY_PLAY_ORDERING"
+    }
+  ],
+  "discovery_guard": {
+    "persist_observed_prop_types": true,
+    "persist_unmapped_prop_types": true,
+    "reason": "BALLDONTLIE prop_type is open-ended; future compatible families must be visible rather than silently discarded"
+  },
+  "odds_api_boundary": {
+    "request_markets_modified": false,
+    "historical_calls_added": false,
+    "note": "new families are captured only from existing BALLDONTLIE fallback responses"
+  },
+  "identity_boundary": {
+    "exact_mlbam_only": true,
+    "fuzzy_matching_used": false
+  },
+  "next_research_priority": [
+    "batter_runs",
+    "batter_runs_rbis",
+    "batter_extra_base_hits",
+    "batter_stolen_bases",
+    "combo families containing stolen bases",
+    "batter_first_home_run only after exact settlement/play-by-play contract"
+  ]
+}
