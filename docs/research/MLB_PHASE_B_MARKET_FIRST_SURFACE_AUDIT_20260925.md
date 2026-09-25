@@ -74,3 +74,40 @@ An interactive all-grid SQL attempt timed out. That is not permission to simplif
 - no Official Picks
 - APOSTAR disabled
 - no historical Odds API spend
+
+
+## Final Phase B closeout
+
+The prior exact line-surface work was recovered before opening any new thresholds.
+
+- **Batter Hits 0.5:** PR #194 already tested the exact surface. No >=75% stable-signal candidate exists. Frozen FAIL.
+- **Batter Total Bases U1.5 <=1.20:** 2025 76.24% with +9.70 pp lift, but 2026 was 7,081/9,471 = **74.77%**. Frozen external FAIL; no threshold rescue.
+- **Batter Total Bases U3.5 <=1.20:** 2026 was 8,583/9,471 = **90.62%**, but lift was only **+4.12 pp**, below the 5 pp signal gate. No promotion.
+- **Batter RBI U0.5 <=0.10:** existing exact contract remains strong: 85.47% in 2025 and 82.88% exact 2026. Move to forward market/price crossing rather than new formula search.
+- **Batter H/R/RBI U1.5 <=0.90:** development passes at 3,607/4,795 = **75.22%**, +7.12 pp lift, worst month 71.77%. However the frozen 2026 external snapshot was not persisted.
+
+### HRRBI 2026 lineage recheck
+
+A bounded recovery attempt used the exact frozen checksums. Current MLB Official gameLog history no longer matches the PR #158 snapshot:
+
+- frozen reference: 30,889 raw rows / 25,729 eligible / U2.5 control 1,073/1,255;
+- current official source: 30,927 raw rows / 25,707 eligible / U2.5 control 1,079/1,263.
+
+The current source has both added raw rows and fewer eligible rows, so this cannot be repaired by excluding the six extra current player identities. It is historical source revision, not merely an identity-universe mismatch.
+
+State:
+
+`DEVELOPMENT_GATE_PASS_EXTERNAL_BLOCKED_SOURCE_SNAPSHOT_DRIFT`
+
+Do not score U1.5 against revised history and label it the frozen external test. The clean path is untouched forward validation at exact 1.5 lines.
+
+### Phase B conclusion
+
+No new surface is promoted from Phase B today. The operationally useful preserved contracts are still:
+
+- Batter Hits U1.5;
+- Batter Total Bases U2.5;
+- Batter RBI U0.5;
+- Batter H/R/RBI U2.5.
+
+H/R/RBI U1.5 is retained as a **forward-only candidate** at the frozen threshold, not as a certified formula.
