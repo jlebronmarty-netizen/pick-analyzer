@@ -1,0 +1,36 @@
+{
+  "artifact": "MLB_BATTER_HRRBI_YES_MILESTONES_RESULT_2025",
+  "research_only": true,
+  "workflow_run_id": 36164259293,
+  "workflow_artifact_id": 10877010527,
+  "workflow_artifact_digest": "sha256:4eec9f42e6b637a6f5ff202caba0df3159c0cbad387b80a943f67525adc02aa5",
+  "source_sha256": "3d1e0e81d5913a635ae7a80366b811b777b832b488274124b4e38e04dd892753",
+  "source_rule": "source_game_date < target_game_date",
+  "same_date_history_allowed": false,
+  "results": [
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 2.5,
+      "side": "YES",
+      "baseline_accuracy": 0.20375633474866456,
+      "passing_threshold_count": 0,
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "market": "batter_hits_runs_rbis",
+      "line": 3.5,
+      "side": "YES",
+      "baseline_accuracy": 0.12041158745377345,
+      "passing_threshold_count": 0,
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    }
+  ],
+  "external_2026_opened": false,
+  "boundaries": {
+    "no_yes_over_aliasing": true,
+    "no_threshold_retuning": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  }
+}
