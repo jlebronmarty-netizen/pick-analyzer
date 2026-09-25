@@ -240,5 +240,89 @@
     "historical_odds_api_spend": 0,
     "tracker_modified": false,
     "no_2026_threshold_rescue": true
+  },
+  "new_information_followup": {
+    "family": "strict-prior bullpen workload reconstructed from mlb_ml_xyear_pitcher_game_v1",
+    "lineage": {
+      "source": "aggregated pitcher-game rows",
+      "starter_flag_used": true,
+      "bullpen_definition": "starter=false",
+      "history_rule": "source_game_date < target_game_date",
+      "same_date_history_allowed": false,
+      "target_windows": [
+        "previous 1 calendar day",
+        "previous 3 calendar days"
+      ]
+    },
+    "moneyline": {
+      "bounded_configs": [
+        "D1_30",
+        "D1_45",
+        "D1_60",
+        "D3_60",
+        "D3_90",
+        "D3_120",
+        "BOTH_30_60",
+        "BOTH_45_90",
+        "BOTH_60_120"
+      ],
+      "best": {
+        "config": "D1_45",
+        "n": 414,
+        "wins": 227,
+        "accuracy": 0.548309,
+        "worst_month": 0.486842
+      },
+      "state": "FAIL"
+    },
+    "totals": {
+      "distribution_frozen_before_outcome_read": {
+        "combined_1d_p20": 68,
+        "combined_1d_p80": 148,
+        "combined_1d_p10": 0,
+        "combined_1d_p90": 174.4,
+        "combined_3d_p20": 248,
+        "combined_3d_p80": 392,
+        "combined_3d_p10": 211,
+        "combined_3d_p90": 430
+      },
+      "best": {
+        "config": "D1_P20P80",
+        "n": 773,
+        "wins": 360,
+        "accuracy": 0.465718,
+        "worst_month": 0.411765
+      },
+      "state": "FAIL"
+    },
+    "run_line_dog_p1p5": {
+      "bounded_configs": [
+        "D1_30",
+        "D1_45",
+        "D1_60",
+        "D3_60",
+        "D3_90",
+        "D3_120",
+        "BOTH_30_60",
+        "BOTH_45_90",
+        "BOTH_60_120"
+      ],
+      "best_n_ge_60": {
+        "config": "D1_45",
+        "n": 179,
+        "wins": 116,
+        "accuracy": 0.648045,
+        "worst_month": 0.48
+      },
+      "best_pooled": {
+        "config": "BOTH_60_120",
+        "n": 23,
+        "wins": 17,
+        "accuracy": 0.73913,
+        "worst_month": 0.5
+      },
+      "state": "FAIL"
+    },
+    "disposition": "BULLPEN_WORKLOAD_CLOSED_FOR_MAIN_3_MARKETS_NO_SIGN_OR_THRESHOLD_REVERSAL"
   }
 }
