@@ -54,7 +54,31 @@ Frozen rule `prior_PA_per_game <= 3.50`:
 - worst month = **74.27%**
 - minimum month n = 1,761
 
-The threshold is frozen at 3.50 before any 2026 OOS evaluation.
+The threshold was frozen at 3.50 before any 2026 OOS evaluation.
+
+## Untouched 2026 OOS
+
+The frozen 3.50 threshold was then applied once to 2026 with no retuning:
+
+- 9,145 / 12,142
+- accuracy = **75.32%**
+- baseline = **68.07%**
+- lift = **+7.25 pp**
+- months = 5
+- worst month = **72.69%**
+
+Monthly accuracy:
+- May 76.27%
+- Jun 72.69%
+- Jul 73.82%
+- Aug 75.05%
+- Sep 79.51%
+
+State:
+
+`CROSS_YEAR_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED`
+
+This is now a cross-year research candidate, not a production or betting rule. Exact sportsbook U1.5 UNDER quotes and untouched forward outcomes are still required.
 
 ## Boundaries
 
