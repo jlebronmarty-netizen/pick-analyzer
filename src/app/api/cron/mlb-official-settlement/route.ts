@@ -4,6 +4,7 @@ import { settleMlbOfficialPickBacklog } from '@/services/pick2-mlb-certified-set
 import { freezeBdlPregameLineups } from '@/services/mlb-bdl-pregame-lineup-freeze.service'
 import { captureBdlMainMarketMovement } from '@/services/mlb-bdl-main-market-movement-capture.service'
 import { runMlbOpeningConsensusProspective } from '@/services/mlb-opening-consensus-prospective.service'
+import { runMlbOpeningConsensusV2Shadow } from '@/services/mlb-opening-consensus-v2-forward.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -41,6 +42,21 @@ export async function GET(request: NextRequest) {
       historicalOddsApiCalls: 0,
       providerCallsMade: 0,
       error: error instanceof Error ? error.message : 'UNKNOWN_OPENING_CONSENSUS_PROSPECTIVE_ERROR',
+    }
+  }
+
+  let researchOpeningConsensusMoneylineV2: unknown
+  try {
+    researchOpeningConsensusMoneylineV2 = await runMlbOpeningConsensusV2Shadow()
+  } catch (error) {
+    researchOpeningConsensusMoneylineV2 = {
+      success: false,
+      status: 'MLB_OPENING_CONSENSUS_V2_SHADOW_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      error: error instanceof Error ? error.message : 'UNKNOWN_V2_SHADOW_ERROR',
     }
   }
 
@@ -86,6 +102,7 @@ export async function GET(request: NextRequest) {
       researchLineupCapture,
       researchMainMarketMovement,
       researchOpeningConsensusMoneyline,
+      researchOpeningConsensusMoneylineV2,
     }, {
       status: 200,
       headers: { 'Cache-Control': 'no-store' },
@@ -98,6 +115,7 @@ export async function GET(request: NextRequest) {
       researchLineupCapture,
       researchMainMarketMovement,
       researchOpeningConsensusMoneyline,
+      researchOpeningConsensusMoneylineV2,
       officialPicksModified: false,
       apostarActivated: false,
     }, {
