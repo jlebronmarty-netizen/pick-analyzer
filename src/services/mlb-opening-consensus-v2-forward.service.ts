@@ -60,7 +60,7 @@ export async function freezeMlbOpeningConsensusV2(input:{targetDate?:string;now?
 
   const gamePks=future.map(r=>Number(r.game_pk)).filter(Number.isFinite)
   const features=await supabaseAdmin.from('mlb_ml_xyear_features_v1')
-    .select('game_pk,canonical_game_id,game_date,actual_winner,feature_cutoff_date,home_sp_ra9,away_sp_ra9,home_bullpen_ra9,away_bullpen_ra9,home_common_win_pct,away_common_win_pct,home_home_win_pct,away_away_win_pct')
+    .select('game_pk,canonical_game_id,game_date,actual_winner,feature_cutoff_date,feature_version,home_sp_ra9,away_sp_ra9,home_bullpen_ra9,away_bullpen_ra9,home_common_win_pct,away_common_win_pct,home_home_win_pct,away_away_win_pct')
     .eq('season',2026)
     .in('game_pk',gamePks)
     .limit(100)
@@ -75,9 +75,19 @@ export async function freezeMlbOpeningConsensusV2(input:{targetDate?:string;now?
   for(const row of future){
     const f=fmap.get(Number(row.game_pk))
     if(!f){missingSecondary++;continue}
+
+    const secondaryCanonical=String(f.canonical_game_id??'')
+    const parentCanonical=String(row.xyear_canonical_game_id??'')
+    const secondaryGameDate=String(f.game_date??'')
+    const secondaryCutoff=String(f.feature_cutoff_date??'')
+    const parentCutoff=String(row.feature_cutoff_date??'')
+
+    if(Number(f.game_pk)!==Number(row.game_pk)){lineageBlocked++;continue}
+    if(!secondaryCanonical||secondaryCanonical!==parentCanonical){lineageBlocked++;continue}
+    if(secondaryGameDate!==targetDate){lineageBlocked++;continue}
     if(f.actual_winner!==null){lineageBlocked++;continue}
-    if(String(f.feature_cutoff_date??'')>=targetDate){lineageBlocked++;continue}
-    if(String(row.feature_cutoff_date??'')>=targetDate){lineageBlocked++;continue}
+    if(!secondaryCutoff||!parentCutoff||secondaryCutoff!==parentCutoff){lineageBlocked++;continue}
+    if(secondaryCutoff>=targetDate){lineageBlocked++;continue}
 
     const home=row.pick_side==='HOME'
     const homeSp=finite(f.home_sp_ra9)
@@ -125,13 +135,16 @@ export async function freezeMlbOpeningConsensusV2(input:{targetDate?:string;now?
       secondary_score:score,
       confidence:confidence(score),
       secondary_snapshot:checks,
-      feature_cutoff_date:row.feature_cutoff_date,
+      feature_cutoff_date:f.feature_cutoff_date,
       freeze_timestamp:now.toISOString(),
       status:'PENDING',
       metadata:{
         researchOnly:true,productionEligible:false,officialPicksEligible:false,
         apostarEnabled:false,parentFormula:V1_FORMULA,forwardOnly:true,
-        noRetune:true,noTeamFilter:true
+        noRetune:true,noTeamFilter:true,
+        secondaryCanonicalGameId:f.canonical_game_id,
+        secondaryFeatureVersion:f.feature_version,
+        parentFeatureVersion:row.feature_version
       }
     })
   }
