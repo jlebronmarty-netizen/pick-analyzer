@@ -1,0 +1,47 @@
+{
+  "contract": "MLB_ML_OPENING_CONSENSUS_2026_EXTERNAL_BACKFILL_V1/1.0.0",
+  "research_only": true,
+  "external_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "frozen_candidate": "MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1/1.0.0",
+  "frozen_candidate_pr": 237,
+  "season": 2026,
+  "universe": {
+    "games": 2402,
+    "game_dates": 182,
+    "min_date": "2026-03-25",
+    "max_date": "2026-09-25",
+    "feature_ready_games": 2078
+  },
+  "provider": "balldontlie",
+  "vendors": [
+    "betmgm",
+    "betrivers"
+  ],
+  "target_market": "moneyline",
+  "target_table": "public.mlb_bdl_opening_ml_2026_external_v1",
+  "batching": {
+    "dates_per_request": 8,
+    "resumable": true,
+    "checkpoint_table": "sports_sync_jobs"
+  },
+  "identity": {
+    "join": "date + deterministic team aliases + game number/order",
+    "fuzzy_matching": false,
+    "doubleheader_count_mismatch": "fail closed"
+  },
+  "formula_lock": {
+    "favorite_probability_min": 0.65,
+    "fundamentals_required": 6,
+    "fundamentals_total": 6,
+    "side_policy": "symmetric",
+    "retuning_allowed": false
+  },
+  "boundaries": {
+    "historical_odds_api_calls": 0,
+    "official_picks_modified": false,
+    "apostar_activated": false
+  }
+}
