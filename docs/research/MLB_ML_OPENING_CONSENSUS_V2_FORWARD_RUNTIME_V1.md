@@ -9,9 +9,12 @@ It makes **no additional odds-provider calls**.
 ## Freeze
 
 For each PENDING V1 row before first pitch:
-- read the same pregame xyear feature row;
+- read the secondary features by exact gamePk;
+- require the xyear canonical game ID to match the frozen V1 row exactly;
+- require the feature row game date to equal the target date;
 - require actual_winner NULL;
-- require feature_cutoff_date < target_date;
+- require the secondary feature cutoff to equal the V1 frozen cutoff exactly;
+- require that shared feature_cutoff_date < target_date;
 - compute the four frozen secondary components;
 - missing secondary data fails closed;
 - freeze V2 only when secondary score >=2.
