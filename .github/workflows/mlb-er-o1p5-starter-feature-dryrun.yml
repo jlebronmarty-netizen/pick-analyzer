@@ -1,0 +1,25 @@
+name: MLB ER O1.5 starter feature dryrun
+
+on:
+  push:
+    branches:
+      - research/er-o1p5-starter-feature-dryrun-20260924
+    paths:
+      - scripts/research/mlb_er_o1p5_starter_feature_dryrun_v1.sql
+      - docs/research/MLB_ER_O1P5_STARTER_FEATURE_DRYRUN_V1.md
+      - scripts/research/verify_mlb_er_o1p5_starter_feature_dryrun_v1.test.mjs
+      - .github/workflows/mlb-er-o1p5-starter-feature-dryrun.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/research/verify_mlb_er_o1p5_starter_feature_dryrun_v1.test.mjs
