@@ -199,7 +199,40 @@
         "wins": 3,
         "accuracy": 1
       }
-    }
+    },
+    "monthly": {
+      "2026-05": {
+        "n": 4,
+        "wins": 4,
+        "losses": 0,
+        "accuracy": 1
+      },
+      "2026-06": {
+        "n": 1,
+        "wins": 1,
+        "losses": 0,
+        "accuracy": 1
+      },
+      "2026-07": {
+        "n": 4,
+        "wins": 3,
+        "losses": 1,
+        "accuracy": 0.75
+      },
+      "2026-08": {
+        "n": 5,
+        "wins": 5,
+        "losses": 0,
+        "accuracy": 1
+      },
+      "2026-09": {
+        "n": 7,
+        "wins": 6,
+        "losses": 1,
+        "accuracy": 0.8571428571428571
+      }
+    },
+    "april_note": "No complete-secondary V2-eligible selection in April; fail-closed/no-pick rather than threshold rescue."
   },
   "rejected_extensions": [
     {
@@ -242,5 +275,34 @@
     "no_recent_pitching_extension": true,
     "official_picks_unchanged": true,
     "apostar_disabled": true
+  },
+  "forward_20260926": {
+    "game_pk": 824543,
+    "matchup": "COL @ CWS",
+    "pick": "CWS",
+    "v1_probability": 0.673005147884336,
+    "v1_fundamentals": "6/6",
+    "secondary_score": 3,
+    "confidence": "STRONG",
+    "components": {
+      "starter_ra9_edge": {
+        "value": 1.7566265060241,
+        "pass": true
+      },
+      "bullpen_ra9_edge": {
+        "value": 1.12710589651023,
+        "pass": true
+      },
+      "common_opponent_edge": {
+        "value": 0.154168,
+        "pass": false
+      },
+      "venue_split_edge": {
+        "value": 0.273288,
+        "pass": true
+      }
+    },
+    "feature_cutoff_date": "2026-09-25",
+    "status": "FROZEN_PENDING_FINAL"
   }
 }
