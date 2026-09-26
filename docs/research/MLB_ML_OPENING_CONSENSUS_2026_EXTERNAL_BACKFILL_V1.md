@@ -63,3 +63,19 @@ Once this backfill is executed:
 - feature definitions cannot change.
 
 No historical Odds API spend.
+
+## Frozen external scoring SQL
+
+Before the 2026 acquisition is executed, the exact external scoring query is frozen at:
+
+`scripts/research/mlb_ml_opening_consensus_2026_external_score.sql`
+
+It requires:
+- BetMGM + BetRivers both present;
+- the same American-odds no-vig formula;
+- consensus favorite probability >=0.65;
+- exactly 6/6 fundamentals aligned;
+- 2026 xyear feature row joined by the persisted xyear canonical game ID;
+- no missing required features.
+
+The query is SELECT-only.
