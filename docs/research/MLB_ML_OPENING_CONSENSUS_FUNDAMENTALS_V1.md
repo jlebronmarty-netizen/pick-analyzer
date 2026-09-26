@@ -157,3 +157,49 @@ The frozen formula is not altered, but the 78 selected rows were checked for boo
 - average favorite probability: BetMGM 69.08%, BetRivers 69.75%
 
 This is descriptive only. The formula remains the two-book consensus mean >=65%; it is not tightened to require both books individually after seeing the result.
+
+## Untouched 2026 external result
+
+The frozen 2025 formula was evaluated once on the independently acquired 2026 opening-market surface with no changes to threshold, side policy, vendors or fundamentals.
+
+Backfill:
+- 182/182 dates complete
+- 0 failed dates
+- 7,464 stored BetMGM/BetRivers rows
+- 1,866 canonical games with both books
+- 427 BALLDONTLIE provider calls
+- 0 historical Odds API calls
+- 0 blocked exact vendor-market contracts
+- 16 extreme-price rows in the stored external surface
+- **0 of the 37 selected games contained an extreme-price row**
+
+Frozen external score:
+- 30 / 37 = **81.08%**
+- average consensus favorite probability = 67.91%
+- wins above aggregate market expectation = +4.874 (descriptive only)
+- months = 6
+- worst month = **33.33%**
+
+Monthly:
+- Apr: 2/4 = 50.00%
+- May: 5/5 = 100.00%
+- Jun: 1/3 = 33.33%
+- Jul: 3/4 = 75.00%
+- Aug: 7/8 = 87.50%
+- Sep: 12/13 = 92.31%
+
+Side readback:
+- HOME: 23/29 = 79.31%
+- AWAY: 7/8 = 87.50%
+
+Permanent external gate:
+- accuracy >=75%: PASS
+- n >=60: **FAIL**
+- >=5 months: PASS
+- worst month >=65%: **FAIL**
+
+Final state:
+
+`EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE`
+
+No threshold, vendor, side or feature rescue is authorized from this result. The 81.08% pooled accuracy is promising descriptive evidence, but it is not certification.
