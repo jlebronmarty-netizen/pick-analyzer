@@ -57,3 +57,10 @@ test('checkpoint statuses match sports_sync_jobs constraint vocabulary',()=>{
   assert.match(service,/status: 'failed'/)
   assert.doesNotMatch(service,/status: 'COMPLETE'|status: 'FAILED'/)
 })
+
+test('season date universe paginates beyond the Data API 1000-row cap',()=>{
+  assert.match(service,/const pageSize = 1000/)
+  assert.match(service,/\.range\(offset, offset \+ pageSize - 1\)/)
+  assert.match(service,/if \(rows\.length < pageSize\) break/)
+  assert.doesNotMatch(service,/\.limit\(5000\)/)
+})
