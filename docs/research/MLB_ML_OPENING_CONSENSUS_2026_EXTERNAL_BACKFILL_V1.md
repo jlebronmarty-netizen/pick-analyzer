@@ -79,3 +79,5 @@ It requires:
 - no missing required features.
 
 The query is SELECT-only.
+
+Runner trigger marker after PR #238 merge.
