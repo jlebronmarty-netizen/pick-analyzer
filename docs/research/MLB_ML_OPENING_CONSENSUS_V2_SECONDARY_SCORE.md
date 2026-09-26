@@ -133,3 +133,28 @@ Secondary components:
 Feature cutoff remains 2026-09-25 and actual winner was NULL at freeze.
 
 This row is forward evidence only.
+
+## Known-2026 monthly diagnostic after the freeze
+
+Using the frozen 2025 secondary cuts on already-known 2026 rows:
+
+- May: 4/4 = 100%
+- Jun: 1/1 = 100%
+- Jul: 3/4 = 75%
+- Aug: 5/5 = 100%
+- Sep: 6/7 = 85.71%
+- April: no complete-secondary V2-eligible selection
+
+Again, this is diagnostic only. It cannot certify V2 because 2026 had already been opened during V1 research.
+
+The pattern is nevertheless directionally useful: V2 removes the April V1 losses from eligibility and retains only one June candidate, which won.
+
+## Sep26 forward candidate
+
+CWS ML vs COL qualifies prospectively with secondary score **3/4 (STRONG)**:
+- starter edge PASS
+- bullpen edge PASS
+- common opponents FAIL by a small margin
+- venue split PASS
+
+The V2 contract was frozen in GitHub before this secondary score was checked.
