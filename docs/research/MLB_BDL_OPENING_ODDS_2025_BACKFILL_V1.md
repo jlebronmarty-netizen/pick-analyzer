@@ -68,3 +68,5 @@ Every row preserves provider `opened_at`.
 BALLDONTLIE documents the opening endpoint as historical opening odds for the most recently completed season and supports cursor pagination with up to 100 results/page.
 
 The paid GOAT tier supports 600 requests/minute, but this implementation is deliberately sequential and pauses between provider requests.
+
+Runner resume marker after full-season pagination repair.
