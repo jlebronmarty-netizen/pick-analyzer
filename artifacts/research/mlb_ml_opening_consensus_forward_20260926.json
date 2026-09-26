@@ -1,0 +1,106 @@
+{
+  "artifact": "MLB_ML_OPENING_CONSENSUS_FORWARD_FREEZE_20260926",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "frozen_formula": "MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1/1.0.0",
+  "formula_state": "EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE",
+  "target_date": "2026-09-26",
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "evidence_id": "20260926_ml_cws_vs_col",
+      "game_pk": 824543,
+      "xyear_canonical_game_id": "xyear:2026:824543",
+      "matchup": "COL @ CWS",
+      "home_team": "CWS",
+      "away_team": "COL",
+      "pick": "CWS",
+      "pick_side": "HOME",
+      "scheduled_at": "2026-09-26T23:10:00Z",
+      "opening_market": {
+        "betmgm": {
+          "home_price": -235,
+          "away_price": 190,
+          "opened_at": "2026-09-26T00:39:04.728Z",
+          "no_vig_home_probability": 0.670437776684702
+        },
+        "betrivers": {
+          "home_price": -240,
+          "away_price": 195,
+          "opened_at": "2026-09-26T01:21:04.242Z",
+          "no_vig_home_probability": 0.675572519083969
+        },
+        "consensus_home_probability": 0.673005147884336,
+        "threshold": 0.65
+      },
+      "fundamentals": {
+        "required": 6,
+        "aligned": 6,
+        "feature_cutoff_date": "2026-09-25",
+        "feature_version": "xyear_daily_sync_v3_leakage_safe",
+        "season_win_pct": {
+          "home": 0.515723270440252,
+          "away": 0.35625,
+          "passes": true
+        },
+        "run_diff_pg": {
+          "home": 0.345911949685535,
+          "away": -1.20625,
+          "passes": true
+        },
+        "pyth_win_pct": {
+          "home": 0.534174012702762,
+          "away": 0.395655447102772,
+          "passes": true
+        },
+        "l5_win_pct": {
+          "home": 0.8,
+          "away": 0,
+          "passes": true
+        },
+        "starter_ra9": {
+          "home": 3.6433734939759,
+          "away": 5.4,
+          "lower_is_better": true,
+          "passes": true
+        },
+        "bullpen_ra9": {
+          "home": 4.5812274368231,
+          "away": 5.70833333333333,
+          "lower_is_better": true,
+          "passes": true
+        }
+      },
+      "strict_pregame": {
+        "feature_cutoff_before_target": true,
+        "opening_before_first_pitch": true,
+        "actual_winner_at_freeze": null,
+        "same_day_outcome_used": false
+      },
+      "status": "FROZEN_PENDING_FINAL"
+    }
+  ],
+  "slate_readback": {
+    "scheduled_games": 13,
+    "feature_rows": 13,
+    "formula_ready_games": 9,
+    "opening_games_with_both_books": 11,
+    "scored_overlap_games": 7,
+    "qualifying_games": 1,
+    "materializer_status": "COMPLETE",
+    "integrity_status": "READY_CORE_FAIL_CLOSED",
+    "cutoff_violation_rows": 0,
+    "starter_evidence_time_violations": 0
+  },
+  "boundaries": {
+    "no_threshold_retune": true,
+    "no_side_change": true,
+    "no_vendor_change": true,
+    "no_feature_change": true,
+    "no_current_odds_substitution": true,
+    "no_postgame_recompute": true,
+    "no_historical_odds_api_spend": true
+  }
+}
