@@ -26,7 +26,7 @@ test('2025 development and internal holdout both exceed 80 percent',()=>{
 
 test('known 2026 is diagnostic only',()=>{
   assert.equal(a.lineage.external_status,'NO_UNTOUCHED_EXTERNAL_AVAILABLE; 2026 already observed for V1')
-  assert.equal(a.validation_mode,undefined)
+  assert.equal(a.lineage.validation_mode,'forward-only after freeze')
   assert.equal(a.state,'FROZEN_FORWARD_ONLY_NO_RETUNE')
 })
 
