@@ -1,0 +1,144 @@
+{
+  "contract": "MLB_TOTALS_BDL_OPENING_AUDIT_20260926/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "development_protocol": {
+    "threshold_derivation": "2025-05-01 through 2025-07-31 only",
+    "internal_holdout": "2025-08-01 through 2025-09-28",
+    "external_2026_used": false,
+    "no_threshold_rescue": true
+  },
+  "exact_market": {
+    "market": "full_game_total",
+    "vendors": [
+      "betmgm",
+      "betrivers"
+    ],
+    "require_identical_opening_line": true,
+    "joined_games_may_sep": 1243,
+    "actual_outcomes": {
+      "over": 556,
+      "under": 625,
+      "push": 62
+    },
+    "avg_opening_no_vig_over_probability": 0.5002
+  },
+  "strict_prior_reconstruction": {
+    "source": "public.mlb_ml_xyear_team_game_v1",
+    "rule": "source game_date < target_date",
+    "same_date_doubleheader_history": false,
+    "season_and_l5_reconstructed": true
+  },
+  "family_1": {
+    "cuts": {
+      "season_abs_residual_q75": 0.9916,
+      "recent_abs_residual_q75": 2.1,
+      "composite_abs_residual_q75": 1.2059
+    },
+    "architectures": [
+      {
+        "id": "TOT_A_SEASON_Q75",
+        "selected_n": 266,
+        "pushes": 15,
+        "evaluable_n": 251,
+        "wins": 131,
+        "accuracy": 0.5219,
+        "development_accuracy": 0.4965,
+        "holdout_accuracy": 0.5545,
+        "worst_month": 0.451,
+        "state": "FAIL"
+      },
+      {
+        "id": "TOT_B_RECENT_Q75",
+        "selected_n": 256,
+        "pushes": 9,
+        "evaluable_n": 247,
+        "wins": 119,
+        "accuracy": 0.4818,
+        "development_accuracy": 0.4552,
+        "holdout_accuracy": 0.5196,
+        "worst_month": 0.381,
+        "state": "FAIL"
+      },
+      {
+        "id": "TOT_C_COMPOSITE_Q75",
+        "selected_n": 257,
+        "pushes": 10,
+        "evaluable_n": 247,
+        "wins": 119,
+        "accuracy": 0.4818,
+        "development_accuracy": 0.4266,
+        "holdout_accuracy": 0.5577,
+        "worst_month": 0.3488,
+        "state": "FAIL"
+      },
+      {
+        "id": "TOT_D_COMPOSITE_MARKET_CONFIRM",
+        "selected_n": 149,
+        "pushes": 5,
+        "evaluable_n": 144,
+        "wins": 73,
+        "accuracy": 0.5069,
+        "development_accuracy": 0.4286,
+        "holdout_accuracy": 0.6167,
+        "worst_month": 0.3846,
+        "state": "FAIL"
+      }
+    ]
+  },
+  "data_coverage": {
+    "statcast_offense_complete": 1243,
+    "starter_contact_complete": 1126,
+    "park_weather_roof_bullpen_fatigue_complete": 0
+  },
+  "family_2": {
+    "definition": "pregame run-environment score from offense hard-hit + barrel + starter hard-hit - starter whiff, normalized on May-Jul only",
+    "cuts": {
+      "environment_q25": -0.7995,
+      "environment_q75": 0.8707,
+      "environment_market_residual_q25": -0.7162,
+      "environment_market_residual_q75": 0.8321
+    },
+    "architectures": [
+      {
+        "id": "TOT_E_ENV_EXTREMES",
+        "selected_n": 536,
+        "pushes": 27,
+        "evaluable_n": 509,
+        "wins": 269,
+        "accuracy": 0.5285,
+        "development_accuracy": 0.5094,
+        "holdout_accuracy": 0.5602,
+        "worst_month": 0.4835,
+        "state": "FAIL"
+      },
+      {
+        "id": "TOT_F_ENV_MARKET_RESIDUAL",
+        "selected_n": 555,
+        "pushes": 21,
+        "evaluable_n": 534,
+        "wins": 286,
+        "accuracy": 0.5356,
+        "development_accuracy": 0.5062,
+        "holdout_accuracy": 0.581,
+        "worst_month": 0.4623,
+        "state": "FAIL"
+      },
+      {
+        "id": "TOT_G_RESIDUAL_MARKET_CONFIRM",
+        "selected_n": 334,
+        "pushes": 12,
+        "evaluable_n": 322,
+        "wins": 164,
+        "accuracy": 0.5093,
+        "development_accuracy": 0.4794,
+        "holdout_accuracy": 0.5547,
+        "worst_month": 0.4262,
+        "state": "FAIL"
+      }
+    ]
+  },
+  "disposition": "NO_75_PLUS_STABLE_FULL_GAME_TOTAL_OPENING_FORMULA_CURRENT_CLEAN_INFORMATION"
+}
