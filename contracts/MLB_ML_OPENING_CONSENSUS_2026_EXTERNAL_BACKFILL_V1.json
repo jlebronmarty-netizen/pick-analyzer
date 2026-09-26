@@ -43,5 +43,7 @@
     "historical_odds_api_calls": 0,
     "official_picks_modified": false,
     "apostar_activated": false
-  }
+  },
+  "external_score_sql": "scripts/research/mlb_ml_opening_consensus_2026_external_score.sql",
+  "external_score_frozen_before_acquisition": true
 }
