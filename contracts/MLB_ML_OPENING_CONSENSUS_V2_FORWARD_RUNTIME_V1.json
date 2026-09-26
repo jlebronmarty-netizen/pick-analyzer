@@ -1,0 +1,40 @@
+{
+  "contract": "MLB_ML_OPENING_CONSENSUS_V2_FORWARD_RUNTIME/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "parent_formula": "MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1",
+  "formula_id": "MLB_ML_OPENING_CONSENSUS_V2_SECONDARY_SCORE",
+  "v1_source_table": "public.mlb_ml_opening_consensus_forward_v1",
+  "v2_target_table": "public.mlb_ml_opening_consensus_v2_forward_v1",
+  "no_new_odds_calls": true,
+  "eligibility": {
+    "min_secondary_score": 2,
+    "missing_secondary_data": "FAIL_CLOSED",
+    "components": {
+      "bullpen_ra9_edge": 0.935409247675931,
+      "common_opponent_edge": 0.158617424242424,
+      "venue_split_edge": 0.238452767470625,
+      "starter_ra9_edge": 1.55737077764639
+    }
+  },
+  "confidence": {
+    "2": "STANDARD",
+    "3": "STRONG",
+    "4": "MAX"
+  },
+  "settlement": {
+    "source": "MLB Official live feed",
+    "require_final": true,
+    "recompute_formula": false
+  },
+  "scheduler": "existing hourly /api/cron/mlb-official-settlement",
+  "failure_policy": "non-blocking to Official Pick settlement",
+  "boundaries": {
+    "no_team_filter": true,
+    "no_retune": true,
+    "no_vendor_change": true,
+    "no_side_change": true
+  }
+}
