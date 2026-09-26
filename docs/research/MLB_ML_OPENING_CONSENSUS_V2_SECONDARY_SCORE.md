@@ -113,3 +113,23 @@ No:
 - offense/recent-pitching add-on after seeing future outcomes.
 
 Official Picks and APOSTAR remain untouched.
+
+## First forward V2 crossing — 2026-09-26
+
+The V2 contract was committed before checking today's secondary score.
+
+CWS ML vs COL also qualifies under V2:
+
+- V1 opening consensus: 67.3005%
+- V1 fundamentals: 6/6
+- V2 secondary score: **3/4 — STRONG**
+
+Secondary components:
+- starter RA9 edge: 1.7566 >= 1.5574 — PASS
+- bullpen RA9 edge: 1.1271 >= 0.9354 — PASS
+- common-opponent edge: 0.1542 < 0.1586 — FAIL
+- venue split edge: 0.2733 >= 0.2385 — PASS
+
+Feature cutoff remains 2026-09-25 and actual winner was NULL at freeze.
+
+This row is forward evidence only.
