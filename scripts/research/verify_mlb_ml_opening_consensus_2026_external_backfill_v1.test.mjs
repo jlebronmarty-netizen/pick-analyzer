@@ -42,3 +42,13 @@ test('research boundaries remain closed',()=>{
   assert.equal(c.official_picks_eligible,false)
   assert.equal(c.apostar_enabled,false)
 })
+
+const scoreSql=fs.readFileSync('scripts/research/mlb_ml_opening_consensus_2026_external_score.sql','utf8')
+test('external scoring SQL is frozen to the exact 2025 formula',()=>{
+  assert.match(scoreSql,/vendor in \('betmgm','betrivers'\)/)
+  assert.match(scoreSql,/having count\(\*\)=2/)
+  assert.match(scoreSql,/favorite_prob>=0\.65/)
+  assert.match(scoreSql,/aligned_votes=6/)
+  assert.match(scoreSql,/f\.season=2026/)
+  assert.doesNotMatch(scoreSql,/\b(insert|update|delete|merge|create|alter|drop|truncate)\b/i)
+})
