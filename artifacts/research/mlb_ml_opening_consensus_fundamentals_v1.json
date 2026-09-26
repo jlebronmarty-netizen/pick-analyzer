@@ -1,0 +1,179 @@
+{
+  "contract": "MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "moneyline",
+  "side_policy": "symmetric market favorite; HOME and AWAY both eligible",
+  "development_season": 2025,
+  "development_window": "2025-05-01 through 2025-09-28",
+  "opening_market_source": {
+    "provider": "balldontlie",
+    "table": "public.mlb_bdl_opening_odds_2025_v1",
+    "vendors": [
+      "betmgm",
+      "betrivers"
+    ],
+    "vendor_quality_rule": "both vendors required; no rescaling or repair of other vendors' extreme prices",
+    "quality_audit": {
+      "betmgm_abs_price_gt_1000_rows": 0,
+      "betrivers_abs_price_gt_1000_rows": 0,
+      "other_vendor_abs_price_gt_1000_pct_range": [
+        3.05,
+        4.038
+      ]
+    },
+    "american_implied_probability_formula": {
+      "negative": "abs(price)/(abs(price)+100)",
+      "positive": "100/(price+100)"
+    },
+    "per_book_no_vig": "home_imp/(home_imp+away_imp)",
+    "consensus_home_probability": "arithmetic mean of BetMGM and BetRivers no-vig home probabilities"
+  },
+  "exact_identity": {
+    "odds_games": 1853,
+    "exact_joined_games": 1853,
+    "unmatched": 0,
+    "ambiguous": 0,
+    "join_rule": "game_date + deterministic team aliases + game_number",
+    "deterministic_team_aliases": {
+      "ARI": "AZ",
+      "CHW": "CWS"
+    },
+    "fuzzy_matching": false
+  },
+  "formula": {
+    "favorite_probability_min": 0.65,
+    "fundamentals_required": 6,
+    "fundamentals_total": 6,
+    "fundamentals": [
+      "market-favorite season win_pct > opponent",
+      "market-favorite run_diff_pg > opponent",
+      "market-favorite pyth_win_pct > opponent",
+      "market-favorite L5 win_pct > opponent",
+      "market-favorite starting pitcher RA9 < opponent starter RA9",
+      "market-favorite bullpen RA9 < opponent bullpen RA9"
+    ],
+    "missing_feature_policy": "fail closed"
+  },
+  "bounded_development_search": {
+    "market_only_probability_cuts": [
+      0.6,
+      0.65,
+      0.7,
+      0.75
+    ],
+    "agreement_probability_cuts": [
+      0.6,
+      0.65
+    ],
+    "agreement_vote_cuts": [
+      4,
+      5,
+      6
+    ],
+    "residual_min_votes": [
+      5,
+      6
+    ],
+    "residual_cuts": [
+      0.15,
+      0.25
+    ],
+    "threshold_rescue_after_external": false
+  },
+  "development_2025": {
+    "n": 78,
+    "wins": 59,
+    "losses": 19,
+    "accuracy": 0.7564102564102564,
+    "months": 5,
+    "worst_month_accuracy": 0.6666666666666666,
+    "market_only_same_prob_cut": {
+      "n": 176,
+      "wins": 131,
+      "accuracy": 0.7443181818181818
+    },
+    "accuracy_lift_vs_market_only_pp": 1.209207459207459,
+    "avg_consensus_favorite_probability": 0.694165,
+    "median_consensus_favorite_probability": 0.68863,
+    "wins_minus_market_expectation": 4.855,
+    "monthly": {
+      "2025-05": {
+        "n": 29,
+        "wins": 23,
+        "accuracy": 0.793103
+      },
+      "2025-06": {
+        "n": 14,
+        "wins": 10,
+        "accuracy": 0.714286
+      },
+      "2025-07": {
+        "n": 8,
+        "wins": 6,
+        "accuracy": 0.75
+      },
+      "2025-08": {
+        "n": 12,
+        "wins": 8,
+        "accuracy": 0.666667
+      },
+      "2025-09": {
+        "n": 15,
+        "wins": 12,
+        "accuracy": 0.8
+      }
+    },
+    "side_readback": {
+      "HOME": {
+        "n": 64,
+        "wins": 49,
+        "accuracy": 0.765625
+      },
+      "AWAY": {
+        "n": 14,
+        "wins": 10,
+        "accuracy": 0.714286
+      }
+    },
+    "book_consensus_robustness": {
+      "avg_absolute_home_probability_gap": 0.010171,
+      "max_absolute_home_probability_gap": 0.032622,
+      "both_books_individually_ge_0p65": 70,
+      "consensus_only_crossings": 8,
+      "avg_betmgm_favorite_probability": 0.690818,
+      "avg_betrivers_favorite_probability": 0.697512,
+      "note": "descriptive only; formula remains consensus mean >=0.65"
+    }
+  },
+  "rejected_families": [
+    {
+      "family": "market-only",
+      "best_gate_note": "0.65 cut = 74.43%; 0.70 cut = 82.76% but n=58 <60"
+    },
+    {
+      "family": "market_fundamental_residual",
+      "best_accuracy": 0.651452,
+      "state": "FAIL"
+    }
+  ],
+  "external_2026": {
+    "opened": false,
+    "state": "SEALED_PENDING_FROZEN_EXTERNAL"
+  },
+  "price_policy": {
+    "calculate_ev": false,
+    "reason": "aggregate accuracy and aggregate market-probability residual are not calibrated per-play edge"
+  },
+  "boundaries": {
+    "no_side_restriction_after_readback": true,
+    "no_vendor_odds_rescaling": true,
+    "no_threshold_retuning_after_2026": true,
+    "no_historical_odds_api_spend": true,
+    "official_picks_unchanged": true,
+    "apostar_disabled": true
+  },
+  "state": "FROZEN_2025_GATE_PASS_EXTERNAL_2026_SEALED"
+}
