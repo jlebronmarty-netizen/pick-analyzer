@@ -1,0 +1,43 @@
+{
+  "contract": "MLB_ML_OPENING_CONSENSUS_PROSPECTIVE_RUNTIME_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "formula_id": "MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1",
+  "formula_state": "EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE",
+  "schedule_stage": "insert-only current-date future games into mlb_ml_xyear_game_v1 with score/winner NULL",
+  "materializer": "mlb_ml_xyear_materialize_pregame_v4",
+  "materializer_required": {
+    "syncStatus": "COMPLETE",
+    "integrityStatus": "READY_CORE_FAIL_CLOSED",
+    "cutoffViolationRows": 0,
+    "starterEvidenceTimeViolations": 0
+  },
+  "opening": {
+    "provider": "balldontlie",
+    "endpoint": "/mlb/v1/odds/opening",
+    "vendors": [
+      "betmgm",
+      "betrivers"
+    ],
+    "current_date_requery_allowed": true,
+    "historical_odds_api_calls": 0
+  },
+  "formula": {
+    "favorite_probability_min": 0.65,
+    "aligned_votes": 6,
+    "side_policy": "symmetric"
+  },
+  "freeze_table": "public.mlb_ml_opening_consensus_forward_v1",
+  "scheduler": "existing hourly /api/cron/mlb-official-settlement",
+  "failure_policy": "non-blocking to certified settlement; fail closed for research candidate",
+  "boundaries": {
+    "no_threshold_change": true,
+    "no_vendor_change": true,
+    "no_side_change": true,
+    "no_feature_change": true,
+    "no_current_odds_substitution": true,
+    "no_postgame_recompute": true
+  }
+}
