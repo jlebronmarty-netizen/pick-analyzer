@@ -202,16 +202,30 @@ async function historicalGames(date: string) {
 }
 
 async function seasonDates() {
-  const result = await supabaseAdmin
-    .from('historical_baseball_games')
-    .select('game_date')
-    .eq('sport_key', SPORT_KEY)
-    .eq('season', SEASON)
-    .order('game_date', { ascending: true })
-    .limit(5000)
+  const dates = new Set<string>()
+  const pageSize = 1000
 
-  if (result.error) throw new Error('HISTORICAL_DATE_READ_FAILED:' + result.error.message)
-  return [...new Set((result.data ?? []).map((row) => String(row.game_date)).filter(Boolean))].sort()
+  for (let offset = 0; ; offset += pageSize) {
+    const result = await supabaseAdmin
+      .from('historical_baseball_games')
+      .select('game_date')
+      .eq('sport_key', SPORT_KEY)
+      .eq('season', SEASON)
+      .order('game_date', { ascending: true })
+      .range(offset, offset + pageSize - 1)
+
+    if (result.error) throw new Error('HISTORICAL_DATE_READ_FAILED:' + result.error.message)
+
+    const rows = result.data ?? []
+    for (const row of rows) {
+      const date = String(row.game_date ?? '')
+      if (date) dates.add(date)
+    }
+
+    if (rows.length < pageSize) break
+  }
+
+  return [...dates].sort()
 }
 
 async function completedDates() {
