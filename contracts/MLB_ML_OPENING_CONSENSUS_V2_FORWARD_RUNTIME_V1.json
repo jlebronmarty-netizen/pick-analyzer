@@ -36,5 +36,13 @@
     "no_retune": true,
     "no_vendor_change": true,
     "no_side_change": true
+  },
+  "lineage": {
+    "exact_game_pk_match": true,
+    "exact_canonical_game_id_match": true,
+    "target_game_date_match": true,
+    "secondary_feature_cutoff_must_equal_v1_cutoff": true,
+    "feature_cutoff_must_precede_target_date": true,
+    "actual_winner_must_be_null_at_freeze": true
   }
 }
