@@ -253,7 +253,22 @@
       "months_pass": true,
       "worst_month_pass": false
     },
-    "state": "EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE"
+    "state": "EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE",
+    "price_diagnostic": {
+      "staking": "1 unit flat per selected game",
+      "price_source": "exact opening price at each book; no best-line switching",
+      "betmgm": {
+        "units": 5.2935,
+        "roi_pct": 14.31,
+        "avg_price": -247.7
+      },
+      "betrivers": {
+        "units": 5.1536,
+        "roi_pct": 13.93,
+        "avg_price": -250.43
+      },
+      "state": "DESCRIPTIVE_REALIZED_ROI_ONLY_NOT_MODEL_EV"
+    }
   },
   "price_policy": {
     "calculate_ev": false,
