@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { settleMlbOfficialPickBacklog } from '@/services/pick2-mlb-certified-settlement-cron.service'
 import { freezeBdlPregameLineups } from '@/services/mlb-bdl-pregame-lineup-freeze.service'
 import { captureBdlMainMarketMovement } from '@/services/mlb-bdl-main-market-movement-capture.service'
+import { runMlbOpeningConsensusProspective } from '@/services/mlb-opening-consensus-prospective.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,6 +24,24 @@ export async function GET(request: NextRequest) {
   }
   if (!authorized(request)) {
     return NextResponse.json({ success: false, status: 'UNAUTHORIZED' }, { status: 401 })
+  }
+
+  let researchOpeningConsensusMoneyline: unknown
+  try {
+    researchOpeningConsensusMoneyline = await runMlbOpeningConsensusProspective()
+  } catch (error) {
+    researchOpeningConsensusMoneyline = {
+      success: false,
+      status: 'MLB_OPENING_CONSENSUS_PROSPECTIVE_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      modelRetuned: false,
+      historicalOddsApiCalls: 0,
+      providerCallsMade: 0,
+      error: error instanceof Error ? error.message : 'UNKNOWN_OPENING_CONSENSUS_PROSPECTIVE_ERROR',
+    }
   }
 
   let researchMainMarketMovement: unknown
@@ -66,6 +85,7 @@ export async function GET(request: NextRequest) {
       ...result,
       researchLineupCapture,
       researchMainMarketMovement,
+      researchOpeningConsensusMoneyline,
     }, {
       status: 200,
       headers: { 'Cache-Control': 'no-store' },
@@ -77,6 +97,7 @@ export async function GET(request: NextRequest) {
       error: error instanceof Error ? error.message : 'UNKNOWN_SETTLEMENT_CRON_ERROR',
       researchLineupCapture,
       researchMainMarketMovement,
+      researchOpeningConsensusMoneyline,
       officialPicksModified: false,
       apostarActivated: false,
     }, {
