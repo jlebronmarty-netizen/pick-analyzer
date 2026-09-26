@@ -203,3 +203,16 @@ Final state:
 `EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE`
 
 No threshold, vendor, side or feature rescue is authorized from this result. The 81.08% pooled accuracy is promising descriptive evidence, but it is not certification.
+
+## External realized-price diagnostic
+
+Using the exact frozen opening price at each book separately and 1 unit flat per selected game:
+
+- BetMGM: **+5.2935u**, ROI **+14.31%**
+- BetRivers: **+5.1536u**, ROI **+13.93%**
+
+Average selected prices:
+- BetMGM: -247.70
+- BetRivers: -250.43
+
+This is realized retrospective ROI on observed opening prices. It is not model EV, not CLV, and it does not override the external n/stability failure.
