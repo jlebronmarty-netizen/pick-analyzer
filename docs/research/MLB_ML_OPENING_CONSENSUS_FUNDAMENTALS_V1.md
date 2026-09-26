@@ -145,3 +145,15 @@ State:
 The next valid step is one untouched 2026 external evaluation using the frozen formula and the same clean opening-market lineage.
 
 No threshold, side, vendor set, feature definition or identity rule may change after the 2026 external set is opened.
+
+## Two-book consensus robustness
+
+The frozen formula is not altered, but the 78 selected rows were checked for book dependence:
+
+- average absolute BetMGM vs BetRivers home-probability gap: **1.02 pp**
+- maximum gap: **3.26 pp**
+- 70/78 selected games were individually >=65% at both books
+- 8/78 crossed 65% only after taking the frozen two-book consensus mean
+- average favorite probability: BetMGM 69.08%, BetRivers 69.75%
+
+This is descriptive only. The formula remains the two-book consensus mean >=65%; it is not tightened to require both books individually after seeing the result.
