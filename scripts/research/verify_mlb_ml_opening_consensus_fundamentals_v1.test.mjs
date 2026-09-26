@@ -29,7 +29,8 @@ test('identity is exact and complete',()=>{
 })
 
 test('2026 remains sealed and no post-readback side restriction is allowed',()=>{
-  assert.equal(a.external_2026.opened,false)
+  assert.equal(a.external_2026.opened,true)
+  assert.equal(a.external_2026.threshold_retuned,false)
   assert.equal(a.boundaries.no_side_restriction_after_readback,true)
   assert.equal(a.boundaries.no_threshold_retuning_after_2026,true)
 })
@@ -41,4 +42,15 @@ test('research boundaries remain closed',()=>{
   assert.equal(a.apostar_enabled,false)
   assert.equal(a.boundaries.no_historical_odds_api_spend,true)
   assert.equal(a.price_policy.calculate_ev,false)
+})
+
+test('untouched 2026 external passes pooled accuracy but fails n and stability gates',()=>{
+  assert.equal(a.external_2026.result.n,37)
+  assert.equal(a.external_2026.result.wins,30)
+  assert(a.external_2026.result.accuracy>=0.75)
+  assert.equal(a.external_2026.gate.accuracy_pass,true)
+  assert.equal(a.external_2026.gate.n_pass,false)
+  assert.equal(a.external_2026.gate.worst_month_pass,false)
+  assert.equal(a.external_2026.backfill.selected_games_with_extreme_price,0)
+  assert.equal(a.external_2026.state,'EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE')
 })
