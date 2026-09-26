@@ -80,24 +80,24 @@ export async function freezeMlbOpeningConsensusV2(input:{targetDate?:string;now?
     if(String(row.feature_cutoff_date??'')>=targetDate){lineageBlocked++;continue}
 
     const home=row.pick_side==='HOME'
-    const starter=home
-      ? finite(f.away_sp_ra9)!-finite(f.home_sp_ra9)!
-      : finite(f.home_sp_ra9)!-finite(f.away_sp_ra9)!
-    const bullpen=home
-      ? finite(f.away_bullpen_ra9)!-finite(f.home_bullpen_ra9)!
-      : finite(f.home_bullpen_ra9)!-finite(f.away_bullpen_ra9)!
-    const common=home
-      ? finite(f.home_common_win_pct)!-finite(f.away_common_win_pct)!
-      : finite(f.away_common_win_pct)!-finite(f.home_common_win_pct)!
-    const venue=home
-      ? finite(f.home_home_win_pct)!-finite(f.away_away_win_pct)!
-      : finite(f.away_away_win_pct)!-finite(f.home_home_win_pct)!
+    const homeSp=finite(f.home_sp_ra9)
+    const awaySp=finite(f.away_sp_ra9)
+    const homeBp=finite(f.home_bullpen_ra9)
+    const awayBp=finite(f.away_bullpen_ra9)
+    const homeCommon=finite(f.home_common_win_pct)
+    const awayCommon=finite(f.away_common_win_pct)
+    const homeVenue=finite(f.home_home_win_pct)
+    const awayVenue=finite(f.away_away_win_pct)
 
-    const values=[starter,bullpen,common,venue]
-    if(values.some(v=>!Number.isFinite(v))){
+    if([homeSp,awaySp,homeBp,awayBp,homeCommon,awayCommon,homeVenue,awayVenue].some(v=>v===null)){
       missingSecondary++
       continue
     }
+
+    const starter=home ? awaySp!-homeSp! : homeSp!-awaySp!
+    const bullpen=home ? awayBp!-homeBp! : homeBp!-awayBp!
+    const common=home ? homeCommon!-awayCommon! : awayCommon!-homeCommon!
+    const venue=home ? homeVenue!-awayVenue! : awayVenue!-homeVenue!
 
     const checks={
       starter_ra9_edge:{value:starter,cut:CUTS.starterRa9,pass:starter>=CUTS.starterRa9},
