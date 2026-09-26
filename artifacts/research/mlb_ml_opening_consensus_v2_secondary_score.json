@@ -1,0 +1,246 @@
+{
+  "contract": "MLB_ML_OPENING_CONSENSUS_V2_SECONDARY_SCORE/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "lineage": {
+    "parent_formula": "MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1/1.0.0",
+    "hypothesis_generation": "post-hoc exploratory analysis of 2025/known-2026 V1 selections",
+    "threshold_derivation_set": "2025-05-01 through 2025-07-31 only",
+    "internal_holdout": "2025-08-01 through 2025-09-28",
+    "external_status": "NO_UNTOUCHED_EXTERNAL_AVAILABLE; 2026 already observed for V1",
+    "validation_mode": "forward-only after freeze"
+  },
+  "base_gate": {
+    "opening_provider": "balldontlie",
+    "vendors": [
+      "betmgm",
+      "betrivers"
+    ],
+    "favorite_probability_min": 0.65,
+    "fundamentals_aligned_required": 6,
+    "fundamentals_total": 6,
+    "side_policy": "symmetric"
+  },
+  "secondary_score": {
+    "eligibility_min": 2,
+    "missing_secondary_feature_policy": "FAIL_CLOSED",
+    "components": [
+      {
+        "id": "bullpen_ra9_edge",
+        "rule": "favorite bullpen RA9 advantage >= 0.935409247675931",
+        "cut_source": "May-Jul 2025 Q25"
+      },
+      {
+        "id": "common_opponent_edge",
+        "rule": "favorite common-opponent win_pct advantage >= 0.158617424242424",
+        "cut_source": "May-Jul 2025 Q25"
+      },
+      {
+        "id": "venue_split_edge",
+        "rule": "favorite venue/home-road win_pct advantage >= 0.238452767470625",
+        "cut_source": "May-Jul 2025 Q25"
+      },
+      {
+        "id": "starter_ra9_edge",
+        "rule": "favorite starter RA9 advantage >= 1.55737077764639",
+        "cut_source": "May-Jul 2025 Q25"
+      }
+    ],
+    "confidence_labels": {
+      "2": "STANDARD",
+      "3": "STRONG",
+      "4": "MAX"
+    },
+    "note": "confidence labels are descriptive; only >=2 is the eligibility contract"
+  },
+  "development_2025": {
+    "parent_v1": {
+      "n": 78,
+      "wins": 59,
+      "losses": 19,
+      "accuracy": 0.7564102564102564
+    },
+    "v2_full": {
+      "n": 63,
+      "wins": 52,
+      "losses": 11,
+      "accuracy": 0.8253968253968254
+    },
+    "development_may_jul": {
+      "n": 44,
+      "wins": 36,
+      "losses": 8,
+      "accuracy": 0.8181818181818182
+    },
+    "internal_holdout_aug_sep": {
+      "n": 19,
+      "wins": 16,
+      "losses": 3,
+      "accuracy": 0.8421052631578947
+    },
+    "monthly": {
+      "2025-05": {
+        "n": 28,
+        "wins": 23,
+        "losses": 5,
+        "accuracy": 0.8214285714285714
+      },
+      "2025-06": {
+        "n": 11,
+        "wins": 8,
+        "losses": 3,
+        "accuracy": 0.7272727272727273
+      },
+      "2025-07": {
+        "n": 5,
+        "wins": 5,
+        "losses": 0,
+        "accuracy": 1
+      },
+      "2025-08": {
+        "n": 8,
+        "wins": 7,
+        "losses": 1,
+        "accuracy": 0.875
+      },
+      "2025-09": {
+        "n": 11,
+        "wins": 9,
+        "losses": 2,
+        "accuracy": 0.8181818181818182
+      }
+    },
+    "worst_month_accuracy": 0.7272727272727273,
+    "score_distribution": {
+      "0": {
+        "n": 2,
+        "wins": 1,
+        "accuracy": 0.5
+      },
+      "1": {
+        "n": 13,
+        "wins": 6,
+        "accuracy": 0.46153846153846156
+      },
+      "2": {
+        "n": 13,
+        "wins": 9,
+        "accuracy": 0.6923076923076923
+      },
+      "3": {
+        "n": 20,
+        "wins": 16,
+        "accuracy": 0.8
+      },
+      "4": {
+        "n": 30,
+        "wins": 27,
+        "accuracy": 0.9
+      }
+    },
+    "excluded_by_v2": {
+      "n": 15,
+      "wins": 7,
+      "losses": 8,
+      "accuracy": 0.4666666666666667
+    },
+    "exploratory_association": {
+      "fisher_exact_one_sided_p": 0.0069702926928472,
+      "odds_ratio": 5.402597402597403,
+      "note": "post-hoc internal statistic only; not external validation"
+    }
+  },
+  "diagnostic_2026_known": {
+    "note": "not external; 2026 was already observed before V2 hypothesis freeze",
+    "complete_secondary_rows": 31,
+    "v2_eligible": {
+      "n": 21,
+      "wins": 19,
+      "losses": 2,
+      "accuracy": 0.9047619047619048
+    },
+    "below_v2": {
+      "n": 10,
+      "wins": 6,
+      "losses": 4,
+      "accuracy": 0.6
+    },
+    "secondary_missing": {
+      "n": 6,
+      "wins": 5,
+      "losses": 1,
+      "accuracy": 0.8333333333333334
+    },
+    "score_distribution": {
+      "0": {
+        "n": 3,
+        "wins": 2,
+        "accuracy": 0.6666666666666666
+      },
+      "1": {
+        "n": 7,
+        "wins": 4,
+        "accuracy": 0.5714285714285714
+      },
+      "2": {
+        "n": 13,
+        "wins": 12,
+        "accuracy": 0.9230769230769231
+      },
+      "3": {
+        "n": 5,
+        "wins": 4,
+        "accuracy": 0.8
+      },
+      "4": {
+        "n": 3,
+        "wins": 3,
+        "accuracy": 1
+      }
+    }
+  },
+  "rejected_extensions": [
+    {
+      "family": "V2 + offense 2-of-3",
+      "n": 46,
+      "wins": 38,
+      "accuracy": 0.8260869565217391,
+      "reason": "negligible accuracy gain vs V2, loses 17 selections"
+    },
+    {
+      "family": "V2 + recent pitching 2-of-3",
+      "n": 51,
+      "wins": 41,
+      "accuracy": 0.803921568627451,
+      "reason": "lower accuracy than V2"
+    },
+    {
+      "family": "V2 + recent pitching 3-of-3",
+      "n": 26,
+      "wins": 23,
+      "accuracy": 0.8846153846153846,
+      "reason": "high accuracy but insufficient sample"
+    },
+    {
+      "family": "V2 + offense 3-of-3",
+      "n": 35,
+      "wins": 28,
+      "accuracy": 0.8,
+      "reason": "lower efficiency and small sample"
+    }
+  ],
+  "state": "FROZEN_FORWARD_ONLY_NO_RETUNE",
+  "boundaries": {
+    "no_team_name_filter": true,
+    "no_2026_retuning": true,
+    "no_threshold_changes_after_freeze": true,
+    "no_side_restriction": true,
+    "no_vendor_change": true,
+    "no_offense_extension": true,
+    "no_recent_pitching_extension": true,
+    "official_picks_unchanged": true,
+    "apostar_disabled": true
+  }
+}
