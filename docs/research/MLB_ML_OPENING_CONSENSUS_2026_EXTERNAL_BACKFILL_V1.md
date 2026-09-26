@@ -81,3 +81,5 @@ It requires:
 The query is SELECT-only.
 
 Runner trigger marker after PR #238 merge.
+
+Forward Sep26 extension trigger after prospective V4 materialization.
