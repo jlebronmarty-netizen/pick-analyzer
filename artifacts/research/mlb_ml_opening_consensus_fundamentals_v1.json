@@ -137,6 +137,15 @@
         "wins": 10,
         "accuracy": 0.714286
       }
+    },
+    "book_consensus_robustness": {
+      "avg_absolute_home_probability_gap": 0.010171,
+      "max_absolute_home_probability_gap": 0.032622,
+      "both_books_individually_ge_0p65": 70,
+      "consensus_only_crossings": 8,
+      "avg_betmgm_favorite_probability": 0.690818,
+      "avg_betrivers_favorite_probability": 0.697512,
+      "note": "descriptive only; formula remains consensus mean >=0.65"
     }
   },
   "rejected_families": [
