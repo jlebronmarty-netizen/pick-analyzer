@@ -160,8 +160,100 @@
     }
   ],
   "external_2026": {
-    "opened": false,
-    "state": "SEALED_PENDING_FROZEN_EXTERNAL"
+    "opened": true,
+    "threshold_retuned": false,
+    "vendor_set_changed": false,
+    "side_policy_changed": false,
+    "feature_definition_changed": false,
+    "backfill": {
+      "completed_dates": 182,
+      "failed_dates": 0,
+      "date_range": "2026-03-25 through 2026-09-25",
+      "stored_rows": 7464,
+      "covered_games": 1866,
+      "betmgm_games": 1866,
+      "betrivers_games": 1866,
+      "provider_calls": 427,
+      "historical_odds_api_calls": 0,
+      "blocked_contracts": 0,
+      "extreme_price_rows": 16,
+      "selected_games_with_extreme_price": 0
+    },
+    "result": {
+      "n": 37,
+      "wins": 30,
+      "losses": 7,
+      "accuracy": 0.810810810810811,
+      "months": 6,
+      "worst_month_accuracy": 0.333333333333333,
+      "avg_market_probability": 0.679091537590577,
+      "wins_minus_market_expectation": 4.87361310914863,
+      "min_date": "2026-04-01",
+      "max_date": "2026-09-25",
+      "monthly": {
+        "2026-04": {
+          "n": 4,
+          "wins": 2,
+          "losses": 2,
+          "accuracy": 0.5
+        },
+        "2026-05": {
+          "n": 5,
+          "wins": 5,
+          "losses": 0,
+          "accuracy": 1
+        },
+        "2026-06": {
+          "n": 3,
+          "wins": 1,
+          "losses": 2,
+          "accuracy": 0.333333333333333
+        },
+        "2026-07": {
+          "n": 4,
+          "wins": 3,
+          "losses": 1,
+          "accuracy": 0.75
+        },
+        "2026-08": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "accuracy": 0.875
+        },
+        "2026-09": {
+          "n": 13,
+          "wins": 12,
+          "losses": 1,
+          "accuracy": 0.923076923076923
+        }
+      },
+      "sides": {
+        "HOME": {
+          "n": 29,
+          "wins": 23,
+          "losses": 6,
+          "accuracy": 0.793103448275862
+        },
+        "AWAY": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "accuracy": 0.875
+        }
+      }
+    },
+    "gate": {
+      "min_n": 60,
+      "min_accuracy": 0.75,
+      "min_months": 5,
+      "min_worst_month_accuracy": 0.65,
+      "accuracy_pass": true,
+      "n_pass": false,
+      "months_pass": true,
+      "worst_month_pass": false
+    },
+    "state": "EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE"
   },
   "price_policy": {
     "calculate_ev": false,
@@ -175,5 +267,5 @@
     "official_picks_unchanged": true,
     "apostar_disabled": true
   },
-  "state": "FROZEN_2025_GATE_PASS_EXTERNAL_2026_SEALED"
+  "state": "EXTERNAL_ACCURACY_PASS_N_AND_STABILITY_FAIL_NO_RETUNE"
 }
