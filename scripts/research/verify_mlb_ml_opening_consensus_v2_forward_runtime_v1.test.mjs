@@ -20,11 +20,19 @@ test('secondary score thresholds are frozen exactly',()=>{
   assert.match(s,/MIN_SCORE=2/)
 })
 
-test('pregame and missing-data gates fail closed',()=>{
+test('pregame, exact lineage, and missing-data gates fail closed',()=>{
   assert.match(s,/actual_winner/)
   assert.match(s,/feature_cutoff_date/)
+  assert.match(s,/secondaryCanonical!==parentCanonical/)
+  assert.match(s,/secondaryGameDate!==targetDate/)
+  assert.match(s,/secondaryCutoff!==parentCutoff/)
   assert.match(s,/missingSecondary/)
   assert.equal(c.eligibility.missing_secondary_data,'FAIL_CLOSED')
+  assert.equal(c.lineage.exact_game_pk_match,true)
+  assert.equal(c.lineage.exact_canonical_game_id_match,true)
+  assert.equal(c.lineage.target_game_date_match,true)
+  assert.equal(c.lineage.secondary_feature_cutoff_must_equal_v1_cutoff,true)
+  assert.equal(c.lineage.actual_winner_must_be_null_at_freeze,true)
 })
 
 test('settlement requires MLB final and does not recompute formula',()=>{
