@@ -1,0 +1,48 @@
+{
+  "artifact": "MLB_ML_OPENING_CONSENSUS_V2_FORWARD_20260926",
+  "research_only": true,
+  "production_eligible": false,
+  "formula_id": "MLB_ML_OPENING_CONSENSUS_V2_SECONDARY_SCORE/1.0.0",
+  "target_date": "2026-09-26",
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "game_pk": 824543,
+      "matchup": "COL @ CWS",
+      "pick": "CWS",
+      "base_v1": {
+        "opening_consensus_probability": 0.673005147884336,
+        "threshold": 0.65,
+        "fundamentals_aligned": 6,
+        "fundamentals_required": 6
+      },
+      "v2_secondary": {
+        "score": 3,
+        "confidence": "STRONG",
+        "eligibility_min": 2,
+        "starter_ra9_adv": 1.7566265060241,
+        "starter_pass": true,
+        "bullpen_ra9_adv": 1.12710589651023,
+        "bullpen_pass": true,
+        "common_opponent_adv": 0.154168,
+        "common_opponent_pass": false,
+        "venue_split_adv": 0.273288,
+        "venue_pass": true
+      },
+      "strict_pregame": {
+        "feature_cutoff_date": "2026-09-25",
+        "opening_before_first_pitch": true,
+        "actual_winner_at_freeze": null,
+        "same_day_outcome_used": false
+      },
+      "status": "FROZEN_PENDING_FINAL"
+    }
+  ],
+  "boundaries": {
+    "no_threshold_retune": true,
+    "no_team_filter": true,
+    "no_postgame_recompute": true,
+    "official_picks_unchanged": true,
+    "apostar_disabled": true
+  }
+}
