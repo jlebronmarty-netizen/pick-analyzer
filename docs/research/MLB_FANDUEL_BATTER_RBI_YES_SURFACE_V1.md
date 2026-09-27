@@ -7,6 +7,8 @@ Objective: test the FanDuel-visible Batter RBI milestone YES surfaces without re
 Exact surfaces:
 - Batter RBI 0.5 YES
 - Batter RBI 1.5 YES
+- Batter RBI 2.5 YES
+- Batter RBI 3.5 YES
 
 Projection:
 `0.50 * (prior RBI / prior PA * L10 PA/game) + 0.50 * L10 RBI/game`
@@ -28,7 +30,7 @@ Frozen search protocol, declared before results:
 
 ## Result
 
-**No threshold passes the full signal gate on either exact YES surface.**
+**No threshold passes the full signal gate on any tested exact YES surface.**
 
 Batter RBI 0.5 YES:
 - unconditional baseline: 29.45%;
@@ -55,3 +57,10 @@ Boundaries:
 - APOSTAR disabled;
 - no production promotion;
 - no historical Odds API spend.
+
+
+Additional FanDuel-visible milestones closed:
+- RBI 2.5 YES: best n>=60 accuracy **7.40%** at threshold 1.05 (n=500), baseline 3.61%, worst month 5.88%.
+- RBI 3.5 YES: best n>=60 accuracy **3.60%** at threshold 1.05 (n=500), baseline 1.19%, worst month 2.94%.
+
+These are clear FAILs; no 2026 evaluation is warranted.
