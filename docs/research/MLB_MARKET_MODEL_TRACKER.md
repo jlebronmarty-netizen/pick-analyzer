@@ -109,7 +109,7 @@ State:
 `REVISIT_AFTER_FIRST_PASS / NO_75_PLUS_STABLE_FULL_GAME_TOTAL_OPENING_FORMULA_CURRENT_CLEAN_INFORMATION`.
 
 Next exact-data gate for Run Line and Total:
-construct a 2026 BALLDONTLIE opening backfill under the same vendor/line contracts used in the 2025 audits, then replay the frozen 2025-derived architectures without retuning.
+PR #247 prepares the 2026 BALLDONTLIE opening backfill under the same vendor/line contracts used in the 2025 audits. Canonical storage `public.mlb_bdl_opening_runline_total_2026_v1` is RLS-enabled/service-role-only and currently contains 0 rows before acquisition. The settled acquisition universe is 2,415 games across 183 dates (2026-03-25 through 2026-09-26). After authorized execution, replay the already-frozen 2025-derived architectures without retuning.
 
 ## 2026-09-20 Approved props real-line market board — authoritative
 
