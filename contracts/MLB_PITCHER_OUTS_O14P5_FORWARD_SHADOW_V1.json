@@ -1,0 +1,53 @@
+{
+  "contract": "MLB_PITCHER_OUTS_O14P5_FORWARD_SHADOW_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "pitcher_outs",
+  "exact_line": 14.5,
+  "side": "OVER",
+  "projection_formula": "0.50*prior_season_to_date_outs_per_start+0.50*L5_outs_per_start",
+  "minimum_prior_starts": 5,
+  "threshold": 15.75,
+  "development_2025": {
+    "n": 2010,
+    "wins": 1550,
+    "accuracy": 0.7711442786069652,
+    "baseline": 0.7145,
+    "lift_pp": 5.67,
+    "worst_month": 0.7237
+  },
+  "diagnostic_2026": {
+    "n": 1811,
+    "wins": 1430,
+    "accuracy": 0.7896189950303699,
+    "baseline": 0.7083,
+    "lift_pp": 8.13,
+    "worst_month": 0.7586
+  },
+  "forward_start": "2026-09-24",
+  "observed_pre_forward_crossing": {
+    "player": "Nick Martinez",
+    "line": 14.5,
+    "side": "OVER",
+    "price": -189,
+    "projection": 17.204,
+    "result": "WIN",
+    "recorded_outs": 18,
+    "certification_effect": "NONE"
+  },
+  "price_policy": {
+    "collect_price": true,
+    "calculate_ev": false,
+    "reason": "no calibrated per-play probability; historical accuracy is not a substitute"
+  },
+  "boundaries": {
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_threshold_retuning": true,
+    "no_fuzzy_identity": true,
+    "strict_pregame_only": true,
+    "no_historical_odds_api_spend": true
+  }
+}
