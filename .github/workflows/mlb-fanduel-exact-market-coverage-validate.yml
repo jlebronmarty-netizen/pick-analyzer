@@ -1,0 +1,20 @@
+name: MLB FanDuel Exact Market Coverage Validate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/research/mlb_fanduel_exact_market_coverage_board_v1.sql'
+      - 'contracts/MLB_FANDUEL_EXACT_MARKET_COVERAGE_BOARD_V1.json'
+      - 'docs/research/MLB_FANDUEL_EXACT_MARKET_COVERAGE_BOARD_V1.md'
+      - 'scripts/research/verify_mlb_fanduel_exact_market_coverage_board_v1.test.mjs'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_fanduel_exact_market_coverage_board_v1.test.mjs
