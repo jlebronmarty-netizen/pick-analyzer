@@ -41,3 +41,29 @@ The authenticated research route processes at most eight settled game dates per 
 No Official Picks changes, no APOSTAR activation, no production model promotion, and no threshold changes are part of this backfill.
 
 After acquisition completes, PR #244 and PR #245 architectures must be replayed with their already-frozen 2025 cuts. 2026 outcomes cannot alter those cuts.
+
+
+## Final acquisition readback — 2026-09-27
+
+The authorized 2026 backfill completed after one operational permission repair.
+
+Final canonical state:
+- settled date checkpoints: 183 / 183;
+- date universe: 2026-03-25 through 2026-09-26;
+- stored rows: 14,450;
+- Run Line rows: 7,106 across 1,863 games;
+- Total rows: 7,344 across 1,864 games;
+- exact BetMGM + BetRivers standard +/-1.5 games: 1,462;
+- identical BetMGM + BetRivers opening-total games: 1,322;
+- provider calls recorded on completed checkpoints: 429;
+- historical Odds API calls: 0.
+
+Operational repair:
+- the initial table DDL revoked all public-role privileges but omitted an explicit grant back to `service_role`;
+- the backfill therefore recorded permission-denied attempts before acquisition started;
+- canonical repair: `GRANT SELECT, INSERT ... TO service_role`;
+- anon/authenticated SELECT and INSERT remain false;
+- all failed target dates were subsequently retried because only completed checkpoints advance the cursor;
+- 183/183 dates ultimately completed.
+
+The frozen 2026 replay results are documented in PR #244 (Run Line) and PR #245 (Total).
