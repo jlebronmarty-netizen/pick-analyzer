@@ -899,6 +899,41 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 - `DFS_ONLY_DEFERRED`: market has not yet completed the unified protocol.
 - `BLOCKED_HISTORICAL_LINE_COVERAGE`: outcome may be reconstructable, but the historical sportsbook point/line is absent.
 
+## 2026-09-27 Pitcher Outs O13.5 exact-line extension
+
+New frozen research candidate:
+`MLB_PITCHER_OUTS_O13P5_LINE_SURFACE_V1/1.0.0`.
+
+Exact contract:
+- market: Pitcher Outs;
+- line: 13.5;
+- side: OVER;
+- projection: 50% prior season-to-date outs/start + 50% L5 outs/start;
+- qualify when projection >= **16.00**;
+- minimum 5 strict-prior starts.
+
+2025 development:
+- 1,526/1,802 = **84.68%**;
+- baseline 79.32%;
+- lift **+5.37 pp**;
+- worst month **81.72%**.
+
+2026 fixed diagnostic:
+- 1,437/1,690 = **85.03%**;
+- baseline 76.94%;
+- lift **+8.09 pp**;
+- worst month **80.75%**.
+
+2026 is diagnostic because Pitcher Outs outcomes were already inspected by earlier families. Untouched forward validation is still required.
+
+FanDuel 2026-09-27:
+- Janson Junk O13.5 -112;
+- projection 13.371;
+- **NO_PLAY** because 13.371 < 16.00.
+
+State:
+`CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED`.
+
 ## Current market scoreboard
 
 **Authoritative current-state table.** When an older first-pass/second-pass section below differs from this table or from a newer dated authoritative section above, the older section is historical evidence only and does not override the current runtime/research state.
