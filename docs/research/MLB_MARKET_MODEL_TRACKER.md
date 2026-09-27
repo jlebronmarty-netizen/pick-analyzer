@@ -928,6 +928,43 @@ Same-opponent 2025-26 history is now displayed alongside the board for context o
 State:
 `FANDUEL_EXACT_LINE_FORWARD_TRACKING_ACTIVE / NO_RETUNE`.
 
+## 2026-09-27 FanDuel exact-market coverage phase
+
+Board: `MLB_FANDUEL_EXACT_MARKET_COVERAGE_BOARD_V1/1.0.0`.
+
+This phase compares frozen prop contracts against the actual FanDuel surface using exact market + exact line + exact direction. No line or side extrapolation is allowed.
+
+Current exact-side available:
+- Pitcher K O3.5;
+- Pitcher K U6.5;
+- Pitcher Outs O14.5.
+
+Current opposite-side-only:
+- Batter Doubles U0.5;
+- Batter Hits U1.5;
+- Batter HR U0.5;
+- Batter RBI U0.5;
+- Batter Total Bases U1.5;
+- Batter Total Bases U2.5;
+- Batter HRRBI U0.5/U1.5/U2.5.
+
+Current other-line-only:
+- Batter Singles U1.5;
+- Pitcher Outs U18.5 V2.
+
+Not captured on FanDuel today:
+- Pitcher Walks O0.5/U2.5/U3.5;
+- Pitcher ER O1.5/U3.5;
+- Pitcher Hits Allowed U6.5;
+- Batter Strikeouts U1.5;
+- Batter Walks U0.5.
+
+Operational implication:
+FanDuel's currently usable frozen prop surface is concentrated in Pitcher Strikeouts. Pitcher Outs O14.5 is available but still requires its projection gate; 2026-09-27 JR Ritchie O14.5 was NO_PLAY because projection 14.30 < 15.75.
+
+State:
+`FANDUEL_EXACT_MARKET_COVERAGE_ACTIVE / NO_SIDE_EXTRAPOLATION`.
+
 ## Current market scoreboard
 
 **Authoritative current-state table.** When an older first-pass/second-pass section below differs from this table or from a newer dated authoritative section above, the older section is historical evidence only and does not override the current runtime/research state.
