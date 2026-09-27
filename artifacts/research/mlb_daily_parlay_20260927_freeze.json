@@ -1,70 +1,306 @@
 {
-  "artifact": "MLB_DAILY_PARLAY_EXPERIMENT_20260927_FREEZE",
-  "version": "1.0.0",
+  "artifact": "MLB_DAILY_FULL_SLATE_ML_PARLAY_20260927_FREEZE",
+  "version": "2.0.0",
+  "supersedes": "MLB_DAILY_PARLAY_EXPERIMENT_20260927_FREEZE/1.0.0",
   "date": "2026-09-27",
   "research_only": true,
   "official_picks_unchanged": true,
   "apostar_disabled": true,
+  "market_scope": "MONEYLINE_ONLY",
   "slate_games": 15,
-  "target_parlays": 1000,
-  "frozen_parlays": 1000,
-  "stake_per_parlay_usd": 1,
-  "theoretical_total_stake_usd": 1000,
-  "source_freeze_timestamp": "2026-09-27T14:46:26.610Z",
-  "source_verified_legs": 116,
-  "source_games_with_verified_legs": 10,
-  "source_timing": {
-    "pregame_ok": 116,
-    "violations": 0
-  },
-  "source_positive_proxy_edge_legs": {
-    "betmgm": 28,
-    "draftkings": 16
-  },
-  "moneyline_v2_forward_rows_at_freeze": 0,
-  "construction": {
-    "sportsbooks": [
-      "betmgm",
-      "draftkings"
-    ],
-    "same_sportsbook_per_parlay": true,
-    "leg_count_min": 3,
-    "leg_count_max": 5,
-    "max_legs_per_game": 1,
-    "max_candidates_per_sportsbook_game": 2,
-    "force_fill_missing_games": false,
-    "rank_basis": [
-      "proxy_expected_return_factor_desc",
-      "joint_proxy_probability_desc",
-      "decimal_payout_desc"
-    ],
-    "joint_probability_certified": false
-  },
-  "portfolio_distribution": {
-    "betmgm": {
-      "three_leg": 6,
-      "four_leg": 136,
-      "five_leg": 669,
-      "total": 811
+  "legs_per_ticket": 15,
+  "binary_outcome_space": 32768,
+  "target_tickets": 1000,
+  "frozen_tickets": 1000,
+  "stake_per_ticket_usd": 1,
+  "total_stake_usd": 1000,
+  "ranking_engine": "MLB Outcome + Portfolio Engine V1 default frozen architecture",
+  "rank_score": "0.72*normalized_modeled_probability + 0.10*normalized_proxy_expected_return + 0.18*favorite_failure_alignment",
+  "regime_components": [
+    {
+      "name": "favorite_heavy",
+      "weight": 0.15,
+      "favorite_logit_shift": 0.55
     },
-    "draftkings": {
-      "three_leg": 18,
-      "four_leg": 69,
-      "five_leg": 102,
-      "total": 189
+    {
+      "name": "neutral",
+      "weight": 0.55,
+      "favorite_logit_shift": 0
+    },
+    {
+      "name": "upset_heavy",
+      "weight": 0.2,
+      "favorite_logit_shift": -0.55
+    },
+    {
+      "name": "chaos",
+      "weight": 0.1,
+      "favorite_logit_shift": -1
     }
+  ],
+  "outcome_engine_default_coefficients": {
+    "external_residual": 0.25,
+    "starter_edge": 0.3,
+    "bullpen_edge": 0.18,
+    "offense_edge": 0.18,
+    "lineup_edge": 0.22,
+    "weather_edge": 0.08,
+    "travel_edge": 0.08,
+    "repeat_same_fav_won": -0.18,
+    "repeat_same_fav_lost": -0.1,
+    "home_favorite": 0.03
   },
-  "payout_summary": {
-    "gross_if_all_win_for_1_each_usd": 2597.88,
-    "avg_decimal_payout": 2.5979,
-    "min_decimal_payout": 1.8725,
-    "max_decimal_payout": 3.1567
+  "games": [
+    {
+      "away": "NYM",
+      "home": "WSH",
+      "away_ml": -118,
+      "home_ml": 100,
+      "external_away_p": 0.5347,
+      "external_home_p": 0.4653,
+      "price_source": "FanDuel Research"
+    },
+    {
+      "away": "BAL",
+      "home": "NYY",
+      "away_ml": 104,
+      "home_ml": -122,
+      "external_away_p": 0.4294,
+      "external_home_p": 0.5706,
+      "price_source": "FanDuel Research"
+    },
+    {
+      "away": "TB",
+      "home": "PHI",
+      "away_ml": 132,
+      "home_ml": -156,
+      "external_away_p": null,
+      "external_home_p": null,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "CHC",
+      "home": "BOS",
+      "away_ml": -124,
+      "home_ml": 106,
+      "external_away_p": 0.5634,
+      "external_home_p": 0.4366,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "HOU",
+      "home": "ATH",
+      "away_ml": -172,
+      "home_ml": 144,
+      "external_away_p": 0.5361,
+      "external_home_p": 0.4639,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "LAD",
+      "home": "SF",
+      "away_ml": -260,
+      "home_ml": 215,
+      "external_away_p": 0.582,
+      "external_home_p": 0.418,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "CIN",
+      "home": "TOR",
+      "away_ml": 150,
+      "home_ml": -178,
+      "external_away_p": 0.425,
+      "external_home_p": 0.575,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "ATL",
+      "home": "MIA",
+      "away_ml": -108,
+      "home_ml": -108,
+      "external_away_p": 0.3731,
+      "external_home_p": 0.6269,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "COL",
+      "home": "CWS",
+      "away_ml": 138,
+      "home_ml": -164,
+      "external_away_p": 0.3341,
+      "external_home_p": 0.6659,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "STL",
+      "home": "MIL",
+      "away_ml": 210,
+      "home_ml": -255,
+      "external_away_p": 0.3495,
+      "external_home_p": 0.6505,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "PIT",
+      "home": "DET",
+      "away_ml": -126,
+      "home_ml": 108,
+      "external_away_p": 0.4879,
+      "external_home_p": 0.5121,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "ARI",
+      "home": "SD",
+      "away_ml": -156,
+      "home_ml": 132,
+      "external_away_p": 0.4861,
+      "external_home_p": 0.5139,
+      "price_source": "FanDuel Research"
+    },
+    {
+      "away": "CLE",
+      "home": "KC",
+      "away_ml": -146,
+      "home_ml": 124,
+      "external_away_p": 0.5778,
+      "external_home_p": 0.4222,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "LAA",
+      "home": "SEA",
+      "away_ml": 160,
+      "home_ml": -190,
+      "external_away_p": 0.3514,
+      "external_home_p": 0.6486,
+      "price_source": "canonical internal FanDuel pregame"
+    },
+    {
+      "away": "TEX",
+      "home": "MIN",
+      "away_ml": -124,
+      "home_ml": 106,
+      "external_away_p": 0.5482,
+      "external_home_p": 0.4518,
+      "price_source": "canonical internal FanDuel pregame"
+    }
+  ],
+  "portfolio_summary": {
+    "modeled_mass_top_1000": 0.13385103885440477,
+    "avg_decimal_payout": 11340.828208242952,
+    "min_decimal_payout": 2011.39704185414,
+    "max_decimal_payout": 308229.2815877543,
+    "avg_upsets": 4.118
   },
-  "heuristic_summary": {
-    "avg_joint_proxy_probability": 0.4676,
-    "avg_proxy_ev": 0.2064,
-    "caveat": "Ranking heuristic only; historical accuracy is not a certified event-level probability and joint probability is not certified."
-  },
-  "freeze_digest": "247dc5b23b409918204f6ff61720e736",
+  "top_examples": [
+    {
+      "rank": 1,
+      "payout_for_1": 2011.4,
+      "selections": [
+        "NYM",
+        "NYY",
+        "PHI",
+        "CHC",
+        "HOU",
+        "LAD",
+        "TOR",
+        "ATL",
+        "CWS",
+        "MIL",
+        "PIT",
+        "ARI",
+        "CLE",
+        "SEA",
+        "TEX"
+      ]
+    },
+    {
+      "rank": 2,
+      "payout_for_1": 2011.4,
+      "selections": [
+        "NYM",
+        "NYY",
+        "PHI",
+        "CHC",
+        "HOU",
+        "LAD",
+        "TOR",
+        "MIA",
+        "CWS",
+        "MIL",
+        "PIT",
+        "ARI",
+        "CLE",
+        "SEA",
+        "TEX"
+      ]
+    },
+    {
+      "rank": 3,
+      "payout_for_1": 2177.48,
+      "selections": [
+        "WSH",
+        "NYY",
+        "PHI",
+        "CHC",
+        "HOU",
+        "LAD",
+        "TOR",
+        "ATL",
+        "CWS",
+        "MIL",
+        "PIT",
+        "ARI",
+        "CLE",
+        "SEA",
+        "TEX"
+      ]
+    },
+    {
+      "rank": 4,
+      "payout_for_1": 2332.51,
+      "selections": [
+        "NYM",
+        "NYY",
+        "PHI",
+        "CHC",
+        "HOU",
+        "LAD",
+        "TOR",
+        "ATL",
+        "CWS",
+        "MIL",
+        "DET",
+        "ARI",
+        "CLE",
+        "SEA",
+        "TEX"
+      ]
+    },
+    {
+      "rank": 5,
+      "payout_for_1": 2293.71,
+      "selections": [
+        "NYM",
+        "NYY",
+        "PHI",
+        "CHC",
+        "HOU",
+        "LAD",
+        "TOR",
+        "ATL",
+        "CWS",
+        "MIL",
+        "PIT",
+        "ARI",
+        "CLE",
+        "SEA",
+        "MIN"
+      ]
+    }
+  ],
+  "deterministic_ticket_digest": "014e6177b7dd5ba3753633ad1252841d60160e15f1cd76b869e9fd606c9d3007",
   "settlement_status": "PENDING"
 }
