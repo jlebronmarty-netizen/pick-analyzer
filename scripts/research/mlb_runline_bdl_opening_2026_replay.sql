@@ -186,7 +186,7 @@ select
   s.n,
   s.wins,
   round(100.0*s.wins/nullif(s.n,0),2) as accuracy_pct,
-  round(100.0*w.worst_month_accuracy,2) as worst_month_accuracy_pct
+  round((100.0*w.worst_month_accuracy)::numeric,2) as worst_month_accuracy_pct
 from summary s
 left join worst w using(architecture)
 order by s.architecture;
