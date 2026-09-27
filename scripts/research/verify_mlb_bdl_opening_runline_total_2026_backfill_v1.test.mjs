@@ -48,3 +48,14 @@ test('frozen replay SQL exists and contains exact 2025-derived constants', () =>
   assert.match(tt, /0\.832120315086954/)
   assert.match(tt, /No 2026 retuning/i)
 })
+
+
+test('post-merge workflow uses repo secret and bounded resumable execution', () => {
+  const wf = fs.readFileSync('.github/workflows/mlb-bdl-2026-runline-total-backfill.yml','utf8')
+  assert.match(wf, /secrets\.CRON_SECRET/)
+  assert.match(wf, /Authorization: Bearer/)
+  assert.match(wf, /seq 1 30/)
+  assert.match(wf, /historicalOddsApiCalls/)
+  assert.match(wf, /officialPicksModified/)
+  assert.match(wf, /apostarActivated/)
+})
