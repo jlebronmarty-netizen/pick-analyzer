@@ -35,3 +35,16 @@ test('route is authenticated and fail-closed', () => {
   assert.match(route, /UNAUTHORIZED/)
   assert.match(route, /INVALID_REQUEST/)
 })
+
+
+test('frozen replay SQL exists and contains exact 2025-derived constants', () => {
+  const rl = fs.readFileSync('scripts/research/mlb_runline_bdl_opening_2026_replay.sql','utf8')
+  const tt = fs.readFileSync('scripts/research/mlb_totals_bdl_opening_2026_replay.sql','utf8')
+  assert.match(rl, /0\.614472548213551/)
+  assert.match(rl, /0\.609468425467735/)
+  assert.match(rl, /NO 2026 threshold selection|No 2026 threshold selection/i)
+  assert.match(tt, /0\.991581133919843/)
+  assert.match(tt, /1\.20590885779599/)
+  assert.match(tt, /0\.832120315086954/)
+  assert.match(tt, /No 2026 retuning/i)
+})
