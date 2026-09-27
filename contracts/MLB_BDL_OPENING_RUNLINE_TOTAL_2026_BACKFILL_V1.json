@@ -98,5 +98,19 @@
     "min_date": "2026-03-25",
     "max_date": "2026-09-26",
     "stored_rows": 0
+  },
+  "final_acquisition": {
+    "completed_dates": 183,
+    "settled_games_universe": 2415,
+    "stored_rows": 14450,
+    "run_line_rows": 7106,
+    "run_line_games": 1863,
+    "run_line_exact_both_books_standard_1p5_games": 1462,
+    "total_rows": 7344,
+    "total_games": 1864,
+    "total_exact_same_line_both_books_games": 1322,
+    "completed_checkpoint_provider_calls": 429,
+    "historical_odds_api_calls": 0,
+    "permission_repair": "explicit SELECT, INSERT grant to service_role; anon/authenticated remain revoked"
   }
 }

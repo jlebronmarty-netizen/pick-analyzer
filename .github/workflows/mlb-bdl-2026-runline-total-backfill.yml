@@ -49,7 +49,7 @@ jobs:
           rm -f backfill-final.json backfill-progress.ndjson
           done_flag=false
 
-          for batch in $(seq 1 30); do
+          for batch in $(seq 1 40); do
             response="backfill-${batch}.json"
 
             curl -fsS               --connect-timeout 10               --max-time 300               -H "Authorization: Bearer ${CRON_SECRET}"               "${ENDPOINT}"               -o "${response}"

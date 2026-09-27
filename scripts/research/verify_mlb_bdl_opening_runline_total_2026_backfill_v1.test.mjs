@@ -54,8 +54,20 @@ test('post-merge workflow uses repo secret and bounded resumable execution', () 
   const wf = fs.readFileSync('.github/workflows/mlb-bdl-2026-runline-total-backfill.yml','utf8')
   assert.match(wf, /secrets\.CRON_SECRET/)
   assert.match(wf, /Authorization: Bearer/)
-  assert.match(wf, /seq 1 30/)
+  assert.match(wf, /seq 1 40/)
   assert.match(wf, /historicalOddsApiCalls/)
   assert.match(wf, /officialPicksModified/)
   assert.match(wf, /apostarActivated/)
+})
+
+
+test('storage DDL preserves service-role-only access', () => {
+  const ddl = fs.readFileSync('scripts/research/mlb_bdl_opening_runline_total_2026_table.sql','utf8')
+  assert.match(ddl, /revoke all .* from anon, authenticated, public/i)
+  assert.match(ddl, /grant select, insert .* to service_role/i)
+})
+
+test('post-merge workflow can cover a fresh 183-date season in one attempt', () => {
+  const wf = fs.readFileSync('.github/workflows/mlb-bdl-2026-runline-total-backfill.yml','utf8')
+  assert.match(wf, /seq 1 40/)
 })

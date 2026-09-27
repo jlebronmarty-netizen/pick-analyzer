@@ -36,3 +36,4 @@ create index if not exists mlb_bdl_opening_rl_total_2026_market_idx
 
 alter table public.mlb_bdl_opening_runline_total_2026_v1 enable row level security;
 revoke all on table public.mlb_bdl_opening_runline_total_2026_v1 from anon, authenticated, public;
+grant select, insert on table public.mlb_bdl_opening_runline_total_2026_v1 to service_role;
