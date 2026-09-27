@@ -90,5 +90,13 @@
       "env_market_resid_q25": -0.716249372048999,
       "env_market_resid_q75": 0.832120315086954
     }
+  },
+  "storage_sql": "scripts/research/mlb_bdl_opening_runline_total_2026_table.sql",
+  "pre_acquisition_state": {
+    "settled_games": 2415,
+    "settled_dates": 183,
+    "min_date": "2026-03-25",
+    "max_date": "2026-09-26",
+    "stored_rows": 0
   }
 }
