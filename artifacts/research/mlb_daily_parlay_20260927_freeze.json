@@ -1,0 +1,70 @@
+{
+  "artifact": "MLB_DAILY_PARLAY_EXPERIMENT_20260927_FREEZE",
+  "version": "1.0.0",
+  "date": "2026-09-27",
+  "research_only": true,
+  "official_picks_unchanged": true,
+  "apostar_disabled": true,
+  "slate_games": 15,
+  "target_parlays": 1000,
+  "frozen_parlays": 1000,
+  "stake_per_parlay_usd": 1,
+  "theoretical_total_stake_usd": 1000,
+  "source_freeze_timestamp": "2026-09-27T14:46:26.610Z",
+  "source_verified_legs": 116,
+  "source_games_with_verified_legs": 10,
+  "source_timing": {
+    "pregame_ok": 116,
+    "violations": 0
+  },
+  "source_positive_proxy_edge_legs": {
+    "betmgm": 28,
+    "draftkings": 16
+  },
+  "moneyline_v2_forward_rows_at_freeze": 0,
+  "construction": {
+    "sportsbooks": [
+      "betmgm",
+      "draftkings"
+    ],
+    "same_sportsbook_per_parlay": true,
+    "leg_count_min": 3,
+    "leg_count_max": 5,
+    "max_legs_per_game": 1,
+    "max_candidates_per_sportsbook_game": 2,
+    "force_fill_missing_games": false,
+    "rank_basis": [
+      "proxy_expected_return_factor_desc",
+      "joint_proxy_probability_desc",
+      "decimal_payout_desc"
+    ],
+    "joint_probability_certified": false
+  },
+  "portfolio_distribution": {
+    "betmgm": {
+      "three_leg": 6,
+      "four_leg": 136,
+      "five_leg": 669,
+      "total": 811
+    },
+    "draftkings": {
+      "three_leg": 18,
+      "four_leg": 69,
+      "five_leg": 102,
+      "total": 189
+    }
+  },
+  "payout_summary": {
+    "gross_if_all_win_for_1_each_usd": 2597.88,
+    "avg_decimal_payout": 2.5979,
+    "min_decimal_payout": 1.8725,
+    "max_decimal_payout": 3.1567
+  },
+  "heuristic_summary": {
+    "avg_joint_proxy_probability": 0.4676,
+    "avg_proxy_ev": 0.2064,
+    "caveat": "Ranking heuristic only; historical accuracy is not a certified event-level probability and joint probability is not certified."
+  },
+  "freeze_digest": "247dc5b23b409918204f6ff61720e736",
+  "settlement_status": "PENDING"
+}
