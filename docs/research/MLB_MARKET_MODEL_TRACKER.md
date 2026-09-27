@@ -899,6 +899,35 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 - `DFS_ONLY_DEFERRED`: market has not yet completed the unified protocol.
 - `BLOCKED_HISTORICAL_LINE_COVERAGE`: outcome may be reconstructable, but the historical sportsbook point/line is absent.
 
+## 2026-09-27 FanDuel exact-line operational phase — Pitcher Strikeouts
+
+Research layer: `MLB_FANDUEL_PITCHER_K_EXACT_LINE_BOARD_V1/1.0.0`.
+
+This phase does **not** search new thresholds. It operationalizes the already-frozen Pitcher K line-surface contracts from PR #190 against exact FanDuel pregame quotes.
+
+Stable exact-line contracts retained:
+- O3.5 when projection >= 4.25 — 2025 **75.94%**, 2026 diagnostic **76.03%**;
+- U6.5 when projection <= 4.50 — existing certified control, 2025 **86.98%**, 2026 **89.03%**;
+- U7.5 when projection <= 5.50 — 2025 **90.19%**, 2026 **90.59%**, high baseline;
+- U8.5 when projection <= 4.75 — 2025 **96.54%**, 2026 **96.56%**, high baseline.
+
+Diagnostic-only exact-line rules remain blocked from promotion:
+- O4.5 >= 6.25;
+- O5.5 >= 7.75;
+- U5.5 <= 4.50.
+
+All three are pooled 75%+ but fail the frozen 2026 monthly-stability requirement.
+
+2026-09-27 FanDuel frozen stable cohort:
+- 10 O3.5 candidates;
+- 0 qualifying U6.5 candidates in the current captured board;
+- no qualifying U7.5/U8.5 candidate captured in the current board.
+
+Same-opponent 2025-26 history is now displayed alongside the board for context only. It is explicitly forbidden from changing the frozen selection.
+
+State:
+`FANDUEL_EXACT_LINE_FORWARD_TRACKING_ACTIVE / NO_RETUNE`.
+
 ## Current market scoreboard
 
 **Authoritative current-state table.** When an older first-pass/second-pass section below differs from this table or from a newer dated authoritative section above, the older section is historical evidence only and does not override the current runtime/research state.
