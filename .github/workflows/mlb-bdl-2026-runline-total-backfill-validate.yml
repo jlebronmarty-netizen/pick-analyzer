@@ -10,6 +10,7 @@ on:
       - 'contracts/MLB_BDL_OPENING_RUNLINE_TOTAL_2026_BACKFILL_V1.json'
       - 'docs/research/MLB_BDL_OPENING_RUNLINE_TOTAL_2026_BACKFILL_V1.md'
       - 'scripts/research/verify_mlb_bdl_opening_runline_total_2026_backfill_v1.test.mjs'
+      - '.github/workflows/mlb-bdl-2026-runline-total-backfill.yml'
 
 permissions:
   contents: read
