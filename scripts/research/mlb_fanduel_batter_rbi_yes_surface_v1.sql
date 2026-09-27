@@ -29,7 +29,7 @@ with pg as (
 ), grid as (
   select l.line,t.threshold,p.*,(p.projection>=t.threshold) selected,
          (p.actual_rbi>l.line) won,to_char(p.game_date,'YYYY-MM') month_key
-  from pred p cross join (values(0.5::numeric),(1.5::numeric)) l(line)
+  from pred p cross join (values(0.5::numeric),(1.5::numeric),(2.5::numeric),(3.5::numeric)) l(line)
   cross join generate_series(0.00,2.00,0.05) t(threshold)
 ), a as (
   select line,threshold,count(*) filter(where selected) n,
