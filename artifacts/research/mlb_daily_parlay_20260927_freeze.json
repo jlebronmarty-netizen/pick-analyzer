@@ -302,5 +302,47 @@
     }
   ],
   "deterministic_ticket_digest": "014e6177b7dd5ba3753633ad1252841d60160e15f1cd76b869e9fd606c9d3007",
-  "settlement_status": "PENDING"
+  "settlement_status": "SETTLED_WIN",
+  "settlement": {
+    "settled_at": "2026-09-27",
+    "scheduled_games": 15,
+    "settled_games": 14,
+    "void_games": 1,
+    "void_matchup": "BAL @ NYY",
+    "void_reason": "cancelled",
+    "actual_winners": [
+      "WSH",
+      "VOID",
+      "PHI",
+      "CHC",
+      "HOU",
+      "LAD",
+      "TOR",
+      "MIA",
+      "CWS",
+      "MIL",
+      "PIT",
+      "SD",
+      "KC",
+      "SEA",
+      "MIN"
+    ],
+    "winning_ticket_in_top_1000": true,
+    "winning_ticket_rank": 614,
+    "winning_ticket_cancelled_leg_selection": "NYY",
+    "equivalent_cancelled_leg_alt_rank": 1025,
+    "original_15_leg_decimal_payout": 4666.94398816238,
+    "void_leg_american_odds": -122,
+    "void_leg_decimal_factor": 1.819672131147541,
+    "adjusted_decimal_payout": 2564.7169664676144,
+    "stake_per_ticket_usd": 1,
+    "total_portfolio_stake_usd": 1000,
+    "winning_tickets": 1,
+    "losing_tickets": 999,
+    "gross_return_usd": 2564.7169664676144,
+    "net_profit_usd": 1564.7169664676144,
+    "roi": 1.5647169664676144,
+    "investment_justified_by_realized_return": true,
+    "freeze_digest_unchanged": true
+  }
 }
