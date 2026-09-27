@@ -1,0 +1,40 @@
+{
+  "contract": "MLB_FANDUEL_BATTER_SINGLES_YES_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "development_season": 2025,
+  "source_table": "public.mlb_statcast_batter_sdt_game_mv",
+  "source_rule": "source_game_date < target_game_date",
+  "same_date_history_allowed": false,
+  "architecture": "strict-prior singles/PA x prior PA/game opportunity projection",
+  "threshold_grid": {
+    "min": 0.1,
+    "max": 1.5,
+    "step": 0.05,
+    "direction": "select YES when projection >= threshold"
+  },
+  "line": 0.5,
+  "side": "YES",
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "lift_pp": 5
+  },
+  "best_n_ge_60": {
+    "threshold": 0.9,
+    "n": 630,
+    "accuracy": 0.5587,
+    "baseline": 0.427,
+    "lift_pp": 13.18,
+    "worst_month_accuracy": 0.5286
+  },
+  "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE",
+  "external_2026_opened": false,
+  "boundaries": {
+    "no_threshold_retuning": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  }
+}
