@@ -19,6 +19,7 @@ jobs:
     env:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       ENDPOINT: https://pick-analyzer.vercel.app/api/research/mlb/bdl-opening-runline-total-2026-backfill
+
     steps:
       - name: Require execution credential
         shell: bash
@@ -50,29 +51,37 @@ jobs:
 
           for batch in $(seq 1 30); do
             response="backfill-${batch}.json"
+
             curl -fsS               --connect-timeout 10               --max-time 300               -H "Authorization: Bearer ${CRON_SECRET}"               "${ENDPOINT}"               -o "${response}"
 
-            node - "${response}" "${batch}" <<'NODE' | tee -a backfill-progress.ndjson
-          const fs = require('fs')
-          const [file,batch] = process.argv.slice(2)
-          const p = JSON.parse(fs.readFileSync(file,'utf8'))
-          if (p.success !== true) throw new Error('backfill batch failed: '+JSON.stringify({status:p.status,error:p.error}))
-          console.log(JSON.stringify({
-            batch: Number(batch),
-            status: p.status,
-            done: p.done,
-            totalDates: p.totalDates,
-            completedDates: p.completedDates,
-            remainingDates: p.remainingDates,
-            processedDates: p.processedDates,
-            insertedRows: p.insertedRows ?? 0,
-            providerCallsMade: p.providerCallsMade ?? 0,
-            failedDates: p.failedDates ?? []
-          }))
-NODE
+            node -e '
+              const fs=require("fs");
+              const file=process.argv[1];
+              const batch=Number(process.argv[2]);
+              const p=JSON.parse(fs.readFileSync(file,"utf8"));
+              if(p.success!==true) throw new Error("backfill batch failed: "+JSON.stringify({status:p.status,error:p.error}));
+              console.log(JSON.stringify({
+                batch,
+                status:p.status,
+                done:p.done,
+                totalDates:p.totalDates,
+                completedDates:p.completedDates,
+                remainingDates:p.remainingDates,
+                processedDates:p.processedDates,
+                insertedRows:p.insertedRows??0,
+                providerCallsMade:p.providerCallsMade??0,
+                failedDates:p.failedDates??[]
+              }));
+            ' "${response}" "${batch}" | tee -a backfill-progress.ndjson
 
             cp "${response}" backfill-final.json
-            done_flag="$(node -p "String(JSON.parse(require('fs').readFileSync('${response}','utf8')).done === true)")"
+
+            done_flag="$(node -e '
+              const fs=require("fs");
+              const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+              process.stdout.write(String(p.done===true));
+            ' "${response}")"
+
             if [ "${done_flag}" = "true" ]; then
               break
             fi
@@ -84,23 +93,23 @@ NODE
         shell: bash
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs')
-          const p = JSON.parse(fs.readFileSync('backfill-final.json','utf8'))
-          if (p.success !== true || p.done !== true) throw new Error('backfill did not finish')
-          if (p.historicalOddsApiCalls !== 0) throw new Error('historical Odds API usage detected')
-          if (p.officialPicksModified !== false) throw new Error('Official Picks boundary failed')
-          if (p.apostarActivated !== false) throw new Error('APOSTAR boundary failed')
-          if (p.provider !== 'balldontlie') throw new Error('unexpected provider')
-          console.log(JSON.stringify({
-            status:p.status,
-            totalDates:p.totalDates,
-            completedDates:p.completedDates,
-            remainingDates:p.remainingDates,
-            storedRows:p.storedRows ?? null,
-            historicalOddsApiCalls:p.historicalOddsApiCalls
-          }, null, 2))
-NODE
+          node -e '
+            const fs=require("fs");
+            const p=JSON.parse(fs.readFileSync("backfill-final.json","utf8"));
+            if(p.success!==true || p.done!==true) throw new Error("backfill did not finish");
+            if(p.historicalOddsApiCalls!==0) throw new Error("historical Odds API usage detected");
+            if(p.officialPicksModified!==false) throw new Error("Official Picks boundary failed");
+            if(p.apostarActivated!==false) throw new Error("APOSTAR boundary failed");
+            if(p.provider!=="balldontlie") throw new Error("unexpected provider");
+            console.log(JSON.stringify({
+              status:p.status,
+              totalDates:p.totalDates,
+              completedDates:p.completedDates,
+              remainingDates:p.remainingDates,
+              storedRows:p.storedRows??null,
+              historicalOddsApiCalls:p.historicalOddsApiCalls
+            },null,2));
+          '
 
       - uses: actions/upload-artifact@v4
         if: always()
