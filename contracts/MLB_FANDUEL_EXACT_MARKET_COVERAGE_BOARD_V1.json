@@ -1,0 +1,15 @@
+{
+  "contract": "MLB_FANDUEL_EXACT_MARKET_COVERAGE_BOARD_V1/1.0.0",
+  "status": "RESEARCH_ONLY",
+  "sportsbook": "fanduel",
+  "rule": "exact market + exact line + exact direction; no line or side extrapolation",
+  "contracts_count": 22,
+  "current_date_example": "2026-09-27",
+  "boundaries": [
+    "no threshold retuning",
+    "no side aliasing beyond YES/OVER and NO/UNDER settlement semantics",
+    "no Official Picks",
+    "APOSTAR disabled",
+    "no historical Odds API spend"
+  ]
+}
