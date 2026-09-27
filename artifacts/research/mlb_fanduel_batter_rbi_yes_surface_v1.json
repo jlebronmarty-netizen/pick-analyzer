@@ -1,0 +1,54 @@
+{
+  "contract": "MLB_FANDUEL_BATTER_RBI_YES_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "development_season": 2025,
+  "source_tables": [
+    "historical_baseball_games",
+    "historical_baseball_batter_appearances"
+  ],
+  "source_rule": "source_game_date < target_game_date",
+  "same_date_history_allowed": false,
+  "projection_formula": "0.50*(prior_RBI/prior_PA*L10_PA_per_game)+0.50*L10_RBI_per_game",
+  "minimum_prior_games": 10,
+  "threshold_grid": {
+    "min": 0,
+    "max": 2,
+    "step": 0.05
+  },
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "lift_pp": 5
+  },
+  "results": [
+    {
+      "line": 0.5,
+      "side": "YES",
+      "baseline_accuracy": 0.2945,
+      "best_observed_n_ge_60": {
+        "threshold": 1.05,
+        "n": 500,
+        "accuracy": 0.382,
+        "lift_pp": 8.75,
+        "worst_month_accuracy": 0.3333
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "line": 1.5,
+      "side": "YES",
+      "baseline_accuracy": 0.1044,
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    }
+  ],
+  "external_2026_opened": false,
+  "boundaries": {
+    "no_side_inversion": true,
+    "no_threshold_retuning": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true
+  }
+}
