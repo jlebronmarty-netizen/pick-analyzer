@@ -1,0 +1,90 @@
+{
+  "contract": "MLB_FANDUEL_BATTER_TOTAL_BASES_YES_VOLUME_V1/1.0.0",
+  "research_only": true,
+  "development_season": 2025,
+  "source_table": "public.mlb_statcast_batter_total_bases_game_mv",
+  "architecture": "strict-prior PA/game opportunity only",
+  "source_rule": "source_game_date < target_game_date",
+  "same_date_history_allowed": false,
+  "threshold_grid": {
+    "min": 3,
+    "max": 5,
+    "step": 0.05,
+    "direction": "select YES when prior_PA_per_game >= threshold"
+  },
+  "lines": [
+    1.5,
+    2.5,
+    3.5,
+    4.5
+  ],
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "lift_pp": 5
+  },
+  "results": [
+    {
+      "line": 1.5,
+      "best_n_ge_60": {
+        "pa_cut": 4.45,
+        "n": 2506,
+        "accuracy": 0.4334,
+        "baseline": 0.3345,
+        "lift_pp": 9.89,
+        "worst_month": 0.4135
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "line": 2.5,
+      "best_n_ge_60": {
+        "pa_cut": 4.6,
+        "n": 574,
+        "accuracy": 0.3014,
+        "baseline": 0.1952,
+        "lift_pp": 10.62,
+        "worst_month": 0.2361
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "line": 3.5,
+      "best_n_ge_60": {
+        "pa_cut": 4.6,
+        "n": 574,
+        "accuracy": 0.2352,
+        "baseline": 0.1386,
+        "lift_pp": 9.66,
+        "worst_month": 0.2083
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "line": 4.5,
+      "best_n_ge_60": {
+        "pa_cut": 4.65,
+        "n": 269,
+        "accuracy": 0.1115,
+        "baseline": 0.066,
+        "lift_pp": 4.55,
+        "worst_month": 0
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    }
+  ],
+  "external_2026_opened": false,
+  "notes": [
+    "New architecture is separate from certified Total Bases UNDER models.",
+    "No exact projection-refit parity was claimed for this architecture.",
+    "No threshold rescue after results."
+  ],
+  "boundaries": {
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true,
+    "no_production_promotion": true
+  }
+}
