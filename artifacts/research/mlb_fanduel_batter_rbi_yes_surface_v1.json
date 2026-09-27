@@ -41,6 +41,32 @@
       "side": "YES",
       "baseline_accuracy": 0.1044,
       "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "line": 2.5,
+      "side": "YES",
+      "baseline_accuracy": 0.0361,
+      "best_observed_n_ge_60": {
+        "threshold": 1.05,
+        "n": 500,
+        "accuracy": 0.074,
+        "lift_pp": 3.79,
+        "worst_month_accuracy": 0.0588
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
+    },
+    {
+      "line": 3.5,
+      "side": "YES",
+      "baseline_accuracy": 0.0119,
+      "best_observed_n_ge_60": {
+        "threshold": 1.05,
+        "n": 500,
+        "accuracy": 0.036,
+        "lift_pp": 2.41,
+        "worst_month_accuracy": 0.0294
+      },
+      "state": "NO_75_PLUS_STABLE_SIGNAL_CANDIDATE"
     }
   ],
   "external_2026_opened": false,
