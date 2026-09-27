@@ -1,0 +1,65 @@
+{
+  "contract": "MLB_PITCHER_OUTS_O13P5_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "source_table": "public.mlb_ml_xyear_pitcher_game_v1",
+  "projection_formula": "0.50 * prior season-to-date outs/start + 0.50 * L5 outs/start",
+  "minimum_prior_starts": 5,
+  "source_rule": "source_game_date < target_game_date",
+  "same_date_history_allowed": false,
+  "development_season": 2025,
+  "exact_line": 13.5,
+  "side": "OVER",
+  "threshold_grid": {
+    "min": 12,
+    "max": 20,
+    "step": 0.25
+  },
+  "champion_policy": "maximize selected n among candidates passing all frozen gates; tiebreak lift, accuracy, lower threshold",
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "lift_pp": 5
+  },
+  "frozen_candidate": {
+    "threshold": 16,
+    "development_2025": {
+      "n": 1802,
+      "wins": 1526,
+      "accuracy": 0.8468,
+      "baseline": 0.7932,
+      "lift_pp": 5.37,
+      "worst_month": 0.8172,
+      "min_month_n": 72
+    },
+    "diagnostic_2026": {
+      "n": 1690,
+      "wins": 1437,
+      "accuracy": 0.8503,
+      "baseline": 0.7694,
+      "lift_pp": 8.09,
+      "worst_month": 0.8075,
+      "min_month_n": 75
+    },
+    "state": "CROSS_YEAR_DIAGNOSTIC_STABLE_75_PLUS_FORWARD_VALIDATION_REQUIRED"
+  },
+  "current_fanduel_2026_09_27": {
+    "pitcher": "Janson Junk",
+    "game_pk": 823814,
+    "line": 13.5,
+    "side": "OVER",
+    "price": -112,
+    "projection": 13.371,
+    "threshold": 16,
+    "decision": "NO_PLAY"
+  },
+  "external_note": "2026 is diagnostic because Pitcher Outs outcomes were previously inspected by earlier families; untouched forward validation remains required.",
+  "boundaries": {
+    "no_threshold_retuning": true,
+    "no_official_picks": true,
+    "apostar_disabled": true,
+    "no_historical_odds_api_spend": true,
+    "no_production_promotion": true
+  }
+}
