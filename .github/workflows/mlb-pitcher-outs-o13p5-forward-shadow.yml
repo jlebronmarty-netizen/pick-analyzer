@@ -1,0 +1,26 @@
+name: MLB Pitcher Outs O13.5 forward shadow
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - contracts/MLB_PITCHER_OUTS_O13P5_FORWARD_SHADOW_V1.json
+      - scripts/research/mlb_pitcher_outs_o13p5_forward_shadow_v1.sql
+      - docs/research/MLB_PITCHER_OUTS_O13P5_FORWARD_SHADOW_V1.md
+      - scripts/research/verify_mlb_pitcher_outs_o13p5_forward_shadow_v1.test.mjs
+      - .github/workflows/mlb-pitcher-outs-o13p5-forward-shadow.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_pitcher_outs_o13p5_forward_shadow_v1.test.mjs

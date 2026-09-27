@@ -1,0 +1,57 @@
+{
+  "contract": "MLB_PITCHER_OUTS_O13P5_FORWARD_SHADOW_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "pitcher_outs",
+  "exact_line": 13.5,
+  "side": "OVER",
+  "projection_formula": "0.50*prior_season_to_date_outs_per_start+0.50*L5_outs_per_start",
+  "minimum_prior_starts": 5,
+  "threshold": 16,
+  "development_2025": {
+    "n": 1802,
+    "wins": 1526,
+    "accuracy": 0.8468,
+    "baseline": 0.7932,
+    "lift_pp": 5.37,
+    "worst_month": 0.8172
+  },
+  "diagnostic_2026": {
+    "n": 1690,
+    "wins": 1437,
+    "accuracy": 0.8503,
+    "baseline": 0.7694,
+    "lift_pp": 8.09,
+    "worst_month": 0.8075
+  },
+  "forward_start": "2026-09-27",
+  "current_2026_09_27": {
+    "player": "Janson Junk",
+    "line": 13.5,
+    "side": "OVER",
+    "price": -112,
+    "projection": 13.371,
+    "state": "MARKET_AVAILABLE_NOT_QUALIFIED"
+  },
+  "states": [
+    "NO_EXACT_MARKET",
+    "MARKET_AVAILABLE_NOT_EVALUABLE",
+    "MARKET_AVAILABLE_NOT_QUALIFIED",
+    "SHADOW_CANDIDATE"
+  ],
+  "price_policy": {
+    "collect_price": true,
+    "calculate_ev": false,
+    "reason": "no calibrated per-play probability; historical accuracy must not be substituted for model probability"
+  },
+  "boundaries": {
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_threshold_retuning": true,
+    "no_fuzzy_identity": true,
+    "strict_pregame_only": true,
+    "no_historical_odds_api_spend": true
+  }
+}
