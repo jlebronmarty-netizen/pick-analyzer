@@ -1,0 +1,28 @@
+name: MLB BDL 2026 Run Line Total Backfill Validate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/services/mlb-bdl-opening-runline-total-2026-backfill.service.ts'
+      - 'src/app/api/research/mlb/bdl-opening-runline-total-2026-backfill/route.ts'
+      - 'contracts/MLB_BDL_OPENING_RUNLINE_TOTAL_2026_BACKFILL_V1.json'
+      - 'docs/research/MLB_BDL_OPENING_RUNLINE_TOTAL_2026_BACKFILL_V1.md'
+      - 'scripts/research/verify_mlb_bdl_opening_runline_total_2026_backfill_v1.test.mjs'
+      - '.github/workflows/mlb-bdl-2026-runline-total-backfill.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate frozen backfill contract
+        run: node --test scripts/research/verify_mlb_bdl_opening_runline_total_2026_backfill_v1.test.mjs
