@@ -1,0 +1,26 @@
+name: MLB FanDuel Pitcher K Exact-Line Board Validate
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/research/mlb_fanduel_pitcher_k_exact_line_board_v1.sql'
+      - 'contracts/MLB_FANDUEL_PITCHER_K_EXACT_LINE_BOARD_V1.json'
+      - 'docs/research/MLB_FANDUEL_PITCHER_K_EXACT_LINE_BOARD_V1.md'
+      - 'scripts/research/verify_mlb_fanduel_pitcher_k_exact_line_board_v1.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate frozen FanDuel K board
+        run: node --test scripts/research/verify_mlb_fanduel_pitcher_k_exact_line_board_v1.test.mjs
