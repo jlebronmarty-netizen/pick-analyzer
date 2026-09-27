@@ -10,6 +10,107 @@ APOSTAR: disabled
 
 
 
+## 2026-09-27 Main-market refresh — authoritative
+
+This section supersedes older Moneyline / Standard Run Line / Full Game Total rows below where they differ.
+
+### Moneyline V2
+
+Frozen candidate: `MLB_ML_OPENING_CONSENSUS_V2_SECONDARY_SCORE/1.0.0`.
+
+Parent market/fundamental gate:
+- BALLDONTLIE opening Moneyline;
+- BetMGM + BetRivers only;
+- per-book no-vig normalization;
+- consensus favorite probability >= 0.65;
+- all 6/6 frozen fundamentals align to the same side.
+
+V2 secondary gate:
+- bullpen RA9 edge >= 0.935409247675931;
+- common-opponent win% edge >= 0.158617424242424;
+- venue split edge >= 0.238452767470625;
+- starter RA9 edge >= 1.55737077764639;
+- eligible when secondary score >= 2/4;
+- missing secondary data fails closed.
+
+2025 frozen evidence:
+- May-Jul development: 36/44 = **81.82%**;
+- Aug-Sep internal holdout: 16/19 = **84.21%**;
+- full May-Sep: 52/63 = **82.54%**;
+- worst selected month: **72.73%**.
+
+Known 2026 diagnostic using the exact BALLDONTLIE BetMGM+BetRivers opening contract:
+- 19/22 = **86.36%**;
+- May 4/4, Jun 1/1, Jul 3/4, Aug 5/5, Sep 6/8;
+- 6 V1-qualified rows lacked complete secondary data and remained fail-closed.
+
+2026 was already opened during V1/V2 research; therefore 19/22 is **diagnostic**, not untouched external certification.
+
+Forward-only certification state:
+- first frozen forward selection: 2026-09-26 COL at CWS, pick CWS ML;
+- V2 secondary score 3/4, confidence STRONG;
+- settled LOSS; actual winner COL;
+- current untouched forward ledger: **0-1, n=1**;
+- n<20 => insufficient forward sample; no retune permitted.
+
+State:
+`TARGET_MET_75_PLUS_RESEARCH_FORWARD_VALIDATION_PENDING`.
+
+### Standard Run Line / Spread
+
+Existing frozen DOG +1.5 V2 remains the prospective benchmark:
+- core: 53/70 = **75.71%** development;
+- transfer: 62/79 = **78.48%** development;
+- broad union: 110/143 = **76.92%** development;
+- 2025 + already-opened 2026 are development evidence, not untouched external certification.
+
+New exact BALLDONTLIE 2025 opening audit:
+- BetMGM + BetRivers;
+- exact standard +/-1.5 only;
+- both books must agree on DOG +1.5 side;
+- thresholds derived May-Jul 2025 only;
+- Aug-Sep internal holdout;
+- eight bounded architectures tested;
+- best new formula: 84/118 = **71.19%**;
+- no new candidate frozen.
+
+2026 source-mismatch diagnostic using the existing opening-proxy matrix:
+- best of the eight new architectures: RL-D 139/219 = **63.47%**;
+- therefore all new architectures remain FAIL;
+- this diagnostic is not an apples-to-apples BALLDONTLIE external test.
+
+Prospective Standard V2 runtime remains active. The latest verified freeze contained 13 observations and 0 core/transfer/broad-union selections.
+
+State:
+`TARGET_MET_75_PLUS_PROSPECTIVE_FORWARD_PENDING` for the pre-existing V2 benchmark;
+`NO_NEW_75_PLUS_STANDARD_RUN_LINE_OPENING_FORMULA` for the 2025-only opening audit.
+
+### Full Game Total
+
+New exact BALLDONTLIE 2025 opening audit:
+- BetMGM + BetRivers;
+- books must have the identical exact opening total;
+- season/L5 runs reconstructed strict-prior with `source_game_date < target_game_date`;
+- SP/bullpen and Statcast run-environment families tested;
+- no sign reversal or threshold rescue.
+
+Best new 2025 result:
+- Statcast environment/market residual: 286/534 = **53.56%**;
+- May-Jul 50.62%;
+- Aug-Sep 58.10%;
+- worst month 46.23%.
+
+2026 source-mismatch diagnostic using the existing SportsDataIO paired consensus close market:
+- family A-D range: **46.65%-50.85%**;
+- family E-G range: **50.12%-51.25%**;
+- best diagnostic: 225/439 = **51.25%**.
+
+State:
+`REVISIT_AFTER_FIRST_PASS / NO_75_PLUS_STABLE_FULL_GAME_TOTAL_OPENING_FORMULA_CURRENT_CLEAN_INFORMATION`.
+
+Next exact-data gate for Run Line and Total:
+PR #247 prepares the 2026 BALLDONTLIE opening backfill under the same vendor/line contracts used in the 2025 audits. Canonical storage `public.mlb_bdl_opening_runline_total_2026_v1` is RLS-enabled/service-role-only and currently contains 0 rows before acquisition. The settled acquisition universe is 2,415 games across 183 dates (2026-03-25 through 2026-09-26). After authorized execution, replay the already-frozen 2025-derived architectures without retuning.
+
 ## 2026-09-20 Approved props real-line market board — authoritative
 
 Contract: `MLB_APPROVED_PROP_REAL_LINE_CONTRACT/1.0.0`.
@@ -787,11 +888,11 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 
 | Market | Current best / frozen model | Validation class | Development / historical result | 2026 external / forward result | Coverage / sample | >=75% evidence? | Unified protocol status | Next action |
 |---|---|---|---:|---:|---:|---|---|---|
-| **Moneyline** | `pregame_high_conf_home_v2` | `LEGACY_ADAPTIVE_2026` | Development folds: 63/81 = **77.78%** | Untouched adaptive holdout: 17/21 = **80.95%**; full selected 2026 set: 80/102 = **78.43%** | 102 selected games in recorded 2026 set | **YES**, adaptive evidence | Not a pristine 2025→2026 one-shot test | Preserve as current selective ML reference. Do not relabel adaptive evidence as pure external validation. |
+| **Moneyline** | `MLB_ML_OPENING_CONSENSUS_V2_SECONDARY_SCORE` | `2025_FROZEN + KNOWN_2026_DIAGNOSTIC + FORWARD_ONLY_CERTIFICATION` | 2025 May-Sep: 52/63 = **82.54%**; internal holdout 16/19 = **84.21%**; worst month **72.73%** | Exact BDL 2026 diagnostic: 19/22 = **86.36%**; untouched forward ledger currently **0-1, n=1** | 2025 n=63; known-2026 n=22; forward n=1 | **YES research; forward insufficient** | `TARGET_MET_75_PLUS_RESEARCH_FORWARD_VALIDATION_PENDING` | Keep V2 frozen. Accumulate untouched forward selections; do not retune from the 0-1 start or from known 2026. |
 | **Full-Game Alternate Spread** | base Run Line outcome exists | historical line gate | base score target available; alternate handicap point absent | — | 0 internal snapshots | **NO MARKET CERTIFICATION** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Reuse base score model only after exact `alternate_spreads` points exist. |
 | **Full-Game Alternate Total** | base Game Total outcome exists | historical line gate | base total target available; alternate total point absent | — | 0 internal snapshots | **NO MARKET CERTIFICATION** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Reuse base total model only after exact `alternate_totals` points exist. |
 | **Full-Game 3-Way ML** | — | settlement gate | generic market includes DRAW; MLB regulation/draw settlement window not frozen | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_SETTLEMENT_SEMANTICS` | Capture a real MLB `h2h_3_way` sample or bookmaker settlement contract before defining the target. |
-| **Run Line / Spread** | Alternate HOME +1.5: `rl_v2_home_p15_alt_favorite_tsh_q92_v1`; Standard V2 forward: `rl_v2_core_fixed_v1`, `rl_v2_transfer_fixed_v1`, `rl_v2_broad_union_fixed_v1` | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective shadow | Alternate 2025: 92/107 = **85.98%**; Standard V2 lineage/parity certified exactly | Alternate historical 2026 through Sep 10: 49/62 = **79.03%**; Standard V2 first valid prospective date **2026-09-21** | Alternate 2025 coverage **4.40%**; Standard V2 forward sample starts prospectively | **YES**, historical evidence; forward pending | `TARGET_MET_75_PLUS_PROSPECTIVE_FORWARD_PENDING` | Continue fixed-clock prospective freezes only. No retrospective Sep20 Standard V2 freeze and no retuning from forward outcomes. |
+| **Run Line / Spread** | Standard DOG +1.5 V2 benchmark: `rl_v2_core_fixed_v1`, `rl_v2_transfer_fixed_v1`, `rl_v2_broad_union_fixed_v1`; separate HOME +1.5 ALT candidate remains frozen | `HISTORICAL_2026_SEEN_BEFORE_FREEZE` + prospective shadow | Standard broad union development 110/143 = **76.92%**; new exact BDL-2025 opening audit best 84/118 = **71.19%** FAIL | New-architecture 2026 opening-proxy diagnostic best 139/219 = **63.47%**; latest prospective Standard V2 freeze: 13 observations, 0 selections | Standard V2 forward sample still sparse | **YES** only for pre-existing V2 development; new audit NO | `TARGET_MET_75_PLUS_PROSPECTIVE_FORWARD_PENDING` | Keep old V2 frozen and accumulate prospective evidence. Build exact 2026 BDL opening ±1.5 backfill for apples-to-apples diagnostic of the new audit. |
 | **First 5 Innings Moneyline** | `f5_ml_sp0p5_ops0p08_win0p05_v1` — symmetric side rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025 certified: 60/88 = **68.18%**; worst month **64.71%**; 15 pushes | 2026 one-shot: 34/61 = **55.74%**; worst month **40.00%**; 9 pushes | 2026 selection coverage **3.56%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve frozen fallback; do not threshold-rescue from 2026. Revisit with materially different architecture/F5 pricing. |
 | **First 5 Innings Totals** | `f5_total_over_ref4p5_proj5p0_v1` — OVER reference 4.5 when projected F5 total >=5.0 | `UNIFIED_2025_TO_2026_ONE_SHOT_REFERENCE_LINE` | 2025: 371/679 = **54.64%**; worst month **48.57%** | 2026: 719/1,373 = **52.37%**; worst month **49.32%**; baseline OVER ref4.5 50.14% | 2026 coverage **63.04%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | 4.5 is research reference only; obtain certified historical F5 lines before price-aware revisit. |
 | **First 5 Innings 3-Way ML** | `f5_3way_sp1p0_ops0p05_win0p20_v1` — HOME/AWAY selective rule | `UNIFIED_2025_TO_2026_ONE_SHOT` | 2025: 53/84 = **63.10%**; worst month **45.45%**; draw-only best 23.21% | 2026: 22/48 = **45.83%**; worst month **39.29%**; 9 selected outcomes were DRAW | 2026 coverage **2.44%** | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve fallback; no 2026 threshold rescue. Draw model also failed to approach target. |
@@ -811,7 +912,7 @@ A high-accuracy selective model is acceptable even when coverage is low. Accurac
 | **Period Alternate Spreads (1/3/5/7 innings)** | — | historical line gate | base period score targets certified | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Alternate spread points are a line-specific layer over the base period outcome; do not invent handicaps. |
 | **Period Alternate Totals (1/3/5/7 innings)** | base period total research only | historical line gate | F1 NRFI/F3/F5/F7 reference studies exist, but exact alternate points are absent | — | 0 internal snapshots | **NO MARKET CERTIFICATION** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Reuse base period score model only after exact historical alternate total points exist. |
 | **Team Totals / Alternate Team Totals** | — | historical line gate | full-game team scores are reconstructable, but historical team-total points are absent | — | 0 internal snapshots | **NO MODEL** | `BLOCKED_HISTORICAL_LINE_COVERAGE` | Obtain exact team-specific historical points; do not substitute fixed 3.5/4.5/5.5 lines. |
-| **Game Totals O/U** | `totals_v37_xyear_under_catboost_v1` — CatBoost UNDER-only, confidence 0.65 | `UNIFIED_2025_ROLLING_TO_2026_ONE_SHOT` | 2025 rolling OOF: 265/479 = **55.32%**; worst month **52.63%** | One-shot 2026: 143/310 = **46.13%**; worst selected month **36.84%** | 2025 coverage **25.38%**; 2026 coverage **20.49%** of non-push | **NO** | `REVISIT_AFTER_FIRST_PASS` | Preserve V37 without retuning. Prior V10 remains a historical reference at 72/102 = 70.59%, but was not validated under this unified cross-year protocol. Revisit Totals only after the first pass across markets with new information/architecture. |
+| **Game Totals O/U** | New exact-opening audit plus historical V37 reference | `BDL_2025_OPENING_AUDIT` + source-mismatch 2026 diagnostic | New 2025 exact-opening audit best 286/534 = **53.56%**; V37 rolling OOF remains 265/479 = **55.32%** | New 2026 source-mismatch diagnostic best 225/439 = **51.25%**; prior V37 one-shot 143/310 = **46.13%** | No 75% candidate | **NO** | `REVISIT_AFTER_FIRST_PASS` | Do not threshold-rescue. Build exact 2026 BDL opening-total backfill, replay frozen 2025 architectures, then close or reopen only on genuinely new information. |
 | **Totals FULL diagnostic** | `totals_full_oracle_v1` | `DIAGNOSTIC_ONLY` | 2025 non-push: 1,809/2,321 = **77.94%** | 2026 external diagnostic: 1,137/1,513 = **75.15%** | large sample | **YES**, but NON-DEPLOYABLE | Never promote as PREGAME | Keep only as teacher/diagnostic target. |
 | **Pitcher Earned Runs** | `pitcher_er_over_1p5_p70_v1` — OVER **1.5** only | Exact runtime certified; real-line contract `EXACT_FROZEN_LINE_ONLY` | 2025 VALIDATION+TEST: 73/91 = **80.22%**; worst split **79.66%**; baseline 64.70% | Prospective market capture/evaluator deployed; canonical exact external outcome work still pending | 2025 n=91; forward real-line sample accumulates prospectively | **YES**, 2025 event accuracy | `TARGET_MET_75_PLUS_EXTERNAL_PENDING_CANONICAL_OUTCOME` + `DEPLOYED_PENDING_PROSPECTIVE_REAL_LINE` | Evaluate only real sportsbook OVER 1.5 quotes with exact MLBAM identity and strict pregame lineage. No alternate-line extrapolation; do not substitute Runs Allowed. |
 | **Pitcher Strikeouts** | `pitcher_k_under_6p5_proj_4p5_v1` — UNDER 6.5 when leakage-safe projection <=4.5 | `UNIFIED_2025_ROLLING_TO_2026_SINGLE_READ`; exact xyear runtime formula | 2025: **1,189/1,367 = 86.98%**; worst month **81.06%**; baseline 75.24%; coverage 40.16% | 2026 single read: **1,035/1,163 = 88.99%**; worst month **76.32%**; baseline 74.73%; coverage 36.20% | 2025 n=1,367; 2026 n=1,163 | **YES** | `DEPLOYED_PENDING_FIRST_PROSPECTIVE_EXACT_LINE_CAPTURE` | Exact-line U6.5 capture/evaluator wired research-only; no alternate-line extrapolation. First future pregame crossing remains required. |
