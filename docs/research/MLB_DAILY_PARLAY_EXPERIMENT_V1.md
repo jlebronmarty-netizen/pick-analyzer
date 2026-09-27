@@ -1,75 +1,53 @@
 # MLB Daily Full-Slate Moneyline Parlay Experiment V1
 
-Status: ACTIVE / RESEARCH-ONLY
-Official Picks: unchanged
-APOSTAR: disabled
+Status: ACTIVE / RESEARCH-ONLY  
+Official Picks: unchanged  
+APOSTAR: disabled  
 Production betting eligibility: false
 
-## Goal
+## Scope
 
-For each MLB slate, enumerate the binary full-slate Moneyline outcome space, rank the best complete-slate combinations using frozen pregame ML evidence, freeze the requested portfolio, settle the exact frozen portfolio after every game is final, and measure realized return versus theoretical stake.
+Moneyline only. Every frozen ticket contains exactly one ML side from every game on that day's MLB slate.
 
-## Non-negotiable market scope
+## Dynamic ticket-count rule
 
-**MONEYLINE ONLY.**
+- 1 game: no parlay
+- 2 games: 2 tickets
+- 3 games: 4
+- 4 games: 8
+- 5 games: 16
+- 6 games: 25
+- 7 games: 50
+- 8 games: 100
+- 9 games: 150
+- 10 games: 300
+- 11 games: 500
+- 12+ games: 1,000
 
-No props, Run Line, Totals, NRFI/YRFI, pitcher markets, batter markets or other markets may enter this experiment.
+Stake convention: $1 theoretical stake per ticket.
 
-Every ticket contains **exactly one Moneyline side from every game on the slate**.
+## Construction
 
-For an N-game slate there are 2^N complete ML outcome combinations. Example: 15 games = 32,768 possible 15-leg ML parlays.
+1. Strictly pregame frozen evidence only.
+2. No live/postgame information in ranking.
+3. Enumerate the binary full-slate outcome space.
+4. Rank combinations using the frozen MLB ML engines/signals available for that date.
+5. Do not retune formulas from later outcomes.
+6. Freeze the exact portfolio and digest before settlement.
+7. Preserve sportsbook ML prices for payout calculation when available.
+8. Cancelled/void games are removed from settled payout according to sportsbook convention.
+9. Research/shadow only.
 
-## Daily portfolio size
+## Baseline backtest
 
-- 13+ MLB games: best 1,000 unique full-slate ML parlays
-- 10-12 MLB games: best 500 unique full-slate ML parlays
-- Under 10 MLB games: best 250 unique full-slate ML parlays
+A leakage-safe ELO pregame baseline was evaluated over all complete ELO days available in 2026:
+- 2026-03-25 through 2026-09-14;
+- 2,255 games;
+- 171 dates total;
+- 169 eligible parlay dates after excluding 1-game slates;
+- 26 winning full-slate outcome combinations covered;
+- hit rate: 15.38%;
+- average tickets/day: 817.8;
+- random-space coverage benchmark under the same ticket counts: ~11.21%.
 
-## Construction contract
-
-1. Pregame only; no live score or same-day outcome information.
-2. Every ticket uses all games on the slate.
-3. Exactly one ML selection per game.
-4. Preserved sportsbook ML prices determine parlay payout.
-5. Outcome ranking starts from no-vig market probability and the frozen MLB Outcome + Portfolio Engine.
-6. Existing frozen ML signals may be added when they are available strictly pregame; they may not be fabricated when absent.
-7. The active selective Pick Analyzer gate `pregame_high_conf_home_v2` remains a selective signal only and must not be converted into a fake calibrated probability.
-8. MLB Outcome + Portfolio Engine V1 uses the frozen default architecture:
-   - market no-vig probability as logit offset;
-   - external residual coefficient 0.25;
-   - starter 0.30;
-   - bullpen 0.18;
-   - offense 0.18;
-   - lineup 0.22;
-   - weather 0.08;
-   - travel 0.08;
-   - repeat same-favorite won -0.18;
-   - repeat same-favorite lost -0.10;
-   - home-favorite 0.03;
-   - quality weighting;
-   - favorite-failure score;
-   - slate-regime mixture: favorite-heavy 15%, neutral 55%, upset-heavy 20%, chaos 10%.
-9. Missing optional engine features remain neutral/zero rather than being inferred from postgame data.
-10. Rank complete-slate outcomes with the Portfolio Engine V1 core score:
-    72% normalized modeled outcome probability + 10% normalized proxy expected return + 18% favorite-failure alignment.
-11. Fixed paper stake: $1 per frozen ticket.
-12. No promos, boosts, insurance, cash-out assumptions or correlated-market substitutions.
-13. Freeze exact deterministic inputs, ranking method and digest before settlement.
-14. Never retune thresholds or weights from the daily results.
-
-## Settlement
-
-Because every ticket covers the entire slate and contains exactly one side per game, only one binary full-slate outcome can be the exact winner when all games settle without voids.
-
-Daily settlement records:
-- exact winning full-slate combination;
-- whether it was inside the frozen portfolio;
-- winning ticket rank, if present;
-- winning ticket payout;
-- theoretical total stake;
-- gross return;
-- net P/L;
-- ROI;
-- whether realized gain exceeded the theoretical investment.
-
-Void/postponement handling must use preserved sportsbook settlement rules when known; otherwise mark the day UNEVALUABLE rather than inventing settlement.
+This baseline is not the final full-engine backtest. It measures whether the dynamic ticket-count rule plus pregame ELO ordering captures the realized slate outcome. Future engine variants must be compared against this frozen baseline without changing the ticket-count rule after seeing results.
