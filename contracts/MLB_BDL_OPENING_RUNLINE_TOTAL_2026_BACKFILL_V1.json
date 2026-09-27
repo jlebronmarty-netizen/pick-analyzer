@@ -48,5 +48,47 @@
     "historical_odds_api_calls": 0,
     "official_picks_modified": false,
     "apostar_activated": false
+  },
+  "replay_sql": {
+    "run_line": "scripts/research/mlb_runline_bdl_opening_2026_replay.sql",
+    "total": "scripts/research/mlb_totals_bdl_opening_2026_replay.sql",
+    "frozen_before_2026_bdl_acquisition": true
+  },
+  "frozen_constants": {
+    "run_line_family_1": {
+      "market_q75": 0.614472548213551,
+      "bullpen_q25": -1.17824129403095,
+      "common_q25": -0.142857142857143,
+      "venue_q25": -0.166545893719807,
+      "starter_q25": -1.79331674422257
+    },
+    "run_line_family_2": {
+      "market_q75": 0.609468425467735,
+      "recent_fatigue_q75": 0.45453945443248,
+      "history_fatigue_q75": 0.293168157231692,
+      "team_starter_history_q75": -0.123011660831321,
+      "broad_q75": 0.0446135668369827
+    },
+    "total_family_1": {
+      "season_abs_residual_q75": 0.991581133919843,
+      "recent_abs_residual_q75": 2.1,
+      "composite_abs_residual_q75": 1.20590885779599
+    },
+    "total_environment": {
+      "off_hard_hit_mean": 0.255466463436146,
+      "off_hard_hit_sd": 0.0114337439694208,
+      "off_barrel_mean": 0.0459414861558386,
+      "off_barrel_sd": 0.00509002539665044,
+      "starter_hard_hit_mean": 0.259248070383735,
+      "starter_hard_hit_sd": 0.0328308069435659,
+      "starter_whiff_mean": 0.219822032234143,
+      "starter_whiff_sd": 0.0332901515907615,
+      "line_mean": 8.570359281437126,
+      "line_sd": 0.8707241758234928,
+      "env_q25": -0.799486697217092,
+      "env_q75": 0.87069411751228,
+      "env_market_resid_q25": -0.716249372048999,
+      "env_market_resid_q75": 0.832120315086954
+    }
   }
 }
