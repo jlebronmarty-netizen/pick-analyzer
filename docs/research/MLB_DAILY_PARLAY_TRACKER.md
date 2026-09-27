@@ -2,9 +2,9 @@
 
 Research-only. Moneyline only. Official Picks unchanged. APOSTAR disabled.
 
-| Date | Slate games | Legs per ticket | Outcome space | Target tickets | Frozen | Stake | Winning ticket in portfolio? | Gross return | Net P/L | ROI | Status | Freeze digest |
-|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---|---|
-| 2026-09-27 | 15 | 15 | 32,768 | 1,000 | 1,000 | $1,000 | PENDING | PENDING | PENDING | PENDING | FROZEN_PRE_SETTLEMENT_ML_ONLY | `014e6177b7dd5ba3753633ad1252841d60160e15f1cd76b869e9fd606c9d3007` |
+| Date | Slate games | Settled games | Void games | Legs per ticket | Outcome space | Target tickets | Frozen | Stake | Winning ticket in portfolio? | Winning rank | Gross return | Net P/L | ROI | Status | Freeze digest |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| 2026-09-27 | 15 | 14 | 1 | 15 pregame / 14 settled | 32,768 pregame | 1,000 | 1,000 | $1,000 | YES | 614 | $2,564.72 | +$1,564.72 | +156.47% | SETTLED_WIN | `014e6177b7dd5ba3753633ad1252841d60160e15f1cd76b869e9fd606c9d3007` |
 
 ## Day 1 — 2026-09-27
 
@@ -12,25 +12,37 @@ This row supersedes the earlier incorrect mixed-market 3-5 leg draft. That portf
 
 Correct experiment:
 - market: Moneyline only;
-- 15 MLB games;
-- every ticket: exactly 15 legs, one ML per game;
-- binary outcome space: 32,768;
+- 15 scheduled MLB games;
+- every frozen ticket: exactly 15 ML legs, one per game;
+- BAL-NYY was cancelled and therefore settled as a void leg;
+- 14 game results determined the winning outcome;
+- binary pregame outcome space: 32,768;
 - frozen portfolio: top 1,000 unique complete-slate combinations;
 - paper stake: $1 each = $1,000 total;
-- primary preserved price source: FanDuel pregame ML;
+- exact winning 14-game result pattern was covered by frozen ticket rank 614;
+- rank 614 carried NYY on the cancelled game, so its NYY ML leg was removed from payout;
+- equivalent BAL version ranked 1,025 and was outside the top 1,000, but cancellation made that distinction irrelevant to the settled 14-game outcome;
+- rank 614 original 15-leg listed payout: 4,666.943988x;
+- cancelled NYY ML (-122) decimal factor: 1.819672131x;
+- adjusted settled payout: 2,564.716966x;
+- $1 winning ticket gross return: $2,564.72;
+- 999 other frozen tickets returned $0 under the all-or-nothing full-slate settlement;
+- total portfolio gross return: $2,564.72;
+- net profit/loss after $1,000 paper stake: +$1,564.72;
+- realized ROI: +156.47%;
+- Day 1 investment criterion: YES, gross return exceeded total theoretical stake.
+
+Pregame methodology preserved:
+- primary price source: FanDuel pregame ML;
 - 12 matchups use canonical internal pregame FanDuel capture;
 - NYM-WSH, BAL-NYY and ARI-SD use preserved FanDuel Research pregame lines because canonical internal FanDuel mapping was absent for those matchups at freeze;
 - MLB Outcome + Portfolio Engine V1 default frozen architecture used for ranking;
-- external probability input: numberFire pregame probability where available on the same FanDuel Research slate page; TB-PHI had no extracted numberFire probability and therefore external residual = 0 for that game;
-- no live scores or final results used;
-- Pick Analyzer selective gate is not converted to a per-game probability.
+- external probability input: numberFire pregame probability where available on the same FanDuel Research slate page;
+- no live scores or final results were used to build or reorder the frozen portfolio.
 
-Portfolio summary:
-- modeled probability mass covered by top 1,000: 13.3851% under the development slate-regime model;
-- average estimated payout for $1 ticket: $11,340.83;
-- minimum estimated payout among frozen tickets: $2,011.40;
-- maximum estimated payout among frozen tickets: $308,229.28;
-- average upset count in frozen tickets: 4.118;
-- exact freeze digest: `014e6177b7dd5ba3753633ad1252841d60160e15f1cd76b869e9fd606c9d3007`.
+Exact winning settled sides:
+WSH, PHI, CHC, HOU, LAD, TOR, MIA, CWS, MIL, PIT, SD, KC, SEA, MIN.
+BAL-NYY: VOID / cancelled.
 
-These are development/paper estimates, not guaranteed probabilities or returns.
+Freeze digest remains unchanged:
+`014e6177b7dd5ba3753633ad1252841d60160e15f1cd76b869e9fd606c9d3007`.
