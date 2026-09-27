@@ -1,0 +1,18 @@
+name: MLB FanDuel Total Bases YES Volume Validate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'artifacts/research/mlb_fanduel_batter_total_bases_yes_volume_v1.json'
+      - 'docs/research/MLB_FANDUEL_BATTER_TOTAL_BASES_YES_VOLUME_V1.md'
+      - 'scripts/research/mlb_fanduel_batter_total_bases_yes_volume_v1.sql'
+      - 'scripts/research/verify_mlb_fanduel_batter_total_bases_yes_volume_v1.test.mjs'
+permissions: { contents: read }
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node --test scripts/research/verify_mlb_fanduel_batter_total_bases_yes_volume_v1.test.mjs
