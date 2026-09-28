@@ -308,20 +308,22 @@ async function loadPlayerDirectory(slate: OfficialGame[]) {
   return map
 }
 
-async function latestKnownRequestsRemaining(targetDate: string) {
-  const range = puertoRicoUtcRange(targetDate)
+async function latestKnownRequestsRemaining() {
+  // Quota is account-level state, not target-date state. Carry the most recent
+  // persisted remaining-credit value across date boundaries so a new MLB day
+  // cannot spend one probe call merely because today's capture ledger is empty.
   const result = await supabaseAdmin
     .from('sports_sync_jobs')
     .select('completed_at,metadata')
     .eq('provider', PROVIDER)
     .eq('sport_key', SPORT_KEY)
-    .gte('completed_at', range.utcStart)
-    .lt('completed_at', range.utcEndExclusive)
     .order('completed_at', { ascending: false })
-    .limit(20)
+    .limit(100)
   if (result.error) throw new Error('MLB_APPROVED_PROP_QUOTA_READ_FAILED:' + result.error.message)
   for (const row of result.data ?? []) {
-    const remaining = Number(asRecord(row.metadata).requestsRemainingAfter)
+    const metadata = asRecord(row.metadata)
+    const candidate = metadata.requestsRemainingAfter ?? metadata.requestsRemaining
+    const remaining = Number(candidate)
     if (Number.isFinite(remaining)) return remaining
   }
   return null
@@ -484,7 +486,7 @@ export async function captureMlbApprovedPropMarkets(input: {
 
   const calls: CaptureCall[] = []
   const rows: Array<Record<string, unknown>> = []
-  const knownRemainingBefore = await latestKnownRequestsRemaining(targetDate)
+  const knownRemainingBefore = await latestKnownRequestsRemaining()
   let remaining: number | null = knownRemainingBefore
   const oddsApiAllowed = knownRemainingBefore === null || knownRemainingBefore > CREDIT_RESERVE
   if (oddsApiAllowed) for (const item of planned) {
