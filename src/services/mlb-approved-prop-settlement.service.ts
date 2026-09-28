@@ -2,8 +2,7 @@ import 'server-only'
 
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { readMlbOfficialBatterGameLog } from '@/services/mlb-official-batter-gamelog.service'
-import { mapConcurrent, readMlbOfficialPitcherGameLog } from '@/services/mlb-official-pitcher-gamelog.service'
+import { mapConcurrent } from '@/services/mlb-official-pitcher-gamelog.service'
 
 const SOURCE='mlb_approved_prop_daily_v1'
 const SETTLEMENT='mlb_approved_prop_settlement_v1'
@@ -50,6 +49,33 @@ function grade(direction:string,line:number|null,actual:number){
 }
 function exactLine(r:DailyRow){return finite(r.observed_line??r.required_line)}
 
+type OfficialBoxMetric={hits:number|null;runs:number|null;rbi:number|null;earnedRuns:number|null}
+
+async function readOfficialBoxscore(gamePk:number){
+  const response=await fetch(`https://statsapi.mlb.com/api/v1/game/${gamePk}/boxscore`,{
+    cache:'no-store',signal:AbortSignal.timeout(15000),
+  })
+  if(!response.ok)throw new Error(`MLB_OFFICIAL_BOXSCORE_HTTP_${response.status}:${gamePk}`)
+  const payload=await response.json() as any
+  const map=new Map<number,OfficialBoxMetric>()
+  for(const side of ['home','away'] as const){
+    const players=payload?.teams?.[side]?.players??{}
+    for(const player of Object.values(players) as any[]){
+      const id=Number(player?.person?.id)
+      if(!Number.isSafeInteger(id)||id<=0)continue
+      const batting=player?.stats?.batting??{}
+      const pitching=player?.stats?.pitching??{}
+      map.set(id,{
+        hits:finite(batting?.hits),
+        runs:finite(batting?.runs),
+        rbi:finite(batting?.rbi),
+        earnedRuns:finite(pitching?.earnedRuns),
+      })
+    }
+  }
+  return map
+}
+
 export async function settleMlbApprovedPropDaily(input:{throughDate?:string;now?:Date}={}){
   const now=input.now??new Date()
   const through=input.throughDate??datePR(now)
@@ -81,23 +107,14 @@ export async function settleMlbApprovedPropDaily(input:{throughDate?:string;now?
   const pitcherMap=new Map(pitcher.map(r=>[key(Number(r.game_pk),Number(r.pitcher)),r]))
   const winMap=new Map(pitcherWin.map(r=>[key(Number(r.game_pk),Number(r.starter_mlbam_id)),r]))
 
-  const rbiMarkets=rows.filter(r=>r.market==='batter_rbis'||r.market==='batter_hits_runs_rbis')
-  const erMarkets=rows.filter(r=>r.market==='pitcher_earned_runs')
-  const batterOfficialIds=[...new Set(rbiMarkets.map(r=>Number(r.player_mlbam_id)))]
-  const pitcherOfficialIds=[...new Set(erMarkets.map(r=>Number(r.player_mlbam_id)))]
-
-  const batterOfficial=await mapConcurrent(batterOfficialIds,6,async id=>{
-    try{return {id,rows:await readMlbOfficialBatterGameLog(id,SEASON),error:null as string|null}}
-    catch(e){return {id,rows:[],error:e instanceof Error?e.message:String(e)}}
+  const officialBoxscoreGames=[...new Set(rows
+    .filter(r=>r.market==='batter_rbis'||r.market==='batter_hits_runs_rbis'||r.market==='pitcher_earned_runs')
+    .map(r=>Number(r.game_pk)))]
+  const officialBoxes=await mapConcurrent(officialBoxscoreGames,6,async gamePk=>{
+    try{return {gamePk,players:await readOfficialBoxscore(gamePk),error:null as string|null}}
+    catch(e){return {gamePk,players:new Map<number,OfficialBoxMetric>(),error:e instanceof Error?e.message:String(e)}}
   })
-  const pitcherOfficial=await mapConcurrent(pitcherOfficialIds,6,async id=>{
-    try{return {id,rows:await readMlbOfficialPitcherGameLog(id,SEASON),error:null as string|null}}
-    catch(e){return {id,rows:[],error:e instanceof Error?e.message:String(e)}}
-  })
-  const batterOfficialMap=new Map<number,Map<number,any>>()
-  for(const p of batterOfficial)batterOfficialMap.set(p.id,new Map(p.rows.map(r=>[r.gamePk,r])))
-  const pitcherOfficialMap=new Map<number,Map<number,any>>()
-  for(const p of pitcherOfficial)pitcherOfficialMap.set(p.id,new Map(p.rows.map(r=>[r.gamePk,r])))
+  const officialBoxByGame=new Map(officialBoxes.map(item=>[item.gamePk,item]))
 
   const prepared:any[]=[]
   let settled=0,blocked=0
@@ -126,17 +143,23 @@ export async function settleMlbApprovedPropDaily(input:{throughDate?:string;now?
     }else if(row.market==='batter_total_bases'){
       actual=finite(tbMap.get(k)?.total_bases);source='mlb_statcast_batter_total_bases_game_mv'
     }else if(row.market==='batter_rbis'||row.market==='batter_hits_runs_rbis'){
-      const v=batterOfficialMap.get(Number(row.player_mlbam_id))?.get(Number(row.game_pk))
-      actual=v?(row.market==='batter_rbis'?finite(v.rbi):finite(v.hits+v.runs+v.rbi)):null
-      source='MLB_OFFICIAL_BATTER_GAMELOG'
+      const box=officialBoxByGame.get(Number(row.game_pk))
+      const v=box?.players.get(Number(row.player_mlbam_id))
+      actual=v?(row.market==='batter_rbis'
+        ? finite(v.rbi)
+        : (v.hits===null||v.runs===null||v.rbi===null?null:v.hits+v.runs+v.rbi)):null
+      source='MLB_OFFICIAL_GAME_BOXSCORE'
+      if(box?.error)blocker='MLB_OFFICIAL_BOXSCORE_UNAVAILABLE'
     }else if(['pitcher_strikeouts','pitcher_walks','pitcher_hits_allowed','pitcher_outs'].includes(row.market)){
       const v=pitcherMap.get(k)
       const field=row.market==='pitcher_strikeouts'?'strikeouts':row.market==='pitcher_walks'?'walks':row.market==='pitcher_hits_allowed'?'hits':'outs'
       actual=v?finite(v[field as keyof Pitcher]):null
       source='mlb_ml_xyear_pitcher_game_v1'
     }else if(row.market==='pitcher_earned_runs'){
-      const v=pitcherOfficialMap.get(Number(row.player_mlbam_id))?.get(Number(row.game_pk))
-      actual=v?finite(v.earnedRuns):null;source='MLB_OFFICIAL_PITCHER_GAMELOG'
+      const box=officialBoxByGame.get(Number(row.game_pk))
+      const v=box?.players.get(Number(row.player_mlbam_id))
+      actual=v?finite(v.earnedRuns):null;source='MLB_OFFICIAL_GAME_BOXSCORE'
+      if(box?.error)blocker='MLB_OFFICIAL_BOXSCORE_UNAVAILABLE'
     }else if(row.market==='pitcher_record_a_win'){
       const v=winMap.get(k)
       source='mlb_pitcher_win_forward_tracker_v1'
