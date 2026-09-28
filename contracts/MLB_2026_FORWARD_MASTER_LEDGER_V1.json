@@ -14,7 +14,8 @@
       "mlb_approved_prop_daily_v1 QUALIFIES_MARKET_VERIFIED only",
       "sports_sync_jobs runline_v2_standard_forward_freeze_v1 selected models only",
       "sports_sync_jobs runline_v2_home_p15_alt_forward_freeze_v1 selected only",
-      "sports_sync_jobs runline_v2_home_p15_alt_forward_settlement_v1 outcomes only"
+      "sports_sync_jobs runline_v2_home_p15_alt_forward_settlement_v1 outcomes only",
+      "mlb_exact_line_forward_shadow_v1 persisted exact-line K/Outs forward rows"
     ],
     "pick_edge": "SEPARATE_IMMUTABLE_ARTIFACT_IMPORTER_REQUIRED",
     "equilizer": "SEPARATE_IMMUTABLE_ARTIFACT_IMPORTER_REQUIRED",
@@ -31,5 +32,10 @@
     "no_model_recalculation": true,
     "no_threshold_retuning": true,
     "no_historical_odds_api_spend": true
-  }
+  },
+  "sync_order": [
+    "SETTLE_EXACT_LINE_FORWARD_SHADOWS",
+    "FREEZE_CURRENT_EXACT_LINE_FORWARD_SHADOWS",
+    "SYNC_ALL_PERSISTED_SOURCES_TO_MASTER_LEDGER"
+  ]
 }
