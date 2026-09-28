@@ -3,6 +3,7 @@ import 'server-only'
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { captureMlbMoneylinePregameStarterEvidence } from '@/services/mlb-moneyline-daily-materializer.service'
+import { MLB_MODEL_GAME_TYPES } from '@/services/mlb-game-type-policy'
 
 const FORMULA_ID='MLB_ML_OPENING_CONSENSUS_FUNDAMENTALS_V1'
 const OPENING_TABLE='mlb_bdl_opening_ml_2026_external_v1'
@@ -65,7 +66,7 @@ async function fetchPaged(base:string,date:string,maxPages:number,extra:Record<s
 async function stageSchedule(targetDate:string,now:Date){
   const games=await supabaseAdmin.from('pick2_mlb_games')
     .select('game_pk,game_date,scheduled_at,doubleheader,game_number,metadata')
-    .eq('game_date',targetDate).order('scheduled_at',{ascending:true}).limit(50)
+    .eq('game_date',targetDate).in('game_type',[...MLB_MODEL_GAME_TYPES]).order('scheduled_at',{ascending:true}).limit(50)
   if(games.error)throw new Error('PICK2_GAME_READ_FAILED:'+games.error.message)
 
   const future=((games.data??[]) as Pick2Game[]).filter(g=>Date.parse(String(g.scheduled_at))>now.getTime())
@@ -138,7 +139,7 @@ async function captureOpening(targetDate:string){
   const features=(xg.data??[]) as XyearGame[]
 
   const [games,opening]=await Promise.all([
-    fetchPaged('https://api.balldontlie.io/mlb/v1/games',targetDate,MAX_GAMES_PAGES,{season_type:'regular'}),
+    fetchPaged('https://api.balldontlie.io/mlb/v1/games',targetDate,MAX_GAMES_PAGES),
     fetchPaged('https://api.balldontlie.io/mlb/v1/odds/opening',targetDate,MAX_OPENING_PAGES)
   ])
   const f=groupFeatureGames(features),p=groupBdlGames(games.rows as BdlGame[])
