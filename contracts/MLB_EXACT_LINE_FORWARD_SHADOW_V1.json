@@ -1,0 +1,89 @@
+{
+  "contract": "MLB_EXACT_LINE_FORWARD_SHADOW_V1/1.0.0",
+  "status": "RESEARCH_ONLY",
+  "table": "public.mlb_exact_line_forward_shadow_v1",
+  "contracts": [
+    {
+      "id": "MLB_PITCHER_K_O3P5_FORWARD_SHADOW_V1/1.0.0",
+      "market": "pitcher_strikeouts",
+      "direction": "OVER",
+      "line": 3.5,
+      "threshold": 4.25,
+      "comparison": "GTE",
+      "accuracy_2025": 0.7594,
+      "accuracy_2026_diagnostic": 0.7603
+    },
+    {
+      "id": "MLB_PITCHER_K_U7P5_FORWARD_SHADOW_V1/1.0.0",
+      "market": "pitcher_strikeouts",
+      "direction": "UNDER",
+      "line": 7.5,
+      "threshold": 5.5,
+      "comparison": "LTE",
+      "accuracy_2025": 0.9019,
+      "accuracy_2026_diagnostic": 0.9059
+    },
+    {
+      "id": "MLB_PITCHER_K_U8P5_FORWARD_SHADOW_V1/1.0.0",
+      "market": "pitcher_strikeouts",
+      "direction": "UNDER",
+      "line": 8.5,
+      "threshold": 4.75,
+      "comparison": "LTE",
+      "accuracy_2025": 0.9654,
+      "accuracy_2026_diagnostic": 0.9656
+    },
+    {
+      "id": "MLB_PITCHER_OUTS_O13P5_FORWARD_SHADOW_V1/1.0.0",
+      "market": "pitcher_outs",
+      "direction": "OVER",
+      "line": 13.5,
+      "threshold": 16,
+      "comparison": "GTE",
+      "accuracy_2025": 0.8468,
+      "accuracy_2026_diagnostic": 0.8503
+    },
+    {
+      "id": "MLB_PITCHER_OUTS_O14P5_FORWARD_SHADOW_V1/1.0.0",
+      "market": "pitcher_outs",
+      "direction": "OVER",
+      "line": 14.5,
+      "threshold": 15.75,
+      "comparison": "GTE",
+      "accuracy_2025": 0.7711442786069652,
+      "accuracy_2026_diagnostic": 0.7896189950303699
+    }
+  ],
+  "excluded_duplicate_contracts": [
+    {
+      "id": "pitcher_k_under_6p5_proj_4p5_v1",
+      "reason": "already persisted by mlb_approved_prop_daily_v1 exact-line board"
+    }
+  ],
+  "selection_policy": {
+    "exact_market": true,
+    "exact_line": true,
+    "exact_direction": true,
+    "minimum_prior_starts": 5,
+    "source_rule": "source_game_date < target_game_date",
+    "same_day_history": false,
+    "price_affects_selection": false
+  },
+  "quote_policy": {
+    "all_exact_quotes_retained": true,
+    "display_quote": "FANDUEL_FIRST_ELSE_HIGHEST_AMERICAN_PRICE",
+    "probability_inference_from_price": false
+  },
+  "settlement_policy": "exact gamePk + exact MLBAM pitcher row; source-authoritative strikeouts/outs only",
+  "postseason_policy": "POSTSEASON_SHADOW_DOMAIN_SHIFT",
+  "boundaries": {
+    "no_retuning": true,
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_historical_accuracy_as_probability": true,
+    "no_official_picks": true,
+    "apostar": false,
+    "production": false,
+    "historical_odds_api_spend": false
+  }
+}

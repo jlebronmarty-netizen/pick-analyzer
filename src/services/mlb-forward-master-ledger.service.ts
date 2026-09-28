@@ -315,6 +315,65 @@ async function syncApprovedProps(): Promise<{ rows: LedgerRow[]; missingGameCont
   return { rows, missingGameContext }
 }
 
+async function syncExactLineShadows(): Promise<{ rows: LedgerRow[]; missingGameContext: number }> {
+  const source = await pagedRead<any>(
+    'mlb_exact_line_forward_shadow_v1',
+    'id,tracking_date,game_pk,start_time,game_type,season_phase,market,contract_id,player_mlbam_id,player_name,direction,exact_line,sportsbook,price,odds_snapshot_id,quotes,projection,threshold,historical_accuracy_2025,historical_accuracy_2026_diagnostic,evidence_class,freeze_timestamp,latest_prior_date,prior_starts,result,actual_value,settled_at,metadata',
+    (query) => query
+      .gte('tracking_date', REGULAR_START)
+      .order('tracking_date', { ascending: true })
+      .order('game_pk'),
+  )
+  const context = await gameContext(source.map((row) => Number(row.game_pk)))
+  const rows: LedgerRow[] = []
+  let missingGameContext = 0
+
+  for (const row of source) {
+    const gamePk = integer(row.game_pk)
+    const targetDate = text(row.tracking_date)
+    const ctx = gamePk === null ? null : context.get(gamePk)
+    if (gamePk === null || !targetDate || !ctx) { missingGameContext++; continue }
+
+    rows.push(baseRow({
+      context: ctx,
+      targetDate,
+      gamePk,
+      engine: 'PICK_ANALYZER',
+      modelId: String(row.contract_id),
+      contractId: String(row.contract_id),
+      evidenceSuffix: 'EXACT_LINE_FORWARD_SHADOW',
+      market: String(row.market),
+      line: finite(row.exact_line),
+      direction: String(row.direction),
+      selection: String(row.player_name),
+      playerId: integer(row.player_mlbam_id),
+      playerName: String(row.player_name),
+      sportsbook: text(row.sportsbook),
+      odds: finite(row.price),
+      oddsSnapshotId: text(row.odds_snapshot_id),
+      projection: finite(row.projection),
+      historicalAccuracy: finite(row.historical_accuracy_2025),
+      threshold: finite(row.threshold),
+      freezeTimestamp: String(row.freeze_timestamp),
+      sourceRelation: 'mlb_exact_line_forward_shadow_v1',
+      sourceRowId: String(row.id),
+      result: result(row.result),
+      actualValue: finite(row.actual_value),
+      settledAt: text(row.settled_at),
+      metadata: {
+        allQuotes: row.quotes,
+        historicalAccuracy2026Diagnostic: row.historical_accuracy_2026_diagnostic,
+        sourceEvidenceClass: row.evidence_class,
+        latestPriorDate: row.latest_prior_date,
+        priorStarts: row.prior_starts,
+        sourceMetadata: row.metadata,
+        probabilitySemantics: 'NO_CALIBRATED_PER_PLAY_PROBABILITY',
+      },
+    }))
+  }
+  return { rows, missingGameContext }
+}
+
 async function syncStandardRunline(): Promise<{ rows: LedgerRow[]; missingGameContext: number }> {
   const jobs = await pagedRead<any>(
     'sports_sync_jobs',
@@ -501,15 +560,17 @@ async function writeRows(rows: LedgerRow[]) {
 }
 
 export async function syncMlb2026ForwardMasterLedger() {
-  const [moneyline, props, standardRunline, homeP15] = await Promise.all([
+  const [moneyline, props, exactLine, standardRunline, homeP15] = await Promise.all([
     syncMoneylineV2(),
     syncApprovedProps(),
+    syncExactLineShadows(),
     syncStandardRunline(),
     syncHomeP15(),
   ])
   const rows = [
     ...moneyline.rows,
     ...props.rows,
+    ...exactLine.rows,
     ...standardRunline.rows,
     ...homeP15.rows,
   ]
@@ -527,12 +588,14 @@ export async function syncMlb2026ForwardMasterLedger() {
     sourceCounts: {
       moneylineV2: moneyline.rows.length,
       approvedPropsExactLine: props.rows.length,
+      exactLineForwardShadows: exactLine.rows.length,
       standardRunline: standardRunline.rows.length,
       homeP15Alt: homeP15.rows.length,
     },
     missingGameContext: {
       moneylineV2: moneyline.missingGameContext,
       approvedPropsExactLine: props.missingGameContext,
+      exactLineForwardShadows: exactLine.missingGameContext,
       standardRunline: standardRunline.missingGameContext,
       homeP15Alt: homeP15.missingGameContext,
     },

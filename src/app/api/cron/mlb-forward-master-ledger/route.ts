@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { timingSafeEqual } from 'node:crypto'
 import { syncMlb2026ForwardMasterLedger } from '@/services/mlb-forward-master-ledger.service'
+import { freezeMlbExactLineForwardShadows, settleMlbExactLineForwardShadows } from '@/services/mlb-exact-line-forward-shadow.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -19,8 +20,20 @@ export async function GET(request: NextRequest) {
     return Response.json({ success: false, status: 'UNAUTHORIZED' }, { status: 401 })
   }
   try {
-    const result = await syncMlb2026ForwardMasterLedger()
-    return Response.json(result, { headers: { 'Cache-Control': 'no-store' } })
+    const settlement = await settleMlbExactLineForwardShadows()
+    const freeze = await freezeMlbExactLineForwardShadows()
+    const ledger = await syncMlb2026ForwardMasterLedger()
+    return Response.json({
+      success: true,
+      status: 'MLB_FORWARD_RESEARCH_SYNCED',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      settlement,
+      freeze,
+      ledger,
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     return Response.json({
       success: false,
