@@ -1,0 +1,33 @@
+name: MLB 2026 Forward Master Ledger Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20260928204500_mlb_2026_forward_master_ledger_v1.sql'
+      - 'src/services/mlb-forward-master-ledger.service.ts'
+      - 'src/app/api/cron/mlb-forward-master-ledger/route.ts'
+      - 'contracts/MLB_2026_FORWARD_MASTER_LEDGER_V1.json'
+      - 'docs/research/MLB_2026_FORWARD_MASTER_LEDGER_V1.md'
+      - 'scripts/research/verify_mlb_2026_forward_master_ledger_v1.test.mjs'
+      - 'vercel.json'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_2026_forward_master_ledger_v1.test.mjs
+      - run: npm ci
+      - run: npm run build

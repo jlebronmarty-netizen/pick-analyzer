@@ -87,6 +87,10 @@
     {
       "path": "/api/cron/mlb-official-settlement",
       "schedule": "12 * * * *"
+    },
+    {
+      "path": "/api/cron/mlb-forward-master-ledger",
+      "schedule": "20 15 * * *"
     }
   ],
   "git": {
