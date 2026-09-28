@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { MLB_MODEL_GAME_TYPES } from '@/services/mlb-game-type-policy'
+
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
@@ -430,7 +432,7 @@ export async function materializeApprovedPropPitcherFeatures(input: {
     .from('pick2_mlb_games')
     .select('game_pk,game_date,scheduled_at,metadata')
     .eq('game_date', input.targetDate)
-    .eq('game_type', 'R')
+    .in('game_type', [...MLB_MODEL_GAME_TYPES])
     .order('scheduled_at', { ascending: true })
   if (gamesResult.error) throw new Error('MLB_PROP_PITCHER_FEATURE_GAME_READ_FAILED:' + gamesResult.error.message)
   const allGames = (gamesResult.data ?? []) as GameRow[]
