@@ -14,6 +14,7 @@ on:
       - 'src/services/mlb-approved-prop-market-capture.service.ts'
       - 'src/services/mlb-approved-prop-balldontlie-capture.service.ts'
       - 'src/services/mlb-approved-prop-future-recovery.service.ts'
+      - 'src/services/mlb-approved-prop-pitcher-feature-materializer.service.ts'
       - 'docs/research/MLB_POSTSEASON_COMPATIBILITY_AUDIT_2026.md'
       - 'scripts/research/verify_mlb_postseason_compatibility_2026.test.mjs'
 
