@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { isMlbModelGameType } from '@/services/mlb-game-type-policy'
+
 import { createHash, randomUUID } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
@@ -183,7 +185,7 @@ async function officialSlate(targetDate: string): Promise<OfficialGame[]> {
     const awayTeam = MLB_TEAM_BY_ID[Number(game?.teams?.away?.team?.id)]
     const detailed = String(game?.status?.detailedState ?? '').toLowerCase()
     if (!Number.isSafeInteger(gamePk) || !startTime || !homeTeam || !awayTeam) continue
-    if (String(game?.gameType ?? '') !== 'R' || detailed.includes('postpon') || detailed.includes('cancel')) continue
+    if (!isMlbModelGameType(game?.gameType) || detailed.includes('postpon') || detailed.includes('cancel')) continue
     const hp = game?.teams?.home?.probablePitcher
     const ap = game?.teams?.away?.probablePitcher
     const hpId = Number(hp?.id)
