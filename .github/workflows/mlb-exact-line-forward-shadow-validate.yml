@@ -9,6 +9,11 @@ on:
       - 'contracts/MLB_EXACT_LINE_FORWARD_SHADOW_V1.json'
       - 'docs/research/MLB_EXACT_LINE_FORWARD_SHADOW_V1.md'
       - 'scripts/research/verify_mlb_exact_line_forward_shadow_v1.test.mjs'
+      - 'src/services/mlb-forward-master-ledger.service.ts'
+      - 'src/app/api/cron/mlb-forward-master-ledger/route.ts'
+      - 'contracts/MLB_2026_FORWARD_MASTER_LEDGER_V1.json'
+      - 'docs/research/MLB_2026_FORWARD_MASTER_LEDGER_V1.md'
+      - 'scripts/research/verify_mlb_2026_forward_master_ledger_v1.test.mjs'
 
 permissions:
   contents: read
@@ -26,5 +31,6 @@ jobs:
         with:
           node-version: 22
       - run: node --test scripts/research/verify_mlb_exact_line_forward_shadow_v1.test.mjs
+      - run: node --test scripts/research/verify_mlb_2026_forward_master_ledger_v1.test.mjs
       - run: npm ci
       - run: npm run build
