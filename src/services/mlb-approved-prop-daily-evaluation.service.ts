@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { MLB_MODEL_GAME_TYPES } from '@/services/mlb-game-type-policy'
+
 import { createHash, randomUUID } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
@@ -485,7 +487,7 @@ export async function evaluateMlbApprovedPropsDaily(input: { targetDate?: string
     .from('pick2_mlb_games')
     .select('game_pk,scheduled_at,metadata')
     .eq('game_date', targetDate)
-    .eq('game_type', 'R')
+    .in('game_type', [...MLB_MODEL_GAME_TYPES])
     .order('scheduled_at', { ascending: true })
   if (gamesResult.error) throw new Error('MLB_APPROVED_PROP_GAME_READ_FAILED:' + gamesResult.error.message)
   const games = (gamesResult.data ?? []) as unknown as GameRow[]
