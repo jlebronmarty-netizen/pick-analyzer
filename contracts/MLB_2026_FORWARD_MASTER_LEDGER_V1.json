@@ -1,0 +1,35 @@
+{
+  "contract": "MLB_2026_FORWARD_MASTER_LEDGER_V1/1.0.0",
+  "status": "RESEARCH_ONLY",
+  "canonical_table": "public.mlb_2026_forward_master_ledger_v1",
+  "season": 2026,
+  "season_phase_values": [
+    "REGULAR_SEASON",
+    "POSTSEASON"
+  ],
+  "canonical_identity": "source_relation + source_row_id + model_id",
+  "source_policy": {
+    "pick_analyzer": [
+      "mlb_ml_opening_consensus_v2_forward_v1",
+      "mlb_approved_prop_daily_v1 QUALIFIES_MARKET_VERIFIED only",
+      "sports_sync_jobs runline_v2_standard_forward_freeze_v1 selected models only",
+      "sports_sync_jobs runline_v2_home_p15_alt_forward_freeze_v1 selected only",
+      "sports_sync_jobs runline_v2_home_p15_alt_forward_settlement_v1 outcomes only"
+    ],
+    "pick_edge": "SEPARATE_IMMUTABLE_ARTIFACT_IMPORTER_REQUIRED",
+    "equilizer": "SEPARATE_IMMUTABLE_ARTIFACT_IMPORTER_REQUIRED",
+    "pulpy": "PROVENANCE_META_SOURCE_NOT_MODEL_RECALCULATION_SOURCE"
+  },
+  "postseason_policy": "POSTSEASON_SHADOW_DOMAIN_SHIFT kept separate from REGULAR_SEASON",
+  "probability_policy": "nullable; historical accuracy is never substituted for per-play probability",
+  "settlement_policy": "source-authoritative only; ledger does not infer outcomes",
+  "boundaries": {
+    "research_only": true,
+    "production_eligible": false,
+    "official_picks_eligible": false,
+    "apostar_enabled": false,
+    "no_model_recalculation": true,
+    "no_threshold_retuning": true,
+    "no_historical_odds_api_spend": true
+  }
+}
