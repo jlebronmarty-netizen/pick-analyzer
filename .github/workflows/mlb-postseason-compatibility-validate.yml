@@ -1,0 +1,32 @@
+name: MLB Postseason Compatibility Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/services/mlb-game-type-policy.ts'
+      - 'src/services/mlb-official-data-provider.service.ts'
+      - 'src/services/mlb-canonical-slate-preflight.service.ts'
+      - 'src/services/mlb-opening-consensus-prospective.service.ts'
+      - 'src/services/mlb-runline-v2-standard-forward-freeze.service.ts'
+      - 'src/services/mlb-runline-home-p15-alt-forward-freeze.service.ts'
+      - 'src/services/mlb-approved-prop-daily-evaluation.service.ts'
+      - 'src/services/mlb-approved-prop-market-capture.service.ts'
+      - 'src/services/mlb-approved-prop-balldontlie-capture.service.ts'
+      - 'src/services/mlb-approved-prop-future-recovery.service.ts'
+      - 'docs/research/MLB_POSTSEASON_COMPATIBILITY_AUDIT_2026.md'
+      - 'scripts/research/verify_mlb_postseason_compatibility_2026.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_postseason_compatibility_2026.test.mjs
