@@ -139,7 +139,6 @@ async function existingCheckpoint(targetDate: string, checkpoint: string) {
 async function loadBdlGames(targetDate: string) {
   const url = new URL('https://api.balldontlie.io/mlb/v1/games')
   url.searchParams.append('dates[]', targetDate)
-  url.searchParams.set('season_type', 'regular')
   url.searchParams.set('per_page', '100')
   const payload = await getJson(url)
   return Array.isArray(payload?.data) ? payload.data as BdlGame[] : []
