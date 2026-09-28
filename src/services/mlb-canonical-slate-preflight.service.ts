@@ -3,6 +3,7 @@ import 'server-only'
 import { createHash } from 'node:crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { fetchMlbOfficialSchedule } from '@/services/mlb-official-data-provider.service'
+import { isMlbModelGameType } from '@/services/mlb-game-type-policy'
 
 const SEASON = 2026
 
@@ -29,11 +30,12 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
   }
 
   const official = await fetchMlbOfficialSchedule(targetDate)
-  const regular = official.rows.filter((game) => (
+  const slate = official.rows.filter((game) => (
     game.officialDate === targetDate
     && game.sourceMetadata?.gamePk != null
+    && isMlbModelGameType(game.gameType)
   ))
-  if (regular.length === 0) {
+  if (slate.length === 0) {
     throw new Error(`MLB_CANONICAL_SLATE_OFFICIAL_EMPTY:${targetDate}:${official.endpoint}`)
   }
 
@@ -51,8 +53,8 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
   }
   if (teamByAbbr.size < 30) throw new Error(`MLB_CANONICAL_SLATE_TEAM_MAP_INCOMPLETE:${teamByAbbr.size}`)
 
-  const gamePks = regular.map((game) => Number(game.gamePk)).filter(Number.isSafeInteger)
-  if (gamePks.length !== regular.length) {
+  const gamePks = slate.map((game) => Number(game.gamePk)).filter(Number.isSafeInteger)
+  if (gamePks.length !== slate.length) {
     throw new Error(`MLB_CANONICAL_SLATE_INVALID_GAME_PK:${gamePks.length}/${regular.length}`)
   }
   const { data: existing, error: existingError } = await supabaseAdmin
@@ -63,7 +65,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
   const existingSet = new Set((existing ?? []).map((row) => Number(row.game_pk)))
 
   const now = Date.now()
-  const inserts = regular
+  const inserts = slate
     .filter((game) => !existingSet.has(Number(game.gamePk)))
     .map((game) => {
       const scheduledAt = game.gameDate ? new Date(game.gameDate).toISOString() : null
@@ -85,6 +87,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
         awayProbablePitcher: game.probablePitchers.away.player,
         gameNumber: game.gameNumber,
         doubleHeader: game.doubleHeader,
+        gameType: game.gameType,
         status: game.status,
       }
 
@@ -95,7 +98,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
         scheduled_at: scheduledAt,
         home_team_id: homeTeamId,
         away_team_id: awayTeamId,
-        game_type: 'R',
+        game_type: game.gameType,
         official_status: game.status.detailedState ?? game.status.abstractGameState ?? null,
         doubleheader: game.doubleHeader,
         game_number: game.gameNumber,
@@ -141,7 +144,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
     targetDate,
     endpoint: official.endpoint,
     officialRows: official.rows.length,
-    regularGames: regular.length,
+    modelEligibleGames: slate.length,
     existingGames: existingSet.size,
     insertedGames: inserts.length,
     readbackGames: readbackSet.size,
