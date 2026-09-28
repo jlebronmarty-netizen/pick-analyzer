@@ -25,7 +25,16 @@ test('ledger preserves phase separation and nullable probability semantics',()=>
 test('synchronizer consumes frozen sources instead of model recalculation',()=>{
   assert.match(service,/mlb_ml_opening_consensus_v2_forward_v1/)
   assert.match(service,/mlb_approved_prop_daily_v1/)
+  assert.match(service,/mlb_exact_line_forward_shadow_v1/)
   assert.match(service,/runline_v2_standard_forward_freeze_v1/)
   assert.match(service,/runline_v2_home_p15_alt_forward_freeze_v1/)
   assert.doesNotMatch(service,/BALLDONTLIE_API_KEY|ODDS_API_KEY|api\.balldontlie|the-odds-api/i)
+})
+
+test('cron settles then freezes exact-line rows before master sync',()=>{
+  const route=fs.readFileSync('src/app/api/cron/mlb-forward-master-ledger/route.ts','utf8')
+  const settle=route.indexOf('settleMlbExactLineForwardShadows()')
+  const freeze=route.indexOf('freezeMlbExactLineForwardShadows()')
+  const sync=route.indexOf('syncMlb2026ForwardMasterLedger()')
+  assert.ok(settle>=0 && freeze>settle && sync>freeze)
 })
