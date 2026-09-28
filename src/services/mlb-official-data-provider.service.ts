@@ -2,6 +2,7 @@ import 'server-only'
 
 import { createHash } from 'crypto'
 import { mapMlbStatsGameToSportEventStatus } from '@/services/mlb-event-status-mapper.service'
+import { isMlbModelGameType, mlbModelGameTypesQuery, type MlbModelGameType } from '@/services/mlb-game-type-policy'
 
 export type MlbOfficialCapability =
   | 'schedule'
@@ -34,6 +35,7 @@ export type MlbOfficialProbablePitcher = {
 export type MlbOfficialScheduleGame = {
   provider: 'mlb_stats_api'
   gamePk: string
+  gameType: MlbModelGameType | null
   officialDate: string | null
   gameDate: string | null
   home: MlbOfficialTeam
@@ -109,6 +111,7 @@ type MlbStatsTeam = { id?: number | string; name?: string; abbreviation?: string
 type MlbStatsPerson = { id?: number | string; fullName?: string }
 type MlbStatsGame = {
   gamePk?: number | string
+  gameType?: string
   gameDate?: string
   officialDate?: string
   gameNumber?: number
@@ -213,6 +216,7 @@ export function normalizeMlbOfficialSchedulePayload(payload: unknown, capturedAt
       return {
         provider: 'mlb_stats_api' as const,
         gamePk: text(game.gamePk) ?? stableMlbOfficialId(['mlb_game', game.gameDate, away.id, home.id]),
+        gameType: isMlbModelGameType(game.gameType) ? game.gameType : null,
         officialDate: text(game.officialDate),
         gameDate: text(game.gameDate),
         home,
@@ -241,6 +245,7 @@ export function normalizeMlbOfficialSchedulePayload(payload: unknown, capturedAt
         capturedAt,
         sourceMetadata: {
           gamePk: game.gamePk ?? null,
+          gameType: game.gameType ?? null,
           officialDate: game.officialDate ?? null,
           rawStatus: game.status ?? null,
           doubleHeader: game.doubleHeader ?? null,
@@ -266,7 +271,7 @@ async function fetchJson(endpoint: string, timeoutMs = DEFAULT_TIMEOUT_MS) {
 
 export async function fetchMlbOfficialSchedule(date: string, options: { timeoutMs?: number } = {}): Promise<MlbOfficialProviderResponse<MlbOfficialScheduleGame>> {
   const requestedAt = nowIso()
-  const endpoint = `/api/v1/schedule?sportId=1&date=${date}&gameType=R&hydrate=probablePitcher,team,venue`
+  const endpoint = `/api/v1/schedule?sportId=1&date=${date}&gameTypes=${mlbModelGameTypesQuery()}&hydrate=probablePitcher,team,venue`
   const payload = await fetchJson(endpoint, options.timeoutMs ?? DEFAULT_TIMEOUT_MS)
   const capturedAt = nowIso()
   return {
