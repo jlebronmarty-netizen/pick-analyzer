@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { isMlbModelGameType } from '@/services/mlb-game-type-policy'
+
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { normalizeMlbModelTeam, normalizedComponentScore, type FeatureValue, type NormalizationStat } from '@/lib/mlb-moneyline-high-confidence-v2'
 import {
@@ -189,7 +191,7 @@ async function loadPick2Slate(targetDate: string) {
     'game_pk,scheduled_at,home_team_id,away_team_id,game_type,official_status',
     (q) => q.eq('game_date', targetDate).eq('season', SEASON).order('scheduled_at').order('game_pk'),
   )
-  return rows.filter((row) => row.game_type === 'R')
+  return rows.filter((row) => isMlbModelGameType(row.game_type))
 }
 
 async function loadCanonicalTeams(ids: string[]) {
@@ -226,7 +228,7 @@ async function loadOfficialContext(targetDate: string) {
   const out = new Map<number, OfficialGame>()
   for (const dateBucket of schedulePayload?.dates ?? []) {
     for (const game of dateBucket?.games ?? []) {
-      if (String(game?.gameType ?? '') !== 'R') continue
+      if (!isMlbModelGameType(game?.gameType)) continue
       const gamePk = Number(game?.gamePk)
       const homeMlbTeamId = asNum(game?.teams?.home?.team?.id)
       const awayMlbTeamId = asNum(game?.teams?.away?.team?.id)
