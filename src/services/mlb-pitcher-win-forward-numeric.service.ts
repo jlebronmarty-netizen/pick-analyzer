@@ -218,7 +218,7 @@ async function officialSlate(targetDate: string): Promise<SlateGame[]> {
   const url = new URL('https://statsapi.mlb.com/api/v1/schedule')
   url.searchParams.set('sportId', '1')
   url.searchParams.set('date', targetDate)
-  url.searchParams.set('gameTypes', 'R')
+  url.searchParams.set('gameTypes', 'R,F,D,L,W')
   url.searchParams.set('hydrate', 'probablePitcher')
 
   const response = await fetch(url.toString(), { cache: 'no-store', signal: AbortSignal.timeout(15_000) })
