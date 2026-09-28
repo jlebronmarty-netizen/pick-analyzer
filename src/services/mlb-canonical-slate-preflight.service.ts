@@ -55,7 +55,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
 
   const gamePks = slate.map((game) => Number(game.gamePk)).filter(Number.isSafeInteger)
   if (gamePks.length !== slate.length) {
-    throw new Error(`MLB_CANONICAL_SLATE_INVALID_GAME_PK:${gamePks.length}/${regular.length}`)
+    throw new Error(`MLB_CANONICAL_SLATE_INVALID_GAME_PK:${gamePks.length}/${slate.length}`)
   }
   const { data: existing, error: existingError } = await supabaseAdmin
     .from('pick2_mlb_games')
