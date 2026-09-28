@@ -36,6 +36,7 @@ Pick Analyzer persisted/frozen sources only:
 3. Standard Run Line frozen jobs, selected Core/Transfer/Broad only.
 4. HOME +1.5 frozen jobs, selected only.
 5. HOME +1.5 authoritative settlement jobs.
+6. Persisted exact-line Pitcher K / Pitcher Outs forward shadows.
 
 The ledger does not rerun any model.
 
@@ -76,8 +77,14 @@ OPEN/null result is valid until the canonical source settles.
 Endpoint:
 `/api/cron/mlb-forward-master-ledger`
 
-Scheduled daily after the normal pregame research freezes. The sync is idempotent and also refreshes
-settlement fields when authoritative sources later settle.
+Scheduled daily after the normal pregame research freezes.
+
+Execution order:
+1. settle previously frozen exact-line K/Outs rows when official pitcher outcomes exist;
+2. freeze current exact-line K/Outs candidates, strictly pregame;
+3. synchronize all persisted evidence into the master ledger.
+
+The master sync is idempotent and refreshes settlement fields when authoritative sources later settle.
 
 ## Boundaries
 
