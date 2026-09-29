@@ -460,23 +460,38 @@ export async function captureMlbApprovedPropMarkets(input: {
   }
   const oddsApiConfigured = Boolean(apiKey())
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
-  const recoveryWindow = clock.hour === 11 && clock.minute <= 50
-  if (clock.hour !== 10 && !recoveryWindow) return { ...base, status: 'NOT_DUE' }
-
-  // A bounded 11:00-11:10 recovery reuses the 10:45 checkpoint identity,
-  // so a successful normal capture remains a strict REUSE_NO_OP.
-  const checkpoint = clock.hour === 10 && clock.minute < 30 ? '10:15' : '10:45'
-  const existing = await existingCheckpoint(targetDate, checkpoint)
-  if (existing) {
-    return { ...base, status: 'REUSE_NO_OP', checkpoint, jobId: existing.id, completedAt: existing.completed_at }
-  }
 
   const [events, slate] = await Promise.all([
     loadEvents(targetDate, now),
     officialSlate(targetDate),
   ])
+  if (!events.length) return { ...base, status: 'NO_PREGAME_EVENTS', checkpoint: null }
+
+  const standardRecoveryWindow = clock.hour === 11 && clock.minute <= 50
+  const standardWindow = clock.hour === 10 || standardRecoveryWindow
+  const earliestStart = Math.min(...events.map((event) => Date.parse(event.start_time)).filter(Number.isFinite))
+  const minutesToEarliest = Number.isFinite(earliestStart)
+    ? (earliestStart - now.getTime()) / 60_000
+    : -1
+  const latePregameRecovery = !standardWindow && minutesToEarliest >= 20
+  if (!standardWindow && !latePregameRecovery) {
+    return { ...base, status: 'NOT_DUE', minutesToEarliest }
+  }
+
+  // Normal automation preserves its historical 10:15/10:45 checkpoints.
+  // Manual pregame recovery outside that window is separately labeled and
+  // never masquerades as the fixed prospective freeze.
+  const checkpoint = latePregameRecovery
+    ? `late_pregame_recovery_${String(clock.hour).padStart(2, '0')}${String(clock.minute).padStart(2, '0')}`
+    : clock.hour === 10 && clock.minute < 30
+      ? '10:15'
+      : '10:45'
+  const existing = await existingCheckpoint(targetDate, checkpoint)
+  if (existing) {
+    return { ...base, status: 'REUSE_NO_OP', checkpoint, jobId: existing.id, completedAt: existing.completed_at }
+  }
+
   const playerDirectory = await loadPlayerDirectory(slate)
-  if (!events.length) return { ...base, status: 'NO_PREGAME_EVENTS', checkpoint }
   const providerIds = await loadProviderEventIds(events.map((event) => event.id))
   const eventGames = events.map((event) => ({ event, game: matchOfficial(event, slate) }))
   const planned = eventGames.flatMap(({ event, game }) => {
