@@ -642,7 +642,15 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
 
       if ('inserted' in result && Number(result.inserted ?? 0) > 0) wroteHistory = true
 
-      if (result.status === 'NO_OP' && 'reason' in result && result.reason === 'ALREADY_CURRENT') {
+      if (
+        result.status === 'NO_OP' &&
+        'reason' in result &&
+        (result.reason === 'ALREADY_CURRENT' || result.reason === 'NO_GAME_DATE_IN_SCAN_WINDOW')
+      ) {
+        // An off-day before a postseason slate is also a valid current state.
+        // Downstream readiness performs the authoritative history/analytics
+        // check, so do not burn the catch-up loop looking for a nonexistent
+        // regular-season game date.
         reachedCurrent = true
         break
       }
