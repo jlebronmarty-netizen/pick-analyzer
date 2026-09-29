@@ -137,8 +137,15 @@ async function existingCheckpoint(targetDate: string, checkpoint: string) {
 }
 
 async function loadBdlGames(targetDate: string) {
+  const nextUtcDate = new Date(targetDate + 'T00:00:00Z')
+  nextUtcDate.setUTCDate(nextUtcDate.getUTCDate() + 1)
+
   const url = new URL('https://api.balldontlie.io/mlb/v1/games')
+  // The operating date is America/Puerto_Rico. Late MLB games can begin after
+  // midnight UTC, so query the target date plus the following UTC date and let
+  // exact team/start-time matching select the canonical game.
   url.searchParams.append('dates[]', targetDate)
+  url.searchParams.append('dates[]', nextUtcDate.toISOString().slice(0, 10))
   url.searchParams.set('per_page', '100')
   const payload = await getJson(url)
   return Array.isArray(payload?.data) ? payload.data as BdlGame[] : []
