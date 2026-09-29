@@ -676,8 +676,8 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       }
     }
 
-    if (!reachedCurrent) {
-      const readiness = await getMlbDailyHistoryReadiness()
+    let readiness = await getMlbDailyHistoryReadiness()
+    if (!reachedCurrent && !readiness.ready) {
       return apiOk({
         success: false,
         status: 'CATCHUP_LIMIT_REACHED',
@@ -696,7 +696,11 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       })
     }
 
-    let readiness = await getMlbDailyHistoryReadiness()
+    // Postseason can have no new regular-season Statcast date to ingest while
+    // previous-day history is already certified. In that case do not block
+    // downstream pregame research evaluation solely because catch-up cannot
+    // advance beyond the regular-season endpoint.
+
     let analyticsRepair: Awaited<ReturnType<typeof refreshMlbStatcastDailyAnalytics>> | null = null
     if (wroteHistory || !readiness.analytics.ready) {
       analyticsRepair = await refreshMlbStatcastDailyAnalytics()
