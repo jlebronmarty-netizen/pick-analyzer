@@ -140,15 +140,19 @@ async function loadBdlGames(targetDate: string) {
   const nextUtcDate = new Date(targetDate + 'T00:00:00Z')
   nextUtcDate.setUTCDate(nextUtcDate.getUTCDate() + 1)
 
-  const url = new URL('https://api.balldontlie.io/mlb/v1/games')
-  // The operating date is America/Puerto_Rico. Late MLB games can begin after
-  // midnight UTC, so query the target date plus the following UTC date and let
-  // exact team/start-time matching select the canonical game.
-  url.searchParams.append('dates[]', targetDate)
-  url.searchParams.append('dates[]', nextUtcDate.toISOString().slice(0, 10))
-  url.searchParams.set('per_page', '100')
-  const payload = await getJson(url)
-  return Array.isArray(payload?.data) ? payload.data as BdlGame[] : []
+  // BALLDONTLIE's MLB date filtering can behave as a single-date filter even
+  // when dates[] is repeated. Query each UTC date independently so late
+  // Puerto Rico games (00:00Z/02:00Z next day) are not dropped.
+  const dates = [targetDate, nextUtcDate.toISOString().slice(0, 10)]
+  const games: BdlGame[] = []
+  for (const date of dates) {
+    const url = new URL('https://api.balldontlie.io/mlb/v1/games')
+    url.searchParams.append('dates[]', date)
+    url.searchParams.set('per_page', '100')
+    const payload = await getJson(url)
+    if (Array.isArray(payload?.data)) games.push(...payload.data as BdlGame[])
+  }
+  return games
 }
 
 function matchGame(event: BdlCapturePlannedEvent, games: BdlGame[]) {
@@ -306,9 +310,9 @@ export async function captureApprovedPropsFromBallDontLie(input: {
   let games: BdlGame[] = []
   try {
     games = await loadBdlGames(input.targetDate)
-    calls += 1
+    calls += 2
   } catch (error) {
-    calls += 1
+    calls += 2
     callErrors.push({ scope: 'games', error: error instanceof Error ? error.message : String(error) })
   }
 
