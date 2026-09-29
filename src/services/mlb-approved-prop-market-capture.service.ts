@@ -458,7 +458,7 @@ export async function captureMlbApprovedPropMarkets(input: {
     rowsInserted: 0,
     rowsUpdated: 0,
   }
-  if (!apiKey()) return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY' }
+  const oddsApiConfigured = Boolean(apiKey())
   if (targetDate !== clock.date) return { ...base, success: false, status: 'BLOCK_NONCURRENT_WRITE_DATE' }
   const recoveryWindow = clock.hour === 11 && clock.minute <= 50
   if (clock.hour !== 10 && !recoveryWindow) return { ...base, status: 'NOT_DUE' }
@@ -478,17 +478,17 @@ export async function captureMlbApprovedPropMarkets(input: {
   const playerDirectory = await loadPlayerDirectory(slate)
   if (!events.length) return { ...base, status: 'NO_PREGAME_EVENTS', checkpoint }
   const providerIds = await loadProviderEventIds(events.map((event) => event.id))
-  const planned = events.flatMap((event) => {
+  const eventGames = events.map((event) => ({ event, game: matchOfficial(event, slate) }))
+  const planned = eventGames.flatMap(({ event, game }) => {
     const providerEventId = providerIds.get(event.id)
-    return providerEventId ? [{ event, providerEventId, game: matchOfficial(event, slate) }] : []
+    return providerEventId ? [{ event, providerEventId, game }] : []
   })
-  if (!planned.length) return { ...base, status: 'NO_PROVIDER_EVENT_IDENTITIES', checkpoint }
 
   const calls: CaptureCall[] = []
   const rows: Array<Record<string, unknown>> = []
-  const knownRemainingBefore = await latestKnownRequestsRemaining(targetDate)
+  const knownRemainingBefore = oddsApiConfigured ? await latestKnownRequestsRemaining(targetDate) : null
   let remaining: number | null = knownRemainingBefore
-  const oddsApiAllowed = knownRemainingBefore === null || knownRemainingBefore > CREDIT_RESERVE
+  const oddsApiAllowed = oddsApiConfigured && (knownRemainingBefore === null || knownRemainingBefore > CREDIT_RESERVE)
   if (oddsApiAllowed) for (const item of planned) {
     if (remaining !== null && remaining <= CREDIT_RESERVE) break
     const url = new URL('https://api.the-odds-api.com/v4/sports/' + SPORT_KEY + '/events/' + encodeURIComponent(item.providerEventId) + '/odds')
@@ -543,18 +543,18 @@ export async function captureMlbApprovedPropMarkets(input: {
     if (call.requestsRemaining === null) break
   }
 
-  const bdlPlannedEvents: BdlCapturePlannedEvent[] = planned.map((item) => ({
-    eventId: item.event.id,
-    startTime: item.event.start_time,
-    homeTeam: item.game?.homeTeam ?? normalizeOddsAuthorityTeam(String(item.event.home_team ?? '')),
-    awayTeam: item.game?.awayTeam ?? normalizeOddsAuthorityTeam(String(item.event.away_team ?? '')),
-    gamePk: item.game?.gamePk ?? null,
-    probablePitchers: [item.game?.homePitcher, item.game?.awayPitcher]
+  const bdlPlannedEvents: BdlCapturePlannedEvent[] = eventGames.map(({ event, game }) => ({
+    eventId: event.id,
+    startTime: event.start_time,
+    homeTeam: game?.homeTeam ?? normalizeOddsAuthorityTeam(String(event.home_team ?? '')),
+    awayTeam: game?.awayTeam ?? normalizeOddsAuthorityTeam(String(event.away_team ?? '')),
+    gamePk: game?.gamePk ?? null,
+    probablePitchers: [game?.homePitcher, game?.awayPitcher]
       .filter(Boolean)
-      .map((pitcher) => pitcher!) ,
+      .map((pitcher) => pitcher!),
   }))
   const oddsCapturedEvents = new Set(calls.filter((call) => call.rowsAccepted > 0).map((call) => call.eventId))
-  const oddsCoverageComplete = planned.every((item) => oddsCapturedEvents.has(item.event.id))
+  const oddsCoverageComplete = planned.length > 0 && planned.every((item) => oddsCapturedEvents.has(item.event.id))
   const bdlFallback = oddsCoverageComplete
     ? null
     : await captureApprovedPropsFromBallDontLie({
@@ -640,7 +640,10 @@ export async function captureMlbApprovedPropMarkets(input: {
       bdlFallbackUsed: Boolean(bdlFallback),
       bdlFallback,
       coverageComplete: combinedCoverageComplete,
-      plannedEvents: planned.length,
+      plannedEvents: bdlPlannedEvents.length,
+      oddsPlannedEvents: planned.length,
+      bdlPlannedEvents: bdlPlannedEvents.length,
+      oddsApiConfigured,
       calls,
     },
     updated_at: completedAt,
@@ -664,6 +667,7 @@ export async function captureMlbApprovedPropMarkets(input: {
     rowsUpdated: Math.min(existingRows, uniqueRows.length),
     requestsRemainingBefore: knownRemainingBefore,
     requestsRemainingAfter: remaining,
+    oddsApiConfigured,
     oddsApiAllowed,
     oddsCoverageComplete,
     bdlFallback,
