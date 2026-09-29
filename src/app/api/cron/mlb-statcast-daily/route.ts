@@ -17,6 +17,7 @@ import { freezePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v
 import { settlePa12ErForwardShadowV2 } from '@/services/pa12-er-forward-shadow-v2-settlement.service'
 import { freezePitcherWinForwardNumeric, settlePitcherWinForwardNumeric, syncPitcherWinForwardHistory } from '@/services/mlb-pitcher-win-forward-numeric.service'
 import { captureMlbApprovedPropMarkets } from '@/services/mlb-approved-prop-market-capture.service'
+import { captureBdlMainMarketMovement } from '@/services/mlb-bdl-main-market-movement-capture.service'
 import { evaluateMlbApprovedPropsDaily } from '@/services/mlb-approved-prop-daily-evaluation.service'
 import { recoverMlbApprovedPropsFutureGames } from '@/services/mlb-approved-prop-future-recovery.service'
 import {
@@ -372,6 +373,23 @@ async function safeApprovedPropMarketCapture(id: string) {
   }
 }
 
+async function safeBdlMainMarketMovement() {
+  try {
+    return await captureBdlMainMarketMovement()
+  } catch (error) {
+    return {
+      success: false,
+      status: 'BDL_MAIN_MARKET_MOVEMENT_FAILED_NON_BLOCKING',
+      researchOnly: true,
+      productionEligible: false,
+      officialPicksModified: false,
+      apostarActivated: false,
+      providerCallsMade: 0,
+      error: errorMessage(error, 'Unknown BDL MLB main-market movement error'),
+    }
+  }
+}
+
 async function safeApprovedPropDailyEvaluation(targetDate: string) {
   try {
     return await evaluateMlbApprovedPropsDaily({ targetDate })
@@ -603,6 +621,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
       : null
     const prospectiveMarketCapture = await maybeCaptureProspectiveMlbMarkets(id)
     const approvedPropMarketCapture = await safeApprovedPropMarketCapture(id)
+    const bdlMainMarketMovement = await safeBdlMainMarketMovement()
 
     // Independent research-only Pitcher ER V2 freeze/settlement run before
     // Statcast catch-up. This preserves fixed-clock evidence even if a separate
@@ -628,6 +647,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
           dailyHistoryReadiness: readiness,
           prospectiveMarketCapture,
           approvedPropMarketCapture,
+          bdlMainMarketMovement,
           canonicalSlateReconcile,
           approvedPropPitcherFeatures,
           pa12ErForwardShadowFreeze,
@@ -665,6 +685,7 @@ async function execute(request: NextRequest, explicitDate?: string | null) {
         dailyHistoryReadiness: readiness,
         prospectiveMarketCapture,
         approvedPropMarketCapture,
+        bdlMainMarketMovement,
         canonicalSlateReconcile,
         approvedPropPitcherFeatures,
         pa12ErForwardShadowFreeze,
