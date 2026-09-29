@@ -273,6 +273,12 @@ async function syncApprovedProps(): Promise<{ rows: LedgerRow[]; missingGameCont
       .order('game_pk'),
   )
   const context = await gameContext(source.map((row) => Number(row.game_pk)))
+  const settlements = await pagedRead<any>(
+    'mlb_approved_prop_settlement_v1',
+    'approved_prop_daily_id,result,actual_value,actual_label,settled_at,blocker,outcome_source,outcome_source_identity',
+    (query) => query.gte('tracking_date', REGULAR_START),
+  )
+  const settlementByDailyId = new Map(settlements.map((row) => [String(row.approved_prop_daily_id), row]))
   const rows: LedgerRow[] = []
   let missingGameContext = 0
   for (const row of source) {
@@ -302,6 +308,10 @@ async function syncApprovedProps(): Promise<{ rows: LedgerRow[]; missingGameCont
       freezeTimestamp: String(row.frozen_at),
       sourceRelation: 'mlb_approved_prop_daily_v1',
       sourceRowId: String(row.id),
+      result: result(settlementByDailyId.get(String(row.id))?.result),
+      actualValue: finite(settlementByDailyId.get(String(row.id))?.actual_value),
+      actualLabel: text(settlementByDailyId.get(String(row.id))?.actual_label),
+      settledAt: text(settlementByDailyId.get(String(row.id))?.settled_at),
       metadata: {
         requiredLine: row.required_line,
         sourceStatus: row.status,
@@ -309,6 +319,7 @@ async function syncApprovedProps(): Promise<{ rows: LedgerRow[]; missingGameCont
         featureSnapshot: row.feature_snapshot,
         marketSnapshot: row.market_snapshot,
         probabilitySemantics: row.model_probability == null ? 'NO_CALIBRATED_PER_PLAY_PROBABILITY' : 'SOURCE_MODEL_PROBABILITY',
+        settlement: settlementByDailyId.get(String(row.id)) ?? null,
       },
     }))
   }

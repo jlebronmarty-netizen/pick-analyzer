@@ -218,7 +218,7 @@ async function officialSlate(targetDate: string): Promise<SlateGame[]> {
   const url = new URL('https://statsapi.mlb.com/api/v1/schedule')
   url.searchParams.set('sportId', '1')
   url.searchParams.set('date', targetDate)
-  url.searchParams.set('gameTypes', 'R')
+  url.searchParams.set('gameTypes', 'R,F,D,L,W')
   url.searchParams.set('hydrate', 'probablePitcher')
 
   const response = await fetch(url.toString(), { cache: 'no-store', signal: AbortSignal.timeout(15_000) })
@@ -363,7 +363,7 @@ async function decisionWinners(startDate: string, endDate: string) {
   url.searchParams.set('sportId', '1')
   url.searchParams.set('startDate', startDate)
   url.searchParams.set('endDate', endDate)
-  url.searchParams.set('gameTypes', 'R')
+  url.searchParams.set('gameTypes', 'R,F,D,L,W')
   url.searchParams.set('hydrate', 'decisions')
   url.searchParams.set('fields', 'dates,date,games,gamePk,decisions,winner,id,fullName,loser')
 

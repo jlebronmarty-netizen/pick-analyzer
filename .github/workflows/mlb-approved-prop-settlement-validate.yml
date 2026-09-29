@@ -1,0 +1,33 @@
+name: MLB Approved Prop Settlement Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20260928213500_mlb_approved_prop_settlement_v1.sql'
+      - 'src/services/mlb-approved-prop-settlement.service.ts'
+      - 'src/services/mlb-pitcher-win-forward-numeric.service.ts'
+      - 'src/services/mlb-forward-master-ledger.service.ts'
+      - 'src/app/api/cron/mlb-forward-master-ledger/route.ts'
+      - 'contracts/MLB_APPROVED_PROP_SETTLEMENT_V1.json'
+      - 'docs/research/MLB_APPROVED_PROP_SETTLEMENT_V1.md'
+      - 'scripts/research/verify_mlb_approved_prop_settlement_v1.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_approved_prop_settlement_v1.test.mjs
+      - run: npm ci
+      - run: npm run build
