@@ -26,11 +26,13 @@ jobs:
         run: |
           set -euo pipefail
           test -n "${CRON_SECRET:-}"
-          curl -fsS --connect-timeout 10 --max-time 480 \
+          http_code="$(curl -sS --connect-timeout 10 --max-time 480 \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             "https://pick-analyzer.vercel.app/api/cron/mlb-statcast-daily" \
-            -o recovery.json
+            -o recovery.json -w '%{http_code}')"
+          echo "HTTP ${http_code}"
           cat recovery.json
+          test "${http_code}" -ge 200
       - uses: actions/upload-artifact@v4
         if: always()
         with:
