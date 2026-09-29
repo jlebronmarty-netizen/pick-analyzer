@@ -1,6 +1,6 @@
 create table if not exists public.mlb_approved_prop_settlement_v1 (
   id text primary key,
-  approved_prop_daily_id uuid not null unique,
+  approved_prop_daily_id text not null unique,
   tracking_date date not null,
   game_pk bigint not null,
   market text not null,
