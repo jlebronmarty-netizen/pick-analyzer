@@ -1,0 +1,46 @@
+{
+  "contract": "MLB_APPROVED_PROP_SETTLEMENT_V1/1.0.0",
+  "status": "RESEARCH_ONLY",
+  "source_table": "public.mlb_approved_prop_daily_v1",
+  "settlement_table": "public.mlb_approved_prop_settlement_v1",
+  "eligibility": {
+    "model_qualifies": true,
+    "market_verified": true,
+    "status": "QUALIFIES_MARKET_VERIFIED",
+    "only_past_tracking_dates": true
+  },
+  "identity": "exact gamePk + exact MLBAM player/pitcher id",
+  "source_policy": {
+    "batter_hits_home_runs_strikeouts_walks": "mlb_statcast_batter_game_logs",
+    "batter_singles_doubles_triples": "mlb_statcast_batter_sdt_game_mv",
+    "batter_total_bases": "mlb_statcast_batter_total_bases_game_mv",
+    "batter_rbis_hrrbi": "MLB Official exact-game boxscore",
+    "pitcher_strikeouts_walks_hits_allowed_outs": "mlb_ml_xyear_pitcher_game_v1",
+    "pitcher_earned_runs": "MLB Official exact-game boxscore",
+    "pitcher_record_a_win": "mlb_pitcher_win_forward_tracker_v1 authoritative settlement"
+  },
+  "fail_closed": true,
+  "no_inferred_outcomes": true,
+  "postseason": {
+    "allowed": true,
+    "pitcher_win_game_types": [
+      "R",
+      "F",
+      "D",
+      "L",
+      "W"
+    ],
+    "evidence_policy": "postseason remains separate/domain-shift in master ledger"
+  },
+  "master_ledger_sync": true,
+  "boundaries": {
+    "no_model_recalculation": true,
+    "no_retuning": true,
+    "no_line_extrapolation": true,
+    "no_fuzzy_identity": true,
+    "no_official_picks": true,
+    "apostar": false,
+    "production": false,
+    "historical_odds_api_spend": false
+  }
+}
