@@ -1,0 +1,39 @@
+name: MLB postseason board recovery 2026-09-29
+
+on:
+  push:
+    branches:
+      - recovery/mlb-postseason-board-20260929
+    paths:
+      - '.github/workflows/mlb-postseason-board-recovery-20260929.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENDPOINT: https://pick-analyzer.vercel.app/api/cron/mlb-statcast-daily
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Require credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CRON_SECRET:-}"
+
+      - name: Invoke production recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --connect-timeout 10 --max-time 480             -H "Authorization: Bearer ${CRON_SECRET}"             "${ENDPOINT}"             -o recovery.json
+          cat recovery.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlb-postseason-board-recovery-20260929
+          path: recovery.json
+          retention-days: 2

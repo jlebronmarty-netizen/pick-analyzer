@@ -24,6 +24,15 @@ function normalizeAbbreviation(value: string | null | undefined) {
   return abbr
 }
 
+function lifecycleStatus(value: string | null | undefined) {
+  const status = String(value ?? '').toLowerCase()
+  if (status.includes('final') || status.includes('completed')) return 'completed'
+  if (status.includes('live') || status.includes('progress')) return 'live'
+  if (status.includes('postpon')) return 'postponed'
+  if (status.includes('cancel')) return 'cancelled'
+  return 'scheduled'
+}
+
 export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
     throw new Error(`MLB_CANONICAL_SLATE_INVALID_DATE:${targetDate}`)
@@ -140,6 +149,58 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
   const missingAfter = gamePks.filter((gamePk) => !readbackSet.has(gamePk))
   if (missingAfter.length) throw new Error(`MLB_CANONICAL_SLATE_READBACK_INCOMPLETE:${missingAfter.join(',')}`)
 
+  // SportsDataIO historically populated sport_events for regular-season MLB,
+  // but postseason games may exist only in the MLB Official / pick2 surface.
+  // Materialize a canonical lifecycle identity for non-regular-season games so
+  // current odds and player-prop capture can crosswalk without fabricating a
+  // SportsDataIO event. Regular-season sport_events remain untouched.
+  const postseasonEvents = slate
+    .filter((game) => game.gameType !== 'R')
+    .map((game) => {
+      const gamePk = Number(game.gamePk)
+      const scheduledAt = game.gameDate ? new Date(game.gameDate).toISOString() : null
+      const homeTeam = normalizeAbbreviation(game.home.abbreviation)
+      const awayTeam = normalizeAbbreviation(game.away.abbreviation)
+      const homeTeamId = teamByAbbr.get(homeTeam)
+      const awayTeamId = teamByAbbr.get(awayTeam)
+      if (!scheduledAt) throw new Error(`MLB_CANONICAL_LIFECYCLE_START_MISSING:${gamePk}`)
+      if (!homeTeamId || !awayTeamId) throw new Error(`MLB_CANONICAL_LIFECYCLE_TEAM_MAPPING_MISSING:${gamePk}`)
+      return {
+        id: `baseball_mlb:mlb:mlb_official:event:${gamePk}`,
+        sport_key: 'baseball_mlb',
+        league_key: 'mlb',
+        season: String(SEASON),
+        stage: 'postseason',
+        home_team_id: homeTeamId,
+        away_team_id: awayTeamId,
+        home_team: homeTeam,
+        away_team: awayTeam,
+        start_time: scheduledAt,
+        venue: null,
+        status: lifecycleStatus(game.status.detailedState ?? game.status.abstractGameState),
+        provider_ids: {
+          mlb_official_game_pk: gamePk,
+        },
+        metadata: {
+          provider: 'mlb_official',
+          entityType: 'event',
+          source: 'MLB_CANONICAL_SLATE_POSTSEASON_LIFECYCLE_V1',
+          gamePk,
+          gameType: game.gameType,
+          officialStatus: game.status.detailedState ?? game.status.abstractGameState ?? null,
+          researchOnly: true,
+          production_eligible: false,
+        },
+      }
+    })
+
+  if (postseasonEvents.length) {
+    const { error: lifecycleError } = await supabaseAdmin
+      .from('sport_events')
+      .upsert(postseasonEvents, { onConflict: 'id' })
+    if (lifecycleError) throw new Error(`MLB_CANONICAL_LIFECYCLE_UPSERT_FAILED:${lifecycleError.message}`)
+  }
+
   console.info('MLB_CANONICAL_SLATE_PREFLIGHT', {
     targetDate,
     endpoint: official.endpoint,
@@ -148,6 +209,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
     existingGames: existingSet.size,
     insertedGames: inserts.length,
     readbackGames: readbackSet.size,
+    postseasonLifecycleEvents: postseasonEvents.length,
   })
 
   return {
@@ -158,6 +220,7 @@ export async function reconcileMlbCanonicalSlateFromOfficial(targetDate: string)
     existingGames: existingSet.size,
     insertedGames: inserts.length,
     readbackGames: readbackSet.size,
+    postseasonLifecycleEvents: postseasonEvents.length,
     providerCallsMade: official.providerCallsMade,
     officialPicksModified: false,
     apostarActivated: false,
