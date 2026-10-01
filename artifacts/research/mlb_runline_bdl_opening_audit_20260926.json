@@ -1,0 +1,141 @@
+{
+  "contract": "MLB_RUNLINE_BDL_OPENING_AUDIT_20260926/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "development_protocol": {
+    "threshold_derivation": "2025-05-01 through 2025-07-31 only",
+    "internal_holdout": "2025-08-01 through 2025-09-28",
+    "external_2026_used": false,
+    "no_threshold_rescue": true
+  },
+  "exact_market": {
+    "market": "run_line",
+    "line": "DOG +1.5 / FAVORITE -1.5",
+    "vendors": [
+      "betmgm",
+      "betrivers"
+    ],
+    "require_both_books_exact_1p5": true,
+    "require_same_dog_side": true,
+    "joined_games_may_sep": 1306,
+    "baseline_dog_cover": {
+      "wins": 803,
+      "n": 1306,
+      "accuracy": 0.6149,
+      "avg_opening_no_vig_dog_probability": 0.578
+    }
+  },
+  "family_1": {
+    "cuts": {
+      "market_q75": 0.614473,
+      "bullpen_edge_q25": -1.178241,
+      "common_opponent_q25": -0.142857,
+      "venue_q25": -0.166546,
+      "starter_q25": -1.793317
+    },
+    "architectures": [
+      {
+        "id": "RL_A_MARKET_Q75",
+        "n": 301,
+        "wins": 208,
+        "accuracy": 0.691,
+        "development_n": 183,
+        "development_accuracy": 0.6995,
+        "holdout_n": 118,
+        "holdout_accuracy": 0.678,
+        "worst_month": 0.6667,
+        "state": "FAIL_ACCURACY"
+      },
+      {
+        "id": "RL_B_MARKET_PLUS_FUND3",
+        "n": 149,
+        "wins": 105,
+        "accuracy": 0.7047,
+        "development_n": 96,
+        "development_accuracy": 0.6771,
+        "holdout_n": 53,
+        "holdout_accuracy": 0.7547,
+        "worst_month": 0.6667,
+        "state": "FAIL_ACCURACY"
+      },
+      {
+        "id": "RL_C_MARKET_PLUS_CONTEXT2",
+        "n": 296,
+        "wins": 205,
+        "accuracy": 0.6926,
+        "development_n": 178,
+        "development_accuracy": 0.7022,
+        "holdout_n": 118,
+        "holdout_accuracy": 0.678,
+        "worst_month": 0.6667,
+        "state": "FAIL_ACCURACY"
+      },
+      {
+        "id": "RL_D_BOTH",
+        "n": 149,
+        "wins": 105,
+        "accuracy": 0.7047,
+        "development_n": 96,
+        "development_accuracy": 0.6771,
+        "holdout_n": 53,
+        "holdout_accuracy": 0.7547,
+        "worst_month": 0.6667,
+        "state": "FAIL_ACCURACY"
+      }
+    ]
+  },
+  "family_2": {
+    "lineage": "DOG-oriented PREGAME components from mlb_runline_model_matrix_2025_v1; BDL exact opening market joined by Retrosheet canonical ID -> exact gamePk",
+    "cuts": {
+      "market_q75": 0.609468,
+      "recent_fatigue_q75": 0.454539,
+      "history_fatigue_q75": 0.293168,
+      "team_starter_history_q75": -0.123012,
+      "broad_q75": 0.044614
+    },
+    "architectures": [
+      {
+        "id": "RL_E_MARKET_RF_Q75",
+        "n": 86,
+        "wins": 59,
+        "accuracy": 0.686,
+        "holdout_accuracy": 0.6364,
+        "worst_month": 0.5714,
+        "state": "FAIL"
+      },
+      {
+        "id": "RL_F_MARKET_HF_Q75",
+        "n": 101,
+        "wins": 70,
+        "accuracy": 0.6931,
+        "holdout_accuracy": 0.5882,
+        "worst_month": 0.5556,
+        "state": "FAIL"
+      },
+      {
+        "id": "RL_G_MARKET_TSH_Q75",
+        "n": 131,
+        "wins": 91,
+        "accuracy": 0.6947,
+        "holdout_accuracy": 0.6538,
+        "worst_month": 0.5926,
+        "state": "FAIL"
+      },
+      {
+        "id": "RL_H_MARKET_BROAD_Q75",
+        "n": 118,
+        "wins": 84,
+        "accuracy": 0.7119,
+        "holdout_accuracy": 0.6818,
+        "worst_month": 0.6538,
+        "state": "FAIL_ACCURACY"
+      }
+    ]
+  },
+  "prior_benchmark": {
+    "note": "Existing DOG +1.5 V2 remains frozen/prospective benchmark; its historical thresholds used already-opened 2026 and are not reused as clean thresholds here."
+  },
+  "disposition": "NO_NEW_75_PLUS_STABLE_STANDARD_RUN_LINE_OPENING_FORMULA"
+}
