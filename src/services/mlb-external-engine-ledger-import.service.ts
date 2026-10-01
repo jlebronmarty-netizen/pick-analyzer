@@ -118,6 +118,58 @@ async function gameContext(gamePks:number[]){
   }
   return out
 }
+async function regularGameFallback(gamePks:number[]){
+  const ids=[...new Set(gamePks.filter(Number.isSafeInteger))]
+  const out=new Map<number,{gameDate:string;home:string;away:string;winner:string|null;homeScore:number|null;awayScore:number|null}>()
+  for(let i=0;i<ids.length;i+=100){
+    const r=await supabaseAdmin.from('mlb_ml_xyear_game_v1')
+      .select('game_pk,game_date,home_team,away_team,actual_winner,home_score,away_score')
+      .eq('season',SEASON).in('game_pk',ids.slice(i,i+100))
+    if(r.error)throw new Error('MLB_EXTERNAL_ENGINE_REGULAR_CONTEXT:'+r.error.message)
+    for(const row of r.data??[]){
+      const gamePk=integer(row.game_pk),gameDate=text(row.game_date)
+      if(gamePk===null||!gameDate)continue
+      out.set(gamePk,{
+        gameDate,
+        home:normalizeTeam(row.home_team),
+        away:normalizeTeam(row.away_team),
+        winner:text(row.actual_winner)?normalizeTeam(row.actual_winner):null,
+        homeScore:finite(row.home_score),
+        awayScore:finite(row.away_score),
+      })
+    }
+  }
+  return out
+}
+
+function resolveArtifactContext(
+  row:ExternalRow,
+  canonical:Map<number,{gameType:string;phase:'REGULAR_SEASON'|'POSTSEASON';scheduledAt:string|null;home:string;away:string}>,
+  regularFallback:Map<number,{gameDate:string;home:string;away:string;winner:string|null;homeScore:number|null;awayScore:number|null}>,
+){
+  const direct=canonical.get(row.game_pk)
+  if(direct){
+    if(direct.home!==normalizeTeam(row.home_team)||direct.away!==normalizeTeam(row.away_team)){
+      throw new Error(`EXTERNAL_ENGINE_TEAM_IDENTITY_MISMATCH:${row.game_pk}`)
+    }
+    return {...direct,contextSource:'pick2_mlb_games' as const}
+  }
+  const fallback=regularFallback.get(row.game_pk)
+  if(!fallback)return null
+  if(fallback.gameDate!==row.target_date)throw new Error(`EXTERNAL_ENGINE_DATE_IDENTITY_MISMATCH:${row.game_pk}`)
+  if(fallback.home!==normalizeTeam(row.home_team)||fallback.away!==normalizeTeam(row.away_team)){
+    throw new Error(`EXTERNAL_ENGINE_TEAM_IDENTITY_MISMATCH:${row.game_pk}`)
+  }
+  return {
+    gameType:'R',
+    phase:'REGULAR_SEASON' as const,
+    scheduledAt:null,
+    home:fallback.home,
+    away:fallback.away,
+    contextSource:'mlb_ml_xyear_game_v1_exact_gamePk_regular_fallback' as const,
+  }
+}
+
 async function canonicalOutcomes(gamePks:number[]){
   const ids=[...new Set(gamePks.filter(Number.isSafeInteger))]
   const out=new Map<number,{winner:string;homeScore:number|null;awayScore:number|null}>()
@@ -182,6 +234,7 @@ async function importPickEdge(dates:string[]){
 
   const allRows=artifacts.flatMap(a=>a.rows)
   const context=await gameContext(allRows.map(r=>r.game_pk))
+  const regularFallback=await regularGameFallback(allRows.map(r=>r.game_pk))
   const ledgerRows:any[]=[]
   const auditRows:any[]=[]
 
@@ -192,7 +245,7 @@ async function importPickEdge(dates:string[]){
     }
     let settled=0,voided=0
     for(const row of artifact.rows){
-      const ctx=context.get(row.game_pk)
+      const ctx=resolveArtifactContext(row,context,regularFallback)
       if(!ctx)continue
       const top=topSide(row)
       const sr=settlementRows.get(row.game_pk)
@@ -226,6 +279,7 @@ async function importPickEdge(dates:string[]){
           settlementPath:artifact.settlement?`predictions/settled/${artifact.date}_PE_ML_V1.settlement.json`:null,
           settlementRow:sr??null,
           historyCutoff:row.history_cutoff,
+          contextSource:ctx.contextSource,
           inferenceVersion:row.inference_version??null,
           moneylineInputDigest:row.moneyline_input_digest??null,
           moneylineOutputDigest:row.moneyline_output_digest??null,
@@ -273,13 +327,14 @@ async function importEquilizer(){
 
   const allRows=artifacts.flatMap(a=>a.rows)
   const context=await gameContext(allRows.map(r=>r.game_pk))
+  const regularFallback=await regularGameFallback(allRows.map(r=>r.game_pk))
   const outcomes=await canonicalOutcomes(allRows.map(r=>r.game_pk))
   const ledgerRows:any[]=[],auditRows:any[]=[]
 
   for(const artifact of artifacts){
     let settled=0
     for(const row of artifact.rows){
-      const ctx=context.get(row.game_pk)
+      const ctx=resolveArtifactContext(row,context,regularFallback)
       if(!ctx)continue
       if(ctx.gameType!=='R')throw new Error(`EQUILIZER_ORIGINAL_COHORT_NON_REGULAR_GAME:${row.game_pk}`)
       const top=topSide(row),outcome=outcomes.get(row.game_pk)
@@ -302,7 +357,7 @@ async function importEquilizer(){
           pHome:row.p_home,pAway:row.p_away,predictedSide:top.side,recommendation:false,continuousProbability:true,
           manifestPath:`predictions/shadow/${artifact.date}_E2_STABLE6.manifest.json`,manifestSha256:hash(artifact.manifestText),
           csvPath:artifact.manifest.csv_path,csvSha256:artifact.manifest.csv_sha256,historyCutoff:row.history_cutoff,
-          originalCohort:true,postseasonEnrollmentAllowed:false,
+          originalCohort:true,postseasonEnrollmentAllowed:false,contextSource:ctx.contextSource,
           outcomeSource:'mlb_ml_xyear_game_v1 canonical official-final materialization',
           homeScore:outcome?.homeScore??null,awayScore:outcome?.awayScore??null,
         },

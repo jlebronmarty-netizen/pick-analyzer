@@ -42,3 +42,14 @@ test('audit table is service-role-only',()=>{
   assert.match(migration,/revoke all .* from anon,authenticated/i)
   assert.match(migration,/grant select,insert,update .* to service_role/i)
 })
+
+
+test('regular-season external artifacts may use exact xyear fallback when pick2 context is absent',()=>{
+  assert.match(service,/regularGameFallback/)
+  assert.match(service,/mlb_ml_xyear_game_v1/)
+  assert.match(service,/fallback\.gameDate!==row\.target_date/)
+  assert.match(service,/fallback\.home!==normalizeTeam\(row\.home_team\)/)
+  assert.match(service,/fallback\.away!==normalizeTeam\(row\.away_team\)/)
+  assert.match(service,/gameType:'R'/)
+  assert.match(service,/mlb_ml_xyear_game_v1_exact_gamePk_regular_fallback/)
+})
