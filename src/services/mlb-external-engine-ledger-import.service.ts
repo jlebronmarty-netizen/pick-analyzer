@@ -120,7 +120,7 @@ async function gameContext(gamePks:number[]){
 }
 async function canonicalOutcomes(gamePks:number[]){
   const ids=[...new Set(gamePks.filter(Number.isSafeInteger))]
-  const out=new Map<number<{winner:string;homeScore:number|null;awayScore:number|null}>()
+  const out=new Map<number,{winner:string;homeScore:number|null;awayScore:number|null}>()
   for(let i=0;i<ids.length;i+=100){
     const r=await supabaseAdmin.from('mlb_ml_xyear_game_v1')
       .select('game_pk,actual_winner,home_score,away_score')
