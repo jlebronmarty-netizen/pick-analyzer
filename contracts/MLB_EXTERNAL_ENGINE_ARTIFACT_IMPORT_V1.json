@@ -1,0 +1,60 @@
+{
+  "contract": "MLB_EXTERNAL_ENGINE_ARTIFACT_IMPORT_V1/1.0.0",
+  "status": "RESEARCH_ONLY",
+  "audit_table": "public.mlb_external_engine_import_audit_v1",
+  "destination": "public.mlb_2026_forward_master_ledger_v1",
+  "engines": {
+    "PICK_EDGE": {
+      "repo": "jlebronmarty-netizen/pick-edge",
+      "model_id": "PE_ML_V1",
+      "freeze_contract": "PE_ML_V1_DAILY_FREEZE/1.0.0",
+      "freeze_pattern": "predictions/shadow/{date}_PE_ML_V1.csv",
+      "manifest_pattern": "predictions/shadow/{date}_PE_ML_V1.manifest.json",
+      "settlement_pattern": "predictions/settled/{date}_PE_ML_V1.settlement.json",
+      "csv_sha256_required": true,
+      "generated_before_all_starts_required": true,
+      "settlement_must_reference_same_freeze": true,
+      "recommendation": false,
+      "postseason_allowed": true
+    },
+    "EQUILIZER": {
+      "repo": "jlebronmarty-netizen/equilizer-picks",
+      "model_id": "EQUILIZER_ML_V2_E2_STABLE6",
+      "model_contract": "EQUILIZER_ML_V2_E2_MODEL_CONTRACT/1.0.0",
+      "original_regular_season_cohort_dates": [
+        "2026-09-15",
+        "2026-09-16",
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20",
+        "2026-09-21",
+        "2026-09-23",
+        "2026-09-24",
+        "2026-09-25",
+        "2026-09-26"
+      ],
+      "excluded_dates": [
+        "2026-09-17",
+        "2026-09-22",
+        "2026-09-27"
+      ],
+      "csv_sha256_required": true,
+      "immutable_after_generation_required": true,
+      "generated_before_all_starts_required": true,
+      "postseason_enrollment_allowed": false,
+      "recommendation": false,
+      "settlement": "canonical official-final winner by exact gamePk"
+    }
+  },
+  "probability_semantics": "continuous probability; top-side stored only for directional evaluation, never as a recommendation",
+  "boundaries": {
+    "no_model_recalculation": true,
+    "no_cross_engine_probability_substitution": true,
+    "no_threshold_invention": true,
+    "no_retuning": true,
+    "no_retrofreeze": true,
+    "official_picks": false,
+    "apostar": false,
+    "production": false
+  }
+}

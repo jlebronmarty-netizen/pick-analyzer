@@ -51,10 +51,39 @@ Fields are nullable.
 
 ## External engines
 
-Pick Edge and Equilizer are intentionally not reconstructed from Pick Analyzer data.
+Pick Edge and Equilizer are imported only from their immutable GitHub artifacts.
 
-They require future importers that consume their immutable frozen CSV + manifest artifacts.
-This preserves engine provenance and avoids silently rebuilding independent models.
+### Pick Edge
+
+Importer source:
+- `predictions/shadow/{date}_PE_ML_V1.csv`;
+- matching manifest;
+- matching settlement artifact when available.
+
+Requirements:
+- exact PE_ML_V1 model id;
+- generated before all target starts;
+- CSV SHA-256 must equal the manifest;
+- settlement source-freeze hash/path must match the imported freeze;
+- no recommendation threshold is invented.
+
+Every row remains a continuous-probability observation. The higher-probability side is stored only for
+directional evaluation/display.
+
+### Equilizer
+
+Only the original regular-season E2 cohort dates are imported:
+Sep15, Sep16, Sep18, Sep19, Sep20, Sep21, Sep23, Sep24, Sep25 and Sep26.
+
+Requirements:
+- exact EQUILIZER_ML_V2_E2_STABLE6 id;
+- immutable pregame freeze;
+- CSV SHA-256 verification;
+- exact gamePk identity;
+- game_type must be R.
+
+Sep17/Sep22/Sep27 are not reconstructed. Postseason cannot increment the original 130/150 cohort.
+Directional outcome is settled against the canonical official-final winner by exact gamePk only.
 
 Pulpy remains a meta/provenance layer and cannot rewrite upstream model rows.
 
@@ -80,9 +109,15 @@ Endpoint:
 Scheduled daily after the normal pregame research freezes.
 
 Execution order:
-1. settle previously frozen exact-line K/Outs rows when official pitcher outcomes exist;
-2. freeze current exact-line K/Outs candidates, strictly pregame;
-3. synchronize all persisted evidence into the master ledger.
+1. settle approved-prop rows when exact authoritative outcomes exist;
+2. settle previously frozen exact-line K/Outs rows;
+3. freeze current exact-line K/Outs candidates, strictly pregame;
+4. import SHA-verified Pick Edge / Equilizer artifacts (non-blocking to internal Pick Analyzer work);
+5. synchronize persisted Pick Analyzer evidence into the master ledger.
+
+A second daily cron run later in the day exists so immutable external freezes published closer to first
+pitch can still be imported after publication. Import time does not redefine freeze time; the artifact's
+own immutable pregame timestamp remains authoritative.
 
 The master sync is idempotent and refreshes settlement fields when authoritative sources later settle.
 
