@@ -17,8 +17,8 @@
       "sports_sync_jobs runline_v2_home_p15_alt_forward_settlement_v1 outcomes only",
       "mlb_exact_line_forward_shadow_v1 persisted exact-line K/Outs forward rows"
     ],
-    "pick_edge": "SEPARATE_IMMUTABLE_ARTIFACT_IMPORTER_REQUIRED",
-    "equilizer": "SEPARATE_IMMUTABLE_ARTIFACT_IMPORTER_REQUIRED",
+    "pick_edge": "IMMUTABLE_GITHUB_FREEZE_AND_SETTLEMENT_IMPORT_SHA256_VERIFIED",
+    "equilizer": "ORIGINAL_REGULAR_SEASON_COHORT_IMMUTABLE_GITHUB_FREEZES_SHA256_VERIFIED",
     "pulpy": "PROVENANCE_META_SOURCE_NOT_MODEL_RECALCULATION_SOURCE"
   },
   "postseason_policy": "POSTSEASON_SHADOW_DOMAIN_SHIFT kept separate from REGULAR_SEASON",
@@ -34,8 +34,36 @@
     "no_historical_odds_api_spend": true
   },
   "sync_order": [
+    "SETTLE_APPROVED_PROP_ROWS",
     "SETTLE_EXACT_LINE_FORWARD_SHADOWS",
     "FREEZE_CURRENT_EXACT_LINE_FORWARD_SHADOWS",
-    "SYNC_ALL_PERSISTED_SOURCES_TO_MASTER_LEDGER"
-  ]
+    "IMPORT_SHA_VERIFIED_EXTERNAL_ENGINE_ARTIFACTS_NON_BLOCKING",
+    "SYNC_ALL_PERSISTED_INTERNAL_SOURCES_TO_MASTER_LEDGER"
+  ],
+  "external_engine_policy": {
+    "pick_edge": {
+      "model_id": "PE_ML_V1",
+      "recommendation": false,
+      "settlement": "Pick Edge immutable settlement artifact only",
+      "postseason_allowed": true
+    },
+    "equilizer": {
+      "model_id": "EQUILIZER_ML_V2_E2_STABLE6",
+      "recommendation": false,
+      "original_cohort_dates": [
+        "2026-09-15",
+        "2026-09-16",
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20",
+        "2026-09-21",
+        "2026-09-23",
+        "2026-09-24",
+        "2026-09-25",
+        "2026-09-26"
+      ],
+      "postseason_enrollment_allowed": false,
+      "settlement": "canonical official-final outcome by exact gamePk"
+    }
+  }
 }
