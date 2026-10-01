@@ -3,6 +3,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { syncMlb2026ForwardMasterLedger } from '@/services/mlb-forward-master-ledger.service'
 import { freezeMlbExactLineForwardShadows, settleMlbExactLineForwardShadows } from '@/services/mlb-exact-line-forward-shadow.service'
 import { settleMlbApprovedPropDaily } from '@/services/mlb-approved-prop-settlement.service'
+import { importMlbExternalEngineArtifacts } from '@/services/mlb-external-engine-ledger-import.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -24,6 +25,16 @@ export async function GET(request: NextRequest) {
     const approvedPropSettlement = await settleMlbApprovedPropDaily()
     const settlement = await settleMlbExactLineForwardShadows()
     const freeze = await freezeMlbExactLineForwardShadows()
+    let externalEngines: unknown
+    try {
+      externalEngines = await importMlbExternalEngineArtifacts()
+    } catch (error) {
+      externalEngines = {
+        success: false,
+        status: 'MLB_EXTERNAL_ENGINE_IMPORT_FAILED_NON_BLOCKING',
+        error: error instanceof Error ? error.message : 'Unknown external engine import error',
+      }
+    }
     const ledger = await syncMlb2026ForwardMasterLedger()
     return Response.json({
       success: true,
@@ -35,6 +46,7 @@ export async function GET(request: NextRequest) {
       approvedPropSettlement,
       settlement,
       freeze,
+      externalEngines,
       ledger,
     }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
