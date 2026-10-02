@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "node scripts/mlb-data-02h-digest-proof-readonly.mjs && next build --webpack",
     "start": "next start",
     "test:product-experience": "playwright test --config=playwright.config.ts",
     "lint": "eslint",
