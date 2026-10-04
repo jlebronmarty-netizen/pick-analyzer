@@ -10,6 +10,224 @@ APOSTAR: disabled
 
 
 
+## 2026-10-04 Postseason master state — authoritative
+
+This section supersedes older operational/forward status rows below where they differ. Historical development evidence remains preserved.
+
+### Canonical forward infrastructure
+
+Canonical ledger:
+`public.mlb_2026_forward_master_ledger_v1`
+
+Security:
+- RLS enabled;
+- anon/authenticated revoked;
+- service-role read/write only.
+
+Season phase is explicit and never pooled automatically:
+- `REGULAR_SEASON`
+- `POSTSEASON`
+
+Postseason evidence class is shadow/domain-shift evidence. Regular-season historical accuracy is not a calibrated postseason per-play probability.
+
+Current engine provenance in the ledger:
+- Pick Analyzer persisted freezes/settlements;
+- Pick Edge immutable SHA-verified GitHub freeze/settlement artifacts;
+- Equilizer immutable SHA-verified original E2 cohort artifacts;
+- Pulpy remains a meta/provenance layer and does not rewrite upstream model rows.
+
+### Pick Edge — imported forward probability ledger
+
+Model:
+`PE_ML_V1`
+
+Imported immutable observations:
+- n = **75**;
+- settled directional rows: **37 WIN / 21 LOSS**;
+- VOID: **1**;
+- OPEN: **16**.
+
+The 16 open rows are from an artifact date without a matching immutable settlement artifact. They remain OPEN; Pick Analyzer does not reconstruct Pick Edge settlements from another engine.
+
+Semantics:
+- continuous moneyline probability;
+- no selection threshold;
+- top-side is display/evaluation only;
+- no ROI/EV/CLV claim.
+
+State:
+`FORWARD_PROBABILITY_ENGINE / ARTIFACT_IMPORT_ACTIVE`.
+
+### Equilizer — original regular-season cohort imported
+
+Model:
+`EQUILIZER_ML_V2_E2_STABLE6`
+
+Original frozen cohort only:
+- n = **130**;
+- directional record = **77-53 = 59.23%**;
+- Sep15 5-10;
+- Sep16 9-6;
+- Sep18 10-5;
+- Sep19 10-5;
+- Sep20 13-2;
+- Sep21 2-1;
+- Sep23 7-7;
+- Sep24 4-8;
+- Sep25 10-3;
+- Sep26 7-6.
+
+Excluded from the original cohort:
+- Sep17;
+- Sep22;
+- Sep27 reconstruction.
+
+The original 130/150 cohort is regular-season-only. Postseason is forbidden from incrementing that counter or unlocking the original final evaluator.
+
+State:
+`REGULAR_SEASON_COHORT_TRUNCATED_INCOMPLETE_N130 / NO_POSTSEASON_ENROLLMENT`.
+
+### Pick Analyzer postseason exact-line forward scoreboard
+
+Postseason is tracked separately from regular season.
+
+#### Batter Doubles U0.5
+Model:
+`batter_doubles_under_0p5_proj_0p16_v1`
+
+Current postseason exact-line forward ledger:
+- n = **138**;
+- settled = 120;
+- **111 WIN / 9 LOSS = 92.50%** on settled rows;
+- OPEN = 18.
+
+OPEN rows remain fail-closed when no exact player/game outcome row exists; they are not graded as wins.
+
+#### Batter Walks U0.5
+Model:
+`batter_walks_under_0p5_proj_0p20_v1`
+
+Postseason:
+- **6-0**, n=6 settled.
+
+#### Pitcher K O3.5
+Contract:
+`MLB_PITCHER_K_O3P5_FORWARD_SHADOW_V1/1.0.0`
+
+Postseason:
+- **0-1**, n=1;
+- Aaron Nola O3.5: actual 1 K => LOSS.
+
+No threshold change.
+
+#### Pitcher Outs O14.5
+Contract:
+`MLB_PITCHER_OUTS_O14P5_FORWARD_SHADOW_V1/1.0.0`
+
+Settled postseason:
+- **1-3**, n=4 settled;
+- Tyler Mahle: 21 outs => WIN;
+- Kevin Gausman: 10 outs => LOSS;
+- Hunter Brown: 2 outs => LOSS;
+- Sonny Gray: 14 outs => LOSS.
+
+Current open:
+- 2026-10-04 Michael King O14.5 FanDuel -136;
+- projection **17.278125**;
+- frozen threshold **15.75**;
+- remains OPEN until authoritative postgame outcome exists.
+
+No threshold change.
+
+#### HOME +1.5 alternate
+Model:
+`rl_v2_home_p15_alt_favorite_tsh_q92_v1`
+
+Forward selected rows:
+- 2026-09-27 MIL +1.5 => WIN (MIL 6-4 STL);
+- 2026-10-03 MIL +1.5 => WIN (MIL 3-2 SD).
+
+Forward record:
+- **2-0**, n=2.
+
+Both rows were settled from exact gamePk official-final canonical outcomes because the original settlement jobs were absent. Freeze artifacts remain unchanged; only settlement fields were repaired.
+
+#### Standard Run Line V2
+Core / Transfer / Broad continue to run prospectively during playoffs under unchanged formulas.
+
+Latest verified 2026-10-04 freeze:
+- 2 slate games;
+- 2 market-eligible;
+- 0 Core selections;
+- 0 Transfer selections;
+- 0 Broad selections.
+
+No retune.
+
+### Postseason history/materialization repair
+
+Raw Statcast was already capturing postseason, but several downstream history layers remained regular-season-only.
+
+PR #265 repairs:
+- `mlb_ml_xyear_refresh_base_v2(date)`;
+- `mlb_statcast_batter_sdt_game_mv`;
+- Pitcher Win recent-starter/team-history views/functions;
+
+from `game_type='R'` to model-eligible:
+`R/F/D/L/W`.
+
+Completed postseason dates already re-materialized:
+- 2026-09-29;
+- 2026-09-30;
+- 2026-10-01;
+- 2026-10-03.
+
+Strict-prior rule remains unchanged:
+`source_game_date < target_game_date`.
+
+This is postgame history/outcome repair, not retro-freezing.
+
+### Pulpy
+
+Postseason compatibility is complete for:
+- outcome capture;
+- prospective capture spec;
+- capture-health schedule discovery.
+
+PR #18 also preserves/enforces:
+- PARTIAL before hard stop => **zero prospective bundle writes**;
+- COMPLETE before hard stop => write once;
+- PARTIAL at hard stop => immutable partial with explicit gaps.
+
+Sep27 remains sealed, PARTIAL and ineligible. No backfill.
+
+Pulpy readiness remains:
+- common ledger data: not yet sufficient for meta training;
+- meta training: CLOSED;
+- production: CLOSED.
+
+### Current closed/research-fail families
+
+Do not reopen with the current architecture:
+- new BDL Standard Run Line RL-A..RL-H;
+- Full Game Total BDL architectures;
+- FanDuel batter YES RBI family;
+- FanDuel batter YES Total Bases family;
+- FanDuel Singles YES 0.5;
+- K O4.5/O5.5/U5.5 stability-fail promotion paths.
+
+### Current operating rule through playoffs
+
+For every postseason slate:
+1. preserve exact gamePk / MLBAM identity;
+2. freeze strictly pregame;
+3. keep exact market + exact line + direction isolated;
+4. settle only from canonical exact outcomes;
+5. maintain postseason W-L-PUSH separately;
+6. do not retune from playoff results;
+7. Official Picks unchanged;
+8. APOSTAR disabled.
+
 ## 2026-09-27 Main-market refresh — authoritative
 
 This section supersedes older Moneyline / Standard Run Line / Full Game Total rows below where they differ.
