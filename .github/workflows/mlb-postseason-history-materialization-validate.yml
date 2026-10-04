@@ -1,0 +1,23 @@
+name: MLB Postseason History Materialization Validate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261004235500_mlb_postseason_history_materialization_v1.sql'
+      - 'docs/research/MLB_POSTSEASON_HISTORY_MATERIALIZATION_V1.md'
+      - 'scripts/research/verify_mlb_postseason_history_materialization_v1.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_postseason_history_materialization_v1.test.mjs
