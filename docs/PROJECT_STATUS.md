@@ -1,3 +1,15 @@
+## 2026-10-07 closeout preparation — authoritative
+
+- Master ledger verified at 686 rows (488 REGULAR_SEASON /198 POSTSEASON), zero unsafe flags or late freezes.
+- HOME +1.5 both frozen rows are WIN again, now with persisted source settlement jobs; SQL recovery is idempotent. Direct ledger-only settlement was superseded because normal sync erased it when source jobs were absent.
+- Pick Edge Sep22 source settlement prepared under exact immutable freeze: 5W/10L/1VOID. After merge/import,75 observations become42W/31L/2VOID/0OPEN (57.53%). Until import completes, live Edge ledger still has16OPEN.
+- Equilizer original cohort archived130/150,77W/53L; ten CSV hashes pass. No postseason enrollment or evaluator unlock.
+- Pulpy current suite58PASS; archive readiness is not meta certification. Sep27 remains PARTIAL/ineligible; no playoff pregame bundle observed.
+- Pick Analyzer contract tests20PASS; webpack and TypeScript pass. Full build is BLOCKED_MISSING_BUILD_ENV (NEXT_PUBLIC_SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY unavailable locally); no production deployment attempted.
+- Approved props missing exact outcomes remain OPEN. There are50 existing settlement blockers EXACT_OUTCOME_NOT_AVAILABLE (48 Doubles and2 Walks); newer ungraded rows also exist. DNP/VOID is not inferred from absence.
+- Playoff capture and settlement remain active. Final2026 archive/pause follows the final slate and canonical settlement reconciliation; no schedules disabled here.
+- Restart2027: separate cohort/phase registry, immutable archive provenance, real-line availability, dry-run/as-of tests, calibrated probability gates before EV, and reserved untouched meta holdout.
+
 UI Polish V2 authorized Preview 62dbbe4 deployed; automated153 checks PASS, but visual review found Research Lab light-gradient contrast failure. Narrow presentation repair locally recertified: build400pages, lint, nine presentation checks, seventeen canonical regressions,153 browser checks and explicit gradient assertion PASS. New exact SHA requires publication approval; main/Production remain99d24d4. No provider/businessDML/DDL/automation changes. Full System Audit not started. Earlier entries below are historical.
 
 UI Polish V2 LOCAL validation PASS; Preview publication blocked by automatic approval review. Nine presentation checks,17 canonical regressions, scoped lint and build400pages pass. Rendered local matrix153 checks across375/390/430/768/1440px and dark/light: accessibility0, browser errors0, horizontal overflow0, canonical parityPASS. Production remains R12 closeout99d24d4, Edge14, with truthful20/20 historical and0/48 operational readback. No providers/businessDML/DDL/automation changes from UI work. Preview and Production certification remain pending; Full System Audit not started. See PICK_ANALYZER_PHASE2_UI_POLISH_V2_AUDIT.md. Earlier entries below are historical.
