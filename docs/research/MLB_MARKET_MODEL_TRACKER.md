@@ -1,3 +1,15 @@
+## 2026-10-07 closeout preparation — authoritative
+
+- Master ledger verified at 686 rows (488 REGULAR_SEASON /198 POSTSEASON), zero unsafe flags or late freezes.
+- HOME +1.5 both frozen rows are WIN again, now with persisted source settlement jobs; SQL recovery is idempotent. Direct ledger-only settlement was superseded because normal sync erased it when source jobs were absent.
+- Pick Edge Sep22 source settlement prepared under exact immutable freeze: 5W/10L/1VOID. After merge/import,75 observations become42W/31L/2VOID/0OPEN (57.53%). Until import completes, live Edge ledger still has16OPEN.
+- Equilizer original cohort archived130/150,77W/53L; ten CSV hashes pass. No postseason enrollment or evaluator unlock.
+- Pulpy current suite58PASS; archive readiness is not meta certification. Sep27 remains PARTIAL/ineligible; no playoff pregame bundle observed.
+- Pick Analyzer contract tests20PASS; webpack and TypeScript pass. Full build is BLOCKED_MISSING_BUILD_ENV (NEXT_PUBLIC_SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY unavailable locally); no production deployment attempted.
+- Approved props missing exact outcomes remain OPEN. There are50 existing settlement blockers EXACT_OUTCOME_NOT_AVAILABLE (48 Doubles and2 Walks); newer ungraded rows also exist. DNP/VOID is not inferred from absence.
+- Playoff capture and settlement remain active. Final2026 archive/pause follows the final slate and canonical settlement reconciliation; no schedules disabled here.
+- Restart2027: separate cohort/phase registry, immutable archive provenance, real-line availability, dry-run/as-of tests, calibrated probability gates before EV, and reserved untouched meta holdout.
+
 # MLB Market Model Tracker
 
 Repository: `jlebronmarty-netizen/pick-analyzer`  
