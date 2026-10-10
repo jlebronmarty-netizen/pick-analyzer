@@ -1,0 +1,62 @@
+{
+  "contract": "MLB_REAL_BET_CANDIDATE_SHADOW_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "stages": [
+    "MODEL_QUALIFIES",
+    "EXACT_MARKET_EXISTS",
+    "EXACT_IDENTITY",
+    "STRICT_PREGAME_LINEAGE",
+    "PRICE_AVAILABLE",
+    "PRICE_EDGE_CHECK_IF_MODEL_PROBABILITY_EXISTS",
+    "FORWARD_EVIDENCE_ACCUMULATING",
+    "REAL_BET_CANDIDATE_SHADOW"
+  ],
+  "rules": {
+    "exact_contract_only": true,
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_fuzzy_identity": true,
+    "no_postgame_features": true,
+    "no_threshold_retuning_from_forward_results": true,
+    "no_historical_odds_api_spend": true,
+    "price_gate": {
+      "when_model_probability_exists": "model_probability > american_odds_implied_probability",
+      "when_model_probability_absent": "DO_NOT_CLAIM_EV; collect price and forward W/L only"
+    }
+  },
+  "candidate_families": [
+    {
+      "market": "pitcher_record_a_win",
+      "side": "NO",
+      "line": null,
+      "model": "pitcher_win_forward_numeric_p015_v1",
+      "state": "FORWARD_MODEL_ACTIVE_PRICE_GATE_REQUIRED"
+    },
+    {
+      "market": "pitcher_earned_runs",
+      "side": "OVER",
+      "line": 1.5,
+      "model": "pitcher_er_over_1p5_p70_v1",
+      "state": "MARKET_LIQUID_RUNTIME_INPUT_COVERAGE_REPAIR_REQUIRED"
+    },
+    {
+      "market": "pitcher_strikeouts",
+      "side": "OVER",
+      "line": 3.5,
+      "model": "MLB_PITCHER_K_LINE_SURFACE_V1",
+      "rule": "projection >= 4.25",
+      "state": "FORWARD_VALIDATION_REQUIRED"
+    },
+    {
+      "market": "pitcher_outs",
+      "side": "OVER",
+      "line": 14.5,
+      "model": "MLB_PITCHER_OUTS_LINE_SURFACE_V1",
+      "rule": "projection >= 15.75",
+      "state": "FORWARD_VALIDATION_REQUIRED"
+    }
+  ]
+}
