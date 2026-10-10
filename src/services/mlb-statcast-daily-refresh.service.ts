@@ -41,7 +41,7 @@ const numericFields = new Set([
 
 type CsvRow = Record<string, string>
 type RawRow = Record<string, unknown> & { id: string; game_pk: number; game_date: string; raw_payload_digest: string }
-type ScheduleGame = { gamePk?: number; status?: { abstractGameState?: string; detailedState?: string; codedGameState?: string } }
+type ScheduleGame = { gamePk?: number; gameType?: string; status?: { abstractGameState?: string; detailedState?: string; codedGameState?: string } }
 
 function ensure(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message)
@@ -112,7 +112,7 @@ function rowIdentity(row: CsvRow) {
   return `statcast:mlb:${SEASON}:${row.game_pk}:${row.at_bat_number}:${row.pitch_number}`
 }
 
-function transformRow(row: CsvRow, teamMap: Map<string, string>): RawRow | null {
+function transformRow(row: CsvRow, teamMap: Map<string, string>, officialGameType?: string | null): RawRow | null {
   if (!row.game_pk || !row.at_bat_number || !row.pitch_number) return null
   const rawPayload = Object.fromEntries(Object.entries(row).map(([key, value]) => [key, value === '' ? null : value]))
   const transformed: Record<string, unknown> = {
@@ -123,6 +123,13 @@ function transformRow(row: CsvRow, teamMap: Map<string, string>): RawRow | null 
     mapping_metadata: { phase: 'MLB_DATA_02H_DAILY_V1', source: 'baseball_savant_statcast_search_csv', source_version: STATCAST_SOURCE_VERSION, canonicalMapping: 'native_game_pk_and_mlbam_person_id' },
   }
   for (const [sourceColumn, destination] of Object.entries(sourceToRaw)) transformed[destination] = normalizeValue(row[sourceColumn], destination)
+  if (!transformed.game_type && officialGameType) {
+    transformed.game_type = officialGameType
+    transformed.mapping_metadata = {
+      ...(transformed.mapping_metadata as Record<string, unknown>),
+      game_type_normalization: 'MLB_OFFICIAL_SCHEDULE_FALLBACK',
+    }
+  }
   transformed.canonical_home_team_id = teamMap.get(String(row.home_team ?? '').toUpperCase()) ?? null
   transformed.canonical_away_team_id = teamMap.get(String(row.away_team ?? '').toUpperCase()) ?? null
   return transformed as RawRow
@@ -175,6 +182,7 @@ async function scheduleForDate(date: string) {
   const dates = Array.isArray(json.dates) ? json.dates as Array<Record<string, unknown>> : []
   const games = (dates.flatMap((entry) => Array.isArray(entry.games) ? entry.games : []) as ScheduleGame[])
   const finalGames: number[] = []
+  const finalGameTypes: Record<string, string> = {}
   const blocking: Array<{ gamePk: number | null; state: string }> = []
   let terminalNoPlay = 0
   for (const game of games) {
@@ -182,11 +190,14 @@ async function scheduleForDate(date: string) {
     const normalized = state.toLowerCase()
     const gamePk = Number(game.gamePk)
     if (game.status?.abstractGameState === 'Final' || game.status?.codedGameState === 'F' || normalized.includes('final')) {
-      if (Number.isFinite(gamePk)) finalGames.push(gamePk)
+      if (Number.isFinite(gamePk)) {
+        finalGames.push(gamePk)
+        if (game.gameType) finalGameTypes[String(gamePk)] = String(game.gameType)
+      }
     } else if (normalized.includes('postpon') || normalized.includes('cancel')) terminalNoPlay += 1
     else blocking.push({ gamePk: Number.isFinite(gamePk) ? gamePk : null, state })
   }
-  return { games: games.length, finalGames: [...new Set(finalGames)].sort((a,b) => a-b), terminalNoPlay, blocking }
+  return { games: games.length, finalGames: [...new Set(finalGames)].sort((a,b) => a-b), finalGameTypes, terminalNoPlay, blocking }
 }
 
 async function latestRawDate() {
@@ -198,11 +209,17 @@ async function latestRawDate() {
 async function resolveAutomaticDate() {
   const yesterday = yesterdayPuertoRico()
   const latest = await latestRawDate()
-  let candidate = latest ? addDays(latest, 1) : `${SEASON}-03-01`
+  let candidate = latest ?? `${SEASON}-03-01`
   for (let scanned = 0; scanned < MAX_SCAN_DAYS && candidate <= yesterday; scanned += 1) {
     const schedule = await scheduleForDate(candidate)
     if (schedule.blocking.length) return { date: candidate, schedule, reason: 'OLDEST_UNRESOLVED_DATE' as const }
-    if (schedule.finalGames.length) return { date: candidate, schedule, reason: 'OLDEST_MISSING_GAME_DATE' as const }
+    if (schedule.finalGames.length) {
+      const existing = await existingRowsForDate(candidate)
+      const storedGames = [...new Set(existing.map((row) => Number(row.game_pk)))].sort((a,b) => a-b)
+      if (JSON.stringify(storedGames) !== JSON.stringify(schedule.finalGames)) {
+        return { date: candidate, schedule, reason: 'OLDEST_INCOMPLETE_GAME_DATE' as const }
+      }
+    }
     candidate = addDays(candidate, 1)
   }
   return { date: null, schedule: null, reason: latest && latest >= yesterday ? 'ALREADY_CURRENT' as const : 'NO_GAME_DATE_IN_SCAN_WINDOW' as const }
@@ -274,7 +291,7 @@ export async function refreshMlbStatcastDaily(input: { date?: string | null; ref
   const csvText = await fetchText(statcastUrl(targetDate))
   const parsed = parseCsv(csvText)
   ensure(parsed.length < 25000, `STATCAST_DAILY_CAP_SUSPECT:${targetDate}:${parsed.length}`)
-  const sourceRows = parsed.map((row) => transformRow(row, teams)).filter((row): row is RawRow => Boolean(row))
+  const sourceRows = parsed.map((row) => transformRow(row, teams, schedule?.finalGameTypes?.[String(row.game_pk)] ?? null)).filter((row): row is RawRow => Boolean(row))
   ensure(sourceRows.length > 0, `STATCAST_EMPTY_FOR_FINAL_SCHEDULE:${targetDate}`)
   const sourceIds = sourceRows.map((row) => row.id)
   ensure(new Set(sourceIds).size === sourceIds.length, `STATCAST_SOURCE_DUPLICATE_IDENTITIES:${targetDate}`)
