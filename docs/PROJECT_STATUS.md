@@ -1,3 +1,12 @@
+## 2026-10-14 Pick Analyzer multisport dashboard — draft review
+
+- Dashboard implemented with weighted overall official accuracy, individual sport readiness/accuracy cards, daily official picks and a separate canonical edge ranking.
+- MLB is the only official performance adapter connected. Other sport records remain unavailable rather than fabricated or mixed with preview/research samples.
+- Performance adds paginated selection-level win/loss/push/void/pending details and result/date filters; original settlements, recommendation policy and historical rows are unchanged.
+- 12 deterministic logic/React render tests PASS. Targeted ESLint and whitespace checks PASS. Webpack and TypeScript PASS after increasing the Node heap. Full build BLOCKED_MISSING_BUILD_ENV (`NEXT_PUBLIC_SUPABASE_URL`, existing copilot route); browser installation failed with truncated downloads. Live review/deployment remain pending. Evidence: `docs/product/MULTISPORT_DASHBOARD.md`.
+- Next integration audits: NHL and NFL preview lifecycles, then NBA foundation. Official recommendation and settlement certification is still required independently for each sport.
+- No provider requests, database writes, migrations, model changes or production deployment were executed by this UI task. Sports Edge Hub and its concurrent research were not modified.
+
 ## 2026-10-07 closeout preparation — authoritative
 
 - Master ledger verified at 686 rows (488 REGULAR_SEASON /198 POSTSEASON), zero unsafe flags or late freezes.

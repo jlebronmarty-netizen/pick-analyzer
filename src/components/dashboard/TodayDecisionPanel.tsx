@@ -1,5 +1,6 @@
 'use client'
 
+import DailyPicksLists from './DailyPicksLists'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import {
   buildOfficialPickReadiness,
@@ -111,6 +112,7 @@ type TodayResponse = {
     }
   }
   sections?: {
+    highestEdge?: { status?: string; data?: unknown[]; reason?: string | null }
     officialPicks?: { status?: string; data?: unknown[]; reason?: string | null }
     groundedOpportunities?: { status?: string; data?: Array<Record<string, unknown>>; reason?: string | null }
     mostLikely?: { status?: string; data?: Array<Record<string, unknown>>; reason?: string | null }
@@ -445,7 +447,7 @@ function performanceFromPayload(payload: unknown): PerformanceSnapshot | null {
   if (!payload || typeof payload !== 'object') return null
   const data = payload as Record<string, unknown>
   const view = data.publicView && typeof data.publicView === 'object' ? data.publicView as Record<string, unknown> : {}
-  const accuracy = Number(view.accuracy)
+  const accuracy = typeof view.accuracy === 'number' ? view.accuracy : Number.NaN
   return {
     trustLabel: labelize(view.trustLabel, 'Trust unavailable'),
     accuracy: Number.isFinite(accuracy) ? accuracy : null,
@@ -803,14 +805,14 @@ function PerformanceSnapshotCard({ snapshot }: { snapshot: PerformanceSnapshot |
     <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-performance-snapshot="true">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">Performance Snapshot</p>
-          <h2 className="mt-2 text-2xl font-black text-white">Trust, accuracy, trend</h2>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">MLB model diagnostics</p>
+          <h2 className="mt-2 text-2xl font-black text-white">Model trust &amp; trend</h2>
         </div>
         <a href="/performance" className="rounded-full border border-violet-400/30 px-4 py-2 text-xs font-black text-violet-100 hover:bg-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-300">Open Performance -&gt;</a>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <PremiumMetric label="Trust" value={snapshot?.trustLabel ?? 'Loading'} detail="Cutoff-safe production scope" tone="blue" />
-        <PremiumMetric label="Accuracy" value={snapshot?.accuracy === null || snapshot?.accuracy === undefined ? 'N/A' : pct(snapshot.accuracy)} detail="Official performance sample" tone={snapshot?.accuracy === null || snapshot?.accuracy === undefined ? 'gray' : 'green'} />
+        <PremiumMetric label="Model accuracy" value={snapshot?.accuracy === null || snapshot?.accuracy === undefined ? 'N/A' : pct(snapshot.accuracy)} detail="Production prediction scope; separate from official pick ledger" tone={snapshot?.accuracy === null || snapshot?.accuracy === undefined ? 'gray' : 'green'} />
         <PremiumMetric label="Recent Trend" value={snapshot?.recentTrend ?? 'Loading'} detail={`Provider calls ${snapshot?.providerCallsMade ?? 0}; mutations ${snapshot?.remoteMutationsMade ?? 0}`} tone="yellow" />
       </div>
     </article>
@@ -926,6 +928,7 @@ export default function TodayDecisionPanel() {
 
   return (
     <section className="space-y-4 pb-4 md:space-y-6" data-b2-today-shell="true" data-b3-best-opportunity-readiness="true" data-b4-decision-cockpit="true" data-b6-mobile-decision-experience="true">
+      <DailyPicksLists operatingDate={data.operatingDate} official={data.sections?.officialPicks} edge={data.sections?.highestEdge} />
       <StickyVerdictStrip verdict={verdict.label} status={decisionPresentation.actionability.state} tone={verdictTone} />
 
       <div className={`rounded-lg border p-4 md:p-8 ${toneClasses[verdictTone]}`} data-b2-verdict-label={verdict.label} data-b4-verdict-hero="true" data-b6-mobile-verdict-hero="true">
@@ -1035,7 +1038,11 @@ export default function TodayDecisionPanel() {
           href,
         }))} />
       </div>
-      <PerformanceSnapshotCard snapshot={performance} />
+      <details className="rounded-lg border border-slate-800 p-4">
+        <summary className="cursor-pointer text-sm font-bold text-slate-300">Advanced MLB model diagnostics</summary>
+        <p className="my-3 text-xs text-slate-400">These prediction diagnostics use a separate sample. Official pick accuracy and results appear in the overview above.</p>
+        <PerformanceSnapshotCard snapshot={performance} />
+      </details>
 
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryMetric label="Market Updated" value={marketFreshness.label} detail={dateTime(opportunity?.updatedAt ?? marketTimestampFor(data), 'Market update time unavailable')} />

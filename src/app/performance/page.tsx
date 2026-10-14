@@ -1,3 +1,4 @@
+import SettlementDetails from '@/components/dashboard/SettlementDetails'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import { getMlbOfficialPerformance } from '@/services/pick2-mlb-performance-read.service'
 
@@ -81,6 +82,8 @@ export default async function PerformancePage() {
             {report.warning}
           </div>
         )}
+
+        <SettlementDetails rows={ledger.selections} available={!['UNAVAILABLE', 'INVALID_SETTLEMENT_EVIDENCE'].includes(report.status)} />
 
         <section aria-label="Official Pick storage summary">
           <div className="mb-3">

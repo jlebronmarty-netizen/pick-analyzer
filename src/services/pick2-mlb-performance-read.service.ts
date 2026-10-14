@@ -105,6 +105,7 @@ export async function getMlbOfficialPerformance() {
         pendingDecisionRows: 0,
         settledUniqueSelections: 0,
         pendingUniqueSelections: 0,
+        selections: [],
         recentSelections: [],
       },
     }
@@ -160,6 +161,8 @@ export async function getMlbOfficialPerformance() {
         storedGameStatus: game?.official_status ?? null,
         state,
         settledOutcome: fullySettled && uniqueOutcomes.length === 1 ? uniqueOutcomes[0] : null,
+        settledUnits: fullySettled && uniqueOutcomes.length === 1 ? settlementByIdentity.get(first.official_pick_identity)?.units ?? null : null,
+        settledAt: fullySettled && uniqueOutcomes.length === 1 ? settlementByIdentity.get(first.official_pick_identity)?.settled_at ?? null : null,
         decisionSnapshots: ordered.length,
         settledSnapshots: groupOutcomes.length,
         firstDecisionAt: first.decision_at,
@@ -215,6 +218,7 @@ export async function getMlbOfficialPerformance() {
         pendingDecisionRows: picks.length - settledDecisionRows,
         settledUniqueSelections,
         pendingUniqueSelections: selections.length - settledUniqueSelections,
+        selections,
         recentSelections: selections.slice(0, 30),
       },
     }
@@ -231,6 +235,7 @@ export async function getMlbOfficialPerformance() {
         pendingDecisionRows: 0,
         settledUniqueSelections: 0,
         pendingUniqueSelections: 0,
+        selections: [],
         recentSelections: [],
       },
     }
