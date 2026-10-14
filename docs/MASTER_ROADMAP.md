@@ -1,3 +1,9 @@
+## Release preparation and runtime integrity repair — 2026-10-14
+
+- Batched MLB raw readers now enforce exact complete counts, per-game caps, scope and duplicate guards. Versioned manifests preserve original certificates, cover 107 operational files and are checked in new provider-free CI.
+- 20 raw-read tests, 26 UI tests, current disposable schema/state/recovery/budget/settlement checks and three exact stored 76-feature/probability replays pass. Model math and policy are unchanged; playoffs remain outside the official champion scope.
+- See `docs/product/MLB_RELEASE_READINESS_20261014.md` for evidence and release/readback procedure. Exact preview build/review is being completed. No production/provider/database/scheduler changes or merge; release approval remains pending.
+
 ## MLB pipeline read-only diagnosis — 2026-10-14
 
 - Exact production commit reproduces R3 source-drift preflight failure before durable/provider work; two R3 and four later readiness hash mismatches exist on main. See `docs/product/MLB_PIPELINE_DIAGNOSTIC_20261014.md` and JSON receipt.

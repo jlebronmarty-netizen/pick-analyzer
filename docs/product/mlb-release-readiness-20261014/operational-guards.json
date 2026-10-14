@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "crosswalk normalizes equivalent UTC offsets and PostgreSQL timestamps; invalid and ambiguous times block",
+      "status": "PASS"
+    },
+    {
+      "name": "private checkpoint replacement, exclusive lock, release and repository/path escape guards",
+      "status": "PASS"
+    },
+    {
+      "name": "provider consumption survives restart and rejects cap overrun, negative calls and unauthorized providers",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

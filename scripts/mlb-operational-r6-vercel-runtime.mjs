@@ -27,7 +27,7 @@ export async function executeVercelProductionTick({packageSha,hostDry=false}) {
   requireCanonicalR3Readiness()
   const activation=JSON.parse(fs.readFileSync(activationPath,'utf8'))
   if(!hostDry){assertAutomationActivation(activation);ensure(activation.runtimeHost?.verified===true && activation.runtimeHost?.type==='VERCEL_PRODUCTION_FUNCTION','HOST_CERTIFICATION')}
-  const readiness=JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json','utf8'))
+  const readiness=JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json','utf8'))
   ensure(readiness.automation?.status==='DRY_CERTIFIED' && Object.hasOwn(readiness.sourceHashes??{},'scripts/mlb-operational-r6-vercel-runtime.mjs'),'RUNTIME_SOURCE_CERTIFICATION')
   for(const [file,digest] of Object.entries(readiness.sourceHashes))ensure(normalizedFileDigest(file)===digest,'RUNTIME_SOURCE_DRIFT')
   await runMlbOperationalSchemaPreflight()

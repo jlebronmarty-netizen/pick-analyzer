@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "Atomic insert and runtime accounting commit together",
+      "status": "PASS"
+    },
+    {
+      "name": "Lost response retry reads canonical row without duplicate count",
+      "status": "PASS"
+    },
+    {
+      "name": "Immutable conflict rolls back all state and business DML",
+      "status": "PASS"
+    },
+    {
+      "name": "Unexpected target, shape and scope reject before mutation",
+      "status": "PASS"
+    },
+    {
+      "name": "Dynamic cumulative player cap checked before insert",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired and wrong-owner requests cannot reach business DML",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact old-value native update succeeds and drift rejects",
+      "status": "PASS"
+    },
+    {
+      "name": "Started-game guard rolls back even an otherwise reusable row",
+      "status": "PASS"
+    }
+  ],
+  "scope": "DISPOSABLE_FENCED_BUSINESS_TRANSACTIONS",
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "productionDeployment": "NOT_ENABLED"
+}

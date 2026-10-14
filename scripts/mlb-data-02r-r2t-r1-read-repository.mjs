@@ -112,17 +112,22 @@ export function createPregameReadRepository(db) {
         for (let start = 0; start < ids.length; start += RAW_READ_CONCURRENCY) {
           const scope = ids.slice(start, start + RAW_READ_CONCURRENCY)
           const scopedRows = []
+          let expectedCount = null
           for (let from = 0; ; from += 1000) {
             const page = await read(db.from(RAW)
-              .select(columns)
+              .select(columns, { count: 'exact' })
               .in('game_pk', scope)
               .order('game_pk', { ascending: true })
               .order('id', { ascending: true })
               .range(from, from + 999), 'scoped_raw_history')
+            expectedCount ??= page.count
+            requireRead(Number.isInteger(page.count) && page.count >= 0 && page.count === expectedCount && page.count <= scope.length * 1000, 'RAW_READ_COUNT')
+            requireRead(page.data.length === Math.min(1000, Math.max(0, page.count - from)), 'RAW_READ_TRUNCATED')
             scopedRows.push(...page.data)
             requireRead(scopedRows.length <= scope.length * 1000, 'TOTAL_RAW_CAP')
-            if (page.data.length < 1000) break
+            if (scopedRows.length === expectedCount) break
           }
+          requireRead(new Set(scopedRows.map(row => row.id)).size === scopedRows.length, 'RAW_READ_DUPLICATE')
           const countByGame = new Map(scope.map((gamePk) => [Number(gamePk), 0]))
           for (const row of scopedRows) {
             const gamePk = Number(row.game_pk)

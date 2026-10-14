@@ -27,7 +27,7 @@ export async function executeProductionTick({ mode=null, packageSha, hostDry=fal
   assertAutomationActivation(activation)
   ensure(activation.runtimeHost?.verified === true && !process.env.VERCEL, 'PERSISTENT_HOST_REQUIRED')
   requireCanonicalR3Readiness()
-  const readiness = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json', 'utf8'))
+  const readiness = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json', 'utf8'))
   ensure(readiness.automation?.status === 'DRY_CERTIFIED' && Object.keys(readiness.sourceHashes ?? {}).includes('scripts/mlb-operational-tick.mjs'), 'AUTOMATION_SOURCE_CERTIFICATION')
   for (const [file, digest] of Object.entries(readiness.sourceHashes)) ensure(normalizedFileDigest(file) === digest, 'AUTOMATION_SOURCE_DRIFT')
   ensure(AUTOMATION_MODES.includes(mode) && /^[a-f0-9]{40}$/.test(packageSha), 'ARGUMENTS')
@@ -83,7 +83,7 @@ export async function executeProductionTick({ mode=null, packageSha, hostDry=fal
       args.checkpoint('PITCH_READBACK', { ...pitches, writes: journal.summary() })
       const settlements = []
       if (activation.settlementAutomation === 'ENABLED' && ['POSTGAME', 'OVERNIGHT'].includes(job.mode)) {
-        const certification = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json', 'utf8'))
+        const certification = JSON.parse(fs.readFileSync('docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json', 'utf8'))
         ensure(certification.settlement?.status === 'CERTIFIED', 'SETTLEMENT_CERTIFICATION_REQUIRED')
         for (const gamePk of scope.gamePks) {
           const picks = await read(client.from('pick2_mlb_official_picks').select('*').eq('game_pk', gamePk).limit(101))

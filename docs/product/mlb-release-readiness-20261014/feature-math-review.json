@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "approvedCommit": "c8aac46648b38935a6dd00f17e0987b90b042033",
+  "results": [
+    {
+      "name": "scanRawRows",
+      "sha256": "a6b8f564bb6987fab1f837c4e16a6cd8baeb2871c180df92e9e98af82c30cc21",
+      "exactMatch": true
+    },
+    {
+      "name": "updateStatsFromGame",
+      "sha256": "364957b1b62630c1948f454ed3f286dc51442e685fd417b4dc98d3fb699e59d7",
+      "exactMatch": true
+    },
+    {
+      "name": "addDailyRows",
+      "sha256": "b2f1d963ea13b78c4ffaa9e9021395c94cc298ea34382c82007ba90c45b4f2f4",
+      "exactMatch": true
+    }
+  ]
+}

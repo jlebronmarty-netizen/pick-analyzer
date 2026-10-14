@@ -1,0 +1,12 @@
+{
+  "status": "R12_HEALTH_PASS",
+  "checks": [
+    "Distinct runtime/web SHAs and historical/daily accounting; unknown credits stay unknown",
+    "Configured ENABLED never conceals a failed current run",
+    "Daily exhaustion is degraded even after a successful unrelated mode",
+    "Unavailable runtime never invents Edge version or active counters"
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

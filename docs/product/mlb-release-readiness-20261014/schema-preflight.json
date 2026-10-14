@@ -1,0 +1,116 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "Certified structural catalog passes",
+      "status": "PASS"
+    },
+    {
+      "name": "missing table",
+      "status": "PASS"
+    },
+    {
+      "name": "missing column",
+      "status": "PASS"
+    },
+    {
+      "name": "missing index",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid index",
+      "status": "PASS"
+    },
+    {
+      "name": "snapshot orphan",
+      "status": "PASS"
+    },
+    {
+      "name": "foreign key drift",
+      "status": "PASS"
+    },
+    {
+      "name": "All certified schema manifests match generated contract",
+      "status": "PASS"
+    },
+    {
+      "name": "Fixed SQL is exact canonical SELECT; no caller SQL",
+      "status": "PASS"
+    },
+    {
+      "name": "Anonymous/wrong role blocked before DB access",
+      "status": "PASS"
+    },
+    {
+      "name": "Request SQL/POST forbidden before DB access",
+      "status": "PASS"
+    },
+    {
+      "name": "Missing DB connection fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Authenticated fixed query uses read-only transaction",
+      "status": "PASS"
+    },
+    {
+      "name": "Modern Supabase server secret accepted; unknown and anon keys still rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Driver error redacted and fail closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Shared server client accepts fresh complete preflight",
+      "status": "PASS"
+    },
+    {
+      "name": "Champion drift fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "76-feature drift fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Feature version drift fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Policy drift fails closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Runtime credential failure blocks",
+      "status": "PASS"
+    },
+    {
+      "name": "HTTP failure blocks",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired preflight blocks",
+      "status": "PASS"
+    },
+    {
+      "name": "Clock lead beyond bounded wait blocks",
+      "status": "PASS"
+    },
+    {
+      "name": "Server caller rejects orphan contract",
+      "status": "PASS"
+    },
+    {
+      "name": "Unverified persistent host blocks before runtime work",
+      "status": "PASS"
+    },
+    {
+      "name": "Unverified Vercel deployment blocks before runtime work",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

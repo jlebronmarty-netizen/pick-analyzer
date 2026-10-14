@@ -1,0 +1,87 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "automation activation rejects empty slate, missing repeatability and disabled state",
+      "status": "PASS"
+    },
+    {
+      "name": "job identity is stable within slot, distinct across modes and slots",
+      "status": "PASS"
+    },
+    {
+      "name": "failed stage checkpoints survive retry; completed slot never executes twice",
+      "status": "PASS"
+    },
+    {
+      "name": "cross-mode overlap blocked by exclusive coordinator lock",
+      "status": "PASS"
+    },
+    {
+      "name": "checkpoint package change blocks before stage execution",
+      "status": "PASS"
+    },
+    {
+      "name": "shared engine incremental ingest expands partial canonical game; checkpoint retry has zero calls/writes",
+      "status": "PASS"
+    },
+    {
+      "name": "pregame target evidence never ingested as dependency",
+      "status": "PASS"
+    },
+    {
+      "name": "durable pitch adapter streams at most 100 rows and checkpoints only verified references",
+      "status": "PASS"
+    },
+    {
+      "name": "settlement reuses core math, preserves pick, supports win/loss/push/void",
+      "status": "PASS"
+    },
+    {
+      "name": "settlement rejects null scores, digest drift, wrong identity, future evidence and nonterminal status",
+      "status": "PASS"
+    },
+    {
+      "name": "SQL settlement persistence independently reads back; retry reuses; immutable conflict and caps reject",
+      "status": "PASS"
+    },
+    {
+      "name": "actual Supabase-shaped settlement adapter respects physical schema, FK and SQL readback",
+      "status": "PASS"
+    },
+    {
+      "name": "operational telemetry uses one deterministic SQL row, bounded status update, reuse and conflict guard",
+      "status": "PASS"
+    },
+    {
+      "name": "performance reports supported units and denominators; no fabricated ROI/CLV for empty sample",
+      "status": "PASS"
+    },
+    {
+      "name": "Today projection has truthful empty, no-prediction, stale, and started-game states",
+      "status": "PASS"
+    },
+    {
+      "name": "Today and Value Board preserve canonical values, require stored pick linkage and block starter changes",
+      "status": "PASS"
+    },
+    {
+      "name": "daily binding resumes the exact R2 run after interruption; saved terminal result prevents reexecution",
+      "status": "PASS"
+    }
+  ],
+  "testedSourceHashes": {
+    "scripts/mlb-operational-automation.mjs": "879688583a22d27c3b3da4b60924d84ee234ee8b8392b531e91df54e731256bb",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "cf5ba6cf1e8bdeed08242d65f4edcb64c82e696d2f888c455ae27207fdcad93e",
+    "src/services/pick2-mlb-settlement.ts": "7e61d78f9831637df24bae110c88ecf8937794a91cfaa3920a0d7cfdb76df2fe",
+    "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
+    "src/services/pick2-operational-projection.ts": "671ba2f2ae44577b4eb124eb955a2ce869155a76ac3b37a3004ebd1a9bcbaf03",
+    "src/services/pick2-operational-telemetry.ts": "696decb4a3ccfe6570f87d41fd621ed89bee7d413f887bd96eae7ec8980df22d",
+    "src/services/pick2-mlb-value-board.service.ts": "b19ac743009b34ac4578f7c3131aa4514289bf0a772dcddc600b3d30e805a953"
+  },
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "injectedStatcastRequests": 3,
+  "activation": "DISABLED"
+}

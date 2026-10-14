@@ -1,0 +1,28 @@
+{
+  "status": "R7_RUNTIME_REPAIR_PASS",
+  "checks": [
+    {
+      "name": "Object commit survives loss before runtime reference checkpoint",
+      "status": "PASS"
+    },
+    {
+      "name": "Immutable response drift rejects without resetting paid reservation",
+      "status": "PASS"
+    },
+    {
+      "name": "Canonical market persistence and zero-write repeat survive UTC midnight",
+      "status": "PASS"
+    },
+    {
+      "name": "Future failure atomically retains sanitized exception and authoritative accounting",
+      "status": "PASS"
+    },
+    {
+      "name": "Expired disposition preserves rows and accounting; stale review rejects",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

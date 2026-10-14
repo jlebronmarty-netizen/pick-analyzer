@@ -1,5 +1,5 @@
 import 'server-only'
-import certificate from '../../docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION.json' with { type: 'json' }
+import certificate from '../../docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_REVALIDATION_20261014.json' with { type: 'json' }
 
 export async function runMlbOperationalSchemaPreflight() {
   if (certificate.certificationVerdict !== 'MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFIED'

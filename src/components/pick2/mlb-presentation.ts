@@ -31,6 +31,7 @@ export function prTime(value: string | null | undefined, date = false) {
 }
 export function friendlyReason(code: string | null | undefined): string {
   if (!code) return 'Analysis pending'
+  if (code === 'REGULAR_SEASON_MODEL_ONLY') return 'Official ML model supports regular season only — this game is outside its certified scope'
   if (/FINAL|GAME_COMPLETE/i.test(code)) return 'Final'
   if (/STARTED|NOT_PREGAME|IN_PROGRESS/i.test(code)) return 'Game started — pregame recommendations locked'
   if (/STARTER.*MISSING|MISSING.*STARTER|STARTER.*UNKNOWN|UNKNOWN.*STARTER/i.test(code)) return 'Waiting for confirmed starter'
