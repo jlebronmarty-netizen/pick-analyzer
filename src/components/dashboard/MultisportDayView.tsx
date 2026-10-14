@@ -14,7 +14,7 @@ export default function MultisportDayView({day,mlb}:{day:Day;mlb:MlbView}){
  const list=(title:string,rows:DayPick[],ranked:boolean)=><section aria-label={title} className="rounded-xl border border-slate-700 bg-slate-900 p-5">
   <h2 className="text-xl font-bold">{title}</h2><p className="mt-2 text-xs text-slate-400">{ranked?'Edge informativo en puntos porcentuales; cada fuente identifica su base de comparación.':'Selecciones de todos los modelos conectados; conservan su clasificación y no todas son recomendaciones oficiales.'}</p>
   <ul className="mt-4 max-h-[32rem] space-y-3 overflow-y-auto">{rows.filter(p=>sport==='ALL'||p.sport===sport).map(p=><li key={p.key} className="rounded-lg border border-slate-700 p-4">
-   <p className="text-xs font-semibold text-teal-300">{p.sport} · {p.classification}</p><p className="mt-2 text-sm text-slate-400">{p.matchup}</p><p className="mt-1 font-bold">{p.selection}</p>
+   <p className="text-xs font-semibold text-teal-300">{p.sport} · {p.classification}</p><p className="mt-2 text-sm text-slate-400">{p.matchup} · {p.marketLabel}</p><p className="mt-1 font-bold">{p.selection}</p>
    <p className="mt-2 text-sm">{p.modelProbability!==null?`Modelo ${pct(p.modelProbability)} · `:p.projection!==null?`Proyección ${p.projection.toFixed(3)} · `:''}{p.edgePp!==null?`Edge ${p.edgePp.toFixed(2)} pp · `:''}Cuota {odds(p.odds)}</p>{p.book&&<p className="mt-1 text-xs text-slate-400">{p.book}</p>}
    <Link href={p.href} className="mt-3 inline-block text-sm font-semibold text-teal-300">Ver modelo y registro →</Link>
   </li>)}</ul>{!rows.some(p=>sport==='ALL'||p.sport===sport)&&<p className="mt-4 text-sm text-slate-400">Sin registros verificados para esta fecha y deporte.</p>}

@@ -6,7 +6,7 @@ import {mlbModelCohorts,displayedModelTotal,nhlModelCohort,OFFICIAL_MLB_MODEL} f
 import {combinedDay,filterDayGames} from '../../src/lib/multisport-day.ts';
 import SportModelOverview from '../../src/components/dashboard/SportModelOverview.tsx';
 import MultisportDayView from '../../src/components/dashboard/MultisportDayView.tsx';
-const research=()=>({status:'AVAILABLE',groups:[{model:'research-a',engine:'PICK_ANALYZER',phase:'REGULAR_SEASON',wins:90,losses:10,pushes:1,voids:1,open:5},{model:'research-a',engine:'PICK_ANALYZER',phase:'POSTSEASON',wins:2,losses:0,pushes:0,voids:0,open:0}],entries:[]});
+const research=()=>({status:'AVAILABLE',groups:[{model:'research-a',market:'batter_doubles',direction:'UNDER',line:0.5,engine:'PICK_ANALYZER',phase:'REGULAR_SEASON',wins:90,losses:10,pushes:1,voids:1,open:5},{model:'research-a',market:'batter_doubles',direction:'UNDER',line:0.5,engine:'PICK_ANALYZER',phase:'POSTSEASON',wins:2,losses:0,pushes:0,voids:0,open:0}],entries:[]});
 const official=()=>({status:'STORED_SETTLEMENTS',summary:{wins:1,losses:9,pushes:0,voids:0,modelVersions:[OFFICIAL_MLB_MODEL],dateFrom:'2026-09-05',dateTo:'2026-09-20'},ledger:{pendingUniqueSelections:2}});
 const view=()=>({date:'2026-10-14',warnings:[],games:[],board:{rows:[]}});
 const nhl=()=>({status:'AVAILABLE',readAt:'2026-10-14T16:00:00Z',health:{status:'PASS',latestRunAt:'2026-10-14T15:30:00Z'},summary:{wins:1,losses:1,pending:1,pushes:0,voids:0,accuracyPct:50},history:[{id:'p',eventId:'1',scheduledAt:'2026-10-14T20:00:00Z',status:'ACTIVE',model:'DRATINGS_PUBLIC_V1',eventName:'AAA @ BBB',direction:'BBB ML',modelProbability:0.6,edgePp:5,odds:-146,sportsbook:'Circa'}],forecasts:[{id:'f',eventId:'1',eventName:'AAA @ BBB',scheduledAt:'2026-10-14T20:00:00Z',capturedAt:'2026-10-14T15:30:00Z',away:'AAA',home:'BBB',awayProbability:0.4,homeProbability:0.6,awayOdds:140,homeOdds:-156,awayEdgePp:-4,homeEdgePp:4}],games:[{eventId:'1',eventName:'AAA @ BBB',scheduledAt:'2026-10-14T20:00:00Z',status:'SCHEDULED',away:'AAA',home:'BBB'},{eventId:'2',eventName:'CCC @ DDD',scheduledAt:'2026-10-14T21:00:00Z',status:'SCHEDULED',away:'CCC',home:'DDD'}]});
@@ -39,7 +39,7 @@ test('missing calendar is not inferred from forecasts; stale/started source cann
 });
 test('research projection keeps its units and phase and never fabricates odds or probability',()=>{
  const r=research();r.groups[0].key='g';r.entries=[{id:'e',groupKey:'g',date:'2026-10-14',gamePk:1,selection:'Doubles under 0.5',projection:0.16,result:'OPEN'}];
- const d=combinedDay(view(),nhl(),r),p=d.selected.find(p=>p.key==='MLB:research:e');assert.equal(p.modelProbability,null);assert.equal(p.odds,null);assert.equal(p.projection,0.16);assert.match(p.classification,/REGULAR_SEASON/);
+ const d=combinedDay(view(),nhl(),r),p=d.selected.find(p=>p.key==='MLB:research:e');assert.equal(p.modelProbability,null);assert.equal(p.odds,null);assert.equal(p.projection,0.16);assert.equal(p.marketLabel,'batter doubles · UNDER 0.5');assert.match(p.classification,/REGULAR_SEASON/);
 });
 test('MLB formula observations enter the combined Picks filter without becoming official NHL or MLB picks',()=>{
  const v=view();v.games=[{gamePk:1,scheduledAt:'2026-10-14T20:30:00Z',home:'HOME',away:'AWAY',analysisAvailable:false,status:'Preview',reason:'MISSING_STARTER'}];
