@@ -41,6 +41,11 @@ test('research projection keeps its units and phase and never fabricates odds or
  const r=research();r.groups[0].key='g';r.entries=[{id:'e',groupKey:'g',date:'2026-10-14',gamePk:1,selection:'Doubles under 0.5',projection:0.16,result:'OPEN'}];
  const d=combinedDay(view(),nhl(),r),p=d.selected.find(p=>p.key==='MLB:research:e');assert.equal(p.modelProbability,null);assert.equal(p.odds,null);assert.equal(p.projection,0.16);assert.match(p.classification,/REGULAR_SEASON/);
 });
+test('MLB formula observations enter the combined Picks filter without becoming official NHL or MLB picks',()=>{
+ const v=view();v.games=[{gamePk:1,scheduledAt:'2026-10-14T20:30:00Z',home:'HOME',away:'AWAY',analysisAvailable:false,status:'Preview',reason:'MISSING_STARTER'}];
+ const r=research();r.groups[0].key='g';r.entries=[{id:'e',groupKey:'g',date:v.date,gamePk:1,selection:'Under 0.5',projection:0.16,result:'OPEN'}];
+ const d=combinedDay(v,nhl(),r),mlb=d.games.find(g=>g.sport==='MLB');assert.equal(d.games.length,3);assert.equal(mlb.registered,1);assert.equal(mlb.official,0);assert.equal(mlb.analyzed,true);assert.equal(filterDayGames(d.games,'MLB','Picks').length,1);assert.equal(d.selected.find(p=>p.sport==='MLB').matchup,'AWAY at HOME');
+});
 test('sport card links open engine hubs and unknown sports have no invented percentages',()=>{
  const html=renderToStaticMarkup(React.createElement(SportModelOverview,{cards:[{key:'mlb',label:'MLB',href:'/mlb/overview',classification:'Research + production',cohorts:mlbModelCohorts(research(),official())},{key:'nhl',label:'NHL',href:'/nhl',classification:'MODEL_ONLY',cohorts:[nhlModelCohort(nhl())]},{key:'nba',label:'NBA',href:'/sports-center/nba',classification:'Foundation',cohorts:[]}]}));
  for(const s of ['82.73%','href="/mlb/overview"','href="/nhl"','MODEL_ONLY','Playoffs','Resultados no conectados'])assert.ok(html.includes(s),s);
