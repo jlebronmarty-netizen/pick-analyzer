@@ -33,7 +33,14 @@ export async function getQualifiedPlaysReport({ includeEntries = false } = {}) {
         if (after !== null) query = query.gt("id", after);
         const { data, error } = await query.abortSignal(signal);
         if (error || !data) throw new Error("PAGE_READ_FAILED");
-        return data;
+        // A dynamic SELECT string cannot infer a static SDK row type. Keep the
+        // database response unknown until its object shape and ledger fields
+        // are checked, rather than asserting a successful typed query.
+        return data.map((row: unknown) => {
+          if (row === null || typeof row !== "object" || Array.isArray(row))
+            throw new Error("INVALID_PAGE_ROW");
+          return row as Record<string, unknown>;
+        });
       },
       includeEntries,
     );
