@@ -1,0 +1,140 @@
+{
+  "status": "PRODUCTION_VERIFIED",
+  "scope": "NHL readonly display integration; external MODEL_ONLY, not official/model profitability certification",
+  "source": {
+    "repository": "jlebronmarty-netizen/sports-edge-hub",
+    "pr": 19,
+    "candidate": "3dd80975b475af10c0de0f4681f5689298400ab0",
+    "production": "a76569893484c9c5a859ef85ed3ae94e75d57616",
+    "deployment": "dpl_B5YaK3x9hH5YN3KDdHmuttDZG1bp",
+    "endpoint": "https://sports-edge-hub.vercel.app/api/nhl/read-bridge",
+    "schema": "NHL_READ_BRIDGE_V1"
+  },
+  "target": {
+    "repository": "jlebronmarty-netizen/pick-analyzer",
+    "pr": 272,
+    "candidate": "dc900296fcda814e650442617b62a46a9172499e",
+    "tree": "1f2fd8fa4d4037317d3aadefc9a72180b81833c5",
+    "merge": "96acb17d990614308f204ada689a2e8124fdc6cf",
+    "preview": "dpl_4e6YDusxg3gXKHp5osonnQAyvQVD",
+    "production": "dpl_39bywFMa8MHAWbJhhsaPYuPrep2Z"
+  },
+  "snapshot": {
+    "readAt": "2026-10-14T23:01:14.305Z",
+    "health": {
+      "status": "PASS",
+      "issues": [],
+      "latestRunAt": "2026-10-14T23:00:13.135983+00:00",
+      "runStatus": "PARTIAL",
+      "coverage": 1,
+      "eligible": 2
+    },
+    "summary": {
+      "settled": 46,
+      "wins": 23,
+      "losses": 23,
+      "pushes": 0,
+      "voids": 0,
+      "pending": 1,
+      "accuracyPct": 50,
+      "profitUnits": -3.893299999999998,
+      "roiPct": -8.463695652173909,
+      "staked": 46
+    },
+    "forecastCount": 1,
+    "independentAccounting": {
+      "rows": 47,
+      "settled": 46,
+      "wins": 23,
+      "losses": 23,
+      "profitStored": -3.893299999999998,
+      "profitFromOriginalOdds": -3.893256862429121,
+      "roundingDifference": -4.3137570877149756e-05,
+      "roiStored": -8.463695652173909
+    }
+  },
+  "checks": {
+    "sourceTests": 128,
+    "targetDashboardTests": 38,
+    "sourceLint": "PASS",
+    "targetChangedFilesLint": "PASS",
+    "sourceBuild": "PASS",
+    "targetIsolatedExactTreeBuild": "PASS exit 0, 400 static pages",
+    "runtimeGuard": "PASS, 107 unchanged runtime pins",
+    "sourceProductionHttp": 200,
+    "targetPreviewHttp": 200,
+    "liveTargetParser": "PASS 47 complete rows",
+    "originalSourcePerformanceParity": "PASS, 50.0%, -3.9u, -8.5%",
+    "browser": {
+      "forecastProbability": "36.60% / 63.40%",
+      "originalOdds": -146,
+      "currentSnapshotOdds": -156,
+      "lossFilter": 23,
+      "winFilter": 23,
+      "historyPagination": "47 selections, two pages",
+      "todayFilter": 1,
+      "detailResult": "BOS 6 - SJS 3",
+      "overallOfficial": "19W/23L, 45.2%, unchanged",
+      "legacySportsCenterRedirect": "PASS"
+    },
+    "targetConfiguredPreviewBuild": "READY",
+    "targetProductionBuild": "READY",
+    "productionVersionSha": "96acb17d990614308f204ada689a2e8124fdc6cf",
+    "productionNhlHttp": 200,
+    "productionBrowser": "PASS, 47 selections, 23W/23L, 50%, -3.89u, -8.46%",
+    "productionRuntimeWarningsErrors": "none returned during verification window",
+    "postReleaseMlbFingerprints": "MATCH before/after, 815 master rows and 151 official rows"
+  },
+  "baselineBeforeTargetRelease": {
+    "method": "md5(string_agg(row_to_json(t)::text,'' order by row_to_json(t)::text))",
+    "master": {
+      "n": 815,
+      "fingerprint": "2a04c7e214e2d7a199739358c1c95139"
+    },
+    "official": {
+      "n": 151,
+      "fingerprint": "4c47f87fab0133e2309f44f14a7041a8"
+    }
+  },
+  "constraints": {
+    "newSportsProviderCalls": 0,
+    "databaseWrites": 0,
+    "databaseMigrations": 0,
+    "newSchedules": 0,
+    "copiedCredentials": 0,
+    "existingAutomation": "unchanged",
+    "nbaNcaabResearch": "untouched",
+    "nhlClassification": "MODEL_ONLY remains outside official MLB accuracy",
+    "fullSourceCoverage": false,
+    "certifiedClosingCLV": false,
+    "certifiedPositiveROI": false,
+    "actualMobileDeviceValidation": false
+  },
+  "incidents": [
+    {
+      "scope": "target publication preparation",
+      "result": "First unreferenced Git tree omitted two large doc blobs; caught by tree hash comparison and corrected before creating commit/branch. Final remote tree matches locally tested tree exactly."
+    },
+    {
+      "scope": "preview access while building",
+      "result": "Vercel share URL reached SSO while deployment still building; same supported temporary link worked after READY. No auth or security changes."
+    },
+    {
+      "scope": "version lookup",
+      "result": "Incorrect /api/health/version returned 404; actual existing /api/system/version returned expected SHA. No application change."
+    }
+  ],
+  "completedAt": "2026-10-14T23:05:30Z",
+  "screenshot": {
+    "path": "docs/product/qa/nhl-production-96acb17.png",
+    "sha256": "cf8546eb1ece7750cd83194eab8b930eb0c8af948912861341c36870a0d1296f"
+  },
+  "logDigests": {
+    "nhl-source-tests-final.log": "cec1c66db7e95ea21a66782fcf8353f91f01d76b83ca963c8c68e705bf0f189f",
+    "nhl-source-lint-final.log": "be484294c77a6535a5fa10cd3d1fa92deb70ecd7141ff8fcb283c4181f05308b",
+    "nhl-source-build-release.log": "c3015acabb25f58815fe40b5838ff86f1803211816ae1c0588941a7992c47d03",
+    "nhl-target-tests-final.log": "6e9f6c1dde6daa856c3ef5c0817820f4f47cf799ff04e1ef0d12867fd7a682b9",
+    "nhl-target-lint-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "nhl-target-build.log": "a400151465a40e341090a8d24c1734751eb570130b85ab28e5cfe6ce35376dc4"
+  }
+}
