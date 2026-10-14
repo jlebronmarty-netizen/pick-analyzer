@@ -24,6 +24,19 @@ export type QualifiedReport = {
   observations: number | null;
   groups: ResearchGroup[];
   warning: string | null;
+  entries?: ResearchEntry[];
+};
+export type ResearchEntry = {
+  id: string;
+  groupKey: string;
+  date: string;
+  gamePk: number;
+  selection: string;
+  projection: number | null;
+  actual: string | null;
+  result: "WIN" | "LOSS" | "PUSH" | "VOID" | "OPEN";
+  frozenAt: string;
+  settledAt: string | null;
 };
 export function unavailableQualifiedReport(): QualifiedReport {
   return {
@@ -44,7 +57,9 @@ export function summarizeQualifiedPlays(
   rows: Record<string, unknown>[],
   readAt: string,
   sourceUpdatedAt: string | null,
+  includeEntries = false,
 ): QualifiedReport {
+  const entries: ResearchEntry[] = [];
   const groups = new Map<string, ResearchGroup>();
   const ids = new Set<string>();
   const sources = new Set<string>();
@@ -113,6 +128,20 @@ export function summarizeQualifiedPlays(
       r.direction,
       r.evidence_class,
     ]);
+    if (includeEntries) {
+      if (!text(r.target_date) || !/^\d{4}-\d{2}-\d{2}$/.test(r.target_date) ||
+          new Date(r.target_date + "T12:00:00Z").toISOString().slice(0, 10) !== r.target_date ||
+          !Number.isSafeInteger(r.game_pk) || Number(r.game_pk) <= 0 || !text(r.selection) ||
+          !(r.projection === null || (typeof r.projection === "number" && Number.isFinite(r.projection))) ||
+          !(r.actual_label === null || text(r.actual_label)) ||
+          !(r.actual_value === null || ((typeof r.actual_value === "number" || text(r.actual_value)) && Number.isFinite(Number(r.actual_value)))))
+        throw new Error("INVALID_RESEARCH_DETAIL");
+      entries.push({id: r.id, groupKey: key, date: r.target_date, gamePk: Number(r.game_pk),
+        selection: r.selection, projection: r.projection as number | null,
+        actual: r.result === null ? null : r.actual_label as string | null ?? (r.actual_value === null ? null : String(r.actual_value)),
+        result: (r.result ?? "OPEN") as ResearchEntry["result"], frozenAt: String(r.freeze_timestamp),
+        settledAt: r.result === null ? null : String(r.settled_at)});
+    }
     const g = groups.get(key) ?? {
       key,
       season: 2026,
@@ -148,6 +177,7 @@ export function summarizeQualifiedPlays(
     observations: rows.length,
     groups: [...groups.values()].sort((a, b) => a.key.localeCompare(b.key)),
     warning: null,
+    ...(includeEntries ? { entries: entries.sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id)) } : {}),
   };
 }
 export type LedgerBoundary = { count: number; updatedAt: string | null };
@@ -155,6 +185,7 @@ export type LedgerBoundary = { count: number; updatedAt: string | null };
 export async function readQualifiedSnapshot(
   boundary: () => Promise<LedgerBoundary>,
   page: (after: string | null) => Promise<Record<string, unknown>[]>,
+  includeEntries = false,
 ): Promise<QualifiedReport> {
   try {
     const before = await boundary();
@@ -194,6 +225,7 @@ export async function readQualifiedSnapshot(
       rows,
       new Date().toISOString(),
       before.updatedAt,
+      includeEntries,
     );
   } catch {
     return unavailableQualifiedReport();

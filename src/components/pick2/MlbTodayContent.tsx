@@ -27,6 +27,7 @@ export function TodayContent({
         <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
           Today&apos;s picks &amp; performance.
         </h1>
+        <Link href="/mlb/overview" className="mt-3 inline-block rounded-lg border border-teal-400/40 px-4 py-2 text-sm font-semibold text-teal-300">MLB general · Pick, Edge, Equilizer y fórmulas →</Link>
       </header>
       {performance}
       <DailyPicksLists

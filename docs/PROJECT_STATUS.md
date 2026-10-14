@@ -1,3 +1,11 @@
+## MLB engine hub — 2026-10-14 (review branch)
+
+- Added `/mlb/overview` and read-only `/api/mlb/engines`: General, Pick, Edge, Equilizer and Formula views; exact-contract accuracy, frozen selections, observed outcomes, date/result/formula filters and pagination.
+- Canonical forward ledger only: 815 observations / 16 groups at audit. Regular season and postseason remain separate; official ML performance is independently deduplicated. Formula view reuses observations, not a fourth engine. Unknown/empty metrics remain unavailable, not invented accuracy.
+- Existing official model, policy, runtime pins, provider budgets and schedulers unchanged. No schema changes, data acquisitions or database writes. Full coverage of every historical formula is not asserted: unsynced formula observations are excluded.
+- This review does not undo the approved PR #270 production release (`498771b`); its natural PREGAME/INCREMENTAL slot completed at 21:45 UTC. Earlier pending-release sections below are historical snapshots.
+- Verification and preview evidence: `docs/product/MLB_ENGINE_HUB_20261014.md`. New hub remains separate from production pending review.
+
 ## Release candidate verified; production approval pending — 2026-10-14
 
 - Application `92aa7e476024a5c2dfa6f11b145b2a9a17a545e4`: ten GitHub checks successful, Vercel preview READY, exact SHA confirmed by API; final local build exit 0. All 107 operational source pins and both certificates are packaged.
