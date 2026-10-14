@@ -1,0 +1,39 @@
+'use client';
+import Link from 'next/link';
+import {useState} from 'react';
+import {GameCard} from '@/components/pick2/MlbCards';
+import {prTime,type MlbView} from '@/components/pick2/mlb-presentation';
+import {DAY_FILTERS,filterDayGames,type DayFilter,type DayPick, type combinedDay} from '@/lib/multisport-day';
+type Day=ReturnType<typeof combinedDay>;
+const pct=(n:number|null)=>n===null?'—':n.toFixed(2)+'%';
+const odds=(n:number|null)=>n===null?'—':(n>0?'+':'')+n;
+export default function MultisportDayView({day,mlb}:{day:Day;mlb:MlbView}){
+ const [sport,setSport]=useState('ALL'),[filter,setFilter]=useState<DayFilter>('All');
+ const scoped=day.games.filter(g=>sport==='ALL'||g.sport===sport),games=filterDayGames(day.games,sport,filter);
+ const summary=[['Games',scoped.length],['Analyzed',scoped.filter(g=>g.analyzed).length],['Official Picks',scoped.reduce((s,g)=>s+g.official,0)],['Model Selections',scoped.reduce((s,g)=>s+g.registered,0)],['Value Candidates',scoped.reduce((s,g)=>s+g.value,0)],['Waiting',scoped.filter(g=>g.waiting).length]] as const;
+ const list=(title:string,rows:DayPick[],ranked:boolean)=><section aria-label={title} className="rounded-xl border border-slate-700 bg-slate-900 p-5">
+  <h2 className="text-xl font-bold">{title}</h2><p className="mt-2 text-xs text-slate-400">{ranked?'Edge informativo en puntos porcentuales; cada fuente identifica su base de comparación.':'Selecciones de todos los modelos conectados; conservan su clasificación y no todas son recomendaciones oficiales.'}</p>
+  <ul className="mt-4 max-h-[32rem] space-y-3 overflow-y-auto">{rows.filter(p=>sport==='ALL'||p.sport===sport).map(p=><li key={p.key} className="rounded-lg border border-slate-700 p-4">
+   <p className="text-xs font-semibold text-teal-300">{p.sport} · {p.classification}</p><p className="mt-2 text-sm text-slate-400">{p.matchup}</p><p className="mt-1 font-bold">{p.selection}</p>
+   <p className="mt-2 text-sm">{p.modelProbability!==null?`Modelo ${pct(p.modelProbability)} · `:p.projection!==null?`Proyección ${p.projection.toFixed(3)} · `:''}{p.edgePp!==null?`Edge ${p.edgePp.toFixed(2)} pp · `:''}Cuota {odds(p.odds)}</p>{p.book&&<p className="mt-1 text-xs text-slate-400">{p.book}</p>}
+   <Link href={p.href} className="mt-3 inline-block text-sm font-semibold text-teal-300">Ver modelo y registro →</Link>
+  </li>)}</ul>{!rows.some(p=>sport==='ALL'||p.sport===sport)&&<p className="mt-4 text-sm text-slate-400">Sin registros verificados para esta fecha y deporte.</p>}
+ </section>;
+ return <section aria-label="Calendario de todos los deportes" className="space-y-5">
+  <header><p className="text-xs font-semibold uppercase tracking-widest text-teal-300">{day.date} · Puerto Rico</p><h2 className="mt-2 text-2xl font-bold">Partidos y picks del día · todos los deportes</h2><p className="mt-2 text-sm text-slate-400">MLB y NHL conectados. Los demás deportes aparecerán cuando tengan una fuente operativa verificada.</p></header>
+  <div role="group" aria-label="Filtrar deporte" className="flex flex-wrap gap-2">{[['ALL','Todos'],['MLB','MLB'],['NHL','NHL']].map(([key,name])=><button type="button" key={key} aria-pressed={sport===key} onClick={()=>setSport(key)} className={`min-h-11 rounded-full border px-4 py-2 text-sm ${sport===key?'border-teal-300 bg-teal-400/10':'border-slate-600'}`}>{name}</button>)}</div>
+  {day.warnings.length>0&&<div role="status" className="rounded-xl border border-amber-400/30 p-4 text-xs leading-6 text-amber-200">Cobertura parcial: {day.warnings.join(' · ')}</div>}
+  <div className="grid gap-4 xl:grid-cols-2">{list('Selecciones registradas de hoy',day.selected,false)}{list('Mayor edge del día',day.edge,true)}</div>
+  <dl aria-label="Resumen del calendario conjunto" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">{summary.map(([name,n])=><div key={name} className="min-w-0 rounded-xl border border-slate-700 bg-slate-900 p-4"><dt className="text-xs text-slate-400">{name}</dt><dd className="mt-2 text-2xl font-bold">{n}</dd></div>)}</dl>
+  <p className="text-xs leading-5 text-slate-400">Games y Analyzed cuentan partidos. Picks y Value cuentan selecciones por lado: Official Picks solo incluye ML oficial; Model Selections también incluye MODEL_ONLY de NHL. Las fórmulas de investigación aparecen en la lista superior. Waiting excluye iniciados. Los precios son snapshots.</p>
+  <div role="group" aria-label="Filtrar partidos del día" className="flex flex-wrap gap-2">{DAY_FILTERS.map(f=><button type="button" key={f} aria-pressed={filter===f} onClick={()=>setFilter(f)} className={`min-h-11 rounded-full border px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-teal-300 ${filter===f?'border-teal-300 bg-teal-400/10':'border-slate-600'}`}>{f}</button>)}</div>
+  <p role="status" className="text-xs text-slate-400">{games.length} de {scoped.length} partidos · {sport==='ALL'?'Todos los deportes':sport} · {filter}</p>
+  <div aria-label="Partidos combinados de hoy" className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">{games.map(g=>g.sport==='MLB'?<div key={g.key} className="min-w-0"><p className="mb-2 text-xs font-bold tracking-widest text-teal-300">MLB</p><GameCard game={mlb.games.find(m=>String(m.gamePk)===g.eventId)!} rows={mlb.board.rows.filter(r=>String(r.game_pk)===g.eventId)}/></div>:<article key={g.key} className="min-w-0 rounded-2xl border border-slate-700 bg-slate-900 p-4">
+   <div className="flex justify-between text-xs"><span className="font-bold tracking-widest text-teal-300">NHL · MODEL_ONLY</span><time dateTime={g.scheduledAt}>{prTime(g.scheduledAt)}</time></div><h3 className="mt-3 text-lg font-bold">{g.title}</h3><p className="mt-2 text-xs text-slate-400">{g.started?'Partido iniciado / cerrado':g.analyzed?'Modelo externo disponible':'Análisis pendiente'} · {g.nhl!.status}</p>
+   <div className="mt-4 grid grid-cols-2 gap-3">{[{side:'Away',team:g.nhl!.away,p:g.nhl!.awayProbability,price:g.nhl!.awayOdds},{side:'Home',team:g.nhl!.home,p:g.nhl!.homeProbability,price:g.nhl!.homeOdds}].map(s=><section key={s.side} aria-label={s.team+' análisis'} className="min-w-0 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">{s.side}</p><h4 className="mt-1 font-bold">{s.team}</h4><p className="mt-3 text-lg font-semibold">{pct(s.p===null?null:s.p*100)}</p><p className="mt-2 text-sm">Circa: {odds(s.price)}</p></section>)}</div>
+   <p className="mt-3 text-xs text-slate-400">{g.nhl!.capturedAt?'Captura '+prTime(g.nhl!.capturedAt,true):'Sin pronóstico/precio pareado almacenado para este partido.'}</p>{g.nhl!.selections.map(s=><p key={s} className="mt-3 text-sm text-teal-300">Selección registrada: {s}</p>)}<Link href="/nhl" className="mt-4 inline-block text-sm font-semibold text-teal-300">Ver predicciones y settlement NHL →</Link>
+  </article>)}</div>
+  {!games.length&&<p className="rounded-xl border border-slate-700 p-5 text-sm">No hay partidos en el calendario conectado con estos filtros. Una fuente no conectada no implica cero partidos.</p>}
+  <p className="text-xs text-slate-400">Horarios Puerto Rico. Cada deporte conserva sus modelos, contratos y criterios originales.</p>
+ </section>;
+}

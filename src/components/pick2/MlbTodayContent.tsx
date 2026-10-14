@@ -1,83 +1,10 @@
-import type { ReactNode } from "react";
-import Link from "next/link";
-import DailyPicksLists from "@/components/dashboard/DailyPicksLists";
-import { operationalDailyPicks } from "@/lib/operational-daily-picks";
-import MlbSlate from "./MlbSlate";
-import type { MlbView } from "./mlb-presentation";
-export function TodayContent({
-  view,
-  performance,
-}: {
-  view: MlbView;
-  performance?: ReactNode;
-}) {
-  const picks = operationalDailyPicks(view);
-  // Summaries and filters derive only from the supplied canonical snapshot.
-  return (
-    <div className="mlb-ui mx-auto max-w-7xl space-y-6">
-      <header className="rounded-2xl border border-slate-700/70 bg-gradient-to-br from-slate-900 to-slate-950 p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">
-          MLB |{" "}
-          {new Intl.DateTimeFormat("en-US", {
-            month: "long",
-            day: "numeric",
-            timeZone: "America/Puerto_Rico",
-          }).format(new Date(view.date + "T12:00:00Z"))}
-        </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Today&apos;s picks &amp; performance.
-        </h1>
-        <Link href="/mlb/overview" className="mt-3 inline-block rounded-lg border border-teal-400/40 px-4 py-2 text-sm font-semibold text-teal-300">MLB general · Pick, Edge, Equilizer y fórmulas →</Link>
-        <Link href="/nhl" className="ml-3 mt-3 inline-block rounded-lg border border-teal-400/40 px-4 py-2 text-sm font-semibold text-teal-300">NHL · predicciones y resultados →</Link>
-      </header>
-      {performance}
-      <DailyPicksLists
-        officialHref="/mlb-value-board"
-        edgeHref="/mlb-value-board"
-        operatingDate={view.date}
-        official={picks.official}
-        edge={picks.edge}
-      />
-      {view.warnings.length > 0 && (
-        <div
-          role="status"
-          className="rounded-xl border border-amber-300/30 p-4 text-sm text-amber-100"
-        >
-          Some game data is unavailable. Analysis may be incomplete.{" "}
-          <Link href="/data-health" className="underline">
-            Check Data Health
-          </Link>
-        </div>
-      )}
-      <details className="text-xs leading-5 text-slate-300">
-        <summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">
-          About probabilities and prices
-        </summary>
-        <p className="mt-1 max-w-2xl">
-          Higher probability does not always mean better value. Consensus
-          probability is not a single-book no-vig quote; that quote is
-          unavailable in this view. Edge and EV appear only when supplied by the
-          canonical analysis. Prices are recorded snapshots.
-        </p>
-      </details>
-      {!view.games.length ? (
-        <section className="rounded-xl border border-slate-700 p-5">
-          <h2 className="font-semibold">
-            Today&apos;s games are not available yet
-          </h2>
-          <p className="mt-2 text-sm text-slate-300">
-            Waiting for the latest schedule and game data. This does not mean
-            there are no games today.
-          </p>
-        </section>
-      ) : (
-        <MlbSlate view={view} />
-      )}
-      <p className="text-xs leading-5 text-slate-400">
-        All times Puerto Rico. Prices are snapshots, not live sportsbook quotes.
-        Official Picks meet the recommendation criteria; no outcome is
-        guaranteed.
-      </p>
-    </div>
-  );
+import {Suspense,type ReactNode} from 'react';
+import MultisportDay from '@/components/dashboard/MultisportDay';
+import type {MlbView} from './mlb-presentation';
+export function TodayContent({view,performance,calendar}:{view:MlbView;performance?:ReactNode;calendar?:ReactNode}){
+ return <div className="mlb-ui mx-auto max-w-7xl space-y-6">
+  <header className="rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 to-slate-950 p-5"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">Todos los deportes · {view.date}</p><h1 className="mt-2 text-3xl font-semibold">Today&apos;s picks &amp; performance.</h1><p className="mt-3 text-sm text-slate-400">Elige un deporte para ver sus motores y fórmulas, o consulta los partidos y selecciones del día en un solo lugar.</p></header>
+  {performance}
+  {calendar??<Suspense fallback={<p role="status">Cargando el calendario de deportes conectados…</p>}><MultisportDay view={view}/></Suspense>}
+ </div>;
 }

@@ -36,3 +36,7 @@ test('NHL MODEL_ONLY results do not change official all-sport accuracy',()=>{
  const sports=[{key:'mlb',label:'MLB',readiness:'Production',connected:true,available:true,wins:19,losses:23,pushes:0,voids:0,pending:0},{key:'nhl',label:'NHL',readiness:'MODEL_ONLY',connected:false,available:false,wins:null,losses:null,pushes:null,voids:null,pending:null}];
  assert.equal(summarizeOfficialSports(sports).accuracy,19/42);
 });
+test('additive NHL calendar validates unique date-scoped games and matches forecast identities',()=>{
+ const r=fixture();r.games=[{eventId:'e',eventName:'AAA @ BBB',scheduledAt:'2026-10-14T20:00:00Z',status:'SCHEDULED',away:'AAA',home:'BBB'}];assert.equal(parseNhlReport(r,new Date(at)).games.length,1);
+ for(const games of [[...r.games,...r.games],[{...r.games[0],scheduledAt:'2026-10-13T20:00:00Z'}],[{...r.games[0],home:'WRONG'}],[]])assert.throws(()=>parseNhlReport({...r,games},new Date(at)));
+});

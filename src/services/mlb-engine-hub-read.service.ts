@@ -1,6 +1,7 @@
 import "server-only";
 import { getQualifiedPlaysReport } from "./qualified-plays-read.service";
 import type { OfficialHubSummary } from "@/lib/mlb-engine-hub";
+import {mlbModelCohorts} from '@/lib/sport-model-overview';
 
 export async function getMlbEngineHub() {
   const [research, official] = await Promise.all([
@@ -13,7 +14,7 @@ export async function getMlbEngineHub() {
   const summary: OfficialHubSummary = { available, wins, losses,
     pending: available && official ? official.ledger.pendingUniqueSelections : null,
     accuracy: wins !== null && losses !== null && wins + losses ? wins / (wins + losses) : null };
-  return { research, official: summary,
+  return { research, official: summary, cohorts:mlbModelCohorts(research,official),
     today: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(new Date()),
     providerCalls: 0, productionDml: 0 };
 }
