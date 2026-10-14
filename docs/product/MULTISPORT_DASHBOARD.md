@@ -100,3 +100,5 @@ The audit also confirms an open operational dependency: game849811 currently lac
 ## Operational readiness follow-up
 
 The October 14 read-only diagnosis reproduces an existing production certificate drift that prevents current MLB predictions. See [pipeline diagnosis](MLB_PIPELINE_DIAGNOSTIC_20261014.md). UI readiness does not imply operational readiness; production and mobile remain paused.
+
+The reviewed runtime repair and desktop/API verification are recorded in [release readiness](MLB_RELEASE_READINESS_20261014.md). The exact application preview passed build and all ten checks; production approval and production-target readback remain pending.

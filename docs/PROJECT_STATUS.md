@@ -1,8 +1,9 @@
-## Release preparation and runtime integrity repair — 2026-10-14
+## Release candidate verified; production approval pending — 2026-10-14
 
-- Batched MLB raw readers now enforce exact complete counts, per-game caps, scope and duplicate guards. Versioned manifests preserve original certificates, cover 107 operational files and are checked in new provider-free CI.
-- 20 raw-read tests, 26 UI tests, current disposable schema/state/recovery/budget/settlement checks and three exact stored 76-feature/probability replays pass. Model math and policy are unchanged; playoffs remain outside the official champion scope.
-- See `docs/product/MLB_RELEASE_READINESS_20261014.md` for evidence and release/readback procedure. Exact preview build/review is being completed. No production/provider/database/scheduler changes or merge; release approval remains pending.
+- Application `92aa7e476024a5c2dfa6f11b145b2a9a17a545e4`: ten GitHub checks successful, Vercel preview READY, exact SHA confirmed by API; final local build exit 0. All 107 operational source pins and both certificates are packaged.
+- 160 operational assertions, 20 pagination tests, 26 dashboard tests and three exact stored 76-feature/probability replays pass. Browser/API review verifies 42 unique official picks (19 W / 23 L), filters, research separation and the postseason scope block.
+- Production read-only Edge health and 0/48 operational budget pass; preview Edge health remains unverified. No source-drift gate has yet been changed in production. Production-target readback and a fresh eligible run remain post-release requirements.
+- See `docs/product/MLB_RELEASE_READINESS_20261014.md` and its receipts. No provider acquisitions, production DML/DDL, scheduler/model/policy changes, merge or production release. Original official records fingerprint-identical; mobile rollout remains separate.
 
 ## MLB pipeline read-only diagnosis — 2026-10-14
 

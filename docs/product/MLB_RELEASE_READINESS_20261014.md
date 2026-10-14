@@ -1,6 +1,6 @@
 # Pick Analyzer — release preparation, October 14
 
-Status: IMPLEMENTED_AND_OFFLINE_VERIFIED; exact preview build/UI verification pending. No production deployment, merge, migration, provider acquisition, model promotion, or scheduler edit.
+Status: READY_FOR_USER_RELEASE_REVIEW_NOT_DEPLOYED. Application commit `92aa7e476024a5c2dfa6f11b145b2a9a17a545e4` passed configured Vercel preview build, ten GitHub checks and desktop/API review. Local final build exited 0; all 107 operational source pins and both versioned certificates are present in the function trace. No production deployment, merge, migration, provider acquisition, model promotion, or scheduler edit.
 
 ## Changes
 
@@ -30,3 +30,12 @@ Status: IMPLEMENTED_AND_OFFLINE_VERIFIED; exact preview build/UI verification pe
 5. Recheck original official/settlement record fingerprints, the dashboard counters and any release errors. Roll back the application artifact if package/preflight/regression checks fail, preserving every recorded row and consumed reservation. Never erase a receipt to retry.
 
 Mobile rollout and production remain paused for the user's review. NHL/NBA/NCAAB and the separate Sports Edge Hub project were not modified.
+
+## Final verification
+
+- [Verification receipt](MLB_RELEASE_VERIFICATION_20261014.json), [build/package receipt](MLB_RELEASE_BUILD_TRACE_20261014.json), [final R3 guard replay](MLB_RELEASE_R3_GUARDS_FINAL_20261014.json).
+- Browser pages `/`, `/today`, `/performance`, `/qualified-plays`, `/mlb-value-board` and `/data-health` reviewed. Read-only API operations/performance/version returned 200 and matched the displayed counts and exact application SHA. Outcome filters showed 19 wins, 23 losses and zero pending. The board remained empty for the known postseason game, with an explicit scope explanation on Today.
+- Production read-only health returned Edge 15, active operational budget, 0/48 consumed and NO_RECENT_COMPLETION_OBSERVED. The existing production source-drift blocker was not removed in production. Preview Edge health repeatedly remained RUNTIME_UNAVAILABLE; its precise environment/transport cause is undetermined. Production-target candidate health must be verified at release; do not hide the preview failure or copy credentials.
+- Official row count 151 and fingerprint `2f421c6a03cc71716a22868fa54508c7` match before/after; champion row count stays 452; provider reservations today stay zero.
+- One full-page browser screenshot timed out; a viewport screenshot succeeded. Direct browser navigation to the JSON API was blocked by the browser client; authenticated Vercel read-only fetch verified those API responses instead. Observed console errors came from browser-extension metadata messaging.
+- Mobile device validation was not performed. No claim of fresh production inference or full original private raw-cache SQL replay. The release procedure remains prepared for approval and production-target readback.
