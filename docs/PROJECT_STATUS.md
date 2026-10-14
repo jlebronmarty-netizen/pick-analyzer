@@ -1,3 +1,11 @@
+## 2026-10-14 Desktop review before mobile/production
+
+- Desktop review completed with corrections: Performance light-theme header/result contrast fixed; returns explicitly labeled one-unit basis. Source3047f48 preview verified,23 tests/lint PASS, nine GitHub checks green.
+- Independent SQL confirms151 snapshots =42 unique selections,19W/23L;109 repeats excluded, zero conflicting settlements. Pagination, outcome/date filters and links checked in browser.
+- Open operational dependency: canonical game849811 has no champion prediction or market observation at the review time. Cause/execution timing remains to be checked; no cron malfunction is asserted from absence alone.
+- Report/receipt/read-only query/before-after captures: `docs/product/DESKTOP_REVIEW_20261014.md`. Mobile and production stay paused. No database/provider/model/scheduler change or merge.
+- Local webpack/TypeScript PASS; full local build blocked at existing missing Supabase environment. Configured preview Ready; no local task process left running.
+
 ## 2026-10-14 Multisport UI and Qualified Plays — verified desktop preview
 
 - PR #270 remains draft: actual `/` and `/today` overview/daily lists, official settlement filters, and separate `/qualified-plays` canonical research view implemented.
