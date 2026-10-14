@@ -96,3 +96,7 @@ The functional update and its contrast/layout follow-up were verified in the con
 At the owner's request, mobile and production remain paused. `DESKTOP_REVIEW_20261014.md` records an independent SQL cross-check of151 original snapshots collapsed to42 selections(19W/23L), complete pagination/filter/navigation checks and a confirmed light-theme Performance contrast defect. Source3047f48 fixes that defect and labels one-unit returns explicitly. The fix is verified in browser,23 tests PASS, targeted lint PASS, configured Vercel preview Ready and nine GitHub checks green. Local webpack/TypeScript PASS; full local build is still blocked by the existing missing Supabase environment.
 
 The audit also confirms an open operational dependency: game849811 currently lacks canonical champion prediction and stored market prices. The UI's waiting/empty state is accurate; the reason and expected input timing were not established by this UI review. Historical metrics do not certify today's input pipeline. No activation, provider fetch or production promotion was attempted.
+
+## Operational readiness follow-up
+
+The October 14 read-only diagnosis reproduces an existing production certificate drift that prevents current MLB predictions. See [pipeline diagnosis](MLB_PIPELINE_DIAGNOSTIC_20261014.md). UI readiness does not imply operational readiness; production and mobile remain paused.

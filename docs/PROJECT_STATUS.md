@@ -1,3 +1,9 @@
+## MLB pipeline read-only diagnosis — 2026-10-14
+
+- Exact production commit reproduces R3 source-drift preflight failure before durable/provider work; two R3 and four later readiness hash mismatches exist on main. See `docs/product/MLB_PIPELINE_DIAGNOSTIC_20261014.md` and JSON receipt.
+- Last durable run and champion prediction are September 22. Today game 849811 has no champion prediction, market observations or official pick. Historical mission cap alone is not established as the active blocker.
+- Offline reproduction exit 2 is expected. Repair requires source review and recertification, not blind hash replacement. No production/provider/database/scheduler changes; mobile and production remain paused.
+
 ## 2026-10-14 Desktop review before mobile/production
 
 - Desktop review completed with corrections: Performance light-theme header/result contrast fixed; returns explicitly labeled one-unit basis. Source3047f48 preview verified,23 tests/lint PASS, nine GitHub checks green.

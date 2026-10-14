@@ -1,0 +1,73 @@
+{
+  "inspectedCommit": "f7e5f5694660bc97e1d8946271bc277c995d0947",
+  "gate": {
+    "status": "BLOCKED",
+    "reason": "R2T_LIVE_BLOCKED:R3_SOURCE_DRIFT:scripts/mlb-data-02h-2026-current-foundation.mjs"
+  },
+  "reports": [
+    {
+      "path": "docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION.json",
+      "checked": 37,
+      "mismatches": [
+        {
+          "file": "scripts/mlb-data-02h-2026-current-foundation.mjs",
+          "expected": "aadde955a68ad566ba135edeb984f123f10aa49063e454159fd1d83e6b826572",
+          "actual": "a4b1eb0bfc4477137f4c189f63b1421989642eb7495cfe6b71a763afb60bba38"
+        },
+        {
+          "file": "scripts/mlb-data-02r-r2t-r1-read-repository.mjs",
+          "expected": "8a67465f7bbb8719459453ad3d0377c7b674bb2879541a49764320b82c71e4eb",
+          "actual": "d0a7527613d5a01127ed155a9a0f44aa3ee41c5bea8f487b92a90b12c6d84dbb"
+        }
+      ]
+    },
+    {
+      "path": "docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json",
+      "checked": 73,
+      "mismatches": [
+        {
+          "file": "scripts/mlb-data-02h-2026-current-foundation.mjs",
+          "expected": "aadde955a68ad566ba135edeb984f123f10aa49063e454159fd1d83e6b826572",
+          "actual": "a4b1eb0bfc4477137f4c189f63b1421989642eb7495cfe6b71a763afb60bba38"
+        },
+        {
+          "file": "src/services/pick2-operational-read.service.ts",
+          "expected": "bb579eb8c0af513aa4bc02b6be15f0efea6c4c12ef409cdac0769e888ca80edc",
+          "actual": "0755dd0b6fbd194ca4619c2d5b417a15d225a246aed65a1e7544930c32f375e0"
+        },
+        {
+          "file": "src/components/pick2/MlbCards.tsx",
+          "expected": "f63ac57707e6adc3da52eab89cfd1b0023195ce1b828087f68d15b17e775b3e4",
+          "actual": "20a92fea292d0686621fc3206b42312aa1e19bfc0e700af3ba5bf2bb0c850b8a"
+        },
+        {
+          "file": "src/components/pick2/mlb-presentation.ts",
+          "expected": "8a76eb1afc150cc9200f8cf0b50a0d28a8e1f0e7d54195ccb43b42c4efb35970",
+          "actual": "4c9638d1f454401e17e4855c4925540b19888757d22f197a317a7bad88a90a59"
+        }
+      ]
+    }
+  ],
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "observedAt": "2026-10-14T21:00:00Z",
+  "productionDeployment": "dpl_DbVRQus7WaMxvTkrvHfSzpNe33Tj",
+  "latestDurableRun": "2026-09-22T15:15:48.012Z",
+  "latestChampionPrediction": "2026-09-22T15:00:10.346Z",
+  "today": {
+    "gamePk": 849811,
+    "championPredictions": 0,
+    "marketObservations": 0,
+    "officialPicks": 0
+  },
+  "historicalMissionOddsConsumed": 20,
+  "separateOperationalReservations": 22,
+  "latestOperationalReservation": "2026-09-22T15:15:26.634Z",
+  "liveInvocationAttempted": false,
+  "productionChanged": false,
+  "limitations": [
+    "No recent operational runtime logs returned; absence does not prove cron disabled.",
+    "Operational budget authority was not invoked; historical 20/20 alone does not prove active budget exhaustion.",
+    "Exact production canonical readiness gate reproduced independently in isolated Git archive."
+  ]
+}
