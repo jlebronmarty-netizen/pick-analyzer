@@ -1,0 +1,187 @@
+{
+  "verifiedAt": "2026-10-14T21:46:12.729Z",
+  "status": "DEPLOYED_AND_NATURAL_COORDINATOR_VERIFIED",
+  "runs": [
+    {
+      "run_id": "automation-acda518d41322b9df15be5ead050bef6a3c7ca8f63a0668dcaabd9b806beb1fd",
+      "package_sha": "498771b29dcbc7697e8a19e0ba2e832bc65dce91",
+      "status": "COMPLETE",
+      "mode": "INCREMENTAL",
+      "stage": "COMPLETE",
+      "result": {
+        "picks": 0,
+        "reused": 0,
+        "status": "NO_SCOPED_GAMES",
+        "values": 0,
+        "inserted": 0,
+        "readback": "PASS",
+        "conflicts": 0,
+        "predictions": 0
+      },
+      "failure": null,
+      "mlb_official_calls": 1,
+      "statcast_calls": 0,
+      "odds_calls": 0,
+      "updated_at": "2026-10-14 21:45:27.097+00"
+    },
+    {
+      "run_id": "automation-d8f305bbb0c79e98c4cf420f6fddaaa2bb0dc3d315eef3d25db1fcd33baa1eee",
+      "package_sha": "498771b29dcbc7697e8a19e0ba2e832bc65dce91",
+      "status": "COMPLETE",
+      "mode": "PREGAME",
+      "stage": "COMPLETE",
+      "result": {
+        "picks": 0,
+        "reused": 0,
+        "status": "NO_VALID_PREGAME_SLATE",
+        "values": 0,
+        "inserted": 0,
+        "readback": "PASS",
+        "conflicts": 0,
+        "predictions": 0
+      },
+      "failure": null,
+      "mlb_official_calls": 1,
+      "statcast_calls": 0,
+      "odds_calls": 0,
+      "updated_at": "2026-10-14 21:45:23.657+00"
+    }
+  ],
+  "afterIntegrity": {
+    "championCount": 452,
+    "officialCount": 151,
+    "officialDigest": "2f421c6a03cc71716a22868fa54508c7",
+    "todayOperationalRequests": 0,
+    "historicalMissionConsumed": 20
+  },
+  "health": {
+    "status": 200,
+    "body": {
+      "asOf": "2026-10-14T21:46:12.729Z",
+      "operatingDate": "2026-10-14",
+      "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+      "featureSet": "MLB_ML_FEATURE_SET_V1",
+      "featureCount": 76,
+      "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+      "currentRun": {
+        "runId": "automation-acda518d41322b9df15be5ead050bef6a3c7ca8f63a0668dcaabd9b806beb1fd",
+        "packageSha": "498771b29dcbc7697e8a19e0ba2e832bc65dce91",
+        "date": "2026-10-14",
+        "asOf": "2026-10-14T21:45:24.911+00:00",
+        "status": "COMPLETE",
+        "stage": "COMPLETE",
+        "completed": [
+          "PITCH_SCOPE"
+        ],
+        "eligibleScope": [],
+        "blocked": [],
+        "result": {
+          "picks": 0,
+          "reused": 0,
+          "status": "NO_SCOPED_GAMES",
+          "values": 0,
+          "inserted": 0,
+          "readback": "PASS",
+          "conflicts": 0,
+          "predictions": 0
+        },
+        "failure": null,
+        "updatedAt": "2026-10-14T21:45:27.097+00:00",
+        "leaseActive": false
+      },
+      "currentRunState": "COMPLETE",
+      "lastPublishedRun": {
+        "runId": "mlb-operational-64d4f1f1-a4c9-4cfc-a178-89bf8866fdd6",
+        "runDate": "2026-09-09",
+        "runAsOf": "2026-09-09T13:48:58.778Z",
+        "packageSha": "633768729b212746d03a5bf4d2ae542d1d84f945",
+        "status": "CANONICAL_STAGES_READBACK_COMPLETE",
+        "eligibleGames": 13,
+        "blockedGames": 2,
+        "providerCalls": {
+          "MLB_OFFICIAL": 4,
+          "THE_ODDS_API": 1,
+          "missionOddsConsumed": 2
+        },
+        "productionDml": 593,
+        "predictions": 13,
+        "observations": 286,
+        "values": 286,
+        "officialPicks": 7
+      },
+      "accountingAsOf": "2026-10-14T21:45:27.097+00:00",
+      "providerAccounting": {
+        "scope": "CURRENT_DURABLE_RUN",
+        "MLBOfficial": 1,
+        "sharedStatcast": 0,
+        "OddsAPI": 0,
+        "missionOddsConsumed": 20,
+        "missionOddsRemaining": 0,
+        "BALLDONTLIE": 0,
+        "SportsDataIO": 0,
+        "otherSportsProviders": 0
+      },
+      "dmlAccounting": [],
+      "deployment": {
+        "webDeploymentSha": "498771b29dcbc7697e8a19e0ba2e832bc65dce91",
+        "edgeVersion": 15,
+        "frozenExecutionPackageSha": "498771b29dcbc7697e8a19e0ba2e832bc65dce91"
+      },
+      "budgets": {
+        "historicalCertification": {
+          "version": "MLB_OPERATIONAL_MISSION",
+          "consumed": 20,
+          "cap": 20,
+          "status": "IMMUTABLE_HISTORY"
+        },
+        "operationalDaily": {
+          "version": "MLB_ODDS_OPERATIONAL_BUDGET_V1",
+          "activation": "ACTIVE",
+          "day": "2026-10-14",
+          "timezone": "America/Puerto_Rico",
+          "cap": 48,
+          "perRunCap": 1,
+          "consumed": 0,
+          "remaining": 48,
+          "observedCredits": null,
+          "unknownCreditRequests": 0
+        }
+      },
+      "accountingNote": "Historical certification requests and operational daily requests are separate. Provider credits are reported only when observed. Business DML excludes runtime coordination updates.",
+      "storedGames": 1,
+      "blockedGames": [
+        {
+          "gamePk": 849811,
+          "reason": "REGULAR_SEASON_MODEL_ONLY"
+        }
+      ],
+      "predictionCount": 0,
+      "valueCount": 0,
+      "officialPickCount": 0,
+      "freshness": [
+        {
+          "gamePk": 849811,
+          "gameEvidenceAt": "2026-10-14T21:45:16.932Z",
+          "predictionAt": null
+        }
+      ],
+      "automation": {
+        "activation": "ENABLED",
+        "dryCertification": "PASS",
+        "reason": "Configuration is separate from observed runtime health.",
+        "observedHealth": "OBSERVED_RECENT_COMPLETION"
+      },
+      "settlement": "STORED_SETTLEMENTS",
+      "warnings": [],
+      "readProviderCalls": 0,
+      "readProductionDml": 0
+    }
+  },
+  "manualProviderCalls": 0,
+  "naturalRunProviderCalls": {
+    "MLBOfficial": 2,
+    "Statcast": 0,
+    "OddsAPI": 0
+  },
+  "eligibleRegularSeasonInferenceVerified": false
+}
