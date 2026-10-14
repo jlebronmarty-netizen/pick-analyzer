@@ -60,14 +60,14 @@ export default async function PerformancePage() {
     ['Pushes', s.pushes],
     ['Voids', s.voids],
     ['Win rate', percent(s.winRate)],
-    ['Units', s.units?.toFixed(3) ?? 'Unavailable'],
-    ['ROI', percent(s.roi)],
+    ['Net units (1u)', s.units?.toFixed(3) ?? 'Unavailable'],
+    ['ROI (1u)', percent(s.roi)],
     ['CLV', 'Unavailable'],
   ] as const
 
   return (
     <DashboardShell>
-      <section className="mx-auto max-w-7xl space-y-6 p-4 text-slate-200 sm:p-6">
+      <section className="mlb-ui mx-auto max-w-7xl space-y-6 p-4 text-slate-200 sm:p-6">
         <header className="rounded-2xl border border-slate-700/70 bg-gradient-to-br from-slate-900 to-slate-950 p-5 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">Official Pick Ledger + Certified Results</p>
           <h1 className="mt-2 text-3xl font-bold text-white">MLB performance</h1>
@@ -123,6 +123,7 @@ export default async function PerformancePage() {
             ))}
           </dl>
           <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-6 text-slate-400">
+            <p>Returns use one unit per unique official selection and its original stored odds; these are not actual wager returns.</p>
             <p>Settled sample: {s.sampleSize}. Dates: {s.dateFrom ?? 'none'} — {s.dateTo ?? 'none'}.</p>
             <p>Model: {s.modelVersions.join(', ') || 'No settled sample'}. Policy: {s.policyVersions.join(', ') || 'No settled sample'}.</p>
             <p>{s.clvReason}</p>
