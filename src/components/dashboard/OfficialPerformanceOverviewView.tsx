@@ -54,7 +54,7 @@ export default function OfficialPerformanceOverviewView({
         </p>
       )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {sports.map((sport) => (
+        {sports.filter((sport) => sport.key !== "nhl").map((sport) => (
           <a
             key={sport.key}
             href={

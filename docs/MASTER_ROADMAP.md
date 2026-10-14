@@ -1,3 +1,9 @@
+## NHL external MODEL_ONLY integration — 2026-10-14
+
+- Added read-only NHL adapter, `/nhl` and `/api/nhl/overview`, separate homepage summary, forecasts/recorded picks/informational edge, independent accuracy/profit/ROI and filtered settlement history.
+- Source authority stays Sports Edge Hub; no copied credential, new scheduler, provider call, database write or migration. NHL MODEL_ONLY does not enter MLB official accuracy. Legacy NHL Preview stays independent; NBA/NCAAB untouched.
+- Contract freshness, full-cohort accounting, identity, complementary forecasts and typed unavailable behavior covered by 38 dashboard tests. Final build and real-data preview evidence: `docs/product/NHL_READONLY_INTEGRATION_20261014.md`.
+
 ## MLB engine hub — 2026-10-14 (review branch)
 
 - Added `/mlb/overview` and read-only `/api/mlb/engines`: General, Pick, Edge, Equilizer and Formula views; exact-contract accuracy, frozen selections, observed outcomes, date/result/formula filters and pagination.

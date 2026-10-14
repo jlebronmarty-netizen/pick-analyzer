@@ -1,0 +1,13 @@
+# NHL read-only integration — October 14
+
+Sports Edge Hub remains the canonical owner of NHL forecasts, selections, original odds and settlement. Pick Analyzer reads only `https://sports-edge-hub.vercel.app/api/nhl/read-bridge` through a server-only, origin-fixed, no-redirect, no-store adapter. It uses no copied Supabase credentials, no new database/migration, and no sports-provider or write request. The existing coordinator continues every 30 minutes; this integration adds no scheduler.
+
+`/nhl` and `/api/nhl/overview` show DRatings external forecasts with paired Circa observations, recorded daily MODEL_ONLY selections, recent pregame informational edge, independent all-history performance and paginated/filterable settlement history. Original historical sportsbook and model fields are preserved; unknown model identity is not filled from current forecasts. Missing/partial/stale source state is explicit. Forecast edge is supplied by the source's existing paired-price helpers, not recalculated with a new prediction formula.
+
+Strict DTO validation checks source/schema/classification, fresh export timestamp, exact history-derived counts/profit/ROI, unique picks/events, frozen pregame timestamps and paired forecast complements. Unknown/private fields are stripped. Source failure returns typed UNAVAILABLE/HTTP 503 without legacy preview, historical or manufactured fallback. Informational opportunities exclude started/stale/unhealthy snapshots. All page values are labeled as-of snapshots, not live execution offers.
+
+The Today page adds a separate MODEL_ONLY NHL summary and link. Its remote read streams in a nested Suspense boundary so an NHL outage cannot delay MLB official metrics. The old NHL placeholder is removed from the official-card grid and `/sports-center/nhl` leads to the connected view. Old in-app NHL preview rows remain separate and unchanged. Overall Official Pick accuracy still uses only its connected official ledgers, currently MLB. No NHL record is promoted to Official Pick.
+
+Validation before live preview: 38 dashboard tests pass, including six NHL contract/view tests, and targeted ESLint passes. An earlier placeholder-only render test was updated to exercise still-disconnected NBA; new tests cover independent NHL display and unchanged official accuracy. All 107 MLB runtime pins remain unchanged. Full build and live SDK/source/HTTP/browser readback are recorded in the verification receipt after completion. Mobile device verification is not claimed.
+
+NBA and NCAAB research/production are outside scope. No model retuning, new market, pricing claim, closing-CLV certification or ROI-success claim is introduced.
