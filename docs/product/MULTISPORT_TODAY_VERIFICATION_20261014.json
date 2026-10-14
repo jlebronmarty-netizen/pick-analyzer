@@ -1,0 +1,229 @@
+{
+  "status": "PRODUCTION_VERIFIED",
+  "source": {
+    "repository": "jlebronmarty-netizen/sports-edge-hub",
+    "pr": 20,
+    "candidate": "98e093bdab8e1210ea3c04946f399f31f7ce89b7",
+    "production": "493c0a80f7ad4b6c94d4dd3979d28e62bd735175",
+    "deployment": "dpl_8MVPK4E5natWn4b5Uq61apesYcR1",
+    "calendarGames": 2,
+    "tests": 129,
+    "lint": "PASS",
+    "build": "PASS"
+  },
+  "target": {
+    "repository": "jlebronmarty-netizen/pick-analyzer",
+    "pr": 273,
+    "candidate": "5f7c1119bd8ead6646f5c55ad2d279ff2ef5fec7",
+    "tree": "afc53e2f7dc9317b6d00c0fa7caa62561a112f5a",
+    "merge": "8c7701bbe1fab75df0a0865fcc0c6da4eb2e664c",
+    "preview": "dpl_H3dwo72oTopBoCDxeTDrHzgsuJvq",
+    "production": "dpl_ChxjEBFcCNRGAbdDxJBTSW5ZMSVT"
+  },
+  "snapshot": {
+    "readAt": "2026-10-14T23:30:07.676Z",
+    "cohorts": [
+      {
+        "key": "mlb",
+        "label": "MLB",
+        "href": "/mlb/overview",
+        "classification": "Producción + forward research",
+        "cohorts": [
+          {
+            "key": "REGULAR_SEASON",
+            "label": "MLB 2026 · temporada regular",
+            "available": true,
+            "wins": 334,
+            "losses": 150,
+            "pending": 44,
+            "pushes": 0,
+            "voids": 2,
+            "models": 9,
+            "accuracy": 0.6900826446280992,
+            "note": "Pick, Edge, Equilizer y ML oficial · registros de modelos"
+          },
+          {
+            "key": "POSTSEASON",
+            "label": "MLB 2026 · playoffs",
+            "available": true,
+            "wins": 271,
+            "losses": 26,
+            "pending": 30,
+            "pushes": 0,
+            "voids": 0,
+            "models": 8,
+            "accuracy": 0.9124579124579124,
+            "note": "Forward shadow de playoffs · cohorte independiente"
+          }
+        ]
+      },
+      {
+        "key": "nhl",
+        "label": "NHL",
+        "href": "/nhl",
+        "classification": "MODEL_ONLY",
+        "cohorts": [
+          {
+            "key": "STORED",
+            "label": "NHL · historial MODEL_ONLY",
+            "available": true,
+            "wins": 23,
+            "losses": 23,
+            "pending": 1,
+            "pushes": 0,
+            "voids": 0,
+            "models": null,
+            "accuracy": 0.5,
+            "note": "Registro completo de origen; conserva modelos de identidad no registrada. No se le asigna una fase MLB."
+          }
+        ]
+      }
+    ],
+    "games": [
+      {
+        "sport": "NHL",
+        "eventId": "84964cdb-43ea-4ada-8520-37067d573af6",
+        "title": "Canadiens @ Capitals",
+        "analyzed": false,
+        "started": true,
+        "official": 0,
+        "registered": 0,
+        "value": 0
+      },
+      {
+        "sport": "MLB",
+        "eventId": "849811",
+        "title": "MIL at LAD",
+        "analyzed": true,
+        "started": false,
+        "official": 0,
+        "registered": 14,
+        "value": 0
+      },
+      {
+        "sport": "NHL",
+        "eventId": "57068e66-e178-49a4-baff-591de6bc68a4",
+        "title": "Stars @ Avalanche",
+        "analyzed": true,
+        "started": false,
+        "official": 0,
+        "registered": 1,
+        "value": 1
+      }
+    ],
+    "selected": 15,
+    "edge": 1
+  },
+  "checks": {
+    "tests": 48,
+    "lint": "PASS",
+    "runtimePins": "107 unchanged, guard PASS",
+    "localBuild": {
+      "status": "PASS",
+      "commit": "b96a8a7c18fa9b14ae3b7f184f2296dc6e7136d7",
+      "tree": "0b1acc1d6071eff73ddd04b7e7c4d5b8350897ba",
+      "scope": "Initial implementation, isolated tracked tree with non-live placeholders; subsequent filter/market-label changes verified in configured final Vercel build"
+    },
+    "configuredFinalBuild": "READY",
+    "browser": {
+      "phaseRegularMlb": "69.01%",
+      "phasePostseasonMlb": "91.25%",
+      "nhl": "50.00%",
+      "globalRegular": "67.36%",
+      "globalPostseason": "85.71%",
+      "nhlWaiting": "1 of 2 before scheduled start",
+      "mlbHub": "Official 45.24%; Pick 82.01%, Edge57.53%, Equilizer59.23%; formula/history views intact",
+      "exactMarketLabel": "batter doubles · UNDER 0.5",
+      "originalNhlOdds": -146,
+      "snapshotNhlOdds": -156
+    },
+    "productionBuild": "READY",
+    "productionHTTP": 200,
+    "rootAndToday": "HTTP200, new model cards and combined calendar",
+    "postReleaseMlbFingerprints": "MATCH, 815 canonical research rows,151 official decision rows",
+    "uiRuntimeLogs": "No warnings/errors returned for release deployment during verification window; source operational issue recorded separately."
+  },
+  "before": {
+    "method": "md5(string_agg(row_to_json(t)::text,'' order by row_to_json(t)::text))",
+    "master": {
+      "n": 815,
+      "digest": "2a04c7e214e2d7a199739358c1c95139"
+    },
+    "official": {
+      "n": 151,
+      "digest": "4c47f87fab0133e2309f44f14a7041a8"
+    }
+  },
+  "scope": {
+    "allModelAccuracy": "Descriptive outcome-weighted model observations; repeated formula views are not additional records. The same game may occur under different models; not independent games, calibrated probability or ROI.",
+    "phases": "MLB regular/postseason never pooled. Official frozen regular-season model counted only in its certified domain; NHL keeps its own stored MODEL_ONLY cohort.",
+    "unknownModels": "Unknown NHL identities remain unknown; unconnected sports display null rather than zero.",
+    "newProviderCalls": 0,
+    "databaseWrites": 0,
+    "migrations": 0,
+    "copiedCredentials": 0,
+    "newSchedulers": 0,
+    "nbaNcaabResearchChanges": 0,
+    "actualMobileDeviceValidation": false
+  },
+  "incidents": [
+    {
+      "scope": "initial tests",
+      "result": "Old UI assertions assumed an official-only header and no model pooling. Replaced with new requested presentation assertions; pure calendar test uses an injected calendar slot to avoid initializing server credentials in offline rendering. Existing core data tests preserved."
+    },
+    {
+      "scope": "browser review",
+      "result": "Daily formulas were initially omitted from the Picks filter and lacked market/line labels. Corrected, added assertions, and recompiled before merge."
+    },
+    {
+      "scope": "source/calendar",
+      "result": "Original source omitted events without forecasts. Added a validated stored calendar; no provider acquisition or data mutation."
+    }
+  ],
+  "production": {
+    "version": {
+      "app": "Pick Analyzer",
+      "environment": "production",
+      "release": "0.1.0",
+      "gitCommit": "8c7701bbe1fab75df0a0865fcc0c6da4eb2e664c",
+      "buildTimestamp": "runtime",
+      "staticPageCount": 235,
+      "apiRouteCount": 245,
+      "providerCallsMade": 0,
+      "requestId": "570e380a-2974-496f-9fba-e23c4ae06a8a"
+    },
+    "readAt": "2026-10-14T23:33:14.640Z",
+    "nhlHealth": {
+      "status": "ATTENTION",
+      "issues": [
+        "critical stage errors"
+      ],
+      "latestRunAt": "2026-10-14T23:30:12.4838+00:00",
+      "runStatus": "PARTIAL",
+      "coverage": null,
+      "eligible": null
+    },
+    "warnings": [
+      "NHL: operación de la fuente requiere atención; sin edge vigente."
+    ],
+    "selected": 15,
+    "games": 3,
+    "edge": 0,
+    "sourceIssue": {
+      "runAt": "2026-10-14T23:30:12.4838+00:00",
+      "code": "prediction_source_unavailable",
+      "behavior": "Historical results and calendar remain visible; current NHL edge suppressed on ATTENTION. No new provider request or scheduler intervention."
+    }
+  },
+  "screenshots": [
+    {
+      "path": "docs/product/qa/multisport-today-8c7701b.png",
+      "sha256": "af9865ea7809b18db394bafaf7da67f38fb3e53d232f91bfe28dd8cdb0eee512"
+    },
+    {
+      "path": "docs/product/qa/multisport-calendar-8c7701b.png",
+      "sha256": "28b1fce8e4e7f3be5b60a5268842d165ae959687e6a051152776776124a946fc"
+    }
+  ],
+  "completedAt": "2026-10-14T23:35:00Z"
+}
