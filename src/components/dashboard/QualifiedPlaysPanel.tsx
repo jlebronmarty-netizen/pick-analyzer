@@ -22,9 +22,9 @@ export default function QualifiedPlaysPanel({
     (g) => g.phase === phase && (engine === "ALL" || g.engine === engine),
   );
   return (
-    <section className="mx-auto max-w-7xl space-y-5 p-4 text-slate-200 sm:p-6">
+    <section className="mlb-ui mx-auto max-w-7xl space-y-5 p-4 text-slate-200 sm:p-6">
       <header className="rounded-2xl border border-violet-400/25 bg-slate-900 p-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-violet-300">
+        <p className="text-xs font-bold uppercase tracking-widest text-teal-300">
           MLB 2026 · Research only
         </p>
         <h1 className="mt-2 text-3xl font-bold text-white">
@@ -69,7 +69,7 @@ export default function QualifiedPlaysPanel({
               type="button"
               aria-pressed={phase === p}
               onClick={() => setPhase(p)}
-              className={`rounded-lg border px-4 py-2 text-sm font-bold ${phase === p ? "border-violet-400 bg-violet-500/20 text-violet-100" : "border-slate-700 text-slate-400"}`}
+              className={`rounded-lg border px-4 py-2 text-sm font-bold ${phase === p ? "border-teal-400 bg-teal-500/20 text-teal-200" : "border-slate-700 text-slate-400"}`}
             >
               {label(p)}
             </button>
@@ -111,7 +111,7 @@ export default function QualifiedPlaysPanel({
           className="overflow-hidden rounded-xl border border-slate-700"
         >
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left text-sm">
+            <table className="w-full min-w-[640px] text-left text-sm">
               <caption className="sr-only">
                 Research results by exact contract and engine for {label(phase)}
               </caption>
@@ -119,14 +119,17 @@ export default function QualifiedPlaysPanel({
                 <tr>
                   {[
                     "Engine / exact contract",
-                    "Model / evidence",
                     "W–L–P",
                     "Void",
                     "Open",
                     "W/L n",
                     "Hit rate",
                   ].map((h) => (
-                    <th scope="col" className="px-4 py-3" key={h}>
+                    <th
+                      scope="col"
+                      className="whitespace-nowrap px-4 py-3"
+                      key={h}
+                    >
                       {h}
                     </th>
                   ))}
@@ -139,29 +142,32 @@ export default function QualifiedPlaysPanel({
                     className="border-t border-slate-800 bg-slate-950/40"
                   >
                     <td className="px-4 py-4">
-                      <p className="text-xs font-semibold text-violet-300">
+                      <p className="text-xs font-semibold text-teal-300">
                         {label(g.engine)}
                       </p>
                       <p className="mt-1 font-bold text-white">
                         {label(g.market)} · {label(g.direction)}
                         {g.line !== null ? ` ${g.line}` : ""}
                       </p>
-                      <p className="mt-1 max-w-xs break-words text-xs text-slate-500">
-                        {g.contract ??
-                          "Contract identified by model + exact market, line and direction"}
-                      </p>
+                      <details className="mt-2 max-w-sm text-xs text-slate-400">
+                        <summary className="cursor-pointer py-1 font-semibold text-teal-300">
+                          Model &amp; evidence
+                        </summary>
+                        <p className="mt-2 break-all">{g.model}</p>
+                        <p className="mt-2 break-all">
+                          {g.contract ??
+                            "Contract identified by model + exact market, line and direction"}
+                        </p>
+                        <p className="mt-2 break-all">{g.evidenceClass}</p>
+                      </details>
                     </td>
-                    <td className="max-w-xs break-words px-4 py-4 text-xs text-slate-400">
-                      <p>{g.model}</p>
-                      <p className="mt-2">{g.evidenceClass}</p>
-                    </td>
-                    <td className="px-4 py-4 tabular-nums">
+                    <td className="whitespace-nowrap px-4 py-4 tabular-nums">
                       {g.wins}–{g.losses}–{g.pushes}
                     </td>
                     <td className="px-4 py-4">{g.voids}</td>
                     <td className="px-4 py-4 text-amber-200">{g.open}</td>
                     <td className="px-4 py-4">{g.wins + g.losses}</td>
-                    <td className="px-4 py-4 font-bold">
+                    <td className="whitespace-nowrap px-4 py-4 font-bold">
                       {g.accuracy === null
                         ? "—"
                         : `${(100 * g.accuracy).toFixed(2)}%`}
