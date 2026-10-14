@@ -42,6 +42,6 @@ test('OPEN history cannot expose a postgame actual or settlement timestamp',()=>
 });
 test('render includes independent official/research metrics, phase controls, formulas and settlement history',()=>{
  const html=renderToStaticMarkup(React.createElement(MlbEngineHub,{research:report(),official:{available:true,wins:19,losses:23,pending:0,accuracy:19/42},today:'2026-10-14'}));
- for(const text of ['MLB general','Equilizer','Edge','Fórmulas','45.24%','Predicciones y resultados','Accuracy por fórmula','No es probabilidad','no se suma un accuracy global','modelo'])assert.ok(html.toLowerCase().includes(text.toLowerCase()),text);
+ for(const text of ['MLB general','Equilizer','Edge','Fórmulas','45.24%','Predicciones y resultados','Accuracy por fórmula','No es probabilidad','no representa partidos independientes','modelo'])assert.ok(html.toLowerCase().includes(text.toLowerCase()),text);
  assert.ok(html.includes('WIN'));assert.ok(html.includes('LOSS'));assert.ok(html.includes('OPEN'));
 });

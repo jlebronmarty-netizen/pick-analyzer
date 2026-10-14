@@ -17,6 +17,7 @@ const schema = z.object({ schema: z.literal("NHL_READ_BRIDGE_V1"), status: z.lit
   classification: z.literal("MODEL_ONLY"), source: z.literal("SPORTS_EDGE_HUB"), readAt: stamp, date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   health: z.object({status:z.enum(["PASS","ATTENTION","UNAVAILABLE"]),issues:z.array(text),latestRunAt:stamp.nullable(),runStatus:text.nullable(),coverage:count.nullable(),eligible:count.nullable()}),
   summary: z.object({settled:count,wins:count,losses:count,pushes:count,voids:count,pending:count,accuracyPct:number.min(0).max(100).nullable(),profitUnits:number.nullable(),roiPct:number.nullable(),staked:count}),
+  games:z.array(z.object({eventId:text,eventName:text,scheduledAt:stamp,status:text,home:text,away:text})).max(256).optional(),
   forecasts: z.array(forecast).max(256), history: z.array(pick).max(10000), providerCalls:z.literal(0),databaseWrites:z.literal(0),warning:text });
 export type NhlAvailableReport = z.infer<typeof schema>;
 export type NhlReport = NhlAvailableReport | {status:"UNAVAILABLE";readAt:string;warning:string};
@@ -40,5 +41,6 @@ export function parseNhlReport(input: unknown, now = new Date()): NhlAvailableRe
     ids.add(p.id);events.add(p.eventId);
   }
   events.clear();for(const f of r.forecasts){if(events.has(f.eventId)||Date.parse(f.capturedAt)>=Date.parse(f.scheduledAt)||Date.parse(f.capturedAt)>now.getTime()+5000||Math.abs(f.awayProbability+f.homeProbability-1)>0.002)throw Error("INVALID_FORECAST");events.add(f.eventId);}
+  if(r.games){events.clear();for(const g of r.games){const date=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(g.scheduledAt));if(events.has(g.eventId)||date!==r.date)throw Error('INVALID_CALENDAR');events.add(g.eventId);}for(const f of r.forecasts){const g=r.games.find(g=>g.eventId===f.eventId);if(!g||g.scheduledAt!==f.scheduledAt||g.home!==f.home||g.away!==f.away)throw Error('INVALID_CALENDAR_FORECAST');}}
   return r;
 }

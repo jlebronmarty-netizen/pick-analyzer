@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { QualifiedReport } from "@/lib/qualified-plays";
+import type {ModelCohort} from '@/lib/sport-model-overview';
 import { engineTotals, filterEngineHub, MLB_ENGINE_VIEWS, type MlbEngineView, type OfficialHubSummary } from "@/lib/mlb-engine-hub";
 
 const labels: Record<string, string> = { GENERAL: "MLB general", PICK_ANALYZER: "Pick", PICK_EDGE: "Edge", EQUILIZER: "Equilizer", FORMULAS: "Fórmulas" };
@@ -10,8 +11,8 @@ const percent = (n: number | null) => n === null ? "—" : `${(n * 100).toFixed(
 const inputClass = "rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100";
 const buttonClass = "rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-teal-300";
 const time = (s: string | null) => s ? new Intl.DateTimeFormat("es-PR", { timeZone: "America/Puerto_Rico", dateStyle: "medium", timeStyle: "short" }).format(new Date(s)) + " PR" : "Sin dato";
-export default function MlbEngineHub({ research, official, today }: {
-  research: QualifiedReport; official: OfficialHubSummary; today: string;
+export default function MlbEngineHub({ research, official, today,cohorts }: {
+  research: QualifiedReport; official: OfficialHubSummary; today: string;cohorts?:ModelCohort[];
 }) {
   const [view, setView] = useState<MlbEngineView>("GENERAL");
   const [phase, setPhase] = useState("REGULAR_SEASON");
@@ -38,6 +39,7 @@ export default function MlbEngineHub({ research, official, today }: {
       {MLB_ENGINE_VIEWS.map(v => <button type="button" key={v} onClick={() => changeView(v)} aria-pressed={view === v}
         className={`${buttonClass} ${view === v ? "border-teal-400 bg-teal-500/20 text-teal-200" : "text-slate-300"}`}>{labels[v]}</button>)}
     </nav>
+    {view==='GENERAL'&&cohorts&&<section aria-label="MLB global model accuracy" className="rounded-xl border border-teal-400/30 bg-slate-900 p-5"><h2 className="font-bold">Accuracy global de modelos · {phase==='REGULAR_SEASON'?'temporada regular':'playoffs'}</h2><p className="mt-2 text-3xl font-bold">{percent(cohorts.find(c=>c.key===phase)?.accuracy??null)}</p><p className="mt-2 text-sm">{cohorts.find(c=>c.key===phase)?.note}</p><p className="mt-2 text-xs text-slate-400">Subtotal descriptivo de resultados de modelos en esta fase, incluido ML oficial solo en temporada regular. Las fórmulas no vuelven a sumar los mismos registros; no es accuracy de partidos únicos ni probabilidad calibrada.</p></section>}
     {(view === "GENERAL" || view === "PICK_ANALYZER") && <section aria-label="Official Pick accuracy" className="rounded-xl border border-slate-700 bg-slate-900 p-5">
       <p className="text-sm font-bold text-teal-300">Pick · ML oficial de producción</p>
       <p className="mt-2 text-3xl font-bold text-white">{percent(official.accuracy)}</p>
@@ -112,6 +114,6 @@ export default function MlbEngineHub({ research, official, today }: {
         <div className="flex gap-3"><button type="button" className={buttonClass} disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>Anterior</button><button type="button" className={buttonClass} disabled={currentPage + 1 >= pages} onClick={() => setPage(currentPage + 1)}>Siguiente</button></div>
       </section>
     </>}
-    <p className="text-xs leading-6 text-slate-400">Accuracy = WIN ÷ (WIN + LOSS); OPEN, PUSH y VOID quedan fuera. Una misma jugada puede estar registrada por distintos modelos: no se suma un accuracy global entre motores. La proyección registrada mantiene las unidades de cada modelo; no es una probabilidad calibrada. Las fórmulas sin observaciones forward sincronizadas todavía no aparecen. Un accuracy alto no demuestra ROI positivo.</p>
+    <p className="text-xs leading-6 text-slate-400">Accuracy = WIN ÷ (WIN + LOSS); OPEN, PUSH y VOID quedan fuera. El agregado por deporte suma resultados por modelo dentro de la fase, sin promediar porcentajes ni duplicar vistas de fórmulas. Una misma jugada puede estar registrada por distintos modelos: no representa partidos independientes. La proyección mantiene las unidades del modelo y no es probabilidad calibrada. Las fórmulas sin observaciones forward sincronizadas todavía no aparecen. Un accuracy alto no demuestra ROI positivo.</p>
   </section>;
 }
