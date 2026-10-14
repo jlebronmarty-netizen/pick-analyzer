@@ -97,8 +97,8 @@ test("overview excludes preview and shows unavailable accuracy without fake perc
       pending: 5,
     },
     {
-      key: "nhl",
-      label: "NHL",
+      key: "nba",
+      label: "NBA",
       readiness: "Preview",
       connected: false,
       available: false,

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import { ProductStatusPill } from '@/components/product/ProductStatus'
@@ -25,6 +25,7 @@ export default async function SportsCenterSportPage({
   params: Promise<{ sport: string }>
 }) {
   const { sport: sportParam } = await params
+  if (sportParam === 'nhl') redirect('/nhl')
   const sport = getSportsCenterSport(sportParam)
   if (!sport) notFound()
   const report = getSportsCenterReport()

@@ -28,6 +28,7 @@ export function TodayContent({
           Today&apos;s picks &amp; performance.
         </h1>
         <Link href="/mlb/overview" className="mt-3 inline-block rounded-lg border border-teal-400/40 px-4 py-2 text-sm font-semibold text-teal-300">MLB general · Pick, Edge, Equilizer y fórmulas →</Link>
+        <Link href="/nhl" className="ml-3 mt-3 inline-block rounded-lg border border-teal-400/40 px-4 py-2 text-sm font-semibold text-teal-300">NHL · predicciones y resultados →</Link>
       </header>
       {performance}
       <DailyPicksLists
