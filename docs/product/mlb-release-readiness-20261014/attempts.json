@@ -1,0 +1,111 @@
+{
+  "initialAttempts": [
+    {
+      "validator": "mlb-data-02r-r2t-r3-validate",
+      "exitCode": 0,
+      "seconds": 1.08
+    },
+    {
+      "validator": "mlb-data-02r-r2t-operational-guards-validate",
+      "exitCode": 0,
+      "seconds": 0.82
+    },
+    {
+      "validator": "mlb-operational-r4-validate",
+      "exitCode": 1,
+      "seconds": 4.11
+    },
+    {
+      "validator": "mlb-operational-r6-host-validate",
+      "exitCode": 0,
+      "seconds": 3.7
+    },
+    {
+      "validator": "mlb-operational-r6-provider-await-validate",
+      "exitCode": 0,
+      "seconds": 0.78
+    },
+    {
+      "validator": "mlb-operational-r6-schema-validate",
+      "exitCode": 1,
+      "seconds": 9.54
+    },
+    {
+      "validator": "mlb-operational-r6-state-validate",
+      "exitCode": 0,
+      "seconds": 11.53
+    },
+    {
+      "validator": "mlb-operational-r6-fenced-write-validate",
+      "exitCode": 0,
+      "seconds": 13.61
+    },
+    {
+      "validator": "mlb-operational-r7-security-validate",
+      "exitCode": 0,
+      "seconds": 2.09
+    },
+    {
+      "validator": "mlb-phase2-r12-budget-validate",
+      "exitCode": 0,
+      "seconds": 6.6
+    },
+    {
+      "validator": "mlb-phase2-r12-operational-validate",
+      "exitCode": 0,
+      "seconds": 23.12
+    },
+    {
+      "validator": "mlb-phase2-r12-health-validate",
+      "exitCode": 0,
+      "seconds": 1.57
+    },
+    {
+      "validator": "mlb-pre-nonempty-readiness-validate",
+      "exitCode": 1,
+      "seconds": 6.08
+    },
+    {
+      "validator": "mlb-target-local-history-block-validate",
+      "exitCode": 0,
+      "seconds": 0.65
+    },
+    {
+      "validator": "mlb-pitcher-feature-query-optimization-validate",
+      "exitCode": 1,
+      "seconds": 0.58
+    },
+    {
+      "validator": "mlb-postseason-compatibility-validate",
+      "exitCode": 1,
+      "seconds": 0.43
+    }
+  ],
+  "resolvedAttempts": [
+    {
+      "validator": "mlb-operational-r4-validate",
+      "cause": "Legacy preload rejects validator-specific OS temp output. Reviewed offline validator rerun without incompatible preload.",
+      "final": "PASS"
+    },
+    {
+      "validator": "mlb-operational-r6-schema-validate",
+      "cause": "Legacy preload rejects validator-specific OS temp output. Reviewed offline validator rerun without incompatible preload.",
+      "final": "PASS"
+    },
+    {
+      "validator": "mlb-pre-nonempty-readiness-validate",
+      "cause": "Stale assertion contradicted preserved canonical Official Pick display; now asserts retained official status, changed-starter blocker and blocked game.",
+      "final": "PASS"
+    },
+    {
+      "validator": "mlb-pitcher-feature-query-optimization-validate",
+      "cause": "Nonexistent script guessed from workflow; actual workflow is build-only.",
+      "final": "NOT_A_VALIDATOR"
+    },
+    {
+      "validator": "mlb-postseason-compatibility-validate",
+      "cause": "Nonexistent path; actual scripts/research node:test file located and run.",
+      "final": "4 tests PASS"
+    }
+  ]
+}

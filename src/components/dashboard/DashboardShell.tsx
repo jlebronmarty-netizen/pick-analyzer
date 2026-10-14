@@ -9,6 +9,7 @@ import {
 const baseProductNavItems: DashboardNavItem[] = [
   { href: '/today', label: 'Today', icon: 'T' },
   { href: '/mlb', label: 'MLB Research Lab', icon: 'B' },
+  { href: '/qualified-plays', label: 'Qualified Plays', icon: 'Q' },
   { href: '/performance', label: 'Performance', icon: 'P' },
   { href: '/model-lab', label: 'Model Lab', icon: 'M' },
   { href: '/data-health', label: 'Data Health', icon: 'D' },
@@ -19,6 +20,7 @@ const titleByPath: DashboardTitleByPath = {
   '/today': 'Today',
   '/mlb': 'MLB Research Lab',
   [PICK2_MLB_VALUE_BOARD_ROUTE]: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
+  '/qualified-plays': 'Qualified Plays',
   '/performance': 'Performance',
   '/model-lab': 'Model Lab',
   '/data-health': 'Data Health',

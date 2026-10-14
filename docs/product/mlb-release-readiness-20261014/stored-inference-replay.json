@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "scope": "IMMUTABLE_STORED_INPUT_INFERENCE_REPLAY_NOT_RAW_REBUILD_OR_LIVE_ELIGIBILITY",
+  "cases": [
+    {
+      "gamePk": 823166,
+      "predictionId": "0ec8dc77-a7b9-41ba-b213-60651b56884b",
+      "vectorCount": 76,
+      "vectorDigest": "101ef4d8fad09110795785f6cffa90328f7a6b0e0212d14d6eb3b0393bfd3110",
+      "homeAbsoluteError": 0,
+      "awayAbsoluteError": 0,
+      "status": "PASS"
+    },
+    {
+      "gamePk": 823543,
+      "predictionId": "20cad5ae-cb32-4e57-8f2d-b48491411f8a",
+      "vectorCount": 76,
+      "vectorDigest": "b7daeff7b639acbba5f3f967a0ceaaaa0ed319742dfd4c326d6f55cd3d6fde13",
+      "homeAbsoluteError": 0,
+      "awayAbsoluteError": 0,
+      "status": "PASS"
+    },
+    {
+      "gamePk": 824953,
+      "predictionId": "25978466-89eb-4ea5-b7d2-53b6e72e2355",
+      "vectorCount": 76,
+      "vectorDigest": "5bf427ebb278797cea0b4eb706862ed0190c3cefbf2e347fe8b0d5d58153c0a1",
+      "homeAbsoluteError": 0,
+      "awayAbsoluteError": 0,
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "databaseWrites": 0
+}

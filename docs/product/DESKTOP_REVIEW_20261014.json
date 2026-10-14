@@ -1,0 +1,77 @@
+{
+  "scope": "Desktop review only; mobile and production remain paused",
+  "official": {
+    "audited_at": "2026-10-14 20:42:39.250328+00",
+    "stored_pick_rows": 151,
+    "unique_selections": 42,
+    "wins": 19,
+    "losses": 23,
+    "pending_or_conflicting": 0,
+    "original_selection_units": "3.2609727963087571",
+    "conflicting_settlement_identities": 0,
+    "repeated_settlement_identities": 0,
+    "repeat_pick_snapshots": 109
+  },
+  "ui": {
+    "accuracyPercent": 45.2,
+    "unitsRounded": "3.261",
+    "oneUnitRoiPercent": 7.8,
+    "tablePage1": 25,
+    "tablePage2": 17,
+    "lossFilter": 23,
+    "pendingFilter": 0,
+    "clearFiltersReturns": 42
+  },
+  "currentSlate": {
+    "gamePk": 849811,
+    "gameDate": "2026-10-14",
+    "scheduledAt": "2026-10-15T00:00:00Z",
+    "officialStatus": "Scheduled",
+    "latestChampionPrediction": null,
+    "latestStoredMarket": null,
+    "storedOfficialPicks": 0,
+    "rootCause": "Not diagnosed in this UI review; scheduling/runtime and source availability still require verification."
+  },
+  "findings": [
+    {
+      "type": "UI",
+      "description": "Performance header and WIN/LOSS colors had insufficient light-theme contrast",
+      "resolution": "Verified in preview3047f48: readable light-theme header and result colors; LOSS computed color rgb(190,18,60)"
+    },
+    {
+      "type": "Labels",
+      "description": "ROI and units needed an explicit one-unit-per-selection basis",
+      "resolution": "Verified in browser: Net units (1u), ROI (1u), and original-price/not-actual-wagers explanation"
+    },
+    {
+      "type": "Operational",
+      "description": "Today's canonical game lacks champion prediction and stored market prices",
+      "resolution": "Open; not resolved by historical performance or this UI-only review"
+    }
+  ],
+  "dataWrites": 0,
+  "providerRequests": 0,
+  "modelChanges": 0,
+  "productionPromotion": false,
+  "verifiedApplicationCommit": "3047f48a9f415d98abf2ae1236ef931da2a31d7b",
+  "remotePreview": "READY",
+  "githubChecks": {
+    "completed": 9,
+    "success": 9
+  },
+  "tests": {
+    "passed": 23,
+    "failed": 0
+  },
+  "mobileReviewed": false,
+  "desktopUiReview": "PASS",
+  "operationalReadiness": "NOT_CERTIFIED",
+  "localBuild": {
+    "webpack": "PASS (95s)",
+    "typescript": "PASS (4.2min)",
+    "completion": "BLOCKED_MISSING_BUILD_ENV",
+    "blockedRoute": "/api/ai/copilot/chat",
+    "missingVariable": "NEXT_PUBLIC_SUPABASE_URL"
+  },
+  "noLocalTaskProcessesActive": true
+}

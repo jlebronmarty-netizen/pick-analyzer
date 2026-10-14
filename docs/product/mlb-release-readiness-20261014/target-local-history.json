@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "mode": "MLB_TARGET_LOCAL_REQUIRED_HISTORY_BLOCK_V1",
+  "checks": 4,
+  "passed": 4,
+  "failed": [],
+  "allowedTargetLocalGuard": [
+    "R2TR1_BLOCK:REQUIRED_HISTORY_MISSING"
+  ]
+}

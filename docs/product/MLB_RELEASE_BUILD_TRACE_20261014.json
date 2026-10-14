@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "tracedFiles": 265,
+  "certificates": [
+    {
+      "certificate": "docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_REVALIDATION_20261014.json",
+      "expected": 38,
+      "missing": []
+    },
+    {
+      "certificate": "docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json",
+      "expected": 108,
+      "missing": []
+    }
+  ],
+  "buildExitCode": 0,
+  "buildEnvironment": "PLACEHOLDERS_NO_LIVE_CREDENTIALS",
+  "buildLogSha256": "5758c97c3ddbcc29d5b5f9750493e60b30882d131a96e612bfe8e0d943309b85"
+}

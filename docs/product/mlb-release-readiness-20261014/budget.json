@@ -1,0 +1,49 @@
+{
+  "status": "R12_LOCAL_CONTRACTS_PASS",
+  "checks": [
+    {
+      "name": "Exact cap and provider-budget diagnostics are retained, arbitrary text withheld",
+      "status": "PASS"
+    },
+    {
+      "name": "In-flight cap becomes explicit terminal result preserving 13 predictions and no downstream fabrication",
+      "status": "PASS"
+    },
+    {
+      "name": "Historical disposition rejects early/stale review and preserves failure, freeze, all rows and mission 20",
+      "status": "PASS"
+    },
+    {
+      "name": "Independent instances execute all safe modes after exhausted pregame and release the shared lease",
+      "status": "PASS"
+    },
+    {
+      "name": "Previously paid evidence can resume at mission cap; other failures remain fail-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "Recurring proposal remains inactive and PR midnight does not mean UTC midnight",
+      "status": "PASS"
+    },
+    {
+      "name": "Data Health contract separates deployment, frozen run, configuration and observed health",
+      "status": "PASS"
+    },
+    {
+      "name": "Production host uses guarded wrapper without importing the proposed recurring policy",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual Vercel host loop continues three non-Odds modes with injected transports after exhausted pregame",
+      "status": "PASS"
+    },
+    {
+      "name": "Exact candidate Edge handler rejects missing/wrong/public credentials before any database connection",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "operationalBudgetActivated": false
+}

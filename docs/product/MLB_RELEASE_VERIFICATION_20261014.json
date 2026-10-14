@@ -1,0 +1,211 @@
+{
+  "status": "READY_FOR_USER_RELEASE_REVIEW_NOT_DEPLOYED",
+  "applicationCommit": "92aa7e476024a5c2dfa6f11b145b2a9a17a545e4",
+  "applicationTree": "fa78d857c48cc86fd93c5725d26b3ce29ee7aace",
+  "previewDeploymentId": "dpl_EZNUj4PpAXieBxNwJkv67o6MCBrU",
+  "previewState": "READY",
+  "previewUrl": "https://pick-analyzer-git-feat-multisport-official-1ab656-pick-analyzer.vercel.app/today",
+  "checks": [
+    {
+      "name": "Vercel Preview Comments",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://vercel.com/github"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071789/job/116109664135"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071922/job/116109662456"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071845/job/116109662331"
+    },
+    {
+      "name": "credential-contract-audit",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071860/job/116109661917"
+    },
+    {
+      "name": "verify",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071830/job/116109661765"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071774/job/116109661761"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071772/job/116109661521"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071753/job/116109661332"
+    },
+    {
+      "name": "validate",
+      "status": "completed",
+      "conclusion": "success",
+      "detailsUrl": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/38639071764/job/116109661287"
+    }
+  ],
+  "tests": {
+    "offlineAssertions": 160,
+    "paginationTests": 20,
+    "dashboardTests": 26,
+    "storedInferenceCases": 3,
+    "storedFeatureValues": 228,
+    "storedInferenceMaximumError": 0
+  },
+  "api": {
+    "operations": {
+      "status": 200,
+      "reason": "REGULAR_SEASON_MODEL_ONLY",
+      "picks": 0,
+      "providerCalls": 0,
+      "productionDml": 0
+    },
+    "performance": {
+      "status": 200,
+      "summary": {
+        "sampleSize": 42,
+        "pickCount": 42,
+        "wins": 19,
+        "losses": 23,
+        "pushes": 0,
+        "voids": 0,
+        "winRate": 0.4523809523809524,
+        "units": 3.2609727963087582,
+        "roi": 0.07764220943592282,
+        "roiBasis": "ONE_UNIT_PER_OFFICIAL_PICK_NOT_ACTUAL_WAGERS",
+        "clv": null,
+        "clvReason": "No certified closing-line evidence is bound to these settlements.",
+        "dateFrom": "2026-09-05",
+        "dateTo": "2026-09-20",
+        "modelVersions": [
+          "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1"
+        ],
+        "policyVersions": [
+          "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1"
+        ]
+      },
+      "uniqueSelections": 42,
+      "decisionSnapshots": 151
+    },
+    "version": {
+      "app": "Pick Analyzer",
+      "environment": "preview",
+      "release": "0.1.0",
+      "gitCommit": "92aa7e476024a5c2dfa6f11b145b2a9a17a545e4",
+      "buildTimestamp": "runtime",
+      "staticPageCount": 235,
+      "apiRouteCount": 245,
+      "providerCallsMade": 0,
+      "requestId": "73dc2220-d627-4bfd-b4f3-aab9b2912213"
+    }
+  },
+  "productionReadOnlyHealth": {
+    "deployment": {
+      "webDeploymentSha": "f7e5f5694660bc97e1d8946271bc277c995d0947",
+      "edgeVersion": 15,
+      "frozenExecutionPackageSha": "c8aac46648b38935a6dd00f17e0987b90b042033"
+    },
+    "budgets": {
+      "historicalCertification": {
+        "version": "MLB_OPERATIONAL_MISSION",
+        "consumed": 20,
+        "cap": 20,
+        "status": "IMMUTABLE_HISTORY"
+      },
+      "operationalDaily": {
+        "version": "MLB_ODDS_OPERATIONAL_BUDGET_V1",
+        "activation": "ACTIVE",
+        "day": "2026-10-14",
+        "timezone": "America/Puerto_Rico",
+        "cap": 48,
+        "perRunCap": 1,
+        "consumed": 0,
+        "remaining": 48,
+        "observedCredits": null,
+        "unknownCreditRequests": 0
+      }
+    },
+    "observedHealth": "NO_RECENT_COMPLETION_OBSERVED"
+  },
+  "previewHealth": {
+    "observedHealth": "RUNTIME_UNAVAILABLE",
+    "edgeVersion": null,
+    "cause": "UNDETERMINED_PREVIEW_ONLY_READ_FAILURE; do not claim credentials as the demonstrated cause or hide it"
+  },
+  "officialBefore": {
+    "championCount": 452,
+    "officialCount": 151,
+    "officialDigest": "2f421c6a03cc71716a22868fa54508c7",
+    "todayOperationalRequests": 0,
+    "historicalMissionConsumed": 20
+  },
+  "officialAfter": {
+    "championCount": 452,
+    "officialCount": 151,
+    "officialDigest": "2f421c6a03cc71716a22868fa54508c7",
+    "todayOperationalRequests": 0,
+    "historicalMissionConsumed": 20
+  },
+  "ui": {
+    "routes": [
+      "/",
+      "/today",
+      "/performance",
+      "/qualified-plays",
+      "/mlb-value-board",
+      "/data-health"
+    ],
+    "outcomeFilters": {
+      "win": 19,
+      "loss": 23,
+      "pending": 0
+    },
+    "qualifiedSourceRows": 815,
+    "postseasonDoubles": {
+      "win": 250,
+      "loss": 20,
+      "open": 27,
+      "hitRatePercent": 92.59
+    },
+    "console": "Observed errors originate from chrome-extension metadata messaging; no app-origin console error observed.",
+    "screenshot": {
+      "path": "docs/product/qa/release-homepage-92aa7e4.jpg",
+      "bytes": 119334,
+      "sha256": "feb53ea8b76b5e65831c96bac302370ba7bec2b9a8d63eb745d0a04894801d84"
+    }
+  },
+  "limits": [
+    "No production promotion or merge. Existing crons can resume provider work after release within the existing guards.",
+    "Preview Edge health could not be verified; production read-only health succeeded. Production-target candidate readback remains a release step.",
+    "No fresh eligible regular-season live run was executed. No new raw-cache reconstruction certification.",
+    "Mobile device validation not performed; mobile rollout stays separate."
+  ],
+  "providerAcquisitions": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "schedulerChanges": 0,
+  "modelPolicyChanges": 0
+}

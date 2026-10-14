@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "provider": "MLB_OFFICIAL",
+      "reservation": "COMMITTED",
+      "fetchCalls": 1,
+      "status": "PASS"
+    },
+    {
+      "provider": "MLB_OFFICIAL",
+      "reservation": "REJECTED",
+      "fetchCalls": 0,
+      "status": "PASS"
+    },
+    {
+      "provider": "THE_ODDS_API",
+      "reservation": "COMMITTED",
+      "fetchCalls": 1,
+      "status": "PASS"
+    },
+    {
+      "provider": "THE_ODDS_API",
+      "reservation": "REJECTED",
+      "fetchCalls": 0,
+      "status": "PASS"
+    },
+    {
+      "provider": "STATCAST",
+      "reservation": "COMMITTED",
+      "fetchCalls": 1,
+      "status": "PASS"
+    },
+    {
+      "provider": "STATCAST",
+      "reservation": "REJECTED",
+      "fetchCalls": 0,
+      "status": "PASS"
+    }
+  ],
+  "realProviderCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

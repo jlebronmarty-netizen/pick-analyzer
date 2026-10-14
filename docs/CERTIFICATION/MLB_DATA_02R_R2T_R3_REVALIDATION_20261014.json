@@ -1,0 +1,665 @@
+{
+  "project": "MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION",
+  "certificationVerdict": "MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFIED",
+  "generatedAt": "2026-09-09T03:05:48.782Z",
+  "priorPackageSha": "3dea44d8892cb71e75ef07a53d05d7eea029e5de",
+  "newPackageSha": "ENCLOSING_SANITIZED_COMMIT",
+  "r2tR2Verdict": "MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION_CERTIFIED",
+  "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+  "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+  "featureSet": "MLB_ML_FEATURE_SET_V1",
+  "featureCount": 76,
+  "syntheticProductionPaths": 0,
+  "gates": [
+    {
+      "id": "R2T_PREREQUISITE",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "R2T-R2 canonical certificate",
+          "assertion": "23 gates certified in published 3dea44d8892cb71e75ef07a53d05d7eea029e5de",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "REAL_CALL_GRAPH",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "disposable_postgres",
+          "assertion": "actual production adapter R2B/R2I SQL pipeline completes and retries without provider reacquisition",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "candidate inventory covers actual transitive runtime, model, policy and schemas",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "MODEL_76",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "disposable_postgres",
+          "assertion": "every real slate game preserves persisted 76-vector and Champion parity",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "production prediction plan preserves the already certified stored input digest",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "uncertified, incomplete, duplicate, model, policy, fixture and source-drift manifests block",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "PROVENANCE_STARTER",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "disposable_postgres",
+          "assertion": "fresh Official evidence vetoes started games and changed starters without replacing frozen inputs",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "native enrichment UPDATE uses old predicates, reads back and never backdates new evidence",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "PHYSICAL_FK",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "Fresh SELECT-only schema review",
+          "assertion": "406 columns; 116 constraints; six snapshot-unique indexes; zero orphans/violations",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "all feature foreign keys preserved by migration",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "preflight rejects stale/future/wrong-project evidence, orphan/invalid indexes and schema drift",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "PROVIDER_CAPS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "R3_guard_validator",
+          "assertion": "actual-time Puerto Rico freeze and package-scoped authorization enforce ONE Odds request and forbidden operations",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "missing private ledger cannot reset previously consumed mission budget",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "shared Statcast cold fixture validates physical insert, canonical cache reuse and actual-request cap",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "DML_SCOPE_CAPS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "disposable_postgres",
+          "assertion": "prediction payload drift, immutable conflicts and scope escape fail closed",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "concurrent native metadata change without timestamp advance prevents the planned UPDATE",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "actual-time Puerto Rico freeze and package-scoped authorization enforce ONE Odds request and forbidden operations",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "RUN_FREEZE_CHECKPOINT",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "R3_guard_validator",
+          "assertion": "actual-time Puerto Rico freeze and package-scoped authorization enforce ONE Odds request and forbidden operations",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "R2B to R2I real-model integration resumes after market handoff without reacquisition",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "uncertain committed INSERT is recovered by exact independent readback and counted once",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "NO_FIXTURE_FALLBACK",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "R3_guard_validator",
+          "assertion": "uncertified, incomplete, duplicate, model, policy, fixture and source-drift manifests block",
+          "status": "PASS"
+        },
+        {
+          "source": "Published R2T-R2 gate 21 and frozen runtime closure",
+          "assertion": "Canonical real core has no fixture construction; legacy synthetic dry graph rejects LIVE_EXECUTE; production factory has no injected provider parameter",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "MANUAL_ENTRYPOINT",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "R3_guard_validator",
+          "assertion": "candidate inventory covers actual transitive runtime, model, policy and schemas",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "preflight rejects stale/future/wrong-project evidence, orphan/invalid indexes and schema drift",
+          "status": "PASS"
+        },
+        {
+          "source": "R3_guard_validator",
+          "assertion": "actual-time Puerto Rico freeze and package-scoped authorization enforce ONE Odds request and forbidden operations",
+          "status": "PASS"
+        },
+        {
+          "source": "Manual launcher code review",
+          "assertion": "Exact HEAD package, actual start freeze, exclusive private lock, recent schema attestation and canonical R2B dispatch",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "READBACK_IDEMPOTENCY",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "disposable_postgres",
+          "assertion": "R2B to R2I full real-model persistence retry performs zero writes",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "value and Official Pick retries preserve immutable decisions with zero writes",
+          "status": "PASS"
+        },
+        {
+          "source": "disposable_postgres",
+          "assertion": "production adapter empty slate terminates after one injected schedule read with no downstream calls or writes",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "id": "NO_CERTIFICATION_SIDE_EFFECTS",
+      "status": "PASS",
+      "requirements": [
+        {
+          "source": "Guarded SQL/launcher validation reports",
+          "assertion": "Sports-provider calls, production DML and production DDL are zero",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "sourceHashAlgorithm": "SHA256 UTF-8 text after CRLF-to-LF normalization; exact transitive runtime inventory required",
+  "sourceHashes": {
+    "artifacts/mlb/mlb-02c-moneyline-baseline-model.json": "30c6e6fd7d3c57e0771c27d6459a7db1853b50a74b6889f0af42f5c0b9706087",
+    "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json": "c81c8f55feb0bef6fbb10e9adb01c4e9e7c2153966e7b8cd05c229ed1105442b",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_DOWNSTREAM_SCHEMA_REVIEW.json": "0a327ebffd62d1aa56491744ad6e636325c7fb30d8df5a414abd20b06eb6bb25",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SCHEMA_REVIEW.json": "9c416227eac19b271cc9d8afc647883d0a13a15c6b2995677c93759349096704",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_NATIVE_SCHEMA_REVIEW.json": "057cc38461b2e5ce2d6fb954c6eda5316c970e4fbfa3ad8dc92c3fef58b6733a",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_RAW_SCHEMA_REVIEW.json": "2388dba409154f57083175319b4e6cd1c953e2fb44484b75655abc58fb5a286e",
+    "docs/CERTIFICATION/mlb-data-02p-official-pick-policy-prep.json": "12a5e90af38bee9b394f78938aef8ffb1d4c386b8d915a2ca5787cb6dea3470a",
+    "package-lock.json": "921fc3e1888157cd4acc3b208c8516649fa65b6124d8ebc759fa25bef25d035d",
+    "package.json": "f44118aa42a3ec5cc264530dd1a32f3db67d2b786b27b74329ebdd690723e316",
+    "scripts/mlb-data-02f-moneyline-prediction-generation-prep.mjs": "082ca798c70de4d60c7cc32465b39717fd6e4ebbcd4e025a5dee5dc7aa3773cd",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "cf5ba6cf1e8bdeed08242d65f4edcb64c82e696d2f888c455ae27207fdcad93e",
+    "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
+    "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be46aede40ca583ecfafc9f8675f50cc0a44782d663b2b5f6a60cb8aaf608fc7",
+    "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs": "7ca9358eced88174739fe88b09acb6e789e256bf23dd3b6f3795038b41945f74",
+    "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
+    "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs": "ba5a7b74fa1b8c044835c14415b99655fc1bf213f1693871c47ad0bd8d14da81",
+    "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs": "1d6b0af10645ad3de4c87f9dc293a5ef8adf67f8f52f0cac6f8eea4e06c2e138",
+    "scripts/mlb-data-02r-r2h-full-dry-integration.mjs": "a876c44443fb79ee75d36181a62d1be0c0d103e7bbdc351e205fc2c6056d1cac",
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "ccc56523abdd7ce8b13e91c3befcc53d6d361d81b5c035538c66317d5441bee4",
+    "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "0342010394598ad616daba889266890216fb597dbb356953e65e48ab6ef7de97",
+    "scripts/mlb-data-02r-r2t-market-binding.mjs": "c7a27a932d457552f6c23cb1f72d0dd87683c710188c1cb64275e3bee04772ba",
+    "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
+    "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
+    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "cf7843dc76bcdb6127887fca0e666d287031c605e27def2398dbfc64ed6dfbc5",
+    "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "dfc5f41770e912ecbd241b1745affefcc9676c9a066d289f7f99920889b92760",
+    "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
+    "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "8ef566089f53359217a664c531a679b046c4ef0303fe4ca418bb7867d06167bd",
+    "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
+    "scripts/mlb-data-02r-r2t-real-feature-champion.mjs": "f9c614afadebc90209e028306eefacb46ab6de4930cbcbb03fdd847a0de3b077",
+    "scripts/mlb-data-02r-r2t-write-contract.mjs": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82",
+    "scripts/mlb-data-02r-r2t-write-journal.mjs": "81c4deacba2189fa2013e8fd76610f0ea93af0d04b2c22fbbeec5f67a298e8b9",
+    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6",
+    "scripts/mlb-operational-manual-refresh.mjs": "b29e7786ea155733fea2b20cdd420ea0f89621803810a120bfd29ede2e7b63db",
+    "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
+    "scripts/mlb-operational-r6-run-store.mjs": "323e185b66d9125defe826cb2eaa3322525618ab8ae96c1dcf6413883bc75531",
+    "scripts/mlb-operational-r6-write-journal.mjs": "2b2c4c79c06e28265f3340c223c9c291fee4421b60a6066644f24bfb13859c78"
+  },
+  "manualEntrypoint": "scripts/mlb-operational-manual-refresh.mjs",
+  "manualInvocation": "node --env-file=.env.local scripts/mlb-operational-manual-refresh.mjs --execute-current-slate --package-sha=<frozen HEAD>",
+  "manualRunLimits": {
+    "OddsAPI": 1,
+    "BALLDONTLIE": 0,
+    "SportsDataIO": 0,
+    "otherProviders": 0,
+    "MLBOfficial": 50,
+    "sharedStatcast": 100,
+    "scope": "One bounded current-slate invocation; Odds response cached for retry; persistent cumulative mission ledger enforced",
+    "dml": "INSERT_ELIGIBLE only or bounded canonical UPDATE with full expected-old row predicates; exact stage caps and independent readback",
+    "ddl": false,
+    "settlement": false,
+    "automation": false
+  },
+  "schemaReview": {
+    "status": "PASS",
+    "checkedAt": "2026-09-09T02:51:58.547839+00:00",
+    "columnsCompared": 406,
+    "preservedConstraintsCompared": 116,
+    "existingNotValidatedChecks": 19,
+    "historicalCheckViolations": 0,
+    "invalidIndexes": 0,
+    "orphanSnapshotReferences": 0,
+    "nativeSnapshotUniqueIndexes": 6,
+    "schemaCompatible": true,
+    "failures": [],
+    "ddlDigest": "3f2df0f2baf8b4cd405bc10560c47eadc143198df85a80fb3577b4b03d5b1f46",
+    "projectRefPublished": false
+  },
+  "validation": {
+    "disposablePostgres": {
+      "status": "PASS",
+      "checks": 66,
+      "sourceHashesUnchangedDuringRun": true
+    },
+    "manualGuards": {
+      "status": "PASS",
+      "checks": [
+        {
+          "name": "candidate inventory covers actual transitive runtime, model, policy and schemas",
+          "status": "PASS"
+        },
+        {
+          "name": "uncertified, incomplete, duplicate, model, policy, fixture and source-drift manifests block",
+          "status": "PASS"
+        },
+        {
+          "name": "preflight rejects stale/future/wrong-project evidence, orphan/invalid indexes and schema drift",
+          "status": "PASS"
+        },
+        {
+          "name": "missing private ledger cannot reset previously consumed mission budget",
+          "status": "PASS"
+        },
+        {
+          "name": "actual-time Puerto Rico freeze and package-scoped authorization enforce ONE Odds request and forbidden operations",
+          "status": "PASS"
+        }
+      ]
+    },
+    "operationalGuards": [
+      {
+        "name": "crosswalk normalizes equivalent UTC offsets and PostgreSQL timestamps; invalid and ambiguous times block",
+        "status": "PASS"
+      },
+      {
+        "name": "private checkpoint replacement, exclusive lock, release and repository/path escape guards",
+        "status": "PASS"
+      },
+      {
+        "name": "provider consumption survives restart and rejects cap overrun, negative calls and unauthorized providers",
+        "status": "PASS"
+      }
+    ],
+    "build": {
+      "exitCode": 0,
+      "staticPages": 400
+    },
+    "eslint": "PASS_ZERO_WARNINGS",
+    "fullExpectedOldPredicateRestReadback": "PASS: one independently read native row matches all JSON, scalar and NULL predicates; SELECT only",
+    "diffCheck": "PASS",
+    "publicationScan": "PASS: bounded structural/code artifacts; no configured secrets, private keys, JWTs or raw production sample payloads"
+  },
+  "boundaries": {
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "liveRefreshExecuted": false,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlementWrites": 0,
+    "modelChanges": 0,
+    "featureSemanticChanges": 0
+  },
+  "missionDdlPrerequisite": "One previously authorized/certified uniqueness migration; not repeated by R3",
+  "readiness": "READY_FOR_ONE_BOUNDED_CURRENT_SLATE_MANUAL_INVOCATION_AFTER_FRESH_SCHEMA_PREFLIGHT",
+  "operationalMissionCertified": false,
+  "limitations": [
+    "Integration uses real archived feature evidence and explicitly structural isolated odds/cold-fetch probes; actual current-slate run remains next.",
+    "Existing NOT VALID positivity constraints are preserved; independent read-only checks find zero violations. No VALIDATE CONSTRAINT DDL performed.",
+    "Raw replay inputs, sample vectors, prices and production row payloads are not included in this certificate.",
+    "Nonempty live execution, repeatability, automation, settlement/performance and Today remain incomplete mission gates."
+  ],
+  "rollback": "Stop invocation or remove/revoke R3 certificate to fail closed; preserve immutable rows. Resume only the same frozen package/run after independent readback; schema rollback needs separate authorization.",
+  "reconciliationRevision": {
+    "validatedAt": "2026-09-09T03:37:17.202Z",
+    "defaultPregameBehavior": "UNCHANGED",
+    "sharedEngineChange": "Explicit bounded INCREMENTAL/POSTGAME/OVERNIGHT cache reconciliation; partial persisted coverage no longer treated as complete in those modes",
+    "disposableRegressionChecks": 66,
+    "priorFrozenPackage": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
+    "productionExecutionThisRevision": false
+  },
+  "largeCheckpointRevision": {
+    "certificate": "MLB_OPERATIONAL_LARGE_CHECKPOINT_REPAIR.json",
+    "checks": 66,
+    "digestParity": "PASS",
+    "shardedCheckpointReadback": "PASS"
+  },
+  "identityReadRevision": {
+    "certificate": "MLB_OPERATIONAL_IDENTITY_READ_BATCH_REPAIR.json",
+    "actualReadback": "PASS",
+    "disposableChecks": 66
+  },
+  "journalReadbackRevision": {
+    "certificate": "MLB_OPERATIONAL_JOURNAL_READBACK_REPAIR.json",
+    "actualRecovery": "PASS",
+    "disposableChecks": 66
+  },
+  "r6RuntimeRecertification": {
+    "at": "2026-09-09T23:01:59.969Z",
+    "sqlChecks": 71,
+    "guardGroups": 5,
+    "modelPolicyFeatureSemantics": "UNCHANGED",
+    "durableR2Resume": "PASS_DISPOSABLE_SQL",
+    "productionAutomation": "DISABLED_EDGE_DEPLOYMENT_APPROVAL_REQUIRED"
+  },
+  "r7Revalidation": {
+    "status": "PASS",
+    "sqlChecks": 72,
+    "championAnd76FeatureParity": "PASS",
+    "source": "MLB_DATA_02R_R7_FROZEN_RUN_MARKET_CHECKPOINT_RECOVERY_AND_AUTOMATION_REVALIDATION.json"
+  },
+  "phase2Revalidation": {
+    "sqlChecks": 72,
+    "featureAndChampionParity": "PASS"
+  },
+  "r9Revalidation": {
+    "at": "2026-09-11T16:37:06.512Z",
+    "physicalChecks": 74,
+    "immutableMarketChecks": 10,
+    "build": "PASS",
+    "productionRecovery": "PENDING"
+  },
+  "r12OperationalRevalidation": {
+    "scope": "APPROVED_OPERATIONAL_BUDGET_AND_PUBLIC_HEALTH_LABELS",
+    "productionActivation": "PENDING_EXACT_DDL_APPROVAL",
+    "historicalMissionCounterChanges": 0,
+    "featureModelPolicyChanges": 0,
+    "changedSources": [
+      "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs",
+      "scripts/mlb-operational-r6-run-store.mjs"
+    ]
+  },
+  "currentSlateLatencyRepair": {
+    "at": "2026-09-20T14:30:00Z",
+    "scope": "DEPENDENCY_INVENTORY_SCHEDULING_ONLY",
+    "concurrency": 3,
+    "featureMathChanges": 0,
+    "modelChanges": 0,
+    "marketPolicyChanges": 0,
+    "officialPickPolicyChanges": 0,
+    "semantics": "Same readDependencies contract and frozen dependency union; only three independent read-only inventory scans are allowed concurrently."
+  },
+  "dependencyReadPerformanceRevalidation": {
+    "at": "2026-09-20T15:12:00Z",
+    "scope": "READ_SCHEDULING_ONLY",
+    "inventorySentinel": "at_bat_number=1 AND pitch_number=1",
+    "sentinelCoverage2026": {
+      "rawGames": 2324,
+      "sentinelGames": 2324,
+      "missing": 0
+    },
+    "fullReadConcurrency": 48,
+    "featureMathChanges": 0,
+    "dependencyFilterChanges": 0,
+    "cutoffChanges": 0,
+    "provenanceGateChanges": 0
+  },
+  "dependencyNativeUpdateDispositionRevalidation": {
+    "at": "2026-09-20T15:35:00Z",
+    "scope": "DEPENDENCY_SCOPE_NATIVE_GAME_UPDATES_ONLY",
+    "allowedTable": "pick2_mlb_games",
+    "requiredProviderCalls": {
+      "MLB_OFFICIAL": 1,
+      "STATCAST": 0,
+      "THE_ODDS_API": 0
+    },
+    "requiresReadbackPass": true,
+    "requiresZeroInserts": true,
+    "requiresAllTargetsStillPregame": true,
+    "downstreamWritePolicy": "FORBIDDEN",
+    "featureMathChanges": 0,
+    "modelChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0,
+    "edgeAuthorityDigest": "394d4f36a3b17ae6ced32f8f145bc12d245d5b398365ddbe132f74dc58a9724b",
+    "edgeFunction": "mlb-runtime-state",
+    "edgeVersion": 15,
+    "sourceInventoryNote": "Edge authority is deployed/certified separately and is intentionally not part of the R3 local runtime sourceHashes inventory."
+  },
+  "rawIdentityTargetVetoRevalidation": {
+    "at": "2026-09-20T19:35:00Z",
+    "scope": "TARGET_LOCAL_RAW_IDENTITY_FAIL_CLOSED",
+    "semantics": "A target whose strict-prior dependency set contains raw identity-invalid rows is vetoed before full transfer; remaining targets continue. Dependency universe and feature math are unchanged.",
+    "observedFutureTargets": {
+      "clean": [
+        825028
+      ],
+      "rawIdentityBlocked": [
+        823247,
+        823975,
+        824789
+      ],
+      "starterBlocked": [
+        823896
+      ]
+    },
+    "modelChanges": 0,
+    "thresholdChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "teamDependencyReadRevalidation": {
+    "at": "2026-09-20T20:47:00Z",
+    "scope": "QUERY_SHAPE_ONLY",
+    "priorSemantics": "home_team_id IN teamIds OR away_team_id IN teamIds",
+    "newSemantics": "union(home_team_id IN teamIds, away_team_id IN teamIds) deduped by game_pk",
+    "dependencyUniverseChanges": 0,
+    "featureMathChanges": 0,
+    "modelChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "dependencyReadStabilityRevalidation": {
+    "at": "2026-09-20T21:02:00Z",
+    "scope": "READ_SCHEDULING_AND_SANITIZED_DIAGNOSTIC_ONLY",
+    "priorFullReadConcurrency": 48,
+    "newFullReadConcurrency": 16,
+    "diagnostic": "label + database error code only; no message/body/url persisted",
+    "dependencyUniverseChanges": 0,
+    "featureMathChanges": 0,
+    "modelChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "rawIdentityPreflightReadRevalidation": {
+    "at": "2026-09-20T21:31:00Z",
+    "scope": "TARGET_LOCAL_RAW_IDENTITY_FAIL_CLOSED_QUERY_SHAPE",
+    "observedProductionFailure": {
+      "label": "raw_identity_preflight",
+      "databaseCode": "57014",
+      "stage": "DEPENDENCY_SCOPE"
+    },
+    "priorQueryShape": "up to 100 dependency game_pk values per IN predicate plus the unchanged identity-null OR predicate",
+    "newQueryShape": "one indexed game_pk equality predicate per dependency game, bounded with existing RAW_READ_CONCURRENCY=16, plus the unchanged identity-null OR predicate",
+    "indexEvidence": {
+      "index": "pick2_raw_mlb_statcast_pitches_game_idx",
+      "representativeGamePk": 823333,
+      "representativeRowsScanned": 294,
+      "explainAnalyzeExecutionMs": 0.917
+    },
+    "successfulReadInvalidRowPolicy": "TARGET_LOCAL_RAW_IDENTITY",
+    "databaseReadErrorPolicy": "HARD_DEPENDENCY_READ_FAILURE_NOT_RAW_IDENTITY",
+    "dependencyUniverseChanges": 0,
+    "featureMathChanges": 0,
+    "cutoffChanges": 0,
+    "modelChanges": 0,
+    "thresholdChanges": 0,
+    "providerCallsAdded": 0,
+    "historicalOddsCallsAdded": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "researchShadowOfficialPickWriteBoundary": {
+    "at": "2026-09-20T21:50:00Z",
+    "scope": "PREGAME_POLICY_EVALUATION_PRESERVED_OFFICIAL_PICK_DML_DISABLED",
+    "observedPriorRun": {
+      "runId": "automation-bf443cccb1ee67cf561cb167db6cc02cdf2ae571f095af016c44fc09155ba5f4",
+      "packageSha": "5586cac82d978ae232d65c88385386b2409d778b",
+      "officialPickRowsInserted": 1
+    },
+    "policyEvaluationPreserved": true,
+    "shadowEligibleRowsPreserved": true,
+    "officialPickRowsPlanned": 0,
+    "officialPickDmlCap": 0,
+    "officialPickWritesAuthorized": false,
+    "existingOfficialPickRowsModified": 0,
+    "apostarChanges": 0,
+    "featureMathChanges": 0,
+    "modelChanges": 0,
+    "thresholdChanges": 0
+  },
+  "officialPickWriteBoundary": {
+    "state": "DISABLED_RESEARCH_BOUNDARY",
+    "discoveredAt": "2026-09-20T23:55:00Z",
+    "rootCause": "CANONICAL_R2I_PATH_PERSISTED_BUILD_CANONICAL_OFFICIAL_PICKS_OUTPUT",
+    "canonicalPath": "SHADOW_DECISIONS_ONLY_ZERO_PERSISTED_ROWS",
+    "repositoryGuard": "NONEMPTY_INSERT_OFFICIAL_PICKS_REJECTED",
+    "existingRowsModified": false,
+    "officialPickCreationAuthorized": false,
+    "apostarActivated": false
+  },
+  "requiredHistoryTargetLocalRepair": {
+    "at": "2026-09-21T20:54:00Z",
+    "scope": "TARGET_LOCAL_REQUIRED_STARTER_HISTORY_FAIL_CLOSED",
+    "observedProductionFailure": {
+      "stage": "DEPENDENCY_SCOPE",
+      "sanitizedCode": "UNCLASSIFIED_STAGE_EXCEPTION",
+      "affectedSlate": [
+        824787,
+        824221,
+        823169
+      ]
+    },
+    "evidence": {
+      "gamePk": 824221,
+      "awayStarter": {
+        "mlbamId": 687792,
+        "name": "DJ Herz",
+        "prior2026RawGames": 0
+      },
+      "homeStarter": {
+        "mlbamId": 689981,
+        "name": "River Ryan",
+        "prior2026RawGames": 0
+      },
+      "certifiedBuilderGuard": "R2TR1_BLOCK:REQUIRED_HISTORY_MISSING"
+    },
+    "repair": {
+      "allowedTargetLocalGuard": [
+        "R2TR1_BLOCK:REQUIRED_HISTORY_MISSING"
+      ],
+      "blockedReason": "REQUIRED_HISTORY_MISSING",
+      "allOtherR2TR1Errors": "HARD_FAIL",
+      "modelChanges": 0,
+      "thresholdChanges": 0,
+      "dependencyUniverseChanges": 0,
+      "providerCallsAdded": 0,
+      "historicalOddsCallsAdded": 0,
+      "officialPicksChanges": 0,
+      "apostarChanges": 0
+    }
+  },
+  "revalidation20261014": {
+    "status": "OFFLINE_REVALIDATED_PRODUCTION_READBACK_PENDING",
+    "generatedAt": "2026-10-14T21:14:14.014Z",
+    "priorCertificate": "docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION.json",
+    "priorCertificateSha256": "b09c2dc04271487801f66e699288faafdc328ba0ee7842e566cee3c3564a4846",
+    "evidenceHashes": {
+      "docs/product/mlb-release-readiness-20261014/attempts.json": "291be6af946f91e609b71096ef06270bc2ad43806ce38dcca452bc2326d43557",
+      "docs/product/mlb-release-readiness-20261014/behavior.json": "793a5f443f31f4eb579a26c0a6c6e73967173c7ede6d07d4ce13427f18cc3992",
+      "docs/product/mlb-release-readiness-20261014/budget.json": "4e350d55e2bfd0e44d7e731c7db4fe1db14a8a113db230bbb36005d190b9990e",
+      "docs/product/mlb-release-readiness-20261014/durable-schema.json": "1d200ee5820b2f440210380ced2b3a2ca086ad9d70989c877508d766b4e7eb73",
+      "docs/product/mlb-release-readiness-20261014/durable-state.json": "55173dc78e8f7cbef38d0e2a0d877db1a253a61855600958c920a3a7212da0dd",
+      "docs/product/mlb-release-readiness-20261014/feature-math-review.json": "a0386bffb9716b99dc9e75b4594bf71b6bc3d63bbc27edfd17336ae4f22248e1",
+      "docs/product/mlb-release-readiness-20261014/fenced-write.json": "eb900db1d429cabd6120952c8a7e34427fcbb2dee2697182297db394dbd28f85",
+      "docs/product/mlb-release-readiness-20261014/health.json": "6bc055aa07fa91025b4883a15f8756d29acd7218b93452e5d932ad7d4dd8e7ec",
+      "docs/product/mlb-release-readiness-20261014/host.json": "d4ca30b41a59772ae43bda769d7a36ebb5940b22b23a97b4e90fb235a8f4c264",
+      "docs/product/mlb-release-readiness-20261014/operational-budget.json": "4bf1918dc7514edc2a885f6cded9a5afd20f2e54870dc76ae867e7cb044184d5",
+      "docs/product/mlb-release-readiness-20261014/operational-guards.json": "e214ffdf3ea022f1a5804c2ec71f69d5ea0a5d863feb52f4538924579a7f94d4",
+      "docs/product/mlb-release-readiness-20261014/provider-await.json": "1711f104a22d09cb0d638d9e1742e7faa42741c8879d4daceafad511848dce79",
+      "docs/product/mlb-release-readiness-20261014/r3-guards.json": "cbe4b2c6bbc6357442416d0144b4dd9d91a0940a37eae80f6ac8180e596a296c",
+      "docs/product/mlb-release-readiness-20261014/recovery.json": "3ff0cc26506cce8806cf09a9fb26098c6bfb3b75e2d23171869c1c01b93a3d2f",
+      "docs/product/mlb-release-readiness-20261014/schema-preflight.json": "cfe70aed534b46cba01ba6f9a934c4da0e929b6693bd22d148f3b24bf8c5bb6a",
+      "docs/product/mlb-release-readiness-20261014/security.json": "9e4c9fcf33b4aa1300a2a85c8ac07d8e1a2ab9a90d4bdef84c2520d126a68941",
+      "docs/product/mlb-release-readiness-20261014/stored-inference-replay.json": "76f2e9c62ab59842f976122e13bb5d3e0aa65e7c398de948a016a2d6b335eb6e",
+      "docs/product/mlb-release-readiness-20261014/target-local-history.json": "f9cfe6463780ec569b1686900f75104a9d4c0b37cfc4488ab68eb140549374b9"
+    },
+    "scope": "Reviewed transport pagination and immutable UI changes; original model, feature math, policy, DML, provider caps and historical records preserved.",
+    "historicalGateEvidence": "Inherited from digest-pinned original; full original private raw-cache SQL integration was not reacquired or rerun. Current boundary, state, schema, recovery, budget and behavioral regressions and three stored 76-feature inference replays are separately recorded.",
+    "deploymentPerformed": false,
+    "productionReadback": "PENDING_NO_DEPLOYMENT",
+    "regularSeasonOnly": true,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  }
+}

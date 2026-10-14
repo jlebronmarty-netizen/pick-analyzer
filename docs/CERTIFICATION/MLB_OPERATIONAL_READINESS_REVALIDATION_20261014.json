@@ -1,0 +1,599 @@
+{
+  "certificationVerdict": "PRE_NONEMPTY_LIVE_READINESS",
+  "generatedAt": "2026-09-09T04:12:53.803Z",
+  "operationalCertified": false,
+  "basePackageSha": "47ee366f25390c5c9e805903bcd8e4cb168fdadc",
+  "packageSha": "ENCLOSING_BOUNDED_COMMIT",
+  "champion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+  "featureSet": "MLB_ML_FEATURE_SET_V1",
+  "featureCount": 76,
+  "policy": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+  "automation": {
+    "status": "DRY_CERTIFIED",
+    "activation": "DISABLED",
+    "modes": [
+      "INITIALIZE",
+      "PREGAME",
+      "STARTER_CHANGE",
+      "ODDS_FRESHNESS",
+      "INCREMENTAL",
+      "POSTGAME",
+      "OVERNIGHT"
+    ],
+    "coordinatorHosts": 1,
+    "rawTarget": "public.pick2_raw_mlb_statcast_pitches",
+    "refreshEngine": "EXISTING_CERTIFIED_R2B_R2I",
+    "checkpointRecovery": "PASS",
+    "overlapPrevention": "PASS",
+    "providerBudgets": "EXISTING_LEDGER;ONE_ODDS_REQUEST_PER_DAILY_INVOCATION;MISSION_MAX_20",
+    "schemaPreflight": "Unattended Supabase Edge fixed read-only query; shared checker and server client; original freshness guard preserved",
+    "activationPrerequisites": [
+      "GENUINE_NONEMPTY_LIVE_SUCCESS",
+      "REAL_PRODUCTION_REPEATABILITY",
+      "ONE_VERIFIED_PERSISTENT_COORDINATOR_WITH_UNATTENDED_PREFLIGHT"
+    ]
+  },
+  "settlement": {
+    "status": "CERTIFIED",
+    "scope": "CODE_AND_DISPOSABLE_POSTGRES;NO_PRODUCTION_SETTLEMENT_EXECUTED",
+    "target": "public.pick2_prediction_results",
+    "outcomes": [
+      "win",
+      "loss",
+      "push",
+      "void"
+    ],
+    "source": "MLB_OFFICIAL_FINAL_FEED_WITH_DIGEST_IDENTITY_SCORE_VERIFICATION",
+    "originalPicksAndPredictions": "IMMUTABLE_UNCHANGED",
+    "readback": "PASS",
+    "idempotency": "REUSE_NO_OP",
+    "conflicts": "FAIL_CLOSED"
+  },
+  "performance": {
+    "status": "IMPLEMENTED_AND_VALIDATED",
+    "sample": "NO_CERTIFIED_SETTLED_SAMPLE_CURRENTLY_STORED",
+    "metrics": [
+      "pick_count",
+      "sample_size",
+      "wins",
+      "losses",
+      "pushes",
+      "voids",
+      "win_rate",
+      "units",
+      "supported_ROI",
+      "date_range",
+      "model_version",
+      "policy_version"
+    ],
+    "roiBasis": "ONE_UNIT_PER_OFFICIAL_PICK;NOT_REAL_WAGERS",
+    "clv": "NULL_UNLESS_CERTIFIED_CLOSING_EVIDENCE_IS_BOUND;NONE_CURRENTLY_BOUND"
+  },
+  "today": {
+    "status": "CANONICAL_READ_ONLY_RESTORED",
+    "routes": [
+      "/",
+      "/today",
+      "/mlb-value-board",
+      "/performance",
+      "/data-health"
+    ],
+    "fixtureFallback": false,
+    "legacyDashboardSideEffects": "REMOVED_FROM_CANONICAL_SURFACES",
+    "emptyState": "TRUTHFUL_STORED_DATA_EMPTY_NOT_ASSERTION_OF_NO_MLB_GAMES",
+    "mobileDesktop": "PASS"
+  },
+  "observability": {
+    "status": "IMPLEMENTED_AND_VALIDATED",
+    "telemetryTable": "public.sports_sync_jobs",
+    "rowCapPerTransition": 1,
+    "persistenceActivation": "PENDING_AUTOMATION_ACTIVATION",
+    "publicAccounting": "EXPLICIT_LAST_PUBLISHED_CERTIFICATION_PLUS_CANONICAL_COORDINATOR_TELEMETRY",
+    "privateEvidence": "EXACT_STAGE_CHECKPOINT_PROVIDER_DML_JOURNALS;NOT_PUBLISHED"
+  },
+  "runbook": {
+    "status": "VALIDATED",
+    "path": "docs/MLB_OPERATIONAL_RECOVERY_RUNBOOK.md",
+    "validatedContracts": [
+      "SCHEMA_PREFLIGHT_CLI",
+      "EXCLUSIVE_LOCK",
+      "EXACT_RUN_RECOVERY",
+      "BOUNDED_RETRY",
+      "RAW_IDEMPOTENCY",
+      "SETTLEMENT_READBACK",
+      "DISABLED_ACTIVATION"
+    ]
+  },
+  "validators": {
+    "behavior": [
+      {
+        "name": "automation activation rejects empty slate, missing repeatability and disabled state",
+        "status": "PASS"
+      },
+      {
+        "name": "job identity is stable within slot, distinct across modes and slots",
+        "status": "PASS"
+      },
+      {
+        "name": "failed stage checkpoints survive retry; completed slot never executes twice",
+        "status": "PASS"
+      },
+      {
+        "name": "cross-mode overlap blocked by exclusive coordinator lock",
+        "status": "PASS"
+      },
+      {
+        "name": "checkpoint package change blocks before stage execution",
+        "status": "PASS"
+      },
+      {
+        "name": "shared engine incremental ingest expands partial canonical game; checkpoint retry has zero calls/writes",
+        "status": "PASS"
+      },
+      {
+        "name": "pregame target evidence never ingested as dependency",
+        "status": "PASS"
+      },
+      {
+        "name": "settlement reuses core math, preserves pick, supports win/loss/push/void",
+        "status": "PASS"
+      },
+      {
+        "name": "settlement rejects null scores, digest drift, wrong identity, future evidence and nonterminal status",
+        "status": "PASS"
+      },
+      {
+        "name": "SQL settlement persistence independently reads back; retry reuses; immutable conflict and caps reject",
+        "status": "PASS"
+      },
+      {
+        "name": "actual Supabase-shaped settlement adapter respects physical schema, FK and SQL readback",
+        "status": "PASS"
+      },
+      {
+        "name": "operational telemetry uses one deterministic SQL row, bounded status update, reuse and conflict guard",
+        "status": "PASS"
+      },
+      {
+        "name": "performance reports supported units and denominators; no fabricated ROI/CLV for empty sample",
+        "status": "PASS"
+      },
+      {
+        "name": "Today projection has truthful empty, no-prediction, stale, and started-game states",
+        "status": "PASS"
+      },
+      {
+        "name": "Today and Value Board preserve canonical values, require stored pick linkage and block starter changes",
+        "status": "PASS"
+      },
+      {
+        "name": "daily binding resumes the exact R2 run after interruption; saved terminal result prevents reexecution",
+        "status": "PASS"
+      }
+    ],
+    "ui": [
+      {
+        "route": "/",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/today",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/data-health",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/performance",
+        "width": 390,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "apiCanonicalParity": "PASS",
+        "width": 390,
+        "gameCount": 0,
+        "valueCount": 0,
+        "performanceStatus": "NO_SETTLED_SAMPLE"
+      },
+      {
+        "route": "/",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/today",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/mlb-value-board",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/data-health",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "route": "/performance",
+        "width": 1365,
+        "status": "PASS",
+        "noHorizontalOverflow": true,
+        "noResetState": true
+      },
+      {
+        "apiCanonicalParity": "PASS",
+        "width": 1365,
+        "gameCount": 0,
+        "valueCount": 0,
+        "performanceStatus": "NO_SETTLED_SAMPLE"
+      }
+    ],
+    "disposableR2IntegrationChecks": 66,
+    "r3GuardGroups": 5,
+    "operationalGuardGroups": 3,
+    "build": {
+      "status": "PASS",
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "staticPages": 400
+    },
+    "eslint": "PASS",
+    "schemaPreflight": {
+      "status": "PASS",
+      "columns": 406,
+      "constraints": 116,
+      "nativeSnapshotUniqueIndexes": 6,
+      "orphans": 0
+    },
+    "finalUiNetwork": {
+      "readOnlyDatabaseRequests": 36,
+      "blockedRequests": 0,
+      "blockedTargets": [],
+      "providerCalls": 0,
+      "productionDml": 0,
+      "productionDdl": 0
+    }
+  },
+  "accountingThisWorkSession": {
+    "MLBOfficial": 0,
+    "Statcast": 0,
+    "OddsAPI": 0,
+    "BALLDONTLIE": 0,
+    "SportsDataIO": 0,
+    "otherProviders": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "liveRefreshes": 0,
+    "automationActivations": 0,
+    "cronChanges": 0,
+    "environmentChanges": 0,
+    "productionModelChanges": 0
+  },
+  "missionCumulative": {
+    "MLBOfficial": 1,
+    "Statcast": 0,
+    "OddsAPI": 0,
+    "productionDml": 0,
+    "productionDdlMigrations": 1,
+    "lastRunStatus": "NO_VALID_PREGAME_SLATE"
+  },
+  "pendingGates": [
+    "FIRST_SUCCESSFUL_NONEMPTY_CURRENT_SLATE_PRODUCTION_REFRESH",
+    "SUBSEQUENT_REAL_REFRESH_PRODUCTION_REPEATABILITY",
+    "AUTOMATION_ACTIVATION_AFTER_REPEATABILITY",
+    "PICK_ANALYZER_MLB_RECOMMENDATION_SYSTEM_OPERATIONAL_CERTIFIED"
+  ],
+  "sourceHashes": {
+    ".github/workflows/mlb-release-readiness.yml": "b932453645d4d28d7b9e1266a01c101a5352cfaa71af97ecc1dca59d2be318e8",
+    ".github/workflows/production-operating-day.yml": "69c9f6b41e955ece839ea08fde63db5493ce66476cbf1eaecacdb006ccf4d30b",
+    "artifacts/mlb/mlb-02c-moneyline-baseline-model.json": "30c6e6fd7d3c57e0771c27d6459a7db1853b50a74b6889f0af42f5c0b9706087",
+    "docs/CERTIFICATION/MLB_DATA_02R_R2T_R2_STORED_OUTPUT_PARITY_AND_REAL_PERSISTENCE_INTEGRATION.json": "c81c8f55feb0bef6fbb10e9adb01c4e9e7c2153966e7b8cd05c229ed1105442b",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_DOWNSTREAM_SCHEMA_REVIEW.json": "0a327ebffd62d1aa56491744ad6e636325c7fb30d8df5a414abd20b06eb6bb25",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_FEATURE_SCHEMA_REVIEW.json": "9c416227eac19b271cc9d8afc647883d0a13a15c6b2995677c93759349096704",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_NATIVE_SCHEMA_REVIEW.json": "057cc38461b2e5ce2d6fb954c6eda5316c970e4fbfa3ad8dc92c3fef58b6733a",
+    "docs/CERTIFICATION/MLB_OPERATIONAL_RAW_SCHEMA_REVIEW.json": "2388dba409154f57083175319b4e6cd1c953e2fb44484b75655abc58fb5a286e",
+    "docs/CERTIFICATION/mlb-data-02p-official-pick-policy-prep.json": "12a5e90af38bee9b394f78938aef8ffb1d4c386b8d915a2ca5787cb6dea3470a",
+    "next.config.ts": "2e47c1604c272be48d7da3b87f1352dbff5f0c298baab98cb8b81d4fe7d24ecc",
+    "package-lock.json": "921fc3e1888157cd4acc3b208c8516649fa65b6124d8ebc759fa25bef25d035d",
+    "package.json": "f44118aa42a3ec5cc264530dd1a32f3db67d2b786b27b74329ebdd690723e316",
+    "scripts/mlb-data-02f-moneyline-prediction-generation-prep.mjs": "082ca798c70de4d60c7cc32465b39717fd6e4ebbcd4e025a5dee5dc7aa3773cd",
+    "scripts/mlb-data-02h-2026-current-foundation.mjs": "cf5ba6cf1e8bdeed08242d65f4edcb64c82e696d2f888c455ae27207fdcad93e",
+    "scripts/mlb-data-02i-current-moneyline-dry-inference-prep.mjs": "6650905f1903b5d0abdc2b045f92e274f8c99569fbd6f623285196ae177da1c6",
+    "scripts/mlb-data-02r-r2a-live-refresh-executor.mjs": "be46aede40ca583ecfafc9f8675f50cc0a44782d663b2b5f6a60cb8aaf608fc7",
+    "scripts/mlb-data-02r-r2d-current-slate-wrappers.mjs": "7ca9358eced88174739fe88b09acb6e789e256bf23dd3b6f3795038b41945f74",
+    "scripts/mlb-data-02r-r2f-stage-contracts.mjs": "debbd58365d33011e8221ef58f66c1f1488ee5d630b0a2e893ffdc80a05d74a7",
+    "scripts/mlb-data-02r-r2f-wave12-interfaces.mjs": "ba5a7b74fa1b8c044835c14415b99655fc1bf213f1693871c47ad0bd8d14da81",
+    "scripts/mlb-data-02r-r2g-persistence-interfaces.mjs": "1d6b0af10645ad3de4c87f9dc293a5ef8adf67f8f52f0cac6f8eea4e06c2e138",
+    "scripts/mlb-data-02r-r2h-full-dry-integration.mjs": "a876c44443fb79ee75d36181a62d1be0c0d103e7bbdc351e205fc2c6056d1cac",
+    "scripts/mlb-data-02r-r2i-live-execution-interfaces.mjs": "ccc56523abdd7ce8b13e91c3befcc53d6d361d81b5c035538c66317d5441bee4",
+    "scripts/mlb-data-02r-r2t-downstream-persistence.mjs": "0342010394598ad616daba889266890216fb597dbb356953e65e48ab6ef7de97",
+    "scripts/mlb-data-02r-r2t-market-binding.mjs": "c7a27a932d457552f6c23cb1f72d0dd87683c710188c1cb64275e3bee04772ba",
+    "scripts/mlb-data-02r-r2t-policy-binding.mjs": "1d0a3823b59619f3b35b1f2bd54dd0313c18bcb05b7c173bc7418eaeeb27ab8e",
+    "scripts/mlb-data-02r-r2t-private-run-store.mjs": "eb3bd3836c246eb49e48df9eadb7b1e34532231331db02ab3c40e14e0294bc19",
+    "scripts/mlb-data-02r-r2t-production-bindings.mjs": "cf7843dc76bcdb6127887fca0e666d287031c605e27def2398dbfc64ed6dfbc5",
+    "scripts/mlb-data-02r-r2t-r1-pregame-contract.mjs": "9a176658e27b61d9316d6cea68e8bcff9762facdca1fe71c24efa710d44a333b",
+    "scripts/mlb-data-02r-r2t-r1-read-repository.mjs": "dfc5f41770e912ecbd241b1745affefcc9676c9a066d289f7f99920889b92760",
+    "scripts/mlb-data-02r-r2t-r2-native-binding.mjs": "01ae3ca95c877a90e512f5452425e4da3a8a6b2ed2b321ce229fa437c863f5d3",
+    "scripts/mlb-data-02r-r2t-r3-readiness.mjs": "8ef566089f53359217a664c531a679b046c4ef0303fe4ca418bb7867d06167bd",
+    "scripts/mlb-data-02r-r2t-r3-validate.mjs": "7ad6543d0a6efb7b7cacb34ff912418b970bd3aa6991198bf558be429635cacf",
+    "scripts/mlb-data-02r-r2t-raw-binding.mjs": "3cb7315288950b51af5ae3d589c4b6d2ed72caca7cb9526e362d1e6d42444013",
+    "scripts/mlb-data-02r-r2t-real-feature-champion.mjs": "f9c614afadebc90209e028306eefacb46ab6de4930cbcbb03fdd847a0de3b077",
+    "scripts/mlb-data-02r-r2t-write-contract.mjs": "70811d7c39a831afe33b46afaceb674e1fbff34311c9acde9935423030edbc82",
+    "scripts/mlb-data-02r-r2t-write-journal.mjs": "81c4deacba2189fa2013e8fd76610f0ea93af0d04b2c22fbbeec5f67a298e8b9",
+    "scripts/mlb-operational-automation.mjs": "879688583a22d27c3b3da4b60924d84ee234ee8b8392b531e91df54e731256bb",
+    "scripts/mlb-operational-budget-exhaustion.mjs": "ffe0c75b5a13de472a53804e9c42cddf5de2464a371fd0d513977d71b26bf996",
+    "scripts/mlb-operational-game-veto.mjs": "6353af1901a3f60bcb42a85ae58829ef7b1f875980f57e33238a668583649eb6",
+    "scripts/mlb-operational-manual-refresh.mjs": "b29e7786ea155733fea2b20cdd420ea0f89621803810a120bfd29ede2e7b63db",
+    "scripts/mlb-operational-preflight.mjs": "c8e76badafcbfd13d1ac549799e3b8984e2faecd377542f331358e7c491e4005",
+    "scripts/mlb-operational-r6-compact-features.mjs": "1b477111d28c870025b911c37aec21f6a24740ad8d7c5ebaa8f077902155b2c9",
+    "scripts/mlb-operational-r6-run-store.mjs": "323e185b66d9125defe826cb2eaa3322525618ab8ae96c1dcf6413883bc75531",
+    "scripts/mlb-operational-r6-state-client.mjs": "51a845c3d8b877c09ab62af90f2ba29bb8cc4aca38316114945572d90c573a18",
+    "scripts/mlb-operational-r6-vercel-runtime.mjs": "6b48a2fe6f8b5bc2597a563c9afefe28f4fe32c6e18e4f94e3d056993478b2f2",
+    "scripts/mlb-operational-r6-write-journal.mjs": "2b2c4c79c06e28265f3340c223c9c291fee4421b60a6066644f24bfb13859c78",
+    "scripts/mlb-operational-r7-errors.mjs": "eb92584126b1e7ec268b357eb090d9a40437dff16aa5fd7b5a7f35c9506ed220",
+    "scripts/mlb-operational-readonly-network-guard.mjs": "b4c535d64cce41aa85ee40be0fbdd351fd47d873262c549711d8c265d3aad383",
+    "scripts/mlb-operational-schema-preflight.sql": "6e796b5416eebea92dfc937ed757d05cc03bd753dad4da8b50769b66a035c30a",
+    "scripts/mlb-operational-tick.mjs": "e94c7d3107dfff260502cea395f8a8e582c360de06272d1568494320287ef5ee",
+    "scripts/mlb-operational-ui-validate.mjs": "1a81d861c995ae9d37a4a00177d119e8d28f68feef0cf6bfd2b5c4722eea1c16",
+    "scripts/mlb-operational-unattended-preflight.mjs": "dcf55b3119ac616687d39e2fdba477cf00dcb758e534b11e9382d5e6e3580fa4",
+    "scripts/mlb-phase2-r10-read-model-validate.mjs": "91732a12b0bff5a95b34937fa5c4684bb7b8ffe624a7374e6ef208e5c389acf7",
+    "scripts/mlb-pre-nonempty-readiness-validate.mjs": "c58169c3cfe838d0d3c662efcba7c16b9fce308945a1cd9040ef77094d04febf",
+    "scripts/verify-mlb-release-readiness.mjs": "c409fdccc4bf36748a22a171b762228aaf1c9f2f29ae41144fb2cd8a73cea9be",
+    "src/app/api/admin/mlb-operational-preflight/route.ts": "7162661a36e47f2467c0d754537371997315447a63594726c9f01a159f3d65f9",
+    "src/app/api/cron/mlb-operational/route.ts": "400417ec0c681ee3847bc00bac263a548ef30de0855aad1994f1c28eac6b1b0e",
+    "src/app/api/cron/operating-day/route.ts": "e43cf1ef095c2f16bc74b5a4e1737bc9e88ebaddbf12754ec2b4cea7c93436fb",
+    "src/app/api/mlb/operations/health/route.ts": "ffef2df6914d48dbfca090771ff54f1dbbcb6eea1d70a4f44eb92e361621e523",
+    "src/app/api/mlb/operations/route.ts": "4259aca43582e249c7e3e1ebd868a09465c41d920d7a6cfa2ab69d3fd5d720f5",
+    "src/app/api/mlb/performance/route.ts": "bbb38e8cc200396b0417f09cf2863d9c6439f0d8d4f1ca9fa8e6952f3fb76f5c",
+    "src/app/data-health/page.tsx": "30808241de4932d191217cc995f99aea724cb981f334a5c50eaefb8a8d83e4ee",
+    "src/app/globals.css": "8c3a114dbe4abac7ba89566f21e4a0071860113b7085499645e04771fb0c0a0b",
+    "src/app/layout.tsx": "40006cd7e1103ebc51528e19700a3ee7832b9e9ba881e45f5bce70d5d9d340b3",
+    "src/app/mlb-value-board/error.tsx": "dc8a83da95361570cd05dc62882ee7f94379e71976f4d1b07356ca03a4b2ab52",
+    "src/app/mlb-value-board/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
+    "src/app/mlb-value-board/page.tsx": "37eb4ae1160dba01388204500444c083ba4de45e58a29a6627bad6795a832a45",
+    "src/app/page.tsx": "8ce9cf3e1720b7abbca7bf22c61714c8e26bd1679aa0e0edb8b3234d0c90a470",
+    "src/app/performance/page.tsx": "44ce482e09e7e84a894a18602349823be821f7bd6485b1e3a9b8ea7772e7e2f5",
+    "src/app/today/error.tsx": "dc8a83da95361570cd05dc62882ee7f94379e71976f4d1b07356ca03a4b2ab52",
+    "src/app/today/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
+    "src/app/today/page.tsx": "211d45e7a6afd244db71c31c5c064daf8b2fc6d321a394739a8b387d74958ef6",
+    "src/components/dashboard/DashboardShell.tsx": "6b85337b0ebde601cec6b4ece58f438c2326b426565fc24ffcc18651d7231be7",
+    "src/components/dashboard/DashboardShellClient.tsx": "eeeeda1eb1a09c9e93b8cbb0b999802dfeb3c09546da485d22b7edb52c9cd621",
+    "src/components/pick2/CanonicalDashboardBoundary.tsx": "547379819564ac87b38b58d643c0419cace11891d0a0671c3e977455b65da409",
+    "src/components/pick2/MlbCards.tsx": "20a92fea292d0686621fc3206b42312aa1e19bfc0e700af3ba5bf2bb0c850b8a",
+    "src/components/pick2/MlbToday.tsx": "69d2efc64d919fdca7daa85c37b459f8377123eed1bf87a90519d23ed767494d",
+    "src/components/pick2/MlbValueBoardClient.tsx": "85944ea723017293f1da9d0bd4cdaaf0230ef9ae16ce4fbe26a5cfa7a60f1080",
+    "src/components/pick2/mlb-presentation.ts": "719429c546fb691ac5a6ed9bfef71395fed7092600fa638f1dbd597febf6f871",
+    "src/services/pick2-mlb-health.service.ts": "d9c0fe474cfa6f4e872cf1b5db4f8268e4004bc0af1bc8c420d7b62498f337e2",
+    "src/services/pick2-mlb-observed-evidence.service.ts": "8063062810edfb8fce881c7cf43d5e79d1193b8bc7197f2c1e47175a1e4be539",
+    "src/services/pick2-mlb-performance-read.service.ts": "0b8d3e8d841346f9ca7d5b3d2909b1c2daa571c28f1e1f9e1c56478154ad635f",
+    "src/services/pick2-mlb-settlement-persistence.service.ts": "0cfc044480e36af94380dfdb9d6433728fd5164d6b5a6ca7b58ae16a622bec85",
+    "src/services/pick2-mlb-settlement.ts": "7e61d78f9831637df24bae110c88ecf8937794a91cfaa3920a0d7cfdb76df2fe",
+    "src/services/pick2-mlb-unattended-preflight.ts": "8b7d8886188a354dbf78b85b6abff268e0455e4483777210bfa864f0b88082b0",
+    "src/services/pick2-mlb-value-board.service.ts": "b19ac743009b34ac4578f7c3131aa4514289bf0a772dcddc600b3d30e805a953",
+    "src/services/pick2-operational-projection.ts": "671ba2f2ae44577b4eb124eb955a2ce869155a76ac3b37a3004ebd1a9bcbaf03",
+    "src/services/pick2-operational-read.service.ts": "46d6d603dcb078192753359b524d8ca0645c7201ca1ceebd268ec02d23f10cf3",
+    "src/services/pick2-operational-telemetry.ts": "696decb4a3ccfe6570f87d41fd621ed89bee7d413f887bd96eae7ec8980df22d",
+    "src/types/pick2-value-board.ts": "4025e3da5bd62fec01c883e93c19e4de2aa19c201bcc0c32af9da685f09b6afa",
+    "supabase/functions/_shared/mlb-fenced-write.mjs": "cabe2cba9e9b43bad0fd200fe149295ba05ce4571804ade7afea2bbebf875624",
+    "supabase/functions/_shared/mlb-odds-budget-schema.mjs": "475819a9003df7865a278f9c50f84b4868fb7553510efc7ce3e7387e34689ca8",
+    "supabase/functions/_shared/mlb-odds-operational-budget.mjs": "d8ae593764a09b2a1c3c81df5f43b768c8eff27d433acd0681919d533f7e3b4c",
+    "supabase/functions/_shared/mlb-provider-evidence.mjs": "e01fecf0eaf9c3544de3fc1b2305f2334011a2224cf60eda143c49a161953b01",
+    "supabase/functions/_shared/mlb-runtime-schema.mjs": "660caaac02febc60eb04ae188c4cbd299830825875aa1925399b3c10530ea951",
+    "supabase/functions/_shared/mlb-runtime-state.mjs": "394d4f36a3b17ae6ced32f8f145bc12d245d5b398365ddbe132f74dc58a9724b",
+    "supabase/functions/mlb-operational-preflight/contract.json": "82510e8cb418c44130c77300d96006a6c9fe83dfa1c2cef506b4f6ed6e38fe2a",
+    "supabase/functions/mlb-operational-preflight/index.ts": "630006a001a94fedb729271f54c38820218976c2e18620e1042c8880bafdfc32",
+    "supabase/functions/mlb-operational-preflight/query.ts": "d6e4d12bbf03dce56f6c4e497df515a2a0e41fd6fdfdad7dec2e7ed77a30895e",
+    "supabase/functions/mlb-operational-preflight/review.mjs": "db31a57e24cf45b63bc8c79bb4b36131ddc2cc18b1ab5c9cc6300f6e5c5a0154",
+    "supabase/functions/mlb-runtime-state/index.ts": "a8b71dd86f24c2945b4938a377131ed1516d487e520afcd3037b010f2499d27a",
+    "supabase/functions/mlb-runtime-state/odds-budget-schema-contract.json": "4fc549240a134104cbbb4349a9adaaba89d1108d124e10689589e6eebcd96c7a",
+    "supabase/functions/mlb-runtime-state/schema-contract.json": "833efa34475a16ef2a006b0784a1b0960e2af54bfc53dc6e530d466fc7c1d52a",
+    "supabase/functions/mlb-runtime-state/write-contract.json": "e744ba78daffd46e2273e71a16a59b5c484d87ac7af55bdade8f972e96c66b92",
+    "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
+    "tests/dashboard-multisport/model-domain.test.mjs": "5ed798219fe3d9bd4a06580c67894e07c146c572f24ad0c2e3c3a77ee0dd3f83",
+    "tests/mlb-production-readiness/raw-pagination.test.mjs": "99fcdeefc7a2667bf831fff38f2d8ae3d6331c545023d824a282f44cfa9d795b"
+  },
+  "nonemptyUiRevision": {
+    "certificate": "MLB_DATA_02R_REPEATABILITY_CERTIFICATION.json",
+    "reason": "Explicit Puerto Rico timezone prevents server/browser hydration drift with real populated rows",
+    "checks": 12,
+    "providerCalls": 0,
+    "productionDml": 0
+  },
+  "r4Preflight": {
+    "status": "EDGE_PASS_VERCEL_AUTH_BLOCKED",
+    "certification": "docs/CERTIFICATION/MLB_DATA_02R_R4_UNATTENDED_PREFLIGHT_CERTIFICATION.json",
+    "activation": "DISABLED",
+    "blocker": "R4_RUNTIME_ACCESS_AND_HOST_UNVERIFIED"
+  },
+  "r5Preflight": {
+    "certification": "docs/CERTIFICATION/MLB_DATA_02R_R5_VERCEL_UNATTENDED_AUTH_AND_EXECUTOR_HOST_RECONCILIATION.json",
+    "schemaPreflight": "VERCEL_EDGE_PASS",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "schedulerActivation": false,
+    "blocker": "R5_PERSISTENT_EXECUTOR_HOST_UNAVAILABLE"
+  },
+  "r6Runtime": {
+    "status": "OFFLINE_VALIDATED_PRODUCTION_DEPLOYMENT_PENDING",
+    "reference": "MLB_DATA_02R_R6_DURABLE_RUNTIME_STATE_AND_VERCEL_FUNCTION_ENTRYPOINT.json",
+    "businessRegressionChecks": 71,
+    "httpHostChecks": 7,
+    "activation": "DISABLED"
+  },
+  "r7Revalidation": {
+    "status": "LOCAL_REPAIR_PASS",
+    "productionActivation": "PENDING",
+    "sqlChecks": 72,
+    "behaviorGroups": 17
+  },
+  "phase2Revalidation": {
+    "sqlChecks": 72,
+    "behaviorGroups": 17,
+    "status": "LOCAL_PASS_PRODUCTION_PENDING"
+  },
+  "r9Revalidation": {
+    "at": "2026-09-11T17:02:43.250Z",
+    "changedSourcePaths": [
+      "scripts/mlb-operational-r6-state-client.mjs",
+      "supabase/functions/_shared/mlb-fenced-write.mjs",
+      "supabase/functions/_shared/mlb-runtime-state.mjs"
+    ],
+    "checks": "R9 10 / runtime 21 / real-model 74 PASS",
+    "productionRecovery": "OBSERVATIONS_286_PERSISTED_CHECKPOINT_RECOVERY_PENDING",
+    "permissions": "UNCHANGED",
+    "checkpointChecks": 3
+  },
+  "uiPresentationRevalidation": {
+    "phase": "PICK_ANALYZER_PHASE2_UI_REDESIGN_V1",
+    "scope": "PRESENTATION_HASHES_ONLY",
+    "protectedRuntimeChanges": 0,
+    "providerChanges": 0,
+    "policyChanges": 0
+  },
+  "r12LocalRevalidation": {
+    "scope": "GRACEFUL_MISSION_EXHAUSTION_ONLY",
+    "operationalBudgetActivated": false,
+    "productionDeployment": "PENDING",
+    "protectedBusinessLogicChanges": 0
+  },
+  "r12OperationalRevalidation": {
+    "scope": "APPROVED_OPERATIONAL_BUDGET_AND_PUBLIC_HEALTH_LABELS",
+    "productionActivation": "PENDING_EXACT_DDL_APPROVAL",
+    "historicalMissionCounterChanges": 0,
+    "featureModelPolicyChanges": 0,
+    "changedSources": [
+      "scripts/mlb-operational-r6-run-store.mjs",
+      "scripts/mlb-operational-r6-state-client.mjs",
+      "src/app/data-health/page.tsx",
+      "src/services/pick2-mlb-health.service.ts",
+      "supabase/functions/_shared/mlb-runtime-state.mjs",
+      "supabase/functions/mlb-runtime-state/index.ts",
+      "scripts/mlb-operational-r7-errors.mjs",
+      "src/components/dashboard/DashboardShell.tsx",
+      "scripts/mlb-operational-budget-exhaustion.mjs"
+    ]
+  },
+  "stalePendingRunRevalidation": {
+    "at": "2026-09-20T13:50:00Z",
+    "scope": "EXPIRED_PRIOR_DATE_RUN_DISPOSITION_ONLY",
+    "authorityOperation": "dispose",
+    "businessLogicChanges": 0,
+    "modelChanges": 0,
+    "oddsPolicyChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0,
+    "behavior": "A prior-date RUNNING state may be disposed only through the existing fenced authority after expired-game and readback checks pass; current-date or active-lease runs remain fail-closed."
+  },
+  "dependencyFailureRecoveryRevalidation": {
+    "at": "2026-09-20T14:30:00Z",
+    "scope": "ZERO_WRITE_DEPENDENCY_FAILURE_DISPOSITION_ONLY",
+    "authorityOperation": "disposeDependencyFailure",
+    "businessLogicChanges": 0,
+    "modelChanges": 0,
+    "oddsPolicyChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0,
+    "guard": "Only FAILED DEPENDENCY_SCOPE runs with completed dependency checkpoint, zero DML stages and zero Odds calls are submitted to the existing fenced authority; authority revalidates schedule evidence and target rows before terminal disposition."
+  },
+  "dependencyNativeUpdateRecovery": {
+    "at": "2026-09-20T15:35:00Z",
+    "scope": "AUTHORITY_REVIEWED_NATIVE_GAME_UPDATES_ONLY",
+    "businessLogicChanges": 0,
+    "modelChanges": 0,
+    "oddsPolicyChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "runtimeStateEdgeV15HashReconciliation": {
+    "at": "2026-09-20T16:56:00Z",
+    "priorHash": "34043e6bcfa57919206effc75620fa46aa0a56755520148053d1cc5986629d59",
+    "currentHash": "394d4f36a3b17ae6ced32f8f145bc12d245d5b398365ddbe132f74dc58a9724b",
+    "edgeVersion": 15,
+    "scope": "CERTIFICATE_HASH_SYNC_ONLY",
+    "modelChanges": 0,
+    "officialPicksChanges": 0,
+    "apostarChanges": 0
+  },
+  "officialPickVisibilityRevalidation": {
+    "at": "2026-09-20",
+    "scope": "PRESENTATION_AND_READ_ONLY_PERFORMANCE_LEDGER",
+    "persistedOfficialPickPriority": "PRESERVED_OVER_CURRENT_MARKET_FRESHNESS",
+    "performanceScopes": "STORED_DECISIONS_AND_CERTIFIED_SETTLEMENTS_SEPARATED",
+    "modelChanges": 0,
+    "policyChanges": 0,
+    "officialPickWrites": 0,
+    "apostarChanges": 0,
+    "protectedHashesUpdated": [
+      "src/services/pick2-operational-projection.ts",
+      "src/services/pick2-mlb-performance-read.service.ts",
+      "src/components/pick2/MlbCards.tsx",
+      "src/components/pick2/mlb-presentation.ts",
+      "src/app/performance/page.tsx"
+    ],
+    "performanceAggregation": "ONE_UNIT_PER_UNIQUE_GAME_SIDE_SELECTION;DECISION_SNAPSHOTS_AUDIT_ONLY"
+  },
+  "revalidation20261014": {
+    "status": "OFFLINE_REVALIDATED_PRODUCTION_READBACK_PENDING",
+    "generatedAt": "2026-10-14T21:14:14.027Z",
+    "priorCertificate": "docs/CERTIFICATION/MLB_PRE_NONEMPTY_LIVE_READINESS.json",
+    "priorCertificateSha256": "a3736a76b8d39fa5ed931096feb706a06b525c628a3340f7954a1bef48bfd77b",
+    "evidenceHashes": {
+      "docs/product/mlb-release-readiness-20261014/attempts.json": "291be6af946f91e609b71096ef06270bc2ad43806ce38dcca452bc2326d43557",
+      "docs/product/mlb-release-readiness-20261014/behavior.json": "793a5f443f31f4eb579a26c0a6c6e73967173c7ede6d07d4ce13427f18cc3992",
+      "docs/product/mlb-release-readiness-20261014/budget.json": "4e350d55e2bfd0e44d7e731c7db4fe1db14a8a113db230bbb36005d190b9990e",
+      "docs/product/mlb-release-readiness-20261014/durable-schema.json": "1d200ee5820b2f440210380ced2b3a2ca086ad9d70989c877508d766b4e7eb73",
+      "docs/product/mlb-release-readiness-20261014/durable-state.json": "55173dc78e8f7cbef38d0e2a0d877db1a253a61855600958c920a3a7212da0dd",
+      "docs/product/mlb-release-readiness-20261014/feature-math-review.json": "a0386bffb9716b99dc9e75b4594bf71b6bc3d63bbc27edfd17336ae4f22248e1",
+      "docs/product/mlb-release-readiness-20261014/fenced-write.json": "eb900db1d429cabd6120952c8a7e34427fcbb2dee2697182297db394dbd28f85",
+      "docs/product/mlb-release-readiness-20261014/health.json": "6bc055aa07fa91025b4883a15f8756d29acd7218b93452e5d932ad7d4dd8e7ec",
+      "docs/product/mlb-release-readiness-20261014/host.json": "d4ca30b41a59772ae43bda769d7a36ebb5940b22b23a97b4e90fb235a8f4c264",
+      "docs/product/mlb-release-readiness-20261014/operational-budget.json": "4bf1918dc7514edc2a885f6cded9a5afd20f2e54870dc76ae867e7cb044184d5",
+      "docs/product/mlb-release-readiness-20261014/operational-guards.json": "e214ffdf3ea022f1a5804c2ec71f69d5ea0a5d863feb52f4538924579a7f94d4",
+      "docs/product/mlb-release-readiness-20261014/provider-await.json": "1711f104a22d09cb0d638d9e1742e7faa42741c8879d4daceafad511848dce79",
+      "docs/product/mlb-release-readiness-20261014/r3-guards.json": "cbe4b2c6bbc6357442416d0144b4dd9d91a0940a37eae80f6ac8180e596a296c",
+      "docs/product/mlb-release-readiness-20261014/recovery.json": "3ff0cc26506cce8806cf09a9fb26098c6bfb3b75e2d23171869c1c01b93a3d2f",
+      "docs/product/mlb-release-readiness-20261014/schema-preflight.json": "cfe70aed534b46cba01ba6f9a934c4da0e929b6693bd22d148f3b24bf8c5bb6a",
+      "docs/product/mlb-release-readiness-20261014/security.json": "9e4c9fcf33b4aa1300a2a85c8ac07d8e1a2ab9a90d4bdef84c2520d126a68941",
+      "docs/product/mlb-release-readiness-20261014/stored-inference-replay.json": "76f2e9c62ab59842f976122e13bb5d3e0aa65e7c398de948a016a2d6b335eb6e",
+      "docs/product/mlb-release-readiness-20261014/target-local-history.json": "f9cfe6463780ec569b1686900f75104a9d4c0b37cfc4488ab68eb140549374b9"
+    },
+    "scope": "Reviewed transport pagination and immutable UI changes; original model, feature math, policy, DML, provider caps and historical records preserved.",
+    "historicalGateEvidence": "Inherited from digest-pinned original; full original private raw-cache SQL integration was not reacquired or rerun. Current boundary, state, schema, recovery, budget and behavioral regressions and three stored 76-feature inference replays are separately recorded.",
+    "deploymentPerformed": false,
+    "productionReadback": "PENDING_NO_DEPLOYMENT",
+    "regularSeasonOnly": true,
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0
+  }
+}

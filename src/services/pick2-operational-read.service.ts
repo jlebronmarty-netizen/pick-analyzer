@@ -15,7 +15,7 @@ export async function readMlbOperationalInputs(at = new Date().toISOString()) {
   const input: MlbReadInput = { at, games: [], teams: [], predictions: [], values: [], picks: [], observations: [], mappings: [], schedules: [] }
   try {
     const [games, teams, schedules] = await Promise.all([
-      rows(supabaseAdmin.from('pick2_mlb_games').select('game_pk,game_date,scheduled_at,home_team_id,away_team_id,official_status,metadata').eq('game_date', date).order('scheduled_at').order('game_pk').limit(51), 50),
+      rows(supabaseAdmin.from('pick2_mlb_games').select('game_pk,game_date,scheduled_at,home_team_id,away_team_id,official_status,game_type,metadata').eq('game_date', date).order('scheduled_at').order('game_pk').limit(51), 50),
       rows(supabaseAdmin.from('sports_teams').select('id,name').eq('sport_key', 'baseball_mlb').limit(101), 100),
       readObservedMlbSchedule(date, at).catch(() => { input.evidenceUnavailable = true; warnings.push('Verified schedule evidence is unavailable; current actionability is blocked.'); return [] }),
     ])

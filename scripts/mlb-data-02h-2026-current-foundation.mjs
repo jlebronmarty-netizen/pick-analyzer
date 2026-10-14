@@ -343,18 +343,22 @@ async function readPersistedRawRowsForGamePks(db, gamePks) {
   for (let index = 0; index < gamePks.length; index += 8) {
     const scope = gamePks.slice(index, index + 8)
     const scopedRows = []
+    let expectedCount = null
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await db
+      const { data, error, count } = await db
         .from('pick2_raw_mlb_statcast_pitches')
-        .select(rawColumns)
+        .select(rawColumns, { count: 'exact' })
         .in('game_pk', scope)
         .order('game_pk', { ascending: true })
         .order('id', { ascending: true })
         .range(from, from + 999)
       if (error || !Array.isArray(data)) throw new Error('R2N_RAW_CACHE_READ_FAILED')
+      expectedCount ??= count
+      if (!Number.isInteger(count) || count < 0 || count !== expectedCount || count > scope.length * 1000
+        || data.length !== Math.min(1000, Math.max(0, count - from))) throw new Error('R2N_RAW_CACHE_TRUNCATED_OR_OVER_CAP')
       scopedRows.push(...data)
       if (scopedRows.length > scope.length * 1000) throw new Error('R2N_RAW_CACHE_TRUNCATED_OR_OVER_CAP')
-      if (data.length < 1000) break
+      if (scopedRows.length === expectedCount) break
     }
     const counts = new Map(scope.map((gamePk) => [Number(gamePk), 0]))
     for (const row of scopedRows) {
@@ -363,6 +367,7 @@ async function readPersistedRawRowsForGamePks(db, gamePks) {
       counts.set(gamePk, (counts.get(gamePk) ?? 0) + 1)
     }
     if ([...counts.values()].some((count) => count > 1000)) throw new Error('R2N_RAW_CACHE_TRUNCATED_OR_OVER_CAP')
+    if (new Set(scopedRows.map(row => row.id)).size !== scopedRows.length) throw new Error('R2N_RAW_CACHE_DUPLICATE')
     rows.push(...scopedRows)
   }
   return rows

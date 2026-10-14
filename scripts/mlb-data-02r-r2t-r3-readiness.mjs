@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 
-export const R3_CERTIFICATE = 'docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_LIVE_REENABLEMENT_CERTIFICATION.json'
+export const R3_CERTIFICATE = 'docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_REVALIDATION_20261014.json'
 export const R3_GATE_IDS = Object.freeze(['R2T_PREREQUISITE', 'REAL_CALL_GRAPH', 'MODEL_76', 'PROVENANCE_STARTER', 'PHYSICAL_FK', 'PROVIDER_CAPS', 'DML_SCOPE_CAPS', 'RUN_FREEZE_CHECKPOINT', 'NO_FIXTURE_FALLBACK', 'MANUAL_ENTRYPOINT', 'READBACK_IDEMPOTENCY', 'NO_CERTIFICATION_SIDE_EFFECTS'])
 const block = (condition, reason) => { if (!condition) throw new Error(`R2T_LIVE_BLOCKED:R3_${reason}`) }
 export const normalizedFileDigest = file => createHash('sha256').update(fs.readFileSync(file, 'utf8').replaceAll('\r\n', '\n')).digest('hex')

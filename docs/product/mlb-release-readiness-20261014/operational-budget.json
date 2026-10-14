@@ -1,0 +1,32 @@
+{
+  "status": "R12_OPERATIONAL_DISPOSABLE_PASS",
+  "checks": [
+    {
+      "name": "Exact catalog, RLS, client denial and service column-only updates",
+      "status": "PASS"
+    },
+    {
+      "name": "48/day independent of historical 20; uncertain attempts count, retries and competing leases denied",
+      "status": "PASS"
+    },
+    {
+      "name": "PR reset creates new day; cadence survives midnight and obeys 60/30/15 boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "Empty, started, near-start and durable veto scope cannot acquire",
+      "status": "PASS"
+    },
+    {
+      "name": "Response credits are observed, never inferred; uncertain HTTP attempts are reserved once",
+      "status": "PASS"
+    },
+    {
+      "name": "Missing schema and catalog drift fail closed; no history mutation",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

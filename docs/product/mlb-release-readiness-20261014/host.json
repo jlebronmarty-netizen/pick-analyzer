@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "Missing and incorrect Cron credentials reject without executor calls",
+      "status": "PASS"
+    },
+    {
+      "name": "Caller-selected scope, dates or request payload reject",
+      "status": "PASS"
+    },
+    {
+      "name": "Cron GET invokes the sole coordinator with deployed package only",
+      "status": "PASS"
+    },
+    {
+      "name": "Authenticated dry POST selects provider-free host probe",
+      "status": "PASS"
+    },
+    {
+      "name": "Production empty POST stream invokes dry host; nonempty stream rejects",
+      "status": "PASS"
+    },
+    {
+      "name": "Unexpected errors cannot expose credentials or raw evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Preview and package mismatch cannot reach schema/provider/database work",
+      "status": "PASS"
+    },
+    {
+      "name": "Puerto Rico cadence preserves initialization pregame incremental postgame overnight modes",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0,
+  "productionHostInvocation": "PENDING_EDGE_DEPLOYMENT_APPROVAL"
+}

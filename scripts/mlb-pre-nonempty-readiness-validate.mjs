@@ -160,7 +160,10 @@ await check('Today and Value Board preserve canonical values, require stored pic
   assert.equal(projectMlbOperations({ ...input, picks: [official] }).sources[0].status, 'OFFICIAL_PICK')
   assert.equal(projectMlbOperations({ ...input, picks: [{ ...official, value_evaluation_id: 'wrong' }] }).sources[0].status, 'VALUE_CANDIDATE')
   const changed = { ...game, metadata: { ...game.metadata, homeProbablePitcher: { id: 3 } } }
-  assert.equal(projectMlbOperations({ ...input, games: [changed], picks: [official] }).sources[0].status, 'BLOCKED')
+  const changedProjection = projectMlbOperations({ ...input, games: [changed], picks: [official] })
+  assert.equal(changedProjection.sources[0].opportunity_status, 'OFFICIAL_PICK')
+  assert.ok(changedProjection.sources[0].blocker_codes.includes('STARTER_EVIDENCE_CHANGED'))
+  assert.equal(changedProjection.games[0].gameStatus, 'BLOCKED')
 })
 await check('daily binding resumes the exact R2 run after interruption; saved terminal result prevents reexecution', async () => {
   const liveRoot = fs.mkdtempSync(path.join(root, 'daily-recovery-'))

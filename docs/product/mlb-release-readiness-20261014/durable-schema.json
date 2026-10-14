@@ -1,0 +1,140 @@
+{
+  "status": "PASS",
+  "certificationScope": "PROPOSED_SCHEMA_ONLY",
+  "migration": "supabase/migrations/20260909210219_mlb_r6_durable_runtime_state.sql",
+  "normalizedSha256": "b8e140c04fdb20404380d368e7ed27ba592934d369072aea3be1785df5331036",
+  "checks": [
+    {
+      "name": "Exact proposed migration applies in disposable PostgreSQL",
+      "status": "PASS"
+    },
+    {
+      "name": "Existing table and row preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "Migration seeds no runtime rows or budget",
+      "status": "PASS"
+    },
+    {
+      "name": "RLS enabled",
+      "status": "PASS"
+    },
+    {
+      "name": "anon read denied",
+      "status": "PASS"
+    },
+    {
+      "name": "anon insert denied",
+      "status": "PASS"
+    },
+    {
+      "name": "anon update denied",
+      "status": "PASS"
+    },
+    {
+      "name": "anon delete denied",
+      "status": "PASS"
+    },
+    {
+      "name": "anon truncate denied",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated read denied",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated insert denied",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated update denied",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated delete denied",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated truncate denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Service role seeds known mission usage at two",
+      "status": "PASS"
+    },
+    {
+      "name": "Mission counter cannot reset to zero",
+      "status": "PASS"
+    },
+    {
+      "name": "Mission counter accepts twenty",
+      "status": "PASS"
+    },
+    {
+      "name": "Mission counter rejects twenty-one",
+      "status": "PASS"
+    },
+    {
+      "name": "Single mission identity enforced",
+      "status": "PASS"
+    },
+    {
+      "name": "Service role can create compact run metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "Duplicate run identity rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "mlb_official_calls hard ceiling",
+      "status": "PASS"
+    },
+    {
+      "name": "statcast_calls hard ceiling",
+      "status": "PASS"
+    },
+    {
+      "name": "odds_calls hard ceiling",
+      "status": "PASS"
+    },
+    {
+      "name": "Oversized checkpoint rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Nonobject checkpoint rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Oversized DML metadata rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Partial lease rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Bounded lease schema accepted",
+      "status": "PASS"
+    },
+    {
+      "name": "Excessive lease interval rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Service role delete denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Service role truncate denied",
+      "status": "PASS"
+    }
+  ],
+  "productionDdl": 0,
+  "productionDml": 0,
+  "providerCalls": 0,
+  "runtimeGatesCertified": false
+}

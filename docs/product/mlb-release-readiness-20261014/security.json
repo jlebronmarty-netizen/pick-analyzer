@@ -1,0 +1,24 @@
+{
+  "status": "R7_SECURITY_PASS",
+  "checks": [
+    {
+      "name": "Evidence access requires RLS and no public/client object policies",
+      "status": "PASS"
+    },
+    {
+      "name": "Storage preflight rejects public or unbounded buckets",
+      "status": "PASS"
+    },
+    {
+      "name": "Object transport forbids overwrite and arbitrary paths",
+      "status": "PASS"
+    },
+    {
+      "name": "Legacy MLB route blocks acquisitions before any planner or database access",
+      "status": "PASS"
+    }
+  ],
+  "providerCalls": 0,
+  "productionDml": 0,
+  "productionDdl": 0
+}

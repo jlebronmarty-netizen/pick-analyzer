@@ -1,3 +1,4 @@
+import { rankHighestEdge } from '@/lib/highest-edge-ranking'
 import 'server-only'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -483,6 +484,7 @@ export type DashboardTodayContract = {
     mostLikely: DashboardTodaySection<unknown[]>
     groundedOpportunities: DashboardTodaySection<unknown[]>
     groundedEventEvidence: DashboardTodaySection<Array<Record<string, unknown>>>
+    highestEdge?: DashboardTodaySection<unknown[]>
     bestValue: DashboardTodaySection<unknown[]>
     modelIntelligence: DashboardTodaySection<unknown>
     projectedScores: DashboardTodaySection<unknown[]>
@@ -2047,6 +2049,16 @@ export async function getDashboardToday({
   const mostLikelyData = boardMostLikelyData
   const modelMostLikelyData = mostLikelyData.length ? mostLikelyData : modelOnly.categories.allModelOutcomes.slice(0, 10)
   const bestValueData = boardBestValueData
+  const highestEdgeData = rankHighestEdge(displayCandidates)
+    .map((candidate) => ({
+      predictionId: candidate.predictionId, matchup: candidate.matchup, scheduledTime: candidate.scheduledTime,
+      marketLabel: candidate.marketLabel, selection: candidate.canonicalOutcome?.selection ?? null,
+      line: candidate.canonicalOutcome?.line ?? null, modelProbability: candidate.canonicalOutcome?.probability ?? null,
+      edgePercentagePoints: candidate.canonicalEv?.edge ?? null,
+      expectedValuePercent: candidate.canonicalEv?.expectedValue ?? null,
+      americanOdds: candidate.canonicalPrice?.americanOdds ?? null,
+      sportsbook: candidate.canonicalPrice?.sportsbook ?? null,
+    }))
   const aiBetFinderData = modelMostLikelyData.slice(0, 5)
   const topOpportunity = modelMostLikelyData[0] ?? null
   const boardGameRows = currentCards.map((card) => ({
@@ -2291,6 +2303,12 @@ export async function getDashboardToday({
           ? `${groundedOpportunitySummary.incompleteEventOnlyEvidenceRows} event-level evidence rows are separated from market opportunities.`
           : 'No event-only grounded evidence rows are currently separated from market-level opportunities.',
         generatedAt
+      ),
+      highestEdge: section(
+        boardResult.ok ? (highestEdgeData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        highestEdgeData,
+        boardResult.ok ? 'Informational candidates ranked by positive model edge; not Official Picks.' : 'Edge ranking is temporarily unavailable.',
+        boardResult.ok ? generatedAt : null
       ),
       bestValue: section(
         boardResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',

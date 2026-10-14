@@ -1,3 +1,48 @@
+## Release candidate verified; production approval pending — 2026-10-14
+
+- Application `92aa7e476024a5c2dfa6f11b145b2a9a17a545e4`: ten GitHub checks successful, Vercel preview READY, exact SHA confirmed by API; final local build exit 0. All 107 operational source pins and both certificates are packaged.
+- 160 operational assertions, 20 pagination tests, 26 dashboard tests and three exact stored 76-feature/probability replays pass. Browser/API review verifies 42 unique official picks (19 W / 23 L), filters, research separation and the postseason scope block.
+- Production read-only Edge health and 0/48 operational budget pass; preview Edge health remains unverified. No source-drift gate has yet been changed in production. Production-target readback and a fresh eligible run remain post-release requirements.
+- See `docs/product/MLB_RELEASE_READINESS_20261014.md` and its receipts. No provider acquisitions, production DML/DDL, scheduler/model/policy changes, merge or production release. Original official records fingerprint-identical; mobile rollout remains separate.
+
+## MLB pipeline read-only diagnosis — 2026-10-14
+
+- Exact production commit reproduces R3 source-drift preflight failure before durable/provider work; two R3 and four later readiness hash mismatches exist on main. See `docs/product/MLB_PIPELINE_DIAGNOSTIC_20261014.md` and JSON receipt.
+- Last durable run and champion prediction are September 22. Today game 849811 has no champion prediction, market observations or official pick. Historical mission cap alone is not established as the active blocker.
+- Offline reproduction exit 2 is expected. Repair requires source review and recertification, not blind hash replacement. No production/provider/database/scheduler changes; mobile and production remain paused.
+
+## 2026-10-14 Desktop review before mobile/production
+
+- Desktop review completed with corrections: Performance light-theme header/result contrast fixed; returns explicitly labeled one-unit basis. Source3047f48 preview verified,23 tests/lint PASS, nine GitHub checks green.
+- Independent SQL confirms151 snapshots =42 unique selections,19W/23L;109 repeats excluded, zero conflicting settlements. Pagination, outcome/date filters and links checked in browser.
+- Open operational dependency: canonical game849811 has no champion prediction or market observation at the review time. Cause/execution timing remains to be checked; no cron malfunction is asserted from absence alone.
+- Report/receipt/read-only query/before-after captures: `docs/product/DESKTOP_REVIEW_20261014.md`. Mobile and production stay paused. No database/provider/model/scheduler change or merge.
+- Local webpack/TypeScript PASS; full local build blocked at existing missing Supabase environment. Configured preview Ready; no local task process left running.
+
+## 2026-10-14 Multisport UI and Qualified Plays — verified desktop preview
+
+- PR #270 remains draft: actual `/` and `/today` overview/daily lists, official settlement filters, and separate `/qualified-plays` canonical research view implemented.
+- 23 tests, targeted ESLint, webpack and TypeScript PASS. Source e583ebad33702b2614d37df5fdc856c24f0baf3d has green GitHub checks and a Ready Vercel preview; real desktop browser checks PASS.
+- Canonical research audit:815 rows/16 exact groups, independent SQL parity PASS. Official MLB19W/23L(45.2%) is kept separate from research; other sports retain unknown official records.
+- Evidence/screenshots: `docs/product/QUALIFIED_PLAYS_PREVIEW_VERIFICATION.md`. Mobile review remains pending. Full local build blocked only at missing configured Supabase environment; configured preview succeeded.
+- No main merge/production promotion, database writes, providers, migrations, model changes or scheduler activation. No local task process remains active.
+
+## 2026-10-14 Qualified Plays integration and homepage route correction — draft
+
+- Added `/qualified-plays` and navigation with a read-only canonical-ledger report; phases, engines, exact lines/directions, models and evidence classes remain separate.
+- Connected the requested overview and daily lists to the actual `/` and `/today` Pick 2 surface, beyond the legacy `/dashboard`. The homepage reuses the existing canonical snapshot; it does not consume legacy recommendation feeds.
+- Direct read-only Supabase audit: 815 observations /16 groups; pure application aggregation and paginated mapper match independent SQL counts. Evidence: `docs/product/QUALIFIED_PLAYS_READ_VERIFICATION_20261014.json`.
+- 23 logic/render regression tests PASS. Publication remains a PR #270 draft; latest build/browser results are recorded in `docs/product/MULTISPORT_DASHBOARD.md`. No production activation or writes to the database.
+
+## 2026-10-14 Pick Analyzer multisport dashboard — draft review
+
+- Dashboard implemented with weighted overall official accuracy, individual sport readiness/accuracy cards, daily official picks and a separate canonical edge ranking.
+- MLB is the only official performance adapter connected. Other sport records remain unavailable rather than fabricated or mixed with preview/research samples.
+- Performance adds paginated selection-level win/loss/push/void/pending details and result/date filters; original settlements, recommendation policy and historical rows are unchanged.
+- 12 deterministic logic/React render tests PASS. Targeted ESLint and whitespace checks PASS. Webpack and TypeScript PASS after increasing the Node heap. Full build BLOCKED_MISSING_BUILD_ENV (`NEXT_PUBLIC_SUPABASE_URL`, existing copilot route); browser installation failed with truncated downloads. Live review/deployment remain pending. Evidence: `docs/product/MULTISPORT_DASHBOARD.md`.
+- Next integration audits: NHL and NFL preview lifecycles, then NBA foundation. Official recommendation and settlement certification is still required independently for each sport.
+- No provider requests, database writes, migrations, model changes or production deployment were executed by this UI task. Sports Edge Hub and its concurrent research were not modified.
+
 ## 2026-10-07 closeout preparation — authoritative
 
 - Master ledger verified at 686 rows (488 REGULAR_SEASON /198 POSTSEASON), zero unsafe flags or late freezes.
