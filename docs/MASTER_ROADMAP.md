@@ -1,3 +1,11 @@
+## 2026-10-14 Multisport UI and Qualified Plays — verified desktop preview
+
+- PR #270 remains draft: actual `/` and `/today` overview/daily lists, official settlement filters, and separate `/qualified-plays` canonical research view implemented.
+- 23 tests, targeted ESLint, webpack and TypeScript PASS. Source e583ebad33702b2614d37df5fdc856c24f0baf3d has green GitHub checks and a Ready Vercel preview; real desktop browser checks PASS.
+- Canonical research audit:815 rows/16 exact groups, independent SQL parity PASS. Official MLB19W/23L(45.2%) is kept separate from research; other sports retain unknown official records.
+- Evidence/screenshots: `docs/product/QUALIFIED_PLAYS_PREVIEW_VERIFICATION.md`. Mobile review remains pending. Full local build blocked only at missing configured Supabase environment; configured preview succeeded.
+- No main merge/production promotion, database writes, providers, migrations, model changes or scheduler activation. No local task process remains active.
+
 ## 2026-10-14 Qualified Plays integration and homepage route correction — draft
 
 - Added `/qualified-plays` and navigation with a read-only canonical-ledger report; phases, engines, exact lines/directions, models and evidence classes remain separate.
