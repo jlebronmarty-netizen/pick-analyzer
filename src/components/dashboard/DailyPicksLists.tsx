@@ -13,7 +13,11 @@ export default function DailyPicksLists({
   operatingDate,
   official,
   edge,
+  officialHref = "/mlb",
+  edgeHref = "/best-value",
 }: {
+  officialHref?: string;
+  edgeHref?: string;
   operatingDate?: string;
   official?: Section;
   edge?: Section;
@@ -44,7 +48,7 @@ export default function DailyPicksLists({
             <p className="mt-2 text-sm text-slate-400">
               {ranked
                 ? "Informational opportunities, ordered by edge in percentage points. These are not official recommendations."
-                : "Selections that passed the existing official recommendation policy."}
+                : "Recorded official selections. Check current availability in the game details."}
             </p>
             {unavailable ? (
               <p role="status" className="mt-5 text-sm text-amber-200">
@@ -97,12 +101,17 @@ export default function DailyPicksLists({
                     <p className="mt-2 text-xs text-slate-500">
                       {pick.sportsbook ?? "Book unavailable"}
                     </p>
+                    {pick.availability && (
+                      <p className="mt-2 text-xs text-amber-200">
+                        {pick.availability}
+                      </p>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
             <Link
-              href={ranked ? "/best-value" : "/mlb"}
+              href={ranked ? edgeHref : officialHref}
               className="mt-4 inline-block text-sm font-semibold text-teal-300"
             >
               {ranked

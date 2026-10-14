@@ -1,4 +1,5 @@
 export type DailyPickDisplay = {
+  availability?: string;
   predictionId: string;
   matchup: string;
   scheduledTime: string | null;

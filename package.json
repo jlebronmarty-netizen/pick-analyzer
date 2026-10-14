@@ -32,7 +32,7 @@
     "mlb:statcast:validate": "node scripts/mlb-statcast-validate.mjs",
     "mlb:statcast:runtime:validate": "node scripts/mlb-statcast-runtime-performance-validate.mjs",
     "mlb:statcast:matchup:validate": "node scripts/mlb-statcast-matchup-validate.mjs",
-    "test:dashboard-multisport": "node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/dashboard-multisport/metrics.test.mjs tests/dashboard-multisport/components.test.mjs"
+    "test:dashboard-multisport": "node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/dashboard-multisport/*.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",

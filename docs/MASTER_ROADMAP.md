@@ -1,3 +1,10 @@
+## 2026-10-14 Qualified Plays integration and homepage route correction — draft
+
+- Added `/qualified-plays` and navigation with a read-only canonical-ledger report; phases, engines, exact lines/directions, models and evidence classes remain separate.
+- Connected the requested overview and daily lists to the actual `/` and `/today` Pick 2 surface, beyond the legacy `/dashboard`. The homepage reuses the existing canonical snapshot; it does not consume legacy recommendation feeds.
+- Direct read-only Supabase audit: 815 observations /16 groups; pure application aggregation and paginated mapper match independent SQL counts. Evidence: `docs/product/QUALIFIED_PLAYS_READ_VERIFICATION_20261014.json`.
+- 23 logic/render regression tests PASS. Publication remains a PR #270 draft; latest build/browser results are recorded in `docs/product/MULTISPORT_DASHBOARD.md`. No production activation or writes to the database.
+
 ## 2026-10-14 Pick Analyzer multisport dashboard — draft review
 
 - Dashboard implemented with weighted overall official accuracy, individual sport readiness/accuracy cards, daily official picks and a separate canonical edge ranking.
