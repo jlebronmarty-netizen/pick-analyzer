@@ -30,6 +30,7 @@ export default function QualifiedPlaysPanel({
         <h1 className="mt-2 text-3xl font-bold text-white">
           Qualified Plays — forward evidence
         </h1>
+        <Link href="/mlb/overview" className="mt-3 inline-block text-sm font-semibold text-teal-300">MLB general · motores, predicciones y resultados →</Link>
         <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">
           Historical observations by exact contract, model and engine. These are
           not Official Picks, calibrated per-play probabilities or proof of
