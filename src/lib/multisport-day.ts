@@ -5,9 +5,10 @@ import {nhlDate,nhlOpportunities} from './nhl-view';
 import type {QualifiedReport} from './qualified-plays';
 import {operationalDailyPicks} from './operational-daily-picks';
 import {dailyDisplayRows} from './daily-pick-display';
-export type DayGame={key:string;sport:'MLB'|'NHL';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
+import {ncaabDate,type NcaabReport} from './ncaab-checkpoint';
+export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
 export type DayPick={key:string;sport:string;classification:string;matchup:string;selection:string;marketLabel:string;modelProbability:number|null;projection:number|null;edgePp:number|null;odds:number|null;book:string|null;href:string};
-export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport){
+export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport){
  const games:DayGame[]=view.games.map(g=>({key:'MLB:'+g.gamePk,sport:'MLB',eventId:String(g.gamePk),title:g.away+' at '+g.home,scheduledAt:g.scheduledAt,
   analyzed:g.analysisAvailable||Number.isFinite(g.homeProbability)&&Number.isFinite(g.awayProbability),started:isStarted(g),waiting:matchesSlateFilter(g,view.board.rows,'Waiting'),official:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,
   registered:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,value:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='VALUE_CANDIDATE').length,noEdge:matchesSlateFilter(g,view.board.rows,'No Edge')}));
@@ -34,6 +35,16 @@ export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport)
   for(const p of nhl.history.filter(p=>nhlDate(p.scheduledAt)===view.date&&!['CANCELLED','VOID'].includes(p.status)))selected.push({key:'NHL:'+p.id,sport:'NHL',classification:'MODEL_ONLY',marketLabel:'Moneyline · incluye OT',matchup:p.eventName,selection:p.direction,modelProbability:100*p.modelProbability,projection:null,edgePp:p.edgePp,odds:p.odds,book:p.sportsbook,href:'/nhl'});
   edge.push(...opportunities.map(p=>({key:'NHL:'+p.key,sport:'NHL',classification:'Informativo · par Circa sin margen',marketLabel:'Moneyline · incluye OT',matchup:p.eventName,selection:p.selection,modelProbability:p.probability*100,projection:null,edgePp:p.edgePp,odds:p.odds,book:'Circa',href:'/nhl'})));
  }else warnings.push('NHL: fuente no disponible; calendario y selecciones incompletos.');
+ if(ncaab?.status==='AVAILABLE'){
+  warnings.push('NCAAB: checkpoint publicado '+ncaab.data.generatedAt+'; sin sincronización continua, cuotas ni edge verificado.');
+  for(const r of ncaab.data.observations){
+   // Placeholder tips must never become verified calendar start times.
+   if(r.reason==='UNVERIFIED_TIP'||ncaabDate(r.scheduled_at)!==view.date)continue;
+   const forecast=r.state==='FORECAST',title=(r.away_name??r.away_id)+' at '+(r.home_name??r.home_id);
+   games.push({key:'NCAAB:'+r.event_id,sport:'NCAAB',eventId:r.event_id,title,scheduledAt:r.scheduled_at,analyzed:forecast,started:Date.parse(r.scheduled_at)<=Date.now(),waiting:!forecast&&Date.parse(r.scheduled_at)>Date.now(),official:0,registered:forecast?1:0,value:0,noEdge:false});
+   if(forecast)selected.push({key:'NCAAB:preseason:'+r.event_id,sport:'NCAAB',classification:'NCAAB_PRESEASON_V1 · experimental · checkpoint',marketLabel:'Ganador proyectado · sin cuota',matchup:title,selection:r.predicted_winner===r.home_id?(r.home_name??r.home_id):(r.away_name??r.away_id),modelProbability:100*(r.predicted_winner===r.home_id?r.home_win_probability!:r.away_win_probability!),projection:null,edgePp:null,odds:null,book:null,href:'/ncaab'});
+  }
+ }else if(ncaab)warnings.push(ncaab.warning);
  const distinct=(rows:DayPick[])=>[...new Map(rows.map(p=>[p.key,p])).values()];
  return {date:view.date,games:games.sort((a,b)=>Date.parse(a.scheduledAt)-Date.parse(b.scheduledAt)||a.key.localeCompare(b.key)),selected:distinct(selected),edge:distinct(edge).sort((a,b)=>(b.edgePp??0)-(a.edgePp??0)||a.key.localeCompare(b.key)),warnings:[...new Set(warnings)],nhlHealth:nhl.status==='AVAILABLE'?nhl.health:null};
 }
