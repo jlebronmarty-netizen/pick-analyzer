@@ -1,0 +1,93 @@
+{
+  "scope": "NCAAB_PUBLISHED_CHECKPOINT_DISPLAY_ONLY",
+  "release": "bed915484d13a7422f1e0e8dfaa7175def68c0e0",
+  "implementation": "67bc371e231551fbb99195439fe117353d726721",
+  "tree": "8e57963eeddb15edd753eb562c7768a0a4ece3d6",
+  "pullRequest": "https://github.com/jlebronmarty-netizen/pick-analyzer/pull/274",
+  "source": {
+    "repository": "jlebronmarty-netizen/sports-edge-hub",
+    "commit": "c451d9fc9767bbeff751e26e631fe0b48579fe75",
+    "pr13StillOpen": true,
+    "originalHashes": [
+      "7cbfce2daa127fe7d6f5cec16ff88e1faec0b6b24a8e693a66b6904af3e937a7",
+      "4d0e6ff6ad933b2f8420f6736ff8a85cbf9096d8f89da4ce250cbd85107d1fbe"
+    ],
+    "projectionReproduction": "BYTE_FOR_BYTE_PASS",
+    "projectionJsonStringifySha256": "3ef881c69ed403d0d2731ab894ddaa0c9532f9a42360108c800476e5b9b498c9"
+  },
+  "checks": {
+    "dashboardTests": 53,
+    "failures": 0,
+    "changedFileLint": "PASS",
+    "fullBuild": "PASS_EXIT_0",
+    "immutableMlbRuntimePins": 107,
+    "immutableR3Sources": 37,
+    "localRemoteAndMergeTreeParity": "PASS"
+  },
+  "preview": {
+    "deployment": "dpl_CQxX9pUyxdgLRz5oLJwipiXsR5oj",
+    "state": "READY",
+    "ncaabApi": 200,
+    "multisportApi": 200,
+    "ui": [
+      "73 forecasts and 108 abstentions",
+      "in-season model empty/warmup",
+      "date filter November 3 yields one forecast",
+      "November 2 PR has 72 forecasts plus 39 verified-tip abstentions",
+      "69 unverified tips excluded from timed calendar",
+      "October 15 NCAAB calendar empty",
+      "tile links to NCAAB detail",
+      "light-theme contrast reviewed"
+    ]
+  },
+  "baselineMlbLedgers": {
+    "master": {
+      "rows": 839,
+      "digest": "4867ef43a1362c6744c3b260477ce8be"
+    },
+    "official": {
+      "rows": 151,
+      "digest": "4c47f87fab0133e2309f44f14a7041a8"
+    }
+  },
+  "production": {
+    "verification": "PASS",
+    "verifiedAt": "2026-10-15T21:23:18.987633+00:00",
+    "deployment": "dpl_CAPeTVsFYN557wg5jGk9vEEc3vnh",
+    "deploymentState": "READY",
+    "url": "https://pick-analyzer.vercel.app/ncaab",
+    "ncaabApi": 200,
+    "multisportApi": 200,
+    "systemVersionApi": 200,
+    "reportedGitCommit": "bed915484d13a7422f1e0e8dfaa7175def68c0e0",
+    "forecastCount": 73,
+    "abstentions": 108,
+    "modelCount": 2,
+    "settled": 0,
+    "accuracy": null,
+    "snapshotGeneratedAt": "2026-10-15T16:42:54.805547+00:00",
+    "providerCalls": 0,
+    "databaseWrites": 0,
+    "desktopViewport": 1348,
+    "documentWidth": 1348,
+    "horizontalOverflow": false,
+    "runtimeWarningErrorFatalLogs": "NONE_REPORTED_IN_10_MIN_WINDOW",
+    "mlbLedgers": "EXACT_BASELINE_ROWS_AND_DIGESTS_UNCHANGED",
+    "screenshot": "docs/product/qa/ncaab-production-bed9154.png",
+    "screenshotSha256": "cd01270840a440a95cbab58c463f63e3cc9c9f2f4695893365d232a990a9e9ff",
+    "mlbAndNhlCardsUnchanged": true
+  },
+  "ncaabProviderAcquisitions": 0,
+  "databaseWrites": 0,
+  "migrations": 0,
+  "schedulerChanges": 0,
+  "modelChanges": 0,
+  "continuousSync": false,
+  "hostedSourcePipelineReady": false,
+  "modelValidated": false,
+  "prospectiveSettled": 0,
+  "accuracy": null,
+  "oddsRoiClv": "DEFERRED",
+  "mobileDeviceCertification": false,
+  "remaining": "Continuous hosted forecast publication and independent settlement are not connected; snapshot is explicitly labeled."
+}
