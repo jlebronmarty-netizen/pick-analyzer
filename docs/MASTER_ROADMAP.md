@@ -1,3 +1,10 @@
+## NCAAB published checkpoint — 2026-10-15
+
+- Added read-only `/ncaab`, `/api/ncaab/overview`, connected sport tile and date-scoped experimental calendar observations. Exact source commit and two original SHA256s verified; curated snapshot reproduces byte for byte.
+- Two separate models: preseason 73 forecasts / 108 abstentions; in-season zero forecasts / warmup. Zero settlements: accuracy null, historical diagnostics excluded, no official picks or invented odds/edge/ROI.
+- Published checkpoint only: continuous sync and settlement not connected, source hosted readiness/model validation remain false. Source PR #13 is not merged by this change. No provider calls, DB writes, scheduler or model changes.
+- See `docs/product/NCAAB_READONLY_INTEGRATION_20261015.md` for provenance, pending live-feed work and verification scope.
+
 ## NHL external MODEL_ONLY integration — 2026-10-14
 
 - Added read-only NHL adapter, `/nhl` and `/api/nhl/overview`, separate homepage summary, forecasts/recorded picks/informational edge, independent accuracy/profit/ROI and filtered settlement history.
