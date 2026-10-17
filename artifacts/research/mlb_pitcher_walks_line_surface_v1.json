@@ -1,0 +1,200 @@
+{
+  "contract": "MLB_PITCHER_WALKS_LINE_SURFACE_V1/1.0.0",
+  "research_only": true,
+  "source": "public.mlb_pitcher_bb_backtest_rows_v1_mv",
+  "point_model": {
+    "intercept": 1.02751690958322,
+    "coefficient_expected_bf_x_pitcher_bb_rate": 0.395408983049705
+  },
+  "development": {
+    "season": 2025,
+    "splits": [
+      "TRAIN",
+      "VALIDATION"
+    ],
+    "months": 5
+  },
+  "holdout": {
+    "season": 2025,
+    "split": "TEST"
+  },
+  "oos": {
+    "season": 2026,
+    "split": "OOS_2026"
+  },
+  "threshold_grid": {
+    "min": 0.25,
+    "max": 5,
+    "step": 0.25
+  },
+  "lines": [
+    0.5,
+    1.5,
+    2.5,
+    3.5
+  ],
+  "gates": {
+    "accuracy": 0.75,
+    "min_n": 60,
+    "min_months": 5,
+    "worst_month_accuracy": 0.65,
+    "development_signal_lift_pp": 5
+  },
+  "champion_policy": "maximize selected n among development signal-gate passers; tiebreak lift, accuracy, lower threshold",
+  "candidates": [
+    {
+      "line": 0.5,
+      "side": "OVER",
+      "threshold": 1.75,
+      "dev2025": {
+        "n": 1389,
+        "wins": 1207,
+        "accuracy": 0.869,
+        "baseline": 0.8169,
+        "lift_pp": 5.21,
+        "coverage": 0.4143,
+        "worst_month": 0.8484,
+        "min_month_n": 194,
+        "wilson_lower": 0.8502
+      },
+      "test2025": {
+        "n": 253,
+        "wins": 230,
+        "accuracy": 0.9091,
+        "baseline": 0.8118,
+        "lift_pp": 9.73,
+        "coverage": 0.3635,
+        "wilson_lower": 0.8673
+      },
+      "oos2026": {
+        "n": 1436,
+        "wins": 1254,
+        "accuracy": 0.8733,
+        "baseline": 0.8284,
+        "lift_pp": 4.49,
+        "coverage": 0.4121,
+        "worst_month": 0.847,
+        "min_month_n": 31,
+        "wilson_lower": 0.8551
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS_OOS_LIFT_BELOW_5PP"
+    },
+    {
+      "line": 2.5,
+      "side": "UNDER",
+      "threshold": 1.5,
+      "dev2025": {
+        "n": 689,
+        "wins": 574,
+        "accuracy": 0.8331,
+        "baseline": 0.7504,
+        "lift_pp": 8.27,
+        "coverage": 0.2055,
+        "worst_month": 0.8012,
+        "min_month_n": 80,
+        "wilson_lower": 0.8034
+      },
+      "test2025": {
+        "n": 135,
+        "wins": 114,
+        "accuracy": 0.8444,
+        "baseline": 0.7859,
+        "lift_pp": 5.85,
+        "coverage": 0.194,
+        "wilson_lower": 0.7739
+      },
+      "oos2026": {
+        "n": 597,
+        "wins": 517,
+        "accuracy": 0.866,
+        "baseline": 0.7449,
+        "lift_pp": 12.11,
+        "coverage": 0.1713,
+        "worst_month": 0.8154,
+        "min_month_n": 12,
+        "wilson_lower": 0.8363
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS"
+    },
+    {
+      "line": 3.5,
+      "side": "UNDER",
+      "threshold": 1.25,
+      "dev2025": {
+        "n": 130,
+        "wins": 129,
+        "accuracy": 0.9923,
+        "baseline": 0.9108,
+        "lift_pp": 8.15,
+        "coverage": 0.0388,
+        "worst_month": 0.9688,
+        "min_month_n": 17,
+        "wilson_lower": 0.9577
+      },
+      "test2025": {
+        "n": 19,
+        "wins": 19,
+        "accuracy": 1,
+        "baseline": 0.9239,
+        "lift_pp": 7.61,
+        "coverage": 0.0273,
+        "wilson_lower": 0.8318
+      },
+      "oos2026": {
+        "n": 137,
+        "wins": 132,
+        "accuracy": 0.9635,
+        "baseline": 0.9067,
+        "lift_pp": 5.68,
+        "coverage": 0.0393,
+        "worst_month": 0.9,
+        "min_month_n": 3,
+        "wilson_lower": 0.9174
+      },
+      "state": "CROSS_YEAR_STABLE_75_PLUS_LOW_COVERAGE"
+    }
+  ],
+  "failed_sides": [
+    "UNDER 0.5",
+    "OVER 1.5",
+    "UNDER 1.5",
+    "OVER 2.5",
+    "OVER 3.5"
+  ],
+  "current_availability_2026_09_22": [
+    {
+      "line": 0.5,
+      "books": [
+        "draftkings"
+      ],
+      "games": 1,
+      "players": 1
+    },
+    {
+      "line": 1.5,
+      "books": [
+        "draftkings"
+      ],
+      "games": 1,
+      "players": 1
+    },
+    {
+      "line": 2.5,
+      "books": [],
+      "games": 0,
+      "players": 0
+    },
+    {
+      "line": 3.5,
+      "books": [],
+      "games": 0,
+      "players": 0
+    }
+  ],
+  "provider_calls_made": 0,
+  "odds_api_historical_credits_consumed": 0,
+  "official_picks_writes": 0,
+  "apostar_activation": false,
+  "production_promotion": false,
+  "tracker_modified": false
+}
