@@ -1,0 +1,32 @@
+name: MLB TB U1.5 low-volume research
+
+on:
+  push:
+    branches:
+      - research/tb-u1p5-low-volume-v1-20260925
+    paths:
+      - artifacts/research/mlb_batter_tb_u1p5_low_volume_v1.json
+      - docs/research/MLB_BATTER_TB_U1P5_LOW_VOLUME_V1.md
+      - scripts/research/mlb_batter_tb_u1p5_low_volume_v1.sql
+      - scripts/research/verify_mlb_batter_tb_u1p5_low_volume_v1.test.mjs
+      - .github/workflows/mlb-tb-u1p5-low-volume-research.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - artifacts/research/mlb_batter_tb_u1p5_low_volume_v1.json
+      - docs/research/MLB_BATTER_TB_U1P5_LOW_VOLUME_V1.md
+      - scripts/research/mlb_batter_tb_u1p5_low_volume_v1.sql
+      - scripts/research/verify_mlb_batter_tb_u1p5_low_volume_v1.test.mjs
+      - .github/workflows/mlb-tb-u1p5-low-volume-research.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --test scripts/research/verify_mlb_batter_tb_u1p5_low_volume_v1.test.mjs
