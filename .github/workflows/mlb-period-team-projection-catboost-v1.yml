@@ -1,0 +1,14 @@
+name: MLB Period Team Projection CatBoost V1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  closed:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "CLOSED_RESEARCH_RUN_COMPLETE"
