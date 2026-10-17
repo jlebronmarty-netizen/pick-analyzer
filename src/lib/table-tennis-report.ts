@@ -11,7 +11,7 @@ export type TtForecast = z.infer<typeof forecast>;
 export type TtFinal = z.infer<typeof final>;
 export type TtObservation = TtForecast & { outcome: 'ABSTAIN' | 'PENDING' | 'AMBIGUOUS' | 'WIN' | 'LOSS' | 'SCORED'; final: TtFinal | null; error: number | null };
 type Metrics = { model: 'TT_ML_V1' | 'TT_TOTAL_V1'; forecasts: number; abstentions: number; pending: number; ambiguous: number; settled: number; wins: number; losses: number; accuracy: number | null; brier: number | null; logLoss: number | null; mae: number | null; meanError: number | null };
-export type TtReport = { status: 'AVAILABLE'; readAt: string; observations: TtObservation[]; metrics: Metrics[]; historyFinals: number; latestCapture: string | null } | { status: 'UNAVAILABLE'; warning: string };
+export type TtReport = { status: 'AVAILABLE'; readAt: string; observations: TtObservation[]; metrics: Metrics[]; historyFinals: number; latestCapture: string | null; excludedModelObservations: number } | { status: 'UNAVAILABLE'; warning: string };
 export const unavailableTt = (): TtReport => ({ status: 'UNAVAILABLE', warning: 'Tenis de mesa: lectura almacenada no disponible o incompleta. No se reemplaza con ceros.' });
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-7;
 const pair = (r: { player_a_key: string; player_b_key: string }) => [r.player_a_key, r.player_b_key].sort().join('||');
@@ -19,7 +19,13 @@ const pair = (r: { player_a_key: string; player_b_key: string }) => [r.player_a_
 // Accounting of immutable forecasts, not a new prediction or settlement writer.
 // Source uses the same player pair +/-10 min. Ambiguous links remain unscored.
 export function parseTtReport(input: unknown, now = Date.now()): TtReport {
-  const data = schema.parse(input), read = Date.parse(data.readAt);
+  // A source addition must not disable already integrated models or silently
+  // enter their accounting. Validate original counts before projecting scope.
+  const envelope = schema.extend({ forecasts: z.array(z.object({ model: z.string().min(1) }).passthrough()) }).parse(input);
+  if (envelope.counts.forecasts !== envelope.forecasts.length || envelope.counts.results !== envelope.results.length) throw Error('INCOMPLETE_SOURCE');
+  const excludedModelObservations = envelope.forecasts.filter(f => f.model === 'TT_SETS_OE_V1').length;
+  const scoped = envelope.forecasts.filter(f => f.model !== 'TT_SETS_OE_V1');
+  const data = schema.parse({ ...envelope, forecasts: scoped, counts: { ...envelope.counts, forecasts: scoped.length } }), read = Date.parse(envelope.readAt);
   if (read > now + 5000 || now - read > 5 * 60000 || data.counts.forecasts !== data.forecasts.length || data.counts.results !== data.results.length) throw Error('INCOMPLETE_OR_STALE');
   const ids = new Set<string>(), economic = new Set<string>();
   for (const f of data.forecasts) {
@@ -74,7 +80,7 @@ export function parseTtReport(input: unknown, now = Date.now()): TtReport {
     const y = (r: TtObservation) => (r.final!.winner_final === 'A' ? r.final!.player_a_key : r.final!.player_b_key) === r.player_a_key ? 1 : 0;
     return { model, forecasts: rows.filter(r => r.status === 'FORECAST').length, abstentions: rows.filter(r => r.status === 'ABSTAIN').length, pending: rows.filter(r => r.outcome === 'PENDING').length, ambiguous: rows.filter(r => r.outcome === 'AMBIGUOUS').length, settled: scored.length, wins, losses, accuracy: wins + losses ? wins / (wins + losses) : null, brier: model === 'TT_ML_V1' ? avg(r => (r.probability_a! - y(r)) ** 2) : null, logLoss: model === 'TT_ML_V1' ? avg(r => { const p = Math.max(1e-12, Math.min(1 - 1e-12, r.probability_a!)); return -(y(r) * Math.log(p) + (1 - y(r)) * Math.log(1 - p)); }) : null, mae: model === 'TT_TOTAL_V1' ? avg(r => Math.abs(r.error!)) : null, meanError: model === 'TT_TOTAL_V1' ? avg(r => r.error!) : null };
   });
-  return { status: 'AVAILABLE', readAt: data.readAt, observations, metrics, historyFinals: data.results.length, latestCapture: data.forecasts.map(f => f.captured_at).sort().at(-1) ?? null };
+  return { status: 'AVAILABLE', readAt: data.readAt, observations, metrics, historyFinals: data.results.length, latestCapture: data.forecasts.map(f => f.captured_at).sort().at(-1) ?? null, excludedModelObservations };
 }
 
 export function ttModelCohort(r: TtReport): ModelCohort {

@@ -10,6 +10,13 @@ const now=Date.parse('2026-10-17T15:00:00Z');
 const forecast=(extra={})=>({id:'f1',source:'pulsescore:netbet-prematch',source_match_id:'event-1',model:'TT_ML_V1',competition:'TT Elite Series',scheduled_at:'2026-10-17T12:00:00Z',captured_at:'2026-10-17T11:00:00Z',player_a:'Alpha',player_b:'Beta',player_a_key:'alpha',player_b_key:'beta',history_a:4,history_b:5,status:'FORECAST',reason:'elo_v1',probability_a:.8,probability_b:.2,projected_total:null,home_decimal_odds:null,away_decimal_odds:null,market_no_vig_a:null,market_no_vig_b:null,model_edge_pp_a:null,model_edge_pp_b:null,...extra});
 const final=(extra={})=>({id:'r1',source:'pulsescore:tipsport',source_match_id:'result-1',competition:'TT Elite Series',scheduled_at:'2026-10-17T12:00:00Z',captured_at:'2026-10-17T13:00:00Z',player_a:'Alpha',player_b:'Beta',player_a_key:'alpha',player_b_key:'beta',sets_a:3,sets_b:0,set_points_a:[11,11,11],set_points_b:[6,7,8],total_points_final:54,winner_final:'A',settlement_source:'fixture',settlement_scraped_at:null,...extra});
 const fixture=(forecasts=[forecast()],results=[final()])=>({schema:'TT_READ_BRIDGE_V1',status:'AVAILABLE',mode:'RESEARCH_SHADOW_ONLY',complete:true,readAt:new Date(now).toISOString(),providerCalls:0,databaseWrites:0,counts:{forecasts:forecasts.length,results:results.length},forecasts,results});
+test('source odd-even extension stays outside frozen ML/Totals accounting without breaking either model',()=>{
+ const raw=fixture([forecast(),{model:'TT_SETS_OE_V1',id:'new-model-observation'}]);
+ const r=parseTtReport(raw,now);assert.equal(r.observations.length,1);assert.equal(r.excludedModelObservations,1);assert.equal(r.metrics[0].wins,1);assert.equal(ttModelCohort(r).accuracy,1);
+ const bad=structuredClone(raw);bad.counts.forecasts=1;assert.throws(()=>parseTtReport(bad,now));
+ const unknown=structuredClone(raw);unknown.forecasts[1].model='UNKNOWN_MODEL';assert.throws(()=>parseTtReport(unknown,now));
+ const known=structuredClone(raw);known.forecasts[0].probability_a=7;assert.throws(()=>parseTtReport(known,now));
+});
 test('ML win/Brier/log loss and Totals errors use separate denominators',()=>{
  const f=forecast({id:'f2',model:'TT_TOTAL_V1',probability_a:null,probability_b:null,projected_total:60});
  const r=parseTtReport(fixture([forecast(),f]),now);const [ml,total]=r.metrics;

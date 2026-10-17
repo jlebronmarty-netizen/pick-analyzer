@@ -1,3 +1,10 @@
+## Multisport display audit — 2026-10-17
+
+- Reviewed MLB, NHL, NCAAB, Soccer and Table Tennis UI/API parity and calendar/model accounting. NFL remains clearly Preview.
+- Fixed a reproduced TT outage caused by the source adding TT_SETS_OE_V1 to a strict two-model feed: validate original counts, explicitly exclude the new model, retain full ML/Totals validation and disclose the excluded scope.
+- MLB/NHL live views verified. NCAAB and Soccer correctly label published checkpoints; continuous NCAAB sync and Soccer operational-tracker connection remain pending, not silently certified.
+- See `docs/product/MULTISPORT_DISPLAY_AUDIT_20261017.md`. No provider calls, database writes, model changes or Official promotion.
+
 ## Table Tennis read-only SHADOW integration — 2026-10-17
 
 - Added `/table-tennis`, `/api/table-tennis/overview`, a linked sport card and date-scoped calendar/model observations.
