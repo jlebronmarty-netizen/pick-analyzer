@@ -1,0 +1,51 @@
+{
+  "scope": "SOCCER_VISUAL_REVIEW_AND_AUTOMATION_PREFLIGHT",
+  "at": "2026-10-17T04:49:37.573210+00:00",
+  "pickRelease": "32d932cab76a86a88e53bc64846c198de4eb9ad8",
+  "sourceMainAtAudit": "a9f5389c356bc166ab6a7a09ebfa80cbc9116a78",
+  "productionUrl": "https://pick-analyzer.vercel.app/soccer",
+  "visual": {
+    "status": "PASS_DESKTOP",
+    "shadowValidFilter": 0,
+    "strongFilter": 0,
+    "insufficientHistoryFilter": 7,
+    "card": "SHADOW / RESEARCH; accuracy null; 0 W / 0 L / 0 pending",
+    "day": "2026-10-17 America/Puerto_Rico",
+    "soccerCalendarGames": 2,
+    "soccerPicksFilter": 0,
+    "officialPicks": 0,
+    "currentEdges": 0,
+    "viewportWidth": 1348,
+    "documentWidth": 1348,
+    "screenshot": "docs/product/qa/soccer-visual-20261017.png",
+    "screenshotSha256": "d15a08e7a35a4216439db4753de2754a228853470088b94d37f1ee5de16603fc",
+    "mobileCertification": false
+  },
+  "automation": {
+    "status": "BLOCKED_SOURCE_DATABASE_ACCESS",
+    "sourceProjectRef": "pltvdwuponathattyzhu",
+    "identifiedFrom": "Sports Edge Hub Vercel NEXT_PUBLIC_SUPABASE_URL, plain public configuration only",
+    "secretValuesRetrieved": false,
+    "therundownKeyProductionConfigured": true,
+    "serviceRoleProductionConfigured": true,
+    "cronSecretProductionConfigured": true,
+    "sourceSupabaseConnectorRead": "DENIED: You do not have permission to perform this action",
+    "projectsVisibleToConnector": [
+      "ynuocvexviorgdjrfthw",
+      "yhhledystkqqjxsgdloa"
+    ],
+    "githubActionsSecretMetadata": "UNAVAILABLE",
+    "sourceSoccerProductionPaths": [
+      "app/api/soccer/read-bridge/route.ts",
+      "data/soccer/shadow-checkpoint.json"
+    ],
+    "sourceSoccerCron": false,
+    "researchPR23": "OPEN_63f7a4dcb53770217c5549399f8e9bf4c1dbc437",
+    "newCollectorActivated": false,
+    "migrationApplied": false,
+    "providerCalls": 0,
+    "databaseWrites": 0,
+    "newSchedules": 0,
+    "nextRequiredInput": "Connect/authorize Supabase project pltvdwuponathattyzhu to inspect its schema before preparing/applying isolated Soccer ledger migration."
+  }
+}
