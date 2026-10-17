@@ -43,4 +43,4 @@ Desktop visual PASS: sport card 50% / 1W-1L, route navigation, all 28 / win 1 / 
 
 Full-page screenshot attempt hit a CDP timeout; viewport capture succeeded and was inspected/saved. Browser console recorded extension metadata transport messages, not identified as application errors. Both final source/Pick runtime error scans found no matching warnings/errors over 10 minutes.
 
-`qa/table-tennis-source-20261017.json.gz` preserves the allowlisted source read; `qa/verify-table-tennis-source.mjs` checks its SHA and replays metrics offline using the frozen audit read time. This replay never supplies live data. The JSON verification receipt and screenshot preserve exact evidence. Audit-only additions are saved on a separate branch to avoid another application deployment.
+`qa/table-tennis-source-20261017.json.gz` preserves the allowlisted source read; `qa/verify-table-tennis-source.mjs` checks its SHA and replays metrics offline using the frozen audit read time. This replay never supplies live data. The JSON verification receipt and screenshot preserve exact evidence. Audit-only additions are saved on a separate branch to avoid another production deployment.
