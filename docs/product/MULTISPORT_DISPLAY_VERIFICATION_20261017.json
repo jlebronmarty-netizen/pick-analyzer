@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-17",
+  "release": "2af33ee33a563804581f3c6ccbd24a636a1db104",
+  "tree": "70310b915a9c70c99bb4664e29574e0adc6b486a",
+  "pullRequest": 277,
+  "tests": 67,
+  "build": "PASS",
+  "sourceInvariants": {
+    "status": "PASS",
+    "failures": [],
+    "date": "2026-10-17",
+    "providerCalls": 0,
+    "databaseWrites": 0
+  },
+  "allFiveSportViews": "VERIFIED",
+  "liveViews": [
+    "MLB",
+    "NHL",
+    "TABLE_TENNIS"
+  ],
+  "checkpointViews": [
+    "NCAAB",
+    "SOCCER"
+  ],
+  "remaining": {
+    "ncaab": "Continuous sync/settlement not connected",
+    "soccer": "Frozen checkpoint; new operational tracker currently empty and not connected to Pick",
+    "nfl": "Preview, no certified production picks"
+  },
+  "regression": {
+    "beforeHTTP": 503,
+    "afterHTTP": 200,
+    "cause": "Known source model extension",
+    "integratedObservations": 102,
+    "excludedOddEven": 36
+  },
+  "globalRegular": {
+    "wins": 364,
+    "losses": 179,
+    "pending": 145,
+    "accuracyPct": 67.03499079189687
+  },
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "modelsChanged": 0,
+  "officialPromotion": 0,
+  "desktopVisual": "PASS",
+  "mobileDeviceCertification": "NOT_PERFORMED",
+  "screenshot": "qa/multisport-audit-20261017.jpg",
+  "productionDeployment": "dpl_j6hZLypMcSGx36wV7bmhnYdGTW7o"
+}
