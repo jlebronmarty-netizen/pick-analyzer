@@ -1,3 +1,11 @@
+## Table Tennis read-only SHADOW integration — 2026-10-17
+
+- Added `/table-tennis`, `/api/table-tennis/overview`, a linked sport card and date-scoped calendar/model observations.
+- Frozen TT_ML_V1 and TT_TOTAL_V1 remain in Sports Edge Hub. Pick only reads allowlisted stored forecasts/finals; no provider calls, database writes, credential copies or model changes.
+- Sport accuracy uses ML W/(W+L); Totals exposes MAE and signed error without inventing an O/U selection, accuracy, ROI or CLV. Ambiguous player/time links remain unscored.
+- Official Picks unchanged. Prospective evidence remains exploratory; the odd/even research PR is excluded.
+- 66 dashboard tests and 107 immutable MLB runtime pins / 37 R3 sources PASS. Hosted end-to-end evidence is recorded in `docs/product/TABLE_TENNIS_SHADOW_INTEGRATION_20261017.md`.
+
 ## Soccer LaLiga SHADOW display — 2026-10-16
 
 - Added `/soccer`, read-only `/api/soccer/overview`, linked Soccer card, date-scoped calendar and gated Shadow picks/edge. Existing Soccer legacy endpoints remain unchanged.

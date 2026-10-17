@@ -7,9 +7,10 @@ import {operationalDailyPicks} from './operational-daily-picks';
 import {dailyDisplayRows} from './daily-pick-display';
 import {ncaabDate,type NcaabReport} from './ncaab-checkpoint';
 import {validSoccerShadow,currentSoccerEdge,type SoccerReport} from './soccer-shadow-report';
-export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB'|'SOCCER';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;soccer?:{status:string};nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
+import type {TtReport} from './table-tennis-report';
+export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB'|'SOCCER'|'TABLE_TENNIS';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;soccer?:{status:string};nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
 export type DayPick={key:string;sport:string;classification:string;matchup:string;selection:string;marketLabel:string;modelProbability:number|null;projection:number|null;edgePp:number|null;odds:number|null;decimalOdds?:number;book:string|null;href:string};
-export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport,soccer?:SoccerReport){
+export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport,soccer?:SoccerReport,tableTennis?:TtReport){
  const games:DayGame[]=view.games.map(g=>({key:'MLB:'+g.gamePk,sport:'MLB',eventId:String(g.gamePk),title:g.away+' at '+g.home,scheduledAt:g.scheduledAt,
   analyzed:g.analysisAvailable||Number.isFinite(g.homeProbability)&&Number.isFinite(g.awayProbability),started:isStarted(g),waiting:matchesSlateFilter(g,view.board.rows,'Waiting'),official:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,
   registered:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,value:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='VALUE_CANDIDATE').length,noEdge:matchesSlateFilter(g,view.board.rows,'No Edge')}));
@@ -58,6 +59,18 @@ export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,
    selected.push(pick);if(current)edge.push(pick);
   }
  }else if(soccer)warnings.push(soccer.warning);
+ if(tableTennis?.status==='AVAILABLE'){
+  warnings.push('Tenis de mesa: RESEARCH / SHADOW; calendario limitado a eventos capturados. Raw edges informativos en el módulo; sin recomendaciones oficiales.');
+  const today=tableTennis.observations.filter(r=>nhlDate(r.scheduled_at)===view.date);
+  const events=new Map<string,typeof today>();
+  for(const r of today)events.set(r.source_match_id,[...(events.get(r.source_match_id)??[]),r]);
+  for(const [id,rows] of events){const r=rows[0], forecasts=rows.filter(r=>r.status==='FORECAST'), started=Date.parse(r.scheduled_at)<=Date.parse(tableTennis.readAt);
+   games.push({key:'TABLE_TENNIS:'+id,sport:'TABLE_TENNIS',eventId:id,title:r.player_a+' vs '+r.player_b,scheduledAt:r.scheduled_at,analyzed:forecasts.length>0,started,waiting:!started&&!forecasts.length,official:0,registered:forecasts.length,value:0,noEdge:false});
+   for(const f of forecasts){const ml=f.model==='TT_ML_V1',a=ml&&f.probability_a!>=.5,price=ml?(a?f.home_decimal_odds:f.away_decimal_odds):null;
+    selected.push({key:'TABLE_TENNIS:'+f.id,sport:'TABLE_TENNIS',classification:f.model+' · SHADOW · '+f.outcome,matchup:r.player_a+' vs '+r.player_b,marketLabel:ml?'Ganador proyectado':'Total proyectado · sin selección O/U',selection:ml?(a?f.player_a:f.player_b):f.projected_total!.toFixed(2)+' puntos',modelProbability:ml?100*(a?f.probability_a!:f.probability_b!):null,projection:ml?null:f.projected_total,edgePp:null,odds:null,...(price===null?{}:{decimalOdds:price}),book:price===null?null:'NetBet · captura archivada',href:'/table-tennis'});
+   }
+  }
+ }else if(tableTennis)warnings.push(tableTennis.warning);
  const distinct=(rows:DayPick[])=>[...new Map(rows.map(p=>[p.key,p])).values()];
  return {date:view.date,games:games.sort((a,b)=>Date.parse(a.scheduledAt)-Date.parse(b.scheduledAt)||a.key.localeCompare(b.key)),selected:distinct(selected),edge:distinct(edge).sort((a,b)=>(b.edgePp??0)-(a.edgePp??0)||a.key.localeCompare(b.key)),warnings:[...new Set(warnings)],nhlHealth:nhl.status==='AVAILABLE'?nhl.health:null};
 }
