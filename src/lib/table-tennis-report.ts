@@ -26,6 +26,7 @@ export function parseTtReport(input: unknown, now = Date.now()): TtReport {
     const key = f.model + ':' + f.source_match_id;
     if (ids.has(f.id) || economic.has(key) || Date.parse(f.captured_at) >= Date.parse(f.scheduled_at) || Date.parse(f.captured_at) > read || f.player_a_key === f.player_b_key) throw Error('INVALID_FORECAST');
     ids.add(f.id); economic.add(key);
+    if (f.source !== 'pulsescore:netbet-prematch' || f.status === 'FORECAST' && Math.min(f.history_a, f.history_b) < 3) throw Error('INVALID_MODEL_GATE');
     if (f.status === 'ABSTAIN') {
       if (f.probability_a !== null || f.probability_b !== null || f.projected_total !== null) throw Error('INVALID_ABSTENTION');
     } else if (f.model === 'TT_ML_V1') {
@@ -40,6 +41,7 @@ export function parseTtReport(input: unknown, now = Date.now()): TtReport {
   ids.clear(); economic.clear();
   for (const r of data.results) {
     const key = r.source + ':' + r.source_match_id;
+    if (Date.parse(r.scheduled_at) > read || Date.parse(r.captured_at) < Date.parse(r.scheduled_at)) throw Error('PREMATURE_FINAL');
     let a = 0, b = 0;
     if (ids.has(r.id) || economic.has(key) || r.source !== 'pulsescore:tipsport' || Date.parse(r.captured_at) > read || r.player_a_key === r.player_b_key || r.set_points_a.length !== r.set_points_b.length || r.set_points_a.length !== r.sets_a + r.sets_b) throw Error('INVALID_FINAL');
     r.set_points_a.forEach((p, i) => { const q = r.set_points_b[i]; if (p === q || Math.max(p, q) < 11 || Math.abs(p - q) < 2) throw Error('INVALID_SET'); if (p > q) a++; else b++; });

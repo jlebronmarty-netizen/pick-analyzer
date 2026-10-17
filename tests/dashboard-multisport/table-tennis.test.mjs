@@ -28,7 +28,7 @@ test('duplicate/ambiguous result links and shared final stay unscored',()=>{
  assert.ok(shared.observations.every(r=>r.outcome==='AMBIGUOUS'));
 });
 test('counts, duplicates, stale reads, late forecasts, final points and probability tampering fail closed',()=>{
- for(const mutate of [r=>r.counts.forecasts++,r=>r.forecasts.push(r.forecasts[0]),r=>r.readAt='2026-10-16T15:00:00Z',r=>r.forecasts[0].captured_at=r.forecasts[0].scheduled_at,r=>r.results[0].total_points_final=55,r=>r.forecasts[0].probability_b=.4,r=>r.complete=false,r=>r.providerCalls=1]){
+ for(const mutate of [r=>r.counts.forecasts++,r=>r.forecasts.push(r.forecasts[0]),r=>r.readAt='2026-10-16T15:00:00Z',r=>r.forecasts[0].captured_at=r.forecasts[0].scheduled_at,r=>r.results[0].total_points_final=55,r=>r.forecasts[0].probability_b=.4,r=>r.complete=false,r=>r.providerCalls=1,r=>r.forecasts[0].history_a=2,r=>r.results[0].scheduled_at='2026-10-18T12:00:00Z',r=>r.results[0].captured_at='2026-10-17T10:00:00Z']){
   const r=fixture();mutate(r);assert.throws(()=>parseTtReport(r,now));
  }
 });
