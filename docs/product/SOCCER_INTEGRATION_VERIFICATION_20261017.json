@@ -1,0 +1,108 @@
+{
+  "scope": "SOCCER_SHADOW_DISPLAY_ONLY",
+  "createdAt": "2026-10-17T02:39:54.422447+00:00",
+  "pick": {
+    "pr": 275,
+    "implementation": "5848d36ac085ffbb3c18b4fd8e06a19a4324ded4",
+    "release": "32d932cab76a86a88e53bc64846c198de4eb9ad8",
+    "tree": "1ce57827f7b18d60404fc9775ea689b17acdc8d5"
+  },
+  "source": {
+    "pr": 24,
+    "implementation": "4fdb54db40bf3d49fbd3068bff4b5895bd778509",
+    "release": "d2c31508a8926a1afa8ab03154f4f3d487fbc196",
+    "tree": "480edf501c87e2eebbdd7dd14082b31bfb0c1f1e",
+    "researchPR23Merged": false,
+    "researchCommit": "63f7a4dcb53770217c5549399f8e9bf4c1dbc437",
+    "originalBlob": "397b31877f1fc286fa6361a3de70acd2d01d60ac",
+    "originalSha256": "61e6feef5637415a796ce8abff76d40ec6229f5614a548e18af9c8bd22b56fc6",
+    "publishedBytesSha256": "1f07ca8a0a1b21095d22ced976e921a35622e51cbb5dfa5948a89ca93b23ce20",
+    "sourceProductionHttp": 200,
+    "exactEventNumericParity": "PASS"
+  },
+  "checks": {
+    "dashboardTests": 59,
+    "failed": 0,
+    "lint": "PASS",
+    "fullBuilds": "SOURCE_AND_PICK_EXIT_0",
+    "immutableMlbRuntimePins": 107,
+    "immutableR3Sources": 37,
+    "previewApi": 200,
+    "previewSsrHtml": 200,
+    "previewSportCard": "PASS",
+    "warmupBlockedAllSeven": true,
+    "previewCurrentSoccerEdge": 0,
+    "previewSoccerSelections": 0,
+    "previewSoccerOfficialPicks": 0
+  },
+  "browserVisualVerification": {
+    "status": "NOT_COMPLETED",
+    "reason": "Cloud browser navigation stalled twice; both calls were aborted. Tab stayed about:blank. No visual/interactivity or mobile verification claimed; no screenshot available. SSR and React-rendering checks passed."
+  },
+  "failedAttemptPreserved": {
+    "sourceFirstPreviewHttp": 503,
+    "reason": "Turbopack JSON loader changed 12 double values; strict hash rejected output. Fixed by runtime byte read with scoped trace and SHA256. Original model/odds were not rounded or retuned."
+  },
+  "counts": {
+    "fixtures": 10,
+    "quotedProjections": 7,
+    "missingOrNon25Quotes": 3,
+    "insufficientHistory": 7,
+    "validShadowPicks": 0,
+    "settled": 0,
+    "accuracy": null,
+    "roi": null,
+    "clv": null
+  },
+  "databaseBefore": {
+    "master": {
+      "rows": 851,
+      "digest": "80656da1a3f0d3eb62d0ee85a0d0bafe"
+    },
+    "official": {
+      "rows": 151,
+      "digest": "4c47f87fab0133e2309f44f14a7041a8"
+    }
+  },
+  "production": {
+    "verification": "API_AND_SSR_PASS_VISUAL_PENDING",
+    "verifiedAt": "2026-10-17T02:42:40.868948+00:00",
+    "deployment": "dpl_GjWBeScgrFBLKyXJxfwhnWVLmqYy",
+    "state": "READY",
+    "url": "https://pick-analyzer.vercel.app/soccer",
+    "pageHttp": 200,
+    "overviewApi": 200,
+    "multisportApi": 200,
+    "systemVersionApi": 200,
+    "reportedGitCommit": "32d932cab76a86a88e53bc64846c198de4eb9ad8",
+    "soccerPicks": 0,
+    "soccerCurrentEdges": 0,
+    "soccerOfficialPicks": 0,
+    "sourceEvents": 7,
+    "validShadowPicks": 0,
+    "accuracy": null,
+    "roi": null,
+    "clv": null,
+    "providerCalls": 0,
+    "databaseWrites": 0,
+    "mlbFingerprintParity": "PASS",
+    "runtimeWarningErrorFatalLogs": "NONE_REPORTED_IN_10_MIN_WINDOW"
+  },
+  "providerAcquisitions": 0,
+  "databaseWrites": 0,
+  "migrations": 0,
+  "modelChanges": 0,
+  "schedulerChanges": 0,
+  "continuousCollection": false,
+  "remaining": "Upstream continuous checkpoint/settlement publication and interactive browser visual review. Pick consumes future separately verified source deployments automatically; no publisher/collector was activated.",
+  "databaseAfter": {
+    "master": {
+      "rows": 851,
+      "digest": "80656da1a3f0d3eb62d0ee85a0d0bafe"
+    },
+    "official": {
+      "rows": 151,
+      "digest": "4c47f87fab0133e2309f44f14a7041a8"
+    }
+  }
+}
