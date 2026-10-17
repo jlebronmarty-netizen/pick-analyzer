@@ -1,0 +1,74 @@
+name: MLB 02H Sep7 Slate Proof
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sep7-slate-proof:
+    if: github.head_ref == 'diag/mlb-02h-historical-digest-proof'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch exact bounded MLB Official Sep 7 schedule
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { createHash } = require('node:crypto')
+          const fs = require('node:fs')
+
+          function stable(value) {
+            if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`
+            if (value && typeof value === 'object') {
+              return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stable(value[key])}`).join(',')}}`
+            }
+            return JSON.stringify(value)
+          }
+          function sha256(value) { return createHash('sha256').update(value).digest('hex') }
+
+          const endpoint = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-09-07&hydrate=probablePitcher'
+          async function main() {
+            const response = await fetch(endpoint)
+            if (!response.ok) throw new Error(`MLB_HTTP_${response.status}`)
+            const payload = await response.json()
+            const rawGames = (payload.dates ?? []).flatMap((date) => date.games ?? [])
+            const games = rawGames.map((game) => ({
+              gamePk: Number(game.gamePk),
+              officialDate: game.officialDate,
+              gameDate: game.gameDate,
+              gameType: game.gameType,
+              doubleHeader: game.doubleHeader ?? null,
+              gameNumber: game.gameNumber ?? null,
+              status: game.status ?? null,
+              away: game.teams?.away ?? null,
+              home: game.teams?.home ?? null,
+              sourcePayloadDigest: sha256(stable(game)),
+            })).sort((a, b) => a.gamePk - b.gamePk)
+            const unique = new Set(games.map((game) => game.gamePk))
+            const proof = {
+              endpoint,
+              runDate: '2026-09-07',
+              count: games.length,
+              uniqueGamePk: unique.size,
+              allOfficialDateMatch: games.every((game) => game.officialDate === '2026-09-07'),
+              gamePks: games.map((game) => game.gamePk),
+              games,
+            }
+            fs.writeFileSync('sep7-slate.json', JSON.stringify(proof, null, 2))
+            console.log(JSON.stringify(proof, null, 2))
+            if (!games.length || unique.size !== games.length || !proof.allOfficialDateMatch) process.exit(1)
+          }
+          main().catch((error) => { console.error(error); process.exit(1) })
+          NODE
+
+      - name: Upload Sep 7 slate proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-02h-sep7-slate-proof
+          path: sep7-slate.json
+          if-no-files-found: error
+          retention-days: 7
