@@ -1,0 +1,26 @@
+name: MLB TB U1.5 low-volume research
+
+on:
+  push:
+    branches:
+      - research/tb-u1p5-low-volume-freeze-20260925
+    paths:
+      - artifacts/research/mlb_tb_u1p5_low_volume_v1.json
+      - docs/research/MLB_TB_U1P5_LOW_VOLUME_V1.md
+      - scripts/research/mlb_tb_u1p5_low_volume_v1.sql
+      - scripts/research/verify_mlb_tb_u1p5_low_volume_v1.test.mjs
+      - .github/workflows/mlb-tb-u1p5-low-volume.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/research/verify_mlb_tb_u1p5_low_volume_v1.test.mjs
