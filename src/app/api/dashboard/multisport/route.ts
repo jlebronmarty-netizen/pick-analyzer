@@ -3,4 +3,4 @@ import {getMultisportModelReport} from '@/services/multisport-model-read.service
 import {getMlbOperationalView} from '@/services/pick2-operational-read.service';
 import {combinedDay} from '@/lib/multisport-day';
 export const dynamic='force-dynamic';
-export async function GET(){const [report,view]=await Promise.all([getMultisportModelReport(),getMlbOperationalView()]);return NextResponse.json({cards:report.cards,day:combinedDay(view,report.nhl,report.research,report.ncaab,report.soccer),readAt:report.readAt,providerCalls:0,databaseWrites:0},{headers:{'Cache-Control':'no-store'}});}
+export async function GET(){const [report,view]=await Promise.all([getMultisportModelReport(),getMlbOperationalView()]);return NextResponse.json({cards:report.cards,day:combinedDay(view,report.nhl,report.research,report.ncaab,report.soccer,report.tableTennis),readAt:report.readAt,providerCalls:0,databaseWrites:0},{headers:{'Cache-Control':'no-store'}});}

@@ -1,0 +1,23 @@
+{
+  "schema": "TT_PICK_INTEGRATION_VERIFICATION_V1",
+  "sourceReadAt": "2026-10-17T15:35:18.566Z",
+  "sourceCounts": {
+    "forecasts": 28,
+    "results": 329
+  },
+  "sourceBodyCanonicalSha256": "fffe07f2551ca7314b8996a0f4d2ea5e26086a1768d9a4063d14d16cc00d7bf3",
+  "sourceProductionCommit": "2bb85098b3f7af755906cc0fdee71ae5488d2895",
+  "sourcePreview": "SOURCE_UNAVAILABLE: branch-scoped server configuration, no secret copied",
+  "sourceTests": 16,
+  "pickTests": 66,
+  "mlbRuntimePins": 107,
+  "mlbR3Sources": 37,
+  "sourceBuild": "PASS",
+  "pickBuild": "PASS",
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "modelChanges": 0,
+  "officialChanges": 0,
+  "performance": "EXPLORATORY_SHADOW_ONLY",
+  "visual": "PENDING"
+}
