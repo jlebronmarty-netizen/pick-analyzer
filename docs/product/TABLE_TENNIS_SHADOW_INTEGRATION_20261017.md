@@ -32,3 +32,15 @@ Hosted counts, deployment IDs and visual evidence are added in the final verific
 2026-10-17: source production bridge HTTP 200, 28 observations and 329 canonical reference finals. Each model: 5 forecasts, 9 abstentions, 2 evaluated and 3 awaiting a matched final; no ambiguous links. ML: 1 WIN/1 LOSS (50%), Brier 0.26344438737818227, log loss 0.7201073367425235. Totals: MAE 21.673156845805835 points, mean error −17.776017560798905 points. These are descriptive results from only two matches, not validation. Latest first-seen forecast capture 2026-10-17T04:31:27.150Z.
 
 Source production merge: `2bb85098b3f7af755906cc0fdee71ae5488d2895`, PR #27. Preview absence of the branch-scoped server key was diagnosed and preserved; production provided the authorized configured reader. Both full builds PASS.
+
+## Release and visual closeout
+
+Pick PR #276 merged as `e9609459426b78c2d9b97883fc473bcf565d7148`, tree `551720ab2f523ff449c86369083be5de20b23336`; local/remote/merge parity PASS. Production deployment `dpl_ErS59Lc6gx7ApZ8DXpsmojKoKSUs` READY; public page, overview, multisport and system-version endpoints HTTP 200 with release SHA verified.
+
+Source PR #28 hardens competition/model scope; production `2d1015332af3c469482f1d574c3ab80c4b700480` / `dpl_ZtwDRj7y3ccZobkTWddwP7eiuGZt` READY. Concurrent Soccer merge `40615bca811c3577eaa26aa12fb3a05647f64e1d` was preserved; this integration did not change its implementation or schedule.
+
+Desktop visual PASS: sport card 50% / 1W-1L, route navigation, all 28 / win 1 / loss 1 / abstain 18 / evaluated 4; model filters 2 evaluated each. Daily TT calendar has 14 unique events, 5 analyzed events, 10 model observations, 0 Official and 0 current-value candidates; Picks filter yields 5 events. Zero upcoming observations currently available; start times already passed and no live status is invented. No horizontal overflow. Mobile-device certification was not performed.
+
+Full-page screenshot attempt hit a CDP timeout; viewport capture succeeded and was inspected/saved. Browser console recorded extension metadata transport messages, not identified as application errors. Both final source/Pick runtime error scans found no matching warnings/errors over 10 minutes.
+
+`qa/table-tennis-source-20261017.json.gz` preserves the allowlisted source read; `qa/verify-table-tennis-source.mjs` checks its SHA and replays metrics offline using the frozen audit read time. This replay never supplies live data. The JSON verification receipt and screenshot preserve exact evidence. Audit-only additions are saved on a separate branch to avoid another application deployment.

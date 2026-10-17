@@ -6,7 +6,7 @@
     "results": 329
   },
   "sourceBodyCanonicalSha256": "fffe07f2551ca7314b8996a0f4d2ea5e26086a1768d9a4063d14d16cc00d7bf3",
-  "sourceProductionCommit": "2bb85098b3f7af755906cc0fdee71ae5488d2895",
+  "sourceProductionCommit": "2d1015332af3c469482f1d574c3ab80c4b700480",
   "sourcePreview": "SOURCE_UNAVAILABLE: branch-scoped server configuration, no secret copied",
   "sourceTests": 16,
   "pickTests": 66,
@@ -19,5 +19,78 @@
   "modelChanges": 0,
   "officialChanges": 0,
   "performance": "EXPLORATORY_SHADOW_ONLY",
-  "visual": "PENDING"
+  "visual": "PASS_DESKTOP",
+  "sourceProductionDeployment": "dpl_ZtwDRj7y3ccZobkTWddwP7eiuGZt",
+  "sourcePRs": [
+    27,
+    28
+  ],
+  "sourceCurrentModels": [
+    "TT_ML_V1",
+    "TT_TOTAL_V1"
+  ],
+  "sourceProductionHTTP": 200,
+  "pickPR": 276,
+  "pickProductionCommit": "e9609459426b78c2d9b97883fc473bcf565d7148",
+  "pickProductionDeployment": "dpl_ErS59Lc6gx7ApZ8DXpsmojKoKSUs",
+  "pickPreviewHTTP": 200,
+  "pickTreeParity": "PASS",
+  "independentPythonAccounting": "PASS",
+  "archive": "qa/table-tennis-source-20261017.json.gz",
+  "archiveSha256": "55d807f55d0efd7d401c1ed0117fbdf9a70d972b701015198bc40e7ee292e65e",
+  "replay": "node --loader ./tests/dashboard-multisport/tsx-loader.mjs docs/product/qa/verify-table-tennis-source.mjs",
+  "knownML": {
+    "wins": 1,
+    "losses": 1,
+    "pending": 3,
+    "accuracy": 0.5,
+    "brier": 0.26344438737818227,
+    "logLoss": 0.7201073367425235
+  },
+  "knownTotals": {
+    "settled": 2,
+    "pending": 3,
+    "mae": 21.673156845805835,
+    "meanError": -17.776017560798905,
+    "accuracy": null
+  },
+  "preservedConcurrentSourceSoccerMerge": "40615bca811c3577eaa26aa12fb3a05647f64e1d",
+  "sourceRuntimeWarningErrorScan": "no matching logs in final source production deployment",
+  "mobileDeviceCertification": "NOT_PERFORMED",
+  "productionHTTP": {
+    "overview": 200,
+    "multisport": 200,
+    "systemVersion": 200,
+    "page": 200
+  },
+  "productionState": "READY",
+  "productionVersionMatchesCommit": true,
+  "visualFilters": {
+    "all": 28,
+    "mlWins": 1,
+    "mlLosses": 1,
+    "abstentions": 18,
+    "evaluatedBoth": 4,
+    "evaluatedML": 2,
+    "evaluatedTotals": 2,
+    "upcoming": 0
+  },
+  "today": {
+    "date": "2026-10-17",
+    "timezone": "America/Puerto_Rico",
+    "uniqueEvents": 14,
+    "analyzedEvents": 5,
+    "modelObservations": 10,
+    "official": 0,
+    "value": 0,
+    "picksFilterEvents": 5
+  },
+  "visualURL": "https://pick-analyzer.vercel.app/table-tennis",
+  "horizontalOverflow": false,
+  "screenshot": "qa/table-tennis-integration-20261017.jpg",
+  "screenshotSha256": "f095b3eed40d61b506ab83c1fd5db0517387b7c3255a1cb797f8f20611040c2a",
+  "screenshotFullPageAttempt": "CDP capture timeout; recovered with viewport capture of the same page",
+  "pickRuntimeWarningErrorScan": "no matching logs in final production deployment over 10 minutes",
+  "browserConsole": "extension metadata transport messages observed; no app error identified",
+  "localProcesses": "no collectors, evaluators or schedulers started"
 }
