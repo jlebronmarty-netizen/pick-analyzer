@@ -1,0 +1,18 @@
+{
+  "counts": {
+    "open": 73,
+    "total": 851,
+    "pendingZeroValues": 0
+  },
+  "blockers": {
+    "ZERO_PA_CONTRACT_REVIEW": 3,
+    "POSTPONED_CONTRACT_REVIEW": 11,
+    "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW": 59
+  },
+  "official": "0e404e3b9e1b8975c7829bcd7f6193bc",
+  "dailyFrozen": "4a3665d7accb79016749a64243ac20d4",
+  "masterFrozen": "dbfa3ea318bcf303da153dc3697d2c49",
+  "propsSettled": "1d8a40b9792944f0c955714d766094b2",
+  "evidenceGames": 35,
+  "priorMasterSettled": "2b32ad0f0796d1ed6076a2911d61cc84"
+}

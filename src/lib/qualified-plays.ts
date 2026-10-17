@@ -1,3 +1,4 @@
+import { pendingReasonLabel } from './mlb-pending-outcome';
 export type ResearchGroup = {
   key: string;
   season: number;
@@ -37,6 +38,7 @@ export type ResearchEntry = {
   result: "WIN" | "LOSS" | "PUSH" | "VOID" | "OPEN";
   frozenAt: string;
   settledAt: string | null;
+  pendingReason?: string | null;
 };
 export function unavailableQualifiedReport(): QualifiedReport {
   return {
@@ -140,7 +142,8 @@ export function summarizeQualifiedPlays(
         selection: r.selection, projection: r.projection as number | null,
         actual: r.result === null ? null : r.actual_label as string | null ?? (r.actual_value === null ? null : String(r.actual_value)),
         result: (r.result ?? "OPEN") as ResearchEntry["result"], frozenAt: String(r.freeze_timestamp),
-        settledAt: r.result === null ? null : String(r.settled_at)});
+        settledAt: r.result === null ? null : String(r.settled_at),
+        pendingReason: r.result === null ? pendingReasonLabel((r.metadata as {settlement?:{blocker?:unknown}}|null)?.settlement?.blocker) : null});
     }
     const g = groups.get(key) ?? {
       key,

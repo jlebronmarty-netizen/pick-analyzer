@@ -1,0 +1,2157 @@
+[
+  {
+    "id": "mlb26fwd_706a1750ef4c21237efc3c6a34ef48432e5cfd19",
+    "target_date": "2026-09-21",
+    "game_pk": 824787,
+    "selection": "Leody Taveras",
+    "player_mlbam_id": 665750,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_17238448912954a5afdd5301b52c18",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824787,
+      "capturedAt": "2026-10-17T20:53:52.928733+00:00",
+      "officialDate": "2026-09-21",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "812858d44ac0874e66989b1ef1253ec0af67b3d8048d2b3a7d0b701e45330bc2",
+      "boxscoreSha256": "592999dbb79ed352c4818e4a1e3c299f83bd93a2203f38500b9b337d1617543a",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_8db753e5cdde9b2103be7ccb12688ce8829a9c64",
+    "target_date": "2026-09-21",
+    "game_pk": 823169,
+    "selection": "Shay Whitcomb",
+    "player_mlbam_id": 694376,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_fd62a44388a11b4e14da54ec2998f7",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "ZERO_PA_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823169,
+      "capturedAt": "2026-10-17T20:53:34.279260+00:00",
+      "officialDate": "2026-09-21",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "b16e19b2ccc5739e12de27fcfaaa05cf343bcb4e24913f990304597828fe8489",
+      "boxscoreSha256": "473e4e359189a37fd5f51f7dd8074648e4c5846f39ee5b36b2e6882e72aabf17",
+      "player": {
+        "plateAppearances": 0,
+        "doubles": 0,
+        "walks": 0
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_1b770cb47b70bc22b3a13e00d1509c8bd32d836f",
+    "target_date": "2026-09-22",
+    "game_pk": 823543,
+    "selection": "Nick Fortes",
+    "player_mlbam_id": 663743,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_0b1ffe8dbea599b94abb2f4bb63f6e",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823543,
+      "capturedAt": "2026-10-17T20:53:39.236467+00:00",
+      "officialDate": "2026-09-22",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "4b6c91d2147dbdcc6e59ef677634dac159275d59a548ffa0ad88f56bc8e1021f",
+      "boxscoreSha256": "d94e3b89a40025025680c1720fba8b110b5bba25e6073b9dc81eefd03985a524",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_28ba2906cbc069de755258a076659e7a1308cdfc",
+    "target_date": "2026-09-22",
+    "game_pk": 823543,
+    "selection": "Taylor Walls",
+    "player_mlbam_id": 670764,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c3df4c749194fd84cac20419d05207",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823543,
+      "capturedAt": "2026-10-17T20:53:39.236467+00:00",
+      "officialDate": "2026-09-22",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "4b6c91d2147dbdcc6e59ef677634dac159275d59a548ffa0ad88f56bc8e1021f",
+      "boxscoreSha256": "d94e3b89a40025025680c1720fba8b110b5bba25e6073b9dc81eefd03985a524",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_658b3ba3d7322c0d7eb62af28664a00a4ff64d81",
+    "target_date": "2026-09-22",
+    "game_pk": 823543,
+    "selection": "Ryan Vilade",
+    "player_mlbam_id": 668723,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c386fb2b474f001188b09995a5a76e",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823543,
+      "capturedAt": "2026-10-17T20:53:39.236467+00:00",
+      "officialDate": "2026-09-22",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "4b6c91d2147dbdcc6e59ef677634dac159275d59a548ffa0ad88f56bc8e1021f",
+      "boxscoreSha256": "d94e3b89a40025025680c1720fba8b110b5bba25e6073b9dc81eefd03985a524",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_97dd937bcef6abe19c4f7db1864158d6f0ba798a",
+    "target_date": "2026-09-22",
+    "game_pk": 823543,
+    "selection": "Austin Wells",
+    "player_mlbam_id": 669224,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_29ae34b1b48c6e23a746fd2f0d00a2",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823543,
+      "capturedAt": "2026-10-17T20:53:39.236467+00:00",
+      "officialDate": "2026-09-22",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "4b6c91d2147dbdcc6e59ef677634dac159275d59a548ffa0ad88f56bc8e1021f",
+      "boxscoreSha256": "d94e3b89a40025025680c1720fba8b110b5bba25e6073b9dc81eefd03985a524",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_d7f889ac69478c8fc4c025542891e7acbad71090",
+    "target_date": "2026-09-22",
+    "game_pk": 823543,
+    "selection": "Ryan McMahon",
+    "player_mlbam_id": 641857,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_0488aad9672c163ad28b2dea24984c",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823543,
+      "capturedAt": "2026-10-17T20:53:39.236467+00:00",
+      "officialDate": "2026-09-22",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "4b6c91d2147dbdcc6e59ef677634dac159275d59a548ffa0ad88f56bc8e1021f",
+      "boxscoreSha256": "d94e3b89a40025025680c1720fba8b110b5bba25e6073b9dc81eefd03985a524",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_04b8645decf2c0c570bdba92ee122b0f7421c2bf",
+    "target_date": "2026-09-26",
+    "game_pk": 823407,
+    "selection": "Edmundo Sosa",
+    "player_mlbam_id": 624641,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_dd63e091478fb0260ee52e780ecad7",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823407,
+      "capturedAt": "2026-10-17T20:53:36.558828+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "5da20315ef1d72fe0e9aba12d6b9dd752476b1e525f8228af5bb275e86c8b405",
+      "boxscoreSha256": "d6aba82222e9f4223a34ee2f3182c3b009ea50e21411301e22bfdff608e12c07",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_135ec692f24c0cd553a222fff48e4ac0c16c8dfb",
+    "target_date": "2026-09-26",
+    "game_pk": 824219,
+    "selection": "Rafael Flores Jr.",
+    "player_mlbam_id": 804668,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_b9146ea2db5aaea9715005c31ee474",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824219,
+      "capturedAt": "2026-10-17T20:53:50.704671+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "e2a6fc60c79581655c1985660baf9a26993c755906e5e3536be5f43a94da5d8b",
+      "boxscoreSha256": "0e9bd439f6574ecc07ad1717fb7588ce54647a50ebba9ce1f5c8cab039d5e10e",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_20e88e4a7e5e67ec5602cb15f3876cb0415f7559",
+    "target_date": "2026-09-26",
+    "game_pk": 824219,
+    "selection": "Gleyber Torres",
+    "player_mlbam_id": 650402,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_d2bc7c6bd0e973796d274e10ac150b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824219,
+      "capturedAt": "2026-10-17T20:53:50.704671+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "e2a6fc60c79581655c1985660baf9a26993c755906e5e3536be5f43a94da5d8b",
+      "boxscoreSha256": "0e9bd439f6574ecc07ad1717fb7588ce54647a50ebba9ce1f5c8cab039d5e10e",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_34c9be74875c17b46478cf2dc230d8580f2ffcfa",
+    "target_date": "2026-09-26",
+    "game_pk": 824219,
+    "selection": "John Peck",
+    "player_mlbam_id": 807726,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_e49cc9f83434de2b748b255e4b4196",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824219,
+      "capturedAt": "2026-10-17T20:53:50.704671+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "e2a6fc60c79581655c1985660baf9a26993c755906e5e3536be5f43a94da5d8b",
+      "boxscoreSha256": "0e9bd439f6574ecc07ad1717fb7588ce54647a50ebba9ce1f5c8cab039d5e10e",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_40dbfae191e950e70bacc24cc50d46d53ec2056a",
+    "target_date": "2026-09-26",
+    "game_pk": 823813,
+    "selection": "Joe Mack",
+    "player_mlbam_id": 691788,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_79d619e3fcb5d9cc69aa9c51fe88bd",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823813,
+      "capturedAt": "2026-10-17T20:53:44.240552+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "45fc4c2e9c2432d9ec63dbea1ffd545cb3df53f00376979e6a4f2660382ef33a",
+      "boxscoreSha256": "058bf5432a64f17f4d3f910dde7884a0eac2e078449020841087435cbba22962",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_45c0f72214dcee2103bd15e08ce24f3b503b020f",
+    "target_date": "2026-09-26",
+    "game_pk": 824543,
+    "selection": "Zac Veen",
+    "player_mlbam_id": 691728,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_272aa653e6c74dcb83ca15f863d6fd",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824543,
+      "capturedAt": "2026-10-17T20:53:52.920995+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "8e677c6dadf68bdd47f070a68afc32e5202b7d0d66c6d3148a6eae8220bf34e0",
+      "boxscoreSha256": "9bb75e13560c6e9827d4ed6f0a103c4162c81d3f8030de4acab4866fc375392a",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_45e2cea2fbcabfecb5123e43265eaa1b0e29c2b0",
+    "target_date": "2026-09-26",
+    "game_pk": 824057,
+    "selection": "Kyle Isbel",
+    "player_mlbam_id": 664728,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_45ddca193d8c673180946fe5d70450",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824057,
+      "capturedAt": "2026-10-17T20:53:48.417040+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "49e0c457a16dd58caf352e0c638fa68ccdb56a2e0836b422bc7d82162134ae14",
+      "boxscoreSha256": "bfed517c2b7441c68ed6a27f3ebe47b0c4db06617ab4f35a066de1c31acc0ab2",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_5148cd905def8d106c8dbb5d2ba677df9e29eda0",
+    "target_date": "2026-09-26",
+    "game_pk": 823653,
+    "selection": "Emmanuel Rodriguez",
+    "player_mlbam_id": 691181,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_8b805f99715c22bcaf68c2545e2a1c",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823653,
+      "capturedAt": "2026-10-17T20:53:41.914258+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "b686abfab87a8ec95acc4e9cc0e6807933fcc593c5eb53ff5365e6d3569c0851",
+      "boxscoreSha256": "bf235cfd1e18ecfd7c36ed6ab7174b9dc40ce39fcd4ee55d07a2a515df18b9eb",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_577d3d47cbd259f6d56fd133b84b9cda9f5ce99e",
+    "target_date": "2026-09-26",
+    "game_pk": 824219,
+    "selection": "Brett Callahan",
+    "player_mlbam_id": 814430,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_5204dddca01ef914379188697e0376",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824219,
+      "capturedAt": "2026-10-17T20:53:50.704671+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "e2a6fc60c79581655c1985660baf9a26993c755906e5e3536be5f43a94da5d8b",
+      "boxscoreSha256": "0e9bd439f6574ecc07ad1717fb7588ce54647a50ebba9ce1f5c8cab039d5e10e",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_5c6ca6610c1f61e3e64f871e7890111e64159815",
+    "target_date": "2026-09-26",
+    "game_pk": 823733,
+    "selection": "Joey Ortiz",
+    "player_mlbam_id": 687401,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_b1d2cbd8cd7f120dd4f60423766f4c",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823733,
+      "capturedAt": "2026-10-17T20:53:44.165363+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "12945194259dc61089bb1e7e5b647106586e1ca5c1ed7b6b0a9605f621869c49",
+      "boxscoreSha256": "9fa7256d4ae35c5427af30b94a9d152702ee68fb1f9c0f7ae997cb2135bda53d",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_8d1e20f1bf5955eeba562de4623e51df08250cdb",
+    "target_date": "2026-09-26",
+    "game_pk": 823407,
+    "selection": "Edmundo Sosa",
+    "player_mlbam_id": 624641,
+    "market": "batter_walks",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c5756f1778cae0391c8729e292f8f6",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823407,
+      "capturedAt": "2026-10-17T20:53:36.558828+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "5da20315ef1d72fe0e9aba12d6b9dd752476b1e525f8228af5bb275e86c8b405",
+      "boxscoreSha256": "d6aba82222e9f4223a34ee2f3182c3b009ea50e21411301e22bfdff608e12c07",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_8ee9c0bcdadc5bb7badd797ac828e06485eb3c58",
+    "target_date": "2026-09-26",
+    "game_pk": 823407,
+    "selection": "Chandler Simpson",
+    "player_mlbam_id": 802415,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c6e85088c19ce7b1e6c9da5bce4a08",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823407,
+      "capturedAt": "2026-10-17T20:53:36.558828+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "5da20315ef1d72fe0e9aba12d6b9dd752476b1e525f8228af5bb275e86c8b405",
+      "boxscoreSha256": "d6aba82222e9f4223a34ee2f3182c3b009ea50e21411301e22bfdff608e12c07",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_9141465bff51b20ae0346c45959789f1688fdf5c",
+    "target_date": "2026-09-26",
+    "game_pk": 823733,
+    "selection": "Masyn Winn",
+    "player_mlbam_id": 691026,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_9b5dc6ebb743f1c6df246734798f2e",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823733,
+      "capturedAt": "2026-10-17T20:53:44.165363+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "12945194259dc61089bb1e7e5b647106586e1ca5c1ed7b6b0a9605f621869c49",
+      "boxscoreSha256": "9fa7256d4ae35c5427af30b94a9d152702ee68fb1f9c0f7ae997cb2135bda53d",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_b1da9ef78549d832d18773c1dccabc535fc67247",
+    "target_date": "2026-09-26",
+    "game_pk": 823813,
+    "selection": "Xavier Edwards",
+    "player_mlbam_id": 669364,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_b0e905c1e93e7a8bf06c0192d034ce",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823813,
+      "capturedAt": "2026-10-17T20:53:44.240552+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "45fc4c2e9c2432d9ec63dbea1ffd545cb3df53f00376979e6a4f2660382ef33a",
+      "boxscoreSha256": "058bf5432a64f17f4d3f910dde7884a0eac2e078449020841087435cbba22962",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_cb227972ba4db1f1d7b914aa01ae2137aa6931d6",
+    "target_date": "2026-09-26",
+    "game_pk": 823653,
+    "selection": "Ryan Kreidler",
+    "player_mlbam_id": 668952,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_a494f2df4359598e2f9ef14acf7d32",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823653,
+      "capturedAt": "2026-10-17T20:53:41.914258+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "b686abfab87a8ec95acc4e9cc0e6807933fcc593c5eb53ff5365e6d3569c0851",
+      "boxscoreSha256": "bf235cfd1e18ecfd7c36ed6ab7174b9dc40ce39fcd4ee55d07a2a515df18b9eb",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_e33565757827c8cf255a1ce4ec8808fbc8c1071b",
+    "target_date": "2026-09-26",
+    "game_pk": 822759,
+    "selection": "Ke'Bryan Hayes",
+    "player_mlbam_id": 663647,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c611c19dbcb7b4a27ad748e3ba9a17",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "ZERO_PA_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 822759,
+      "capturedAt": "2026-10-17T20:53:30.708259+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "6a40fc3f2620189a1567517a57abdc13642af6ff3520306ec6f3393cb9d16d83",
+      "boxscoreSha256": "f68ddfad0419807be46fa12a1e3459cfcfb0528d57ad87290e416d351f56d659",
+      "player": {
+        "plateAppearances": 0,
+        "doubles": 0,
+        "walks": 0
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_e8cb8f7ff3afd9574b1b2d561712c31a64100538",
+    "target_date": "2026-09-26",
+    "game_pk": 823653,
+    "selection": "Elias Díaz",
+    "player_mlbam_id": 553869,
+    "market": "batter_walks",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_d268da5159705af0dea340731a450e",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823653,
+      "capturedAt": "2026-10-17T20:53:41.914258+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "b686abfab87a8ec95acc4e9cc0e6807933fcc593c5eb53ff5365e6d3569c0851",
+      "boxscoreSha256": "bf235cfd1e18ecfd7c36ed6ab7174b9dc40ce39fcd4ee55d07a2a515df18b9eb",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_f4155abde2909519bf386f10b5407e1dece5a7f8",
+    "target_date": "2026-09-26",
+    "game_pk": 823813,
+    "selection": "Sean Murphy",
+    "player_mlbam_id": 669221,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_af4060f552500f7ffb243c7bb4c355",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823813,
+      "capturedAt": "2026-10-17T20:53:44.240552+00:00",
+      "officialDate": "2026-09-26",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "45fc4c2e9c2432d9ec63dbea1ffd545cb3df53f00376979e6a4f2660382ef33a",
+      "boxscoreSha256": "058bf5432a64f17f4d3f910dde7884a0eac2e078449020841087435cbba22962",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_0b596b596c6e7418a286de9b5b8afceed4a1f909",
+    "target_date": "2026-09-27",
+    "game_pk": 823814,
+    "selection": "Jakob Marsee",
+    "player_mlbam_id": 805300,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_21df8d574a5936e3fb7f09e784be95",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823814,
+      "capturedAt": "2026-10-17T20:53:46.397924+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "05e5c4b5e950b3dc71d7d07036c938cd37d6d172d0d465357f60f4f66698d09d",
+      "boxscoreSha256": "2ffb02543d63b03365175edf85ea14752325791524e2ca45bf8fdf8eb11df60c",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_15fc65f586b07c89527d609e1ebbf64c0f6cc58f",
+    "target_date": "2026-09-27",
+    "game_pk": 823164,
+    "selection": "Osleivis Basabe",
+    "player_mlbam_id": 678545,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_af3d8cf2b772dce245ca6fcd540db5",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823164,
+      "capturedAt": "2026-10-17T20:53:34.220119+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "23128bda81b3153c59c432f0aca4b8fb10dd5b55c5adf77637420e08f0e0b9c2",
+      "boxscoreSha256": "8f8f39ee338202b08b802f909ee135f537f88d337407812e1e30c395ed7ad848",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_1ff0e6a4cc059042492901c8d7acdbadbe53b866",
+    "target_date": "2026-09-27",
+    "game_pk": 824055,
+    "selection": "Steven Kwan",
+    "player_mlbam_id": 680757,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c2d9495e0a32425bebf03753e71f3d",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824055,
+      "capturedAt": "2026-10-17T20:53:46.446408+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "bd49bfeadba8ea37a54b301496b70bad24c102a61c675dc25cd2b3af7a796c5e",
+      "boxscoreSha256": "00053f37978679cdde8efea29edbdecddf93b1574dd42d0a41564e3924bd8a93",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_28be79c40fff1e4b4a79f27e86dbf64eca915c32",
+    "target_date": "2026-09-27",
+    "game_pk": 823408,
+    "selection": "Taylor Walls",
+    "player_mlbam_id": 670764,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_a70764e48c6fbf9885841831df90a5",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823408,
+      "capturedAt": "2026-10-17T20:53:36.616269+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "8791794dd620ddd2db7b6f4b93d9519452489976452421bcd2a495300b3bfba3",
+      "boxscoreSha256": "655020816c59737d246d69f1b19870b36fcba063506a2f83bc7c85cefbe4ee13",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_2bbeb5c22d2c882c33960858f8a5c855dae9ee5d",
+    "target_date": "2026-09-27",
+    "game_pk": 823164,
+    "selection": "Will Smith",
+    "player_mlbam_id": 669257,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_53067e3e168ea183cc2ffe1ae1df47",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823164,
+      "capturedAt": "2026-10-17T20:53:34.220119+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "23128bda81b3153c59c432f0aca4b8fb10dd5b55c5adf77637420e08f0e0b9c2",
+      "boxscoreSha256": "8f8f39ee338202b08b802f909ee135f537f88d337407812e1e30c395ed7ad848",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_3486d22554f1912c9f1727091e68212d76008bf0",
+    "target_date": "2026-09-27",
+    "game_pk": 824055,
+    "selection": "Brayan Rocchio",
+    "player_mlbam_id": 677587,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_12341bc7ffcead9df6a1fe6e4d252f",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824055,
+      "capturedAt": "2026-10-17T20:53:46.446408+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "bd49bfeadba8ea37a54b301496b70bad24c102a61c675dc25cd2b3af7a796c5e",
+      "boxscoreSha256": "00053f37978679cdde8efea29edbdecddf93b1574dd42d0a41564e3924bd8a93",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_3bcc56df41157f2d532406479b423a83fe8e89e9",
+    "target_date": "2026-09-27",
+    "game_pk": 824542,
+    "selection": "Kyle Teel",
+    "player_mlbam_id": 691019,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_c8e1f250c3e731904e501b06a30736",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824542,
+      "capturedAt": "2026-10-17T20:53:50.772636+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "f1b0c8409e1be0a9f728d07a0a6da912e93210a209e934cdfdf5382536496b94",
+      "boxscoreSha256": "437e91343ea15ff48dd54ee396d8ad463fb8615e484bc2fdd27d88740ed96b2a",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_5f924e43f48c4e577d84d9c3f28c0b1dba9e062d",
+    "target_date": "2026-09-27",
+    "game_pk": 822761,
+    "selection": "Dane Myers",
+    "player_mlbam_id": 667472,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_88f8029548ac29f49c9d10e3c7b685",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 822761,
+      "capturedAt": "2026-10-17T20:53:30.709938+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "83c3ca4900b7a04fd4fcf8a829d0e45d5a6566b1f40e5696c80a1ced4659a838",
+      "boxscoreSha256": "f45d75eea724c51f9ba05cacc3dc3ace728bcf6c4b8324056fb258c285b57027",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_667752f3145c6b44d5e2d518b7b40d9cc2bfb9dc",
+    "target_date": "2026-09-27",
+    "game_pk": 824217,
+    "selection": "Oneil Cruz",
+    "player_mlbam_id": 665833,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_e420e965ccc056897e9c6b51c3de5b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 824217,
+      "capturedAt": "2026-10-17T20:53:48.452958+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "b41a427824de4db10843b8953039093d3d035214661a09f1f0a3fda636b9839c",
+      "boxscoreSha256": "420459b53468de57da1c40e4f7ed5a0b964bb2117d06337e4fb5dc3983fe2de4",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_7061c2a675dd9aa0ec84f50cd011b3717ce17b36",
+    "target_date": "2026-09-27",
+    "game_pk": 823650,
+    "selection": "Emmanuel Rodriguez",
+    "player_mlbam_id": 691181,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_e74dea2e42cca7ca47be7fe59772e4",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823650,
+      "capturedAt": "2026-10-17T20:53:39.250748+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "74ae7264f6fec97b2870c5a3154f9e9f250ed1ff0e2a079ee7000d29b9f73da4",
+      "boxscoreSha256": "93868daedf8df18266bd71a0171af4228bfff54e58fbb5829ac7b8185526f71c",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_7135b31a703da14b2f7307bb59f0cecfad8ca12d",
+    "target_date": "2026-09-27",
+    "game_pk": 822761,
+    "selection": "Eugenio Suárez",
+    "player_mlbam_id": 553993,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_e4fab11a5ce1a3f6d08553efc4de3b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 822761,
+      "capturedAt": "2026-10-17T20:53:30.709938+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "83c3ca4900b7a04fd4fcf8a829d0e45d5a6566b1f40e5696c80a1ced4659a838",
+      "boxscoreSha256": "f45d75eea724c51f9ba05cacc3dc3ace728bcf6c4b8324056fb258c285b57027",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_8bf70e55217acecf152e0f9e18b41dd56b2b4647",
+    "target_date": "2026-09-27",
+    "game_pk": 823731,
+    "selection": "JJ Wetherholt",
+    "player_mlbam_id": 802139,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_869793164965cba98c4e38bf91683e",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823731,
+      "capturedAt": "2026-10-17T20:53:42.011681+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "d4cc3653854475873f8b32aa4f7f13b2323e4df76d1a3d742c5b10803396178e",
+      "boxscoreSha256": "652a0a73ff9c1a0f22f7ef827bec4535aa0d32b14b977e44da689752bd095887",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_b25d6e05275b27a6c21b645a030752c2706f01d1",
+    "target_date": "2026-09-27",
+    "game_pk": 823164,
+    "selection": "Andrew Knizner",
+    "player_mlbam_id": 668800,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_bb0e9325e539af40bd4313c18c9ef6",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823164,
+      "capturedAt": "2026-10-17T20:53:34.220119+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "23128bda81b3153c59c432f0aca4b8fb10dd5b55c5adf77637420e08f0e0b9c2",
+      "boxscoreSha256": "8f8f39ee338202b08b802f909ee135f537f88d337407812e1e30c395ed7ad848",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_bb862e0289d5530a770945cf78f0f1aca0173185",
+    "target_date": "2026-09-27",
+    "game_pk": 823814,
+    "selection": "Joe Mack",
+    "player_mlbam_id": 691788,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_9e65784e29a220e8aa4170e2aa7f80",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823814,
+      "capturedAt": "2026-10-17T20:53:46.397924+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "05e5c4b5e950b3dc71d7d07036c938cd37d6d172d0d465357f60f4f66698d09d",
+      "boxscoreSha256": "2ffb02543d63b03365175edf85ea14752325791524e2ca45bf8fdf8eb11df60c",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_cfd8857b90cf7e24d0f8fa5cc114cda87ca739cc",
+    "target_date": "2026-09-27",
+    "game_pk": 823814,
+    "selection": "Ronald Acuña Jr.",
+    "player_mlbam_id": 660670,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_3cf9bc6d521a0dff7589625a141f70",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823814,
+      "capturedAt": "2026-10-17T20:53:46.397924+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "05e5c4b5e950b3dc71d7d07036c938cd37d6d172d0d465357f60f4f66698d09d",
+      "boxscoreSha256": "2ffb02543d63b03365175edf85ea14752325791524e2ca45bf8fdf8eb11df60c",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_de8c8e5d08dcd92451f14186217283c777410e76",
+    "target_date": "2026-09-27",
+    "game_pk": 823408,
+    "selection": "Bryan De La Cruz",
+    "player_mlbam_id": 650559,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_7bcdf74c24c2753829c01df1dbb453",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823408,
+      "capturedAt": "2026-10-17T20:53:36.616269+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "8791794dd620ddd2db7b6f4b93d9519452489976452421bcd2a495300b3bfba3",
+      "boxscoreSha256": "655020816c59737d246d69f1b19870b36fcba063506a2f83bc7c85cefbe4ee13",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_e7e7465502ea7072c80f5195090ae025002fb32b",
+    "target_date": "2026-09-27",
+    "game_pk": 823731,
+    "selection": "Joey Ortiz",
+    "player_mlbam_id": 687401,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_a40e0b93182d3780656d27476562e2",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823731,
+      "capturedAt": "2026-10-17T20:53:42.011681+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "d4cc3653854475873f8b32aa4f7f13b2323e4df76d1a3d742c5b10803396178e",
+      "boxscoreSha256": "652a0a73ff9c1a0f22f7ef827bec4535aa0d32b14b977e44da689752bd095887",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_feb1c29ff379b0f4b0b3fae26fab5a51e3e6a37b",
+    "target_date": "2026-09-27",
+    "game_pk": 823731,
+    "selection": "Bryan Torres",
+    "player_mlbam_id": 663494,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_2bf7d2acf04507f833d585260f0715",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 823731,
+      "capturedAt": "2026-10-17T20:53:42.011681+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "d4cc3653854475873f8b32aa4f7f13b2323e4df76d1a3d742c5b10803396178e",
+      "boxscoreSha256": "652a0a73ff9c1a0f22f7ef827bec4535aa0d32b14b977e44da689752bd095887",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_ff69910127e190f20925ed4fa10bd2bb2c15f7af",
+    "target_date": "2026-09-27",
+    "game_pk": 822761,
+    "selection": "Alejandro Kirk",
+    "player_mlbam_id": 672386,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "REGULAR_SEASON",
+    "source_row_id": "approvedprop_53619edd3d71a0e2ae419f0ccd7e4a",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 822761,
+      "capturedAt": "2026-10-17T20:53:30.709938+00:00",
+      "officialDate": "2026-09-27",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "83c3ca4900b7a04fd4fcf8a829d0e45d5a6566b1f40e5696c80a1ced4659a838",
+      "boxscoreSha256": "f45d75eea724c51f9ba05cacc3dc3ace728bcf6c4b8324056fb258c285b57027",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_79c22d25b13936333cb95b8062aed50d0c5ecfe4",
+    "target_date": "2026-09-30",
+    "game_pk": 849846,
+    "selection": "Taylor Trammell",
+    "player_mlbam_id": 666211,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_81d054c6185aa65c319ad83e93e0f1",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849846,
+      "capturedAt": "2026-10-17T20:54:11.651016+00:00",
+      "officialDate": "2026-09-30",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "e17bdc581bac37d87068c6e14cfe7cfc98578a64ad8fc1d174ade2cd65a99594",
+      "boxscoreSha256": "2021f8623e477e2e66f7c8ede80b51b897ad9fddd78ec601c9c9781d02bf4c00",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_b93f288fa1189f969328c30712e64f65d4d9f9af",
+    "target_date": "2026-10-01",
+    "game_pk": 849844,
+    "selection": "Sean Murphy",
+    "player_mlbam_id": 669221,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_0d7698c4ff793a44c31c6086457fdd",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849844,
+      "capturedAt": "2026-10-17T20:54:09.511148+00:00",
+      "officialDate": "2026-10-01",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "a436d9b887eba21fde5c89f9db553606b55f548f0904222f1e0e143994b6a2c9",
+      "boxscoreSha256": "d7deedd5d6d17094ab13af48c7454f46862aad97d4c1556168754b50faaf0e44",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_06789138f5e8ba61f7891a661fc5689c83971ad1",
+    "target_date": "2026-10-03",
+    "game_pk": 849829,
+    "selection": "Luisangel Acuña",
+    "player_mlbam_id": 682668,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_5fa1c6c4ed01cf2bd01efea360a6ac",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849829,
+      "capturedAt": "2026-10-17T20:54:04.908449+00:00",
+      "officialDate": "2026-10-03",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "37860f6a72c41c25b673d49e853ca32066dc41510f7bfff1370f171e23db026f",
+      "boxscoreSha256": "8818c2a850f7cee57ffda8d6378ca303f6c6a0bb99c25a34315b565c40109b99",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_1580db6b2bc0faa92627fbe55b43c8cac568dd99",
+    "target_date": "2026-10-03",
+    "game_pk": 849835,
+    "selection": "Cedric Mullins",
+    "player_mlbam_id": 656775,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_6938c4c55753789795e04f631189d0",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849835,
+      "capturedAt": "2026-10-17T20:54:07.090822+00:00",
+      "officialDate": "2026-10-03",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "4f5d09cc12b062c372b68bb09110dc73a44c3dfa193ab08d16e161251e5354c2",
+      "boxscoreSha256": "469b11707415ca0a535dae5f8657c59899816a580852fd5ac427d55b507ab9d7",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_7e4c271f0e52fb26048ee7faa3264aa18d54c241",
+    "target_date": "2026-10-04",
+    "game_pk": 849823,
+    "selection": "Ha-Seong Kim",
+    "player_mlbam_id": 673490,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_dc0328291d143e43409619dd055d88",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849823,
+      "capturedAt": "2026-10-17T20:54:02.272866+00:00",
+      "officialDate": "2026-10-04",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "a1b2f8cd1ff16cf9916df86086b10d414ab586fa2eb210a22903031ce99b1a71",
+      "boxscoreSha256": "f6ec3e6aa5620ce19ff9b920c51cd9632cb762c5bd5a405a36bf0a2f89db7c7d",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_b9e776585dc73161cbdd40dd658b50f657f31fe8",
+    "target_date": "2026-10-04",
+    "game_pk": 849825,
+    "selection": "Ethan Salas",
+    "player_mlbam_id": 806956,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_9c3becc40a82b7740b1f5da88b9515",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849825,
+      "capturedAt": "2026-10-17T20:54:04.842257+00:00",
+      "officialDate": "2026-10-04",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "220a838a99ed7cc3a518eada34515c692675c62ca5e5508d981fa701dae58ea0",
+      "boxscoreSha256": "9e3d0247ad8cf26baa24db67b234d598af0e8714b6185434f14e13d38e9e2cd2",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_f37ee5d76937fbf99ac16e36b7b35636dc10e06b",
+    "target_date": "2026-10-06",
+    "game_pk": 849819,
+    "selection": "Sean Murphy",
+    "player_mlbam_id": 669221,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_ce9d253f427aa51f593b8e7c07cf57",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849819,
+      "capturedAt": "2026-10-17T20:54:00.093521+00:00",
+      "officialDate": "2026-10-06",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "554afdf7661e7a60366d94d9958b20e118cb07c3c5101a40ea3991b3820c4e78",
+      "boxscoreSha256": "39db90115b260b446e0dc95a3a0b6188e8d174b3914462fe918b5570ee2913c1",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_310dd0045a2b9f97af305f916751839118e66a2f",
+    "target_date": "2026-10-07",
+    "game_pk": 849838,
+    "selection": "Ryan McMahon",
+    "player_mlbam_id": 641857,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_4044e28be0966f658e2888e816be4b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849838,
+      "capturedAt": "2026-10-17T20:54:09.462638+00:00",
+      "officialDate": "2026-10-07",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "c643e3f6492e1c3e8556ecb48f99ef2d6ce3cf4d0fd16e6c8038ad35abd3b046",
+      "boxscoreSha256": "befde92f0c7622fc4beae5c99eb2cf96f78805c6d89e819c4d3ac9d4d873e3b6",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_7157a37d97f7e2a369723abfc2311d4df0f8ef75",
+    "target_date": "2026-10-07",
+    "game_pk": 849838,
+    "selection": "Chandler Simpson",
+    "player_mlbam_id": 802415,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_a92ffc681d833cc909d794f23d0537",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849838,
+      "capturedAt": "2026-10-17T20:54:09.462638+00:00",
+      "officialDate": "2026-10-07",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "c643e3f6492e1c3e8556ecb48f99ef2d6ce3cf4d0fd16e6c8038ad35abd3b046",
+      "boxscoreSha256": "befde92f0c7622fc4beae5c99eb2cf96f78805c6d89e819c4d3ac9d4d873e3b6",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_9fdf17c5f0a409676e8377435ea8894a53f74520",
+    "target_date": "2026-10-07",
+    "game_pk": 849833,
+    "selection": "Andrew Benintendi",
+    "player_mlbam_id": 643217,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_3c28dc60a1028363b0fbb0e5dfb32b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849833,
+      "capturedAt": "2026-10-17T20:54:07.050103+00:00",
+      "officialDate": "2026-10-07",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "f53b63c47ea2728bb0db2b8ef138d395be8d79a87cf08700245182a89a7da684",
+      "boxscoreSha256": "dd1423d9e144ef618450765c215443648e8084c8d0550667e36204d1007fcb2c",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_add70781dc0a19d6471a01f6f8668e24e905a800",
+    "target_date": "2026-10-07",
+    "game_pk": 849838,
+    "selection": "Nick Fortes",
+    "player_mlbam_id": 663743,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_47dcdc6ae1a892bec955e2d7ca3f7c",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849838,
+      "capturedAt": "2026-10-17T20:54:09.462638+00:00",
+      "officialDate": "2026-10-07",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "c643e3f6492e1c3e8556ecb48f99ef2d6ce3cf4d0fd16e6c8038ad35abd3b046",
+      "boxscoreSha256": "befde92f0c7622fc4beae5c99eb2cf96f78805c6d89e819c4d3ac9d4d873e3b6",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_0198e4025dfa0732385ccb29559757d406f61826",
+    "target_date": "2026-10-12",
+    "game_pk": 849812,
+    "selection": "Joey Ortiz",
+    "player_mlbam_id": 687401,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_b3c596727dbe181258394c51b20a38",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849812,
+      "capturedAt": "2026-10-17T20:53:57.795969+00:00",
+      "officialDate": "2026-10-12",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "49a9185e6aea94f90835a18cda2e29139642f27c390f894018e2786766307547",
+      "boxscoreSha256": "0812e2eefe940a1beb1565032edfd32e3c93d7f24e8cf171755b75e64336b22d",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_136dfc4ea658cbc68cc37c24e855c471e3daa51c",
+    "target_date": "2026-10-12",
+    "game_pk": 849812,
+    "selection": "Enrique Hernández",
+    "player_mlbam_id": 571771,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_a8d3506e1a07b2aba0b0f86765d89e",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849812,
+      "capturedAt": "2026-10-17T20:53:57.795969+00:00",
+      "officialDate": "2026-10-12",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "49a9185e6aea94f90835a18cda2e29139642f27c390f894018e2786766307547",
+      "boxscoreSha256": "0812e2eefe940a1beb1565032edfd32e3c93d7f24e8cf171755b75e64336b22d",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_b61aca1b1dd82e504f1cf5cf0900f5c38bd4c17c",
+    "target_date": "2026-10-12",
+    "game_pk": 849820,
+    "selection": "Richie Palacios",
+    "player_mlbam_id": 680700,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_08fb60f6fa9428f02c784e648259af",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849820,
+      "capturedAt": "2026-10-17T20:54:02.204528+00:00",
+      "officialDate": "2026-10-12",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "13d54413eb1cfdf2ec6da87c63e673c6d74548002cb0a22ec39d59c40d828a29",
+      "boxscoreSha256": "2671d17ab65a504e207ed4fb9a53527584f342b20d5ac2be57a1d1dc98ecc778",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_3b93bc8e151c698dcd9e03ec5afc5f7e06407036",
+    "target_date": "2026-10-13",
+    "game_pk": 849813,
+    "selection": "Nick Fortes",
+    "player_mlbam_id": 663743,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_c4e48f0e2380211f0afa8d48e45c3b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849813,
+      "capturedAt": "2026-10-17T20:53:57.839988+00:00",
+      "officialDate": "2026-10-13",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "7ba1428243992fea1b85adda426ec6672576e368ee62a4cfe8449f88afde32af",
+      "boxscoreSha256": "8d99990175d94e9b1b0ec42ef607f548eb13efa49767b28ac64e1d6038211857",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_b5265a3414203c21b8f751ac038d963014b3d1fc",
+    "target_date": "2026-10-13",
+    "game_pk": 849813,
+    "selection": "Ryan Vilade",
+    "player_mlbam_id": 668723,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_9bb7bb8d8643a21537ec5567cf9625",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849813,
+      "capturedAt": "2026-10-17T20:53:57.839988+00:00",
+      "officialDate": "2026-10-13",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "7ba1428243992fea1b85adda426ec6672576e368ee62a4cfe8449f88afde32af",
+      "boxscoreSha256": "8d99990175d94e9b1b0ec42ef607f548eb13efa49767b28ac64e1d6038211857",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_0cc4f4a9442b715f9a93dc3d80b01b1650b9e919",
+    "target_date": "2026-10-14",
+    "game_pk": 849811,
+    "selection": "MIL",
+    "player_mlbam_id": null,
+    "market": "run_line",
+    "line": "1.5",
+    "direction": "DOG_PLUS_1P5",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "fff38a5c-9929-4ef0-8fc9-5b1466638e88:849811:rl_v2_core_fixed_v1",
+    "source_relation": "sports_sync_jobs",
+    "outcome": {
+      "result": "WIN",
+      "actualValue": 4,
+      "actualLabel": "AWAY +4; final MIL 6–2 LAD",
+      "settledAt": "2026-10-17T20:53:55.279201+00:00"
+    }
+  },
+  {
+    "id": "mlb26fwd_90815942da6420591fae949db9c51ba831baabeb",
+    "target_date": "2026-10-14",
+    "game_pk": 849811,
+    "selection": "MIL",
+    "player_mlbam_id": null,
+    "market": "run_line",
+    "line": "1.5",
+    "direction": "DOG_PLUS_1P5",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "fff38a5c-9929-4ef0-8fc9-5b1466638e88:849811:rl_v2_broad_union_fixed_v1",
+    "source_relation": "sports_sync_jobs",
+    "outcome": {
+      "result": "WIN",
+      "actualValue": 4,
+      "actualLabel": "AWAY +4; final MIL 6–2 LAD",
+      "settledAt": "2026-10-17T20:53:55.279201+00:00"
+    }
+  },
+  {
+    "id": "mlb26fwd_97aa1db42b8e153ded52593407522857ef322556",
+    "target_date": "2026-10-15",
+    "game_pk": 849810,
+    "selection": "Miguel Rojas",
+    "player_mlbam_id": 500743,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_e3ae05e677f4a007b9c0e09d33335c",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "ZERO_PA_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849810,
+      "capturedAt": "2026-10-17T20:53:55.249203+00:00",
+      "officialDate": "2026-10-15",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "8068f2708b6fa0d50e188b6f1b9ed49a85ae8bf82b5dc42101352c0077eb4732",
+      "boxscoreSha256": "a6361baa401361b3350369e05d4a71eec6a8df2195627377b2ba10abbe1747c7",
+      "player": {
+        "plateAppearances": 0,
+        "doubles": 0,
+        "walks": 0
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_dad33a359a715ab5243b72b00db4da63766f159d",
+    "target_date": "2026-10-15",
+    "game_pk": 849810,
+    "selection": "Joey Ortiz",
+    "player_mlbam_id": 687401,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_a0db606d0f3ff94bbe97d004b65c9a",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "NO_BATTING_PARTICIPATION_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849810,
+      "capturedAt": "2026-10-17T20:53:55.249203+00:00",
+      "officialDate": "2026-10-15",
+      "statusCode": "F",
+      "detailedState": "Final",
+      "scheduleSha256": "8068f2708b6fa0d50e188b6f1b9ed49a85ae8bf82b5dc42101352c0077eb4732",
+      "boxscoreSha256": "a6361baa401361b3350369e05d4a71eec6a8df2195627377b2ba10abbe1747c7",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_07168b9059648ffc04c4c8e7b0c9e3791f9c0df0",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Patrick Bailey",
+    "player_mlbam_id": 672275,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_b64a86420345f9323d54946c3208f4",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_1423511fc98455ebc9711d00228555498326f473",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Steven Kwan",
+    "player_mlbam_id": 680757,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_271cd6857a816adc446f5c40f9e68b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_253adf59f05dda9c4583ae38601fe134e8f5c076",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Jonathan Aranda",
+    "player_mlbam_id": 666018,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_9c86abafe15f7f4d9a61c167edb0d4",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_39c28100d657b5c25c56d0075d43a7970d357a44",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Petey Halpin",
+    "player_mlbam_id": 690984,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_00114b02526c2bd718da5f0e12d8b3",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_3c51c661edf6e95ec011519e44358cca573d7ae5",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Chandler Simpson",
+    "player_mlbam_id": 802415,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_ce6e999b0019ddc315068ea7828961",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_637dd4b3d3034ce02883bd047a8db7aee701174b",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Richie Palacios",
+    "player_mlbam_id": 680700,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_0b5b55c349bea3c59cdfaa87db4778",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_77a589980c71b3e42a2e6c22ace5adc672207a0c",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Junior Caminero",
+    "player_mlbam_id": 691406,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_e872fc48b99cba7085465e596363cd",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_a5e9b4938c4a664708cab4346dfda7d381386adc",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Brayan Rocchio",
+    "player_mlbam_id": 677587,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_4addfd407fd27465cc184372daede9",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_bc445844f96ddbd686799baabddfd67af798a594",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Victor Mesa Jr.",
+    "player_mlbam_id": 683748,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_c0d4914def276c160577da8a8d3de0",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_d7e9681a2facd5e83e134ff0330cdc8c270cb490",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Taylor Walls",
+    "player_mlbam_id": 670764,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_3ab569faacc8270bd728e6244cb85f",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  },
+  {
+    "id": "mlb26fwd_ffabd6e4a424b366270ebd470460a0139f2b5751",
+    "target_date": "2026-10-16",
+    "game_pk": 849817,
+    "selection": "Liam Hicks",
+    "player_mlbam_id": 689414,
+    "market": "batter_doubles",
+    "line": "0.5",
+    "direction": "UNDER",
+    "season_phase": "POSTSEASON",
+    "source_row_id": "approvedprop_69e9c1a059675554d6b3c38f46355b",
+    "source_relation": "mlb_approved_prop_daily_v1",
+    "blocker": "POSTPONED_CONTRACT_REVIEW",
+    "pendingEvidence": {
+      "gamePk": 849817,
+      "capturedAt": "2026-10-17T20:54:00.051429+00:00",
+      "officialDate": "2026-10-18",
+      "statusCode": "DR",
+      "detailedState": "Postponed",
+      "scheduleSha256": "156ca5285592fede70ec6e506c5e39c06f89c82a3046b43cd1b67f9376b396e7",
+      "boxscoreSha256": "a3a6c60913f92d9fc8277145414ab90b9394e5c5f7696b1183ccf2c4ae7e7104",
+      "player": {
+        "plateAppearances": null,
+        "doubles": null,
+        "walks": null
+      },
+      "contractRuleCertified": false
+    }
+  }
+]
