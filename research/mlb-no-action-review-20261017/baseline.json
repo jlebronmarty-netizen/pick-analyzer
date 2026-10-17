@@ -1,0 +1,13 @@
+{
+  "counts": {
+    "open": 73,
+    "wins": 615,
+    "voids": 2,
+    "losses": 161
+  },
+  "official": "0e404e3b9e1b8975c7829bcd7f6193bc",
+  "dailyFrozen": "4a3665d7accb79016749a64243ac20d4",
+  "masterFrozen": "dbfa3ea318bcf303da153dc3697d2c49",
+  "propsSettled": "1d8a40b9792944f0c955714d766094b2",
+  "masterSettled": "507e791d92c1617c706c2c59ffe485f1"
+}
