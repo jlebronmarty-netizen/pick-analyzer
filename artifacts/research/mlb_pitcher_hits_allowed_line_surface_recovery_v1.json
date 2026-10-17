@@ -1,0 +1,88 @@
+{
+  "contract": "MLB_PITCHER_HITS_ALLOWED_LINE_SURFACE_RECOVERY_V1/1.0.0",
+  "research_only": true,
+  "certified_runtime_reference": {
+    "source": "PR #111 / artifacts/research/mlb_five_market_daily_runtime_parity_20260919.json",
+    "candidate_id": "pitcher_hits_allowed_under_6p5_proj_5p0_v1",
+    "raw_feature": "avg(BF last 5 prior starts) * cumulative prior hits allowed / cumulative prior BF",
+    "minimum_prior_starts": 5,
+    "strict_prior_date": true,
+    "same_date_history_allowed": false,
+    "frozen_refit_2025": {
+      "n": 3099,
+      "intercept": 2.97876810879942,
+      "slope": 0.415326852941172
+    },
+    "frozen_control_2025": {
+      "line": 6.5,
+      "direction": "UNDER",
+      "projection_max": 5,
+      "n": 761,
+      "wins": 634,
+      "accuracy": 0.8331143232588699
+    },
+    "runtime_parity_certified": true
+  },
+  "source_recovery_attempts": [
+    {
+      "source": "public.historical_baseball_pitcher_appearances + public.historical_baseball_games",
+      "base_starter_rows": 4860,
+      "pitchers": 368,
+      "hits_present_rows": 4860,
+      "hits_range": [
+        0,
+        13
+      ],
+      "avg_hits": 4.9,
+      "reconstructed_refit": {
+        "n": 3404,
+        "intercept": 2.91867490130191,
+        "slope": 0.429984398499566
+      },
+      "parity": false,
+      "note": "This reproduces the prior Retrosheet diagnostic, not the frozen MLB Official refit."
+    },
+    {
+      "source": "current MLB Official StatsAPI season=2025 gameLog pitching / primaryPosition=P directory",
+      "directory_rows": 1470,
+      "requested_pitcher_ids": 802,
+      "raw_start_rows": 4846,
+      "reconstructed_refit_all_eligible": {
+        "n": 3395,
+        "intercept": 2.891752760430316,
+        "slope": 0.43502479113585496
+      },
+      "reconstructed_refit_may_sep": {
+        "n": 3277,
+        "intercept": 2.7708662384249063,
+        "slope": 0.4571206857870661
+      },
+      "parity": false,
+      "note": "Current provider state does not reproduce the row-level snapshot used by the certified freeze."
+    }
+  ],
+  "current_board_2026_09_22": {
+    "exact_lines": [
+      3.5,
+      4.5,
+      5.5,
+      6.5,
+      7.5,
+      8.5,
+      9.5
+    ],
+    "source": "persisted sports_odds_snapshots read-only audit",
+    "provider_calls": 0
+  },
+  "state": "LINE_SURFACE_BLOCKED_EXACT_FROZEN_ROWSET_NOT_PERSISTED_CURRENT_SOURCE_DRIFT",
+  "decision": "NO_ALTERNATE_LINE_SEARCH_ON_APPROXIMATE_OR_DRIFTED_CORPUS",
+  "required_to_continue": "Recover the exact row-level 2025 MLB Official gameLog corpus/universe used by the n=3099 certified refit, or use a genuinely new prospective architecture/data source under a new contract.",
+  "boundaries": {
+    "official_picks_writes": 0,
+    "apostar_activation": false,
+    "production_promotion": false,
+    "odds_api_historical_credits_consumed": 0,
+    "tracker_modified": false,
+    "certified_runtime_retuned": false
+  }
+}
