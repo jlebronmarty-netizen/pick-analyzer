@@ -1,3 +1,10 @@
+## MLB historical OPEN repair — 2026-10-17
+
+- Applied a guarded research-only repair to all 75 pending observations: two frozen MIL +1.5 Run Line model rows graded WIN from verified final evidence; 73 props retain OPEN with specific participation/postponement contract-review reasons.
+- Frozen master columns, approved-prop predictions, all original settled records and Official Picks verified identical before/after. Cleared misleading zero actuals on pending rows.
+- Added visible OPEN explanations, null-safe metric handling, exact-final standard Run Line settlement and settled-row preservation. Existing authenticated cron reuses evidence with bounded FREE calls and daily duplicate guards; no new scheduler/worker.
+- See `research/mlb-open-repair-20261017/REPORT.md`, raw archive, baseline and verification. Historical action/void terms remain uncertified; this is not complete liquidation of all OPEN props.
+
 ## Multisport display audit — 2026-10-17
 
 - Reviewed MLB, NHL, NCAAB, Soccer and Table Tennis UI/API parity and calendar/model accounting. NFL remains clearly Preview.

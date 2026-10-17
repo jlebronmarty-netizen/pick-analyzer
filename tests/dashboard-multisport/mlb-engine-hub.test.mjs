@@ -9,6 +9,13 @@ const at='2026-10-14T12:00:00Z';
 const row=(id,extra={})=>({id,season:2026,season_phase:'REGULAR_SEASON',engine:'PICK_ANALYZER',model_id:'test_model',contract_id:null,market:'batter_doubles',line:'0.5',direction:'UNDER',evidence_class:'REGULAR_SEASON_FORWARD_APPROVED_PROP_EXACT_LINE',result:'WIN',freeze_timestamp:'2026-09-13T16:00:00Z',scheduled_at:'2026-09-13T20:00:00Z',settled_at:at,updated_at:at,source_relation:'test_source',source_row_id:id,research_only:true,production_eligible:false,official_picks_eligible:false,apostar_enabled:false,target_date:'2026-09-13',game_pk:123,selection:'Test player',projection:0.1,actual_value:'0',actual_label:null,...extra});
 const report=()=>summarizeQualifiedPlays([row('a'),row('b',{result:'LOSS'}),row('c',{engine:'PICK_EDGE',model_id:'PE_ML_V1'}),row('d',{engine:'EQUILIZER',model_id:'E2'}),row('e',{result:null,settled_at:null,target_date:'2026-10-14'}),row('f',{season_phase:'POSTSEASON',evidence_class:'POSTSEASON_SHADOW_DOMAIN_SHIFT',target_date:'2026-10-14'})],at,at,true);
 const base={view:'GENERAL',phase:'REGULAR_SEASON',formula:'ALL',date:'',outcome:'ALL'};
+test('OPEN detail shows only an allowlisted review reason, without leaking raw metadata or counting a win',()=>{
+  const research=summarizeQualifiedPlays([row('pending',{result:null,settled_at:null,metadata:{private:'PRIVATE_SENTINEL',settlement:{blocker:'ZERO_PA_CONTRACT_REVIEW'}}})],at,at,true);
+  assert.equal(research.groups[0].accuracy,null);assert.equal(research.groups[0].open,1);
+  assert.equal(research.entries[0].actual,null);
+  const html=renderToStaticMarkup(React.createElement(MlbEngineHub,{research,official:{status:'AVAILABLE',wins:0,losses:0,accuracy:null},today:'2026-10-14'}));
+  assert.match(html,/Sin aparición al plato/);assert.doesNotMatch(html,/PRIVATE_SENTINEL/);
+});
 test('sanitized details are opt-in and omit private metadata, raw sources, odds and probability',()=>{
   const r=row('a',{metadata:{private:'never send'},model_probability:0.9,odds:-1000});
   assert.equal(summarizeQualifiedPlays([r],at,at).entries,undefined);

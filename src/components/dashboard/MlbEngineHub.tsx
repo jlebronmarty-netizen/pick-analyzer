@@ -106,7 +106,7 @@ export default function MlbEngineHub({ research, official, today,cohorts }: {
             <td className="max-w-sm px-3 py-4"><p className="font-bold text-white">{r.selection}</p><p className="mt-1 text-xs text-teal-300">{labels[g.engine] ?? g.engine} · {label(g.market)} · {label(g.direction)} {g.line ?? ""}</p>
               <details className="mt-2 break-all text-xs text-slate-400"><summary className="cursor-pointer py-1">Ver registro</summary><p>{g.model}</p><p>Congelado: {time(r.frozenAt)}</p><p>Liquidado: {time(r.settledAt)}</p></details></td>
             <td className="px-3 py-4">{r.projection === null ? "—" : r.projection.toFixed(3)}</td>
-            <td className={`px-3 py-4 font-bold ${r.result === "WIN" ? "text-teal-300" : r.result === "LOSS" ? "text-rose-300" : "text-amber-200"}`}>{r.result}</td>
+            <td className={`max-w-xs px-3 py-4 font-bold ${r.result === "WIN" ? "text-teal-300" : r.result === "LOSS" ? "text-rose-300" : "text-amber-200"}`}>{r.result}{r.result === "OPEN" && <p className="mt-2 text-xs font-normal leading-5">{r.pendingReason ?? "Falta resultado exacto verificado para liquidar."}</p>}</td>
             <td className="max-w-xs break-words px-3 py-4">{r.actual ?? "—"}</td>
           </tr>; })}</tbody>
         </table></div>

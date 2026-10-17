@@ -11,6 +11,8 @@ import {
 } from '@/lib/mlb-runline-v2-standard'
 import { isMlbModelGameType } from '@/services/mlb-game-type-policy'
 import { RUNLINE_V2_HOME_P15_ALT_CANDIDATE_ID } from '@/services/mlb-runline-home-p15-alt-shadow.service'
+import { outcomeNumber, standardRunlineOutcome } from '@/lib/mlb-pending-outcome'
+import { readPendingOutcomeEvidence } from '@/services/mlb-pending-outcome-evidence.service'
 
 const LEDGER = 'mlb_2026_forward_master_ledger_v1'
 const SEASON = 2026
@@ -309,7 +311,7 @@ async function syncApprovedProps(): Promise<{ rows: LedgerRow[]; missingGameCont
       sourceRelation: 'mlb_approved_prop_daily_v1',
       sourceRowId: String(row.id),
       result: result(settlementByDailyId.get(String(row.id))?.result),
-      actualValue: finite(settlementByDailyId.get(String(row.id))?.actual_value),
+      actualValue: result(settlementByDailyId.get(String(row.id))?.result) === null ? null : outcomeNumber(settlementByDailyId.get(String(row.id))?.actual_value),
       actualLabel: text(settlementByDailyId.get(String(row.id))?.actual_label),
       settledAt: text(settlementByDailyId.get(String(row.id))?.settled_at),
       metadata: {
@@ -396,6 +398,7 @@ async function syncStandardRunline(): Promise<{ rows: LedgerRow[]; missingGameCo
   )
   const allPks = jobs.flatMap((job) => array(record(job.metadata).observations).map((obs) => Number(obs.gamePk)))
   const context = await gameContext(allPks)
+  const evidence = await readPendingOutcomeEvidence(allPks)
   const rows: LedgerRow[] = []
   let missingGameContext = 0
 
@@ -417,6 +420,8 @@ async function syncStandardRunline(): Promise<{ rows: LedgerRow[]; missingGameCo
       const dogSide = text(obs.dogSide)
       const selection = dogSide === 'HOME' ? text(obs.homeTeam) : dogSide === 'AWAY' ? text(obs.awayTeam) : null
       if (!dogSide || !selection) continue
+      const outcome = standardRunlineOutcome(evidence.get(gamePk), {gamePk,targetDate,
+        homeTeam:String(obs.homeTeam??''),awayTeam:String(obs.awayTeam??''),dogSide})
 
       for (const modelId of models) {
         const projection = modelId === MLB_RUNLINE_V2_CORE_MODEL
@@ -446,6 +451,10 @@ async function syncStandardRunline(): Promise<{ rows: LedgerRow[]; missingGameCo
           freezeTimestamp: frozenAt,
           sourceRelation: 'sports_sync_jobs',
           sourceRowId: `${job.id}:${gamePk}:${modelId}`,
+          result: outcome?.result ?? null,
+          actualValue: outcome?.actualValue ?? null,
+          actualLabel: outcome?.actualLabel ?? null,
+          settledAt: outcome?.settledAt ?? null,
           metadata: {
             dogSide,
             marketProxy: market,
@@ -453,6 +462,8 @@ async function syncStandardRunline(): Promise<{ rows: LedgerRow[]; missingGameCo
             components: obs.components,
             sourceJobId: job.id,
             marketProbabilitySemantics: 'OPENING_MARKET_PROXY_NOT_MODEL_PROBABILITY',
+            settlement: {blocker:outcome?null:'WAITING_FOR_OFFICIAL_FINAL',
+              outcomeSource:'MLB_PENDING_OUTCOME_EVIDENCE_V1',evidence:evidence.get(gamePk)??null},
           },
         }))
       }
@@ -558,14 +569,28 @@ async function syncHomeP15(): Promise<{ rows: LedgerRow[]; missingGameContext: n
 
 async function writeRows(rows: LedgerRow[]) {
   if (!rows.length) return { written: 0 }
+  const settled = await pagedRead<{id:string}>(LEDGER,'id',q=>q.not('result','is',null))
+  const settledIds = new Set(settled.map(r=>r.id))
+  rows = rows.filter(r=>!settledIds.has(r.id))
+  const pending = await pagedRead<{id:string;metadata:JsonMap}>(LEDGER,'id,metadata',q=>q.is('result',null))
+  const priorMetadata = new Map(pending.map(r=>[r.id,r.metadata]))
   let written = 0
   for (let offset = 0; offset < rows.length; offset += 100) {
     const chunk = rows.slice(offset, offset + 100)
     const response = await supabaseAdmin
       .from(LEDGER)
-      .upsert(chunk, { onConflict: 'id' })
+      .upsert(chunk, { onConflict: 'id', ignoreDuplicates:true })
     if (response.error) throw new Error(`MLB_FORWARD_MASTER_WRITE_FAILED:${response.error.message}`)
-    written += chunk.length
+    for(const row of chunk){
+      // Existing forecasts are frozen: update outcome fields only, retaining
+      // original feature/market metadata instead of rematerializing predictions.
+      const outcomePatch = {result:row.result,actual_value:row.result===null?null:row.actual_value,
+        actual_label:row.actual_label,settled_at:row.settled_at,updated_at:row.updated_at,
+        ...('settlement' in row.metadata ? {metadata:{...(priorMetadata.get(row.id)??row.metadata),settlement:row.metadata.settlement}} : {})}
+      const update=await supabaseAdmin.from(LEDGER).update(outcomePatch).eq('id',row.id).is('result',null)
+      if(update.error)throw new Error(`MLB_FORWARD_MASTER_UPDATE_FAILED:${update.error.message}`)
+      written++
+    }
   }
   return { written }
 }

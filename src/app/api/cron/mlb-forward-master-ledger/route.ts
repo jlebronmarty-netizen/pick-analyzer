@@ -4,6 +4,7 @@ import { syncMlb2026ForwardMasterLedger } from '@/services/mlb-forward-master-le
 import { freezeMlbExactLineForwardShadows, settleMlbExactLineForwardShadows } from '@/services/mlb-exact-line-forward-shadow.service'
 import { settleMlbApprovedPropDaily } from '@/services/mlb-approved-prop-settlement.service'
 import { importMlbExternalEngineArtifacts } from '@/services/mlb-external-engine-ledger-import.service'
+import { refreshPendingOutcomeEvidence } from '@/services/mlb-pending-outcome-evidence.service'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ success: false, status: 'UNAUTHORIZED' }, { status: 401 })
   }
   try {
+    const pendingEvidence = await refreshPendingOutcomeEvidence()
     const approvedPropSettlement = await settleMlbApprovedPropDaily()
     const settlement = await settleMlbExactLineForwardShadows()
     const freeze = await freezeMlbExactLineForwardShadows()
@@ -44,6 +46,7 @@ export async function GET(request: NextRequest) {
       officialPicksModified: false,
       apostarActivated: false,
       approvedPropSettlement,
+      pendingEvidence,
       settlement,
       freeze,
       externalEngines,

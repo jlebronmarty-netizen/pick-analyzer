@@ -3,6 +3,8 @@ import 'server-only'
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { mapConcurrent } from '@/services/mlb-official-pitcher-gamelog.service'
+import { outcomeNumber, pendingPropBlocker } from '@/lib/mlb-pending-outcome'
+import { readPendingOutcomeEvidence } from '@/services/mlb-pending-outcome-evidence.service'
 
 const SOURCE='mlb_approved_prop_daily_v1'
 const SETTLEMENT='mlb_approved_prop_settlement_v1'
@@ -25,7 +27,7 @@ function datePR(now=new Date()){
   const p=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]))
   return `${p.year}-${p.month}-${p.day}`
 }
-function finite(v:unknown){const n=Number(v);return Number.isFinite(n)?n:null}
+const finite=outcomeNumber
 function hash(parts:unknown[]){return createHash('sha256').update(parts.map(v=>String(v??'null')).join('|')).digest('hex').slice(0,40)}
 async function page<T>(table:string,cols:string,configure:(q:any)=>any){
   const out:T[]=[]
@@ -79,14 +81,18 @@ async function readOfficialBoxscore(gamePk:number){
 export async function settleMlbApprovedPropDaily(input:{throughDate?:string;now?:Date}={}){
   const now=input.now??new Date()
   const through=input.throughDate??datePR(now)
-  const rows=await page<DailyRow>(SOURCE,
+  const sourceRows=await page<DailyRow>(SOURCE,
     'id,tracking_date,game_pk,market,candidate_id,player_mlbam_id,player_name,direction,required_line,observed_line,status,model_qualifies,market_verified',
     q=>q.lt('tracking_date',through).eq('model_qualifies',true).eq('market_verified',true).eq('status','QUALIFIES_MARKET_VERIFIED').order('tracking_date').order('game_pk')
   )
+  const prior=await page<{approved_prop_daily_id:string;result:string|null}>(SETTLEMENT,'approved_prop_daily_id,result',q=>q.not('result','is',null))
+  const settledIds=new Set(prior.map(r=>r.approved_prop_daily_id))
+  const rows=sourceRows.filter(r=>!settledIds.has(r.id))
   if(!rows.length)return {success:true,status:'NO_SETTLEABLE_APPROVED_PROP_ROWS',writes:0,researchOnly:true,officialPicksModified:false,apostarActivated:false}
 
   const gamePks=[...new Set(rows.map(r=>Number(r.game_pk)))]
   const playerIds=[...new Set(rows.map(r=>Number(r.player_mlbam_id)))]
+  const pendingEvidence=await readPendingOutcomeEvidence(gamePks)
 
   const [basic,sdt,tb,pitcher,pitcherWin]=await Promise.all([
     page<BatterBasic>('mlb_statcast_batter_game_logs','game_pk,batter,hits,home_runs,strikeouts,walks',
@@ -174,7 +180,14 @@ export async function settleMlbApprovedPropDaily(input:{throughDate?:string;now?
     }
 
     const finalResult=sourceResult??(actual===null?null:grade(row.direction,line,actual))
-    if(actual===null&&!blocker)blocker='EXACT_OUTCOME_NOT_AVAILABLE'
+    if(actual===null&&!blocker){
+      const evidence=pendingEvidence.get(Number(row.game_pk))
+      blocker=evidence?pendingPropBlocker(evidence,Number(row.player_mlbam_id),row.tracking_date):'EXACT_OUTCOME_NOT_AVAILABLE'
+      if(evidence) sourceIdentity={...sourceIdentity,pendingEvidence:{gamePk:evidence.gamePk,
+        capturedAt:evidence.capturedAt,officialDate:evidence.officialDate,statusCode:evidence.statusCode,
+        detailedState:evidence.detailedState,scheduleSha256:evidence.scheduleSha256,boxscoreSha256:evidence.boxscoreSha256,
+        player:evidence.players[String(row.player_mlbam_id)]??null,contractRuleCertified:false}}
+    }
     if(finalResult)settled++;else blocked++
 
     prepared.push({
@@ -203,8 +216,15 @@ export async function settleMlbApprovedPropDaily(input:{throughDate?:string;now?
   }
 
   for(let i=0;i<prepared.length;i+=100){
-    const r=await supabaseAdmin.from(SETTLEMENT).upsert(prepared.slice(i,i+100),{onConflict:'approved_prop_daily_id'})
-    if(r.error)throw new Error('MLB_APPROVED_PROP_SETTLEMENT_WRITE:'+r.error.message)
+    // Insert missing rows, then update only rows still OPEN. A concurrent writer
+    // cannot downgrade or regrade a settlement that has already completed.
+    const chunk=prepared.slice(i,i+100)
+    const inserted=await supabaseAdmin.from(SETTLEMENT).upsert(chunk,{onConflict:'approved_prop_daily_id',ignoreDuplicates:true})
+    if(inserted.error)throw new Error('MLB_APPROVED_PROP_SETTLEMENT_WRITE:'+inserted.error.message)
+    for(const row of chunk){
+      const r=await supabaseAdmin.from(SETTLEMENT).update(row).eq('approved_prop_daily_id',row.approved_prop_daily_id).is('result',null)
+      if(r.error)throw new Error('MLB_APPROVED_PROP_SETTLEMENT_UPDATE:'+r.error.message)
+    }
   }
 
   return {

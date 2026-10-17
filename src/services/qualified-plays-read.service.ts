@@ -26,7 +26,7 @@ export async function getQualifiedPlaysReport({ includeEntries = false } = {}) {
       async (after) => {
         let query = supabaseAdmin
           .from(TABLE)
-          .select(COLUMNS + (includeEntries ? ",target_date,game_pk,selection,projection,actual_value,actual_label" : ""))
+          .select(COLUMNS + (includeEntries ? ",target_date,game_pk,selection,projection,actual_value,actual_label,metadata" : ""))
           .eq("season", 2026)
           .order("id", { ascending: true })
           .limit(500);
