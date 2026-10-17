@@ -1,0 +1,41 @@
+{
+  "contract": "MLB_BATTER_WALKS_U0P5_FORWARD_SHADOW_V1/1.0.0",
+  "research_only": true,
+  "production_eligible": false,
+  "official_picks_eligible": false,
+  "apostar_enabled": false,
+  "market": "batter_walks",
+  "exact_line": 0.5,
+  "side": "UNDER",
+  "candidate_id": "batter_walks_under_0p5_proj_0p20_v1",
+  "projection_formula": {
+    "intercept": 0.117815177785939,
+    "slope": 0.593708345578887,
+    "raw": "(recent_PA_per_game)*(prior_walks/prior_PA)",
+    "prediction": "max(0, intercept + slope*raw)"
+  },
+  "minimum_prior_games": 10,
+  "threshold": 0.20,
+  "historical_accuracy": 0.8339,
+  "forward_start": "2026-09-24",
+  "runtime_requirements": {
+    "exact_mlbam_identity": true,
+    "strict_target_feature_required": true,
+    "feature_table": "pick2_mlb_batter_daily_features",
+    "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "source_rule": "source_game_date < target_game_date"
+  },
+  "price_policy": {
+    "collect_price": true,
+    "calculate_ev": false,
+    "reason": "historical accuracy is not a calibrated per-play probability"
+  },
+  "boundaries": {
+    "no_line_extrapolation": true,
+    "no_side_substitution": true,
+    "no_threshold_retuning": true,
+    "no_fuzzy_identity": true,
+    "strict_pregame_only": true,
+    "no_historical_odds_api_spend": true
+  }
+}
