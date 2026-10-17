@@ -1,3 +1,10 @@
+## Soccer LaLiga SHADOW display — 2026-10-16
+
+- Added `/soccer`, read-only `/api/soccer/overview`, linked Soccer card, date-scoped calendar and gated Shadow picks/edge. Existing Soccer legacy endpoints remain unchanged.
+- Seven actual quoted projections, all INSUFFICIENT_HISTORY; zero valid Shadow picks/settlements, null accuracy/ROI/CLV. Raw high edges are diagnostic and excluded from rankings/Official Picks.
+- Warmup/quote/timing/settlement accounting verified; fixed read bridge uses stored checkpoint only, no paid/provider requests, credentials copied, DB writes, models or automation changes.
+- Source continuously published updates/settlement remain pending; future verified source releases are consumed without Pick redeploy. See `docs/product/SOCCER_SHADOW_INTEGRATION_20261016.md`.
+
 ## NCAAB published checkpoint — 2026-10-15
 
 - Added read-only `/ncaab`, `/api/ncaab/overview`, connected sport tile and date-scoped experimental calendar observations. Exact source commit and two original SHA256s verified; curated snapshot reproduces byte for byte.

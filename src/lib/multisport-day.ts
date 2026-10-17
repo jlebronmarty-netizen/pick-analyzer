@@ -6,9 +6,10 @@ import type {QualifiedReport} from './qualified-plays';
 import {operationalDailyPicks} from './operational-daily-picks';
 import {dailyDisplayRows} from './daily-pick-display';
 import {ncaabDate,type NcaabReport} from './ncaab-checkpoint';
-export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
-export type DayPick={key:string;sport:string;classification:string;matchup:string;selection:string;marketLabel:string;modelProbability:number|null;projection:number|null;edgePp:number|null;odds:number|null;book:string|null;href:string};
-export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport){
+import {validSoccerShadow,currentSoccerEdge,type SoccerReport} from './soccer-shadow-report';
+export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB'|'SOCCER';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;soccer?:{status:string};nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
+export type DayPick={key:string;sport:string;classification:string;matchup:string;selection:string;marketLabel:string;modelProbability:number|null;projection:number|null;edgePp:number|null;odds:number|null;decimalOdds?:number;book:string|null;href:string};
+export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport,soccer?:SoccerReport){
  const games:DayGame[]=view.games.map(g=>({key:'MLB:'+g.gamePk,sport:'MLB',eventId:String(g.gamePk),title:g.away+' at '+g.home,scheduledAt:g.scheduledAt,
   analyzed:g.analysisAvailable||Number.isFinite(g.homeProbability)&&Number.isFinite(g.awayProbability),started:isStarted(g),waiting:matchesSlateFilter(g,view.board.rows,'Waiting'),official:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,
   registered:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,value:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='VALUE_CANDIDATE').length,noEdge:matchesSlateFilter(g,view.board.rows,'No Edge')}));
@@ -45,6 +46,18 @@ export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,
    if(forecast)selected.push({key:'NCAAB:preseason:'+r.event_id,sport:'NCAAB',classification:'NCAAB_PRESEASON_V1 · experimental · checkpoint',marketLabel:'Ganador proyectado · sin cuota',matchup:title,selection:r.predicted_winner===r.home_id?(r.home_name??r.home_id):(r.away_name??r.away_id),modelProbability:100*(r.predicted_winner===r.home_id?r.home_win_probability!:r.away_win_probability!),projection:null,edgePp:null,odds:null,book:null,href:'/ncaab'});
   }
  }else if(ncaab)warnings.push(ncaab.warning);
+ if(soccer?.status==='AVAILABLE'){
+  warnings.push('Soccer: LaLiga O/U 2.5 · captura publicada '+soccer.capturedAt+' · '+soccer.events.length+'/'+soccer.scheduledFixtures+' partidos con cuotas. Warmup obligatorio; sin colector continuo.');
+  for(const r of soccer.events){
+   if(nhlDate(r.kickoffUtc)!==view.date)continue;
+   const valid=validSoccerShadow(r),current=currentSoccerEdge(r,soccer.readAt),started=Date.parse(r.kickoffUtc)<=Date.parse(soccer.readAt),title=r.homeTeam+' vs '+r.awayTeam;
+   games.push({key:'SOCCER:'+r.eventId,sport:'SOCCER',eventId:r.eventId,title,scheduledAt:r.kickoffUtc,analyzed:true,started,waiting:!started&&!r.warmupComplete,official:0,registered:valid?1:0,value:current?1:0,noEdge:false,soccer:{status:r.qualificationStatus}});
+   if(!valid)continue;
+   const over=r.rawSelectedSide==='OVER_2_5';
+   const pick:DayPick={key:'SOCCER:'+r.eventId,sport:'SOCCER',classification:'SHADOW · '+r.qualificationStatus,matchup:title,marketLabel:'LaLiga · O/U 2.5',selection:over?'Over 2.5':'Under 2.5',modelProbability:100*(over?r.modelOver25:r.modelUnder25),projection:null,edgePp:r.rawSelectedEdgePp,odds:null,decimalOdds:over?r.over25Decimal:r.under25Decimal,book:'TheRundown FREE · affiliate #'+r.affiliateId,href:'/soccer'};
+   selected.push(pick);if(current)edge.push(pick);
+  }
+ }else if(soccer)warnings.push(soccer.warning);
  const distinct=(rows:DayPick[])=>[...new Map(rows.map(p=>[p.key,p])).values()];
  return {date:view.date,games:games.sort((a,b)=>Date.parse(a.scheduledAt)-Date.parse(b.scheduledAt)||a.key.localeCompare(b.key)),selected:distinct(selected),edge:distinct(edge).sort((a,b)=>(b.edgePp??0)-(a.edgePp??0)||a.key.localeCompare(b.key)),warnings:[...new Set(warnings)],nhlHealth:nhl.status==='AVAILABLE'?nhl.health:null};
 }
