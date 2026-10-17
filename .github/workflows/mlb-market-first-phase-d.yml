@@ -1,0 +1,27 @@
+name: MLB Market-First Phase D coverage expansion
+
+on:
+  push:
+    branches: [research/market-first-phase-d-coverage-expansion-20260925]
+    paths:
+      - artifacts/research/mlb_market_first_phase_d_coverage_expansion_v1.json
+      - docs/research/MLB_MARKET_FIRST_PHASE_D_COVERAGE_EXPANSION_V1.md
+      - scripts/research/verify_mlb_market_first_phase_d_coverage_expansion_v1.test.mjs
+      - .github/workflows/mlb-market-first-phase-d.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - artifacts/research/mlb_market_first_phase_d_coverage_expansion_v1.json
+      - docs/research/MLB_MARKET_FIRST_PHASE_D_COVERAGE_EXPANSION_V1.md
+      - scripts/research/verify_mlb_market_first_phase_d_coverage_expansion_v1.test.mjs
+      - .github/workflows/mlb-market-first-phase-d.yml
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: node --test scripts/research/verify_mlb_market_first_phase_d_coverage_expansion_v1.test.mjs
