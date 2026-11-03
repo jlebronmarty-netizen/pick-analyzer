@@ -38,13 +38,13 @@ export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,
   edge.push(...opportunities.map(p=>({key:'NHL:'+p.key,sport:'NHL',classification:'Informativo · par Circa sin margen',marketLabel:'Moneyline · incluye OT',matchup:p.eventName,selection:p.selection,modelProbability:p.probability*100,projection:null,edgePp:p.edgePp,odds:p.odds,book:'Circa',href:'/nhl'})));
  }else warnings.push('NHL: fuente no disponible; calendario y selecciones incompletos.');
  if(ncaab?.status==='AVAILABLE'){
-  warnings.push('NCAAB: checkpoint publicado '+ncaab.data.generatedAt+'; sin sincronización continua, cuotas ni edge verificado.');
+  warnings.push('NCAAB: '+(ncaab.data.continuousSync?'proceso diario gratuito':'checkpoint publicado sin sincronización continua')+' · '+ncaab.data.generatedAt+'; sin cuotas ni edge verificado.');
   for(const r of ncaab.data.observations){
    // Placeholder tips must never become verified calendar start times.
    if(r.reason==='UNVERIFIED_TIP'||ncaabDate(r.scheduled_at)!==view.date)continue;
    const forecast=r.state==='FORECAST',title=(r.away_name??r.away_id)+' at '+(r.home_name??r.home_id);
    games.push({key:'NCAAB:'+r.event_id,sport:'NCAAB',eventId:r.event_id,title,scheduledAt:r.scheduled_at,analyzed:forecast,started:Date.parse(r.scheduled_at)<=Date.now(),waiting:!forecast&&Date.parse(r.scheduled_at)>Date.now(),official:0,registered:forecast?1:0,value:0,noEdge:false});
-   if(forecast)selected.push({key:'NCAAB:preseason:'+r.event_id,sport:'NCAAB',classification:'NCAAB_PRESEASON_V1 · experimental · checkpoint',marketLabel:'Ganador proyectado · sin cuota',matchup:title,selection:r.predicted_winner===r.home_id?(r.home_name??r.home_id):(r.away_name??r.away_id),modelProbability:100*(r.predicted_winner===r.home_id?r.home_win_probability!:r.away_win_probability!),projection:null,edgePp:null,odds:null,book:null,href:'/ncaab'});
+   if(forecast)selected.push({key:'NCAAB:preseason:'+r.event_id,sport:'NCAAB',classification:'NCAAB_PRESEASON_V1 · experimental',marketLabel:'Ganador proyectado · sin cuota',matchup:title,selection:r.predicted_winner===r.home_id?(r.home_name??r.home_id):(r.away_name??r.away_id),modelProbability:100*(r.predicted_winner===r.home_id?r.home_win_probability!:r.away_win_probability!),projection:null,edgePp:null,odds:null,book:null,href:'/ncaab'});
   }
  }else if(ncaab)warnings.push(ncaab.warning);
  if(soccer?.status==='AVAILABLE'){
