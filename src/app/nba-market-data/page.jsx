@@ -10,5 +10,5 @@ export default async function Page(){
   if(!host||!/^[a-z0-9-]+\.vercel\.app$/.test(host))notFound();
   if((await headers()).get('host')!==host)redirect(`https://${host}/nba-market-data`);
  }
- return <Board/>;
+ return <Board archiveControls={process.env.VERCEL_ENV==='production'}/>;
 }
