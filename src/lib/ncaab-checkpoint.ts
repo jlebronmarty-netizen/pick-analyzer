@@ -36,9 +36,15 @@ export const checkpointSchema=z.object({schemaVersion:z.literal(1),sport:z.liter
  }
 });
 export type NcaabCheckpoint=z.infer<typeof checkpointSchema>;
-export type NcaabReport={status:'AVAILABLE';data:NcaabCheckpoint}|{status:'UNAVAILABLE';warning:string};
+export type NcaabData=Omit<NcaabCheckpoint,'models'|'observations'|'connection'|'continuousSync'|'hostedPipelineReady'> & {
+ connection:'PUBLISHED_CHECKPOINT'|'DAILY_FREE_PIPELINE';continuousSync:boolean;hostedPipelineReady:boolean;
+ models:{id:'NCAAB_PRESEASON_V1'|'NCAAB_FREE_SCORE_V1_1';forecasts:number;abstentions:number;settled:number;wins:number;losses?:number;winnerDenominator:number;accuracy:number|null;review?:number}[];
+ observations:import('./ncaab-live').LiveObservation[];lastRun?:{status:string;completedAt:string|null;providerCalls:number};warning?:string;
+};
+export type NcaabReport={status:'AVAILABLE';data:NcaabData}|{status:'UNAVAILABLE';warning:string};
 export function ncaabModelCohort(report:NcaabReport):ModelCohort{
  const available=report.status==='AVAILABLE';
- return {key:'PUBLISHED_CHECKPOINT',label:'NCAAB · observación prospectiva experimental',available,wins:available?0:null,losses:available?0:null,pending:available?report.data.models.reduce((n,m)=>n+m.forecasts,0):null,pushes:available?0:null,voids:available?0:null,models:available?report.data.models.length:null,accuracy:null,note:available?'Checkpoint publicado; sin sincronización continua ni resultados liquidados. Históricos excluidos.':report.warning};
+ const ms=available?report.data.models:[],wins=ms.reduce((n,m)=>n+m.wins,0),losses=ms.reduce((n,m)=>n+(m.losses??(m.winnerDenominator-m.wins)),0);
+ return {key:'NCAAB_PROSPECTIVE',label:'NCAAB · observación prospectiva experimental',available,wins:available?wins:null,losses:available?losses:null,pending:available?ms.reduce((n,m)=>n+m.forecasts-m.settled-(m.review??0),0):null,pushes:available?0:null,voids:available?0:null,models:available?ms.length:null,accuracy:wins+losses?wins/(wins+losses):null,note:available?(report.data.continuousSync?'Proceso diario gratuito; revisiones excluidas de W/L.':'Checkpoint publicado; Sin sincronización continua. Históricos excluidos.'):report.warning};
 }
 export function ncaabDate(iso:string){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(iso));}

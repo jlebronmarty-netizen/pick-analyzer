@@ -95,6 +95,10 @@
     {
       "path": "/api/cron/mlb-forward-master-ledger",
       "schedule": "30 22 * * *"
+    },
+    {
+      "path": "/api/cron/ncaab-daily",
+      "schedule": "0 4,10,16,22 * * *"
     }
   ],
   "git": {
