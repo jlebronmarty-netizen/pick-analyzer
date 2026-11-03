@@ -19,7 +19,7 @@ export const getMultisportModelReport=cache(async()=>{
     {key:'nhl',label:'NHL',href:'/nhl',classification:'MODEL_ONLY',cohorts:[nhlModelCohort(nhl)]},
     {key:'soccer',label:'Soccer',href:'/soccer',classification:'SHADOW / RESEARCH',cohorts:[soccerModelCohort(soccer)]},
     {key:'table-tennis',label:'Tenis de mesa',href:'/table-tennis',classification:'RESEARCH / SHADOW',cohorts:[ttModelCohort(tableTennis)]},
-    ...getSportsCenterReport().sports.filter(s=>!['mlb','nhl','soccer','table-tennis'].includes(s.key)).map(s=>({key:s.key,label:s.label,href:'/sports-center/'+s.key,classification:s.status,cohorts:[]})),
+    ...getSportsCenterReport().sports.filter(s=>!['mlb','nhl','soccer','table-tennis'].includes(s.key)).map(s=>({key:s.key,label:s.label,href:s.key==='nba'?'/nba-market-data':'/sports-center/'+s.key,classification:s.key==='nba'?'Cuotas · modelo separado':s.status,cohorts:[]})),
     {key:'ncaab',label:'NCAAB',href:'/ncaab',classification:'Experimental · checkpoint publicado',cohorts:[ncaabModelCohort(ncaab)]},
   ];
   return {cards,research,nhl,ncaab,soccer,tableTennis,readAt:new Date().toISOString()};
