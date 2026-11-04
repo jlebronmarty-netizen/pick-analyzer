@@ -26,7 +26,8 @@
     {"path":"/api/cron/mlb-forward-master-ledger","schedule":"30 22 * * *"},
     {"path":"/api/cron/ncaab-daily","schedule":"0 4,10,16,22 * * *"},
     {"path":"/api/cron/nhl-free","schedule":"7,37 * * * *"},
-    {"path":"/api/cron/edge-lab-soccer","schedule":"15,45 * * * *"}
+    {"path":"/api/cron/edge-lab-soccer","schedule":"15,45 * * * *"},
+    {"path":"/api/cron/edge-lab-sports","schedule":"*/10 * * * *"}
   ],
   "git":{"deploymentEnabled":{"research/*":false}}
 }
