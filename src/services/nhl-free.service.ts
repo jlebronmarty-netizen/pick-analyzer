@@ -2,7 +2,7 @@ import 'server-only';
 import {createHash,randomUUID} from 'node:crypto';
 import {gzipSync} from 'node:zlib';
 import {parseDratingsUpcoming,parseDratingsCirca,DRATINGS_URL} from '@/lib/nhl-free-source';
-import {normalizeNhlScore,matchFreeNhl,freezeNhlForecast,finalNhl,reconcileFreeNhl,freeNhlMetrics,nhlSportsDate,verifyFreeNhlForecast,type NhlGame,type NhlFreeForecast,type NhlFreeFinal,type NhlFreeAvailableReport} from '@/lib/nhl-free';
+import {normalizeNhlScore,normalizeNhlDirectory,matchFreeNhl,freezeNhlForecast,finalNhl,reconcileFreeNhl,freeNhlMetrics,nhlSportsDate,verifyFreeNhlForecast,type NhlGame,type NhlFreeForecast,type NhlFreeFinal,type NhlFreeAvailableReport} from '@/lib/nhl-free';
 import type {NhlReport} from '@/lib/nhl-external-report';
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 async function db(){return (await import('@/lib/supabase-admin')).supabaseAdmin;}
@@ -40,7 +40,7 @@ export async function runNhlFree(){
   const known=new Set(ps.map(p=>String(p.event_id))),finished=new Set(os.map(o=>String(o.event_id)));
   // Fixed hosts/paths, 12 requests maximum, no retries, no redirect or paid fallback.
   async function fetchSource(url:string,maxBytes:number){
-   const u=new URL(url);if(u.protocol!=='https:'||!((u.hostname==='api-web.nhle.com'&&/^\/v1\/score\/\d{4}-\d{2}-\d{2}$/.test(u.pathname))||(u.hostname==='www.dratings.com'&&/^\/predictor\/nhl-hockey-predictions\/(?:[a-f0-9-]+)?\/?$/.test(u.pathname))))throw Error('NHL_SOURCE_NOT_ALLOWED');
+   const u=new URL(url);if(u.protocol!=='https:'||!((u.hostname==='api-web.nhle.com'&&/^\/v1\/score\/\d{4}-\d{2}-\d{2}$/.test(u.pathname))||(u.hostname==='api.nhle.com'&&u.pathname==='/stats/rest/en/team')||(u.hostname==='www.dratings.com'&&/^\/predictor\/nhl-hockey-predictions\/(?:[a-f0-9-]+)?\/?$/.test(u.pathname))))throw Error('NHL_SOURCE_NOT_ALLOWED');
    if(blocked.has(u.hostname))throw Error('NHL_SOURCE_ACCESS_DENIED_REVIEW');
    if(calls>=12||Date.now()-start>230000)throw Error('NHL_BUDGET');
    calls++;const at=new Date().toISOString(),id=randomUUID();
@@ -59,8 +59,10 @@ export async function runNhlFree(){
   const dates=new Set([-1,0,1].map(d=>nhlSportsDate(new Date(start+d*86400000).toISOString())));
   for(const p of ps.filter(p=>!finished.has(String(p.event_id))).sort((a,b)=>String(a.scheduled_at).localeCompare(String(b.scheduled_at)))){if(dates.size>=5)break;if(Date.parse(String(p.scheduled_at))<start)dates.add(nhlSportsDate(String(p.scheduled_at)));}
   const gamesById=new Map<string,NhlGame>();
+  let directory:ReturnType<typeof normalizeNhlDirectory>|undefined,directorySourceId:string|null=null;
+  try{const d=await fetchSource('https://api.nhle.com/stats/rest/en/team',2000000);directory=normalizeNhlDirectory(JSON.parse(d.raw));directorySourceId=d.id;}catch(e){detail.issues.push(e instanceof Error?e.message:'NHL_DIRECTORY_FAILED');}
   for(const date of dates){try{
-   const s=await fetchSource('https://api-web.nhle.com/v1/score/'+date,2000000),games=normalizeNhlScore(JSON.parse(s.raw));
+   const s=await fetchSource('https://api-web.nhle.com/v1/score/'+date,2000000),games=normalizeNhlScore(JSON.parse(s.raw),directory);
    for(const g of games){gamesById.set(g.eventId,g);const final=finalNhl(g,s.at);if(final&&known.has(g.eventId)){
     const {capturedAt:ignored,...identity}=final;void ignored;
     const save=await client.from('nhl_free_outcomes_v1').upsert({id:hash(JSON.stringify(identity)),event_id:g.eventId,source_id:s.id,observed_at:s.at,body:final},{onConflict:'id',ignoreDuplicates:true});if(save.error)throw Error('NHL_OUTCOME_SAVE');settled++;
@@ -76,11 +78,12 @@ export async function runNhlFree(){
      const at=new Date().toISOString(),frozen=freezeNhlForecast(g,f,at,price);if(!frozen)continue;
      detail.forecasts.push(frozen);
      if(known.has(g.eventId))continue;
-     const saved=await client.from('nhl_free_predictions_v1').upsert({id:frozen.id,event_id:g.eventId,scheduled_at:g.scheduledAt,created_at:at,source_id:s.id,body:{...frozen,priceSourceId:priceSource}},{onConflict:'id',ignoreDuplicates:true});if(saved.error)throw Error('NHL_FORECAST_SAVE');known.add(g.eventId);added++;
+     const saved=await client.from('nhl_free_predictions_v1').upsert({id:frozen.id,event_id:g.eventId,scheduled_at:g.scheduledAt,created_at:at,source_id:s.id,body:{...frozen,priceSourceId:priceSource,directorySourceId}},{onConflict:'id',ignoreDuplicates:true});if(saved.error)throw Error('NHL_FORECAST_SAVE');known.add(g.eventId);added++;
     }
    }catch(e){detail.issues.push(e instanceof Error?e.message:'NHL_FORECAST_FAILED');}
   }
-  const future=detail.games.filter(g=>g.status==='SCHEDULED'&&Date.parse(g.scheduledAt)>Date.now());
+  const today=nhlSportsDate(new Date().toISOString());
+  const future=detail.games.filter(g=>nhlSportsDate(g.scheduledAt)===today&&g.status==='SCHEDULED'&&Date.parse(g.scheduledAt)>Date.now());
   if(future.some(g=>!detail.forecasts.some(f=>f.eventId===g.eventId)))detail.issues.push('Cobertura incompleta de probabilidades.');
   detail.issues=[...new Set(detail.issues)];const status=detail.issues.length?'PARTIAL':'PASS';
   const saved=await client.from('nhl_free_runs_v1').update({status,completed_at:new Date().toISOString(),provider_calls:calls,detail}).eq('id',slot);if(saved.error)throw Error('NHL_RUN_CLOSE');

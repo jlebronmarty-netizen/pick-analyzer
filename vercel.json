@@ -102,7 +102,7 @@
     },
     {
       "path": "/api/cron/nhl-free",
-      "schedule": "23,53 * * * *"
+      "schedule": "7,37 * * * *"
     }
   ],
   "git": {

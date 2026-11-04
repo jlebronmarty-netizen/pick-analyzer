@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-11-04T15:20:29.054113+00:00",
+  "tests": {
+    "passed": 83,
+    "failed": 0
+  },
+  "scoped_lint": "PASS",
+  "local_build_exit": 0,
+  "preview_deployment": "dpl_qXuJVnMYvpTfs5eEm3xEmrByxBkB",
+  "preview_build": "READY",
+  "preview_empty_read_status": 503,
+  "preview_page_status": 200,
+  "preview_cron_auth_check": "NOT_VERIFIED_VERCEL_PROTECTION_401",
+  "source_tree": "1894e9915bb9470c7bb86b51a981ddaaed61c28a",
+  "implementation_commit": "adac1be9fbdba40049810dc7fa58d185bf27aea5",
+  "merge_commit": "859951acc2d291d6f7ea369198a8cf0af049ca98",
+  "production_capture": "PENDING_FIRST_CRON",
+  "mlb_baseline": {
+    "rows": 919,
+    "md5": "d587daf5bb4cf251dfb37027240b2895"
+  },
+  "hashes": {
+    "src/lib/nhl-free.ts": "430c0bd94f891f1405e752b8ddbe8af47f7bb5ddd19d076327b241a248bbf843",
+    "src/lib/nhl-free-source.ts": "733bd1c3614291289234027f0559720f2dc21dc5119b3ba5ab0ddc593b2dbc13",
+    "src/services/nhl-free.service.ts": "6fde953e9b1e3bfc861c872daadd3b9a415c9a2b64ba2c9cdfe103f52b4783e8",
+    "src/app/api/cron/nhl-free/route.ts": "bd1dfe87c6373ff0fb3ea7eb79fcbb24f5049d465eb6f11d36a9431d97e35945",
+    "supabase/migrations/20261104150700_nhl_free_direct_forward_v1.sql": "6e6039f17ac68d71c82188b46546ac38aed43512c4cafd2fbfd235bc8638ff66",
+    "vercel.json": "eadfecff78f7c51889baa48edf1b444e0b97414a829a33bbc4ae1d5fde6fc531"
+  },
+  "local_preflight": "Two GET requests returned 403 in the restricted scratch environment; a further diagnostic HEAD was attempted, its response is not retained. These do not establish production source availability."
+}
