@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parseMlbSchedule} from '../src/lib/edge-lab/multisport.mjs';
+const original={gamePk:824912,gameType:'R',gameDate:'2026-06-16T23:15:00Z',resumeDate:'2026-06-17T18:00:00Z',officialDate:'2026-06-16',status:{abstractGameState:'Final',codedGameState:'F',startTimeTBD:false},teams:{home:{team:{id:1,name:'A'},score:2},away:{team:{id:2,name:'B'},score:7}}};
+const resumed={...original,gameDate:'2026-06-17T18:00:00Z',resumeDate:undefined,resumedFrom:'2026-06-16T23:15:00Z'};const calendar=(...games)=>({totalGames:games.length,dates:[{games}]});
+test('Explicit resumed pair with matching final counts once',()=>{const rows=parseMlbSchedule(calendar(original,resumed));assert.equal(rows.length,1);assert.equal(rows[0].scheduled_at,'2026-06-16T23:15:00.000Z');assert.equal(rows[0].calendar_observations,2);});
+test('Resumed score correction is dispute, not best version',()=>assert.throws(()=>parseMlbSchedule(calendar(original,{...resumed,teams:{...resumed.teams,home:{...resumed.teams.home,score:3}}})))));
+test('Same score without official resumption link rejected',()=>assert.throws(()=>parseMlbSchedule(calendar(original,{...resumed,resumedFrom:undefined})))));
+test('Resumption linked to different start rejected',()=>assert.throws(()=>parseMlbSchedule(calendar(original,{...resumed,resumedFrom:'2026-06-15T23:15Z'})))));
