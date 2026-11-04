@@ -1,0 +1,252 @@
+{
+  "http": 200,
+  "card": {
+    "key": "nhl",
+    "label": "NHL",
+    "href": "/nhl",
+    "classification": "MODEL_ONLY",
+    "cohorts": [
+      {
+        "key": "STORED",
+        "label": "NHL \u00b7 historial MODEL_ONLY",
+        "available": true,
+        "wins": 0,
+        "losses": 0,
+        "pending": 4,
+        "pushes": 0,
+        "voids": 0,
+        "models": 1,
+        "accuracy": null,
+        "note": "Nueva cohorte prospectiva gratuita. Historial anterior del Hub pendiente de recuperaci\u00f3n; no incluido."
+      }
+    ]
+  },
+  "games": [
+    {
+      "key": "NHL:nhl:2026020247",
+      "sport": "NHL",
+      "eventId": "nhl:2026020247",
+      "title": "Ottawa Senators @ Buffalo Sabres",
+      "scheduledAt": "2026-11-05T00:30:00.000Z",
+      "analyzed": true,
+      "started": false,
+      "waiting": false,
+      "official": 0,
+      "registered": 1,
+      "value": 1,
+      "noEdge": false,
+      "nhl": {
+        "away": "Ottawa Senators",
+        "home": "Buffalo Sabres",
+        "awayProbability": 0.429,
+        "homeProbability": 0.5710000000000001,
+        "awayOdds": 111,
+        "homeOdds": -124,
+        "capturedAt": "2026-11-04T15:37:20.397Z",
+        "status": "SCHEDULED",
+        "selections": [
+          "Buffalo Sabres ML \u00b7 -124"
+        ]
+      }
+    },
+    {
+      "key": "NHL:nhl:2026020248",
+      "sport": "NHL",
+      "eventId": "nhl:2026020248",
+      "title": "Chicago Blackhawks @ Florida Panthers",
+      "scheduledAt": "2026-11-05T00:30:00.000Z",
+      "analyzed": true,
+      "started": false,
+      "waiting": false,
+      "official": 0,
+      "registered": 1,
+      "value": 1,
+      "noEdge": false,
+      "nhl": {
+        "away": "Chicago Blackhawks",
+        "home": "Florida Panthers",
+        "awayProbability": 0.316,
+        "homeProbability": 0.684,
+        "awayOdds": 220,
+        "homeOdds": -249,
+        "capturedAt": "2026-11-04T15:37:21.062Z",
+        "status": "SCHEDULED",
+        "selections": [
+          "Florida Panthers ML \u00b7 -249"
+        ]
+      }
+    },
+    {
+      "key": "NHL:nhl:2026020249",
+      "sport": "NHL",
+      "eventId": "nhl:2026020249",
+      "title": "San Jose Sharks @ Los Angeles Kings",
+      "scheduledAt": "2026-11-05T03:00:00.000Z",
+      "analyzed": true,
+      "started": false,
+      "waiting": false,
+      "official": 0,
+      "registered": 1,
+      "value": 1,
+      "noEdge": false,
+      "nhl": {
+        "away": "San Jose Sharks",
+        "home": "Los Angeles Kings",
+        "awayProbability": 0.431,
+        "homeProbability": 0.569,
+        "awayOdds": 143,
+        "homeOdds": -160,
+        "capturedAt": "2026-11-04T15:37:22.799Z",
+        "status": "SCHEDULED",
+        "selections": [
+          "Los Angeles Kings ML \u00b7 -160"
+        ]
+      }
+    },
+    {
+      "key": "NHL:nhl:2026020250",
+      "sport": "NHL",
+      "eventId": "nhl:2026020250",
+      "title": "Calgary Flames @ Seattle Kraken",
+      "scheduledAt": "2026-11-05T03:00:00.000Z",
+      "analyzed": true,
+      "started": false,
+      "waiting": false,
+      "official": 0,
+      "registered": 1,
+      "value": 1,
+      "noEdge": false,
+      "nhl": {
+        "away": "Calgary Flames",
+        "home": "Seattle Kraken",
+        "awayProbability": 0.436,
+        "homeProbability": 0.564,
+        "awayOdds": 116,
+        "homeOdds": -129,
+        "capturedAt": "2026-11-04T15:37:21.807Z",
+        "status": "SCHEDULED",
+        "selections": [
+          "Seattle Kraken ML \u00b7 -129"
+        ]
+      }
+    }
+  ],
+  "selected": [
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020249",
+      "sport": "NHL",
+      "classification": "MODEL_ONLY",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "San Jose Sharks @ Los Angeles Kings",
+      "selection": "Los Angeles Kings ML",
+      "modelProbability": 56.89999999999999,
+      "projection": null,
+      "edgePp": -3.026017262638725,
+      "odds": -160,
+      "book": "CIRCA",
+      "href": "/nhl"
+    },
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020250",
+      "sport": "NHL",
+      "classification": "MODEL_ONLY",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "Calgary Flames @ Seattle Kraken",
+      "selection": "Seattle Kraken ML",
+      "modelProbability": 56.39999999999999,
+      "projection": null,
+      "edgePp": 1.5107083760144913,
+      "odds": -129,
+      "book": "CIRCA",
+      "href": "/nhl"
+    },
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020247",
+      "sport": "NHL",
+      "classification": "MODEL_ONLY",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "Ottawa Senators @ Buffalo Sabres",
+      "selection": "Buffalo Sabres ML",
+      "modelProbability": 57.10000000000001,
+      "projection": null,
+      "edgePp": 3.224701424923815,
+      "odds": -124,
+      "book": "CIRCA",
+      "href": "/nhl"
+    },
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020248",
+      "sport": "NHL",
+      "classification": "MODEL_ONLY",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "Chicago Blackhawks @ Florida Panthers",
+      "selection": "Florida Panthers ML",
+      "modelProbability": 68.4,
+      "projection": null,
+      "edgePp": -1.1409320998428951,
+      "odds": -249,
+      "book": "CIRCA",
+      "href": "/nhl"
+    }
+  ],
+  "edge": [
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020247:HOME",
+      "sport": "NHL",
+      "classification": "Informativo \u00b7 par Circa sin margen",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "Ottawa Senators @ Buffalo Sabres",
+      "selection": "Buffalo Sabres ML",
+      "modelProbability": 57.10000000000001,
+      "projection": null,
+      "edgePp": 3.224701424923815,
+      "odds": -124,
+      "book": "Circa",
+      "href": "/nhl"
+    },
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020249:AWAY",
+      "sport": "NHL",
+      "classification": "Informativo \u00b7 par Circa sin margen",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "San Jose Sharks @ Los Angeles Kings",
+      "selection": "San Jose Sharks ML",
+      "modelProbability": 43.1,
+      "projection": null,
+      "edgePp": 3.026017262638714,
+      "odds": 143,
+      "book": "Circa",
+      "href": "/nhl"
+    },
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020250:HOME",
+      "sport": "NHL",
+      "classification": "Informativo \u00b7 par Circa sin margen",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "Calgary Flames @ Seattle Kraken",
+      "selection": "Seattle Kraken ML",
+      "modelProbability": 56.39999999999999,
+      "projection": null,
+      "edgePp": 1.5107083760144913,
+      "odds": -129,
+      "book": "Circa",
+      "href": "/nhl"
+    },
+    {
+      "key": "NHL:DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020248:AWAY",
+      "sport": "NHL",
+      "classification": "Informativo \u00b7 par Circa sin margen",
+      "marketLabel": "Moneyline \u00b7 incluye OT",
+      "matchup": "Chicago Blackhawks @ Florida Panthers",
+      "selection": "Chicago Blackhawks ML",
+      "modelProbability": 31.6,
+      "projection": null,
+      "edgePp": 1.1409320998429062,
+      "odds": 220,
+      "book": "Circa",
+      "href": "/nhl"
+    }
+  ],
+  "providerCalls": 0,
+  "databaseWrites": 0
+}

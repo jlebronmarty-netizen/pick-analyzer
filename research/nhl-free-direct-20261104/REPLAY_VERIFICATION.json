@@ -1,0 +1,63 @@
+{
+  "verifiedAt": "2026-11-04T15:45:58.870Z",
+  "rawSourcesVerified": 13,
+  "replayedPredictions": [
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020247",
+      "sourceIds": [
+        "5bf02f05-c4df-4a75-841d-212dd92f220d",
+        "52e6c4c1-3266-438f-931e-5761cf73b122",
+        "4ca3d04f-1597-4f1c-8418-3cf6618f2f08",
+        "06bf869a-7723-4d29-8128-8417d0dbae0b"
+      ],
+      "entryPriceVerified": true,
+      "forwardCapture": true
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020248",
+      "sourceIds": [
+        "5bf02f05-c4df-4a75-841d-212dd92f220d",
+        "52e6c4c1-3266-438f-931e-5761cf73b122",
+        "4ca3d04f-1597-4f1c-8418-3cf6618f2f08",
+        "0a0e1893-f4dd-4801-a8ec-fbb7d4c208b0"
+      ],
+      "entryPriceVerified": true,
+      "forwardCapture": true
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020249",
+      "sourceIds": [
+        "5bf02f05-c4df-4a75-841d-212dd92f220d",
+        "52e6c4c1-3266-438f-931e-5761cf73b122",
+        "4ca3d04f-1597-4f1c-8418-3cf6618f2f08",
+        "b7377e63-a557-4b18-b371-fead171f20ff"
+      ],
+      "entryPriceVerified": true,
+      "forwardCapture": true
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020250",
+      "sourceIds": [
+        "5bf02f05-c4df-4a75-841d-212dd92f220d",
+        "52e6c4c1-3266-438f-931e-5761cf73b122",
+        "4ca3d04f-1597-4f1c-8418-3cf6618f2f08",
+        "01a14238-0d49-49b8-a476-27cb14fadc5c"
+      ],
+      "entryPriceVerified": true,
+      "forwardCapture": true
+    }
+  ],
+  "summary": {
+    "settled": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "voids": 0,
+    "pending": 4,
+    "accuracyPct": null,
+    "profitUnits": null,
+    "roiPct": null,
+    "staked": 0
+  },
+  "result": "PASS"
+}

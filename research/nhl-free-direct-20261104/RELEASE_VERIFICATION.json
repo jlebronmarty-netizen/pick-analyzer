@@ -1,0 +1,152 @@
+{
+  "checked_at": "2026-11-04T15:51:18.490243+00:00",
+  "result": "PASS",
+  "runtime_deployment": "dpl_H6pxDm3nxE5Wb2XZf55wP2PHV9zY",
+  "runtime_commit": "2f6eadad77f6457cc2bcdf95bcb911947fdefc50",
+  "production_ready": true,
+  "nhl_api_http": 200,
+  "nhl_source": "PICK_ANALYZER",
+  "schema": "NHL_FREE_DIRECT_V1",
+  "health": "PASS",
+  "coverage": 4,
+  "eligible": 4,
+  "pending_forward_selections": 4,
+  "priced_entries": 4,
+  "settled": 0,
+  "accuracy": null,
+  "roi": null,
+  "first_failed_run_preserved": {
+    "id": "NHL:996558",
+    "status": "PARTIAL",
+    "calls": 4,
+    "forecasts": 0
+  },
+  "successful_run": {
+    "id": "NHL:996559",
+    "status": "PASS",
+    "calls": 9,
+    "forecasts": 4,
+    "completed_at": "2026-11-04T15:37:22.862Z"
+  },
+  "total_persisted_calls_before_and_after_reads": 13,
+  "raw_sources": [
+    {
+      "id": "d0aaa019-a8de-41e0-9c68-d2117e075ee9",
+      "sha256": "95a6560a775491e5e717fe5796a0aa3d166e4f001281b3a2fdd9fef8a0970de2",
+      "bytes": 88227,
+      "pass": true
+    },
+    {
+      "id": "14ea2767-4a20-4645-b779-61b474115953",
+      "sha256": "054eedb1789ac6e5069e98b2a0078ee0f581b34be49edf307d5abaaedc48edbd",
+      "bytes": 15496,
+      "pass": true
+    },
+    {
+      "id": "cac455cb-be6f-4bc0-a0f8-5baa59964c35",
+      "sha256": "89cb723796c757ca1f304023c14c6eee09472276f16eb408a690dce86471a99d",
+      "bytes": 35235,
+      "pass": true
+    },
+    {
+      "id": "b4437cd3-8b07-4766-b119-3726e10f58b4",
+      "sha256": "dd6ccd202149a93fca0f876353247c928836f7e519cf65f197e9d03e6bbcdde8",
+      "bytes": 76841,
+      "pass": true
+    },
+    {
+      "id": "4ca3d04f-1597-4f1c-8418-3cf6618f2f08",
+      "sha256": "d692a7b564603459d12462dd37de7347b6d52f8fce8d8004eb212742cc993337",
+      "bytes": 6664,
+      "pass": true
+    },
+    {
+      "id": "36e3d88d-230c-4606-92d5-300706fc988f",
+      "sha256": "95a6560a775491e5e717fe5796a0aa3d166e4f001281b3a2fdd9fef8a0970de2",
+      "bytes": 88227,
+      "pass": true
+    },
+    {
+      "id": "52e6c4c1-3266-438f-931e-5761cf73b122",
+      "sha256": "71f44303bf91688593bd007e3b65ccd8b930eb6e11430db929a21faf0b174218",
+      "bytes": 15496,
+      "pass": true
+    },
+    {
+      "id": "9a770a17-ce2b-4e8a-8555-8a4a076aa886",
+      "sha256": "89cb723796c757ca1f304023c14c6eee09472276f16eb408a690dce86471a99d",
+      "bytes": 35235,
+      "pass": true
+    },
+    {
+      "id": "5bf02f05-c4df-4a75-841d-212dd92f220d",
+      "sha256": "16086620e69e5ae1b0f262c803ff1fe5488b3008c737dcf13a74b623131a6072",
+      "bytes": 76840,
+      "pass": true
+    },
+    {
+      "id": "06bf869a-7723-4d29-8128-8417d0dbae0b",
+      "sha256": "5fd219d92b19eda31fd47d1f421d75bc6a54f369f50069ab6dd9901ee952e9d0",
+      "bytes": 70097,
+      "pass": true
+    },
+    {
+      "id": "0a0e1893-f4dd-4801-a8ec-fbb7d4c208b0",
+      "sha256": "f838089a2038d676590743964aef6e004e7e1a3ec792eb93c9bb230b2abef26c",
+      "bytes": 70023,
+      "pass": true
+    },
+    {
+      "id": "01a14238-0d49-49b8-a476-27cb14fadc5c",
+      "sha256": "260e9317212556d83ae8ae9f8af272bdb03578fdefe5e839ca2e93b3e8c31e29",
+      "bytes": 69889,
+      "pass": true
+    },
+    {
+      "id": "b7377e63-a557-4b18-b371-fead171f20ff",
+      "sha256": "efd0e8c50f8ce540c6a5757fcb618ea96d58893b4b72df3a1604f32b6ab3a5fd",
+      "bytes": 69793,
+      "pass": true
+    }
+  ],
+  "new_outcomes": 0,
+  "lease_released": true,
+  "rls_all_five_tables": true,
+  "anon_select": false,
+  "authenticated_insert": false,
+  "tests_passed": 84,
+  "tests_failed": 0,
+  "lint": "PASS",
+  "local_build_exit": 0,
+  "local_packaging_retry": "One ENOTEMPTY cleanup race after compilation/types/static generation. Preserved generated export directory and repeated full build successfully. No application config change.",
+  "public_cron_browser_response": {
+    "status": "UNAUTHORIZED"
+  },
+  "dashboard_provider_calls": 0,
+  "dashboard_database_writes": 0,
+  "ncaab_md5_at_1544": "aebdce9a2a5430a5ebb65d52280a0b0b",
+  "other_sport_scope": "No changes to other sport models or writers. Existing MLB scheduled jobs stayed enabled; its mutable ledger digest changed during the existing 15:20 scheduled window, so full-ledger checksum invariance is not claimed.",
+  "historical_hub_recovery": "PENDING_SEPARATE_VERIFIED_EXPORT",
+  "official_promotion": false,
+  "screenshot": "Browser visual verification performed; screenshot export did not synchronize to scratch and is not linked.",
+  "source_hashes": {
+    "src/lib/nhl-free.ts": "4f22fed269e8314a2d0bb97915ed93f1bf7a0dd9b6850860fbe5b5c8dfbb8dd2",
+    "src/lib/nhl-free-source.ts": "733bd1c3614291289234027f0559720f2dc21dc5119b3ba5ab0ddc593b2dbc13",
+    "src/services/nhl-free.service.ts": "d10497b82b62e88f374a2c8ce4bd56bb7cac0b47150bf31913cd3b22eb9ee296",
+    "src/services/nhl-external-read.service.ts": "349b7575265bcd74e1953c27f2c33fc83989b6759328c317f0169182fbd63493",
+    "src/components/dashboard/NhlDashboard.tsx": "905d6c3f6a19a0a7d330833c40ea70347027eedc7ee6da97eea5430a30fa550c",
+    "src/lib/nhl-external-report.ts": "2ef1089da706482ab1bf91949e22939e3f086ce3aa76bd4ed96f0a02f536ff06",
+    "src/app/api/cron/nhl-free/route.ts": "bd1dfe87c6373ff0fb3ea7eb79fcbb24f5049d465eb6f11d36a9431d97e35945",
+    "vercel.json": "6d97f2787e5fc2cd7c97ad5083280f242440354eaa8ab9429f483f2090702f25"
+  },
+  "prediction_md5_before_and_after_reads": "d3a61b4f617c5e6a31513a7638422229",
+  "after_multisport_read": {
+    "checked_at": "2026-11-04 15:51:48.40828+00",
+    "runs": 2,
+    "calls": 13,
+    "sources": 13,
+    "predictions": 4,
+    "prediction_md5": "d3a61b4f617c5e6a31513a7638422229",
+    "lock_free": true
+  }
+}
