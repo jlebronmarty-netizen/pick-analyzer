@@ -1,6 +1,8 @@
 import 'server-only';
-import {createClient} from '@supabase/supabase-js';import {randomUUID} from 'node:crypto';
-import {COHORT_MULTI,digest,normalizeTtResults,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../lib/edge-lab/multisport.mjs';
+import {createClient} from '@supabase/supabase-js';
+import {randomUUID} from 'node:crypto';
+import {COHORT_MULTI,digest,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../lib/edge-lab/multisport.mjs';
+import {readTtPagination,normalizeTtResultPage,makeProviderPacer,multiOperationalState} from '../lib/edge-lab/tt-coverage.mjs';
 const GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/source-gateway';
 const T={sources:'edge_lab_multi_sources_v1',forecasts:'edge_lab_multi_forecasts_v1',outcomes:'edge_lab_multi_outcomes_v1',finals:'edge_lab_tt_finals_v1',runs:'edge_lab_multi_runs_v1',locks:'edge_lab_multi_locks_v1',budget:'edge_lab_tt_request_budget_v1'};
 function dbClient(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||new URL(url).hostname!=='ynuocvexviorgdjrfthw.supabase.co'||!key)throw Error('DESTINATION_NOT_CONFIGURED');return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
@@ -14,29 +16,35 @@ export async function gatewayRequest(request,action,page=1){
 }
 export async function checkTtSource(request){try{const b=await gatewayRequest(request,'health');return {status:b.status,checked_at:b.checked_at,provider:b.provider,database_dependency:b.database_dependency,provider_calls:0};}catch(e){return {status:e.message,provider_calls:0,available:false};}}
 async function paidRead(db,request,action,page,summary){const budget=checked(await db.rpc('edge_lab_tt_claim_request_v1'),'BUDGET');summary.local_budget=budget;summary.provider_attempts++;return gatewayRequest(request,action,page);}
-async function settle(db,rows,existingOutcomes,resolve,summary){const done=new Set(existingOutcomes.map(x=>x.forecast_id));for(const f of rows){if(f.status==='ABSTAIN'||done.has(f.id)||Date.parse(f.scheduled_at)>Date.now())continue;const result=resolve(f);if(result.status==='PENDING'){summary.pending_without_final=(summary.pending_without_final??0)+1;continue;}
- summary.outcomes_inserted+=await insertRows(db,T.outcomes,[{id:f.id,forecast_id:f.id,status:result.status,checked_at:new Date().toISOString(),actual:typeof result.actual==='number'?result.actual:null,absolute_error:result.absolute_error??null,payload:{...result,statistical_only:true,sportsbook_settlement:false}}],'forecast_id');}}
+async function settle(db,rows,existingOutcomes,resolve,summary){const done=new Set(existingOutcomes.map(x=>x.forecast_id));for(const f of rows){if(f.status==='ABSTAIN'||done.has(f.id)||Date.parse(f.scheduled_at)>Date.now())continue;const result=resolve(f);if(result.status==='PENDING'){summary.pending_without_final=(summary.pending_without_final??0)+1;continue;}summary.outcomes_inserted+=await insertRows(db,T.outcomes,[{id:f.id,forecast_id:f.id,status:result.status,checked_at:new Date().toISOString(),actual:typeof result.actual==='number'?result.actual:null,absolute_error:result.absolute_error??null,payload:{...result,statistical_only:true,sportsbook_settlement:false}}],'forecast_id');}}
 async function collectTt(db,request,summary){
  const health=await gatewayRequest(request,'health');summary.provider_configured=health.status==='CONFIGURED';
- let allIncoming=[];for(let page=1;page<=2;page++){
-  if(page>1)await new Promise(r=>setTimeout(r,1200));const response=await paidRead(db,request,'results',page,summary),parsed=normalizeTtResults(response.data,response.received_at);
-  allIncoming.push(...parsed.rows);summary.result_pages.push({page,received:parsed.received,normalized:parsed.rows.length,rejected:parsed.rejected,has_next:parsed.hasNextPage,pagination_verified:parsed.paginationVerified});summary.provider_rate_window=response.rate_window;
-  if(!parsed.paginationVerified)summary.warnings.push('RESULT_PAGINATION_UNVERIFIED');if(!parsed.hasNextPage)break;if(page===2)summary.warnings.push('RESULT_WINDOW_LIMITED_TO_200');
+ const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_COVERAGE_V2';summary.provider_spacing_ms=1200;
+ for(let page=1;page<=2;page++){
+  const response=await paced(()=>paidRead(db,request,'results',page,summary)),parsed=normalizeTtResultPage(response.data,response.received_at,page);
+  for(const row of parsed.rows){const key=row.source+':'+row.sourceMatchId;if(resultIds.has(key))summary.warnings.push('RESULT_PAGE_OVERLAP');resultIds.add(key);}
+  allIncoming.push(...parsed.rows);summary.result_pages.push({page,received:parsed.received,normalized:parsed.rows.length,rejected:parsed.rejected,...parsed.coverage});summary.provider_rate_window=response.rate_window;
+  if(!parsed.paginationVerified){summary.warnings.push('RESULT_PAGINATION_UNVERIFIED');break;}
+  if(!parsed.hasNextPage)break;
+  if(page===2)summary.warnings.push('RESULT_PAGE_BUDGET_REACHED');
  }
+ summary.result_coverage={pages:summary.result_pages.length,received:summary.result_pages.reduce((n,p)=>n+p.received,0),normalized:allIncoming.length,complete:summary.result_pages.at(-1)?.complete===true,provider_total:summary.result_pages[0]?.total??null};
  const incoming=allIncoming.map(r=>({id:digest([r.source,r.sourceMatchId,r.contentDigest]),source_event_id:r.sourceMatchId,source:r.source,scheduled_at:r.scheduledAt,captured_at:r.capturedAt,content_digest:r.contentDigest,payload:r}));summary.finals_inserted=await insertRows(db,T.finals,incoming);
  const stored=await readAll(db,T.finals),history=canonicalTtHistory(stored.map(r=>r.payload));summary.history_finals=history.finals.length;summary.history_conflicts=history.conflicts;summary.history_latest=history.finals.length?history.finals.map(r=>r.scheduledAt).sort().at(-1):null;
- const existing=await readAll(db,T.forecasts,'TT'),outcomes=await readAll(db,T.outcomes);
- await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
- const response=await paidRead(db,request,'prematch',1,summary),asOf=new Date().toISOString();
+ const existing=await readAll(db,T.forecasts,'TT'),outcomes=await readAll(db,T.outcomes);await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
+ const response=await paced(()=>paidRead(db,request,'prematch',1,summary)),asOf=new Date().toISOString();
  const rawEvents=Array.isArray(response.data.events)?response.data.events:Array.isArray(response.data.results)?response.data.results:null;if(!rawEvents)throw Error('TT_PREMATCH_SCHEMA_CHANGED');
+ const coverage=readTtPagination(response.data,rawEvents.length,{expectedPage:1,allowUnpaged:true});summary.prematch_coverage=coverage;
  const minimal=rawEvents.map(e=>({eventId:e.eventId??e.id,home:e.home,away:e.away,startTime:e.startTime,league:e.league,gameStatus:e.gameStatus,inPlay:e.inPlay,isLive:e.isLive,live:e.live,markets:(e.markets??[]).filter(m=>m.period==='FULL_TIME').map(m=>({canonicalMarket:m.canonicalMarket??m.type,period:m.period,line:m.line,suspended:m.suspended}))}));
- const input={source_url:response.source_url,provider_received_at:response.received_at,prematch_digest:digest(response.data),events:minimal,history_ids:stored.map(r=>r.id),history_conflicts:history.conflicts,pagination:response.data.pagination??null};const sourceId=digest(input);
+ const input={source_url:response.source_url,provider_received_at:response.received_at,prematch_digest:digest(response.data),events:minimal,history_ids:stored.map(r=>r.id),history_conflicts:history.conflicts,pagination:coverage,result_coverage:summary.result_coverage,collector_version:summary.collector_version};const sourceId=digest(input);
  await insertRows(db,T.sources,[{id:sourceId,sport:'TT',source:'PulseScore / Tipsport finals / NetBet prematch',captured_at:asOf,payload:input}]);
- const forecasts=ttForecasts({events:minimal,pagination:response.data.pagination},history.finals,asOf,sourceId);summary.source_events=forecasts.source_events;summary.skipped=forecasts.skipped;summary.prematch_has_next=forecasts.hasNextPage;
+ const forecasts=ttForecasts({events:minimal,pagination:coverage},history.finals,asOf,sourceId);summary.source_events=forecasts.source_events;summary.skipped=forecasts.skipped;summary.prematch_has_next=coverage.hasNextPage;
  summary.forecasts_inserted=await insertRows(db,T.forecasts,forecasts.rows);summary.forecasts_reused=forecasts.rows.length-summary.forecasts_inserted;summary.status_counts=Object.fromEntries(['FORECAST','PROJECTION','ABSTAIN'].map(s=>[s,forecasts.rows.filter(r=>r.status===s).length]));
- if(forecasts.hasNextPage)summary.warnings.push('PREMATCH_WINDOW_LIMITED_TO_100');if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');
+ if(!coverage.verified)summary.warnings.push('PREMATCH_COVERAGE_UNVERIFIED');else if(coverage.hasNextPage)summary.warnings.push('PREMATCH_PAGE_BUDGET_REACHED');
+ if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');
  if(!history.finals.length&&allIncoming.length===0)summary.warnings.push('NO_VERIFIED_FINALS_AVAILABLE');
- return summary.warnings.some(w=>!['RESULT_WINDOW_LIMITED_TO_200','PREMATCH_WINDOW_LIMITED_TO_100'].includes(w))?'PARTIAL':'SUCCESS';
+ summary.warnings=[...new Set(summary.warnings)];summary.operational_state=summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';
+ return summary.warnings.length?'PARTIAL':'SUCCESS';
 }
 async function getMlb(url){if(!url.startsWith('https://statsapi.mlb.com/api/v1/schedule?'))throw Error('SOURCE_NOT_ALLOWED');const r=await fetch(url,{redirect:'error',cache:'no-store',signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error('MLB_SOURCE_HTTP_'+r.status);const text=await r.text();if(text.length>12000000)throw Error('MLB_SOURCE_TOO_LARGE');return {games:parseMlbSchedule(JSON.parse(text)),digest:digest(text),url};}
 async function collectMlb(db,summary){
@@ -66,7 +74,10 @@ export async function runMultiSports(request){
 export async function readMultiSports(){
  const db=dbClient(),forecasts=await readAll(db,T.forecasts),outcomes=await readAll(db,T.outcomes),byId=new Map(outcomes.map(r=>[r.forecast_id,r]));
  const rows=forecasts.map(r=>({...r,outcome:byId.get(r.id)??null})).sort((a,b)=>a.scheduled_at.localeCompare(b.scheduled_at)||a.market.localeCompare(b.market));
- const runs=checked(await db.from(T.runs).select('*').order('started_at',{ascending:false}).limit(15),'RUNS');const budget=checked(await db.from(T.budget).select('*').order('month',{ascending:false}).limit(1),'BUDGET_READ');
+ const groups=await Promise.all(['TT','MLB'].map(sport=>db.from(T.runs).select('*').eq('sport',sport).order('started_at',{ascending:false}).limit(10)));
+ const runs=groups.flatMap(r=>checked(r,'RUNS')).sort((a,b)=>b.started_at.localeCompare(a.started_at));const locks=checked(await db.from(T.locks).select('sport,next_due'),'LOCK_READ');
+ const budget=checked(await db.from(T.budget).select('*').order('month',{ascending:false}).limit(1),'BUDGET_READ');
+ const states=['TT','MLB'].map(sport=>multiOperationalState(sport,runs.find(r=>r.sport===sport),locks.find(r=>r.sport===sport),process.env.MLB_OFFSEASON_PAUSED==='true'));
  const days=[...new Set(rows.map(r=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))))];
- return {cohort:COHORT_MULTI,checked_at:new Date().toISOString(),rows,metrics:multiMetrics(rows),daily:days.flatMap(date=>multiMetrics(rows.filter(r=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))===date)).map(m=>({date,...m}))),runs,budget,states:['TT','MLB'].map(sport=>({sport,last_run:runs.find(r=>r.sport===sport)??null})),nhl:'EXCLUDED_OTHER_CHAT',ncaaf:'FROZEN_PYTHON_ENGINE_REVIEW_PENDING'};
+ return {cohort:COHORT_MULTI,checked_at:new Date().toISOString(),rows,metrics:multiMetrics(rows),daily:days.flatMap(date=>multiMetrics(rows.filter(r=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))===date)).map(m=>({date,...m}))),runs,budget,states,nhl:'EXCLUDED_OTHER_CHAT',ncaaf:'FROZEN_PYTHON_ENGINE_REVIEW_PENDING'};
 }
