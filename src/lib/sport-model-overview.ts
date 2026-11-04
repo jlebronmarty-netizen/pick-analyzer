@@ -35,7 +35,7 @@ export function nhlModelCohort(r:NhlReport):ModelCohort{
   const s=r.summary,known=new Set(r.history.map(p=>p.model).filter(Boolean));
   return {key:'STORED',label:'NHL · historial MODEL_ONLY',available:true,wins:s.wins,losses:s.losses,pending:s.pending,pushes:s.pushes,voids:s.voids,
     models:r.history.some(p=>p.model===null)?null:known.size,accuracy:s.accuracyPct===null?null:s.accuracyPct/100,
-    note:'Registro completo de origen; conserva modelos de identidad no registrada. No se le asigna una fase MLB.'};
+    note:r.source==='PICK_ANALYZER'?'Nueva cohorte prospectiva gratuita. Historial anterior del Hub pendiente de recuperación; no incluido.':'Registro completo de origen; conserva modelos de identidad no registrada. No se le asigna una fase MLB.'};
 }
 export function displayedModelTotal(cohorts:ModelCohort[]){
   if(!cohorts.length||cohorts.some(c=>!c.available))return {accuracy:null,wins:null,losses:null,pending:null,available:false};
