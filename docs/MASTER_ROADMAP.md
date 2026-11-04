@@ -4218,3 +4218,5 @@ NCAAB display names: university-only labels keyed by ESPN team ID are projected 
 
 
 NCAAB selection-first cards now lead with the frozen projected winner, its model probability and settlement status. Score projections and totals are secondary expandable details. Missing winner remains no selection. Experimental/no verified price/no Official Pick labels remain visible; no new recommendation policy, market contract, confidence threshold, model, stake, data or settlement change.
+
+NHL free direct restoration (2026-11-04): standalone Pick forward acquisition and settlement, daily selection/accuracy/price-conditional ROI on existing NHL and multisport views. New `DRATINGS_PUBLIC_ARGMAX_V1` cohort; recover old Hub ledger separately without pooling or reconstructing prior profits. Authenticated 30-minute production collector, fixed free sources and persisted acquisition budget/provenance; no page-triggered writes, paid fallback or Official promotion. Protocol: research/nhl-free-direct-20261104/PROTOCOL.md. Live release verification remains required before marking restored.

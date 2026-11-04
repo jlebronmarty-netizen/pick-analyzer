@@ -99,6 +99,10 @@
     {
       "path": "/api/cron/ncaab-daily",
       "schedule": "0 4,10,16,22 * * *"
+    },
+    {
+      "path": "/api/cron/nhl-free",
+      "schedule": "23,53 * * * *"
     }
   ],
   "git": {

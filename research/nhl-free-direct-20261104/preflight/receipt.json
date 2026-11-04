@@ -1,0 +1,18 @@
+{
+  "purpose": "Owner-authorized FREE NHL direct integration preflight",
+  "maximum_requests": 2,
+  "calls": [
+    {
+      "url": "https://api-web.nhle.com/v1/score/2026-11-04",
+      "started_at": "2026-11-04T14:52:56.473234+00:00",
+      "status": "FAILED",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "url": "https://www.dratings.com/predictor/nhl-hockey-predictions/",
+      "started_at": "2026-11-04T14:53:01.831944+00:00",
+      "status": "FAILED",
+      "error": "HTTP Error 403: Forbidden"
+    }
+  ]
+}
