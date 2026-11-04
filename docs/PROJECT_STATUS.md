@@ -3381,3 +3381,6 @@ Verification: 78 dashboard tests passed, including 73-case frozen parity, pregam
 
 
 NCAAB presentation: forecasts and API observations are ordered by the actual start timestamp, earliest first, with deterministic event-ID ties. The NCAAB page labels Puerto Rico time explicitly; combined daily NCAAB selections inherit the same ordering. No forecast values, outcomes, accuracy or scheduler changes.
+
+
+NCAAB display names: university-only labels keyed by ESPN team ID are projected from archived scoreboard location fields in the model page, final-score labels and combined day selections. Original provider names, identities, predictions and settlement records are preserved. Unknown IDs retain the original label; campuses are not merged by name heuristics. No new acquisitions or provider calls.
