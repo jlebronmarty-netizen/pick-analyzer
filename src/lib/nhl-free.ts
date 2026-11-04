@@ -10,11 +10,20 @@ export type NhlFreeAvailableReport=Omit<NhlLegacyAvailableReport,'schema'|'sourc
 export const nhlSportsDate=(s:string)=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(s));
 const object=(v:unknown):Record<string,unknown>=>v&&typeof v==='object'?v as Record<string,unknown>:{};
 const localized=(v:unknown)=>String(object(v).default??'');
-export function normalizeNhlScore(input:unknown):NhlGame[]{
+export type NhlDirectory=Map<number,{name:string;abbreviation:string}>;
+export function normalizeNhlDirectory(input:unknown):NhlDirectory{
+ const raw=object(input);if(!Array.isArray(raw.data))throw Error('NHL_TEAM_DIRECTORY_SCHEMA');const result:NhlDirectory=new Map();
+ for(const item of raw.data){const t=object(item);if(!Number.isSafeInteger(t.id)||typeof t.fullName!=='string'||!t.fullName||typeof t.triCode!=='string'||!t.triCode||result.has(Number(t.id)))throw Error('NHL_TEAM_DIRECTORY_IDENTITY');result.set(Number(t.id),{name:t.fullName,abbreviation:t.triCode});}
+ if(!result.size)throw Error('NHL_TEAM_DIRECTORY_EMPTY');return result;
+}
+export function normalizeNhlScore(input:unknown,directory?:NhlDirectory):NhlGame[]{
  const raw=object(input);if(!Array.isArray(raw.games))throw Error('NHL_SCHEDULE_SCHEMA');
  const seen=new Set<string>();return raw.games.map(item=>{
   const g=object(item),a=object(g.awayTeam),h=object(g.homeTeam),tip=String(g.startTimeUTC??'');
-  const teamName=(t:Record<string,unknown>)=>localized(t.name)||[localized(t.placeName),localized(t.commonName)].filter(Boolean).join(' ');
+  const teamName=(t:Record<string,unknown>)=>{
+   const official=directory?.get(Number(t.id));if(official){if(official.abbreviation!==t.abbrev)throw Error('NHL_TEAM_DIRECTORY_MISMATCH');return official.name;}
+   return [localized(t.placeName),localized(t.commonName)].filter(Boolean).join(' ')||localized(t.name);
+  };
   const away=teamName(a),home=teamName(h),eventId='nhl:'+g.id;
   if(!Number.isSafeInteger(g.id)||!Number.isSafeInteger(a.id)||!Number.isSafeInteger(h.id)||a.id===h.id||!away||!home||!Number.isFinite(Date.parse(tip))||seen.has(eventId))throw Error('NHL_SCHEDULE_IDENTITY');seen.add(eventId);
   const states:Record<string,string>={FUT:'SCHEDULED',PRE:'SCHEDULED',LIVE:'LIVE',CRIT:'LIVE',OFF:'FINAL',FINAL:'FINAL',PPD:'POSTPONED',CANC:'CANCELLED'};

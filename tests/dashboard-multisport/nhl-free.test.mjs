@@ -39,3 +39,12 @@ test('persisted probabilities, entry-price pairs, edges and cutoff cannot be sil
  const {verifyFreeNhlForecast}=await import('../../src/lib/nhl-free.ts');const f=forecast({awayOdds:120,homeOdds:-135});assert.equal(verifyFreeNhlForecast(f),f);
  for(const bad of [{...f,capturedAt:f.scheduledAt},{...f,homeProbability:0.9},{...f,awayOdds:null},{...f,awayEdgePp:20},{...f,id:'old-hub-id'}])assert.throws(()=>verifyFreeNhlForecast(bad));
 });
+test('real score API nickname-only shape joins full names by official numeric ID and abbreviation',async()=>{
+ const {normalizeNhlDirectory}=await import('../../src/lib/nhl-free.ts');
+ const directory=normalizeNhlDirectory({data:[{id:9,triCode:'OTT',fullName:'Ottawa Senators'},{id:7,triCode:'BUF',fullName:'Buffalo Sabres'}]});
+ const source={games:[{...raw.games[0],awayTeam:{id:9,abbrev:'OTT',name:{default:'Senators'}},homeTeam:{id:7,abbrev:'BUF',name:{default:'Sabres'}}}]};
+ assert.equal(matchFreeNhl(f,normalizeNhlScore(source),at),null);
+ assert.equal(matchFreeNhl(f,normalizeNhlScore(source,directory),at)?.home,'Buffalo Sabres');
+ assert.throws(()=>normalizeNhlScore({games:[{...source.games[0],awayTeam:{...source.games[0].awayTeam,abbrev:'SEA'}}]},directory));
+ assert.throws(()=>normalizeNhlDirectory({data:[{id:9,triCode:'OTT',fullName:'Ottawa Senators'},{id:9,triCode:'OTT',fullName:'Ottawa Senators'}]}));
+});
