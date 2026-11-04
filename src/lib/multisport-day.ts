@@ -1,3 +1,4 @@
+import {ncaabTeamName} from './ncaab-team-display';
 import type {MlbView} from '@/components/pick2/mlb-presentation';
 import {matchesSlateFilter,presentationStatus,isStarted} from '@/components/pick2/mlb-presentation';
 import type {NhlReport} from './nhl-external-report';
@@ -42,9 +43,9 @@ export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,
   for(const r of ncaab.data.observations){
    // Placeholder tips must never become verified calendar start times.
    if(r.reason==='UNVERIFIED_TIP'||ncaabDate(r.scheduled_at)!==view.date)continue;
-   const forecast=r.state==='FORECAST',title=(r.away_name??r.away_id)+' at '+(r.home_name??r.home_id);
+   const forecast=r.state==='FORECAST',title=ncaabTeamName(r.away_id,r.away_name)+' at '+ncaabTeamName(r.home_id,r.home_name);
    games.push({key:'NCAAB:'+r.event_id,sport:'NCAAB',eventId:r.event_id,title,scheduledAt:r.scheduled_at,analyzed:forecast,started:Date.parse(r.scheduled_at)<=Date.now(),waiting:!forecast&&Date.parse(r.scheduled_at)>Date.now(),official:0,registered:forecast?1:0,value:0,noEdge:false});
-   if(forecast)selected.push({key:'NCAAB:preseason:'+r.event_id,sport:'NCAAB',classification:'NCAAB_PRESEASON_V1 · experimental',marketLabel:'Ganador proyectado · sin cuota',matchup:title,selection:r.predicted_winner===r.home_id?(r.home_name??r.home_id):(r.away_name??r.away_id),modelProbability:100*(r.predicted_winner===r.home_id?r.home_win_probability!:r.away_win_probability!),projection:null,edgePp:null,odds:null,book:null,href:'/ncaab'});
+   if(forecast)selected.push({key:'NCAAB:preseason:'+r.event_id,sport:'NCAAB',classification:'NCAAB_PRESEASON_V1 · experimental',marketLabel:'Ganador proyectado · sin cuota',matchup:title,selection:r.predicted_winner===r.home_id?ncaabTeamName(r.home_id,r.home_name):ncaabTeamName(r.away_id,r.away_name),modelProbability:100*(r.predicted_winner===r.home_id?r.home_win_probability!:r.away_win_probability!),projection:null,edgePp:null,odds:null,book:null,href:'/ncaab'});
   }
  }else if(ncaab)warnings.push(ncaab.warning);
  if(soccer?.status==='AVAILABLE'){
