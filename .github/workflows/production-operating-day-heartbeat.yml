@@ -7,8 +7,6 @@ on:
         description: "Run observer planner only without provider calls or mutations"
         required: false
         default: "true"
-  schedule:
-    - cron: "3,33 * * * *"
 
 concurrency:
   group: production-operating-day-heartbeat

@@ -123,7 +123,13 @@ assert.ok(!consumer.includes("failClosedReason: 'FROZEN_FAIL_CLOSED_INPUT_GAP'")
 
 const vercel = JSON.parse(vercelText)
 assert.ok(Array.isArray(vercel.crons))
-assert.ok(vercel.crons.some((entry) => entry.path === '/api/cron/mlb-statcast-daily' && entry.schedule === '45 14 * * *'), '10:45 America/Puerto_Rico = 14:45 UTC cron missing')
+const offseasonPaused = vercel.crons.every((entry) => !entry.path.startsWith('/api/cron/mlb-'))
+if (offseasonPaused) {
+  assert.ok(vercel.crons.some((entry) => entry.path === '/api/cron/edge-lab-sports'), 'Shared TT collector must remain scheduled')
+  assert.match(await read('src/services/edge-lab-multi.service.mjs'), /MLB_OFFSEASON_PAUSED/, 'Shared collector must support independent MLB pause')
+} else {
+  assert.ok(vercel.crons.some((entry) => entry.path === '/api/cron/mlb-statcast-daily' && entry.schedule === '45 14 * * *'), '10:45 America/Puerto_Rico = 14:45 UTC cron missing')
+}
 
 for (const table of [
   'mlb_ml_prior2025_team_v1',
@@ -150,7 +156,7 @@ console.log(JSON.stringify({
   contract: 'MLB_MONEYLINE_DAILY_FREEZE_V1',
   modelVersion: 'pregame_high_conf_home_v2',
   freezeTimePuertoRico: '10:45',
-  freezeCronUtc: '45 14 * * *',
+  freezeCronUtc: offseasonPaused ? null : '45 14 * * *',
   canonicalComponentNormalization: 'direction*((value-mean)/sd);missing=0;denominator=declared_feature_count',
   officialPicksWrites: false,
   apostarActive: false,
