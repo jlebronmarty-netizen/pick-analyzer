@@ -1,0 +1,11 @@
+{
+ "module":"EDGE_LAB_RESTART_20261104",
+ "port_type":"Mathematical reimplementation, not byte-identical or new empirical validation",
+ "hub_sources":{"repository":"jlebronmarty-netizen/sports-edge-hub","blobs":{"soccer-v0.ts":"e51c0d95ff4b9a30011ab52bf93b369973ca0dd5","soccer-backtest.ts":"c8a9b70ddd32eee61e947be8405d56781bd0c0ce","table-tennis-model.ts":"9a03529945f3a527a8866f86ef6afe5114a5403a","table-tennis-data.ts":"0669f3689c03400abce9fb0bf8245d81a8a3d23c"}},
+ "edge_sources":{"repository":"jlebronmarty-netizen/pick-edge","blobs":{"moneyline-v1.mjs":"6164607ce0513ea01622ad54d492f02ee7a9c764","team-run-v1.mjs":"cfc7a6d2871e346c9d9513586952110413b21b9b","main-markets.mjs":"04784be0a352a44a2833dab4f4677ccb73b87cff"}},
+ "soccer_input_contract":"Current-season Football-Data LaLiga finals strictly before UTC query date; ESPN confirmed scheduled identities; no historical picks or odds reconstructed",
+ "model_versions":["SOCCER_V0_PICK_PORT_1","TT_ML_V1_PICK_PORT_1","TT_TOTAL_V1_PICK_PORT_1","TT_SETS_OE_V1_PICK_PORT_1","PE_ML_V1_PICK_PORT_1"],
+ "excluded":["NHL managed in another chat","Official Picks","APOSTAR","Existing frozen MLB gates"],
+ "pending":["TT source and results pipeline","MLB Edge feature serving and preserved gate integration","NCAAF hosted integration","Full postgame production reconciliation","Old Hub soccer scheduler retirement"],
+ "database_migration":"edge_lab_restart_soccer_isolated_v1"
+}

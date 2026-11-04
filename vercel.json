@@ -1,113 +1,32 @@
 {
   "crons": [
-    {
-      "path": "/api/cron/mlb-operational",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "15 10 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "15 12 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "15 14 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "45 14 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "55 14 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "5 15 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "15 15 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "25 15 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "50 15 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "5 16 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-runline-v2-forward",
-      "schedule": "46 14 * * *"
-    },
-    {
-      "path": "/api/cron/nba-current-era-shadow",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/mlb-operational",
-      "schedule": "55 16 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "2 17 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-operational",
-      "schedule": "5 17 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "9 17 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-operational",
-      "schedule": "50 19 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "2 20 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "50 20 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "20 21 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-official-settlement",
-      "schedule": "12 * * * *"
-    },
-    {
-      "path": "/api/cron/mlb-forward-master-ledger",
-      "schedule": "20 15 * * *"
-    },
-    {
-      "path": "/api/cron/mlb-forward-master-ledger",
-      "schedule": "30 22 * * *"
-    },
-    {
-      "path": "/api/cron/ncaab-daily",
-      "schedule": "0 4,10,16,22 * * *"
-    },
-    {
-      "path": "/api/cron/nhl-free",
-      "schedule": "7,37 * * * *"
-    }
+    {"path":"/api/cron/mlb-operational","schedule":"*/15 * * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"15 10 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"15 12 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"15 14 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"45 14 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"55 14 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"5 15 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"15 15 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"25 15 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"50 15 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"5 16 * * *"},
+    {"path":"/api/cron/mlb-runline-v2-forward","schedule":"46 14 * * *"},
+    {"path":"/api/cron/nba-current-era-shadow","schedule":"*/30 * * * *"},
+    {"path":"/api/cron/mlb-operational","schedule":"55 16 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"2 17 * * *"},
+    {"path":"/api/cron/mlb-operational","schedule":"5 17 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"9 17 * * *"},
+    {"path":"/api/cron/mlb-operational","schedule":"50 19 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"2 20 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"50 20 * * *"},
+    {"path":"/api/cron/mlb-statcast-daily","schedule":"20 21 * * *"},
+    {"path":"/api/cron/mlb-official-settlement","schedule":"12 * * * *"},
+    {"path":"/api/cron/mlb-forward-master-ledger","schedule":"20 15 * * *"},
+    {"path":"/api/cron/mlb-forward-master-ledger","schedule":"30 22 * * *"},
+    {"path":"/api/cron/ncaab-daily","schedule":"0 4,10,16,22 * * *"},
+    {"path":"/api/cron/nhl-free","schedule":"7,37 * * * *"},
+    {"path":"/api/cron/edge-lab-soccer","schedule":"15,45 * * * *"}
   ],
-  "git": {
-    "deploymentEnabled": {
-      "research/*": false
-    }
-  }
+  "git":{"deploymentEnabled":{"research/*":false}}
 }
