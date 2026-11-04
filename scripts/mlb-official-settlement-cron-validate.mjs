@@ -25,6 +25,12 @@ assert.equal(activation.settlementAutomation,'DISABLED')
 assert.equal(activation.dedicatedSettlementRuntime.writeTarget,'public.pick2_prediction_results')
 assert.equal(activation.dedicatedSettlementRuntime.officialPickWrites,0)
 assert.equal(activation.dedicatedSettlementRuntime.apostar,false)
-assert.ok(vercel.crons.some((row)=>row.path==='/api/cron/mlb-official-settlement' && row.schedule==='12 * * * *'))
+const offseasonPaused = vercel.crons.every((row) => !row.path.startsWith('/api/cron/mlb-'))
+if (offseasonPaused) {
+  assert.ok(vercel.crons.some((row) => row.path === '/api/cron/edge-lab-sports'))
+  assert.match(fs.readFileSync('src/services/edge-lab-multi.service.mjs', 'utf8'), /MLB_OFFSEASON_PAUSED/)
+} else {
+  assert.ok(vercel.crons.some((row)=>row.path==='/api/cron/mlb-official-settlement' && row.schedule==='12 * * * *'))
+}
 
 console.log('MLB dedicated Official Pick settlement cron contract: PASS')
