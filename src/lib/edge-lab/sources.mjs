@@ -3,7 +3,8 @@ import {createHash} from 'node:crypto';
 export const sha=x=>createHash('sha256').update(typeof x==='string'?x:JSON.stringify(x)).digest('hex');
 export const dayPR=now=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
 export const addDay=(day,offset)=>new Date(Date.parse(day+'T12:00:00Z')+offset*86400000).toISOString().slice(0,10);
-const aliases={'alaves':['alaves'],'athletic club':['ath bilbao','athletic club'],'atletico madrid':['ath madrid','atletico madrid'],'celta vigo':['celta','celta vigo'],'deportivo la coruna':['la coruna','deportivo la coruna','rc deportivo'],'espanyol':['espanol','espanyol'],'racing santander':['santander','racing santander'],'real betis':['betis','real betis'],'real sociedad':['sociedad','real sociedad'],'rayo vallecano':['vallecano','rayo vallecano']};
+// ESPN esp.1 team 90 has slug esp.deportivo_coruna and displayName Deportivo; verified 2026-11-04.
+const aliases={'alaves':['alaves'],'athletic club':['ath bilbao','athletic club'],'atletico madrid':['ath madrid','atletico madrid'],'celta vigo':['celta','celta vigo'],'deportivo':['la coruna'],'deportivo la coruna':['la coruna','deportivo la coruna','rc deportivo'],'espanyol':['espanol','espanyol'],'racing santander':['santander','racing santander'],'real betis':['betis','real betis'],'real sociedad':['sociedad','real sociedad'],'rayo vallecano':['vallecano','rayo vallecano']};
 export function resolveTeam(names,external){const n=normalize(external),options=aliases[n]??[n];const hits=[...new Set(names)].filter(x=>options.includes(normalize(x)));return hits.length===1?hits[0]:null;}
 function split(line){const out=[];let value='',quoted=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quoted&&line[i+1]==='"'){value+='"';i++;}else quoted=!quoted;}else if(c===','&&!quoted){out.push(value);value='';}else value+=c;}if(quoted)throw Error('UNTERMINATED_CSV');out.push(value);return out;}
 function csvDate(text){const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);if(!m)throw Error('INVALID_HISTORY_DATE');const s=`${m[3]}-${m[2]}-${m[1]}`;if(new Date(s+'T12:00:00Z').toISOString().slice(0,10)!==s)throw Error('INVALID_HISTORY_DATE');return s;}
@@ -28,6 +29,7 @@ export function forecastRows(events,history,now,source){
  const names=history.flatMap(x=>[x.homeTeam,x.awayTeam]),rows=[],skipped=[];
  for(const e of events){
  if(e.state!=='pre'||e.status!=='STATUS_SCHEDULED'||!e.time_valid||e.completed||Date.parse(e.scheduled_at)<=now.getTime()+600000)continue;
+ if((normalize(e.home)==='deportivo'&&e.home_id!=='90')||(normalize(e.away)==='deportivo'&&e.away_id!=='90')){skipped.push({id:e.id,reason:'TEAM_ID_CONFLICT'});continue;}
  const h=resolveTeam(names,e.home),a=resolveTeam(names,e.away);
  if(!h||!a||h===a){skipped.push({id:e.id,reason:'TEAM_NOT_RESOLVED'});continue;}
  const p=soccerProjection(history,h,a),base={cohort:COHORT,sport:'SOCCER',competition:'LaLiga',season:source.season,model_version:SOCCER_MODEL,event_id:e.id,home_name:e.home,away_name:e.away,home_id:e.home_id,away_id:e.away_id,scheduled_at:e.scheduled_at,emitted_at:now.toISOString(),source_received_at:source.received_at,history_digest:source.history_digest,input_version:'FOOTBALL_DATA_SEASON_PRIOR_DAYS_ESPN_V1',projection:p,evidence:{...source,home_history_name:h,away_history_name:a,history_rows:history.length,history_latest:history.at(-1)?.date??null},odds:null,sportsbook:null,scope:'REGULATION_90_PLUS_STOPPAGE',recommendation_status:'RESEARCH_PROJECTION_NOT_BET'};
