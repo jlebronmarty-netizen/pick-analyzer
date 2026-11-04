@@ -4209,3 +4209,6 @@ Manual activation acquired exactly two FREE scoreboards using the same hosted no
 DB migration 20261103231506_ncaab_daily_shadow_v1 is additive: runs, sources, predictions, outcomes and lease. RLS is enabled, anon/authenticated permissions revoked; only server service_role reads/writes. Evidence tables reject updates/deletes. The RLS-with-no-client-policies advisory is intentional server-only access, not public exposure.
 
 Verification: 78 dashboard tests passed, including 73-case frozen parity, pregame/as-of/venue/history/phase gates, duplicate-final denominator and correction review. Production build, release checks and hosted runtime verification are recorded in research/ncaab-daily-20261103. Rollback: remove the new cron and restore only NCAAB read wiring to the preserved checkpoint reader; do not drop tables, delete forecasts or revert unrelated work.
+
+
+NCAAB presentation: forecasts and API observations are ordered by the actual start timestamp, earliest first, with deterministic event-ID ties. The NCAAB page labels Puerto Rico time explicitly; combined daily NCAAB selections inherit the same ordering. No forecast values, outcomes, accuracy or scheduler changes.
