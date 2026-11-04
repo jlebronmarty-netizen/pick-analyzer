@@ -1,5 +1,4 @@
-import DashboardShell from '@/components/dashboard/DashboardShell';
-import TableTennisDashboard from '@/components/dashboard/TableTennisDashboard';
-import { getTableTennisReport } from '@/services/table-tennis-read.service';
-export const dynamic = 'force-dynamic';
-export default async function Page() { return <DashboardShell><TableTennisDashboard report={await getTableTennisReport()} /></DashboardShell>; }
+import {redirect} from 'next/navigation';
+export const dynamic='force-dynamic';
+// New prospective ledger is separate from the unrecovered Hub history.
+export default function TableTennisPage(){redirect('/edge-lab?sport=TT');}
