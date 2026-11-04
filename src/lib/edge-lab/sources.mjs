@@ -38,13 +38,13 @@ export function forecastRows(events,history,now,source){
  return {rows,skipped};
 }
 export async function boundedGet(url,fetchFn=fetch){
- const u=new URL(url);if(u.protocol!=='https:'||!['www.football-data.co.uk','site.api.espn.com'].includes(u.hostname))throw Error('SOURCE_NOT_ALLOWED');
+ const u=new URL(url);if(u.protocol!=='https:'||!['football-data.co.uk','site.api.espn.com'].includes(u.hostname))throw Error('SOURCE_NOT_ALLOWED');
  const r=await fetchFn(u,{cache:'no-store',redirect:'error',signal:AbortSignal.timeout(12000),headers:{Accept:u.pathname.endsWith('.csv')?'text/csv':'application/json'}});
  if(!r.ok)throw Error('SOURCE_HTTP_'+r.status);const reader=r.body?.getReader();if(!reader)throw Error('EMPTY_SOURCE');let size=0;const parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>2000000)throw Error('SOURCE_TOO_LARGE');parts.push(Buffer.from(value));}}finally{await reader.cancel().catch(()=>{});}return Buffer.concat(parts).toString('utf8');
 }
 export async function loadSoccer(now=new Date(),extraDates=[],fetchFn=fetch){
  const year=now.getUTCMonth()>=6?now.getUTCFullYear():now.getUTCFullYear()-1,season=String(year).slice(-2)+String(year+1).slice(-2);
- const history_url=`https://www.football-data.co.uk/mmz4281/${season}/SP1.csv`,csv=await boundedGet(history_url,fetchFn),history=parseHistory(csv,now);
+ const history_url=`https://football-data.co.uk/mmz4281/${season}/SP1.csv`,csv=await boundedGet(history_url,fetchFn),history=parseHistory(csv,now);
  if(history.length<20)throw Error('INSUFFICIENT_LEAGUE_HISTORY');
  const day=dayPR(now),dates=[...new Set([...Array.from({length:9},(_,i)=>addDay(day,i-1)),...extraDates])].sort();if(dates.length>24)throw Error('SETTLEMENT_BACKLOG_LIMIT');
  const events=new Map(),sources=[],errors=[];
