@@ -54,6 +54,7 @@ async function collectMlb(db,summary){
 export async function runMultiSports(request){
  if(process.env.VERCEL_ENV!=='production')throw Error('PRODUCTION_ONLY');const db=dbClient(),results=[];
  for(const sport of ['TT','MLB']){
+  if(sport==='MLB' && process.env.MLB_OFFSEASON_PAUSED==='true'){results.push({sport,status:'OFFSEASON_PAUSED',provider_attempts:0});continue;}
   const id=randomUUID(),claimed=checked(await db.rpc('edge_lab_multi_claim_v1',{p_sport:sport,p_run:id}),'CLAIM');if(!claimed){results.push({sport,status:'NOT_DUE_OR_LOCKED'});continue;}
   const summary={cohort:COHORT_MULTI,sport,provider_attempts:0,result_pages:[],forecasts_inserted:0,forecasts_reused:0,outcomes_inserted:0,warnings:[],errors:[],nhl_touched:false,official_picks_written:false};let status='FAILED';
   try{status=sport==='TT'?await collectTt(db,request,summary):await collectMlb(db,summary);}catch(e){const error=/^[A-Z0-9_]+$/.test(e.message)?e.message:'MULTISPORT_OPERATION_FAILED';summary.errors.push(error);status=/KEY_MISSING|UNAUTHORIZED|AUTH_FAILED|BUDGET|QUOTA|PLAN_RESTRICTED|IDENTITY_UNAVAILABLE/.test(error)?'BLOCKED':'FAILED';}
