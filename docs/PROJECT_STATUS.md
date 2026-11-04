@@ -3384,3 +3384,6 @@ NCAAB presentation: forecasts and API observations are ordered by the actual sta
 
 
 NCAAB display names: university-only labels keyed by ESPN team ID are projected from archived scoreboard location fields in the model page, final-score labels and combined day selections. Original provider names, identities, predictions and settlement records are preserved. Unknown IDs retain the original label; campuses are not merged by name heuristics. No new acquisitions or provider calls.
+
+
+NCAAB selection-first cards now lead with the frozen projected winner, its model probability and settlement status. Score projections and totals are secondary expandable details. Missing winner remains no selection. Experimental/no verified price/no Official Pick labels remain visible; no new recommendation policy, market contract, confidence threshold, model, stake, data or settlement change.
