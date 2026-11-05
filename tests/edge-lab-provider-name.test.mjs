@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {providerPlayerName,planTtRecovery} from '../src/lib/edge-lab/tt-pending-recovery.mjs';
+const final={playerA:'Kotwica Dawid',playerB:'Other Player',scheduledAt:'2026-11-04T22:00:00Z',capturedAt:'2026-11-04T23:00:00Z',setsA:3,setsB:0,totalPoints:60};
+test('Use source spelling not NetBet word order',()=>assert.equal(providerPlayerName('Dawid Kotwica',[final]),'Kotwica Dawid'));
+test('Do not infer unrelated aliases',()=>assert.equal(providerPlayerName('Different Name',[final]),'Different Name'));
+test('Canonical diacritics comparison retains actual query spelling',()=>assert.equal(providerPlayerName('Łukasz Test',[{playerA:'Test Łukasz',playerB:'Other Person'}]),'Test Łukasz'));
+test('Plan keeps original participant separate from provider query',()=>{const f={id:'f',event_id:'netbet:test',sport:'TT',status:'FORECAST',market:'MONEYLINE',participant_a:'Dawid Kotwica',participant_b:'Szymon Brud',scheduled_at:'2026-11-05T00:20:00Z',emitted_at:'2026-11-05T00:10:00Z'};const p=planTtRecovery([f],[],[final],[],new Date('2026-11-05T12:00:00Z'));assert.equal(p.target.team,'Kotwica Dawid');assert.equal(p.target.participant_name,'Dawid Kotwica');assert.equal(f.participant_a,'Dawid Kotwica');});
