@@ -3,35 +3,55 @@ import {createClient} from '@supabase/supabase-js';
 import {randomUUID} from 'node:crypto';
 import {COHORT_MULTI,digest,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../lib/edge-lab/multisport.mjs';
 import {readTtPagination,normalizeTtResultPage,makeProviderPacer,multiOperationalState} from '../lib/edge-lab/tt-coverage.mjs';
+import {planTtRecovery,recoveryCursor} from '../lib/edge-lab/tt-pending-recovery.mjs';
 const GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/source-gateway';
+const RECOVERY_GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/results-recovery';
 const T={sources:'edge_lab_multi_sources_v1',forecasts:'edge_lab_multi_forecasts_v1',outcomes:'edge_lab_multi_outcomes_v1',finals:'edge_lab_tt_finals_v1',runs:'edge_lab_multi_runs_v1',locks:'edge_lab_multi_locks_v1',budget:'edge_lab_tt_request_budget_v1'};
 function dbClient(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||new URL(url).hostname!=='ynuocvexviorgdjrfthw.supabase.co'||!key)throw Error('DESTINATION_NOT_CONFIGURED');return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
 function checked(r,stage){if(r.error)throw Error('DB_'+stage+'_'+(/^[A-Z0-9]+$/.test(r.error.code??'')?r.error.code:'FAILED'));return r.data;}
 async function readAll(db,table,sport){if(!Object.values(T).includes(table))throw Error('INVALID_TABLE');let rows=[];for(let offset=0;offset<20000;offset+=500){let q=db.from(table).select('*').order('id').range(offset,offset+499);if(sport)q=q.eq('sport',sport);const page=checked(await q,'READ');rows.push(...page);if(page.length<500)return rows;}throw Error('READ_LIMIT_REACHED');}
 async function insertRows(db,table,rows,conflict='id'){let inserted=0;for(let i=0;i<rows.length;i+=100)inserted+=checked(await db.from(table).upsert(rows.slice(i,i+100),{onConflict:conflict,ignoreDuplicates:true}).select('id'),'INSERT').length;return inserted;}
-export async function gatewayRequest(request,action,page=1){
+export async function gatewayRequest(request,action,page=1,team){
  const token=request.headers.get('x-vercel-oidc-token');if(!token)throw Error('SERVICE_IDENTITY_UNAVAILABLE');
- const r=await fetch(GATEWAY,{method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(24000),headers:{Authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({action,page})});
+ const recovery=action==='results-player';
+ const r=await fetch(recovery?RECOVERY_GATEWAY:GATEWAY,{method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(24000),headers:{Authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify(recovery?{team,page}:{action,page})});
  const text=await r.text();if(text.length>3200000)throw Error('GATEWAY_RESPONSE_TOO_LARGE');let b;try{b=JSON.parse(text);}catch{throw Error('GATEWAY_NOT_JSON');}if(!r.ok||!['CONFIGURED','SOURCE_RETRIEVED'].includes(b.status))throw Error(/^[A-Z0-9_]+$/.test(b.status??'')?b.status:'GATEWAY_FAILED');return b;
 }
 export async function checkTtSource(request){try{const b=await gatewayRequest(request,'health');return {status:b.status,checked_at:b.checked_at,provider:b.provider,database_dependency:b.database_dependency,provider_calls:0};}catch(e){return {status:e.message,provider_calls:0,available:false};}}
-async function paidRead(db,request,action,page,summary){const budget=checked(await db.rpc('edge_lab_tt_claim_request_v1'),'BUDGET');summary.local_budget=budget;summary.provider_attempts++;return gatewayRequest(request,action,page);}
+async function paidRead(db,request,action,page,summary,team){const budget=checked(await db.rpc('edge_lab_tt_claim_request_v1'),'BUDGET');summary.local_budget=budget;summary.provider_attempts++;return gatewayRequest(request,action,page,team);}
 async function settle(db,rows,existingOutcomes,resolve,summary){const done=new Set(existingOutcomes.map(x=>x.forecast_id));for(const f of rows){if(f.status==='ABSTAIN'||done.has(f.id)||Date.parse(f.scheduled_at)>Date.now())continue;const result=resolve(f);if(result.status==='PENDING'){summary.pending_without_final=(summary.pending_without_final??0)+1;continue;}summary.outcomes_inserted+=await insertRows(db,T.outcomes,[{id:f.id,forecast_id:f.id,status:result.status,checked_at:new Date().toISOString(),actual:typeof result.actual==='number'?result.actual:null,absolute_error:result.absolute_error??null,payload:{...result,statistical_only:true,sportsbook_settlement:false}}],'forecast_id');}}
 async function collectTt(db,request,summary){
  const health=await gatewayRequest(request,'health');summary.provider_configured=health.status==='CONFIGURED';
- const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_COVERAGE_V2';summary.provider_spacing_ms=1200;
- for(let page=1;page<=2;page++){
+ const existing=await readAll(db,T.forecasts,'TT'),outcomes=await readAll(db,T.outcomes),storedBefore=await readAll(db,T.finals);
+ const attempts=checked(await db.from(T.runs).select('sport,started_at,summary').eq('sport','TT').order('started_at',{ascending:false}).limit(1000),'RECOVERY_RUNS');
+ const plan=planTtRecovery(existing,outcomes,canonicalTtHistory(storedBefore.map(r=>r.payload)).finals,attempts);
+ summary.recovery_backlog_events=plan.backlog_events;summary.recovery_skipped=plan.skipped;
+ const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V3';summary.provider_spacing_ms=1200;
+ const recentPages=plan.target?1:2;
+ for(let page=1;page<=recentPages;page++){
   const response=await paced(()=>paidRead(db,request,'results',page,summary)),parsed=normalizeTtResultPage(response.data,response.received_at,page);
   for(const row of parsed.rows){const key=row.source+':'+row.sourceMatchId;if(resultIds.has(key))summary.warnings.push('RESULT_PAGE_OVERLAP');resultIds.add(key);}
   allIncoming.push(...parsed.rows);summary.result_pages.push({page,received:parsed.received,normalized:parsed.rows.length,rejected:parsed.rejected,...parsed.coverage});summary.provider_rate_window=response.rate_window;
   if(!parsed.paginationVerified){summary.warnings.push('RESULT_PAGINATION_UNVERIFIED');break;}
   if(!parsed.hasNextPage)break;
-  if(page===2)summary.warnings.push('RESULT_PAGE_BUDGET_REACHED');
+  if(page===recentPages)summary.warnings.push('RESULT_PAGE_BUDGET_REACHED');
  }
  summary.result_coverage={pages:summary.result_pages.length,received:summary.result_pages.reduce((n,p)=>n+p.received,0),normalized:allIncoming.length,complete:summary.result_pages.at(-1)?.complete===true,provider_total:summary.result_pages[0]?.total??null};
- const incoming=allIncoming.map(r=>({id:digest([r.source,r.sourceMatchId,r.contentDigest]),source_event_id:r.sourceMatchId,source:r.source,scheduled_at:r.scheduledAt,captured_at:r.capturedAt,content_digest:r.contentDigest,payload:r}));summary.finals_inserted=await insertRows(db,T.finals,incoming);
+ if(plan.target){
+  const target=plan.target;summary.recovery={...target,attempted_at:new Date().toISOString(),next_page:target.page,next_side:target.side,status:'REQUESTED'};
+  const response=await paced(()=>paidRead(db,request,'results-player',target.page,summary,target.team));
+  const parsed=normalizeTtResultPage(response.data,response.received_at,target.page);
+  const evidence={kind:'TT_PENDING_RESULT_SEARCH',target,source_url:response.source_url,received_at:response.received_at,response_digest:digest(response.data),coverage:parsed.coverage,normalized_finals:parsed.rows,rejected:parsed.rejected};
+  const sourceId=digest(evidence);await insertRows(db,T.sources,[{id:sourceId,sport:'TT',source:'PulseScore Tipsport player-filtered pending results',captured_at:response.received_at,payload:evidence}]);
+  allIncoming.push(...parsed.rows);
+  summary.recovery={...summary.recovery,...recoveryCursor(target,parsed.coverage),status:'SEARCH_CAPTURED',source_id:sourceId,received:parsed.received,normalized:parsed.rows.length,rejected:parsed.rejected,coverage:parsed.coverage};
+  if(!parsed.paginationVerified)summary.warnings.push('RECOVERY_PAGINATION_UNVERIFIED');if(summary.recovery.page_ceiling_reached)summary.warnings.push('RECOVERY_PAGE_CEILING_REACHED');
+ }
+ const incoming=[...new Map(allIncoming.map(r=>{const id=digest([r.source,r.sourceMatchId,r.contentDigest]);return [id,{id,source_event_id:r.sourceMatchId,source:r.source,scheduled_at:r.scheduledAt,captured_at:r.capturedAt,content_digest:r.contentDigest,payload:r}];})).values()];
+ summary.finals_inserted=await insertRows(db,T.finals,incoming);
  const stored=await readAll(db,T.finals),history=canonicalTtHistory(stored.map(r=>r.payload));summary.history_finals=history.finals.length;summary.history_conflicts=history.conflicts;summary.history_latest=history.finals.length?history.finals.map(r=>r.scheduledAt).sort().at(-1):null;
- const existing=await readAll(db,T.forecasts,'TT'),outcomes=await readAll(db,T.outcomes);await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
+ await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
+ if(plan.target){const contracts=existing.filter(f=>f.event_id===plan.target.event_id&&f.status!=='ABSTAIN');summary.recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(summary.recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
  const response=await paced(()=>paidRead(db,request,'prematch',1,summary)),asOf=new Date().toISOString();
  const rawEvents=Array.isArray(response.data.events)?response.data.events:Array.isArray(response.data.results)?response.data.results:null;if(!rawEvents)throw Error('TT_PREMATCH_SCHEMA_CHANGED');
  const coverage=readTtPagination(response.data,rawEvents.length,{expectedPage:1,allowUnpaged:true});summary.prematch_coverage=coverage;
@@ -41,7 +61,7 @@ async function collectTt(db,request,summary){
  const forecasts=ttForecasts({events:minimal,pagination:coverage},history.finals,asOf,sourceId);summary.source_events=forecasts.source_events;summary.skipped=forecasts.skipped;summary.prematch_has_next=coverage.hasNextPage;
  summary.forecasts_inserted=await insertRows(db,T.forecasts,forecasts.rows);summary.forecasts_reused=forecasts.rows.length-summary.forecasts_inserted;summary.status_counts=Object.fromEntries(['FORECAST','PROJECTION','ABSTAIN'].map(s=>[s,forecasts.rows.filter(r=>r.status===s).length]));
  if(!coverage.verified)summary.warnings.push('PREMATCH_COVERAGE_UNVERIFIED');else if(coverage.hasNextPage)summary.warnings.push('PREMATCH_PAGE_BUDGET_REACHED');
- if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');
+ if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
  if(!history.finals.length&&allIncoming.length===0)summary.warnings.push('NO_VERIFIED_FINALS_AVAILABLE');
  summary.warnings=[...new Set(summary.warnings)];summary.operational_state=summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';
  return summary.warnings.length?'PARTIAL':'SUCCESS';
