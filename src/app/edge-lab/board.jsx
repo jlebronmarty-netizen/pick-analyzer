@@ -1,5 +1,6 @@
 'use client';
 import {useCallback,useEffect,useRef,useState} from 'react';
+import NcaafPanel from './ncaaf-panel';
 const box={border:'1px solid #334155',borderRadius:12,padding:18,marginTop:16};const pct=v=>typeof v==='number'?(v*100).toFixed(1)+'%':'N/A';const num=v=>typeof v==='number'?v.toFixed(2):'N/A';const date=v=>v?new Date(v).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'}):'Sin ejecución';
 const names={SOCCER:'Soccer · LaLiga',TT:'Tenis de mesa · TT Elite',MLB:'MLB · motores Edge',NCAAF:'NCAAF'};
 const marketName={MONEYLINE:'Ganador',TOTAL_POINTS:'Total de puntos',SETS_ODD_EVEN:'Sets par/impar',HOME_TEAM_RUNS:'Carreras local',AWAY_TEAM_RUNS:'Carreras visitante','1X2':'Local / empate / visitante',TOTAL_2_5:'Total de goles 2.5'};
@@ -19,7 +20,7 @@ export default function Board({initialSport='SOCCER'}){
  <div role="tablist" aria-label="Deporte de Edge Lab" style={{display:'flex',gap:8,flexWrap:'wrap'}}>{Object.entries(names).map(([id,label])=><button key={id} role="tab" aria-selected={sport===id} onClick={()=>{setSport(id);window.history.replaceState(null,'','/edge-lab?sport='+id);}} style={{padding:12,border:'1px solid '+(sport===id?'#67e8f9':'#475569'),borderRadius:8,background:sport===id?'#164e63':'transparent'}}>{label}</button>)}</div>
  <p><button onClick={refresh} disabled={busy} style={{padding:10,border:'1px solid #64748b',borderRadius:8}}>{busy?'Consultando…':'Actualizar estado'}</button> La actualización de pantalla consulta el archivo; no consume consultas del proveedor de tenis de mesa.</p>
  {errors.map(e=><p role="alert" key={e} style={{color:'#fda4af'}}>{e}. Los datos previos visibles no se certifican como actuales.</p>)}
- {sport==='NCAAF'?<section style={box}><h2>NCAAF · integración pendiente</h2><p>El motor original PPG/Ridge está en una implementación Python separada. No se reemplaza por una fórmula distinta para aparentar operación. No hay aquí nuevas predicciones NCAAF ni un cron habilitado.</p></section>:<>
+ {sport==='NCAAF'?<NcaafPanel/>:<>
  <section style={box}><h2>{names[sport]}</h2><p>Estado operativo: <strong>{operation?.state??last?.status??(data?'NOT_RUN':'Comprobando…')}</strong>{stale?' · ACTUALIZACIÓN ATRASADA':''}.</p><p>Último ciclo registrado: {last?.status??'N/A'} · Inicio: {date(last?.started_at)} · Finalización: {date(last?.finished_at)}.</p>
  {paused?<p>MLB está pausado por receso de temporada. Esta pantalla conserva el histórico, no reactiva procesos ni consume consultas MLB.</p>:<p>Cohorte: {cohort??'Pendiente de lectura'} · {sport==='TT'?'Recolección cada 8 horas con presupuesto máximo de dos páginas de resultados y una consulta prematch. El proveedor determina el tamaño real de cada página; no se promete cobertura completa.':sport==='MLB'?'Revisión cada 12 horas. Motor de investigación limitado a temporada regular; no altera Official Picks.':'LaLiga, cada 30 minutos. Sin cuota exacta no se calcula ROI.'}</p>}
  {operation?.state==='WARMUP'&&<p>Se están reuniendo resultados para los ratings. Todavía no hay historial suficiente para estos participantes; PASAR no es una apuesta perdida ni un error del modelo.</p>}

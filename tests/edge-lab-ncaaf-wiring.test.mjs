@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+test('NCAAF uses existing scheduler, no duplicate cron',()=>{const v=JSON.parse(read('vercel.json'));assert.equal(v.crons.filter(c=>c.path==='/api/cron/edge-lab-sports').length,1);assert.equal(v.crons.filter(c=>c.path.includes('ncaaf')).length,0);});
+test('NHL schedule preserved',()=>assert.ok(JSON.parse(read('vercel.json')).crons.some(c=>c.path==='/api/cron/nhl-free'&&c.schedule==='7,37 * * * *')));
+test('MLB pause preserved',()=>assert.match(read('src/services/edge-lab-multi.service.mjs'),/MLB_OFFSEASON_PAUSED==='true'/));
+test('NCAAF source uses verified conferences and bounded requests',()=>{const s=read('src/lib/edge-lab/ncaaf-sources.mjs');assert.match(s,/groups\/80\/children/);assert.match(s,/verifyConference/);assert.match(s,/requests>=205/);assert.match(s,/spacing=1100/);assert.match(s,/deadlineMs=235000/);});
+test('No NCAAF writes during UI reads',()=>{const s=read('src/app/api/edge-lab/ncaaf/route.js');assert.match(s,/privateRequest/);assert.ok(!s.includes('runNcaafModule'));assert.ok(!s.includes('collectNcaaf'));});
+test('Ridge never represented as PPG',()=>{const s=read('src/app/edge-lab/ncaaf-panel.jsx');assert.match(s,/Ridge no está activo/);assert.match(s,/PPG no se presenta como Ridge/);});
+test('NCAAF board is integrated into existing tab selector',()=>assert.match(read('src/app/edge-lab/board.jsx'),/sport==='NCAAF'\?<NcaafPanel\/>/));
+test('Chron remains authenticated and production-only',()=>{const s=read('src/app/api/cron/edge-lab-sports/route.js');assert.match(s,/timingSafeEqual/);assert.match(s,/CRON_SECRET/);assert.match(s,/PRODUCTION_ONLY/);assert.match(s,/maxDuration=300/);});
