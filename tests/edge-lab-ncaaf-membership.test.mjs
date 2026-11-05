@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parseFbsConferences,verifyConference,parseTeamSchedule} from '../src/lib/edge-lab/ncaaf-sources.mjs';
+const ref=id=>'http://sports.core.api.espn.com/v2/sports/football/leagues/college-football/seasons/2026/types/2/groups/'+id;
+const body={count:1,pageIndex:1,pageCount:1,items:[{$ref:ref('37')}]};
+test('Conferences must be explicit same-season references',()=>assert.deepEqual(parseFbsConferences(body,2026),['37']));
+test('FBS root not allowed as its own conference',()=>assert.throws(()=>parseFbsConferences({...body,items:[{$ref:ref('80')}]},2026)));
+test('Wrong year membership rejected',()=>assert.throws(()=>parseFbsConferences(body,2025)));
+test('Conference parent80 verified',()=>assert.equal(verifyConference({id:'37',parent:{$ref:ref('80')}},'37',2026).verified_parent,'80'));
+test('Conference parent81 rejected',()=>assert.throws(()=>verifyConference({id:'37',parent:{$ref:ref('81')}},'37',2026)));
+const schedule={team:{id:'6',displayName:'Team',groups:{id:'168',parent:{id:'37'}}},season:{year:2026,type:2},requestedSeason:{year:2026,type:2},events:[]},capture={id:'cap',captured_at:'2026-11-05T12:00:00Z'};
+test('SunBelt division accepted only with verified conference evidence',()=>assert.equal(parseTeamSchedule(schedule,'6',2026,capture,{id:'37',verified_parent:'80'}).conference_id,'37'));
+test('Division alone not assumed FBS',()=>assert.throws(()=>parseTeamSchedule(schedule,'6',2026,capture)));
+test('Unrelated conference proof rejected',()=>assert.throws(()=>parseTeamSchedule(schedule,'6',2026,capture,{id:'8',verified_parent:'80'})));
+test('Unassigned future opponent inventoried, not a fake game or lost team',()=>{const b={...schedule,events:[{id:'10',season:{year:2026},date:'2026-11-28T05:00Z',competitions:[{id:'10',timeValid:false,status:{type:{state:'pre',name:'STATUS_SCHEDULED'}},competitors:[{id:'6',homeAway:'home',team:{displayName:'Team'}},{id:'-1',homeAway:'away',team:{displayName:'TBD'}}]}]}]};const p=parseTeamSchedule(b,'6',2026,capture,{id:'37',verified_parent:'80'});assert.equal(p.rows.length,0);assert.equal(p.excluded[0].reason,'UNASSIGNED_FUTURE_OPPONENT');});
