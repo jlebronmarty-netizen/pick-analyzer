@@ -1,0 +1,214 @@
+{
+  "calendarPlan": [
+    "2026-11-07"
+  ],
+  "result": "PASS",
+  "verifiedAt": "2026-11-07T21:46:19.321Z",
+  "raws": 13,
+  "quotes": 10,
+  "run": {
+    "id": "NHL:996715",
+    "issues": [],
+    "status": "PASS",
+    "started_at": "2026-11-07T21:37:16.868164+00:00",
+    "completed_at": "2026-11-07T21:37:24.032+00:00",
+    "provider_calls": 12,
+    "quote_attempts": [
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020267",
+        "sourceId": "f7fd00bf-bd23-4bc2-8f34-64d910a1e2aa",
+        "capturedAt": "2026-11-07T21:37:18.865Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020268",
+        "sourceId": "083efbf9-76e4-4ef0-933f-81adfc12fa08",
+        "capturedAt": "2026-11-07T21:37:19.343Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020269",
+        "sourceId": "0ace37a1-64b4-4f96-b50a-f9ccedb5517c",
+        "capturedAt": "2026-11-07T21:37:19.927Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020270",
+        "sourceId": "c4eef143-20c5-4ece-9729-d52298fa3593",
+        "capturedAt": "2026-11-07T21:37:20.676Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020271",
+        "sourceId": "e249d014-cfb8-4305-a231-f98b67b55df3",
+        "capturedAt": "2026-11-07T21:37:21.211Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020272",
+        "sourceId": "6dc8bcfd-c50a-4205-8f65-af89fd8652c9",
+        "capturedAt": "2026-11-07T21:37:21.728Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020273",
+        "sourceId": "763260b4-e9b8-4f80-9d5a-616716e112ec",
+        "capturedAt": "2026-11-07T21:37:22.262Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020274",
+        "sourceId": "959c8d75-8f95-46d4-a4a5-f4174eed7d08",
+        "capturedAt": "2026-11-07T21:37:23.087Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020275",
+        "sourceId": "2e9f09f0-8509-46bb-b7a6-db9662552b68",
+        "capturedAt": "2026-11-07T21:37:23.505Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020276",
+        "sourceId": "b2bf137b-c59f-406d-b5e4-11b3d72fd869",
+        "capturedAt": "2026-11-07T21:37:23.954Z"
+      }
+    ],
+    "cached_directory": true
+  },
+  "observations": [
+    {
+      "id": "a080c3d945baa863fcb929d9a68dc23da417cc5ba4b64fe4169a6d9a70574051",
+      "eventId": "nhl:2026020267",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020267",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "f7fd00bf-bd23-4bc2-8f34-64d910a1e2aa",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "3d7599f74169fba61eeab0c10b7c1de8001e5e903a4bb429cda9d72b67018f63",
+      "eventId": "nhl:2026020268",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020268",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "083efbf9-76e4-4ef0-933f-81adfc12fa08",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "e88cbc3a0bdd77e33c8dda47dd379fa17f7a04eb9e196a88e30d3e79a3609ba3",
+      "eventId": "nhl:2026020269",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020269",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "0ace37a1-64b4-4f96-b50a-f9ccedb5517c",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "7530a218bee33f2a7cc65f875f540babd5a09caf3d125f729d6c84218ff8ca3c",
+      "eventId": "nhl:2026020270",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020270",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "c4eef143-20c5-4ece-9729-d52298fa3593",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "7dbe09fa3d75a89b12e4a62b4e0d1c5c9f8b364ff53b654dfacb584a153b917c",
+      "eventId": "nhl:2026020271",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020271",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "e249d014-cfb8-4305-a231-f98b67b55df3",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "84c1dd179168f413bdaa592ac387ae91c6ad3f94da1d48041dc392484a9a2425",
+      "eventId": "nhl:2026020272",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020272",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "6dc8bcfd-c50a-4205-8f65-af89fd8652c9",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "66c8b8ac2d93ba404d9e70b0fa87194df6283455c1182affd620a3596e983c3c",
+      "eventId": "nhl:2026020273",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020273",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "763260b4-e9b8-4f80-9d5a-616716e112ec",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "9563b889737d8d8d7d7f8bd3c24d1fdb70ac7bb9acdb9efd0efac8017a4bc964",
+      "eventId": "nhl:2026020274",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020274",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "959c8d75-8f95-46d4-a4a5-f4174eed7d08",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "6ca4d913a70848fe09850baf9790c3dbf25e94e0512094fb4602c60aa4cb1097",
+      "eventId": "nhl:2026020275",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020275",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "2e9f09f0-8509-46bb-b7a6-db9662552b68",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    },
+    {
+      "id": "283e280d94733c9ee81f9722c1d28b7aabf3afebd2d36e24cde4281738c4d100",
+      "eventId": "nhl:2026020276",
+      "predictionId": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020276",
+      "paired": true,
+      "pregame": true,
+      "sourceIds": [
+        "b2bf137b-c59f-406d-b5e4-11b3d72fd869",
+        "d3dc5f3a-a584-4823-98cf-c9606c2f3c75",
+        "81f65701-7b4f-4917-8068-7a9e1930afac",
+        "afaf8fc9-db53-4628-b8d3-40fc2e6d3e44"
+      ]
+    }
+  ],
+  "providerCalls": 0,
+  "databaseWrites": 0
+}

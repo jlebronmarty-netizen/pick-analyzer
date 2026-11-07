@@ -1,0 +1,158 @@
+{
+  "checkedAt": "2026-11-07T21:44:41.462Z",
+  "result": "PASS",
+  "firstCycle": {
+    "id": "NHL:996715",
+    "issues": [],
+    "status": "PASS",
+    "started_at": "2026-11-07T21:37:16.868164+00:00",
+    "completed_at": "2026-11-07T21:37:24.032+00:00",
+    "provider_calls": 12,
+    "quote_attempts": [
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020267",
+        "sourceId": "f7fd00bf-bd23-4bc2-8f34-64d910a1e2aa",
+        "capturedAt": "2026-11-07T21:37:18.865Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020268",
+        "sourceId": "083efbf9-76e4-4ef0-933f-81adfc12fa08",
+        "capturedAt": "2026-11-07T21:37:19.343Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020269",
+        "sourceId": "0ace37a1-64b4-4f96-b50a-f9ccedb5517c",
+        "capturedAt": "2026-11-07T21:37:19.927Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020270",
+        "sourceId": "c4eef143-20c5-4ece-9729-d52298fa3593",
+        "capturedAt": "2026-11-07T21:37:20.676Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020271",
+        "sourceId": "e249d014-cfb8-4305-a231-f98b67b55df3",
+        "capturedAt": "2026-11-07T21:37:21.211Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020272",
+        "sourceId": "6dc8bcfd-c50a-4205-8f65-af89fd8652c9",
+        "capturedAt": "2026-11-07T21:37:21.728Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020273",
+        "sourceId": "763260b4-e9b8-4f80-9d5a-616716e112ec",
+        "capturedAt": "2026-11-07T21:37:22.262Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020274",
+        "sourceId": "959c8d75-8f95-46d4-a4a5-f4174eed7d08",
+        "capturedAt": "2026-11-07T21:37:23.087Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020275",
+        "sourceId": "2e9f09f0-8509-46bb-b7a6-db9662552b68",
+        "capturedAt": "2026-11-07T21:37:23.505Z"
+      },
+      {
+        "status": "PAIRED",
+        "eventId": "nhl:2026020276",
+        "sourceId": "b2bf137b-c59f-406d-b5e4-11b3d72fd869",
+        "capturedAt": "2026-11-07T21:37:23.954Z"
+      }
+    ],
+    "cached_directory": true
+  },
+  "beforeCoverage": {
+    "paired": 5,
+    "eligible": 10
+  },
+  "afterCoverage": {
+    "book": "CIRCA",
+    "paired": 10,
+    "eligible": 10,
+    "missing": [],
+    "latestCapturedAt": "2026-11-07T21:37:23.954Z"
+  },
+  "quoteObservations": 10,
+  "rawHashesVerified": 13,
+  "originalIdsPreserved": true,
+  "originalCount": 29,
+  "originalMetricsBefore": {
+    "settled": 19,
+    "wins": 14,
+    "losses": 5,
+    "pushes": 0,
+    "voids": 0,
+    "pending": 10,
+    "accuracyPct": 73.6842105263158,
+    "profitUnits": 3.038749759174954,
+    "roiPct": 30.387497591749543,
+    "staked": 10
+  },
+  "originalMetricsAfter": {
+    "settled": 19,
+    "wins": 14,
+    "losses": 5,
+    "pushes": 0,
+    "voids": 0,
+    "pending": 10,
+    "accuracyPct": 73.6842105263158,
+    "profitUnits": 3.038749759174954,
+    "roiPct": 30.387497591749543,
+    "staked": 10
+  },
+  "pages": {
+    "nhlHttp": 200,
+    "coverageLabel": true,
+    "laterPriceLabel": true,
+    "originalRoiPreservationLabel": true,
+    "providerCalls": 0,
+    "databaseWrites": 0
+  },
+  "afterReads": {
+    "quotes": 10,
+    "callsLastRun": 12,
+    "sourcesLastRun": 12,
+    "leaseFree": true
+  },
+  "grants": {
+    "migration": "20261107212911",
+    "service_select": true,
+    "service_insert": true,
+    "service_update": false,
+    "service_delete": false,
+    "service_truncate": false,
+    "anon_select": false
+  },
+  "tests": {
+    "multisportPassed": 93,
+    "edgeLabRegressionPassed": 261,
+    "failed": 0,
+    "scopedLint": "PASS",
+    "fullLocalBuild": "PASS"
+  },
+  "merges": {
+    "core": "e754894ada22589597c4ece576f7d5f6fa2ec988",
+    "calendarAndPermissions": "f68cb0534856f14cdde0d437e2e1d2bf3ad8968f"
+  },
+  "officialPromotion": false,
+  "paidSources": false,
+  "retroactiveEntryPriceFill": false,
+  "newScheduler": false,
+  "finalSourceDeployment": {
+    "id": "dpl_EDFeqDcWVGmzEcaj5X4Noo3WwadR",
+    "commit": "f68cb0534856f14cdde0d437e2e1d2bf3ad8968f",
+    "status": "READY"
+  },
+  "calendarPlanMatchesObservedRun": true
+}
