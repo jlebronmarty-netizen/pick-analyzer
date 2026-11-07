@@ -3,7 +3,7 @@ import {createHash,randomUUID} from 'node:crypto';
 import {gzipSync} from 'node:zlib';
 import {parseDratingsUpcoming,parseDratingsCirca,DRATINGS_URL} from '@/lib/nhl-free-source';
 import {normalizeNhlScore,normalizeNhlDirectory,matchFreeNhl,freezeNhlForecast,finalNhl,reconcileFreeNhl,freeNhlMetrics,nhlSportsDate,verifyFreeNhlForecast,type NhlGame,type NhlFreeForecast,type NhlFreeFinal,type NhlFreeAvailableReport} from '@/lib/nhl-free';
-import {rankNhlQuoteTargets,mergeNhlQuoteSnapshots,nhlQuoteCoverage,sameNhlQuoteIdentity,type NhlQuoteAttempt} from '@/lib/nhl-quotes';
+import {rankNhlQuoteTargets,nhlQuoteCalendarDates,mergeNhlQuoteSnapshots,nhlQuoteCoverage,sameNhlQuoteIdentity,type NhlQuoteAttempt} from '@/lib/nhl-quotes';
 import {readNhlDirectoryCache} from '@/lib/nhl-directory-cache';
 import type {NhlReport} from '@/lib/nhl-external-report';
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
@@ -61,9 +61,7 @@ export async function runNhlFree(){
    if(message)throw Error('NHL_SOURCE_'+(denied?'ACCESS_DENIED':status||'TRANSPORT'));
    return {raw,id,at};
   }
-  const today=nhlSportsDate(new Date(start).toISOString()),tomorrow=nhlSportsDate(new Date(start+86400000).toISOString());
-  const dates=new Set([today]);
-  for(const p of ps.filter(p=>!finished.has(String(p.event_id))).sort((a,b)=>String(a.scheduled_at).localeCompare(String(b.scheduled_at)))){if(dates.size>=4)break;if(nhlSportsDate(String(p.scheduled_at))<today)dates.add(nhlSportsDate(String(p.scheduled_at)));}
+  const today=nhlSportsDate(new Date(start).toISOString());
   const gamesById=new Map<string,NhlGame>(),scheduleSources=new Map<string,string>();
   let directory:ReturnType<typeof normalizeNhlDirectory>|undefined,directorySourceId:string|null=null;
   try{
@@ -75,8 +73,8 @@ export async function runNhlFree(){
   let forecastSource:Awaited<ReturnType<typeof fetchSource>>|null=null,publicForecasts:ReturnType<typeof parseDratingsUpcoming>=[];
   try{
    forecastSource=await fetchSource(DRATINGS_URL,2000000);publicForecasts=parseDratingsUpcoming(forecastSource.raw);
-   for(const f of publicForecasts){const date=nhlSportsDate(f.scheduledAt);if(date>today&&date<=tomorrow)dates.add(date);}
   }catch(e){detail.issues.push(e instanceof Error?e.message:'NHL_FORECAST_FAILED');}
+  const dates=nhlQuoteCalendarDates(publicForecasts,ps.filter(p=>!finished.has(String(p.event_id))).map(p=>String(p.scheduled_at)),new Date(start).toISOString());
   for(const date of dates){try{
    const s=await fetchSource('https://api-web.nhle.com/v1/score/'+date,2000000),games=normalizeNhlScore(JSON.parse(s.raw),directory);
    for(const g of games){gamesById.set(g.eventId,g);scheduleSources.set(g.eventId,s.id);const final=finalNhl(g,s.at);if(final&&known.has(g.eventId)){

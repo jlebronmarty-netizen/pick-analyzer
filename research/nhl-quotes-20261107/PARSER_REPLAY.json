@@ -1,0 +1,81 @@
+{
+  "verifiedAt": "2026-11-07T21:24:36.781Z",
+  "raws": 7,
+  "priorPairs": 5,
+  "fixedPairs": 7,
+  "results": [
+    {
+      "sourceId": "a39b9ffa-265e-47e0-bcea-275d7fe33df8",
+      "sha256": "f80e5e1f0a29fd6880a28663c3a33dc03461761d33b16a9b3d09f1d5cf379239",
+      "eventId": "nhl:2026020273",
+      "eventName": "Tampa Bay Lightning @ Minnesota Wild",
+      "priorPaired": true,
+      "fixedPaired": true,
+      "awayOdds": -133,
+      "homeOdds": 119
+    },
+    {
+      "sourceId": "0d9d3375-f1a7-4bba-bfad-71c476a1a3da",
+      "sha256": "f2831af4ff140b83b5e2f36a65e1f4e1810fff32b53f790abaea7aa2300a7f6c",
+      "eventId": "nhl:2026020272",
+      "eventName": "San Jose Sharks @ Dallas Stars",
+      "priorPaired": true,
+      "fixedPaired": true,
+      "awayOdds": 255,
+      "homeOdds": -291
+    },
+    {
+      "sourceId": "61be4a1b-1883-4c08-aab9-9aff615c332d",
+      "sha256": "103c78316b03b64448617b2bc62b9beba1bc6926b80e574fae5fd6e98718c7d7",
+      "eventId": "nhl:2026020270",
+      "eventName": "New Jersey Devils @ New York Islanders",
+      "priorPaired": false,
+      "fixedPaired": true,
+      "awayOdds": -140,
+      "homeOdds": 126
+    },
+    {
+      "sourceId": "58a8d812-3189-4af2-abd7-f6e6e7dd526c",
+      "sha256": "7942b1d984c92b7aa7640566dad12208db20547d31701599094e7fd957e2687f",
+      "eventId": "nhl:2026020267",
+      "eventName": "New York Rangers @ Seattle Kraken",
+      "priorPaired": false,
+      "fixedPaired": true,
+      "awayOdds": -130,
+      "homeOdds": 117
+    },
+    {
+      "sourceId": "ebb8dd49-545f-4b43-8bc0-309737619ec5",
+      "sha256": "f589217f85575df2e5c4642a52e4ae1b36cbc553b4d6d4f2dedf66995df91ec1",
+      "eventId": "nhl:2026020268",
+      "eventName": "Montréal Canadiens @ Toronto Maple Leafs",
+      "priorPaired": true,
+      "fixedPaired": true,
+      "awayOdds": -116,
+      "homeOdds": 104
+    },
+    {
+      "sourceId": "c3be23ca-d606-4e7c-be72-2017877ac712",
+      "sha256": "98ced0e43b9101057c3806d8d28cbc8c0ef3208c8db118d3864562333d432cc1",
+      "eventId": "nhl:2026020271",
+      "eventName": "Chicago Blackhawks @ Carolina Hurricanes",
+      "priorPaired": true,
+      "fixedPaired": true,
+      "awayOdds": 385,
+      "homeOdds": -454
+    },
+    {
+      "sourceId": "2c65109e-00c4-42ef-91af-f4bb37c4e520",
+      "sha256": "458605150dd73f27f93d863e0dde6ddb98cfae880eb87587a67b4764ebb5fed1",
+      "eventId": "nhl:2026020269",
+      "eventName": "Utah Mammoth @ Ottawa Senators",
+      "priorPaired": true,
+      "fixedPaired": true,
+      "awayOdds": -116,
+      "homeOdds": 104
+    }
+  ],
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "historicalPricesBackfilled": false
+}
