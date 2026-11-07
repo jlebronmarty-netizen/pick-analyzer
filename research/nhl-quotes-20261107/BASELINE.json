@@ -1,0 +1,129 @@
+{
+  "rls": true,
+  "quotes": 0,
+  "anon_read": false,
+  "migration": "20261107211452",
+  "originals": [
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020247",
+      "md5": "4ea74463da9b1d26a69959795fd4f072"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020248",
+      "md5": "ea0bb1fd0b2ef4775eb4f8ce11b86c3a"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020249",
+      "md5": "a28362b18231a330e8c0848fd4878694"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020250",
+      "md5": "54fac5fd881fb197d7a9eb1d6031f958"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020251",
+      "md5": "d930e6197290999439f6e63b1ef187a9"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020252",
+      "md5": "bb8abf4c021e2d06b49a93591aeed457"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020253",
+      "md5": "7c19c67ca7265e944e035e44b0174d10"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020254",
+      "md5": "5163848e9b6488b1e9768ca88bf2e499"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020255",
+      "md5": "35f1366f819629e6e75094d536a00217"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020256",
+      "md5": "c668cd0f5eba24f3db31315ca372504b"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020257",
+      "md5": "bb526de975b053ee0dd90bd7c55d3ba6"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020258",
+      "md5": "4c41c951607c6f8637acac8857350781"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020260",
+      "md5": "d7ccd2a105abcce8b38a09041b539ca0"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020261",
+      "md5": "89ff8276fe20bc4a986e2751baa91374"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020262",
+      "md5": "d26dfead3dd33bbec89f78cc21f1d3c6"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020263",
+      "md5": "dd874109f2846cdd5e705b7cede42d67"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020264",
+      "md5": "3ed14a03c40ccb5540c25fbb1ba5c1cf"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020265",
+      "md5": "9585b9084830744a6f210d1e4e898fea"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020266",
+      "md5": "b03a7422a4a2d7ab3bb105d120429f2d"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020267",
+      "md5": "90f9a55c2a7b78b19f571ed8082addef"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020268",
+      "md5": "b9620cdaf6c59de6859b4ea4c88f7de3"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020269",
+      "md5": "66e7ffa9e77869042876c033dbeb1a1d"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020270",
+      "md5": "991ce067d36c7c1c5e2f534452129496"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020271",
+      "md5": "241c15fb757749dcf13a10bbdf4e8470"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020272",
+      "md5": "621b0958193ef85ea83486597bb829a4"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020273",
+      "md5": "62f95861a66a078ac2fc5fdae6881285"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020274",
+      "md5": "053a62e6fcf6096dab04f277b221ba91"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020275",
+      "md5": "b883de1cdbcceb51d9b5ef2dba696649"
+    },
+    {
+      "id": "DRATINGS_PUBLIC_ARGMAX_V1:nhl:2026020276",
+      "md5": "83968da18adcc6f87d1073df35a535ac"
+    }
+  ],
+  "view_options": [
+    "security_invoker=true"
+  ],
+  "service_insert": true,
+  "authenticated_insert": false
+}
