@@ -28,12 +28,12 @@ create index nhl_free_quote_directory_source_idx on public.nhl_free_quote_observ
 create index nhl_free_quote_run_idx on public.nhl_free_quote_observations_v1(run_id);
 create trigger nhl_quote_immutable before update or delete on public.nhl_free_quote_observations_v1 for each row execute function public.nhl_free_immutable_v1();
 alter table public.nhl_free_quote_observations_v1 enable row level security;
-revoke all on public.nhl_free_quote_observations_v1 from anon,authenticated;
+revoke all on public.nhl_free_quote_observations_v1 from public,anon,authenticated,service_role;
 grant select,insert on public.nhl_free_quote_observations_v1 to service_role;
 create view public.nhl_free_latest_quotes_v1 with(security_invoker=true) as
  select distinct on(q.prediction_id) q.id,q.prediction_id,q.event_id,q.scheduled_at,q.captured_at,q.source_id,q.body
  from public.nhl_free_quote_observations_v1 q join public.nhl_free_runs_v1 r on r.id=q.run_id
  where r.status in ('PASS','PARTIAL')
  order by q.prediction_id,q.captured_at desc,q.id;
-revoke all on public.nhl_free_latest_quotes_v1 from anon,authenticated;
+revoke all on public.nhl_free_latest_quotes_v1 from public,anon,authenticated,service_role;
 grant select on public.nhl_free_latest_quotes_v1 to service_role;

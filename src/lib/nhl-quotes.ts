@@ -24,3 +24,19 @@ export function nhlQuoteCoverage(forecasts:NhlFreeForecast[],games:NhlGame[],at:
  const quoted=eligible.filter(g=>forecasts.some(f=>f.eventId===g.eventId&&g.scheduledAt===f.scheduledAt&&g.awayId===f.awayId&&g.homeId===f.homeId&&hasPair(f)&&Date.parse(f.capturedAt)<=now+5000&&now-Date.parse(f.capturedAt)<=NHL_QUOTE_FRESH_MS));
  return {book:'CIRCA',paired:quoted.length,eligible:eligible.length,missing:eligible.filter(g=>!quoted.includes(g)).map(g=>g.eventName),latestCapturedAt:forecasts.filter(f=>quoted.some(g=>g.eventId===f.eventId)).map(f=>f.capturedAt).sort().at(-1)??null};
 }
+// NHL score-day boundaries can differ from the Puerto Rico display day. Keep both
+// calendars around the allowed 15-minute model/official start-time tolerance.
+export function nhlQuoteCalendarDates(forecasts:{scheduledAt:string}[],unresolvedTimes:string[],at:string){
+ const day=(s:string,zone:string)=>new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(s));
+ const now=Date.parse(at),today=day(at,'America/Puerto_Rico'),tomorrow=day(new Date(now+86400000).toISOString(),'America/Puerto_Rico'),dates=new Set([today]);
+ for(const time of unresolvedTimes.slice().sort()){
+  if(dates.size>=4)break;if(!Number.isFinite(Date.parse(time))||Date.parse(time)>=now)continue;
+  for(const zone of ['America/Puerto_Rico','America/New_York']){if(dates.size>=4)break;dates.add(day(time,zone));}
+ }
+ for(const f of forecasts){
+  const tip=Date.parse(f.scheduledAt);if(!Number.isFinite(tip)||tip<=now)continue;
+  const date=day(f.scheduledAt,'America/Puerto_Rico');if(date<today||date>tomorrow)continue;
+  for(const offset of [-15*60000,15*60000])for(const zone of ['America/Puerto_Rico','America/New_York']){if(dates.size>=5)break;dates.add(day(new Date(tip+offset).toISOString(),zone));}
+ }
+ return dates;
+}

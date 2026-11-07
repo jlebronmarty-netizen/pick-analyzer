@@ -71,3 +71,11 @@ test('observed NY aliases recover exact Circa pairs and still reject reversed or
  const montreal={...published,awayName:'Montréal Canadiens',homeName:'St. Louis Blues'};
  assert.ok(parseDratingsCirca(table('Montreal','St Louis'),montreal));
 });
+test('relevant calendar dates preserve winter midnight, source-time tolerance, and unresolved prior games',async()=>{
+ const {nhlQuoteCalendarDates}=await import('../../src/lib/nhl-quotes.ts');
+ const ordinary=[...nhlQuoteCalendarDates([{scheduledAt:'2026-11-08T00:07:00Z'}],[],at)];assert.deepEqual(ordinary,['2026-11-07']);
+ const midnight=nhlQuoteCalendarDates([{scheduledAt:'2026-11-08T05:02:00Z'}],[],'2026-11-08T04:50:00Z');assert.ok(midnight.has('2026-11-07'));assert.ok(midnight.has('2026-11-08'));
+ const unfinished=nhlQuoteCalendarDates([],['2026-11-08T04:30:00Z'],'2026-11-08T07:00:00Z');assert.ok(unfinished.has('2026-11-07'));
+ const summer=nhlQuoteCalendarDates([{scheduledAt:'2026-07-08T03:55:00Z'}],[],'2026-07-07T22:00:00Z');assert.ok(summer.has('2026-07-07'));assert.ok(summer.has('2026-07-08'));
+ const many=nhlQuoteCalendarDates([],Array.from({length:20},(_,i)=>new Date(Date.parse(at)-(i+1)*86400000).toISOString()),at);assert.ok(many.size<=5);
+});
