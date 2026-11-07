@@ -6,7 +6,7 @@ export type NhlFreeForecast={id:string;eventId:string;eventName:string;scheduled
 export type NhlFreeFinal={eventId:string;scheduledAt:string;awayId:number;homeId:number;awayScore:number;homeScore:number;capturedAt:string};
 type LegacyPick=NhlLegacyAvailableReport['history'][number];
 export type NhlFreePick=Omit<LegacyPick,'odds'|'settlement'> & {odds:number|null;settlement:(Omit<NonNullable<LegacyPick['settlement']>,'profitUnits'> & {profitUnits:number|null})|null};
-export type NhlFreeAvailableReport=Omit<NhlLegacyAvailableReport,'schema'|'source'|'history'|'forecasts'> & {schema:'NHL_FREE_DIRECT_V1';source:'PICK_ANALYZER';history:NhlFreePick[];forecasts:NhlFreeForecast[]};
+export type NhlFreeAvailableReport=Omit<NhlLegacyAvailableReport,'schema'|'source'|'history'|'forecasts'> & {schema:'NHL_FREE_DIRECT_V1';source:'PICK_ANALYZER';history:NhlFreePick[];forecasts:NhlFreeForecast[];quoteCoverage?:import('./nhl-quotes').NhlQuoteCoverage;laterPriceObservations?:{predictionId:string;eventId:string;capturedAt:string;odds:number;book:'CIRCA'}[]};
 export const nhlSportsDate=(s:string)=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(s));
 const object=(v:unknown):Record<string,unknown>=>v&&typeof v==='object'?v as Record<string,unknown>:{};
 const localized=(v:unknown)=>String(object(v).default??'');

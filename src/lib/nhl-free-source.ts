@@ -47,8 +47,15 @@ export function parseDratingsCirca(html: string, forecast: PublicNhlForecast): P
     const index = rows[0]?.indexOf('Circa') ?? -1;
     if (index < 0 || rows.length !== 3) continue;
     const [away, home] = rows.slice(1);
-    const teamLabelMatches = (full: string, label: string) => full === label || full.startsWith(label + ' ');
-    if (!teamLabelMatches(forecast.awayName, away[0]) || !teamLabelMatches(forecast.homeName, home[0])) continue;
+    const canonical=(name:string)=>name.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+    // Explicit aliases observed in archived DRatings tables, never a generic city abbreviation guess.
+    const aliases:Record<string,string>={'new york rangers':'ny rangers','new york islanders':'ny islanders'};
+    const teamLabelMatches=(full:string,label:string)=>{
+      const name=canonical(full),value=canonical(label);if(!value)return false;
+      return [name,aliases[name]].filter(Boolean).some(n=>n===value||n.startsWith(value+' '));
+    };
+    if (!teamLabelMatches(forecast.awayName, away[0]) || !teamLabelMatches(forecast.homeName, home[0])
+      || teamLabelMatches(forecast.homeName,away[0]) || teamLabelMatches(forecast.awayName,home[0])) continue;
     const odds = [away[index], home[index]];
     if (odds.some(o => !/^[+-]\d+$/.test(o) || Math.abs(Number(o)) < 100)) continue;
     return { awayOdds: Number(odds[0]), homeOdds: Number(odds[1]), book: 'CIRCA', rawTable: table };

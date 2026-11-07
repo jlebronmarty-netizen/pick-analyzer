@@ -3,7 +3,7 @@ export const nhlDate=(s:string)=>new Intl.DateTimeFormat("en-CA",{timeZone:"Amer
 export function nhlOpportunities(r:NhlAvailableReport){
   const now=Date.parse(r.readAt),run=r.health.latestRunAt?Date.parse(r.health.latestRunAt):NaN;
   if(r.health.status!=="PASS"||!Number.isFinite(run)||now-run>45*60000||run>now+5000)return [];
-  return r.forecasts.filter(f=>Date.parse(f.scheduledAt)>now&&now-Date.parse(f.capturedAt)<=45*60000).flatMap(f=>[
+  return r.forecasts.filter(f=>Date.parse(f.scheduledAt)>now&&Date.parse(f.capturedAt)<=now+5000&&now-Date.parse(f.capturedAt)<=45*60000&&(!r.games||r.games.some(g=>g.eventId===f.eventId&&g.scheduledAt===f.scheduledAt&&g.status==='SCHEDULED'))).flatMap(f=>[
     {key:f.id+":AWAY",eventName:f.eventName,selection:f.away+" ML",probability:f.awayProbability,odds:f.awayOdds,edgePp:f.awayEdgePp,capturedAt:f.capturedAt},
     {key:f.id+":HOME",eventName:f.eventName,selection:f.home+" ML",probability:f.homeProbability,odds:f.homeOdds,edgePp:f.homeEdgePp,capturedAt:f.capturedAt},
   ]).filter((f): f is typeof f & {edgePp:number;odds:number}=>f.edgePp!==null&&f.odds!==null&&f.edgePp>0).sort((a,b)=>b.edgePp-a.edgePp||a.key.localeCompare(b.key));
