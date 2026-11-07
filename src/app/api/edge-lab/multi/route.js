@@ -1,5 +1,6 @@
 import {privateRequest} from '@/services/edge-lab.service.mjs';import {readMultiSports,checkTtSource} from '@/services/edge-lab-multi.service.mjs';
 import {ttBudgetStatus,settlementCoverage} from '@/lib/edge-lab/operational-readiness.mjs';
+import {presentMultiAdmission} from '@/lib/edge-lab/budget-admission-view.mjs';
 export const dynamic='force-dynamic';export const runtime='nodejs';export const maxDuration=60;
 export async function GET(request){
  const reply=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
@@ -7,7 +8,7 @@ export async function GET(request){
  const q=new URL(request.url).searchParams;if([...q.keys()].some(k=>!['mode','_vercel_share'].includes(k))||q.getAll('mode').length>1||q.has('mode')&&!['status','summary','source-health'].includes(q.get('mode')))return reply({status:'INVALID_QUERY'},400);
  try{
   if(q.get('mode')==='source-health')return reply(await checkTtSource(request));
-  const data=await readMultiSports(),due=data.states?.find(s=>s.sport==='TT')?.next_due;
+  const data=presentMultiAdmission(await readMultiSports()),due=data.states?.find(s=>s.sport==='TT')?.next_due;
   const diagnostics={tt_budget:ttBudgetStatus(data.budget,data.checked_at,due),settlement_coverage:['TT','NCAAF'].map(sport=>settlementCoverage(data.rows,sport,data.checked_at,{reviewAfterHours:sport==='NCAAF'?8:4})),read_only:true,provider_calls:0};
   if(q.get('mode')==='summary'){const {rows,...summary}=data;return reply({...summary,diagnostics,record_count:rows.length});}
   return reply({...data,diagnostics});

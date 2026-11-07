@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+import {presentMultiAdmission} from '../src/lib/edge-lab/budget-admission-view.mjs';
+const fixture=()=>({checked_at:'2026-11-07T21:00:00Z',states:[{sport:'TT',state:'PARTIAL',next_due:'2026-11-08T00:00:00Z',last_run:{status:'PARTIAL'}},{sport:'MLB',state:'OFFSEASON_PAUSED'}],budget:[{month:'2026-11',used:29,cap:240,daily:{'2026-11-07':9}}],rows:[{id:'original'}],ncaaf:'FROZEN_PYTHON_ENGINE_REVIEW_PENDING'});
+test('Empty quota displayed as intentional wait',()=>assert.equal(presentMultiAdmission(fixture()).states[0].state,'LOCAL_BUDGET_WAIT'));
+test('Actual last cycle preserved',()=>assert.equal(presentMultiAdmission(fixture()).states[0].last_cycle_state,'PARTIAL'));
+test('MLB pause unchanged',()=>assert.deepEqual(presentMultiAdmission(fixture()).states[1],fixture().states[1]));
+test('NCAAF points to dedicated real status, not hardcoded successful',()=>{const x=presentMultiAdmission(fixture());assert.equal(x.ncaaf,'SEE_DEDICATED_PPG_STATUS');assert.equal(x.ncaaf_status_url,'/api/edge-lab/ncaaf?mode=summary');});
+test('No source or ledger mutation',()=>{const f=fixture(),before=JSON.stringify(f);const x=presentMultiAdmission(f);assert.equal(JSON.stringify(f),before);assert.deepEqual(x.rows,f.rows);});
+test('Funded cycle retains actual coverage state',()=>{const f=fixture();f.budget[0].daily['2026-11-07']=6;assert.equal(presentMultiAdmission(f).states[0].state,'PARTIAL');});
+test('Running worker not masked by quota consumption',()=>{const f=fixture();f.states[0].last_run.status='RUNNING';f.states[0].state='RUNNING';assert.equal(presentMultiAdmission(f).states[0].state,'RUNNING');});
+for(const state of ['FAILED','BLOCKED'])test(state+' error not hidden by budget view',()=>{const f=fixture();f.states[0].state=state;assert.equal(presentMultiAdmission(f).states[0].state,state);});
+test('Unknown budget not claimed valid',()=>{const f=fixture();f.budget[0].used=null;assert.equal(presentMultiAdmission(f).states[0].budget_admission,'UNKNOWN');});
+test('API remains private and read-only',()=>{const s=fs.readFileSync('src/app/api/edge-lab/multi/route.js','utf8');assert.match(s,/privateRequest/);assert.match(s,/presentMultiAdmission/);assert.ok(!s.includes('runMultiSports'));});
+test('Claim SQL guards quota before scheduling and keeps invoker',()=>{const s=fs.readFileSync('docs/edge-lab/sql/tt-budget-aware-claim-v2.sql','utf8');assert.match(s,/SECURITY INVOKER/);assert.match(s,/FOR UPDATE SKIP LOCKED/);assert.ok(s.indexOf('IF v_retry IS NOT NULL')<s.indexOf('SET run_id=p_run'));assert.ok(!/grant |revoke /i.test(s));});
