@@ -59,3 +59,15 @@ test('even a fresh quoted forecast cannot enter edge after official LIVE status 
  assert.equal(nhlOpportunities({...r,games:[{...game(),status:'LIVE'}]}).length,0);
  assert.equal(nhlOpportunities({...r,forecasts:[{...f,capturedAt:'2026-11-07T20:01:00Z'}]}).length,0);
 });
+test('observed NY aliases recover exact Circa pairs and still reject reversed or ambiguous teams',async()=>{
+ const {parseDratingsCirca}=await import('../../src/lib/nhl-free-source.ts');
+ const table=(a,h)=>`id="scroll-money"><table><tr><th></th><th>Open Line</th><th>Circa</th><th>Best Line</th></tr><tr><td>${a}</td><td>-150</td><td>-130</td><td>-120</td></tr><tr><td>${h}</td><td>+130</td><td>+117</td><td>+125</td></tr></table><div id="scroll-spread">`;
+ const ny={...published,awayName:'New York Rangers',homeName:'New York Islanders'};
+ assert.equal(parseDratingsCirca(table('NY Rangers','NY Islanders'),ny).awayOdds,-130);
+ assert.equal(parseDratingsCirca(table('NY Rangers','NY Islanders'),ny).homeOdds,117);
+ assert.equal(parseDratingsCirca(table('NY Islanders','NY Rangers'),ny),null);
+ assert.equal(parseDratingsCirca(table('New York','New York'),ny),null);
+ assert.equal(parseDratingsCirca(table('NY','NY'),ny),null);
+ const montreal={...published,awayName:'Montréal Canadiens',homeName:'St. Louis Blues'};
+ assert.ok(parseDratingsCirca(table('Montreal','St Louis'),montreal));
+});

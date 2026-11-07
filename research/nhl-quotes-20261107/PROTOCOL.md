@@ -27,3 +27,5 @@ Initial observed state: 29 original forecasts, 18 outcome observations; forecast
 ## Verification required
 
 Unit/integration checks for target rotation, source-cache tampering/expiry, stale/started/identity-conflicting prices, whole-snapshot consistency, independent quote coverage, and unchanged original ROI. Full module build and deployed preview/production checks. Apply additive schema and inspect its security grants/advisories. Verify a natural authenticated scheduled cycle, both current pair coverage and immutable original-ID hashes before/after, no page-triggered acquisitions/writes, and preserved other-sport runtime configuration.
+
+Additional stored-raw diagnostic: both previously unpriced requested games had exact Circa pairs, but DRatings labeled them NY Rangers and NY Islanders. Add only those two explicit full-name aliases, normalize accents/punctuation, and reject ambiguous/reversed row identities. This repairs source identity parsing, not model probabilities, frozen entry prices, betting thresholds or historical ROI. Archived pre-change observations are not backfilled.
