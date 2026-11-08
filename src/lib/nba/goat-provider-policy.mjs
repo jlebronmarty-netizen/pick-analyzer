@@ -64,5 +64,5 @@ export function nbaGoatGate({enabled,continuousEnabled,pending,rowsToday,statsCu
  return {allowed:blockers.length===0,blockers,continuous,repair,perRunWriteCap:Math.max(0,Math.min(3,continuous?3-rowsToday:12-canaryRows)),directProviderCalls:0};
 }
 export function isExactGoatModelMatch(p,event,q){
- return Boolean(p&&p.gameId===event.id&&p.market===q.market&&p.team===q.outcome&&(p.line??null)===(q.line??null)&&String(p.sportsbook).toLowerCase()===String(q.sportsbook).toLowerCase()&&p.odds===q.price&&time(p.oddsTimestamp)!==null&&time(p.oddsTimestamp)===time(q.provider_timestamp)&&Number.isFinite(p.modelProbability)&&p.modelProbability>0&&p.modelProbability<100&&p.dataSufficiencyScore>=35&&p.featureQualityScore>0&&!p.explanation?.warnings?.some(w=>/Missing team_stats|trial|scrambled|fallback/i.test(w)));
+ return Boolean(p&&p.gameId===event.id&&p.market===q.market&&p.team===q.outcome&&(p.line??null)===(q.line??null)&&String(p.sportsbook).toLowerCase()===String(q.sportsbook).toLowerCase()&&p.odds===q.price&&time(p.oddsTimestamp)!==null&&time(p.oddsTimestamp)===time(q.provider_timestamp)&&Number.isFinite(p.modelProbability)&&p.modelProbability>0&&p.modelProbability<100&&p.dataSufficiencyScore>=35&&p.featureQualityScore>0&&!p.explanation?.warnings?.some(w=>/Missing team_stats/i.test(w)));
 }
