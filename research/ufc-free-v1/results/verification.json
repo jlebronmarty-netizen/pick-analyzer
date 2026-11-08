@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "independentLanguage": "Python",
+  "facts": 8679,
+  "trials": 26064,
+  "bets": 10540,
+  "checks": [
+    "unique bouts and economic selections",
+    "prior-date Elo replay all K",
+    "warmup",
+    "frozen threshold and odds bounds",
+    "flat stakes, result identity, profits and ROI",
+    "development/confirmation separation",
+    "protocol and selection hashes"
+  ],
+  "limits": [
+    "source availability and sportsbook contracts not certified",
+    "no positive-ROI candidate; no certification of profitability"
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "chosen": null,
+  "development": [
+    {
+      "id": "ELO_K16_EV3",
+      "selected": 644,
+      "settled": 632,
+      "excludedDrawNC": 12,
+      "wins": 227,
+      "losses": 405,
+      "accuracy": 0.35917721518987344,
+      "profitUnits": -12.970000000000017,
+      "roiPct": -2.0522151898734204,
+      "interval95": null
+    },
+    {
+      "id": "ELO_K16_EV7",
+      "selected": 590,
+      "settled": 579,
+      "excludedDrawNC": 11,
+      "wins": 200,
+      "losses": 379,
+      "accuracy": 0.3454231433506045,
+      "profitUnits": -18.010000000000005,
+      "roiPct": -3.110535405872194,
+      "interval95": null
+    },
+    {
+      "id": "ELO_K32_EV3",
+      "selected": 645,
+      "settled": 632,
+      "excludedDrawNC": 13,
+      "wins": 230,
+      "losses": 402,
+      "accuracy": 0.3639240506329114,
+      "profitUnits": -14.34000000000001,
+      "roiPct": -2.2689873417721538,
+      "interval95": null
+    },
+    {
+      "id": "ELO_K32_EV7",
+      "selected": 588,
+      "settled": 576,
+      "excludedDrawNC": 12,
+      "wins": 197,
+      "losses": 379,
+      "accuracy": 0.3420138888888889,
+      "profitUnits": -26.880000000000003,
+      "roiPct": -4.666666666666668,
+      "interval95": null
+    },
+    {
+      "id": "ELO_K64_EV3",
+      "selected": 630,
+      "settled": 617,
+      "excludedDrawNC": 13,
+      "wins": 226,
+      "losses": 391,
+      "accuracy": 0.36628849270664504,
+      "profitUnits": -24.619999999999994,
+      "roiPct": -3.990275526742301,
+      "interval95": null
+    },
+    {
+      "id": "ELO_K64_EV7",
+      "selected": 583,
+      "settled": 571,
+      "excludedDrawNC": 12,
+      "wins": 205,
+      "losses": 366,
+      "accuracy": 0.35901926444833626,
+      "profitUnits": -20.960000000000004,
+      "roiPct": -3.6707530647985998,
+      "interval95": null
+    },
+    {
+      "id": "FAVORITE_BASELINE",
+      "selected": 1444,
+      "settled": 1418,
+      "excludedDrawNC": 26,
+      "wins": 934,
+      "losses": 484,
+      "accuracy": 0.6586741889985895,
+      "profitUnits": 11.199999999999983,
+      "roiPct": 0.7898448519040892,
+      "interval95": null
+    },
+    {
+      "id": "ELO_K32_ARGMAX",
+      "selected": 704,
+      "settled": 691,
+      "excludedDrawNC": 13,
+      "wins": 371,
+      "losses": 320,
+      "accuracy": 0.5369030390738061,
+      "profitUnits": -19.56000000000001,
+      "roiPct": -2.830680173661362,
+      "interval95": null
+    }
+  ],
+  "rule": "development ROI >0, >=150; no confirmatory reselection",
+  "protocolSha256": "19d7e35dae4272ea80a34b2e7f854bbd338ef90cd6feec7f5570fdf0e2693131"
+}
