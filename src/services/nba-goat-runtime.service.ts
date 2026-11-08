@@ -40,6 +40,15 @@ async function load(){
  return {status,candidates,history:goatHistory};
 }
 export async function getNbaGoatRuntimeStatus(){return (await load()).status;}
+export async function previewNbaGoatShadowMatches(){
+ const loaded=await load();
+ const {generateNbaPredictions}=await import('./nba-prediction-engine.service');
+ const result=await generateNbaPredictions({persist:false,limit:25});
+ const eligible=loaded.candidates.filter((c:any)=>c.check.writeEligible);
+ const matches=eligible.filter((c:any)=>result.predictions.some((p:any)=>isExactGoatModelMatch(p,c.event,c.quote)));
+ return {status:'PREVIEW_ONLY',provider:NBA_GOAT_PROVIDER,checked_at:new Date().toISOString(),events:loaded.status.events,write_eligible_quotes:eligible.length,model_outputs:result.predictions.length,exact_matches:matches.length,recommended_by_engine:result.predictions.filter((p:any)=>p.recommendedPick).length,provider_calls:0,database_writes:0,legacy_pending:loaded.status.legacy_shadow_pending,goat_pending:loaded.status.goat_shadow_pending,warning:'Preview does not emit picks, alter accuracy, or bypass shadow gates.'};
+}
+
 export async function runNbaGoatShadowScheduler(){
  const loaded=await load(),status=loaded.status,candidates=loaded.candidates,history=loaded.history;
  if(!status.gate.allowed)return {...status,read_only:false,predictions_inserted:0,provider_calls:0,finalClassification:status.classification};
