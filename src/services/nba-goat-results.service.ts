@@ -37,7 +37,7 @@ export async function reconcileNbaGoatShadowResults(){
    const item=finalByEvent.get(p.game_id);if(!item)continue;
    let decision;try{decision=settleGoatContract(p,{homeTeam:item.event.home_team,awayTeam:item.event.away_team,homeScore:item.result.homeScore,awayScore:item.result.awayScore});}catch{continue;}
    const evidence=p.feature_snapshot?.marketContractEvidence??null;
-   const upd=await db.from('prediction_history').update({result:decision.outcome,status:decision.outcome,lifecycle_status:'settled',settled_at:new Date().toISOString(),result_id:resultIds.get(p.game_id)??null,settlement_source:'balldontlie_schedule_archive',settlement_version:SETTLEMENT,settlement_details:{statisticalOnly:true,sportsbookSettlement:false,market:p.market,selection:p.team??p.selection,line:p.line,odds:p.odds,actual:decision.actual,marketContractEvidence:evidence,goatProviderPolicy:NBA_GOAT_POLICY}}).eq('id',p.id).eq('prediction_origin',ORIGIN).is('settled_at',null);
+   const upd=await db.from('prediction_history').update({result:decision.outcome,status:'settled',lifecycle_status:'settled',settled_at:new Date().toISOString(),result_id:resultIds.get(p.game_id)??null,settlement_source:'balldontlie_schedule_archive',settlement_version:SETTLEMENT,settlement_details:{statisticalOnly:true,sportsbookSettlement:false,market:p.market,selection:p.team??p.selection,line:p.line,odds:p.odds,actual:decision.actual,marketContractEvidence:evidence,goatProviderPolicy:NBA_GOAT_POLICY}}).eq('id',p.id).eq('prediction_origin',ORIGIN).is('settled_at',null);
    if(upd.error)throw Error('NBA_GOAT_SHADOW_SETTLEMENT_WRITE_FAILED');writes++;settled++;
    if(decision.outcome==='win')wins++;else if(decision.outcome==='loss')losses++;else if(decision.outcome==='push')pushes++;
   }
