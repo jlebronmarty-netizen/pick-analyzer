@@ -1,0 +1,3 @@
+import fs from 'node:fs/promises';import {resolve as baseResolve,load as baseLoad} from '../dashboard-multisport/tsx-loader.mjs';
+export async function resolve(specifier,context,next){if(specifier==='@/lib/supabase-admin')return {url:'data:text/javascript,export const supabaseAdmin=globalThis.__ufcTestDb',shortCircuit:true};return baseResolve(specifier,context,next);}
+export async function load(url,context,next){if(url.endsWith('/src/lib/ufc/seed-v2.json'))return {format:'module',shortCircuit:true,source:'export default '+await fs.readFile(new URL(url),'utf8')};return baseLoad(url,context,next);}

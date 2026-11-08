@@ -1,0 +1,6 @@
+{
+  "classification": "LOCAL_PRE_REPLAY_IDENTITY_REPAIR_FREEZE_NOT_EXTERNAL_TIMESTAMP",
+  "commit": "ee4047e6776c44abe92a1e3b5be5e6b1a12ab481",
+  "amendmentSha256": "20d46b64cd4542c59952b290af03e980a7d9e1eb01ac30bfa9875439232d4a84",
+  "identityPatchSha256": "cc1d82c34bc7dbcadd5da02cec283f1e67a2f70b4ab93f57b149bc71d0e5cdbf"
+}

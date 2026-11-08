@@ -1,0 +1,75 @@
+{
+  "status": "VERIFIED_SHADOW_V2_NOT_ROI_CERTIFIED",
+  "codeHead": "efcdd9cbb8fbde32e12a2a82d40fec6d5f479721",
+  "merge": "378237092fd7f67c9af5ceec0e5064ce2ac8fac8",
+  "tree": "8330f304bbcf8d2cfb67491d00507ad39745bbc9",
+  "productionDeployment": "dpl_5jMj9874DhTewkfFNEKtT2LBp6VZ",
+  "previewDeployment": "dpl_9D2CKuMPqYV2UuPL3EoULNRWpH4R",
+  "publicUrl": "https://pick-analyzer.vercel.app/ufc",
+  "database": {
+    "models": [
+      {
+        "n": 21,
+        "model": "UFC_ELO_K32_FREE_V1",
+        "fingerprint": "b5c2351fac8b3674e754bf07c112c556"
+      },
+      {
+        "n": 21,
+        "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+        "fingerprint": "97990b737199b8b2f32a0af626bbdfec"
+      }
+    ],
+    "calls": 30,
+    "sources": 30,
+    "quotes": 18,
+    "lock_free": true,
+    "late_predictions": 0
+  },
+  "activeModel": "UFC_ELO_K32_FREE_V2_IDENTITY",
+  "retiredModel": "UFC_ELO_K32_FREE_V1",
+  "api": {
+    "http": 200,
+    "active": 21,
+    "retired": 21,
+    "upcoming": 34,
+    "abstentions": 13,
+    "providerCalls": 0,
+    "databaseWrites": 0,
+    "accuracy": null,
+    "roi": null
+  },
+  "html": {
+    "http": 200,
+    "version2Text": true,
+    "retirementNotice": true
+  },
+  "checks": {
+    "dashboardUfc": 107,
+    "edgeLabNba": 335,
+    "build": "PASS",
+    "eslint": "PASS",
+    "historicalIndependentPython": "PASS",
+    "forwardRawReplay": "PASS",
+    "isolatedProducerV2": "PASS",
+    "frozenV1Manifest": "21/21 unchanged"
+  },
+  "automation": {
+    "schedule": "49 1,5,9,13,17,21 * * *",
+    "maxProviderCallsPerRun": 8,
+    "firstNaturalInfrastructureRun": "V1 at 2026-11-08T21:49:29.769Z",
+    "v2NaturalRun": "NOT_YET_OBSERVED; next due 2026-11-09T01:49Z",
+    "v2VerifiedBootstrapCalls": 8,
+    "v2ProducerScenario": "real archived sources + mock persistence, no external egress; 21 V2 rows, V1 unchanged, slot dedup, reads zero writes"
+  },
+  "science": {
+    "positiveRoiDemonstrated": false,
+    "independentConfirmation": false,
+    "reason": "history reused after technical identity repair; uncertified historical prices/contracts"
+  },
+  "limitations": [
+    "legacy name directory not universally certified; known homonym repaired, unknown homonym IDs abstain",
+    "four ambiguous/dependent histories remain excluded",
+    "V1 public rollout/browser check superseded for model validity; V2 production API/HTML verified",
+    "no separately certified mobile viewport"
+  ]
+}

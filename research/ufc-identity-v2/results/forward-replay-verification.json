@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "replayedQuoteObservations": 18,
+  "replayedPredictions": 21,
+  "replayedOriginalPricePairs": 6,
+  "rawSources": 30,
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "checks": [
+    "gzip/raw SHA256",
+    "source foreign keys and capture ordering",
+    "real ESPN fighter IDs",
+    "history-derived Elo and uncertainty gates",
+    "original quote athlete pairing",
+    "complete equality with frozen prospective prediction body"
+  ]
+}
