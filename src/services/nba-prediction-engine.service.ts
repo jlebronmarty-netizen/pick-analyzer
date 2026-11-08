@@ -307,7 +307,8 @@ async function loadInputs({
       .select('*')
       .eq('sport_key', NBA_SPORT_KEY)
       .eq('season', season.key)
-      .in('status', ['scheduled', 'live'])
+      .eq('status', 'scheduled')
+      .gte('start_time', new Date().toISOString())
       .order('start_time', { ascending: true })
       .limit(limit),
     supabaseAdmin
