@@ -4,7 +4,7 @@ import { engineTotals } from './mlb-engine-hub';
 
 export const OFFICIAL_MLB_MODEL = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1';
 export type ModelCohort = { key:string; label:string; available:boolean; wins:number|null; losses:number|null; pending:number|null; pushes:number|null; voids:number|null; models:number|null; accuracy:number|null; note:string };
-export type SportModelCard = { key:string; label:string; href:string; classification:string; cohorts:ModelCohort[] };
+export type SportModelCard = { key:string; label:string; href:string; classification:string; cohorts:ModelCohort[]; metricLabel?:string; detailLines?:string[]; checkedAt?:string; linkLabel?:string };
 type Official = { status:string; summary:{wins:number;losses:number;pushes:number;voids:number;modelVersions:string[];dateFrom:string|null;dateTo:string|null};ledger:{pendingUniqueSelections:number} } | null;
 const empty=(key:string,label:string,note:string):ModelCohort=>({key,label,available:false,wins:null,losses:null,pending:null,pushes:null,voids:null,models:null,accuracy:null,note});
 export function mlbModelCohorts(research:QualifiedReport, official:Official):ModelCohort[]{
