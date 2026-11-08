@@ -1,38 +1,20 @@
 export const NBA_GOAT_PROVIDER='balldontlie';
 export const NBA_GOAT_POLICY='NBA_GOAT_ARCHIVE_SHADOW_V1';
+export const NBA_GOAT_STATS_VERSION='NBA_GOAT_TEAM_STATS_V1';
+export const FANDUEL_NBA_FULL_GAME_RULE={
+ id:'FANDUEL_NBA_FULL_GAME_OT_2026_10',
+ source:'FanDuel official Sportsbook Terms and Conditions Â· Basketball',
+ url:'https://policies.fanduel.com/SB/NJ/2026-10-15T12-42-58.html',
+ observedAt:'2026-11-08',
+ scope:'FULL_GAME_INCLUDING_OT',
+ statisticalScopeVerified:true,
+ sportsbookSettlementClaimed:false,
+};
 const time=x=>typeof x==='string'&&Number.isFinite(Date.parse(x))?Date.parse(x):null;
-export function nbaGoatQuoteChecks(event,quote,now=new Date().toISOString()){
- const issues=[],writeIssues=[],at=time(now),start=time(event?.start_time),updated=time(quote?.provider_timestamp),received=time(quote?.metadata?.source_received_at);
- if(quote?.provider!==NBA_GOAT_PROVIDER)issues.push('NBA_PROVIDER_MUST_BE_BALLDONTLIE');
- if(event?.sport_key!=='basketball_nba'||event?.league_key!=='nba'||quote?.event_id!==event?.id)issues.push('EVENT_IDENTITY_MISMATCH');
- if(at===null||start===null||updated===null||received===null)issues.push('UNVERIFIABLE_TIMESTAMPS');
- else{if(start<=at+600000)issues.push('PREGAME_CUTOFF_FAILED');if(updated>received||received>at)issues.push('FUTURE_QUOTE_EVIDENCE');if(at-updated>1800000)issues.push('STALE_GOAT_QUOTE');}
- if(!['scheduled','created','pre_game','pregame','not_started'].includes(String(event?.status??'').toLowerCase())||quote?.metadata?.phase!=='PREGAME')issues.push('NOT_PREGAME');
- if(!['moneyline','spread','total'].includes(quote?.market))issues.push('UNSUPPORTED_SHADOW_MARKET');
- if(String(quote?.sportsbook??'').toLowerCase()!=='fanduel')issues.push('UNSUPPORTED_BOOK');
- if(typeof quote?.price!=='number'||!Number.isFinite(quote.price)||Math.abs(quote.price)<100)issues.push('INVALID_PRICE');
- if(quote?.market!=='moneyline'&&(typeof quote?.line!=='number'||!Number.isFinite(quote.line)))issues.push('MISSING_EXACT_LINE');
- if(quote?.market==='moneyline'&&quote.line!==null)issues.push('UNEXPECTED_LINE');
- if(['moneyline','spread'].includes(quote?.market)&&![event?.home_team,event?.away_team].includes(quote?.outcome))issues.push('INVALID_SELECTION');
- if(quote?.market==='total'&&!['Over','Under'].includes(quote?.outcome))issues.push('INVALID_SELECTION');
- if(quote?.metadata?.module!=='NBA_MARKET_DATA_V1'||!quote?.metadata?.quote_id||!quote?.metadata?.snapshot_id)issues.push('MISSING_ARCHIVE_PROVENANCE');
- if(event?.metadata?.trial===true||event?.metadata?.scrambled===true||quote?.metadata?.trial===true||quote?.metadata?.scrambled===true)issues.push('TRIAL_OR_SCRAMBLED');
- if(event?.metadata?.season_phase_verified!==true)writeIssues.push('SEASON_PHASE_UNVERIFIED');
- if(quote?.metadata?.settlement_eligible!==true||quote?.metadata?.overtime_rule==='NOT_VERIFIED'||!quote?.metadata?.overtime_rule)writeIssues.push('MARKET_SCOPE_UNVERIFIED');
- return {providerAccepted:quote?.provider===NBA_GOAT_PROVIDER,priceEligible:issues.length===0,writeEligible:issues.length===0&&writeIssues.length===0,issues:[...new Set(issues)],writeIssues:[...new Set(writeIssues)]};
-}
-export function nbaGoatGate({enabled,continuousEnabled,pending,rowsToday,statsCurrent,priceCount,contractCount,completedRuns,repairedRuns,canaryRows,repairEnabled}){
- const blockers=[];if([pending,rowsToday,priceCount,contractCount,completedRuns,repairedRuns,canaryRows].some(n=>!Number.isSafeInteger(n)||n<0))return {allowed:false,blockers:['INVALID_GATE_COUNTERS'],continuous:false,repair:false,perRunWriteCap:0,directProviderCalls:0};if(!enabled)blockers.push('SCHEDULER_DISABLED');
- const continuous=continuousEnabled&&completedRuns>=2&&repairedRuns>=1,repair=repairEnabled&&completedRuns>=2&&repairedRuns<1;
- if(pending>=75||(continuous&&pending>=60))blockers.push('PENDING_SHADOW_REVIEW_REQUIRED');
- if(!continuous&&!repair&&completedRuns>=2)blockers.push('CANARY_REVIEW_REQUIRED');
- if(!continuous&&(completedRuns>=4||canaryRows>=12))blockers.push('CANARY_HARD_LIMIT');
- if(continuous&&rowsToday>=3)blockers.push('DAILY_SHADOW_ROW_CAP');
- if(!statsCurrent)blockers.push('CURRENT_SEASON_STATS_MISSING_OR_STALE');
- if(!priceCount)blockers.push('NO_FRESH_PREGAME_GOAT_QUOTES');
- if(!contractCount)blockers.push('CONTRACT_SCOPE_REQUIRES_VERIFICATION');
- return {allowed:blockers.length===0,blockers,continuous,repair,perRunWriteCap:Math.max(0,Math.min(3,continuous?3-rowsToday:12-canaryRows)),directProviderCalls:0};
-}
-export function isExactGoatModelMatch(p,event,q){
- return Boolean(p&&p.gameId===event.id&&p.market===q.market&&p.team===q.outcome&&(p.line??null)===(q.line??null)&&String(p.sportsbook).toLowerCase()===String(q.sportsbook).toLowerCase()&&p.odds===q.price&&time(p.oddsTimestamp)!==null&&time(p.oddsTimestamp)===time(q.provider_timestamp)&&Number.isFinite(p.modelProbability)&&p.modelProbability>0&&p.modelProbability<100&&p.dataSufficiencyScore>=35&&p.featureQualityScore>0&&!p.explanation?.warnings?.some(w=>/Missing team_stats|trial|scrambled|fallback/i.test(w)));
-}
+const marketContract={moneyline:new Set(['WINNER']),spread:new Set(['SIGNED_HANDICAP']),total:new Set(['STRICT_GREATER_THAN','STRICT_LESS_THAN'])};
+function providerId(event){const m=/^bdl_nba_(\d+)$/.exec(String(event?.id??''));return m?Number(m[1]):null;}
+export function nbaGoatDerivedContext(event,quote,scheduleGame,scheduleReceivedAt,now=new Date().toISOString()){
+ const at=time(now),received=time(scheduleReceivedAt),gid=providerId(event),scheduled=String(scheduleGame?.status_state??'').toLowerCase()==='scheduled';
+ const identity=gid!==null&&scheduleGame?.id===gid&&scheduleGame?.home_team?.full_name===event?.home_team&&scheduleGame?.visitor_team?.full_name===event?.away_team;
+ const scheduleFresh=at!==null&&received!==null&&received<=at&&at-received<=3600000;
+ const phaseVerified=Boolean(identity&&scheduleFresh&&scheduled&&scheduleGame?.postponed===false&&scheduleGame?.postse¶»§q«^u•‘ññÉ••¥Ù•ù…Ð¥¥ÍÍÕ•Ì¹ÁÕÍ  UQUI}EU=Q}Y%9œ¤í¥˜¡…ÐµÕÁ‘…Ñ•øÄàÀÀÀÀÀ¥¥ÍÍÕ•Ì¹ÁÕÍ  MQ1}=Q}EU=Qœ¤íô(¥˜ …lÍ¡•‘Õ±•œ°É•…Ñ•œ°ÁÉ•}…µ”œ°ÁÉ•…µ”œ°¹½Ñ}ÍÑ…ÉÑ•t¹¥¹±Õ‘•Ì¡MÑÉ¥¹œ¡•Ù•¹Ðü¹ÍÑ…ÑÕÌüüœœ¤¹Ñ½1½Ý•É…Í” ¤¥ññÅÕ½Ñ”ü¹µ•Ñ…‘…Ñ„ü¹Á¡…Í”„ôôAI5œ¥¥ÍÍÕ•Ì¹ÁÕÍ  9=Q}AI5œ¤ì(¥˜ …lµ½¹•å±¥¹”œ°ÍÁÉ•…œ°Ñ½Ñ…°t¹¥¹±Õ‘•Ì¡ÅÕ½Ñ”ü¹µ…É­•Ð¤¥¥ÍÍÕ•Ì¹ÁÕÍ  U9MUAA=IQ}M!=]}5I-Pœ¤ì(¥˜¡MÑÉ¥¹œ¡ÅÕ½Ñ”ü¹ÍÁ½ÉÑÍ‰½½¬üüœœ¤¹Ñ½1½Ý•É…Í” ¤„ôô™…¹‘Õ•°œ¥¥ÍÍÕ•Ì¹ÁÕÍ  U9MUAA=IQ}	==,œ¤ì(¥˜¡ÑåÁ•½˜ÅÕ½Ñ”ü¹ÁÉ¥”„ôô¹Õµ‰•Èñð…9Õµ‰•È¹¥Í¥¹¥Ñ”¡ÅÕ½Ñ”¹ÁÉ¥”¥ññ5…Ñ ¹…‰Ì¡ÅÕ½Ñ”¹ÁÉ¥”¤ðÄÀÀ¥¥ÍÍÕ•Ì¹ÁÕÍ  %9Y1%}AI%œ¤ì(¥˜¡ÅÕ½Ñ”ü¹µ…É­•Ð„ôôµ½¹•å±¥¹”œ˜˜¡ÑåÁ•½˜ÅÕ½Ñ”ü¹±¥¹”„ôô¹Õµ‰•Èñð…9Õµ‰•È¹¥Í¥¹¥Ñ”¡ÅÕ½Ñ”¹±¥¹”¤¤¥¥ÍÍÕ•Ì¹ÁÕÍ  5%MM%9}aQ}1%9œ¤ì(¥˜¡ÅÕ½Ñ”ü¹µ…É­•Ðôôôµ½¹•å±¥¹”œ˜™ÅÕ½Ñ”¹±¥¹”„ôõ¹Õ±°¥¥ÍÍÕ•Ì¹ÁÕÍ  U9aAQ}1%9œ¤ì(¥˜¡lµ½¹•å±¥¹”œ°ÍÁÉ•…t¹¥¹±Õ‘•Ì¡ÅÕ½Ñ”ü¹µ…É­•Ð¤˜˜…m•Ù•¹Ðü¹¡½µ•}Ñ•…´±•Ù•¹Ðü¹…Ý…å}Ñ•…µt¹¥¹±Õ‘•Ì¡ÅÕ½Ñ”ü¹½ÕÑ½µ”¤¥¥ÍÍÕ•Ì¹ÁÕÍ  %9Y1%}M1Q%=8œ¤ì(¥˜¡ÅÕ½Ñ”ü¹µ…É­•ÐôôôÑ½Ñ…°œ˜˜…l=Ù•Èœ°U¹‘•Èt¹¥¹±Õ‘•Ì¡ÅÕ½Ñ”ü¹½ÕÑ½µ”¤¥¥ÍÍÕ•Ì¹ÁÕÍ  %9Y1%}M1Q%=8œ¤ì(¥˜¡ÅÕ½Ñ”ü¹µ•Ñ…‘…Ñ„ü¹µ½‘Õ±”„ôô9	}5I-Q}Q}XÄñð…ÅÕ½Ñ”ü¹µ•Ñ…‘…Ñ„ü¹ÅÕ½Ñ•}¥‘ñð…ÅÕ½Ñ”ü¹µ•Ñ…‘…Ñ„ü¹Í¹…ÁÍ¡½Ñ}¥¥¥ÍÍÕ•Ì¹ÁÕÍ  5%MM%9}I!%Y}AI=Y99œ¤ì(¥˜¡•Ù•¹Ðü¹µ•Ñ…‘…Ñ„ü¹ÑÉ¥…°ôôõÑÉÕ•ññ•Ù•¹Ðü¹µ•Ñ…‘…Ñ„ü¹ÍÉ…µ‰±•ôôõÑÉÕ•ññÅÕ½Ñ”ü¹µ•Ñ…‘…Ñ„ü¹ÑÉ¥…°ôôõÑÉÕ•ññÅÕ½Ñ”ü¹µ•Ñ…‘…Ñ„ü¹ÍÉ…µ‰±•ôôõÑÉÕ”¥¥ÍÍÕ•Ì¹ÁÕÍ  QI%1}=I}MI5	1œ¤ì(½¹ÍÐÁ¡…Í•Y•É¥™¥•õ½¹Ñ•áÐ¹Í•…Í½¹A¡…Í•Y•É¥™¥•üý•Ù•¹Ðü¹µ•Ñ…‘…Ñ„ü¹Í•…Í½¹}Á¡…Í•}Ù•É¥™¥•ôôõÑÉÕ”ì(½¹ÍÐŽÚîÆ­yÒ–&Æö6¶W'2çW6‚‚t5U%$TåEõ4T4ôåõ5DE5ôÔ•54”äuôõ%õ5DÄRr“°¢–b‚&–6T6÷VçB–&Æö6¶W'2çW6‚‚täõôe$U4…õ$TtÔUôtôEõTõDU2r“°¢–b‚6öçG&7D6÷VçB–&Æö6¶W'2çW6‚‚t4ôåE$5Eõ44õUõ$UT•$U5õdU$”d”4D”ôâr“°¢&WGW&â¶ÆÆ÷vVC¦&Æö6¶W'2æÆVæwFƒÓÓÓÆ&Æö6¶W'2Æ6öçF–çV÷W2Ç&W—"ÇW%'Våw&—FT6¤ÖF‚æÖ‚ƒÄÖF‚æÖ–âƒ2Æ6öçF–çV÷W3ó2×&÷w5FöF“£"Ö6æ'•&÷w2’’ÆF—&V7E&÷f–FW$6ÆÇ3£Ó°§Ð¦W‡÷'BgVæ7F–öâ—4W†7DvöDÖöFVÄÖF6‚‡ÆWfVçBÇ—°¢&WGW&â&ööÆVâ‡bgævÖT–CÓÓÖWfVçBæ–BbgæÖ&¶WCÓÓ×æÖ&¶WBbgçFVÓÓÓ×æ÷WF6öÖRbb‡æÆ–æSóöçVÆÂ“ÓÓÒ‡æÆ–æSóöçVÆÂ’be7G&–ær‡ç7÷'G6&öö²’çFôÆ÷vW$66R‚“ÓÓÕ7G&–ær‡ç7÷'G6&öö²’çFôÆ÷vW$66R‚’bgæöFG3ÓÓ×ç&–6RbgF–ÖR‡æöFG5F–ÖW7F×’ÓÖçVÆÂbgF–ÖR‡æöFG5F–ÖW7F×“ÓÓ×F–ÖR‡ç&÷f–FW%÷F–ÖW7F×’bdçVÖ&W"æ—4f–æ—FR‡æÖöFVÅ&ö&&–Æ—G’’bgæÖöFVÅ&ö&&–Æ—G“ãbgæÖöFVÅ&ö&&–Æ—G“ÃbgæFF7Vff–6–Væ7•66÷&SãÓ3RbgæfVGW&UVÆ—G•66÷&SãbbæW‡ÆæF–öãòçv&æ–æw3òç6öÖR‡sÓâôÖ—76–ærFVÕ÷7FG7ÇG&–ÇÇ67&Ö&ÆVGÆfÆÆ&6²ö’çFW7B‡r’’“°§Ð

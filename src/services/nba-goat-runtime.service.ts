@@ -1,60 +1,32 @@
 import 'server-only';
 import {createHash} from 'node:crypto';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
-import {NBA_GOAT_PROVIDER,NBA_GOAT_POLICY,nbaGoatQuoteChecks,nbaGoatGate,isExactGoatModelMatch} from '@/lib/nba/goat-provider-policy.mjs';
+import {NBA_GOAT_PROVIDER,NBA_GOAT_POLICY,nbaGoatQuoteChecks,nbaGoatGate,isExactGoatModelMatch,nbaGoatDerivedContext} from '@/lib/nba/goat-provider-policy.mjs';
+import {teamStatsFresh} from '@/lib/nba/goat-team-stats-core.mjs';
 const SPORT='basketball_nba',ORIGIN='CURRENT_ERA_SHADOW';
 function rows(r:any){if(r.error)throw Error('NBA_GOAT_READ_FAILED');return r.data??[];}
+function yearAndSeason(now=new Date()){const year=now.getUTCMonth()>=9?now.getUTCFullYear():now.getUTCFullYear()-1;return {year,season:String(year)+'-'+String(year+1).slice(-2)};}
+function scheduleMap(row:any){const games=row?.payload?.data?.games;if(!Array.isArray(games))return new Map<number,any>();return new Map<number,any>(games.filter((g:any)=>Number.isSafeInteger(g?.id)).map((g:any)=>[g.id,g] as [number,any]));}
+function providerGameId(id:string){const m=/^bdl_nba_(\d+)$/.exec(id);return m?Number(m[1]):null;}
 async function load(){
- const checkedAt=new Date().toISOString(),year=new Date().getUTCMonth()>=9?new Date().getUTCFullYear():new Date().getUTCFullYear()-1,season=`${year}-${String(year+1).slice(-2)}`;
- const [ev,od,st,ph,jobs,archive]=await Promise.all([
- db.from('sport_events').select('id,sport_key,league_key,season,home_team,away_team,start_time,status,metadata').eq('sport_key',SPORT).eq('season',season).gte('start_time',checkedAt).order('start_time').limit(25),
- db.from('sports_odds_snapshots').select('id,event_id,provider,sportsbook,market,outcome,price,line,snapshot_time,provider_timestamp,metadata').eq('sport_key',SPORT).eq('provider',NBA_GOAT_PROVIDER).gte('snapshot_time',new Date(Date.now()-1800000).toISOString()).order('snapshot_time',{ascending:false}).limit(2000),
- db.from('team_stats').select('team_name,season,updated_at').eq('sport_key',SPORT).eq('season',String(year)),
- db.from('prediction_history').select('id,game_id,market,team,line,sportsbook,model_version,result,created_at,prediction_origin').eq('sport_key',SPORT).eq('prediction_origin',ORIGIN).order('id').limit(1000),
- db.from('sports_sync_jobs').select('id,job_type,status,started_at,records_inserted,metadata').eq('sport_key',SPORT).in('job_type',['nba_current_era_shadow_scheduler_canary_v1','nba_goat_shadow_v1']).order('started_at',{ascending:false}).limit(1000),
- db.from('nba_market_sync_runs_v1').select('status,completed_at,summary').order('started_at',{ascending:false}).limit(1),
- ]);
- const events=rows(ev),quotes=rows(od),stats=rows(st),history=rows(ph),runs=rows(jobs),lastArchive=rows(archive)[0]??null;
- if(events.length>=25)throw Error('NBA_GOAT_EVENT_WINDOW_REVIEW_REQUIRED');
- if(history.length>=1000||runs.length>=1000||quotes.length>=2000)throw Error('NBA_GOAT_SCAN_LIMIT_REVIEW_REQUIRED');
- const eventMap=new Map<string,any>(events.map((e:any)=>[e.id,e] as [string,any])),seen=new Set<string>(),candidates:any[]=[];
- for(const q of quotes){const e=eventMap.get(q.event_id);if(!e)continue;const k=[q.event_id,q.market,q.outcome,q.line,q.sportsbook].join('|');if(seen.has(k))continue;seen.add(k);candidates.push({event:e,quote:q,check:nbaGoatQuoteChecks(e,q,checkedAt)});}
- const today=checkedAt.slice(0,10),pending=history.filter((p:any)=>!p.result||p.result==='pending').length,rowsToday=history.filter((p:any)=>String(p.created_at).slice(0,10)===today).length;
- const completed=runs.filter((r:any)=>r.status==='completed'),repaired=completed.filter((r:any)=>r.metadata?.runPurpose==='REPAIRED_RUNTIME_VERIFICATION_RUN').length,canaryRows=completed.reduce((n:number,r:any)=>n+Number(r.records_inserted??r.metadata?.insertedCount??0),0);
- const freshNames=new Set(stats.filter((s:any)=>Number.isFinite(Date.parse(s.updated_at))&&Date.parse(s.updated_at)<=Date.parse(checkedAt)&&Date.parse(checkedAt)-Date.parse(s.updated_at)<=48*3600000).map((s:any)=>s.team_name));
- const missingTeams=[...new Set(events.flatMap((e:any)=>[e.home_team,e.away_team]).filter((name:string)=>!freshNames.has(name)))];
- const enabled=process.env.NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED==='true',continuousEnabled=process.env.NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED==='true',repairEnabled=process.env.NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED==='true';
- const priceCount=candidates.filter(c=>c.check.priceEligible).length,contractCount=candidates.filter(c=>c.check.writeEligible).length;
- const gate=nbaGoatGate({enabled,continuousEnabled,repairEnabled,pending,rowsToday,statsCurrent:events.length>0&&missingTeams.length===0,priceCount,contractCount,completedRuns:completed.length,repairedRuns:repaired,canaryRows});
- const status={module:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,checked_at:checkedAt,season,read_only:true,provider_calls:0,database_writes:0,legacy_provider_fallback:false,scheduler_enabled:enabled,continuous_enabled:continuousEnabled,events:events.length,quotes_examined:candidates.length,fresh_pregame_quotes:priceCount,verified_contract_quotes:contractCount,team_stats_rows:stats.length,missing_current_team_stats:missingTeams,pending_original_shadow:pending,rows_emitted_today:rowsToday,last_archive:lastArchive,gate,classification:gate.allowed?'NBA_GOAT_SHADOW_PREREQUISITES_READY':'NBA_GOAT_ODDS_CONNECTED_MODEL_BLOCKED',issues:candidates.reduce((a:Record<string,number>,c:any)=>{for(const k of [...c.check.issues,...c.check.writeIssues])a[k]=(a[k]??0)+1;return a;},{}),note:'GOAT prices are not predictions. Historical providers and pending outcomes are preserved; no Official Picks or sportsbook settlement.'};
- return {status,candidates,history,runs};
-}
-export async function getNbaGoatRuntimeStatus(){return (await load()).status;}
-export async function runNbaGoatShadowScheduler(){
- const {status,candidates,history}=await load();
- if(!status.gate.allowed)return {...status,read_only:false,predictions_inserted:0,provider_calls:0,finalClassification:status.classification};
- // The existing post-archive cron is the only caller. No duplicate network refresh.
- const slot=Math.floor(Date.now()/1800000),h=createHash('sha256').update(`${NBA_GOAT_POLICY}:${slot}`).digest('hex'),runId=`${h.slice(0,8)}-${h.slice(8,12)}-4${h.slice(13,16)}-a${h.slice(17,20)}-${h.slice(20,32)}`;
- const claim=await db.from('sports_sync_jobs').insert({id:runId,job_type:'nba_goat_shadow_v1',sport_key:SPORT,league_key:'nba',provider:NBA_GOAT_PROVIDER,status:'running',metadata:{policy:NBA_GOAT_POLICY,slot}});
- if(claim.error){if(claim.error.code==='23505')return {...status,finalClassification:'ALREADY_CLAIMED',predictions_inserted:0};throw Error('NBA_GOAT_CLAIM_FAILED');}
- let inserted=0;const reasons:Record<string,number>={};
- try{
-  const {generateNbaPredictions}=await import('./nba-prediction-engine.service');
-  const {buildNbaCurrentEraShadowPredictionRow}=await import('./nba-current-era-shadow-canary.service');
-  const {savePredictionHistory}=await import('./prediction-history.service');
-  const result=await generateNbaPredictions({persist:false,limit:25});
-  const eventCounts=new Map<string,number>(),marketCounts=new Map<string,number>();for(const p of history){eventCounts.set(p.game_id,(eventCounts.get(p.game_id)??0)+1);const k=p.game_id+'|'+p.market;marketCounts.set(k,(marketCounts.get(k)??0)+1);}
-  for(const c of candidates){if(inserted>=status.gate.perRunWriteCap)break;if(!c.check.writeEligible)continue;
-   const e=c.event,q=c.quote,key=e.id+'|'+q.market;if((eventCounts.get(e.id)??0)>=6||(marketCounts.get(key)??0)>=3)continue;
-   if(history.some((p:any)=>p.game_id===e.id&&p.market===q.market&&p.team===q.outcome&&(p.line??null)===(q.line??null)&&p.sportsbook===q.sportsbook))continue;
-   const model=result.predictions.find(p=>isExactGoatModelMatch(p,e,q));if(!model){reasons.EXACT_MODEL_OUTPUT_UNAVAILABLE=(reasons.EXACT_MODEL_OUTPUT_UNAVAILABLE??0)+1;continue;}
-   const refreshed=nbaGoatQuoteChecks(e,q);if(!refreshed.writeEligible)continue;
-   const row=buildNbaCurrentEraShadowPredictionRow({event:e,odds:q,generatedAt:new Date().toISOString(),modelPrediction:model});
-   row.feature_snapshot={...row.feature_snapshot,goatProviderPolicy:NBA_GOAT_POLICY,marketContractEvidence:q.metadata};
-   const saved=await savePredictionHistory([row]);inserted+=saved.saved??0;if(saved.saved){eventCounts.set(e.id,(eventCounts.get(e.id)??0)+1);marketCounts.set(key,(marketCounts.get(key)??0)+1);}
-  }
-  const summary={policy:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,providerCalls:0,insertedCount:inserted,reasons,runPurpose:status.gate.continuous?'CONTINUOUS_SHADOW_EVIDENCE_RUN':status.gate.repair?'REPAIRED_RUNTIME_VERIFICATION_RUN':'GOAT_CANARY',officialPickDelta:0,modelFormulaChanged:false};
-  const saved=await db.from('sports_sync_jobs').update({status:'completed',completed_at:new Date().toISOString(),records_inserted:inserted,metadata:summary}).eq('id',runId);if(saved.error)throw Error('NBA_GOAT_AUDIT_FAILED');
-  return {success:true,finalClassification:inserted?'NBA_GOAT_SHADOW_SUCCESS':'NO_EXACT_MODEL_MATCH',...summary};
- }catch{await db.from('sports_sync_jobs').update({status:'failed',completed_at:new Date().toISOString(),last_error:'NBA_GOAT_SHADOW_EXECUTION_FAILED',records_inserted:inserted}).eq('id',runId);throw Error('NBA_GOAT_SHADOW_EXECUTION_FAILED');}
-}
+ const now=new Date(),checkedAt=now.toISOString(),info=yearAndSeason(now),year=info.year,season=info.season;
+ const [ev,od,st,ph,jobs,archive,schedule]=await Promise.all([
+  db.from('sport_events').select('id,sport_key,league_key,season,home_team,away_team,start_time,status,metadata').eq('sport_key',SPORT).eq('season',season).gte('start_time',checkedAt).order('start_time').limit(25),
+  db.from('sports_odds_snapshots').select('id,event_id,provider,sportsbook,¶»§q«^u5…À¡±…ÍÑM¡•‘Õ±”¤±•Ù•¹Ñ5…Àõ¹•Ü5…ÀñÍÑÉ¥¹œ±…¹äø¡•Ù•¹ÑÌ¹µ…À ¡”é…¹ä¤ôùm”¹¥±•t…ÌmÍÑÉ¥¹œ±…¹åt¤¤±Í••¸õ¹•ÜM•ĞñÍÑÉ¥¹œø ¤±…¹‘¥‘…Ñ•Ìé…¹åmtõmtì(™½È¡½¹ÍĞÄ½˜ÅÕ½Ñ•Ì¥í½¹ÍĞ”õ•Ù•¹Ñ5…À¹•Ğ¡Ä¹•Ù•¹Ñ}¥¤í¥˜ …”¥½¹Ñ¥¹Õ”í½¹ÍĞ­•äõmÄ¹•Ù•¹Ñ}¥±Ä¹µ…É­•Ğ±Ä¹½ÕÑ½µ”±Ä¹±¥¹”±Ä¹ÍÁ½ÉÑÍ‰½½­t¹©½¥¸ ğœ¤í¥˜¡Í••¸¹¡…Ì¡­•ä¤¥½¹Ñ¥¹Õ”íÍ••¸¹…‘¡­•ä¤í½¹ÍĞ¥õÁÉ½Ù¥‘•É…µ•%¡”¹¥¤±œõ¥ôôõ¹Õ±°ı¹Õ±°éÉ…İ…µ•Ì¹•Ğ¡¥¤±½¹Ñ•áĞõ¹‰…½…Ñ•É¥Ù•‘½¹Ñ•áĞ¡”±Ä±œ±±…ÍÑM¡•‘Õ±”ü¹Í½ÕÉ•}É••¥Ù•‘}…Ğ±¡•­•‘Ğ¤í…¹‘¥‘…Ñ•Ì¹ÁÕÍ ¡í•Ù•¹Ğé”±ÅÕ½Ñ”éÄ±½¹Ñ•áĞ±¡•¬é¹‰…½…ÑEÕ½Ñ•¡•­Ì¡”±Ä±¡•­•‘Ğ±½¹Ñ•áĞ¥ô¤íô(½¹ÍĞÁ•¹‘¥¹I½İÌõ¡¥ÍÑ½Éä¹™¥±Ñ•È ¡Àé…¹ä¤ôø…À¹É•ÍÕ±ÑññÀ¹É•ÍÕ±ĞôôôÁ•¹‘¥¹œœ¤±½…ÑA•¹‘¥¹I½İÌõÁ•¹‘¥¹I½İÌ¹™¥±Ñ•È ¡Àé…¹ä¤ôùÀ¹™•…ÑÕÉ•}Í¹…ÁÍ¡½Ğü¹½…ÑAÉ½Ù¥‘•ÉA½±¥äôôõ9	}=Q}A=1%d¤±±•…åA•¹‘¥¹I½İÌõÁ•¹‘¥¹I½İÌ¹™¥±Ñ•È ¡Àé…¹ä¤ôùÀ¹™•…ÑÕÉ•}Í¹…ÁÍ¡½Ğü¹½…ÑAÉ½Ù¥‘•ÉA½±¥ä„ôõ9	}=Q}A=1%d¤ì(½¹ÍĞÑ½‘…äõ¡•­•‘Ğ¹Í±¥” À°ÄÀ¤±½…Ñ!¥ÍÑ½Éäõ¡¥ÍÑ½Éä¹™¥±Ñ•È ¡Àé…¹ä¤ôùÀ¹™•…ÑÕÉ•}Í¹…ÁÍ¡½Ğü¹½…ÑAÉ½Ù¥‘•ÉA½±¥äôôõ9	}=Q}A=1%d¤±É½İÍQ½‘…äõ½…Ñ!¥ÍÑ½Éä¹™¥±Ñ•È ¡Àé…¹ä¤ôùMÑÉ¥¹œ¡À¹É•…Ñ•‘}…Ğ¤¹Í±¥” À°ÄÀ¤ôôõÑ½‘…ä¤¹±•¹Ñ ì(½¹ÍĞ½µÁ±•Ñ•õÉÕ¹Ì¹™¥±Ñ•È ¡Èé…¹ä¤ôùÈ¹ÍÑ…ÑÕÌôôô½µÁ±•Ñ•œ¤±É•Á…¥É•õ½µÁ±•Ñ•¹™¥±Ñ•È ¡Èé…¹ä¤ôùÈ¹µ•Ñ…‘…Ñ„ü¹ÉÕ¹AÕÉÁ½Í”ôôôIA%I}IU9Q%5}YI%%Q%=9}IU8œ¤¹±•¹Ñ ±…¹…ÉåI½İÌõ½µÁ±•Ñ•¹É•‘Õ” ¡¸é¹Õµ‰•È±Èé…¹ä¤ôù¸­9Õµ‰•È¡È¹É•½É‘Í}¥¹Í•ÉÑ•üıÈ¹µ•Ñ…‘…Ñ„ü¹¥¹Í•ÉÑ•‘½Õ¹ĞüüÀ¤°À¤ì(½¹ÍĞÕÉÉ•¹ÑMÑ…ÑÌõÑ•…µMÑ…ÑÍÉ•Í ¡ÍÑ…ÑÌ±¹½Ü¤±ÍÑ…Ñ9…µ•Ìõ¹•ÜM•Ğ¡ÍÑ…ÑÌ¹µ…À ¡Ìé…¹ä¤ôùÌ¹Ñ•…µ}¹…µ”¤¤±µ¥ÍÍ¥¹Q•…µÌõl¸¸¹¹•ÜM•Ğ¡•Ù•¹ÑÌ¹™±…Ñ5…À ¡”é…¹ä¤ôùm”¹¡½µ•}Ñ•…´±”¹…ŞÚîÆ­yÔôDE5ô4ôääT5DTEôÔôDTÅô$Äô4´TBrÆ—77VW3¦6æF–FFW2ç&VGV6R‚†¥&V6÷&CÇ7G&–ærÆçVÖ&W#âÆ3¦ç’“Óç¶f÷"†6öç7B²öb²ââæ2æ6†V6²æ—77VW2Âââæ2æ6†V6²çw&—FT—77VW5Ò–¶µÓÒ†¶µÓóó’³·&WGW&â·ÒÇ·Ò’Ææ÷FS¢ttôB&–6W2&Ræ÷B&VF–7F–öç2âÆVv7’6†F÷r&÷w2&VÖ–â6W&FRæBFòæ÷B&Æö6²F†RtôB6ö†÷'BâæWr6öçG&7G2&R7FF—7F–6Â6†F÷rWf–FVæ6RÂæ÷B6Æ–ÒöbW6W"7÷'G6&öö²6WGFÆVÖVçBâwÓ°¢&WGW&â·7FGW2Æ6æF–FFW2Æ†—7F÷'“¦vöD†—7F÷'—Ó°§Ğ¦W‡÷'B7–æ2gVæ7F–öâvWDæ&vöE'VçF–ÖU7FGW2‚—·&WGW&â†v—BÆöB‚’’ç7FGW3·Ğ¦W‡÷'B7–æ2gVæ7F–öâ'Väæ&vöE6†F÷u66†VGVÆW"‚—°¢6öç7BÆöFVCÖv—BÆöB‚’Ç7FGW3ÖÆöFVBç7FGW2Æ6æF–FFW3ÖÆöFVBæ6æF–FFW2Æ†—7F÷'“ÖÆöFVBæ†—7F÷'“¶–b‚7FGW2ævFRæÆÆ÷vVB—&WGW&â²ââç7FGW2Ç&VEööæÇ“¦fÇ6RÇ&VF–7F–öç5ö–ç6W'FVC£Ç&÷f–FW%ö6ÆÇ3£Æf–æÄ6Æ76–f–6F–öã§7FGW2æ6Æ76–f–6F–öçÓ°¢6öç7B6Æ÷CÔÖF‚æfÆö÷"„FFRææ÷r‚’óƒ’ÆƒÖ7&VFT†6‚‚w6†#Sbr’çWFFR„ä$ôtôEõôÄ”5’²s¢rµ7G&–ær‡6Æ÷B’’æF–vW7B‚v†W‚r’Ç'Vä–CÖ‚ç6Æ–6RƒÃ‚’²rÒr¶‚ç6Æ–6Rƒ‚Ã"’²rÓBr¶‚ç6Æ–6Rƒ2Ãb’²rÖr¶‚ç6Æ–6RƒrÃ#’²rÒr¶‚ç6Æ–6Rƒ#Ã3"“°¢6öç7B6Æ–ÓÖv—BF"æg&öÒ‚w7÷'G5÷7–æ5ö¦ö'2r’æ–ç6W'B‡¶–C§'Vä–BÆ¦ö%÷G—S¢væ&övöE÷6†F÷u÷crÇ7÷'Eö¶W“¥5õ%BÆÆVwVUö¶W“¢væ&rÇ&÷f–FW#¤ä$ôtôEõ$õd”DU"Ç7FGW3¢w'Vææ–ærrÆÖWFFF§·öÆ–7“¤ä$ôtôEõôÄ”5’Ç6Æ÷G×Ò“¶–b†6Æ–ÒæW'&÷"—¶–b†6Æ–ÒæW'&÷"æ6öFSÓÓÒs#3SRr—&WGW&â²ââç7FGW2Æf–æÄ6Æ76–f–6F–öã¢tÅ$TE•ô4Ä”ÔTBrÇ&VF–7F–öç5ö–ç6W'FVC£Ó·F‡&÷rW'&÷"‚tä$ôtôEô4Ä”Õôd”ÄTBr“·Ğ¢ÆWB–ç6W'FVCÓ¶6öç7B&V6öç3¥&V6÷&CÇ7G&–ærÆçVÖ&W#ã×·Ó°¢G'—°¢6öç7B¶vVæW&FTæ&&VF–7F–öç7ÓÖv—B›kºwµçXË˜ÛÛ^œÙX\ÛÛ”\ÙQ]šY[˜ÙKÛİ\˜ÙT][İRYœKšYÛİ\˜ÙT›İšY\“WÑÓĞUÔ“Õ’QTŸNÜ›İËœ™XÛÛ[Y[™YÜXÚÏY˜[ÙNÜ›İËœ›ÙXİ[Û—Ù[YÚX›OY˜[ÙNØÛÛœİØ]™YX]ØZ]Ø]™T™YXİ[Û’\İÜJÜ›İ×JNÚ[œÙ\Y
+Ï\Ø]™YœØ]™YÏÌÚYŠØ]™YœØ]™Y
+^Ù]™[Ûİ[ËœÙ]
+KšY
+]™[Ûİ[Ë™Ù]
+KšY
+OÏÌ
+JÌJNÛX\šÙ]Ûİ[ËœÙ]
+Ù^K
+X\šÙ]Ûİ[Ë™Ù]
+Ù^JOÏÌ
+JÌJNß_BˆÛÛœİİ[[X\O^ÜÛXŞN“WÑÓĞUÔÓPÖK›İšY\“WÑÓĞUÔ“Õ’QT‹›İšY\Ø[ÎŒ[œÙ\YÛİ[š[œÙ\Y™X\ÛÛœË[”\œÜÙNœİ]\Ë™Ø]K˜ÛÛ[[İ\ÏÉĞÓÓ•S•SÕT×ÔÒQÕ×ÑU’QSÑWÔ•S‰Îœİ]\Ë™Ø]Kœ™\Z\ÉÔ‘TRT‘QÔ•S•SQWÕ‘T’Q’PĞUSÓ—Ô•S‰Î‰ÑÓĞUĞĞST–IËÙ™šXÚX[XÚÑ[NŒ[Ù[›Ü›][PÚ[™ÙY™˜[ÙKYØXŞT[™[™Ñ^ÛYYY_NØÛÛœİØ]™YX]ØZ]‹™œ›ÛJ	ÜÜÜ×ÜŞ[˜×Ú›ØœÉÊK\]JÜİ]\Î‰ØÛÛ\]Y	ËÛÛ\]YØ]›™]È]J
+KÒTÓÔİš[™Ê
+K™XÛÜ™×Ú[œÙ\Yš[œÙ\YY]Y]Nœİ[[X\_JK™\J	ÚY	Ë[’Y
+NÚYŠØ]™Y™\œ›ÜŠ]›İÈ\œ›ÜŠ	ÓWÑÓĞUĞUQUÑRSQ	ÊNÜ™]\›ˆÜİXØÙ\ÜÎYKš[˜[Û\ÜÚYšXØ][Ûš[œÙ\YÉÓWÑÓĞUÔÒQÕ×ÔÕPĞÑTÔÉÎ‰Ó“×ÑVPÕÓSÑSÓPUÒ	Ë‹‹œİ[[X\_NÂˆXØ]ÚØ]ØZ]‹™œ›ÛJ	ÜÜÜ×ÜŞ[˜×Ú›ØœÉÊK\]JÜİ]\Î‰Ù˜Z[Y	ËÛÛ\]YØ]›™]È]J
+KÒTÓÔİš[™Ê
+K\İÙ\œ›Ü‰ÓWÑÓĞUÔÒQÕ×ÑVPÕUSÓ—ÑRSQ	Ë™XÛÜ™×Ú[œÙ\Yš[œÙ\YJK™\J	ÚY	Ë[’Y
+Nİ›İÈ\œ›ÜŠ	ÓWÑÓĞUÔÒQÕ×ÑVPÕUSÓ—ÑRSQ	ÊNßBŸB
