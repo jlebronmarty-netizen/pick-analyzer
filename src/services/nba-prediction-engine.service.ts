@@ -320,6 +320,8 @@ async function loadInputs({
       .select('*')
       .eq('sport_key', NBA_SPORT_KEY)
       .eq('season', season.key)
+      .eq('provider', 'balldontlie')
+      .gte('snapshot_time', new Date(Date.now() - 30 * 60 * 1000).toISOString())
       .order('snapshot_time', { ascending: false })
       .limit(3000),
     getNbaInjuryLineupConfidenceStatus(),
