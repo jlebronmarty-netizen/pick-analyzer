@@ -1,3 +1,10 @@
+## MLB reviewed no-action closure — 2026-10-17
+
+- Closed the remaining 73 OPEN observations as explicitly conditional research VOID: 61 non-starters, one zero-PA starter, eleven postponed before start. All 851 master observations now have a disposition; W/L counts and every existing accuracy denominator are unchanged.
+- Applied US-MA public-rule references for research accounting only. Original quote jurisdiction and actual bookmaker settlement remain uncertified; each new row visibly discloses that limitation. No automatic VOID policy was enabled for future unknown contracts.
+- Frozen predictions, all prior settlements and Official Picks preserved by exact hashes. Current production API verified AVAILABLE / zero OPEN; no app code or deployment change required.
+- Evidence, reversible review lineage and verification: `research/mlb-no-action-review-20261017/REPORT.md`. Prior repair and its raw archive remain intact.
+
 ## MLB historical OPEN repair — 2026-10-17
 
 - Applied a guarded research-only repair to all 75 pending observations: two frozen MIL +1.5 Run Line model rows graded WIN from verified final evidence; 73 props retain OPEN with specific participation/postponement contract-review reasons.

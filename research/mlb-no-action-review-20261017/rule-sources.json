@@ -1,0 +1,33 @@
+{
+  "policy": "MLB_REVIEWED_NO_ACTION_RESEARCH_V1",
+  "scope": "CONDITIONAL_RESEARCH_ACCOUNTING_ONLY",
+  "originalQuoteJurisdictionCertified": false,
+  "actualBookSettlementCertified": false,
+  "consultedAt": "2026-10-17",
+  "sources": [
+    {
+      "sportsbook": "betmgm",
+      "url": "https://massgaming.com/wp-content/uploads/BetMGM-House-Rules-11.24.25.pdf",
+      "jurisdiction": "US-MA_REFERENCE",
+      "approvedDate": "2025-11-20",
+      "effectiveDate": "2025-11-24",
+      "printedPages": [15],
+      "summary": "Pregame batter props require starting and a plate appearance for action. A zero-PA starter does not meet the appearance condition.",
+      "retrieval": "Primary regulatory PDF text verified through web retrieval; a separate terminal download returned HTTP 403 and no PDF bytes were retained."
+    },
+    {
+      "sportsbook": "draftkings",
+      "url": "https://massgaming.com/wp-content/uploads/DraftKings-House-Rules-8.18.25.pdf",
+      "jurisdiction": "US-MA_REFERENCE",
+      "versionDate": "2025-08-18",
+      "printedPages": [32, 35],
+      "summary": "Batter participation means at least one plate appearance. Pregame player props require starting and participating. A game that never starts on its original local scheduled day is void; the separate postseason interruption rule applies only after play starts.",
+      "retrieval": "Primary regulatory PDF text verified through web retrieval."
+    }
+  ],
+  "limits": [
+    "Book vendor names on archived quotes do not identify jurisdiction or prove these were the exact rules attached to an executed ticket.",
+    "VOID is a conditional research disposition under the stated reference policy, not a verified bookmaker refund.",
+    "This policy closes only 73 individually reviewed observations; it is not enabled as an automatic default for future missing statistics."
+  ]
+}

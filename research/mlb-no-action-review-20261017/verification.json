@@ -1,0 +1,19 @@
+{
+  "counts": {
+    "open": 0,
+    "wins": 615,
+    "voids": 75,
+    "losses": 161,
+    "observations": 851
+  },
+  "closureReasons": {
+    "DID_NOT_START": 61,
+    "STARTED_ZERO_PA": 1,
+    "POSTPONED_BEFORE_START_DIFFERENT_LOCAL_DAY": 11
+  },
+  "officialPreserved": true,
+  "predictionsPreserved": true,
+  "frozenMasterPreserved": true,
+  "priorSettledPropsPreserved": true,
+  "priorSettledMasterPreserved": true
+}
