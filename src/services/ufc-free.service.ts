@@ -1,8 +1,8 @@
 import 'server-only';
 import {createHash,randomUUID} from 'node:crypto';import {gzipSync} from 'node:zlib';
-import seed from '@/lib/ufc/seed.json';
-import {UFC_MODEL,eloProbability,type Rating} from '@/lib/ufc/elo';
-import {calendarCoverage,normalizeUfcBoard,normalizeUfcQuote,ratingsWithRecent,freezeUfc,reconcileUfc,ufcSummary,emptyUfc,sameQuote,type UfcBout,type UfcForecast,type UfcQuote,type UfcResult,type UfcReport} from '@/lib/ufc/free';
+import seed from '@/lib/ufc/seed-v2.json';
+import {UFC_MODEL,eloProbability,type Rating} from '@/lib/ufc/elo-v2';
+import {calendarCoverage,normalizeUfcBoard,normalizeUfcQuote,ratingsWithRecent,freezeUfc,reconcileUfc,ufcSummary,emptyUfc,sameQuote,type UfcBout,type UfcForecast,type UfcQuote,type UfcResult,type UfcReport} from '@/lib/ufc/free-v2';
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 async function db(){return (await import('@/lib/supabase-admin')).supabaseAdmin;}
 async function rows(table:string){const client=await db(),out:Record<string,unknown>[]=[];let cursor='';for(;;){let q=client.from(table).select('*').order('id').limit(500).abortSignal(AbortSignal.timeout(15000));if(cursor)q=q.gt('id',cursor);const {data,error}=await q;if(error||!data)throw Error('UFC_DATABASE_READ');out.push(...data);if(data.length<500)return out;cursor=String(data.at(-1)!.id);}}
@@ -13,14 +13,14 @@ function verify(f:UfcForecast){
 }
 export async function getUfcFreeReport():Promise<UfcReport>{
  try{const client=await db(),[ps,rs,qs,runs]=await Promise.all([rows('ufc_free_predictions_v1'),rows('ufc_free_results_v1'),rows('ufc_free_quotes_v1'),client.from('ufc_free_runs_v1').select('*').neq('status','RUNNING').order('started_at',{ascending:false}).limit(1)]);if(runs.error)throw Error('UFC_RUN_READ');const last=runs.data?.[0];if(!last)return emptyUfc();
-  const now=new Date().toISOString(),detail=last.detail as Detail,history=ps.map(p=>{const f=verify(p.body as UfcForecast);if(f.id!==p.id||f.bout.id!==p.bout_id||new Date(String(p.captured_at)).toISOString()!==f.capturedAt||new Date(String(p.scheduled_at)).toISOString()!==f.bout.scheduledAt)throw Error('UFC_ROW_IDENTITY');return reconcileUfc(f,rs.map(r=>r.body as UfcResult),qs.map(q=>q.body as UfcQuote));}).sort((a,b)=>a.bout.scheduledAt.localeCompare(b.bout.scheduledAt)||a.id.localeCompare(b.id));
+  const now=new Date().toISOString(),detail=last.detail as Detail,history=ps.filter(p=>(p.body as UfcForecast).model===UFC_MODEL).map(p=>{const f=verify(p.body as UfcForecast);if(f.id!==p.id||f.bout.id!==p.bout_id||new Date(String(p.captured_at)).toISOString()!==f.capturedAt||new Date(String(p.scheduled_at)).toISOString()!==f.bout.scheduledAt)throw Error('UFC_ROW_IDENTITY');return reconcileUfc(f,rs.map(r=>r.body as UfcResult),qs.map(q=>q.body as UfcQuote));}).sort((a,b)=>a.bout.scheduledAt.localeCompare(b.bout.scheduledAt)||a.id.localeCompare(b.id));
   const issues=[...(detail.issues??[])];if(!last.completed_at||Date.parse(now)-Date.parse(last.completed_at)>5*3600000)issues.push('Captura desactualizada; revisar proceso.');if(last.status==='FAILED')issues.push('Último ciclo falló; consultar evidencia persistida.');
-  return {status:'AVAILABLE',classification:'SHADOW / RESEARCH',readAt:now,latestRunAt:last.completed_at,health:issues.length?'ATTENTION':'PASS',issues,bouts:detail.bouts??[],forecasts:history,summary:ufcSummary(history),abstentions:detail.abstentions??[],providerCalls:0,databaseWrites:0};
+  return {retiredForecasts:ps.filter(p=>(p.body as UfcForecast).model!==UFC_MODEL).length,status:'AVAILABLE',classification:'SHADOW / RESEARCH',readAt:now,latestRunAt:last.completed_at,health:issues.length?'ATTENTION':'PASS',issues,bouts:detail.bouts??[],forecasts:history,summary:ufcSummary(history),abstentions:detail.abstentions??[],providerCalls:0,databaseWrites:0};
  }catch{return {...emptyUfc(),issues:['No se pudo verificar el registro de UFC.']};}
 }
 
 export async function runUfcFree(){
- const client=await db(),owner=randomUUID(),slot='UFC:'+Math.floor(Date.now()/(4*3600000)),start=Date.now(),{data:claimed,error}=await client.rpc('ufc_free_claim_v1',{run_id:owner});if(error)throw Error('UFC_LOCK');if(!claimed)return {status:'BUSY',providerCalls:0};
+ const client=await db(),owner=randomUUID(),slot='UFC:'+UFC_MODEL+':'+Math.floor(Date.now()/(4*3600000)),start=Date.now(),{data:claimed,error}=await client.rpc('ufc_free_claim_v1',{run_id:owner});if(error)throw Error('UFC_LOCK');if(!claimed)return {status:'BUSY',providerCalls:0};
  let calls=0,created=0;const detail:Detail={bouts:[],abstentions:[],issues:[],historyBouts:0,historyThrough:null,seedSha256:hash(JSON.stringify(seed))};
  try{
   const prior=await client.from('ufc_free_runs_v1').select('id').eq('id',slot).maybeSingle();if(prior.error)throw Error('UFC_DEDUP_GUARD');if(prior.data)return {status:'REUSED_SLOT',providerCalls:0};const begin=await client.from('ufc_free_runs_v1').insert({id:slot,status:'RUNNING'});if(begin.error)throw Error('UFC_RUN_CREATE');
@@ -38,7 +38,7 @@ export async function runUfcFree(){
   if(!coverage)detail.issues.push('Historia ESPN incompleta respecto al calendario; abstención de nuevas predicciones.');
   const current=await source(`https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard?dates=${today}-${until}&limit=1000`),upcoming=normalizeUfcBoard(current.data);detail.bouts=upcoming;detail.historyBouts=recent.length;detail.historyThrough=history.capturedAt;
   const maps=ratingsWithRecent(seed.ratings as [string,Rating][],recent,history.capturedAt);if(maps.uncertain.size)detail.issues.push(`${maps.uncertain.size} identidades/historias afectadas por finales sin ganador inequívoco; abstenciones conservadas.`);
-  const known=new Map(ps.map(p=>[String(p.bout_id),verify(p.body as UfcForecast)]));
+  const known=new Map(ps.filter(p=>(p.body as UfcForecast).model===UFC_MODEL).map(p=>[String(p.bout_id),verify(p.body as UfcForecast)]));
   for(const b of [...recent,...upcoming]){if(!known.has(b.id)||!['FINAL','CANCELLED','UNKNOWN'].includes(b.status)||b.scheduledAt>=history.capturedAt)continue;const r:UfcResult={boutId:b.id,eventId:b.eventId,aId:b.aId,bId:b.bId,winnerId:b.winnerId,status:b.status,capturedAt:history.capturedAt};const {capturedAt:ignored,...identity}=r;void ignored;const save=await client.from('ufc_free_results_v1').upsert({id:hash(JSON.stringify(identity)),bout_id:b.id,captured_at:r.capturedAt,source_id:recent.some(r=>r.id===b.id)?history.id:current.id,body:r},{onConflict:'id',ignoreDuplicates:true});if(save.error)throw Error('UFC_RESULT_SAVE');}
   const prospective=upcoming.filter(b=>b.status==='SCHEDULED'&&b.scheduledAt>new Date().toISOString());
   const eligible=prospective.filter(b=>coverage&&freezeUfc(b,maps.ratings,maps.uncertain,new Date().toISOString(),null));
