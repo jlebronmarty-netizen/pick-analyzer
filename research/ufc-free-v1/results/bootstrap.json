@@ -1,0 +1,108 @@
+{
+  "status": "PARTIAL",
+  "calls": 8,
+  "historyBouts": 302,
+  "upcomingBouts": 34,
+  "predictions": 21,
+  "quotes": 6,
+  "abstentions": [
+    {
+      "boutId": "401922641",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401922646",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401932013",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401927853",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401927854",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933596",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933598",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933599",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933600",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933602",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933604",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933605",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    },
+    {
+      "boutId": "401933606",
+      "reason": "INSUFFICIENT_OR_UNCERTAIN_HISTORY"
+    }
+  ],
+  "issues": [
+    "4 identidades/historias afectadas por finales sin ganador inequívoco; abstenciones conservadas."
+  ],
+  "sourceHashes": [
+    {
+      "url": "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard?dates=20260516-20261108&limit=1000",
+      "sha256": "c2633796ea7eb2572f84e8ff0a08f39d4b4678b4d1e4bc380a822a8408cbb59d",
+      "capturedAt": "2026-11-08T21:23:52.863Z"
+    },
+    {
+      "url": "https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard?dates=20261108-20261206&limit=1000",
+      "sha256": "5fd0d9544eaad15cd59b5250d6b7310a961560527503a6faba02b3c541b56b02",
+      "capturedAt": "2026-11-08T21:23:52.965Z"
+    },
+    {
+      "url": "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/events/600061400/competitions/401913646/odds?lang=en&region=us",
+      "sha256": "476aa23c44be8e3617ba0d0e50e27c6efa061898dd13642f77aca68e9ffe2bbf",
+      "capturedAt": "2026-11-08T21:23:56.362Z"
+    },
+    {
+      "url": "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/events/600061400/competitions/401913647/odds?lang=en&region=us",
+      "sha256": "04b666b9333fe27465ee9ed0550f83a70bb9d9c048a5dbb7385fe55c951810a0",
+      "capturedAt": "2026-11-08T21:23:56.402Z"
+    },
+    {
+      "url": "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/events/600061400/competitions/401922638/odds?lang=en&region=us",
+      "sha256": "7e383f87d2c76fb9cb87ae366c4426d81007384abf4ac5aa42b044701c149910",
+      "capturedAt": "2026-11-08T21:23:56.441Z"
+    },
+    {
+      "url": "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/events/600061400/competitions/401922639/odds?lang=en&region=us",
+      "sha256": "665468964bd177e523831fd0c6b2af70d7ccd9623afb86e1627c5f53c01130c8",
+      "capturedAt": "2026-11-08T21:23:56.480Z"
+    },
+    {
+      "url": "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/events/600061400/competitions/401922640/odds?lang=en&region=us",
+      "sha256": "bd35c9a4579d8b94cc8634241e700ebc62add2a11293e96e5c9fddf42925c063",
+      "capturedAt": "2026-11-08T21:23:56.527Z"
+    },
+    {
+      "url": "https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/events/600061400/competitions/401922642/odds?lang=en&region=us",
+      "sha256": "8adbe5c31d9979c3cea4d63ed2e4f993273e7c1778c790ae3b76153287fa29d2",
+      "capturedAt": "2026-11-08T21:23:56.566Z"
+    }
+  ],
+  "cutoff": "2026-11-08T21:23:52.863Z"
+}
