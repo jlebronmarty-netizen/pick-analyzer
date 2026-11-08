@@ -1,0 +1,32 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+import {buildEdgeLabOverviewCard} from '../src/lib/edge-lab/overview-cards.mjs';
+import {visibleLedgerRows} from '../src/lib/edge-lab/ledger-visibility.mjs';
+const now='2026-11-08T21:00:00Z';
+const base={id:'1',sport:'TT',cohort:'EDGE_LAB_LIVE_20261104',model_version:'TT_ML_V1_PICK_PORT_1',event_id:'event1',market:'MONEYLINE',status:'FORECAST',emitted_at:'2026-11-07T12:00:00Z',scheduled_at:'2026-11-08T18:00:00Z'};
+const row=(over={})=>({...base,...over}),card=rows=>buildEdgeLabOverviewCard('TT',{rows},now),primary=rows=>card(rows).cohorts[0];
+test('Real-ledger winner accuracy W/(W+L)',()=>{const c=primary([row({outcome:{forecast_id:'1',status:'W'}}),row({id:'2',event_id:'2',outcome:{forecast_id:'2',status:'L'}})]);assert.equal(c.accuracy,.5);assert.equal(c.pending,0);});
+test('Secondary market never inflates headline',()=>{const rows=[row({outcome:{forecast_id:'1',status:'W'}}),row({id:'odd',market:'SETS_ODD_EVEN',model_version:'TT_SETS_OE_V1_PICK_PORT_1',outcome:{forecast_id:'odd',status:'L'}})];assert.equal(primary(rows).wins,1);assert.equal(primary(rows).losses,0);assert.match(card(rows).detailLines.join(' '),/0 W \/ 1 L/);});
+test('Numerical total gives MAE, not a fabricated accuracy',()=>{const r=row({id:'num',status:'PROJECTION',market:'TOTAL_POINTS',model_version:'TT_TOTAL_V1_PICK_PORT_1',outcome:{forecast_id:'num',status:'NUMERIC',absolute_error:12.34}});assert.equal(primary([r]).accuracy,null);assert.match(card([r]).detailLines.join(' '),/MAE 12.34/);});
+test('Pending is not a loss',()=>{const c=primary([row()]);assert.equal(c.pending,1);assert.equal(c.losses,0);assert.equal(c.accuracy,null);});
+test('Abstentions excluded from accuracy and pending',()=>{const c=primary([row({status:'ABSTAIN'})]);assert.equal(c.pending,0);assert.equal(c.accuracy,null);});
+test('Disputes excluded and disclosed',()=>{const c=card([row({outcome:{forecast_id:'1',status:'DISPUTE'}})]);assert.equal(c.cohorts[0].pending,0);assert.match(c.detailLines.join(' '),/Disputas: 1/);});
+test('Push excluded from W/L denominator',()=>{const c=primary([row({outcome:{forecast_id:'1',status:'PUSH'}})]);assert.equal(c.accuracy,null);assert.equal(c.pushes,1);});
+test('Empty successful read is N/A, not 0%',()=>{const c=primary([]);assert.equal(c.available,true);assert.equal(c.accuracy,null);});
+test('Read failure does not become zero record',()=>{const c=buildEdgeLabOverviewCard('TT',null,now).cohorts[0];assert.equal(c.available,false);assert.equal(c.wins,null);});
+test('Wrong cohort excluded',()=>{const c=card([row({cohort:'OLD'})]);assert.equal(c.cohorts[0].pending,0);assert.match(c.detailLines.join(' '),/1 registros de otra/);});
+test('Wrong model excluded',()=>assert.equal(primary([row({model_version:'OTHER'})]).pending,0));
+for(const [name,rows] of [
+ ['duplicate id',[row(),row()]],['duplicate contract',[row(),row({id:'2'})]],['late emission',[row({emitted_at:base.scheduled_at})]],['bad date',[row({scheduled_at:'bad'})]],['wrong outcome link',[row({outcome:{forecast_id:'other',status:'W'}})]],['settled abstention',[row({status:'ABSTAIN',outcome:{forecast_id:'1',status:'W'}})]],['unknown outcome',[row({outcome:{forecast_id:'1',status:'WIN'}})]],['numeric as win',[row({status:'PROJECTION',outcome:{forecast_id:'1',status:'W'}})]]
+])test('Fail closed '+name,()=>assert.equal(primary(rows).available,false));
+test('Soccer connects current cohort, not old checkpoint',()=>{const c=buildEdgeLabOverviewCard('SOCCER',{rows:[row({sport:'SOCCER',cohort:'EDGE_LAB_RESTART_20261104',market:'1X2',model_version:'SOCCER_V0_PICK_PORT_1',outcome:{forecast_id:'1',status:'L'}})]},now);assert.equal(c.cohorts[0].losses,1);assert.equal(c.href,'/edge-lab?sport=SOCCER');});
+test('NCAAF is independent of TT rows',()=>{const c=buildEdgeLabOverviewCard('NCAAF',{rows:[row(),row({id:'nc',sport:'NCAAF',cohort:'NCAAF_PPG_PICK_20261105',model_version:'NCAAF_PPG_V1_PICK_PORT_1',outcome:{forecast_id:'nc',status:'W'}})]},now);assert.equal(c.cohorts[0].wins,1);assert.equal(c.cohorts[0].pending,0);assert.equal(c.href,'/edge-lab?sport=NCAAF');});
+test('Card does not serialize selections, prices or raw source records',()=>{const serialized=JSON.stringify(card([row({participant_a:'PRIVATE_PARTICIPANT',payload:{api_key:'DO_NOT_RETURN'},selection:'PRIVATE_SELECTION'})]));assert.ok(!serialized.includes('PRIVATE_'));assert.ok(!serialized.includes('DO_NOT_RETURN'));});
+test('Summary does not mutate source',()=>{const rows=[row()],copy=JSON.stringify(rows);card(rows);assert.equal(JSON.stringify(rows),copy);});
+test('Ledger today uses Puerto Rico day',()=>{const rows=[row({scheduled_at:'2026-11-09T02:00:00Z'})];assert.equal(visibleLedgerRows(rows,{now}).length,1);});
+test('Upcoming excludes started and completed rows',()=>{const rows=[row(),row({id:'2',scheduled_at:'2026-11-09T23:00:00Z'}),row({id:'3',scheduled_at:'2026-11-09T23:00:00Z',outcome:{status:'DISPUTE'}})];assert.deepEqual(visibleLedgerRows(rows,{now,period:'UPCOMING'}).map(r=>r.id),['2']);});
+test('Default visible decisions exclude PASAR',()=>assert.equal(visibleLedgerRows([row({status:'ABSTAIN'})],{now}).length,0));
+test('Historical PASAR remains reachable',()=>assert.equal(visibleLedgerRows([row({status:'ABSTAIN'})],{now,period:'ALL',kind:'ABSTAIN'}).length,1));
+test('Filtering does not mutate source or results',()=>{const rows=[row()],before=JSON.stringify(rows);visibleLedgerRows(rows,{now,period:'ALL'});assert.equal(JSON.stringify(rows),before);});
+test('Bad display filters fail empty',()=>assert.deepEqual(visibleLedgerRows([row()],{now,period:'WRONG'}),[]));
+test('No injected writer or provider call in adapter',()=>{const s=fs.readFileSync('src/services/edge-lab-overview-read.service.ts','utf8');assert.match(s,/Promise.allSettled/);assert.ok(!/runEdge|runMulti|previewSoccer|\.insert\(|\.upsert\(/.test(s));});
+test('Top-level cards no longer use frozen Soccer/TT summaries',()=>{const s=fs.readFileSync('src/services/multisport-model-read.service.ts','utf8');assert.match(s,/getEdgeLabOverviewCards/);assert.ok(!/soccerModelCohort\(|ttModelCohort\(/.test(s));});

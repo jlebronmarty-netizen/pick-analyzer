@@ -23,7 +23,7 @@ export function normalizeUfcBoard(input:unknown):UfcBout[]{
    const aId=id(cs[0].id),bId=id(cs[1].id),a=String(obj(cs[0].athlete).fullName??''),c=String(obj(cs[1].athlete).fullName??'');
    if(!aId||!bId||aId===bId||!a||!c||fighterKey(a)===fighterKey(c))throw Error('UFC_ATHLETE_IDENTITY');
    const winners=cs.filter(c=>c.winner===true);if(winners.length>1)throw Error('UFC_TWO_WINNERS');
-   const cancelled=/CANCEL|POSTPON|NO_CONTEST/.test(stateName);const st:UfcBout['status']=cancelled?'CANCELLED':status.completed===true&&state==='post'?'FINAL':state==='pre'?'SCHEDULED':state==='in'?'LIVE':'UNKNOWN';
+   const cancelled=/CANCEL|POSTPON/.test(stateName);const st:UfcBout['status']=cancelled?'CANCELLED':status.completed===true&&state==='post'?'FINAL':state==='pre'?'SCHEDULED':state==='in'?'LIVE':'UNKNOWN';
    out.push({id:boutId,eventId,eventName:name,scheduledAt,boutTime:iso(b.date)??scheduledAt,a,b:c,aId,bId,status:st,winnerId:st==='FINAL'&&winners.length===1?String(winners[0].id):null,cardComplete:obj(obj(e.status).type).completed===true});
   }
  }return out.sort((a,b)=>a.scheduledAt.localeCompare(b.scheduledAt)||a.id.localeCompare(b.id));
