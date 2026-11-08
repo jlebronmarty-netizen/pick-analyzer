@@ -11,3 +11,14 @@ Se volvió a calcular exactamente la misma familia de seis reglas y dos comparad
 Reproducción: `node --loader ./tests/dashboard-multisport/tsx-loader.mjs scripts/ufc/research-v2.mjs`, luego `python scripts/ufc/verify-v2.py`. Se usan inputs V1 congelados más identity-v2.json y el protocolo de reparación, sin llamadas. Los replays V1 originales siguen pasando y se conservan como cálculos forenses, no como validación de identidad.
 
 Pruebas:107 dashboard/UFC (incluye4 nuevas sobre separación, warmup e ID desconocido),292 Edge Lab; build/ESLint y replay Python PASS. La respuesta de perfil y la captura V2 tienen sus propios archivos y ledger; ninguna cuota se rellena retroactivamente en V1. Bootstrap V2: ocho solicitudes FREE; despliegue, carga a DB y verificación final registrados al cierre.
+
+
+## Cierre V2
+
+PR305 integrado; producción dpl_5jMj9874DhTewkfFNEKtT2LBp6VZ READY. API y HTML públicos200:21 activas exclusivamente V2,21 V1 retiradas,34 peleas y13 abstenciones. Contador/carta global usa solo V2. Firma V1 b5c2351fac8b3674e754bf07c112c556 intacta; V2 97990b737199b8b2f32a0af626bbdfec. Hay30 respuestas archivadas para30 consultas FREE contabilizadas,18 observaciones de cuota;29 hashes raw verificados y un404 deliberadamente sin cuerpo. Se reproducen21 nuevos forecasts,6 precios originales y18 observaciones de precio, sin consultas. Todos los21 archivos del manifiesto V1 siguen idénticos.
+
+107 pruebas dashboard/UFC y335 Edge Lab/NBA PASS; productor V2 completo con respuestas reales archivadas y persistencia simulada PASS (ocho requests interceptadas,21 V2, V1 intacta, slot dedup y lectura sin escrituras). Build/ESLint y replay histórico independiente PASS. No se consultó ninguna clave, no se reactivó proveedor pagado, ni se alteraron modelos/horarios de otros deportes; cambios NBA simultáneos preservados. Dos pruebas Git de NBA se bloquearon inicialmente porque faltaba el objeto base en el checkout sintético; se reconstruyó el objeto firmado público exacto y se verificó su SHA antes de importarlo, sin cambiar tests;335/335 pasaron después.
+
+El colector sigue programado cada4h con autorización de servidor y máximo8 solicitudes. La infraestructura ejecutó un ciclo real V1 a21:49; V2 tiene bootstrap real de8 consultas y prueba de productor, pero su primer ciclo natural V2 aún no se había observado al cierre (siguiente01:49UTC). Esto no se presenta como ejecución natural V2 ya comprobada. Seguimiento exclusivamente SHADOW, sin rentabilidad o contratos certificados. La revisión visual desktop inicial se mantiene para layout; el contenido V2 se verificó por HTML/API; mobile no se certificó separadamente.
+
+Reproducir V2 desde raw: `node --loader ./tests/dashboard-multisport/tsx-loader.mjs scripts/ufc/verify-forward-v2.mjs`. Probar productor sin egress: `node --loader ./tests/ufc/runtime-loader.mjs tests/ufc/runtime-scenario.mjs`. Ninguno llama a proveedores ni escribe en la base real.

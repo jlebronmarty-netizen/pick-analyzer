@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "sources": 30,
+  "rawHashesVerified": 29,
+  "explicitUnavailableBodies": [
+    {
+      "id": "89b657fd-66b3-4929-bcd0-a1e0fd280c60",
+      "httpStatus": 404,
+      "semantics": "audit recording time, not original HTTP capture"
+    }
+  ],
+  "activePredictions": 21,
+  "quoteObservations": 18
+}

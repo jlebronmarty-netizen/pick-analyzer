@@ -1,0 +1,110 @@
+{
+  "research/ufc-identity-v2/CHECKPOINT.md": {
+    "bytes": 1023,
+    "sha256": "a6058fd978cbecd5b90f6a02f7713ce5a69cfa473554bf1eb613968218df1a80"
+  },
+  "research/ufc-identity-v2/PROTOCOL_AMENDMENT.md": {
+    "bytes": 1650,
+    "sha256": "20d46b64cd4542c59952b290af03e980a7d9e1eb01ac30bfa9875439232d4a84"
+  },
+  "research/ufc-identity-v2/REPORT.md": {
+    "bytes": 5205,
+    "sha256": "8c56467afa6a6f8966bbbeb62ed9b93a8c0e2997628e6ae8557f2cae43df2a98"
+  },
+  "research/ufc-identity-v2/results/bets.json.gz": {
+    "bytes": 236268,
+    "sha256": "d4d117b17ba3a96b765cf8f7492590080329a1d3ba0f30aabfab03765507ab2b"
+  },
+  "research/ufc-identity-v2/results/bootstrap-import.json.gz": {
+    "bytes": 87545,
+    "sha256": "f9ab619d84a2ab67c87cc7c0e50ee159640802ec6d5674608a9f39ae49dc2574"
+  },
+  "research/ufc-identity-v2/results/bootstrap.json": {
+    "bytes": 3764,
+    "sha256": "3e242bab017252de88304ac1ddce90d086dddb37d747bfeb56a9f2cc760ff811"
+  },
+  "research/ufc-identity-v2/results/excluded.json": {
+    "bytes": 8109,
+    "sha256": "62d4984d8bec3fb3c32091d3728bff9cfbe2b8cae7a3ccfcc550e3353a5cdabe"
+  },
+  "research/ufc-identity-v2/results/forward-replay-verification.json": {
+    "bytes": 457,
+    "sha256": "f726f9aef2efd74eee50bbf6b063cf21f6be0eb853842ca3ff1b04ab399942ae"
+  },
+  "research/ufc-identity-v2/results/identity-source.json.gz": {
+    "bytes": 1550,
+    "sha256": "f1371523391ebaf3a58bc46bb8e8f1064b8c7a837d6f5d17ddb7418ca65831bb"
+  },
+  "research/ufc-identity-v2/results/initial-forward-archive.json.gz": {
+    "bytes": 318188,
+    "sha256": "1d09411863c6ac3cde7b8124e38f5923acf193d2324a42156afcc9e5421610d1"
+  },
+  "research/ufc-identity-v2/results/protocol-receipt.json": {
+    "bytes": 327,
+    "sha256": "3da1945dba3bae9ed813a339270cae7dd6382ba4dc0b397914260023bbea5cf6"
+  },
+  "research/ufc-identity-v2/results/raw-archive-verification.json": {
+    "bytes": 317,
+    "sha256": "778fd8b0e8b271c6f77d34631fb450de1238e4f46d2245d97e8550bf1f8e9212"
+  },
+  "research/ufc-identity-v2/results/release-verification.json": {
+    "bytes": 2414,
+    "sha256": "db75290f64f13d44861478d5bb0f315a110ae51b3c4763f039ee72740c6aeb94"
+  },
+  "research/ufc-identity-v2/results/selection.json": {
+    "bytes": 2566,
+    "sha256": "a257f054c7c972eca9c32fad14587a6d9ad7252dcf853e41624d0cfc75aebf23"
+  },
+  "research/ufc-identity-v2/results/summary.json": {
+    "bytes": 15804,
+    "sha256": "d6638593c684591e2d575b30306e63ad78d126ed2f2ef455b180cc3da6b8b4d0"
+  },
+  "research/ufc-identity-v2/results/trials.json.gz": {
+    "bytes": 199303,
+    "sha256": "c363089e9b0ad9d7636b7b130558ae2486b6f7c463457061af1ee839d3af6098"
+  },
+  "research/ufc-identity-v2/results/verification.json": {
+    "bytes": 613,
+    "sha256": "f2a004fd4e0b2081eced94fe5e6ee7ca27afe8578b4ec091ede2c5c7b12d564b"
+  },
+  "scripts/ufc/bootstrap-v2.mjs": {
+    "bytes": 3986,
+    "sha256": "221c9338b2f2f21c1ffd48abd9519c4dde0afe48da6b4e603539487f0f0c1684"
+  },
+  "scripts/ufc/research-v2.mjs": {
+    "bytes": 7671,
+    "sha256": "504727d47c646c63767e802b42a40d478955eb454c9ddbb654f5d30983744713"
+  },
+  "scripts/ufc/verify-forward-v2.mjs": {
+    "bytes": 2732,
+    "sha256": "1a6aef3a520ee8fcb732df5d24c20208f45d1468cf78b10308e93cff2dfd2ccd"
+  },
+  "scripts/ufc/verify-v2.py": {
+    "bytes": 4250,
+    "sha256": "404af5c4708718c55f4505045f978f598f0d855e2605af8e4425ca30165bdb29"
+  },
+  "src/lib/ufc/elo-v2.ts": {
+    "bytes": 2312,
+    "sha256": "b8ad874522efc2d3eb2bdab9ce38e408669e679c7eb40d42ed14bb956619e02f"
+  },
+  "src/lib/ufc/free-v2.ts": {
+    "bytes": 11522,
+    "sha256": "203df6c0b336295d596fcc37f02a92800c92cdfd4da57b0354861e6c4c8e7cdc"
+  },
+  "src/lib/ufc/identity-v2.json": {
+    "bytes": 1452,
+    "sha256": "cc1d82c34bc7dbcadd5da02cec283f1e67a2f70b4ab93f57b149bc71d0e5cdbf"
+  },
+  "src/lib/ufc/seed-v2.json": {
+    "bytes": 278821,
+    "sha256": "229d6c6122fb68c4953aa26d2d8a55d3bd6cf3746d272b0613f6dddf21e52359"
+  },
+  "tests/ufc/runtime-loader.mjs": {
+    "bytes": 604,
+    "sha256": "aa849773f88e13dbcd4db7cd3fc1cd1598dd4aad8e7d758776965a9180ba6242"
+  },
+  "tests/ufc/runtime-scenario.mjs": {
+    "bytes": 3638,
+    "sha256": "d9e8175bf067646cf6bca750b2442c1eda0fc7df8e03e4521495754441626df7"
+  }
+}
