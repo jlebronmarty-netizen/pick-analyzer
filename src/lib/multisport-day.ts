@@ -1,5 +1,5 @@
-import type {UfcReport} from './ufc/free';
-import {decimalOdds} from './ufc/free';
+import type {UfcReport} from './ufc/free-v2';
+import {decimalOdds} from './ufc/free-v2';
 import {ncaabTeamName} from './ncaab-team-display';
 import type {MlbView} from '@/components/pick2/mlb-presentation';
 import {matchesSlateFilter,presentationStatus,isStarted} from '@/components/pick2/mlb-presentation';

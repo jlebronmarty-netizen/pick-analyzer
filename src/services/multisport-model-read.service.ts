@@ -1,6 +1,6 @@
 import 'server-only';
 import {getUfcFreeReport} from './ufc-free.service';
-import {ufcCohort} from '@/lib/ufc/free';
+import {ufcCohort} from '@/lib/ufc/free-v2';
 import { cache } from 'react';
 import { getQualifiedPlaysReport } from './qualified-plays-read.service';
 import { getMlbOfficialPerformance } from './pick2-mlb-performance-read.service';

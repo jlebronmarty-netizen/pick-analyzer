@@ -1,0 +1,36 @@
+{
+  "schema": "UFC_IDENTITY_PATCH_V2",
+  "reason": "Two distinct UFC athletes share full name Bruno Silva; V1 merged them. Split known cases only; no parameter/ROI tuning.",
+  "officialProfiles": {
+    "Flyweight": "https://www.ufc.com/athlete/bruno-silva",
+    "Middleweight": "https://www.ufc.com/athlete/bruno-silva-blindado"
+  },
+  "evidence": "Official UFC search-index fight histories match each original date/opponent and division. 2019 Khalid Taha bantamweight belongs to flyweight athlete and was overturned NC.",
+  "legacyBoutDivision": {
+    "fc9168fd102e2e66": "Flyweight",
+    "668a44403a130043": "Flyweight",
+    "b6a87389bdc36a00": "Flyweight",
+    "6ecfa439ef900bcc": "Middleweight",
+    "1a635a5e4551e7d5": "Flyweight",
+    "bde635a4f345bc3e": "Middleweight",
+    "94541dd979e0b4bd": "Flyweight",
+    "77992b8727382373": "Middleweight",
+    "539732694ab2c8d6": "Middleweight",
+    "9124740fe7816d70": "Middleweight",
+    "d00d5ef4ae0ac01b": "Middleweight",
+    "c3af2b6ab1262fef": "Flyweight",
+    "38b6ef176439c39b": "Middleweight",
+    "226884e46a10865d": "Middleweight",
+    "9039762cb9f4abdb": "Middleweight",
+    "fefa96b6d939ffea": "Middleweight",
+    "bb1ac382e0277b3f": "Middleweight",
+    "b381dc272b32ce03": "Flyweight",
+    "55bf7f19a132e0fc": "Flyweight",
+    "dbb5d682a2d7f584": "Flyweight",
+    "1a2d13834696c4ab": "Flyweight",
+    "57ff0eb2351979c4": "Flyweight"
+  },
+  "liveEspnIds": {
+    "3895544": "Flyweight"
+  }
+}
