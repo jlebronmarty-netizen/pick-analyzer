@@ -52,8 +52,8 @@ export async function previewNbaGoatShadowMatches(){
 export async function runNbaGoatShadowScheduler(){
  const loaded=await load(),status=loaded.status,candidates=loaded.candidates,history=loaded.history;
  if(!status.gate.allowed)return {...status,read_only:false,predictions_inserted:0,provider_calls:0,finalClassification:status.classification};
- const slot=Math.floor(Date.now()/1800000),h=createHash('sha256').update(NBA_GOAT_POLICY+':'+String(slot)).digest('hex'),runId=h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20,32);
- const claim=await db.from('sports_sync_jobs').insert({id:runId,job_type:'nba_goat_shadow_v1',sport_key:SPORT,league_key:'nba',provider:NBA_GOAT_PROVIDER,status:'running',metadata:{policy:NBA_GOAT_POLICY,slot}});
+ const slot=Math.floor(Date.now()/1800000),codeRevision=process.env.VERCEL_GIT_COMMIT_SHA?.trim()||'unknown-revision',h=createHash('sha256').update(NBA_GOAT_POLICY+':'+String(slot)+':'+codeRevision).digest('hex'),runId=h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20,32);
+ const claim=await db.from('sports_sync_jobs').insert({id:runId,job_type:'nba_goat_shadow_v1',sport_key:SPORT,league_key:'nba',provider:NBA_GOAT_PROVIDER,status:'running',metadata:{policy:NBA_GOAT_POLICY,slot,codeRevision}});
  if(claim.error){if(claim.error.code==='23505')return {...status,finalClassification:'ALREADY_CLAIMED',predictions_inserted:0};throw Error('NBA_GOAT_CLAIM_FAILED');}
  let inserted=0;const reasons:Record<string,number>={};
  try{
