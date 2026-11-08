@@ -1,0 +1,149 @@
+{
+  "status": "PASS_OPERATIONAL_SHADOW_WITH_EXCLUSIONS",
+  "codeHead": "eea41db1c51011791d2acedc955b8bec16e4497c",
+  "merge": "046a7acc2bf9fd54d7f30f6a4ee4f1b924ade384",
+  "productionDeployment": "dpl_4fqTDrLSf62Q9HE34YZ2psF8XYrA",
+  "previewDeployment": "dpl_zrLxHb2dz6AHjKvh3So8HrCPmsMi",
+  "tree": "9566e8ea24587c4a88bcd4f04d71e7121553e18e",
+  "publicUrl": "https://pick-analyzer.vercel.app/ufc",
+  "migration": "20261108211855",
+  "tests": {
+    "ufc": 10,
+    "dashboard": 93,
+    "edgeLab": 292,
+    "build": "PASS",
+    "eslint": "PASS",
+    "independentResearchReplay": "PASS",
+    "forwardRawReplay": "PASS"
+  },
+  "operational": {
+    "forecasts": 21,
+    "fingerprint": "b5c2351fac8b3674e754bf07c112c556",
+    "quote_observations": 12,
+    "bouts_with_quotes": 10,
+    "calls": 21,
+    "sources": 21,
+    "lock_free": true,
+    "latest_run": {
+      "id": "UFC:124595",
+      "issues": [
+        "4 identidades/historias afectadas por finales sin ganador inequívoco; abstenciones conservadas."
+      ],
+      "status": "PARTIAL",
+      "startedAt": "2026-11-08T21:49:27.837991+00:00",
+      "completedAt": "2026-11-08T21:49:29.769+00:00",
+      "providerCalls": 8
+    }
+  },
+  "grants": [
+    {
+      "table_name": "ufc_free_lock_v1",
+      "rls": true,
+      "anon_select": false,
+      "authenticated_select": false,
+      "service_select": true,
+      "service_insert": true,
+      "service_update": true,
+      "service_delete": false,
+      "service_truncate": false
+    },
+    {
+      "table_name": "ufc_free_predictions_v1",
+      "rls": true,
+      "anon_select": false,
+      "authenticated_select": false,
+      "service_select": true,
+      "service_insert": true,
+      "service_update": false,
+      "service_delete": false,
+      "service_truncate": false
+    },
+    {
+      "table_name": "ufc_free_quotes_v1",
+      "rls": true,
+      "anon_select": false,
+      "authenticated_select": false,
+      "service_select": true,
+      "service_insert": true,
+      "service_update": false,
+      "service_delete": false,
+      "service_truncate": false
+    },
+    {
+      "table_name": "ufc_free_results_v1",
+      "rls": true,
+      "anon_select": false,
+      "authenticated_select": false,
+      "service_select": true,
+      "service_insert": true,
+      "service_update": false,
+      "service_delete": false,
+      "service_truncate": false
+    },
+    {
+      "table_name": "ufc_free_runs_v1",
+      "rls": true,
+      "anon_select": false,
+      "authenticated_select": false,
+      "service_select": true,
+      "service_insert": true,
+      "service_update": true,
+      "service_delete": false,
+      "service_truncate": false
+    },
+    {
+      "table_name": "ufc_free_sources_v1",
+      "rls": true,
+      "anon_select": false,
+      "authenticated_select": false,
+      "service_select": true,
+      "service_insert": true,
+      "service_update": false,
+      "service_delete": false,
+      "service_truncate": false
+    }
+  ],
+  "api": {
+    "status": 200,
+    "providerCalls": 0,
+    "databaseWrites": 0,
+    "summary": {
+      "wins": 0,
+      "losses": 0,
+      "pending": 21,
+      "review": 0,
+      "cancelled": 0,
+      "accuracyPct": null,
+      "brier": null,
+      "logLoss": null,
+      "pricedSettled": 0,
+      "conditionalProfitUnits": null,
+      "conditionalRoiPct": null
+    },
+    "forecasts": 21,
+    "upcoming": 34,
+    "abstentions": 13,
+    "currentPricePairs": 10,
+    "originalPricePairs": 6
+  },
+  "browser": {
+    "productionCardClick": "PASS",
+    "desktopViewport": 1363,
+    "overflow": false,
+    "lightLabelRgb": "14,116,144",
+    "contrast": 5.36,
+    "mobileViewport": "NOT_SEPARATELY_VERIFIED"
+  },
+  "science": {
+    "status": "NO_DEMONSTRATED_ROI",
+    "candidate": null,
+    "holdoutLabel": "conditional chronological confirmation; historical price availability uncertified",
+    "officialPicks": 0
+  },
+  "limits": [
+    "four affected histories quarantined; producer status PARTIAL is intentional",
+    "future results do not yet exist for the new cohort",
+    "no executable ROI or certified sportsbook contracts",
+    "legacy source identity bridge is exact normalized names, not a complete certified fighter directory"
+  ]
+}

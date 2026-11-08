@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "sources": [
+    {
+      "name": "history",
+      "bytes": 3047693,
+      "sha256": "1b8075549ee04d0a326f6aaea110e79fef493259ff904f1b52b49f349e4bc291",
+      "gitBlob": "f42aacf95a8fc6d2a81fda8fba9293984cad70a9",
+      "expectedGitBlob": "f42aacf95a8fc6d2a81fda8fba9293984cad70a9",
+      "exact": true
+    },
+    {
+      "name": "quotes",
+      "bytes": 2746971,
+      "sha256": "4c57304d54e2ba00199306d30ea8da6aa68ca8c21fd9cc7260b70997fc8ece57",
+      "gitBlob": "28210d7696d272c63bee6eb13580f1881d658dfd",
+      "expectedGitBlob": "28210d7696d272c63bee6eb13580f1881d658dfd",
+      "exact": true
+    }
+  ],
+  "normalizedHistoryRowsVerified": 8679,
+  "quoteRowsVerified": 7340,
+  "newRequests": 0,
+  "normalizedQuoteFieldsVerified": 7340,
+  "seedSha256": "54ff0660853ed594a636e7ef363cd10b700e32bdfc8263be5f67158f6a016e2e"
+}

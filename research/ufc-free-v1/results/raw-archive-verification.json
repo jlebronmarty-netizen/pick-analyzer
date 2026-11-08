@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "archivedSources": 21,
+  "rawHashesVerified": 20,
+  "explicitUnavailableBodies": [
+    {
+      "id": "89b657fd-66b3-4929-bcd0-a1e0fd280c60",
+      "status": 404,
+      "semantics": "audit recording time, not original HTTP capture"
+    }
+  ],
+  "frozenPredictions": 21,
+  "quoteObservations": 12,
+  "predictionSourceForeignKeysVerified": true
+}
