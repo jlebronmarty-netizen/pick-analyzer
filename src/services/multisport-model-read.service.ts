@@ -12,14 +12,16 @@ import {ncaabModelCohort} from '@/lib/ncaab-checkpoint';
 import {getSoccerShadowReport} from './soccer-shadow-read.service';
 import {getTableTennisReport} from './table-tennis-read.service';
 import {getEdgeLabOverviewCards} from './edge-lab-overview-read.service';
+import {getNbaGoatModelCard} from './nba-goat-model-read.service';
 export const getMultisportModelReport=cache(async()=>{
-  const [research,official,nhl,soccer,tableTennis,ncaab,ufc,edgeLabCards]=await Promise.all([getQualifiedPlaysReport({includeEntries:true}),getMlbOfficialPerformance().catch(()=>null),getNhlExternalReport(),getSoccerShadowReport(),getTableTennisReport(),getNcaabDailyReport(),getUfcFreeReport(),getEdgeLabOverviewCards()]);
+  const [research,official,nhl,soccer,tableTennis,ncaab,ufc,edgeLabCards,nbaCard]=await Promise.all([getQualifiedPlaysReport({includeEntries:true}),getMlbOfficialPerformance().catch(()=>null),getNhlExternalReport(),getSoccerShadowReport(),getTableTennisReport(),getNcaabDailyReport(),getUfcFreeReport(),getEdgeLabOverviewCards(),getNbaGoatModelCard()]);
   const cards:SportModelCard[]=[
     {key:'mlb',label:'MLB',href:'/mlb/overview',classification:'Producción + forward research',cohorts:mlbModelCohorts(research,official)},
     {key:'nhl',label:'NHL',href:'/nhl',classification:'MODEL_ONLY',cohorts:[nhlModelCohort(nhl)]},
     ...edgeLabCards,
     {key:'ufc',label:'UFC',href:'/ufc',classification:'SHADOW / RESEARCH · FREE',cohorts:[ufcCohort(ufc)]},
-    ...getSportsCenterReport().sports.filter(s=>!['mlb','nhl','soccer','table-tennis','ncaaf','ufc','mma_ufc'].includes(s.key)).map(s=>({key:s.key,label:s.label,href:s.key==='nba'?'/nba-market-data':'/sports-center/'+s.key,classification:s.key==='nba'?'Cuotas · modelo separado':s.status,cohorts:[]})),
+    nbaCard,
+    ...getSportsCenterReport().sports.filter(s=>!['mlb','nhl','soccer','table-tennis','ncaaf','ufc','mma_ufc','nba'].includes(s.key)).map(s=>({key:s.key,label:s.label,href:'/sports-center/'+s.key,classification:s.status,cohorts:[]})),
     {key:'ncaab',label:'NCAAB',href:'/ncaab',classification:'Experimental · proceso diario FREE',cohorts:[ncaabModelCohort(ncaab)]},
   ];
   return {cards,research,nhl,ncaab,soccer,tableTennis,ufc,readAt:new Date().toISOString()};
