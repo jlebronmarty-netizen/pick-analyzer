@@ -1,6 +1,7 @@
 import {notFound,redirect} from 'next/navigation';
 import {headers} from 'next/headers';
 import {enabled} from '../../lib/nba-production-feed.mjs';
+import DashboardShell from '@/components/dashboard/DashboardShell';
 import Board from './board';
 export const dynamic='force-dynamic';
 export default async function Page(){
@@ -10,5 +11,5 @@ export default async function Page(){
   if(!host||!/^[a-z0-9-]+\.vercel\.app$/.test(host))notFound();
   if((await headers()).get('host')!==host)redirect(`https://${host}/nba-market-data`);
  }
- return <Board archiveControls={process.env.VERCEL_ENV==='production'}/>;
+ return <DashboardShell><Board archiveControls={process.env.VERCEL_ENV==='production'}/></DashboardShell>;
 }

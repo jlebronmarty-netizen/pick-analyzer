@@ -24,6 +24,11 @@ const titleByPath: DashboardTitleByPath = {
   '/performance': 'Performance',
   '/model-lab': 'Model Lab',
   '/data-health': 'Data Health',
+  '/nba-market-data': 'NBA Â· GOAT',
+  '/edge-lab': 'Edge Lab',
+  '/nhl': 'NHL',
+  '/ncaab': 'NCAAB',
+  '/ufc': 'UFC',
 }
 
 function getProductNavItems(): DashboardNavItem[] {
@@ -41,15 +46,4 @@ function getProductNavItems(): DashboardNavItem[] {
 
 export default function DashboardShell({
   children,
-}: {
-  children: ReactNode
-}) {
-  return (
-    <DashboardShellClient
-      productNavItems={getProductNavItems()}
-      titleByPath={titleByPath}
-    >
-      {children}
-    </DashboardShellClient>
-  )
-}
+¶»§q«^
