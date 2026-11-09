@@ -1,2 +1,3 @@
 import NbaModelStatus from './model-status';
-export default function Layout({children}){return <><NbaModelStatus/>{children}</>;}
+import NbaModelReport from './model-report';
+export default function Layout({children}){return <><NbaModelStatus/><NbaModelReport/>{children}</>;}
