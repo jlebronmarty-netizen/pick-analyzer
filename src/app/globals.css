@@ -134,3 +134,169 @@ html.pa-light .mlb-ui .text-emerald-200 { color: #047857; }
 
 /* UFC labels retain readable contrast in the existing light theme. */
 html.pa-light .ufc-module .text-cyan-300 { color: #0e7490; }
+
+
+/* Shared visual language for sport modules.
+   Presentation only: no data, model, provider, settlement, or scheduling behavior. */
+.sport-standard {
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+.sport-standard-hero {
+  border: 1px solid rgb(45 212 191 / .30);
+  border-radius: 1rem;
+  background: rgb(15 23 42);
+  padding: 1.5rem;
+}
+.sport-standard-hero > a {
+  color: rgb(94 234 212);
+  font-size: .875rem;
+  font-weight: 600;
+}
+.sport-standard-eyebrow {
+  margin-top: 1.25rem;
+  color: rgb(94 234 212);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.sport-standard-hero h1 {
+  margin-top: .5rem;
+  color: white;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+}
+.sport-standard-hero h1 + p {
+  margin-top: .75rem;
+  max-width: 56rem;
+  color: rgb(203 213 225);
+  font-size: .875rem;
+  line-height: 1.5rem;
+}
+.sport-standard > section:not(.sport-standard-panel),
+.sport-standard-panel {
+  border: 1px solid rgb(51 65 85) !important;
+  border-radius: .75rem !important;
+  background: rgb(15 23 42) !important;
+  padding: 1.25rem !important;
+  margin: 0 !important;
+  color: rgb(226 232 240) !important;
+}
+.sport-standard section h2 {
+  color: white;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+}
+.sport-standard section h2 + p {
+  margin-top: .375rem;
+  color: rgb(148 163 184);
+  font-size: .875rem;
+  line-height: 1.5rem;
+}
+.sport-standard button,
+.sport-standard select,
+.sport-standard input {
+  border: 1px solid rgb(71 85 105) !important;
+  border-radius: .5rem !important;
+  background: rgb(2 6 23) !important;
+  color: rgb(241 245 249) !important;
+  min-height: 2.5rem;
+}
+.sport-standard button {
+  padding: .55rem .9rem !important;
+  font-size: .875rem;
+  font-weight: 600;
+}
+.sport-standard button:hover:not(:disabled) {
+  border-color: rgb(45 212 191) !important;
+}
+.sport-standard button[aria-selected="true"],
+.sport-standard button[aria-pressed="true"] {
+  border-color: rgb(45 212 191) !important;
+  background: rgb(20 78 74 / .35) !important;
+  color: rgb(153 246 228) !important;
+}
+.sport-standard select,
+.sport-standard input {
+  padding: .5rem .75rem !important;
+}
+.sport-standard table {
+  width: 100% !important;
+  border-spacing: 0 !important;
+  font-size: .875rem;
+}
+.sport-standard table thead {
+  background: rgb(2 6 23);
+}
+.sport-standard table th {
+  border-bottom: 1px solid rgb(71 85 105);
+  padding: .75rem !important;
+  color: rgb(148 163 184);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sport-standard table td {
+  border-bottom: 1px solid rgb(30 41 59);
+  padding: .75rem !important;
+  color: rgb(226 232 240);
+  vertical-align: top;
+}
+.sport-standard table tbody tr:hover {
+  background: rgb(30 41 59 / .35);
+}
+.sport-standard details {
+  border-top: 1px solid rgb(51 65 85);
+  padding: .75rem 0;
+}
+.sport-standard summary {
+  cursor: pointer;
+  color: rgb(94 234 212);
+  font-weight: 600;
+}
+.sport-standard pre {
+  margin-top: .75rem;
+  border-radius: .5rem;
+  background: rgb(2 6 23);
+  padding: .75rem;
+  color: rgb(203 213 225);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.sport-standard a {
+  color: rgb(94 234 212);
+}
+.sport-standard [role="alert"] {
+  border: 1px solid rgb(251 191 36 / .3);
+  border-radius: .75rem;
+  padding: .75rem;
+  color: rgb(253 230 138) !important;
+}
+@media (max-width: 640px) {
+  .sport-standard-hero { padding: 1.25rem; }
+  .sport-standard-hero h1 { font-size: 1.5rem; line-height: 2rem; }
+  .sport-standard > section:not(.sport-standard-panel),
+  .sport-standard-panel { padding: 1rem !important; }
+}
+html.pa-light .sport-standard-hero,
+html.pa-light .sport-standard > section:not(.sport-standard-panel),
+html.pa-light .sport-standard-panel {
+  background: white !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.pa-light .sport-standard-hero h1,
+html.pa-light .sport-standard section h2 { color: #0f172a; }
+html.pa-light .sport-standard-hero h1 + p,
+html.pa-light .sport-standard section h2 + p,
+html.pa-light .sport-standard table td { color: #334155; }
+html.pa-light .sport-standard button,
+html.pa-light .sport-standard select,
+html.pa-light .sport-standard input,
+html.pa-light .sport-standard table thead,
+html.pa-light .sport-standard pre { background: #f8fafc !important; color: #0f172a !important; }
