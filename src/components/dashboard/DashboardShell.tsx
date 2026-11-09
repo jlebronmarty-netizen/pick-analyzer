@@ -24,6 +24,11 @@ const titleByPath: DashboardTitleByPath = {
   '/performance': 'Performance',
   '/model-lab': 'Model Lab',
   '/data-health': 'Data Health',
+  '/nba-market-data': 'NBA · GOAT',
+  '/edge-lab': 'Edge Lab',
+  '/nhl': 'NHL',
+  '/ncaab': 'NCAAB',
+  '/ufc': 'UFC',
 }
 
 function getProductNavItems(): DashboardNavItem[] {
