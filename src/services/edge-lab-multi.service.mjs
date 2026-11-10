@@ -27,7 +27,7 @@ async function collectTt(db,request,summary){
  const plan=planTtRecovery(existing,outcomes,canonicalTtHistory(storedBefore.map(r=>r.payload)).finals,attempts);
  summary.recovery_backlog_events=plan.backlog_events;summary.recovery_skipped=plan.skipped;
  const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V4';summary.provider_spacing_ms=1200;
- const recentPages=plan.target?1:2;
+ const recentPages=plan.backlog_events>10?0:plan.target?1:2;summary.settlement_priority=plan.backlog_events>10;
  for(let page=1;page<=recentPages;page++){
   const response=await paced(()=>paidRead(db,request,'results',page,summary)),parsed=normalizeTtResultPage(response.data,response.received_at,page);
   for(const row of parsed.rows){const key=row.source+':'+row.sourceMatchId;if(resultIds.has(key))summary.warnings.push('RESULT_PAGE_OVERLAP');resultIds.add(key);}
@@ -36,7 +36,7 @@ async function collectTt(db,request,summary){
   if(!parsed.hasNextPage)break;
   if(page===recentPages)summary.warnings.push('RESULT_PAGE_BUDGET_REACHED');
  }
- summary.result_coverage={pages:summary.result_pages.length,received:summary.result_pages.reduce((n,p)=>n+p.received,0),normalized:allIncoming.length,complete:summary.result_pages.at(-1)?.complete===true,provider_total:summary.result_pages[0]?.total??null};
+ summary.result_coverage={pages:summary.result_pages.length,received:summary.result_pages.reduce((n,p)=>n+p.received,0),normalized:allIncoming.length,complete:summary.result_pages.length?summary.result_pages.at(-1)?.complete===true:false,provider_total:summary.result_pages[0]?.total??null};
  summary.recoveries=[];
  for(const target of plan.targets??(plan.target?[plan.target]:[])){
   const recovery={...target,attempted_at:new Date().toISOString(),next_page:target.page,next_side:target.side,status:'REQUESTED'};
