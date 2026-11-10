@@ -8,10 +8,18 @@ const sportLabel=(label:string)=>label
   .replace('NCAAF · PPG','NCAAF')
   .replace('Tennis','Tenis');
 const classificationLabel=(value:string)=>value
-  .replaceAll(' / ',' · ')
-  .replaceAll(' + ',' · ')
   .replace('Producción + forward research','PRODUCCIÓN')
-  .replace('Experimental · proceso diario FREE','EXPERIMENTAL · FREE');
+  .replace('Experimental · proceso diario FREE','EXPERIMENTAL · FREE')
+  .replaceAll(' / ',' · ')
+  .replaceAll(' + ',' · ');
+const metricLabel=(card:SportModelCard)=>{
+  if(card.metricLabel==='Ganador / empate (1X2)')return '1X2';
+  if(card.metricLabel)return card.metricLabel;
+  if(card.key==='mlb')return 'Selecciones registradas';
+  if(card.key==='nhl')return 'Moneyline';
+  if(card.key==='ncaab')return 'Ganador';
+  return null;
+};
 const checkedAtLabel=(value:string)=>new Intl.DateTimeFormat('es-PR',{
   timeZone:'America/Puerto_Rico',
   day:'numeric',
@@ -32,8 +40,8 @@ export default function SportModelOverview({cards}:{cards:SportModelCard[]}){
     <p className="text-xs leading-6 text-slate-400">Se suman WIN y LOSS; no se promedian porcentajes. Cada registro cuenta una vez; distintos modelos pueden seleccionar el mismo partido. Fórmulas y pestañas son vistas del mismo ledger. No es accuracy de juegos únicos, probabilidad calibrada, ROI ni certificación conjunta. OPEN, PUSH y VOID quedan fuera. Fútbol, tenis de mesa, NCAAF y NBA aportan solo su mercado principal de ganador/Moneyline; los mercados secundarios no se suman a este subtotal.</p>
     <div role="group" aria-label="Fase MLB de las tarjetas" className="flex flex-wrap items-center gap-2"><span className="text-sm text-slate-400">MLB:</span>{[['REGULAR_SEASON','Temporada regular'],['POSTSEASON','Playoffs']].map(([key,name])=><button type="button" key={key} onClick={()=>setPhase(key)} aria-pressed={phase===key} className={`rounded-lg border px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-teal-300 ${phase===key?'border-teal-400 bg-teal-500/10':'border-slate-600'}`}>{name}</button>)}</div>
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{cards.map(card=>{const c=card.cohorts.find(c=>c.key===phase)??card.cohorts[0];return <Link key={card.key} data-sport-card={card.key} prefetch={false} href={card.href} className="rounded-xl border border-slate-700 bg-slate-900 p-5 transition hover:border-teal-300 focus-visible:outline-2 focus-visible:outline-teal-300">
-      <div className="flex justify-between gap-3"><h3 className="text-lg font-bold">{sportLabel(card.label)}</h3><span className="text-right text-xs font-semibold uppercase tracking-wide text-slate-400">{classificationLabel(card.classification)}</span></div>
-      {card.metricLabel&&<p className="mt-3 text-xs text-slate-300">Accuracy · {card.metricLabel}</p>}
+      <div className="flex flex-wrap items-start justify-between gap-3"><h3 className="text-lg font-bold">{sportLabel(card.label)}</h3><div className="flex flex-wrap justify-end gap-1.5">{classificationLabel(card.classification).split(' · ').map(tag=><span key={tag} className="rounded-full border border-slate-600 bg-slate-950/60 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-300">{tag}</span>)}</div></div>
+      {metricLabel(card)&&<p className="mt-3 text-xs text-slate-300">Accuracy · {metricLabel(card)}</p>}
       <p className="mt-4 text-3xl font-bold">{pct(c?.accuracy??null)}</p><p className="mt-2 text-sm">{c?.available?`${c.wins} W / ${c.losses} L · ${c.pending} pendientes`:'Resultados no conectados o no disponibles'}</p>
       {c&&<><p className="mt-3 text-xs text-teal-300">{c.label}</p><p className="mt-2 text-xs leading-5 text-slate-400">{c.note}</p></>}
       <div className="mt-3 space-y-2 text-xs leading-5 text-slate-300">{card.detailLines?.map(line=><p key={line}>{line}</p>)}</div>
