@@ -55,7 +55,8 @@ export default function DashboardShellClient({
                     const active = pathname === item.href || (pathname === '/' && item.href === '/today')
                     return (
                       <div key={item.href}>
-                      {index === 2 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">INVESTIGACIÓN Y HERRAMIENTAS</p>}
+                      {index === 2 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">INVESTIGACIÓN</p>}
+                      {index === 5 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">RESULTADOS</p>}
                       <a
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
