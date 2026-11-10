@@ -22,9 +22,11 @@ test('gates reject live, stale, unknown venue, missing team and wrong season',()
 });
 const f=original.forecasts[0];
 const final={event_id:f.event_id,home_id:f.home_id,away_id:f.away_id,scheduled_at:f.scheduled_at,home_score:80,away_score:60,captured_at:'2026-11-03T23:00:00Z',status:'FINAL'};
-test('duplicate finals do not duplicate denominator; corrections and changed tip require review',()=>{
+test('duplicate finals do not duplicate denominator; exact event identity tolerates bounded tip/side corrections but conflicting scores review',()=>{
  const row=reconcileNcaab(f,[final,final]);assert.equal(row.settlement.outcome,'WIN');assert.equal(ncaabMetrics([row]).winnerDenominator,1);
- for(const change of [{scheduled_at:'2026-11-03T01:00:00Z'},{home_id:f.away_id},{home_score:81}]){
+ const shifted=reconcileNcaab(f,[{...final,scheduled_at:new Date(Date.parse(f.scheduled_at)+45*60000).toISOString()}]);assert.equal(shifted.review_required,false);
+ const swapped=reconcileNcaab(f,[{...final,home_id:f.away_id,away_id:f.home_id,home_score:60,away_score:80}]);assert.equal(swapped.review_required,false);assert.equal(swapped.settlement.outcome,'WIN');
+ for(const change of [{scheduled_at:new Date(Date.parse(f.scheduled_at)+3*3600000).toISOString()},{home_id:'other-team'},{home_score:81}]){
   const reviewed=reconcileNcaab(f,[final,{...final,...change}]);assert.equal(reviewed.review_required,true);assert.equal(ncaabMetrics([reviewed]).winnerDenominator,0);
  }
  assert.equal(reconcileNcaab(f,[]).settlement,null);
