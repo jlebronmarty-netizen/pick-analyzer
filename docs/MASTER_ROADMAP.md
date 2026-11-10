@@ -4254,7 +4254,8 @@ No se modificaron motores, fórmulas, probabilidades, predicciones, selección d
 ### Free winner-model expansion (2026-11-10)
 
 NFL, tennis singles and BSN share an experimental pregame ledger and dashboard.
-Validate the NFL priced subset prospectively. For tennis, certify a no-cost
-pregame quote source before reporting ROI. For BSN, obtain approved future
+Start with open NFL schedules and results; certify a no-cost pregame quote
+source for ROI. For tennis, verify the terms and coverage of a free
+calendar/results API, then validate prices separately. For BSN, obtain approved future
 calendar/results via a permissioned feed or operator-attested CSV, then audit
 price availability separately. Keep all three in SHADOW. See [rollout contract](free-sports-shadow-v1.md).

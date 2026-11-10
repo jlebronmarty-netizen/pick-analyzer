@@ -28,7 +28,8 @@ export default async function FreeSportPage({params}:{params:Promise<{sport:stri
   </section>
   <p className="text-sm text-slate-300">Accuracy = ganadas ÷ (ganadas + perdidas). El ROI simula 1 unidad por selección con cuota archivada antes del inicio. Empates, retiros, cancelaciones y casos en revisión quedan fuera. Una muestra vacía se muestra como «—».</p>
   {sport==='bsn'&&<p className="rounded-xl border border-amber-400/40 p-4 text-sm text-amber-200">Pick conserva resultados históricos de BSN. Para emitir pronósticos hace falta un calendario autorizado o un CSV con origen atestado. No hay una fuente de cuotas aprobada para este módulo.</p>}
-  {sport==='tennis'&&<p className="rounded-xl border border-slate-700 p-4 text-sm">La fuente consultada no entrega pares de cuotas verificables para ATP/WTA. El accuracy puede medirse cuando haya partidos liquidados; el ROI queda sin datos.</p>}
+  {sport==='tennis'&&<p className="rounded-xl border border-slate-700 p-4 text-sm">ATP y WTA están preparados para medir accuracy. La emisión está en espera de una fuente autorizada para el calendario y los resultados. El ROI requiere además cuotas prepartido verificadas.</p>}
+  {sport==='nfl'&&<p className="text-sm text-slate-300">Calendario y resultados: <a href="https://github.com/nflverse/nflverse-data/releases/tag/schedules" className="text-teal-300 underline">nflverse</a>, <a href="https://creativecommons.org/licenses/by/4.0/" className="text-teal-300 underline">CC BY 4.0</a>. Los datos se filtran y el modelo genera sus propias proyecciones. El calendario abierto no acredita precios prepartido.</p>}
   {reports.map(r=>{
    const current=new Map(r.rows.filter(row=>row.outcome==='OPEN').map(row=>[row.forecast.event.id,row]));
    return <section key={r.league} className="space-y-4 rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-6">

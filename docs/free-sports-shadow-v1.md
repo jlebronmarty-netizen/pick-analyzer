@@ -11,8 +11,8 @@ Existing sport-specific engines and cohorts remain separate.
 
 | League | Calendar and results | Price at issuance |
 | --- | --- | --- |
-| NFL regular season | [ESPN NFL scoreboard](https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=2026&seasontype=2&limit=1000). Exact current season/type 2 required; up to 10 days ahead, not a completeness claim. | Matched two-way DraftKings quotes as observed in the same pregame ESPN response. The upstream field is named `close`; it is used as an observed snapshot, with no claim of a closing or executable price. |
-| ATP/WTA singles | [ATP ESPN scoreboard](https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard) and [WTA ESPN scoreboard](https://site.api.espn.com/apis/site/v2/sports/tennis/wta/scoreboard). One rolling 48-day feed window, exact participants/start, singles only. | No usable pairs in the two scoreboard samples; one separate upcoming odds endpoint per tour returned zero items. No ROI until a source with reliable pregame prices is available. |
+| NFL regular season | [nflverse schedules release](https://github.com/nflverse/nflverse-data/releases/tag/schedules), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), maintained by Lee Sharpe/nflverse. Times in Eastern converted to UTC; filter exact season/type and 10-day forecast horizon. | Unavailable. The schedule's line fields do not prove a pregame timestamp and are ignored. |
+| ATP/WTA singles | Model and UI ready; production collection disabled until an authorized feed is verified. [Setpoint API](https://point.tennis/api) lists a free schedule/final-results plan; actual access, terms, IDs and coverage are unverified. | No approved price feed. [TheRundown](https://therundown.io/tennis-odds-api) describes ATP/WTA main lines on a free tier with a five-minute delay for personal/internal use; commercial display requires a different tier. No key usage or sign-up in this release. |
 | BSN Puerto Rico | Existing `sport_events`, 38 finals available at preflight. No external network requests. Upcoming only with approved feed or attested operator CSV; no current approved future slate. See [BSN source inventory](bsn-data-source-inventory.md). | No approved feed or matched pair. |
 
 The BSN reader requires stable IDs and `metadata.free_shadow_attestation`
@@ -25,19 +25,21 @@ forward accuracy or ROI.
 
 ## Validation and operation
 
-Source preflight, 2026-11-10 02:13 UTC (read-only replay, no issued picks):
+Open NFL source preflight, 2026-11-10 02:31 UTC (read-only replay):
+**134 decisive finals, 1 tie, 136 valid future fixtures, 15 eligible forecasts
+within the horizon, 0 accepted prices.** No forecast was issued.
+Release CSV SHA256: `5f36209e28c756af2e754b9ebbc51818b1bcc89da90cc148f52b46bf13b72dc8`.
 
-| League | Timed decisive finals parsed | Valid future fixtures in feed | Model-eligible within horizon | Eligible with quote |
-| --- | ---: | ---: | ---: | ---: |
-| NFL | 134 | 101 | 15 | 12 |
-| ATP | 495 | 7 | 7 | 0 |
-| WTA | 944 | 11 | 8 | 0 |
+Earlier bounded ESPN diagnostics (2026-11-10 02:13 UTC): 15 NFL, 7 ATP and 8
+WTA eligible, with 12 matched NFL quote pairs and none for tennis. These
+observations are source discovery only, not scheduled or approved ingest.
+ESPN links to the [Disney terms](https://disneytermsofuse.com/english/), which
+restrict automated extraction. The runtime cannot call ESPN for these sports.
+The diagnostic parser remains for offline fixture checks. No ESPN quote is
+eligible for the production cohort.
 
-Raw-response SHA256: NFL `292eb0f8dcaefab5be6e1dfee5af4e8cc17353b650bdbe7da756e632b10eb98c`;
-ATP `b611732f7c002b5355f3f5a35a3caaee98171ae8b646d67c83b441b6e7f17290`;
-WTA `7cb613dce5f32607e7e9c78c3bbd988103684d306ec45df4ac3c1b6242371089`.
 The normalized counts exclude TBD participants, absent start times, unsupported
-statuses, mismatched seasons, and ambiguous identities. Nondecisive matches
+statuses, mismatched seasons and ambiguous identities. Nondecisive matches
 are excluded from training and win/loss accounting.
 
 - Accuracy = wins / (wins + losses), all decisive forecasts. Paper ROI =
@@ -53,8 +55,8 @@ are excluded from training and win/loss accounting.
   records source, UTC slot, result, capture time, digest, counts and normalized
   pregame evidence; forecast-producing runs include the training IDs/outcomes.
 - Production-only authenticated cron at minute 23 every four hours UTC. Per
-  cycle: at most one HTTP request each for NFL, ATP, WTA; BSN uses Supabase
-  only. No retries, no paid keys, 20-second timeout and 8 MiB response cap.
+  cycle: one NFL GitHub release request with at most one allowlisted asset
+  redirect. BSN uses Supabase only; ATP/WTA perform no collection. No retries, no paid keys, 20-second timeout and 8 MiB response cap.
   A failed source does not stop the other sports. The UI hides a stale
   calendar after 5 hours and retains the frozen historical ledger.
 - Pages: `/sports-shadow/nfl`, `/sports-shadow/tennis`, `/sports-shadow/bsn`.

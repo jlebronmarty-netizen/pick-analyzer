@@ -1,4 +1,4 @@
-import {dateOffset,type Fixture,type League,type Party,type Quote} from './model';
+import type {Fixture,League,Party,Quote} from './model';
 
 type Competition={id?:unknown;date?:unknown;timeValid?:unknown;status?:{type?:{name?:unknown;completed?:unknown;state?:unknown}};competitors?:Competitor[];odds?:Odds[]};
 type Competitor={id?:unknown;homeAway?:unknown;team?:{id?:unknown;displayName?:unknown};athlete?:{fullName?:unknown};score?:unknown;winner?:unknown};
@@ -12,12 +12,6 @@ const iso=(x:unknown)=>typeof x==='string'&&/^\d{4}-\d\d-\d\dT/.test(x)&&Number.
 const score=(x:unknown)=>typeof x==='number'&&Number.isSafeInteger(x)&&x>=0?x:typeof x==='string'&&/^\d{1,4}$/.test(x)?Number(x):null;
 const list=<T,>(x:T[]|undefined):T[]=>Array.isArray(x)?x:[];
 const odd=(x:unknown)=>typeof x==='string'&&/^[+-]\d{3,5}$/.test(x)&&Math.abs(Number(x))>=100&&Math.abs(Number(x))<=10000?Number(x):null;
-export function espnRequest(league:Exclude<League,'BSN'>,clock:Date){
- const year=clock.getUTCFullYear()-(clock.getUTCMonth()<2?1:0);
- const endpoint='https://site.api.espn.com/apis/site/v2/sports/';
- return league==='NFL'?{url:endpoint+'football/nfl/scoreboard?dates='+year+'&seasontype=2&limit=1000',year}:
-  {url:endpoint+'tennis/'+league.toLowerCase()+'/scoreboard?dates='+dateOffset(clock,-40).replaceAll('-','')+'-'+dateOffset(clock,7).replaceAll('-','')+'&limit=1000',year};
-}
 function pregameQuote(c:Competition,eventId:string,a:string,b:string,observedAt:string):Quote|null{
  const offers=list(c.odds).filter(o=>o?.provider?.id==='100'&&['Draft Kings','DraftKings'].includes(String(o.provider.name)));
  if(offers.length!==1)return null;
@@ -99,4 +93,65 @@ export function parseBsn(rows:BsnEvent[],observedAt:string){
   if(['cancelled','canceled','abandoned'].includes(status??''))return [{...base,state:'EXCLUDED',reason:status??null}];
   return [];
  }));
+}
+
+// Open CC BY 4.0 release; the legacy ESPN parser above is used only for offline source comparison.
+export const NFLVERSE_SCHEDULE='https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv';
+const nflNames:Record<string,string>={
+ ARI:'Arizona Cardinals',ATL:'Atlanta Falcons',BAL:'Baltimore Ravens',BUF:'Buffalo Bills',CAR:'Carolina Panthers',
+ CHI:'Chicago Bears',CIN:'Cincinnati Bengals',CLE:'Cleveland Browns',DAL:'Dallas Cowboys',DEN:'Denver Broncos',
+ DET:'Detroit Lions',GB:'Green Bay Packers',HOU:'Houston Texans',IND:'Indianapolis Colts',JAX:'Jacksonville Jaguars',
+ KC:'Kansas City Chiefs',LA:'Los Angeles Rams',LAC:'Los Angeles Chargers',LV:'Las Vegas Raiders',MIA:'Miami Dolphins',
+ MIN:'Minnesota Vikings',NE:'New England Patriots',NO:'New Orleans Saints',NYG:'New York Giants',NYJ:'New York Jets',
+ PHI:'Philadelphia Eagles',PIT:'Pittsburgh Steelers',SEA:'Seattle Seahawks',SF:'San Francisco 49ers',
+ TB:'Tampa Bay Buccaneers',TEN:'Tennessee Titans',WAS:'Washington Commanders',
+};
+const eastern=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+function easternKickoff(day:string,time:string){
+ if(!/^\d{4}-\d\d-\d\d$/.test(day)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))return null;
+ const local=day+' '+time,nominal=Date.parse(day+'T'+time+':00Z');
+ if(!Number.isFinite(nominal))return null;
+ const exact=[4,5].map(h=>new Date(nominal+h*3600000)).filter(d=>eastern.format(d)===local);
+ return exact.length===1?exact[0].toISOString():null;
+}
+function csvRows(csv:string){
+ const rows:string[][]=[];let fields:string[]=[],value='',quoted=false,closed=false;
+ for(let i=0;i<csv.length;i++){
+  const ch=csv[i];
+  if(quoted){
+   if(ch==='"'){
+    if(csv[i+1]==='"'){value+='"';i++;}
+    else{quoted=false;closed=true;}
+   }else value+=ch;
+  }else if(ch==='"'&&!value&&!closed)quoted=true;
+  else if(ch===','){fields.push(value);value='';closed=false;}
+  else if(ch==='\n'||ch==='\r'){
+   if(ch==='\r'&&csv[i+1]==='\n')i++;
+   fields.push(value);rows.push(fields);fields=[];value='';closed=false;
+  }else if(closed||ch==='"')throw Error('NFLVERSE_INVALID_CSV');
+  else value+=ch;
+ }
+ if(quoted)throw Error('NFLVERSE_INVALID_CSV');
+ if(value||fields.length||closed)rows.push([...fields,value]);
+ return rows;
+}
+export function parseNflverse(csv:string,observedAt:string,year:number){
+ const [header,...lines]=csvRows(csv.replace(/^\uFEFF/,''));
+ const required=['game_id','season','game_type','gameday','gametime','home_team','away_team','home_score','away_score','result'];
+ if(!header||required.some(k=>header.filter(h=>h===k).length!==1))throw Error('NFLVERSE_INVALID_HEADER');
+ const field=Object.fromEntries(required.map(k=>[k,header.indexOf(k)]));
+ const rows=lines.flatMap((r):Fixture[]=>{
+  if(r.length!==header.length||r[field.season]!==String(year)||r[field.game_type]!=='REG')return [];
+  const home=r[field.home_team],away=r[field.away_team],eventId=r[field.game_id];
+  const start=easternKickoff(r[field.gameday],r[field.gametime]);
+  if(!start||!Object.hasOwn(nflNames,home)||!Object.hasOwn(nflNames,away)||home===away||
+     !new RegExp('^'+year+'_\\d{2}_'+away+'_'+home+'$').test(eventId))return [];
+  const base={id:eventId,start,a:{id:home,name:nflNames[home]},b:{id:away,name:nflNames[away]},quote:null,winner:null,reason:null};
+  const x=score(r[field.home_score]),y=score(r[field.away_score]),result=r[field.result];
+  if(start>observedAt&&r[field.home_score]===''&&r[field.away_score]===''&&result==='')return [{...base,state:'PRE'}];
+  if(start<observedAt&&x!==null&&y!==null&&result!==''&&Number(result)===x-y)
+   return x===y?[{...base,state:'TIE',reason:'Empate oficial'}]:[{...base,state:'FINAL',winner:x>y?home:away}];
+  return [];
+ });
+ return unique(rows);
 }

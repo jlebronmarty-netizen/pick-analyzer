@@ -3423,7 +3423,7 @@ No se modificaron motores, fórmulas, probabilidades, predicciones, selección d
 ### FREE shadow expansion — NFL, ATP/WTA and BSN (2026-11-10)
 
 Implemented the shared winner-only tracker in the proposed release. Source
-preflight replay: 15 NFL forecasts (12 with an eligible quote), 7 ATP and 8
-WTA (unpriced). BSN has 38 archived finals and no approved future slate in
-preflight. These are diagnostics, not issued picks. Production verification and
-a forward settlement sample are release gates. See [source and rollout contract](free-sports-shadow-v1.md).
+preflight replay: 15 NFL forecasts from the open nflverse release, without
+verified prices. ATP/WTA production collection awaits an authorized free feed;
+BSN has 38 archived finals and no approved future slate. These are diagnostics,
+not issued picks. Production verification and a forward sample are release gates. See [source and rollout contract](free-sports-shadow-v1.md).

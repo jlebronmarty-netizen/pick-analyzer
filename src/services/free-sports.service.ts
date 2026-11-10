@@ -2,13 +2,13 @@ import 'server-only';
 import {createHash} from 'node:crypto';
 import {cache} from 'react';
 import {cohort,issueForecasts,LEAGUES,metrics,resolve,SPORT_LEAGUES,SPORT_NAMES,tennisCohort,type Fixture,type Forecast,type League,type LeagueReport,type Observation,type Sport} from '@/lib/free-sports/model';
-import {espnRequest,parseBsn,parseEspn,type BsnEvent} from '@/lib/free-sports/sources';
+import {NFLVERSE_SCHEDULE,parseBsn,parseNflverse,type BsnEvent} from '@/lib/free-sports/sources';
 import type {SportModelCard} from '@/lib/sport-model-overview';
 
 const RUNS='free_sports_runs_v1',FORECASTS='free_sports_forecasts_v1',RESULTS='free_sports_results_v1';
 const BSN_SELECT='id,start_time,home_team_id,away_team_id,home_team,away_team,status,home_score,away_score,metadata';
 type LedgerForecast={event_id:string;start_at:string;forecast:Forecast};
-type RunEvidence={history:number;upcoming:Fixture[];sha256:string;records:number;providerCalls:number;unpriced:number;modelFacts?:[string,string,string,string,string][]};
+type RunEvidence={history:number;upcoming:Fixture[];sha256:string;records:number;providerCalls:number;maxHttpRequests:number;unpriced:number;modelFacts?:[string,string,string,string,string][]};
 type Admin=(typeof import('@/lib/supabase-admin'))['supabaseAdmin'];
 const admin=async()=> (await import('@/lib/supabase-admin')).supabaseAdmin;
 const hash=(x:Uint8Array|string)=>createHash('sha256').update(x).digest('hex');
@@ -28,7 +28,19 @@ async function readPages<T>(db:Admin,table:string,columns:string,league:League){
  throw Error('LEDGER_PAGE_CAP');
 }
 async function fetchBody(url:string){
- const response=await fetch(url,{redirect:'error',cache:'no-store',signal:AbortSignal.timeout(20000),headers:{Accept:'application/json'}});
+ const signal=AbortSignal.timeout(20000);
+ const request={redirect:'manual',cache:'no-store',signal,headers:{Accept:'text/csv'}} as const;
+ let providerCalls=1,response=await fetch(url,request);
+ if([301,302,303,307,308].includes(response.status)){
+  const loc=response.headers.get('location');
+  if(!loc)throw Error('SOURCE_INVALID_REDIRECT');
+  const redirect=new URL(loc,url);
+  if(url!==NFLVERSE_SCHEDULE||redirect.origin!=='https://release-assets.githubusercontent.com'||
+     !redirect.pathname.startsWith('/github-production-release-asset/'))throw Error('SOURCE_INVALID_REDIRECT');
+  await response.body?.cancel().catch(()=>{});
+  providerCalls++;
+  response=await fetch(redirect,request);
+ }
  if(!response.ok)throw Error('SOURCE_HTTP_'+response.status);
  const cap=8*1024*1024;
  if(Number(response.headers.get('content-length'))>cap||!response.body)throw Error('SOURCE_BODY_LIMIT');
@@ -37,30 +49,33 @@ async function fetchBody(url:string){
  try{
   while(true){const {done,value}=await reader.read();if(done)break;total+=value.byteLength;if(total>cap)throw Error('SOURCE_BODY_LIMIT');chunks.push(value);}
  }finally{await reader.cancel().catch(()=>{});}
- return Buffer.concat(chunks,total);
+ return {body:Buffer.concat(chunks,total),providerCalls};
 }
 async function collect(db:Admin,league:League,source:string,year:number){
  if(league==='BSN'){
   const {data,error}=await db.from('sport_events').select(BSN_SELECT).eq('sport_key','basketball_bsn').order('id').limit(1000);
   if(error||!data||data.length>=1000)throw Error('BSN_ARCHIVE_UNAVAILABLE_OR_LIMIT');
   const observedAt=new Date().toISOString(),rows=data as BsnEvent[];
-  return {observedAt,sha256:hash(JSON.stringify(rows)),events:parseBsn(rows,observedAt)};
+  return {observedAt,sha256:hash(JSON.stringify(rows)),events:parseBsn(rows,observedAt),providerCalls:0};
  }
- const body=await fetchBody(source),observedAt=new Date().toISOString();
- return {observedAt,sha256:hash(body),events:parseEspn(JSON.parse(body.toString('utf8')),league,observedAt,year)};
+ if(league!=='NFL'||source!==NFLVERSE_SCHEDULE)throw Error('SOURCE_NOT_APPROVED');
+ const {body,providerCalls}=await fetchBody(source),observedAt=new Date().toISOString();
+ return {observedAt,sha256:hash(body),events:parseNflverse(body.toString('utf8'),observedAt,year),providerCalls};
 }
 async function runLeague(db:Admin,league:League,clock:Date){
  const slot=new Date(Math.floor(clock.getTime()/14400000)*14400000).toISOString();
- const request=league==='BSN'?{url:'sport_events:basketball_bsn',year:clock.getUTCFullYear()}:espnRequest(league,clock);
+ if(league==='ATP'||league==='WTA')return {league,state:'WAITING_APPROVED_SOURCE',providerCalls:0};
+ const year=clock.getUTCFullYear()-(clock.getUTCMonth()<2?1:0);
+ const request={url:league==='BSN'?'sport_events:basketball_bsn':NFLVERSE_SCHEDULE,year};
  const claim=await db.from(RUNS).insert({league,slot,source:request.url}).select('id').single();
  if(claim.error?.code==='23505')return {league,state:'SKIPPED_ALREADY_CLAIMED'};
  if(claim.error||!claim.data)throw Error('CLAIM_FAILED');
  const p_run=claim.data.id as number;
- const providerCalls=league==='BSN'?0:1;
+ const maxHttpRequests=league==='BSN'?0:2;
  try{
   const existing=await readPages<LedgerForecast>(db,FORECASTS,'event_id,start_at,forecast',league);
   const indexed=new Map(existing.map(r=>[r.event_id,r.forecast]));
-  const {events,observedAt,sha256}=await collect(db,league,request.url,request.year);
+  const {events,observedAt,sha256,providerCalls}=await collect(db,league,request.url,request.year);
   const issuedAt=new Date().toISOString();
   const predictions=issueForecasts(league,events,observedAt,issuedAt).filter(f=>!indexed.has(f.event.id));
   const results=events.flatMap(e=>{
@@ -72,14 +87,14 @@ async function runLeague(db:Admin,league:League,clock:Date){
    return outcome?[{event_id:e.id,start_at:e.start,a_id:a,b_id:b,outcome}]:[];
   });
   const upcoming=events.filter(e=>e.state==='PRE'&&e.start>issuedAt&&Date.parse(e.start)<=Date.parse(issuedAt)+(league==='NFL'?10:7)*86400000);
-  const evidence:RunEvidence={history:events.filter(e=>e.state==='FINAL').length,upcoming,sha256,records:events.length,providerCalls,unpriced:upcoming.filter(e=>!e.quote).length,
+  const evidence:RunEvidence={history:events.filter(e=>e.state==='FINAL').length,upcoming,sha256,records:events.length,providerCalls,maxHttpRequests,unpriced:upcoming.filter(e=>!e.quote).length,
    ...(predictions.length?{modelFacts:events.flatMap((e):[string,string,string,string,string][]=>e.state==='FINAL'&&e.winner&&e.start.slice(0,10)<issuedAt.slice(0,10)?[[e.id,e.start,e.a.id,e.b.id,e.winner]]:[])}:{})};
   const finished=await db.rpc('finish_free_sports_run_v1',{p_run,p_state:'OK',p_observed:observedAt,p_evidence:evidence,p_forecasts:predictions,p_results:results});
   if(finished.error)throw Error('COMMIT_FAILED');
   return {league,state:'OK',providerCalls,history:evidence.history,upcoming:upcoming.length,newForecasts:finished.data};
  }catch(err){
   const code=err instanceof Error&&/^(SOURCE_HTTP_\d+|SOURCE_BODY_LIMIT|[A-Z_]+)$/.test(err.message)?err.message:'SOURCE_OR_LEDGER_FAILED';
-  const finished=await db.rpc('finish_free_sports_run_v1',{p_run,p_state:'ERROR',p_observed:null,p_evidence:{code,providerCallsUpperBound:providerCalls},p_forecasts:[],p_results:[]});
+  const finished=await db.rpc('finish_free_sports_run_v1',{p_run,p_state:'ERROR',p_observed:null,p_evidence:{code,maxHttpRequests},p_forecasts:[],p_results:[]});
   return {league,state:'ERROR',code:finished.error?'CHECK_RUN_LEDGER':code};
  }
 }

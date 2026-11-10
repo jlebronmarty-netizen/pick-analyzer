@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {cohort,issueForecasts,resolve,metrics,tennisCohort} from '../../src/lib/free-sports/model.ts';
-import {parseEspn,parseBsn} from '../../src/lib/free-sports/sources.ts';
+import {parseEspn,parseBsn,parseNflverse} from '../../src/lib/free-sports/sources.ts';
 
 const now='2026-11-10T12:00:00.000Z',start='2026-11-12T12:00:00.000Z';
 const a={id:'1',name:'Home Team'},b={id:'2',name:'Away Team'};
@@ -74,4 +74,21 @@ test('sport card uses fractional accuracy and weights both tennis tours by decis
  const combined=tennisCohort([atp,wta]);
  assert.deepEqual([combined.accuracy,combined.wins,combined.losses,combined.models],[.5,2,2,2]);
  assert.equal(tennisCohort([atp,{...wta,status:'UNAVAILABLE'}]).accuracy,null);
+});
+
+test('open NFL feed converts Eastern kickoff and never treats scoreboard odds as frozen prices',()=>{
+ const csv=[
+  'game_id,season,game_type,gameday,gametime,home_team,away_team,home_score,away_score,result,home_moneyline,away_moneyline,venue',
+  '2026_10_WAS_NYG,2026,REG,2026-11-12,20:15,NYG,WAS,,,,-130,+110,"Venue, NY"',
+  '2026_02_NYG_WAS,2026,REG,2026-09-13,13:00,WAS,NYG,20,7,13,-210,+185,Venue',
+  '2026_09_NE_NYJ,2026,REG,2026-11-08,13:00,NYJ,NE,7,7,0,-110,-110,Venue',
+  '2026_12_PHI_NYG,2026,REG,2026-11-29,,NYG,PHI,,,,,,Venue',
+  '2026_10_NE_NYJ,2026,REG,2026-11-15,13:00,NYJ,NE,20,0,20,,,Venue',
+ ].join('\r\n');
+ const rows=parseNflverse(csv,now,2026);
+ assert.deepEqual(rows.map(e=>[e.state,e.start,e.winner,e.quote]),[
+  ['FINAL','2026-09-13T17:00:00.000Z','WAS',null],
+  ['TIE','2026-11-08T18:00:00.000Z',null,null],
+  ['PRE','2026-11-13T01:15:00.000Z',null,null],
+ ]);
 });
