@@ -35,12 +35,20 @@ export function predictNcaab(s:Schedule,now:string):LiveObservation{
 }
 export function reconcileNcaab(f:LiveObservation,finals:Final[]):LiveObservation{
  if(!finals.length)return f;
- const signatures=new Set(finals.map(x=>JSON.stringify([x.home_id,x.away_id,Date.parse(x.scheduled_at),x.home_score,x.away_score,x.status])));
- const x=finals[0];const mismatch=x.home_id!==f.home_id||x.away_id!==f.away_id||Date.parse(x.scheduled_at)!==Date.parse(f.scheduled_at);
- if(signatures.size>1||mismatch||x.status!=='FINAL')return {...f,review_required:true,review_reason:'CORRECTION_OR_IDENTITY_REVIEW',settlement:null};
- if(!Number.isInteger(x.home_score)||!Number.isInteger(x.away_score)||Math.min(x.home_score,x.away_score)<0||x.home_score===x.away_score||Date.parse(x.captured_at)<Date.parse(x.scheduled_at))return {...f,review_required:true,review_reason:'INVALID_FINAL',settlement:null};
- const winner=x.home_score>x.away_score?x.home_id:x.away_id;
- return {...f,review_required:false,settlement:{home_score:x.home_score,away_score:x.away_score,outcome:f.predicted_winner===null?null:f.predicted_winner===winner?'WIN':'LOSS',observed_at:x.captured_at}};
+ const normalized=finals.map(x=>{
+  const same=x.home_id===f.home_id&&x.away_id===f.away_id,swapped=x.home_id===f.away_id&&x.away_id===f.home_id;
+  const drift=Math.abs(Date.parse(x.scheduled_at)-Date.parse(f.scheduled_at));
+  if((!same&&!swapped)||!Number.isFinite(drift)||drift>2*3600000||x.status!=='FINAL')return null;
+  return {x,home_score:swapped?x.away_score:x.home_score,away_score:swapped?x.home_score:x.away_score};
+ });
+ if(normalized.some(x=>x===null))return {...f,review_required:true,review_reason:'CORRECTION_OR_IDENTITY_REVIEW',settlement:null};
+ const valid=normalized as {x:Final;home_score:number;away_score:number}[];
+ const signatures=new Set(valid.map(({home_score,away_score})=>JSON.stringify([home_score,away_score])));
+ if(signatures.size>1)return {...f,review_required:true,review_reason:'CORRECTION_OR_IDENTITY_REVIEW',settlement:null};
+ const {x,home_score,away_score}=valid[0];
+ if(!Number.isInteger(home_score)||!Number.isInteger(away_score)||Math.min(home_score,away_score)<0||home_score===away_score||Date.parse(x.captured_at)<Date.parse(x.scheduled_at))return {...f,review_required:true,review_reason:'INVALID_FINAL',settlement:null};
+ const winner=home_score>away_score?f.home_id:f.away_id;
+ return {...f,review_required:false,review_reason:null,settlement:{home_score,away_score,outcome:f.predicted_winner===null?null:f.predicted_winner===winner?'WIN':'LOSS',observed_at:x.captured_at}};
 }
 export function ncaabMetrics(rows:LiveObservation[]){
  const fs=rows.filter(r=>r.state==='FORECAST'),settled=fs.filter(r=>r.settlement&&!r.review_required),wins=settled.filter(r=>r.settlement!.outcome==='WIN').length,losses=settled.filter(r=>r.settlement!.outcome==='LOSS').length;
