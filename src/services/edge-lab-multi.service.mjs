@@ -57,6 +57,7 @@ async function collectTt(db,request,summary){
  const stored=await readAll(db,T.finals),history=canonicalTtHistory(stored.map(r=>r.payload));summary.history_finals=history.finals.length;summary.history_conflicts=history.conflicts;summary.history_latest=history.finals.length?history.finals.map(r=>r.scheduledAt).sort().at(-1):null;
  await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
  for(const recovery of summary.recoveries){const contracts=existing.filter(f=>f.event_id===recovery.event_id&&f.status!=='ABSTAIN');recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(recovery.contract_evaluations.length&&recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
+ try{
  const response=await paced(()=>paidRead(db,request,'prematch',1,summary)),asOf=new Date().toISOString();
  const rawEvents=Array.isArray(response.data.events)?response.data.events:Array.isArray(response.data.results)?response.data.results:null;if(!rawEvents)throw Error('TT_PREMATCH_SCHEMA_CHANGED');
  const coverage=readTtPagination(response.data,rawEvents.length,{expectedPage:1,allowUnpaged:true});summary.prematch_coverage=coverage;
@@ -66,6 +67,7 @@ async function collectTt(db,request,summary){
  const forecasts=ttForecasts({events:minimal,pagination:coverage},history.finals,asOf,sourceId);summary.source_events=forecasts.source_events;summary.skipped=forecasts.skipped;summary.prematch_has_next=coverage.hasNextPage;
  summary.forecasts_inserted=await insertRows(db,T.forecasts,forecasts.rows);summary.forecasts_reused=forecasts.rows.length-summary.forecasts_inserted;summary.status_counts=Object.fromEntries(['FORECAST','PROJECTION','ABSTAIN'].map(s=>[s,forecasts.rows.filter(r=>r.status===s).length]));
  if(!coverage.verified)summary.warnings.push('PREMATCH_COVERAGE_UNVERIFIED');else if(coverage.hasNextPage)summary.warnings.push('PREMATCH_PAGE_BUDGET_REACHED');
+ }catch(e){summary.warnings.push('PREMATCH_REFRESH_FAILED');summary.errors.push(e instanceof Error?e.message:'TT_PREMATCH_FAILED');summary.operational_state='SETTLEMENT_RECOVERY';return 'PARTIAL';}
  if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
  if(!history.finals.length&&allIncoming.length===0)summary.warnings.push('NO_VERIFIED_FINALS_AVAILABLE');
  summary.warnings=[...new Set(summary.warnings)];summary.operational_state=summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';
