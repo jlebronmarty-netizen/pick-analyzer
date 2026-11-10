@@ -29,7 +29,7 @@ export default function DashboardShellClient({
   return (
     <SportProvider>
       <div className="min-h-screen bg-slate-950 text-white">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-slate-950 focus:p-4">Skip to content</a>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-slate-950 focus:p-4">Saltar al contenido</a>
         <div className="flex">
           <aside className="sticky top-0 hidden h-screen w-72 overflow-y-auto border-r border-slate-800 bg-slate-950/95 p-6 xl:block">
             <div className="rounded-lg border border-sky-500/20 bg-sky-950/10 p-5">
@@ -37,17 +37,17 @@ export default function DashboardShellClient({
                 Pick Analyzer 2.0
               </p>
 
-              <p className="mt-2 text-2xl font-black">Baseball, in focus.</p>
+              <p className="mt-2 text-2xl font-black">One board. Every edge.</p>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Understand the matchup. Evaluate the price.
+                Modelos, probabilidades, cuotas y resultados.
               </p>
             </div>
 
             <nav className="mt-8 space-y-2 pb-24">
               <div className="pt-2">
                 <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
-                  Primary
+                  PRINCIPAL
                 </p>
 
                 <div className="mt-2 space-y-1">
@@ -55,7 +55,7 @@ export default function DashboardShellClient({
                     const active = pathname === item.href || (pathname === '/' && item.href === '/today')
                     return (
                       <div key={item.href}>
-                      {index === 2 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Research &amp; tools</p>}
+                      {index === 2 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">INVESTIGACIÓN Y HERRAMIENTAS</p>}
                       <a
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
@@ -80,11 +80,11 @@ export default function DashboardShellClient({
             </nav>
 
             <div className="fixed bottom-6 w-[224px] rounded-lg border border-slate-800 bg-slate-900/95 p-4">
-              <p className="text-xs text-slate-500">Recommendation evidence</p>
+              <p className="text-xs text-slate-500">Evidencia de recomendaciones</p>
 
               <div className="mt-2 flex flex-wrap gap-2">
                 <ProductStatusBadge tone="blue">
-                  Zero picks is valid
+                  Cero picks es válido
                 </ProductStatusBadge>
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function DashboardShellClient({
                 <div className="flex min-w-0 items-center gap-3 overflow-x-auto">
                   <span className="hidden lg:inline-flex">
                     <ProductStatusBadge tone="blue">
-                      Evidence first
+                      Evidencia primero
                     </ProductStatusBadge>
                   </span>
 
@@ -120,7 +120,7 @@ export default function DashboardShellClient({
               </div>
             </header>
 
-            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Research &amp; tools</summary><nav aria-label="Research and secondary navigation" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{productNavItems.slice(2).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
+            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Research &amp; tools</summary><nav aria-label="Investigación y navegación secundaria" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{productNavItems.slice(2).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
             <div className="mx-auto max-w-[1800px] space-y-10 p-4 md:p-8">
               {children}
             </div>
@@ -129,7 +129,7 @@ export default function DashboardShellClient({
 
         <nav
           className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 px-2 pt-2 backdrop-blur xl:hidden"
-          aria-label="Primary mobile navigation"
+          aria-label="Navegación principal móvil"
           data-b4-mobile-bottom-nav="true"
           data-b5-1-mobile-bottom-nav="true"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
