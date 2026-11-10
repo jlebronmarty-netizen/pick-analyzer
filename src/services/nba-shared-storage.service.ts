@@ -42,15 +42,12 @@ export async function runSharedNbaArchive(token:string,mode:'cron'|'manual'='cro
  const summary={module:'NBA_SHARED_ARCHIVE_V1',snapshots:0,quotes:0,legacy_rows:0,gateway_requests:0,planned:0,completed:0,eligible:0,schedule_days:[] as string[],errors:[] as string[],models_written:false,settlement_performed:false}
  try{
   const previousDay=localDay(new Date(Date.parse(day+'T12:00:00Z')-86400000))
-  for(const scheduleDay of [previousDay,day]){
-   summary.gateway_requests++
-   const schedule=await sourceRead(new URLSearchParams({action:'games',date:scheduleDay}),token,deadline)
-   await archiveEnvelope(schedule)
-   summary.schedule_days.push(scheduleDay)
-  }
+  summary.gateway_requests++
+  const previous=await sourceRead(new URLSearchParams({action:'games',date:previousDay}),token,deadline)
+  await archiveEnvelope(previous);summary.schedule_days.push(previousDay)
   summary.gateway_requests++
   const s=await sourceRead(new URLSearchParams({action:'games',date:day}),token,deadline)
-  await archiveEnvelope(s)
+  await archiveEnvelope(s);summary.schedule_days.push(day)
   const plan=syncPlan(s.data.games);summary.eligible=plan.eligible
   const tasks=[...plan.main.map((g:{id:number})=>({action:'quote',game_id:String(g.id),group:'main'})),...plan.props.map((g:{game_id:number,prop_type:string})=>({action:'quote',game_id:String(g.game_id),group:'props',prop_type:g.prop_type}))]
   summary.planned=tasks.length
