@@ -37,7 +37,7 @@ export default function DashboardShellClient({
                 Pick Analyzer 2.0
               </p>
 
-              <p className="mt-2 text-2xl font-black">One board. Every edge.</p>
+              <p className="mt-2 text-2xl font-black">Un tablero. Cada edge.</p>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 Modelos, probabilidades, cuotas y resultados.
@@ -115,13 +115,13 @@ export default function DashboardShellClient({
                     href="/settings"
                     className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
                   >
-                    Settings
+                    Configuración
                   </Link>
                 </div>
               </div>
             </header>
 
-            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Research &amp; tools</summary><nav aria-label="Investigación y navegación secundaria" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{productNavItems.slice(2).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
+            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Investigación y resultados</summary><nav aria-label="Investigación y navegación secundaria" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{productNavItems.slice(2).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
             <div className="mx-auto max-w-[1800px] space-y-10 p-4 md:p-8">
               {children}
             </div>
