@@ -7,28 +7,33 @@ import {
 } from '@/config/pick2-value-board-navigation'
 
 const baseProductNavItems: DashboardNavItem[] = [
-  { href: '/today', label: 'Today', icon: 'T' },
-  { href: '/mlb', label: 'MLB Research Lab', icon: 'B' },
-  { href: '/qualified-plays', label: 'Qualified Plays', icon: 'Q' },
-  { href: '/performance', label: 'Performance', icon: 'P' },
-  { href: '/model-lab', label: 'Model Lab', icon: 'M' },
-  { href: '/data-health', label: 'Data Health', icon: 'D' },
+  { href: '/today', label: 'Hoy', icon: 'H' },
+  { href: '/mlb', label: 'Laboratorio MLB', icon: 'B' },
+  { href: '/qualified-plays', label: 'Jugadas calificadas', icon: 'Q' },
+  { href: '/model-lab', label: 'Laboratorio de modelos', icon: 'M' },
+  { href: '/performance', label: 'Rendimiento', icon: 'R' },
+  { href: '/data-health', label: 'Estado de datos', icon: 'D' },
 ]
 
 const titleByPath: DashboardTitleByPath = {
-  '/': 'Today',
-  '/today': 'Today',
-  '/mlb': 'MLB Research Lab',
-  [PICK2_MLB_VALUE_BOARD_ROUTE]: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
-  '/qualified-plays': 'Qualified Plays',
-  '/performance': 'Performance',
-  '/model-lab': 'Model Lab',
-  '/data-health': 'Data Health',
-  '/nba-market-data': 'NBA · GOAT',
+  '/': 'Hoy',
+  '/today': 'Hoy',
+  '/mlb': 'Laboratorio MLB',
+  [PICK2_MLB_VALUE_BOARD_ROUTE]: 'Valor / Edge',
+  '/qualified-plays': 'Jugadas calificadas',
+  '/performance': 'Rendimiento',
+  '/model-lab': 'Laboratorio de modelos',
+  '/data-health': 'Estado de datos',
+  '/nba-market-data': 'NBA',
   '/edge-lab': 'Edge Lab',
   '/nhl': 'NHL',
   '/ncaab': 'NCAAB',
   '/ufc': 'UFC',
+  '/soccer': 'Fútbol',
+  '/table-tennis': 'Tenis de mesa',
+  '/ncaaf': 'NCAAF',
+  '/sports': 'Estado',
+  '/settings': 'Configuración',
 }
 
 function getProductNavItems(): DashboardNavItem[] {
@@ -37,7 +42,7 @@ function getProductNavItems(): DashboardNavItem[] {
     baseProductNavItems[0],
     {
       href: PICK2_MLB_VALUE_BOARD_ROUTE,
-      label: 'Value Board',
+      label: 'Valor / Edge',
       icon: PICK2_MLB_VALUE_BOARD_NAVIGATION_ICON,
     },
     ...baseProductNavItems.slice(1),
