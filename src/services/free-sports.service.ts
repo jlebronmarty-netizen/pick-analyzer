@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import {cache} from 'react';
 import {cohort,issueForecasts,LEAGUES,metrics,resolve,SPORT_LEAGUES,SPORT_NAMES,tennisCohort,type Fixture,type Forecast,type League,type LeagueReport,type Observation,type Sport} from '@/lib/free-sports/model';
 import {NFLVERSE_SCHEDULE,parseBsn,parseNflverse,type BsnEvent} from '@/lib/free-sports/sources';
+import {runTennisSourcePreflight} from './tennis-source-preflight.service.mjs';
 import type {SportModelCard} from '@/lib/sport-model-overview';
 
 const RUNS='free_sports_runs_v1',FORECASTS='free_sports_forecasts_v1',RESULTS='free_sports_results_v1';
@@ -64,6 +65,7 @@ async function collect(db:Admin,league:League,source:string,year:number){
 }
 async function runLeague(db:Admin,league:League,clock:Date){
  const slot=new Date(Math.floor(clock.getTime()/14400000)*14400000).toISOString();
+ if(league==='ATP')return runTennisSourcePreflight();
  if(league!=='NFL')return {league,state:'WAITING_APPROVED_SOURCE',providerCalls:0};
  const year=clock.getUTCFullYear()-(clock.getUTCMonth()<2?1:0);
  const request={url:NFLVERSE_SCHEDULE,year};
@@ -120,7 +122,7 @@ export const getFreeLeagueReport=cache(async(league:League):Promise<LeagueReport
   const rows=forecasts.map(f=>resolve(f.forecast,byEvent.get(f.event_id)??[],now));
   const fresh=!!observedAt&&Date.now()-Date.parse(observedAt)<5*3600000;
   const upcoming=fresh?(evidence?.upcoming??[]).filter(e=>e.start>now).map(e=>({...e,quote:null})):[];
-  return {league,status:evidence?'AVAILABLE':'WAITING',sourceAt:observedAt??null,history:evidence?.history??0,upcoming,rows,metrics:metrics(rows)};
+  return {league,status:evidence&&!('captureOnly' in evidence)?'AVAILABLE':'WAITING',sourceAt:evidence&&'captureOnly' in evidence?null:observedAt??null,history:evidence?.history??0,upcoming,rows,metrics:metrics(rows)};
  }catch{return {league,status:'UNAVAILABLE',sourceAt:null,history:0,upcoming:[],rows:[],metrics:metrics([])};}
 });
 export const getFreeSportsReports=cache(async()=>Promise.all(LEAGUES.map(getFreeLeagueReport)));

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "forecastRows": 152,
+  "allFeatureDatesStrictlyPrior": true,
+  "allInputEventsKnown": true,
+  "manifest": {
+    "PROTOCOL.json": "43529e0ea0d21d27be2adfa9de572110fe24113cd0a9fdec1ea55888acbf7518",
+    "inputs/sport-events.json": "93f2ea37d415ea4cffea9521615924ccea1f019f40b5a936e6ff62e0fba2afc5",
+    "results/summary.json": "a1a8318173067063211509913cd75d8366bfd52237d7364b46cea18b60921d45",
+    "results/predictions.json": "75dbfcbdeab24d723310b9ad28ac64d5f56f8322a3fc71e94c2315095d441f96",
+    "REPORT.md": "69ac1f71a6721f5b7d345266c58e4a0f955cec3e806efb044846218f06503cee"
+  }
+}

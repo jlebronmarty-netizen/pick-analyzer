@@ -3436,3 +3436,17 @@ preflight replay: 15 NFL forecasts from the open nflverse release, without
 verified prices. ATP/WTA production collection awaits an authorized free feed;
 BSN has 38 archived finals and no approved future slate. These are diagnostics,
 not issued picks. Production verification and a forward sample are release gates. See [source and rollout contract](free-sports-shadow-v1.md).
+
+### Tennis FREE preflight and BSN 2027 pilot — 2026-11-10
+
+Prepared an authenticated source preflight for the operator's free RapidAPI
+tennis account. It uses one source request per UTC day only if a server key is
+configured, persists sanitized private evidence, and never issues forecasts.
+Source/account response and the historical model pipeline are still pending.
+NFL keeps its active cohort and schedule.
+
+Completed a fixed exploratory BSN replay on 38 existing archived finals: local
+baseline 21/38; Elo and rolling scores 8/13; recent form 7/12. This is not
+independent validation or ROI evidence; missing prices remain null. Full
+protocol, inputs, per-game prior features, exclusions and reproducible report
+are in research/bsn-preseason-2027-v1/. No new BSN data or prediction rows.
