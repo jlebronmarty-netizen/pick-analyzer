@@ -1,0 +1,17 @@
+{
+ "version":"BSN_PRESEASON_2027_PILOT_V1",
+ "classification":"EXPLORATORY_RETROSPECTIVE_REPLAY",
+ "source":"Existing frozen sport_events basketball_bsn export. No new collection approved by this protocol.",
+ "registration":"Written before running this pilot. Archive existence and a few outcomes already inspected; not preregistered unseen evidence.",
+ "cutoff":"All features use strictly earlier America/Puerto_Rico calendar dates, no same-day updates. Source-generated midnight timestamps are not verified tipoff times.",
+ "policies":[
+  {"id":"HOME_BASELINE","rule":"Always home; comparator only."},
+  {"id":"ELO32_MIN3","rule":"1500 initial Elo, K32, no home advantage. Date-batched updates; both teams need at least 3 prior decisive games; abstain if pHome=0.5."},
+  {"id":"FORM5_MIN3","rule":"Compare wins/played in each team's last 5 decisive games, both need 3. Abstain on exact equal rates. Ranking score, not calibrated probability."},
+  {"id":"SCORES5_MIN3","rule":"Expected home=(home last5 pointsFor + away last5 pointsAgainst)/2; away symmetric. Both need 3 prior games. Select larger score, abstain on equality; report margin/total MAE."}
+ ],
+ "data_gates":"Distinct canonical IDs, season, date and final nonnegative integer scores. Quarantine conflicting ID or duplicate economic event records. Preserve inputs and hashes. Phase unknown remains explicit.",
+ "evaluation":"Per-policy W/L, coverage, date/team counts, win-rate Wilson interval, same-intersection HOME comparator, forecast rows with input IDs and feature last date. No optimization, no promotion.",
+ "roi":"UNAVAILABLE unless independently audited exact market/price/book/as-of evidence is provided. Never substitute prices, assume -110, or infer sportsbook ROI from score accuracy.",
+ "future":"Expand only with licensed/permissioned/open data or attested operator files. Freeze subsequent development/confirmation periods before search; do not reuse this pilot as independent confirmation."
+}

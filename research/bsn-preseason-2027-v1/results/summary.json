@@ -1,0 +1,120 @@
+{
+  "classification": "EXPLORATORY_RETROSPECTIVE_REPLAY",
+  "inputSha256": "93f2ea37d415ea4cffea9521615924ccea1f019f40b5a936e6ff62e0fba2afc5",
+  "protocolSha256": "43529e0ea0d21d27be2adfa9de572110fe24113cd0a9fdec1ea55888acbf7518",
+  "games": 38,
+  "seasons": [
+    "2026"
+  ],
+  "dateFrom": "2026-06-19",
+  "dateTo": "2026-07-17",
+  "quarantined": [],
+  "policies": [
+    {
+      "policy": "HOME_BASELINE",
+      "attempts": 38,
+      "bets": null,
+      "forecastCount": 38,
+      "wins": 21,
+      "losses": 17,
+      "abstentions": 0,
+      "coveragePct": 100.0,
+      "accuracyPct": 55.26315789473684,
+      "wilson95Pct": [
+        39.70629712199248,
+        69.85359900194877
+      ],
+      "homeBaselineSameGamesPct": 55.26315789473684,
+      "dates": 20,
+      "teams": 12,
+      "brier": null,
+      "marginMAE": null,
+      "totalMAE": null,
+      "roi": null,
+      "profit": null,
+      "oddsCount": 0
+    },
+    {
+      "policy": "ELO32_MIN3",
+      "attempts": 38,
+      "bets": null,
+      "forecastCount": 13,
+      "wins": 8,
+      "losses": 5,
+      "abstentions": 25,
+      "coveragePct": 34.21052631578947,
+      "accuracyPct": 61.53846153846154,
+      "wilson95Pct": [
+        35.5228915126657,
+        82.29029220223742
+      ],
+      "homeBaselineSameGamesPct": 53.84615384615385,
+      "dates": 8,
+      "teams": 8,
+      "brier": 0.24576127089304078,
+      "marginMAE": null,
+      "totalMAE": null,
+      "roi": null,
+      "profit": null,
+      "oddsCount": 0
+    },
+    {
+      "policy": "FORM5_MIN3",
+      "attempts": 38,
+      "bets": null,
+      "forecastCount": 12,
+      "wins": 7,
+      "losses": 5,
+      "abstentions": 26,
+      "coveragePct": 31.57894736842105,
+      "accuracyPct": 58.333333333333336,
+      "wilson95Pct": [
+        31.951131254954973,
+        80.67396863412435
+      ],
+      "homeBaselineSameGamesPct": 50.0,
+      "dates": 8,
+      "teams": 8,
+      "brier": null,
+      "marginMAE": null,
+      "totalMAE": null,
+      "roi": null,
+      "profit": null,
+      "oddsCount": 0
+    },
+    {
+      "policy": "SCORES5_MIN3",
+      "attempts": 38,
+      "bets": null,
+      "forecastCount": 13,
+      "wins": 8,
+      "losses": 5,
+      "abstentions": 25,
+      "coveragePct": 34.21052631578947,
+      "accuracyPct": 61.53846153846154,
+      "wilson95Pct": [
+        35.5228915126657,
+        82.29029220223742
+      ],
+      "homeBaselineSameGamesPct": 53.84615384615385,
+      "dates": 8,
+      "teams": 8,
+      "brier": null,
+      "marginMAE": 10.10576923076923,
+      "totalMAE": 14.181410256410253,
+      "roi": null,
+      "profit": null,
+      "oddsCount": 0
+    }
+  ],
+  "independentHoldout": false,
+  "sportsbookROI": "UNAVAILABLE_NO_VERIFIED_PRICES",
+  "knownLimitations": [
+    "Small selected archive, not a complete season",
+    "Archive captured after events",
+    "No verified tipoff times; local calendar date cutoffs only",
+    "Regular/postseason phase not certified",
+    "No independent holdout or multiple-testing claim",
+    "No verified sportsbook prices"
+  ]
+}

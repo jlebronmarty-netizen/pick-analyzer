@@ -4268,3 +4268,12 @@ source for ROI. For tennis, verify the terms and coverage of a free
 calendar/results API, then validate prices separately. For BSN, obtain approved future
 calendar/results via a permissioned feed or operator-attested CSV, then audit
 price availability separately. Keep all three in SHADOW. See [rollout contract](free-sports-shadow-v1.md).
+
+### Tennis / BSN next gates — 2026-11-10
+
+Tennis: verify a real FREE RapidAPI response and storage/display rights before
+history collection, stable-identity settlement and model activation. The
+preflight is credential-gated, capped at one request per UTC day, and has no
+forecast writes. BSN: preserve the 38-game exploratory pilot; acquire complete
+permissioned/open seasons before selecting or confirming new formulas. Keep
+retrospective results separate from prospective Pick accuracy and from ROI.

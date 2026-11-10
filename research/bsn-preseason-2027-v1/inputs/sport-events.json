@@ -1,0 +1,1148 @@
+{
+  "exportedAt": "2026-11-10T21:48:06.910Z",
+  "table": "public.sport_events",
+  "filter": "sport_key=basketball_bsn",
+  "classification": "EXISTING_ARCHIVE_READ_ONLY",
+  "rows": [
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_19_junio_gbo_pon",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "away_team_id": "basketball_bsn:bsn_pr:team:mets",
+      "home_team": "Leones",
+      "away_team": "Mets",
+      "start_time": "2026-06-20 00:00:00+00",
+      "status": "completed",
+      "home_score": 95,
+      "away_score": 88,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:19_junio:GBO:PON"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "19 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/GBO",
+        "awayTeamCode": "GBO",
+        "homeTeamCode": "PON",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_19_junio_que_man",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:osos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:piratas",
+      "home_team": "Osos",
+      "away_team": "Piratas",
+      "start_time": "2026-06-20 00:00:00+00",
+      "status": "completed",
+      "home_score": 105,
+      "away_score": 94,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:19_junio:QUE:MAN"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "19 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/QUE",
+        "awayTeamCode": "QUE",
+        "homeTeamCode": "MAN",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_20_junio_agu_may",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:indios",
+      "away_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "home_team": "Indios",
+      "away_team": "Santeros",
+      "start_time": "2026-06-21 00:00:00+00",
+      "status": "completed",
+      "home_score": 85,
+      "away_score": 92,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:20_junio:AGU:MAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "20 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAY",
+        "awayTeamCode": "AGU",
+        "homeTeamCode": "MAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_21_junio_man_pon",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "away_team_id": "basketball_bsn:bsn_pr:team:osos",
+      "home_team": "Leones",
+      "away_team": "Osos",
+      "start_time": "2026-06-22 00:00:00+00",
+      "status": "completed",
+      "home_score": 88,
+      "away_score": 96,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:21_junio:MAN:PON"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "21 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAN",
+        "awayTeamCode": "MAN",
+        "homeTeamCode": "PON",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_21_junio_que_gbo",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:mets",
+      "away_team_id": "basketball_bsn:bsn_pr:team:piratas",
+      "home_team": "Mets",
+      "away_team": "Piratas",
+      "start_time": "2026-06-22 00:00:00+00",
+      "status": "completed",
+      "home_score": 114,
+      "away_score": 101,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:21_junio:QUE:GBO"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "21 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/QUE",
+        "awayTeamCode": "QUE",
+        "homeTeamCode": "GBO",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_22_junio_may_cag",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:indios",
+      "home_team": "Criollos",
+      "away_team": "Indios",
+      "start_time": "2026-06-23 00:00:00+00",
+      "status": "completed",
+      "home_score": 114,
+      "away_score": 86,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:22_junio:MAY:CAG"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "22 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAY",
+        "awayTeamCode": "MAY",
+        "homeTeamCode": "CAG",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_23_junio_are_man",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:osos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "home_team": "Osos",
+      "away_team": "Capitanes",
+      "start_time": "2026-06-24 00:00:00+00",
+      "status": "completed",
+      "home_score": 93,
+      "away_score": 92,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:23_junio:ARE:MAN"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "23 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAN",
+        "awayTeamCode": "ARE",
+        "homeTeamCode": "MAN",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_24_junio_sge_may",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:indios",
+      "away_team_id": "basketball_bsn:bsn_pr:team:atleticos",
+      "home_team": "Indios",
+      "away_team": "Atléticos",
+      "start_time": "2026-06-25 00:00:00+00",
+      "status": "completed",
+      "home_score": 95,
+      "away_score": 68,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:24_junio:SGE:MAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "24 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAY",
+        "awayTeamCode": "SGE",
+        "homeTeamCode": "MAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_25_junio_are_que",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:piratas",
+      "away_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "home_team": "Piratas",
+      "away_team": "Capitanes",
+      "start_time": "2026-06-26 00:00:00+00",
+      "status": "completed",
+      "home_score": 105,
+      "away_score": 100,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:25_junio:ARE:QUE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "25 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/QUE",
+        "awayTeamCode": "ARE",
+        "homeTeamCode": "QUE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_25_junio_gbo_bay",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:vaqueros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:mets",
+      "home_team": "Vaqueros",
+      "away_team": "Mets",
+      "start_time": "2026-06-26 00:00:00+00",
+      "status": "completed",
+      "home_score": 104,
+      "away_score": 83,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:25_junio:GBO:BAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "25 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/GBO",
+        "awayTeamCode": "GBO",
+        "homeTeamCode": "BAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_25_junio_man_cag",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:osos",
+      "home_team": "Criollos",
+      "away_team": "Osos",
+      "start_time": "2026-06-26 00:00:00+00",
+      "status": "completed",
+      "home_score": 98,
+      "away_score": 92,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:25_junio:MAN:CAG"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "25 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAN",
+        "awayTeamCode": "MAN",
+        "homeTeamCode": "CAG",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_26_junio_may_car",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:indios",
+      "home_team": "Gigantes",
+      "away_team": "Indios",
+      "start_time": "2026-06-27 00:00:00+00",
+      "status": "completed",
+      "home_score": 85,
+      "away_score": 88,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:26_junio:MAY:CAR"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "26 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAY",
+        "awayTeamCode": "MAY",
+        "homeTeamCode": "CAR",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_27_junio_agu_que",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:piratas",
+      "away_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "home_team": "Piratas",
+      "away_team": "Santeros",
+      "start_time": "2026-06-28 00:00:00+00",
+      "status": "completed",
+      "home_score": 90,
+      "away_score": 105,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:27_junio:AGU:QUE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "27 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/QUE",
+        "awayTeamCode": "AGU",
+        "homeTeamCode": "QUE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_27_junio_are_sge",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:atleticos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "home_team": "Atléticos",
+      "away_team": "Capitanes",
+      "start_time": "2026-06-28 00:00:00+00",
+      "status": "completed",
+      "home_score": 98,
+      "away_score": 96,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:27_junio:ARE:SGE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "27 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/SGE",
+        "awayTeamCode": "ARE",
+        "homeTeamCode": "SGE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_27_junio_cag_gbo",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:mets",
+      "away_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "home_team": "Mets",
+      "away_team": "Criollos",
+      "start_time": "2026-06-28 00:00:00+00",
+      "status": "completed",
+      "home_score": 102,
+      "away_score": 129,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:27_junio:CAG:GBO"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "27 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/GBO",
+        "awayTeamCode": "CAG",
+        "homeTeamCode": "GBO",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_28_junio_car_gbo",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:mets",
+      "away_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "home_team": "Mets",
+      "away_team": "Gigantes",
+      "start_time": "2026-06-29 00:00:00+00",
+      "status": "completed",
+      "home_score": 96,
+      "away_score": 111,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:28_junio:CAR:GBO"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "28 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/GBO",
+        "awayTeamCode": "CAR",
+        "homeTeamCode": "GBO",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_28_junio_sce_may",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:indios",
+      "away_team_id": "basketball_bsn:bsn_pr:team:cangrejeros",
+      "home_team": "Indios",
+      "away_team": "Cangrejeros",
+      "start_time": "2026-06-29 00:00:00+00",
+      "status": "completed",
+      "home_score": 78,
+      "away_score": 111,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:28_junio:SCE:MAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "28 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAY",
+        "awayTeamCode": "SCE",
+        "homeTeamCode": "MAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_29_junio_man_car",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:osos",
+      "home_team": "Gigantes",
+      "away_team": "Osos",
+      "start_time": "2026-06-30 00:00:00+00",
+      "status": "completed",
+      "home_score": 85,
+      "away_score": 123,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:29_junio:MAN:CAR"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "29 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/MAN",
+        "awayTeamCode": "MAN",
+        "homeTeamCode": "CAR",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_29_junio_pon_cag",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "home_team": "Criollos",
+      "away_team": "Leones",
+      "start_time": "2026-06-30 00:00:00+00",
+      "status": "completed",
+      "home_score": 104,
+      "away_score": 80,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:29_junio:PON:CAG"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "29 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/PON",
+        "awayTeamCode": "PON",
+        "homeTeamCode": "CAG",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_29_junio_que_agu",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:piratas",
+      "home_team": "Santeros",
+      "away_team": "Piratas",
+      "start_time": "2026-06-30 00:00:00+00",
+      "status": "completed",
+      "home_score": 98,
+      "away_score": 90,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:29_junio:QUE:AGU"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "29 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/QUE",
+        "awayTeamCode": "QUE",
+        "homeTeamCode": "AGU",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_29_junio_sce_are",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:cangrejeros",
+      "home_team": "Capitanes",
+      "away_team": "Cangrejeros",
+      "start_time": "2026-06-30 00:00:00+00",
+      "status": "completed",
+      "home_score": 92,
+      "away_score": 114,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:29_junio:SCE:ARE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "29 junio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/SCE",
+        "awayTeamCode": "SCE",
+        "homeTeamCode": "ARE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_9_julio_agu_are",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "home_team": "Capitanes",
+      "away_team": "Santeros",
+      "start_time": "2026-07-10 00:00:00+00",
+      "status": "completed",
+      "home_score": 101,
+      "away_score": 98,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:9_julio:AGU:ARE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "9 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/AGU",
+        "awayTeamCode": "AGU",
+        "homeTeamCode": "ARE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_9_julio_car_bay",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:vaqueros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "home_team": "Vaqueros",
+      "away_team": "Gigantes",
+      "start_time": "2026-07-10 00:00:00+00",
+      "status": "completed",
+      "home_score": 69,
+      "away_score": 78,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:9_julio:CAR:BAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "9 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/CAR",
+        "awayTeamCode": "CAR",
+        "homeTeamCode": "BAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_10_julio_pon_sge",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:atleticos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "home_team": "Atléticos",
+      "away_team": "Leones",
+      "start_time": "2026-07-11 00:00:00+00",
+      "status": "completed",
+      "home_score": 88,
+      "away_score": 75,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:10_julio:PON:SGE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "10 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/PON",
+        "awayTeamCode": "PON",
+        "homeTeamCode": "SGE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_10_julio_sce_cag",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:cangrejeros",
+      "home_team": "Criollos",
+      "away_team": "Cangrejeros",
+      "start_time": "2026-07-11 00:00:00+00",
+      "status": "completed",
+      "home_score": 98,
+      "away_score": 92,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:10_julio:SCE:CAG"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "10 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/SCE",
+        "awayTeamCode": "SCE",
+        "homeTeamCode": "CAG",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_11_julio_are_agu",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "home_team": "Santeros",
+      "away_team": "Capitanes",
+      "start_time": "2026-07-12 00:00:00+00",
+      "status": "completed",
+      "home_score": 83,
+      "away_score": 79,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:11_julio:ARE:AGU"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "11 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/AGU",
+        "awayTeamCode": "ARE",
+        "homeTeamCode": "AGU",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_11_julio_bay_car",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:vaqueros",
+      "home_team": "Gigantes",
+      "away_team": "Vaqueros",
+      "start_time": "2026-07-12 00:00:00+00",
+      "status": "completed",
+      "home_score": 71,
+      "away_score": 73,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:11_julio:BAY:CAR"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "11 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/CAR",
+        "awayTeamCode": "BAY",
+        "homeTeamCode": "CAR",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_12_julio_cag_sce",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:cangrejeros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "home_team": "Cangrejeros",
+      "away_team": "Criollos",
+      "start_time": "2026-07-13 00:00:00+00",
+      "status": "completed",
+      "home_score": 98,
+      "away_score": 77,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:12_julio:CAG:SCE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "12 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/SCE",
+        "awayTeamCode": "CAG",
+        "homeTeamCode": "SCE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_12_julio_sge_pon",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "away_team_id": "basketball_bsn:bsn_pr:team:atleticos",
+      "home_team": "Leones",
+      "away_team": "Atléticos",
+      "start_time": "2026-07-13 00:00:00+00",
+      "status": "completed",
+      "home_score": 115,
+      "away_score": 96,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:12_julio:SGE:PON"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "12 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/PON",
+        "awayTeamCode": "SGE",
+        "homeTeamCode": "PON",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_13_julio_agu_are",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "home_team": "Capitanes",
+      "away_team": "Santeros",
+      "start_time": "2026-07-14 00:00:00+00",
+      "status": "completed",
+      "home_score": 86,
+      "away_score": 98,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:13_julio:AGU:ARE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "13 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/AGU",
+        "awayTeamCode": "AGU",
+        "homeTeamCode": "ARE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_13_julio_car_bay",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:vaqueros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "home_team": "Vaqueros",
+      "away_team": "Gigantes",
+      "start_time": "2026-07-14 00:00:00+00",
+      "status": "completed",
+      "home_score": 101,
+      "away_score": 78,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:13_julio:CAR:BAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "13 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/CAR",
+        "awayTeamCode": "CAR",
+        "homeTeamCode": "BAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_14_julio_pon_sge",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:atleticos",
+      "away_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "home_team": "Atléticos",
+      "away_team": "Leones",
+      "start_time": "2026-07-15 00:00:00+00",
+      "status": "completed",
+      "home_score": 91,
+      "away_score": 95,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:14_julio:PON:SGE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "14 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/PON",
+        "awayTeamCode": "PON",
+        "homeTeamCode": "SGE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_15_julio_are_agu",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "home_team": "Santeros",
+      "away_team": "Capitanes",
+      "start_time": "2026-07-16 00:00:00+00",
+      "status": "completed",
+      "home_score": 93,
+      "away_score": 100,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:15_julio:ARE:AGU"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "15 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/AGU",
+        "awayTeamCode": "ARE",
+        "homeTeamCode": "AGU",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_15_julio_bay_car",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:vaqueros",
+      "home_team": "Gigantes",
+      "away_team": "Vaqueros",
+      "start_time": "2026-07-16 00:00:00+00",
+      "status": "completed",
+      "home_score": 68,
+      "away_score": 72,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:15_julio:BAY:CAR"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "15 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/CAR",
+        "awayTeamCode": "BAY",
+        "homeTeamCode": "CAR",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_16_julio_cag_sce",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:cangrejeros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:criollos",
+      "home_team": "Cangrejeros",
+      "away_team": "Criollos",
+      "start_time": "2026-07-17 00:00:00+00",
+      "status": "completed",
+      "home_score": 78,
+      "away_score": 95,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:16_julio:CAG:SCE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "16 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/SCE",
+        "awayTeamCode": "CAG",
+        "homeTeamCode": "SCE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_16_julio_sge_pon",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:leones",
+      "away_team_id": "basketball_bsn:bsn_pr:team:atleticos",
+      "home_team": "Leones",
+      "away_team": "Atléticos",
+      "start_time": "2026-07-17 00:00:00+00",
+      "status": "completed",
+      "home_score": 98,
+      "away_score": 92,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:16_julio:SGE:PON"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "16 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/PON",
+        "awayTeamCode": "SGE",
+        "homeTeamCode": "PON",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_17_julio_agu_are",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:capitanes",
+      "away_team_id": "basketball_bsn:bsn_pr:team:santeros",
+      "home_team": "Capitanes",
+      "away_team": "Santeros",
+      "start_time": "2026-07-18 00:00:00+00",
+      "status": "completed",
+      "home_score": 92,
+      "away_score": 95,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:17_julio:AGU:ARE"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "17 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/AGU",
+        "awayTeamCode": "AGU",
+        "homeTeamCode": "ARE",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    },
+    {
+      "id": "basketball_bsn:bsn_pr:event:2026_17_julio_car_bay",
+      "season": "2026",
+      "home_team_id": "basketball_bsn:bsn_pr:team:vaqueros",
+      "away_team_id": "basketball_bsn:bsn_pr:team:gigantes",
+      "home_team": "Vaqueros",
+      "away_team": "Gigantes",
+      "start_time": "2026-07-18 00:00:00+00",
+      "status": "completed",
+      "home_score": 90,
+      "away_score": 81,
+      "provider_ids": {
+        "official_bsn_homepage": "2026:17_julio:CAR:BAY"
+      },
+      "metadata": {
+        "source": "official_bsn_homepage",
+        "dateLabel": "17 julio",
+        "fetchedAt": "2026-07-19T01:22:19.119Z",
+        "sourceUrl": "https://www.bsnpr.com/equipos/CAR",
+        "awayTeamCode": "CAR",
+        "homeTeamCode": "BAY",
+        "missingFields": [
+          "venue",
+          "quarter_scores",
+          "boxscore",
+          "officials",
+          "attendance"
+        ]
+      }
+    }
+  ]
+}
