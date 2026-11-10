@@ -3413,3 +3413,9 @@ Production /ufc and its homepage card are live (PR #302; code eea41db1c51011791d
 
 ## 2026-11-08 — UFC identity correction V2
 V1 retired after finding two distinct Bruno Silva fighters merged in its name-only history. Preserve all21 original forecasts, sources and study artifacts unchanged; prior PASS was arithmetic/replay, not certified identity. Active UFC_ELO_K32_FREE_V2_IDENTITY splits22 legacy bouts using raw division plus official UFC date/opponent histories, binds current ESPN flyweight3895544, and abstains on unverified homonym IDs. All other Elo/selection parameters unchanged. New versioned uniqueness preserves both generations; active cards/accuracy exclude V1, with a visible retirement notice. Repaired retrospective results use already-viewed history and remain exploratory; no demonstrated ROI or Official promotion. Protocol, mapping, outputs and independent replay are under research/ufc-identity-v2.
+
+## 2026-11-09 — Uniformidad visual multideporte
+
+Cambio exclusivamente de presentación. Se normalizaron nombres de deportes, idioma de navegación, etiquetas de estado, nombres de métricas, fecha/hora visible y copy de tarjetas en la superficie principal de Pick Analyzer 2.0.
+
+No se modificaron motores, fórmulas, probabilidades, predicciones, selección de picks, ledger, settlement, APIs, proveedores, crons, Supabase ni contratos de datos. Las claves internas de deporte, filtros y estados se conservan; solo se proyectan etiquetas visuales uniformes.
