@@ -1,3 +1,4 @@
+import {sameIdentity,type LeagueReport} from './free-sports/model';
 import type {UfcReport} from './ufc/free-v2';
 import {decimalOdds} from './ufc/free-v2';
 import {ncaabTeamName} from './ncaab-team-display';
@@ -11,9 +12,9 @@ import {dailyDisplayRows} from './daily-pick-display';
 import {ncaabDate,type NcaabReport} from './ncaab-checkpoint';
 import {validSoccerShadow,currentSoccerEdge,type SoccerReport} from './soccer-shadow-report';
 import type {TtReport} from './table-tennis-report';
-export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB'|'SOCCER'|'TABLE_TENNIS'|'UFC';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;soccer?:{status:string};nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
+export type DayGame={key:string;sport:'MLB'|'NHL'|'NCAAB'|'SOCCER'|'TABLE_TENNIS'|'UFC'|'NFL'|'TENNIS'|'BSN';eventId:string;title:string;scheduledAt:string;analyzed:boolean;started:boolean;waiting:boolean;official:number;registered:number;value:number;noEdge:boolean;freeShadow?:{href:string;selection:string|null;probability:number|null};soccer?:{status:string};nhl?:{away:string;home:string;awayProbability:number|null;homeProbability:number|null;awayOdds:number|null;homeOdds:number|null;capturedAt:string|null;status:string;selections:string[]}};
 export type DayPick={key:string;sport:string;classification:string;matchup:string;selection:string;marketLabel:string;modelProbability:number|null;projection:number|null;edgePp:number|null;odds:number|null;decimalOdds?:number;book:string|null;href:string};
-export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport,soccer?:SoccerReport,tableTennis?:TtReport,ufc?:UfcReport){
+export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,ncaab?:NcaabReport,soccer?:SoccerReport,tableTennis?:TtReport,ufc?:UfcReport,freeSports?:LeagueReport[]){
  const games:DayGame[]=view.games.map(g=>({key:'MLB:'+g.gamePk,sport:'MLB',eventId:String(g.gamePk),title:g.away+' at '+g.home,scheduledAt:g.scheduledAt,
   analyzed:g.analysisAvailable||Number.isFinite(g.homeProbability)&&Number.isFinite(g.awayProbability),started:isStarted(g),waiting:matchesSlateFilter(g,view.board.rows,'Waiting'),official:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,
   registered:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='OFFICIAL_PICK').length,value:view.board.rows.filter(r=>r.game_pk===g.gamePk&&presentationStatus(r)==='VALUE_CANDIDATE').length,noEdge:matchesSlateFilter(g,view.board.rows,'No Edge')}));
@@ -82,6 +83,23 @@ export function combinedDay(view:MlbView,nhl:NhlReport,research:QualifiedReport,
    if(rawEdge!==null&&rawEdge>0){edge.push({...pick,classification:'Edge teórico SHADOW · no calibrado'});games.at(-1)!.value=1;}
   }
  }else if(ufc)warnings.push('UFC: captura gratuita no disponible.');
+ for(const report of freeSports??[]){
+  const sport=report.league==='ATP'||report.league==='WTA'?'TENNIS':report.league;
+  const href='/sports-shadow/'+sport.toLowerCase(),rows=new Map(report.rows.map(row=>[row.forecast.event.id,row]));
+  const fixtures=new Map(report.upcoming.map(e=>[e.id,e]));
+  for(const row of report.rows){
+   const e=row.forecast.event;
+   if(!fixtures.has(e.id)&&(row.outcome!=='OPEN'||report.status==='WAITING'))fixtures.set(e.id,e);
+  }
+  for(const e of fixtures.values()){
+   if(nhlDate(e.start)!==view.date)continue;
+   const row=rows.get(e.id),f=row&&row.outcome!=='REVIEW'&&sameIdentity(e,{start_at:row.forecast.event.start,a_id:row.forecast.event.a.id,b_id:row.forecast.event.b.id})?row.forecast:null;
+   const title=e.a.name+' vs '+e.b.name,started=Date.parse(e.start)<=Date.now();
+   const selection=f?(f.selectedId===e.a.id?e.a.name:e.b.name):null,probability=f?100*Math.max(f.probabilityA,1-f.probabilityA):null,key=report.league+':'+e.id;
+   games.push({key,sport,eventId:e.id,title,scheduledAt:e.start,analyzed:!!f,started,waiting:!started&&!f,official:0,registered:f?1:0,value:0,noEdge:false,freeShadow:{href,selection,probability}});
+   if(f&&selection)selected.push({key,sport,classification:report.league+' · SHADOW',marketLabel:'Ganador proyectado',matchup:title,selection,modelProbability:probability,projection:null,edgePp:null,odds:row?.price??null,book:row?.price==null?null:'DraftKings · archivada',href});
+  }
+ }
  const distinct=(rows:DayPick[])=>[...new Map(rows.map(p=>[p.key,p])).values()];
  return {date:view.date,games:games.sort((a,b)=>Date.parse(a.scheduledAt)-Date.parse(b.scheduledAt)||a.key.localeCompare(b.key)),selected:distinct(selected),edge:distinct(edge).sort((a,b)=>(b.edgePp??0)-(a.edgePp??0)||a.key.localeCompare(b.key)),warnings:[...new Set(warnings)],nhlHealth:nhl.status==='AVAILABLE'?nhl.health:null};
 }

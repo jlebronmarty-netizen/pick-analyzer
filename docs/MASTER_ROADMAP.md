@@ -4250,3 +4250,11 @@ V1 retired after finding two distinct Bruno Silva fighters merged in its name-on
 Cambio exclusivamente de presentación. Se normalizaron nombres de deportes, idioma de navegación, etiquetas de estado, nombres de métricas, fecha/hora visible y copy de tarjetas en la superficie principal de Pick Analyzer 2.0.
 
 No se modificaron motores, fórmulas, probabilidades, predicciones, selección de picks, ledger, settlement, APIs, proveedores, crons, Supabase ni contratos de datos. Las claves internas de deporte, filtros y estados se conservan; solo se proyectan etiquetas visuales uniformes.
+
+### Free winner-model expansion (2026-11-10)
+
+NFL, tennis singles and BSN share an experimental pregame ledger and dashboard.
+Validate the NFL priced subset prospectively. For tennis, certify a no-cost
+pregame quote source before reporting ROI. For BSN, obtain approved future
+calendar/results via a permissioned feed or operator-attested CSV, then audit
+price availability separately. Keep all three in SHADOW. See [rollout contract](free-sports-shadow-v1.md).

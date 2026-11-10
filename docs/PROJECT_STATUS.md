@@ -3419,3 +3419,11 @@ V1 retired after finding two distinct Bruno Silva fighters merged in its name-on
 Cambio exclusivamente de presentación. Se normalizaron nombres de deportes, idioma de navegación, etiquetas de estado, nombres de métricas, fecha/hora visible y copy de tarjetas en la superficie principal de Pick Analyzer 2.0.
 
 No se modificaron motores, fórmulas, probabilidades, predicciones, selección de picks, ledger, settlement, APIs, proveedores, crons, Supabase ni contratos de datos. Las claves internas de deporte, filtros y estados se conservan; solo se proyectan etiquetas visuales uniformes.
+
+### FREE shadow expansion — NFL, ATP/WTA and BSN (2026-11-10)
+
+Implemented the shared winner-only tracker in the proposed release. Source
+preflight replay: 15 NFL forecasts (12 with an eligible quote), 7 ATP and 8
+WTA (unpriced). BSN has 38 archived finals and no approved future slate in
+preflight. These are diagnostics, not issued picks. Production verification and
+a forward settlement sample are release gates. See [source and rollout contract](free-sports-shadow-v1.md).
