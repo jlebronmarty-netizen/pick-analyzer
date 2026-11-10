@@ -4282,3 +4282,7 @@ Tennis source transport diagnosis: distinguish malformed-key configuration,
 timeout, DNS/TLS/reset and HTTP denial without storing exception text or
 credentials. The preserved V1 pre-HTTP failure permits one bounded extra
 diagnostic; do not activate predictions from an unverified capture.
+
+Tennis credential status: header compatibility and provider authentication are
+distinct. Do not ask the operator to replace a valid key based on an invented
+local regex. No new request allowance is introduced by the validation fix.
