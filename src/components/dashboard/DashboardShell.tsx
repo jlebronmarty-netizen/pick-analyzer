@@ -10,8 +10,8 @@ const baseProductNavItems: DashboardNavItem[] = [
   { href: '/today', label: 'Hoy', icon: 'H' },
   { href: '/mlb', label: 'Laboratorio MLB', icon: 'B' },
   { href: '/qualified-plays', label: 'Jugadas calificadas', icon: 'Q' },
-  { href: '/performance', label: 'Rendimiento', icon: 'R' },
   { href: '/model-lab', label: 'Laboratorio de modelos', icon: 'M' },
+  { href: '/performance', label: 'Rendimiento', icon: 'R' },
   { href: '/data-health', label: 'Estado de datos', icon: 'D' },
 ]
 
@@ -19,7 +19,7 @@ const titleByPath: DashboardTitleByPath = {
   '/': 'Hoy',
   '/today': 'Hoy',
   '/mlb': 'Laboratorio MLB',
-  [PICK2_MLB_VALUE_BOARD_ROUTE]: PICK2_MLB_VALUE_BOARD_NAVIGATION_LABEL,
+  [PICK2_MLB_VALUE_BOARD_ROUTE]: 'Valor / Edge',
   '/qualified-plays': 'Jugadas calificadas',
   '/performance': 'Rendimiento',
   '/model-lab': 'Laboratorio de modelos',
@@ -29,6 +29,11 @@ const titleByPath: DashboardTitleByPath = {
   '/nhl': 'NHL',
   '/ncaab': 'NCAAB',
   '/ufc': 'UFC',
+  '/soccer': 'Fútbol',
+  '/table-tennis': 'Tenis de mesa',
+  '/ncaaf': 'NCAAF',
+  '/sports': 'Estado',
+  '/settings': 'Configuración',
 }
 
 function getProductNavItems(): DashboardNavItem[] {
