@@ -4,7 +4,7 @@ import {gzipSync} from 'node:zlib';
 import {TENNIS_HOST,TENNIS_URL,parseUpcoming} from '../../scripts/tennis-free/source-contract.mjs';
 
 const table='free_sports_runs_v1';
-const sourceVersion='TENNIS_RAPIDAPI_PREFLIGHT_V2_DIAGNOSTIC';
+const sourceVersion='TENNIS_RAPIDAPI_PREFLIGHT_V3_HEADER_COMPATIBILITY';
 const admin=async()=> (await import('../lib/supabase-admin')).supabaseAdmin;
 export function safeSourceError(err){
  if(err?.name==='TimeoutError')return 'SOURCE_TIMEOUT';
@@ -15,7 +15,13 @@ export function safeSourceError(err){
  return err instanceof Error&&/^[A-Z_0-9]+$/.test(err.message)?err.message:'SOURCE_TRANSPORT_ERROR';
 }
 const shortError=safeSourceError;
-const keyValid=key=>typeof key==='string'&&/^[A-Za-z0-9_-]{16,256}$/.test(key);
+export function keyHeaderIssue(key){
+ if(typeof key!=='string'||!key.trim())return 'MISSING';
+ if(/[\r\n]/.test(key))return 'LINE_BREAK_IN_VALUE';
+ try{new Headers({'X-RapidAPI-Key':key});return null;}
+ catch{return 'UNSUPPORTED_HTTP_HEADER_CHARACTER';}
+}
+const keyValid=key=>keyHeaderIssue(key)===null;
 async function bodyLimited(response){
  if(!response.body||Number(response.headers.get('content-length'))>2097152)throw Error('BODY_LIMIT');
  const stream=response.body.getReader(),chunks=[];let bytes=0;
@@ -26,7 +32,7 @@ async function bodyLimited(response){
 export async function runTennisSourcePreflight(){
  const key=process.env.TENNIS_RAPIDAPI_KEY?.trim();
  if(!key)return {league:'ATP',state:'KEY_REQUIRED',providerCalls:0};
- if(!keyValid(key))return {league:'ATP',state:'KEY_FORMAT_INVALID',providerCalls:0};
+ if(!keyValid(key))return {league:'ATP',state:'KEY_HEADER_INVALID',providerCalls:0};
  const db=await admin(),deployment=process.env.VERCEL_DEPLOYMENT_ID??'local';
  const latest=await db.from(table).select('slot,evidence').eq('league','ATP').eq('source',TENNIS_URL).order('id',{ascending:false}).limit(1).maybeSingle();
  if(latest.error)throw Error('SOURCE_LEDGER_READ_FAILED');
@@ -76,6 +82,6 @@ export async function getTennisSourceHealth(){
   const e=last.data?.evidence;
   return {status:!e?'WAITING_CREDENTIAL_OR_FIRST_RUN':e.schemaStatus==='CANDIDATE_SCHEMA_PASS'?'CAPTURED_PENDING_HISTORY_AND_TERMS':'SOURCE_REVIEW_REQUIRED',
    capturedAt:last.data?.observed_at??null,httpStatus:e?.httpStatus??null,schema:e?.schemaStatus??null,error:e?.code??null,elapsedMs:e?.elapsedMs??null,fixtures:e?.fixtureCount??null,priced:e?.pricedCount??null,tours:e?.byTour??null,
-   configured:!!process.env.TENNIS_RAPIDAPI_KEY?.trim(),keyFormatValid:keyValid(process.env.TENNIS_RAPIDAPI_KEY?.trim()),modelActive:false,forecastsIssued:0,providerCalls:0,databaseWrites:0,limit:'One regular preflight per UTC day; one additional diagnostic only for the preserved V1 pre-HTTP failure. No HTTP-denial retries.'};
- }catch{return {status:'UNAVAILABLE',configured:!!process.env.TENNIS_RAPIDAPI_KEY?.trim(),keyFormatValid:keyValid(process.env.TENNIS_RAPIDAPI_KEY?.trim()),modelActive:false,forecastsIssued:0,providerCalls:0,databaseWrites:0};}
+   configured:!!process.env.TENNIS_RAPIDAPI_KEY?.trim(),keyFormatValid:keyValid(process.env.TENNIS_RAPIDAPI_KEY?.trim()),headerCompatible:keyValid(process.env.TENNIS_RAPIDAPI_KEY?.trim()),configurationIssue:keyHeaderIssue(process.env.TENNIS_RAPIDAPI_KEY?.trim()),credentialValidity:'NOT_ESTABLISHED_BY_HEADER_CHECK',modelActive:false,forecastsIssued:0,providerCalls:0,databaseWrites:0,limit:'One regular preflight per UTC day; one additional diagnostic only for the preserved V1 pre-HTTP failure. No HTTP-denial retries.'};
+ }catch{return {status:'UNAVAILABLE',configured:!!process.env.TENNIS_RAPIDAPI_KEY?.trim(),keyFormatValid:keyValid(process.env.TENNIS_RAPIDAPI_KEY?.trim()),headerCompatible:keyValid(process.env.TENNIS_RAPIDAPI_KEY?.trim()),configurationIssue:keyHeaderIssue(process.env.TENNIS_RAPIDAPI_KEY?.trim()),credentialValidity:'NOT_ESTABLISHED_BY_HEADER_CHECK',modelActive:false,forecastsIssued:0,providerCalls:0,databaseWrites:0};}
 }

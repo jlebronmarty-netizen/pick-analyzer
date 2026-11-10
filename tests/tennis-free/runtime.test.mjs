@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {gunzipSync} from 'node:zlib';
-import {runTennisSourcePreflight,getTennisSourceHealth,safeSourceError} from '../../src/services/tennis-source-preflight.service.mjs';
+import {runTennisSourcePreflight,getTennisSourceHealth,safeSourceError,keyHeaderIssue} from '../../src/services/tennis-source-preflight.service.mjs';
 const store={rows:[],requests:0,body:null,status:200};
 function reset(){store.rows=[];store.requests=0;store.status=200;store.body={hasNextPage:false,matches:[]};process.env.TENNIS_RAPIDAPI_KEY='isolated-fixture-value';process.env.VERCEL_DEPLOYMENT_ID='test-deployment';}
 globalThis.__tennisPreflightDb={
@@ -52,7 +52,7 @@ test('safe diagnostics classify causes without revealing error messages',()=>{
 });
 test('malformed keys are identified without any provider call',async()=>{
  reset();process.env.TENNIS_RAPIDAPI_KEY='invalid key with newline\nvalue';
- assert.equal((await runTennisSourcePreflight()).state,'KEY_FORMAT_INVALID');
+ assert.equal((await runTennisSourcePreflight()).state,'KEY_HEADER_INVALID');
  assert.equal(store.requests,0);assert.equal(store.rows.length,0);
  assert.equal((await getTennisSourceHealth()).keyFormatValid,false);
 });
@@ -68,4 +68,12 @@ test('exactly one extra diagnostic preserves the failed V1 receipt',async()=>{
   assert.equal((await runTennisSourcePreflight()).state,'PREFLIGHT_ALREADY_CLAIMED_TODAY');
   assert.equal(store.requests,1);assert.equal(store.rows.length,2);assert.equal(store.rows[0],original);
  }finally{globalThis.fetch=savedFetch;}
+});
+
+test('header validation does not invent provider key syntax or expose characters',()=>{
+ assert.equal(keyHeaderIssue('abc.def+ghi/='),null);
+ assert.equal(keyHeaderIssue('short'),null);
+ assert.equal(keyHeaderIssue('value with spaces'),null);
+ assert.equal(keyHeaderIssue('line1\nline2'),'LINE_BREAK_IN_VALUE');
+ assert.equal(keyHeaderIssue('non-http-😀'),'UNSUPPORTED_HTTP_HEADER_CHARACTER');
 });

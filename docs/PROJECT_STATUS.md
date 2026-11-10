@@ -3457,3 +3457,9 @@ key format without revealing credentials, classify transport causes safely,
 record elapsed time, and allow exactly one extra diagnostic for that V1
 pre-HTTP failure. Add a daily tennis-source tick at 22:19 UTC using the same
 claim guard; it does not increase requests after success or access denial.
+
+Tennis header-validation correction: the previous alphabet/length regex was
+not a verified provider key contract and must not establish invalid credentials.
+Use standard HTTP Headers compatibility, report only categorical configuration
+issues, and retain provider acceptance as unverified until an actual response.
+The existing diagnostic tick moves to 22:47 UTC with the same request guard.
