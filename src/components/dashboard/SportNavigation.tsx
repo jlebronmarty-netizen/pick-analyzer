@@ -9,6 +9,9 @@ const sports = [
   ['/soccer', 'Fútbol'],
   ['/ncaab', 'NCAAB'],
   ['/ncaaf', 'NCAAF'],
+  ['/sports-shadow/nfl', 'NFL'],
+  ['/sports-shadow/bsn', 'BSN'],
+  ['/sports-shadow/tennis', 'Tenis'],
   ['/edge-lab', 'Edge Lab'],
   ['/sports', 'Estado'],
 ]

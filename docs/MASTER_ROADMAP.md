@@ -4259,3 +4259,12 @@ Settlement-only repair; prediction equations, probabilities and frozen selection
 - NCAAB reconciliation now accepts an exact ESPN event ID with the exact same two team IDs when ESPN later corrects home/away designation or moves tip time by at most two hours. Scores are normalized back to the frozen forecast orientation. Conflicting score versions, different teams or larger time shifts remain review-only.
 - Table tennis pending recovery now prioritizes two overdue event searches per due cycle while the backlog exceeds 10 events, replacing the generic recent-results page so the existing 9-request/day budget is not increased. Individual recovery failures are isolated and recorded rather than discarding successful settlement evidence from another target.
 - No Official Pick promotion, sportsbook settlement claim, model refit, probability rewrite or historical deletion is introduced.
+
+### Free winner-model expansion (2026-11-10)
+
+NFL, tennis singles and BSN share an experimental pregame ledger and dashboard.
+Start with open NFL schedules and results; certify a no-cost pregame quote
+source for ROI. For tennis, verify the terms and coverage of a free
+calendar/results API, then validate prices separately. For BSN, obtain approved future
+calendar/results via a permissioned feed or operator-attested CSV, then audit
+price availability separately. Keep all three in SHADOW. See [rollout contract](free-sports-shadow-v1.md).
