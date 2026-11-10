@@ -26,6 +26,24 @@ test('blocked, started, stale and future-date rows cannot become highest-edge op
 test('homepage retains model overview above a combined connected-sports calendar',()=>{
  const v=view([row('v')]);const day=combinedDay(v,{status:'UNAVAILABLE',warning:'NHL: fuente no disponible'}, {status:'EMPTY',groups:[],entries:[]});
  const html=renderToStaticMarkup(React.createElement(TodayContent,{view:v,performance:React.createElement('div',null,'Model overview'),calendar:React.createElement(MultisportDayView,{day,mlb:v})}))
- for(const text of ['picks &amp; performance','Model overview','Mayor edge del día','62.00%','7.00 pp','href="/mlb-value-board"','Partidos combinados de hoy','NHL: fuente no disponible'])assert.ok(html.includes(text),text)
+ for(const text of ['Picks y rendimiento de hoy.','Model overview','Mayor edge del día','62.00%','7.00 pp','href="/mlb-value-board"','Partidos combinados de hoy','NHL: fuente no disponible'])assert.ok(html.includes(text),text)
  assert.ok(html.indexOf('Model overview')<html.indexOf('Calendario de todos los deportes'))
 })
+
+test('free tennis tours and NFL appear as time-sorted shadow selections without affecting Official Picks or edge',()=>{
+ const report=(league,id,at)=>{
+  const e={id,start:at,a:{id:'1',name:league+' Alpha'},b:{id:'2',name:league+' Beta'},state:'PRE',quote:null};
+  return {league,status:'AVAILABLE',upcoming:[e],rows:[{forecast:{event:e,league,probabilityA:.61,selectedId:'1'},outcome:'OPEN',price:null}]};
+ };
+ const v=view([],{games:[]});
+ const reports=[report('NFL','1','2026-10-14T23:00:00.000Z'),report('ATP','1','2026-10-14T21:00:00.000Z'),report('WTA','1','2026-10-14T22:00:00.000Z')];
+ const day=combinedDay(v,{status:'UNAVAILABLE'},{status:'EMPTY',groups:[],entries:[]},undefined,undefined,undefined,undefined,reports);
+ assert.deepEqual(day.games.map(g=>g.key),['ATP:1','WTA:1','NFL:1']);
+ assert.deepEqual(day.games.map(g=>g.official),[0,0,0]);
+ assert.deepEqual(day.selected.map(p=>p.classification),['NFL · SHADOW','ATP · SHADOW','WTA · SHADOW']);
+ assert.ok(day.selected.every(p=>p.modelProbability===61&&p.odds===null));
+ assert.equal(day.edge.length,0);
+ const html=renderToStaticMarkup(React.createElement(MultisportDayView,{day,mlb:v}));
+ assert.match(html,/Ganador proyectado: ATP Alpha/);
+ assert.match(html,/href="\/sports-shadow\/tennis"/);
+});

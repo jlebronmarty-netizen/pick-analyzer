@@ -63,6 +63,13 @@ export function metrics(rows:Settled[]){
 export type LeagueReport={league:League;status:'AVAILABLE'|'WAITING'|'UNAVAILABLE';sourceAt:string|null;history:number;upcoming:Fixture[];rows:Settled[];metrics:ReturnType<typeof metrics>};
 export function cohort(report:LeagueReport):ModelCohort{
  const m=report.metrics,available=report.status!=='UNAVAILABLE';
- return {key:modelId(report.league),label:report.league+' · Elo SHADOW',available,wins:available?m.wins:null,losses:available?m.losses:null,pending:available?m.pending:null,pushes:null,voids:null,models:available?1:null,accuracy:m.accuracy,
+ return {key:modelId(report.league),label:report.league+' · Elo SHADOW',available,wins:available?m.wins:null,losses:available?m.losses:null,pending:available?m.pending:null,pushes:null,voids:null,models:available?1:null,accuracy:m.accuracy===null?null:m.accuracy/100,
   note:report.league==='BSN'?'Calendario futuro sujeto a una fuente atestada.':m.roi===null?'ROI simulado: sin pronósticos liquidados con cuota.':'ROI simulado: '+m.roi.toFixed(2)+'% · '+m.priced+' con cuota.'};
+}
+
+export function tennisCohort(reports:LeagueReport[]):ModelCohort{
+ const m=metrics(reports.flatMap(r=>r.rows)),available=reports.length===2&&reports.every(r=>r.status!=='UNAVAILABLE');
+ return {key:'TENNIS_SINGLES_SHADOW_V1',label:'ATP + WTA · individuales',available,wins:available?m.wins:null,losses:available?m.losses:null,
+  pending:available?m.pending:null,pushes:null,voids:null,models:available?reports.length:null,accuracy:available&&m.accuracy!==null?m.accuracy/100:null,
+  note:'Dos modelos separados en el detalle. ROI: sin cuotas prepartido verificadas.'};
 }

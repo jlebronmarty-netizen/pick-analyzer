@@ -1,7 +1,7 @@
 import 'server-only';
 import {createHash} from 'node:crypto';
 import {cache} from 'react';
-import {cohort,issueForecasts,LEAGUES,metrics,resolve,SPORT_LEAGUES,SPORT_NAMES,type Fixture,type Forecast,type League,type LeagueReport,type Observation,type Sport} from '@/lib/free-sports/model';
+import {cohort,issueForecasts,LEAGUES,metrics,resolve,SPORT_LEAGUES,SPORT_NAMES,tennisCohort,type Fixture,type Forecast,type League,type LeagueReport,type Observation,type Sport} from '@/lib/free-sports/model';
 import {espnRequest,parseBsn,parseEspn,type BsnEvent} from '@/lib/free-sports/sources';
 import type {SportModelCard} from '@/lib/sport-model-overview';
 
@@ -110,5 +110,8 @@ export const getFreeLeagueReport=cache(async(league:League):Promise<LeagueReport
 });
 export const getFreeSportsReports=cache(async()=>Promise.all(LEAGUES.map(getFreeLeagueReport)));
 export const freeSportCards=(reports:LeagueReport[]):SportModelCard[]=>
- (Object.keys(SPORT_LEAGUES) as Sport[]).map(sport=>({key:sport,label:SPORT_NAMES[sport],href:'/sports-shadow/'+sport,classification:'SHADOW / RESEARCH · FREE',
-  cohorts:reports.filter(r=>(SPORT_LEAGUES[sport] as readonly League[]).includes(r.league)).map(cohort)}));
+ (Object.keys(SPORT_LEAGUES) as Sport[]).map(sport=>{
+  const leagues=reports.filter(r=>(SPORT_LEAGUES[sport] as readonly League[]).includes(r.league));
+  return {key:sport,label:SPORT_NAMES[sport],href:'/sports-shadow/'+sport,classification:'SHADOW / RESEARCH · FREE',metricLabel:'Ganador del partido',
+   cohorts:sport==='tennis'?[tennisCohort(leagues)]:leagues.map(cohort)};
+ });

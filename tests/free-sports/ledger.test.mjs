@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {issueForecasts,resolve,metrics} from '../../src/lib/free-sports/model.ts';
+import {cohort,issueForecasts,resolve,metrics,tennisCohort} from '../../src/lib/free-sports/model.ts';
 import {parseEspn,parseBsn} from '../../src/lib/free-sports/sources.ts';
 
 const now='2026-11-10T12:00:00.000Z',start='2026-11-12T12:00:00.000Z';
@@ -62,4 +62,16 @@ test('tennis retirements do not become decisive; BSN requires explicit pregame p
  const bsn={id:'bsn_1',start_time:start,home_team_id:'home',away_team_id:'away',home_team:'Home',away_team:'Away',status:'scheduled',home_score:null,away_score:null,metadata:null};
  assert.deepEqual(parseBsn([bsn],now),[]);
  assert.equal(parseBsn([{...bsn,metadata:{free_shadow_attestation:{source:'operator_attested_csv',capturedAt:now,reference:'verified.csv'}}}],now)[0].state,'PRE');
+});
+
+test('sport card uses fractional accuracy and weights both tennis tours by decisions',()=>{
+ const f=prediction(),played='2026-11-13T12:00:00.000Z';
+ const obs={event_id:'401',start_at:start,a_id:a.id,b_id:b.id,outcome:a.id,observed_at:played};
+ const win=resolve(f,[obs],played),loss=resolve(f,[{...obs,outcome:b.id}],played);
+ const report=(league,rows)=>({league,status:'AVAILABLE',rows,metrics:metrics(rows)});
+ const atp=report('ATP',[win]),wta=report('WTA',[win,loss,loss]);
+ assert.equal(cohort(atp).accuracy,1);
+ const combined=tennisCohort([atp,wta]);
+ assert.deepEqual([combined.accuracy,combined.wins,combined.losses,combined.models],[.5,2,2,2]);
+ assert.equal(tennisCohort([atp,{...wta,status:'UNAVAILABLE'}]).accuracy,null);
 });
