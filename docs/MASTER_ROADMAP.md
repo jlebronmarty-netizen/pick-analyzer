@@ -4277,3 +4277,8 @@ preflight is credential-gated, capped at one request per UTC day, and has no
 forecast writes. BSN: preserve the 38-game exploratory pilot; acquire complete
 permissioned/open seasons before selecting or confirming new formulas. Keep
 retrospective results separate from prospective Pick accuracy and from ROI.
+
+Tennis source transport diagnosis: distinguish malformed-key configuration,
+timeout, DNS/TLS/reset and HTTP denial without storing exception text or
+credentials. The preserved V1 pre-HTTP failure permits one bounded extra
+diagnostic; do not activate predictions from an unverified capture.
