@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/free-sports",
       "schedule": "39 1,5,9,13,17,21 * * *"
+    },
+    {
+      "path": "/api/cron/tennis-source",
+      "schedule": "19 22 * * *"
     }
   ],
   "git": {

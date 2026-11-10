@@ -3450,3 +3450,10 @@ baseline 21/38; Elo and rolling scores 8/13; recent form 7/12. This is not
 independent validation or ROI evidence; missing prices remain null. Full
 protocol, inputs, per-game prior features, exclusions and reproducible report
 are in research/bsn-preseason-2027-v1/. No new BSN data or prediction rows.
+
+Tennis diagnostic follow-up (2026-11-10): the operator-triggered receipt failed
+before receiving an HTTP status and issued no forecasts. Preserve it. Validate
+key format without revealing credentials, classify transport causes safely,
+record elapsed time, and allow exactly one extra diagnostic for that V1
+pre-HTTP failure. Add a daily tennis-source tick at 22:19 UTC using the same
+claim guard; it does not increase requests after success or access denial.

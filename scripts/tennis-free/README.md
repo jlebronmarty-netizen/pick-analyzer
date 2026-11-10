@@ -15,7 +15,7 @@ allows **one request per UTC day**, even if the four-hour cron is run again.
 It requests the mixed-tour singles calendar once with bounded metadata;
 does not follow provider links, request its model probabilities, fetch past
 odds, or create predictions. HTTP 401/403/429 stop automatic retries within
-that deployment. Redirects are rejected; timeout 15 seconds; cap 2 MiB.
+that deployment. Redirects are not followed; timeout 25 seconds; cap 2 MiB. A preserved V1 SOURCE_FAILED before any HTTP response can receive exactly one diagnostic receipt at UTC 01:00, without modifying the original. No retry for HTTP denials or schema failures. The daily tennis-source cron at 22:19 UTC shares this same guard with the four-hour job.
 
 All requests use a claim in `free_sports_runs_v1` before the provider call.
 The service-only receipt keeps a hash and gzip payload for replay. Auth headers
