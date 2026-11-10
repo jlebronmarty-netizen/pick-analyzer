@@ -15,7 +15,10 @@ export function planTtRecovery(forecasts,outcomes,finals,runs,now=new Date()){
   const existing=events.get(f.event_id);if(existing&&(existing.participant_a!==f.participant_a||existing.participant_b!==f.participant_b||Date.parse(existing.scheduled_at)!==Date.parse(f.scheduled_at)))throw Error('RECOVERY_CONTRACT_CONFLICT');
   if(!existing)events.set(f.event_id,f);
  }
- const attempts=runs.filter(r=>r.sport==='TT'&&r.summary?.recovery?.event_id).sort((a,b)=>b.started_at.localeCompare(a.started_at));
+ const attempts=runs.filter(r=>r.sport==='TT').flatMap(r=>{
+  const list=Array.isArray(r.summary?.recoveries)?r.summary.recoveries:r.summary?.recovery?[r.summary.recovery]:[];
+  return list.filter(x=>x?.event_id).map(recovery=>({started_at:r.started_at,summary:{recovery}}));
+ }).sort((a,b)=>b.started_at.localeCompare(a.started_at));
  const candidates=[];for(const [event_id,f] of events){
   const latest=attempts.find(r=>r.summary.recovery.event_id===event_id),previous=latest?.summary.recovery;
   let side=previous?.next_side==='B'?'B':'A',page=Number.isInteger(previous?.next_page)&&previous.next_page>=1&&previous.next_page<=100?previous.next_page:1;
@@ -25,7 +28,7 @@ export function planTtRecovery(forecasts,outcomes,finals,runs,now=new Date()){
   candidates.push({event_id,team,participant_name:participant,page,side,scheduled_at:f.scheduled_at,previous_attempt_at:latest?.started_at??null});
  }
  candidates.sort((a,b)=>(a.previous_attempt_at??'').localeCompare(b.previous_attempt_at??'')||a.scheduled_at.localeCompare(b.scheduled_at)||a.event_id.localeCompare(b.event_id));
- return {target:candidates[0]??null,backlog_events:events.size,skipped};
+ return {target:candidates[0]??null,targets:candidates.slice(0,2),backlog_events:events.size,skipped};
 }
 export function recoveryCursor(target,coverage){
  const advance=coverage?.verified===true&&coverage.hasNextPage===true&&target.page<100;
