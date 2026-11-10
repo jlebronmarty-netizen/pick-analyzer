@@ -64,14 +64,14 @@ async function collect(db:Admin,league:League,source:string,year:number){
 }
 async function runLeague(db:Admin,league:League,clock:Date){
  const slot=new Date(Math.floor(clock.getTime()/14400000)*14400000).toISOString();
- if(league==='ATP'||league==='WTA')return {league,state:'WAITING_APPROVED_SOURCE',providerCalls:0};
+ if(league!=='NFL')return {league,state:'WAITING_APPROVED_SOURCE',providerCalls:0};
  const year=clock.getUTCFullYear()-(clock.getUTCMonth()<2?1:0);
- const request={url:league==='BSN'?'sport_events:basketball_bsn':NFLVERSE_SCHEDULE,year};
+ const request={url:NFLVERSE_SCHEDULE,year};
  const claim=await db.from(RUNS).insert({league,slot,source:request.url}).select('id').single();
  if(claim.error?.code==='23505')return {league,state:'SKIPPED_ALREADY_CLAIMED'};
  if(claim.error||!claim.data)throw Error('CLAIM_FAILED');
  const p_run=claim.data.id as number;
- const maxHttpRequests=league==='BSN'?0:2;
+ const maxHttpRequests=2;
  try{
   const existing=await readPages<LedgerForecast>(db,FORECASTS,'event_id,start_at,forecast',league);
   const indexed=new Map(existing.map(r=>[r.event_id,r.forecast]));

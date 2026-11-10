@@ -50,13 +50,13 @@ are excluded from training and win/loss accounting.
   cancellations, walkovers and retirements do not receive book-specific
   settlement assumptions. Missing outcomes stay pending, including when the
   free calendar stops returning a fixture.
-- Additive private tables `free_sports_*_v1` and a service-only atomic finish
+- Migration 20261110213011 creates private tables `free_sports_*_v1` and a service-only atomic finish
   function. A run claim is stored before any provider call. The run ledger
   records source, UTC slot, result, capture time, digest, counts and normalized
   pregame evidence; forecast-producing runs include the training IDs/outcomes.
-- Production-only authenticated cron at minute 23 every four hours UTC. Per
+- Production-only authenticated cron at 01:39, 05:39, 09:39, 13:39, 17:39 and 21:39 UTC. Per
   cycle: one NFL GitHub release request with at most one allowlisted asset
-  redirect. BSN uses Supabase only; ATP/WTA perform no collection. No retries, no paid keys, 20-second timeout and 8 MiB response cap.
+  redirect. ATP/WTA and BSN perform no scheduled collection in the NFL-only release. No retries, no paid keys, 20-second timeout and 8 MiB response cap.
   A failed source does not stop the other sports. The UI hides a stale
   calendar after 5 hours and retains the frozen historical ledger.
 - Pages: `/sports-shadow/nfl`, `/sports-shadow/tennis`, `/sports-shadow/bsn`.

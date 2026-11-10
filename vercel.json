@@ -26,7 +26,7 @@
     },
     {
       "path": "/api/cron/free-sports",
-      "schedule": "23 0,4,8,12,16,20 * * *"
+      "schedule": "39 1,5,9,13,17,21 * * *"
     }
   ],
   "git": {

@@ -26,8 +26,8 @@ async function collectTt(db,request,summary){
  const attempts=checked(await db.from(T.runs).select('sport,started_at,summary').eq('sport','TT').order('started_at',{ascending:false}).limit(1000),'RECOVERY_RUNS');
  const plan=planTtRecovery(existing,outcomes,canonicalTtHistory(storedBefore.map(r=>r.payload)).finals,attempts);
  summary.recovery_backlog_events=plan.backlog_events;summary.recovery_skipped=plan.skipped;
- const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V3';summary.provider_spacing_ms=1200;
- const recentPages=plan.target?1:2;
+ const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V4';summary.provider_spacing_ms=1200;
+ const recentPages=plan.backlog_events>10?0:plan.target?1:2;summary.settlement_priority=plan.backlog_events>10;
  for(let page=1;page<=recentPages;page++){
   const response=await paced(()=>paidRead(db,request,'results',page,summary)),parsed=normalizeTtResultPage(response.data,response.received_at,page);
   for(const row of parsed.rows){const key=row.source+':'+row.sourceMatchId;if(resultIds.has(key))summary.warnings.push('RESULT_PAGE_OVERLAP');resultIds.add(key);}
@@ -36,22 +36,28 @@ async function collectTt(db,request,summary){
   if(!parsed.hasNextPage)break;
   if(page===recentPages)summary.warnings.push('RESULT_PAGE_BUDGET_REACHED');
  }
- summary.result_coverage={pages:summary.result_pages.length,received:summary.result_pages.reduce((n,p)=>n+p.received,0),normalized:allIncoming.length,complete:summary.result_pages.at(-1)?.complete===true,provider_total:summary.result_pages[0]?.total??null};
- if(plan.target){
-  const target=plan.target;summary.recovery={...target,attempted_at:new Date().toISOString(),next_page:target.page,next_side:target.side,status:'REQUESTED'};
-  const response=await paced(()=>paidRead(db,request,'results-player',target.page,summary,target.team));
-  const parsed=normalizeTtResultPage(response.data,response.received_at,target.page);
-  const evidence={kind:'TT_PENDING_RESULT_SEARCH',target,source_url:response.source_url,received_at:response.received_at,response_digest:digest(response.data),coverage:parsed.coverage,normalized_finals:parsed.rows,rejected:parsed.rejected};
-  const sourceId=digest(evidence);await insertRows(db,T.sources,[{id:sourceId,sport:'TT',source:'PulseScore Tipsport player-filtered pending results',captured_at:response.received_at,payload:evidence}]);
-  allIncoming.push(...parsed.rows);
-  summary.recovery={...summary.recovery,...recoveryCursor(target,parsed.coverage),status:'SEARCH_CAPTURED',source_id:sourceId,received:parsed.received,normalized:parsed.rows.length,rejected:parsed.rejected,coverage:parsed.coverage};
-  if(!parsed.paginationVerified)summary.warnings.push('RECOVERY_PAGINATION_UNVERIFIED');if(summary.recovery.page_ceiling_reached)summary.warnings.push('RECOVERY_PAGE_CEILING_REACHED');
+ summary.result_coverage={pages:summary.result_pages.length,received:summary.result_pages.reduce((n,p)=>n+p.received,0),normalized:allIncoming.length,complete:summary.result_pages.length?summary.result_pages.at(-1)?.complete===true:false,provider_total:summary.result_pages[0]?.total??null};
+ summary.recoveries=[];
+ for(const target of plan.targets??(plan.target?[plan.target]:[])){
+  const recovery={...target,attempted_at:new Date().toISOString(),next_page:target.page,next_side:target.side,status:'REQUESTED'};
+  try{
+   const response=await paced(()=>paidRead(db,request,'results-player',target.page,summary,target.team));
+   const parsed=normalizeTtResultPage(response.data,response.received_at,target.page);
+   const evidence={kind:'TT_PENDING_RESULT_SEARCH',target,source_url:response.source_url,received_at:response.received_at,response_digest:digest(response.data),coverage:parsed.coverage,normalized_finals:parsed.rows,rejected:parsed.rejected};
+   const sourceId=digest(evidence);await insertRows(db,T.sources,[{id:sourceId,sport:'TT',source:'PulseScore Tipsport player-filtered pending results',captured_at:response.received_at,payload:evidence}]);
+   allIncoming.push(...parsed.rows);
+   const completed={...recovery,...recoveryCursor(target,parsed.coverage),status:'SEARCH_CAPTURED',source_id:sourceId,received:parsed.received,normalized:parsed.rows.length,rejected:parsed.rejected,coverage:parsed.coverage};
+   summary.recoveries.push(completed);
+   if(!parsed.paginationVerified)summary.warnings.push('RECOVERY_PAGINATION_UNVERIFIED');if(completed.page_ceiling_reached)summary.warnings.push('RECOVERY_PAGE_CEILING_REACHED');
+  }catch(e){summary.recoveries.push({...recovery,status:'FAILED',error:e instanceof Error?e.message:'RECOVERY_FAILED'});summary.warnings.push('RECOVERY_TARGET_FAILED');}
  }
+ summary.recovery=summary.recoveries[0]??null;
  const incoming=[...new Map(allIncoming.map(r=>{const id=digest([r.source,r.sourceMatchId,r.contentDigest]);return [id,{id,source_event_id:r.sourceMatchId,source:r.source,scheduled_at:r.scheduledAt,captured_at:r.capturedAt,content_digest:r.contentDigest,payload:r}];})).values()];
  summary.finals_inserted=await insertRows(db,T.finals,incoming);
  const stored=await readAll(db,T.finals),history=canonicalTtHistory(stored.map(r=>r.payload));summary.history_finals=history.finals.length;summary.history_conflicts=history.conflicts;summary.history_latest=history.finals.length?history.finals.map(r=>r.scheduledAt).sort().at(-1):null;
  await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
- if(plan.target){const contracts=existing.filter(f=>f.event_id===plan.target.event_id&&f.status!=='ABSTAIN');summary.recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(summary.recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
+ for(const recovery of summary.recoveries){const contracts=existing.filter(f=>f.event_id===recovery.event_id&&f.status!=='ABSTAIN');recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(recovery.contract_evaluations.length&&recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
+ try{
  const response=await paced(()=>paidRead(db,request,'prematch',1,summary)),asOf=new Date().toISOString();
  const rawEvents=Array.isArray(response.data.events)?response.data.events:Array.isArray(response.data.results)?response.data.results:null;if(!rawEvents)throw Error('TT_PREMATCH_SCHEMA_CHANGED');
  const coverage=readTtPagination(response.data,rawEvents.length,{expectedPage:1,allowUnpaged:true});summary.prematch_coverage=coverage;
@@ -61,6 +67,7 @@ async function collectTt(db,request,summary){
  const forecasts=ttForecasts({events:minimal,pagination:coverage},history.finals,asOf,sourceId);summary.source_events=forecasts.source_events;summary.skipped=forecasts.skipped;summary.prematch_has_next=coverage.hasNextPage;
  summary.forecasts_inserted=await insertRows(db,T.forecasts,forecasts.rows);summary.forecasts_reused=forecasts.rows.length-summary.forecasts_inserted;summary.status_counts=Object.fromEntries(['FORECAST','PROJECTION','ABSTAIN'].map(s=>[s,forecasts.rows.filter(r=>r.status===s).length]));
  if(!coverage.verified)summary.warnings.push('PREMATCH_COVERAGE_UNVERIFIED');else if(coverage.hasNextPage)summary.warnings.push('PREMATCH_PAGE_BUDGET_REACHED');
+ }catch(e){summary.warnings.push('PREMATCH_REFRESH_FAILED');summary.errors.push(e instanceof Error?e.message:'TT_PREMATCH_FAILED');summary.operational_state='SETTLEMENT_RECOVERY';return 'PARTIAL';}
  if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
  if(!history.finals.length&&allIncoming.length===0)summary.warnings.push('NO_VERIFIED_FINALS_AVAILABLE');
  summary.warnings=[...new Set(summary.warnings)];summary.operational_state=summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';

@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {normalizeTtFinal,normalizeTtResults,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../src/lib/edge-lab/multisport.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {normalizeTtFinal,normalizeTtResults,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../src/lib/edge-lab/multisport.mjs';import {planTtRecovery} from '../src/lib/edge-lab/tt-pending-recovery.mjs';
 const receipt='2026-11-04T20:00:00Z',base={sport:'table-tennis',league:'TT Elite Series',eventId:'x1',home:'One A',away:'Two B',startTime:'2026-11-03T10:00:00Z',score:{home:3,away:0},statistics:{sets:{home:[11,11,11],away:[8,9,7]}},settlement:{final:true,inPlay:false}};
 test('TT complete final derives total and sets',()=>{const r=normalizeTtFinal(base,receipt);assert.equal(r.ok,true);assert.equal(r.row.totalPoints,57);assert.equal(r.row.setsA,3);});
 test('TT rejects explicit nonfinal',()=>assert.equal(normalizeTtFinal({...base,settlement:{final:false}},receipt).ok,false));
@@ -48,3 +48,18 @@ test('MLB forecasts same ID on retry',()=>assert.deepEqual(mlbForecasts([schedul
 test('MLB numerical results are MAE not accuracy',()=>{const f=mlbForecasts([scheduled],mlbHistory,receipt,'s').rows.find(x=>x.market==='HOME_TEAM_RUNS');const r=mlbOutcome(f,{...scheduled,code:'F',home:{...scheduled.home,score:5},away:{...scheduled.away,score:2}});assert.equal(r.status,'NUMERIC');assert.equal(r.absolute_error,1);});
 test('Metrics separate outcomes and projection errors',()=>{const base={sport:'TT',market:'TOTAL_POINTS',model_version:'v',phase:'p'};const r=multiMetrics([{...base,status:'FORECAST',outcome:{status:'W'}},{...base,status:'FORECAST',outcome:{status:'L'}},{...base,status:'PROJECTION',outcome:{status:'NUMERIC',absolute_error:2}},{...base,status:'ABSTAIN'}])[0];assert.equal(r.accuracy,.5);assert.equal(r.evaluable,2);assert.equal(r.mae,2);assert.equal(r.abstentions,1);});
 test('Zero evaluables never returns a fixed percentage',()=>assert.equal(multiMetrics([{sport:'TT',market:'MONEYLINE',model_version:'v',phase:'p',status:'ABSTAIN'}])[0].accuracy,null));
+
+test('TT recovery plans two oldest/fair overdue events and remembers multi-target attempts',()=>{
+ const now=new Date('2026-11-10T12:00:00Z');
+ const mk=(id,at,a,b)=>({id:id+'-ml',sport:'TT',event_id:id,status:'FORECAST',market:'MONEYLINE',scheduled_at:at,participant_a:a,participant_b:b});
+ const forecasts=[
+  mk('e1','2026-11-08T10:00:00Z','Alpha One','Beta Two'),
+  mk('e2','2026-11-08T11:00:00Z','Gamma Three','Delta Four'),
+  mk('e3','2026-11-08T12:00:00Z','Epsilon Five','Zeta Six'),
+ ];
+ const first=planTtRecovery(forecasts,[],[],[],now);
+ assert.equal(first.targets.length,2);assert.deepEqual(first.targets.map(x=>x.event_id),['e1','e2']);
+ const runs=[{sport:'TT',started_at:'2026-11-10T11:00:00Z',summary:{recoveries:[{event_id:'e1',next_page:2,next_side:'A'},{event_id:'e2',next_page:1,next_side:'B'}]}}];
+ const next=planTtRecovery(forecasts,[],[],runs,now);
+ assert.equal(next.targets.length,2);assert.equal(next.targets[0].event_id,'e3');
+});

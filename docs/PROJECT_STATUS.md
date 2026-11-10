@@ -3420,6 +3420,15 @@ Cambio exclusivamente de presentación. Se normalizaron nombres de deportes, idi
 
 No se modificaron motores, fórmulas, probabilidades, predicciones, selección de picks, ledger, settlement, APIs, proveedores, crons, Supabase ni contratos de datos. Las claves internas de deporte, filtros y estados se conservan; solo se proyectan etiquetas visuales uniformes.
 
+## 2026-11-10 — Settlement reconciliation recovery
+
+Settlement-only repair; prediction equations, probabilities and frozen selections remain unchanged.
+
+- NBA GOAT archive now refreshes the previous Puerto Rico calendar day in addition to the current day so late/final game states remain available to the existing statistical reconciler after midnight.
+- NCAAB reconciliation now accepts an exact ESPN event ID with the exact same two team IDs when ESPN later corrects home/away designation or moves tip time by at most two hours. Scores are normalized back to the frozen forecast orientation. Conflicting score versions, different teams or larger time shifts remain review-only.
+- Table tennis pending recovery now prioritizes two overdue event searches per due cycle while the backlog exceeds 10 events, replacing the generic recent-results page so the existing 9-request/day budget is not increased. Individual recovery failures are isolated and recorded rather than discarding successful settlement evidence from another target.
+- No Official Pick promotion, sportsbook settlement claim, model refit, probability rewrite or historical deletion is introduced.
+
 ### FREE shadow expansion — NFL, ATP/WTA and BSN (2026-11-10)
 
 Implemented the shared winner-only tracker in the proposed release. Source
