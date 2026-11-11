@@ -112,10 +112,10 @@ async function ufc():Promise<SportLearning>{
 }
 
 async function mlb():Promise<SportLearning>{
- const q=await db.from('prediction_history').select('result,settled_at,market,model_version,feature_snapshot,settlement_details').eq('sport_key','baseball_mlb').not('settled_at','is',null).eq('recommended_pick',true).eq('production_eligible',true).order('settled_at',{ascending:false}).limit(2000);
+ const q=await db.from('mlb_2026_forward_master_ledger_v1').select('result,settled_at,model_id,market,target_date').eq('model_id','EQUILIZER_ML_V2_E2_STABLE6').order('target_date',{ascending:false}).limit(1000);
  if(q.error)throw Error('MLB_LEARNING_READ_FAILED');
  const rows=q.data??[],wl=rows.map(x=>resultWL(x.result)).filter(Boolean),wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length,recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'MLB',model:'MLB producción + research',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Feature snapshots y settlement maduros','Learning Brain existente permanece separado','Ningún auto-tuning viejo se considera evidencia de promoción multideporte'],candidate:null});
+ return stateFor({sport:'MLB',model:'EQUILIZER_ML_V2_E2_STABLE6',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Cohorte forward congelada y liquidada','Historial separado de otros motores MLB','Learning Brain y auto-tuning legacy no autorizan promoción multideporte'],candidate:null});
 }
 
 export async function getMultisportLearningOverview(){
