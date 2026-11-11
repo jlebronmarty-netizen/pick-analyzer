@@ -1,9 +1,16 @@
 export const BASE='https://v1.basketball.api-sports.io';
-export const VERSION='BSN_APISPORTS_ARCHIVE_V1';
+export const TARGET_SEASONS=[2025,2026];
 export const SEASONS=[2024,2025,2026,2023,2022,2021,2020,2019,2018,2017,2016,2015];
 export const BATCH_SOURCE='bsn:apisports:archive-v1';
 const int=n=>Number.isInteger(n)&&n>=0;
 const positive=n=>int(n)&&n>0;
+export function freeSeasonRange(body,season){
+ const match=typeof body?.errors?.plan==='string'&&body.errors.plan.match(/^Free plans do not have access to this season, try from (\d{4}) to (\d{4})\.$/);
+ if(!match||Object.keys(body.errors).length!==1||body.results!==0||!Array.isArray(body.response)||body.response.length||String(body.parameters?.league)!=='76'||String(body.parameters?.season)!==String(season))return null;
+ const from=Number(match[1]),to=Number(match[2]);
+ if(from>to||!SEASONS.includes(from)||!SEASONS.includes(to)||season>=from&&season<=to)return null;
+ return {from,to};
+}
 export function envelope(body){
  if(!body||!Array.isArray(body.response)||!int(body.results)||body.results!==body.response.length)throw Error('INVALID_ENVELOPE_OR_COUNT');
  if(!body.errors||Object.keys(body.errors).length)throw Error('PROVIDER_REPORTED_ERRORS');

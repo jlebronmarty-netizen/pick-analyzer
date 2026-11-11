@@ -3483,3 +3483,14 @@ admitted for modeling. HTTP/provider/schema failures or interrupted receipts
 stop acquisition for review. Public reads have zero provider calls.
 No model activation, predictions, betting prices or ROI; prior pilot and all
 other sports preserved. See scripts/bsn-free/README.md for replay and limitations.
+
+
+### BSN archive — 2025–2026 research scope
+
+The first production capture returned 250 internally consistent 2024 finals,
+exactly matching the supplied Live Demo response. 2025 returned a plan error
+specifying 2022–2024. Both receipts and the 2024 archive remain intact. User
+scope is 2025 and 2026 only; no 2022/2023 calls, no paid tier. BSN schedule
+paused; source status explains that both target seasons require an alternate
+permitted source. Research will track date-effective player team membership
+and only use availability known before each game. See scripts/bsn-free/README.md.
