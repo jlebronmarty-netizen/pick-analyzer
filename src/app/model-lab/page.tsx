@@ -1,7 +1,3 @@
-import Pick2Surface from '@/components/pick2/Pick2Surface'
-
-export const dynamic = 'force-dynamic'
-
-export default function ModelLabPage() {
-  return <Pick2Surface area="model-lab" />
-}
+import MultisportLearningCenter from '@/components/model-learning/MultisportLearningCenter';
+export const dynamic='force-dynamic';
+export default function ModelLabPage(){return <MultisportLearningCenter/>}
