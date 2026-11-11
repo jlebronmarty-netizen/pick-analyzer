@@ -2,7 +2,7 @@ import 'server-only';
 import {createHash} from 'node:crypto';
 import {gzipSync,gunzipSync} from 'node:zlib';
 import {BASE,BATCH_SOURCE,SEASONS,TARGET_SEASONS,envelope,freeSeasonRange,auditGames,auditTeamStats,auditPlayers,buildTasks} from '../../scripts/bsn-free/archive-contract.mjs';
-const VERSION='BSN_APISPORTS_ARCHIVE_V2_TARGET_SEASONS';
+const VERSION='BSN_APISPORTS_ARCHIVE_V3_FREE_2022_2024';
 const TABLE='free_sports_runs_v1',CAP=20;
 const admin=async()=> (await import('../lib/supabase-admin')).supabaseAdmin;
 export function bsnKeyState(){

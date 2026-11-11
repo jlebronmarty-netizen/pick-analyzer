@@ -4315,3 +4315,11 @@ scope is 2025 and 2026 only; no 2022/2023 calls, no paid tier. BSN schedule
 paused; source status explains that both target seasons require an alternate
 permitted source. Research will track date-effective player team membership
 and only use availability known before each game. See scripts/bsn-free/README.md.
+
+
+### BSN — free 2022–2024 acquisition resumed
+
+User authorized free historical acquisition while evaluating 2025–2026 access.
+Resume the BSN archive schedule for 2022–2024 only, reusing the 250 archived 2024
+finals and preserving the plan denial. Pending: 2022/2023 game results and 2024
+team/player box scores. No paid plan, models, forecasts or changes to other sports.
