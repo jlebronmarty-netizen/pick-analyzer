@@ -4304,3 +4304,13 @@ admitted for modeling. HTTP/provider/schema failures or interrupted receipts
 stop acquisition for review. Public reads have zero provider calls.
 No model activation, predictions, betting prices or ROI; prior pilot and all
 other sports preserved. See scripts/bsn-free/README.md for replay and limitations.
+
+
+### BSN archive — verified free-plan restriction
+
+Production first capture: catalogue HTTP 200; 2024 has 250 validated finals,
+exactly matching the supplied Live Demo payload. 2025 returned a provider plan
+error specifying 2022–2024. Preserve the original denial; narrow remaining
+requests to the verified range. 2022/23 access still pending, per-game team and
+player data only advertised for 2024 within that range. No paid tier, model,
+picks or ROI activated.

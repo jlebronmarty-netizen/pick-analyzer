@@ -1,4 +1,4 @@
-# BSN API-Sports archive V1
+# BSN API-Sports archive V2
 
 Scope: source acquisition and quality audit only. No model activation, forecasts,
 Official Picks, settlement changes, or ROI claims. Frozen 38-game pilot retained.
@@ -16,8 +16,10 @@ are claimed before each request. At most 60 requests per UTC day from this
 collector, leaving 40 of the advertised 100/day for manual/other account use.
 Calls are spaced >=6.5 seconds; provider reported remaining quota <=10 stops
 that batch. This cannot account for untracked calls from other applications.
-No automatic retry of failed, interrupted or denied requests. Any failed or
-RUNNING receipt stops subsequent acquisition for review. No receipt deletion.
+No automatic retry of failed, interrupted or denied requests. Unknown failed or
+RUNNING receipts stop acquisition. A verified free-plan range denial narrows the
+remaining queue without deleting or rewriting either request or batch receipt.
+A provider quota reserve stops all further batches that UTC day.
 
 Catalogue /leagues?id=76, results /games?league=76&season=YYYY for 2015-2026
 (priority 2024,2025,2026). Team and player per-game stats for 2024-2026 in
@@ -71,3 +73,15 @@ References: https://api-sports.io/sports/basketball,
 https://api-sports.io/documentation/basketball/basketball-v1.yaml,
 https://api-sports.io/terms. Account access is distinct from third-party data
 publication rights; this collector provides private research storage and counts.
+
+## First production capture and plan limit
+
+2026-11-11 01:53 UTC: catalogue returned HTTP 200 and 12 advertised seasons.
+2024 returned 250 unique finals, all passing score arithmetic and matching the
+250 user-supplied Live Demo records field-for-field. Raw SHA256
+ea2090e5072ba7e4cf16f03be03b5b3384cfe07137b974c257262b447ea85825.
+The 2025 call returned HTTP 200 with a provider plan error explicitly giving
+2022–2024. V1 receipts are retained. V2 verifies the archived error hash and
+uses the stated interval only for the BSN archive queue; 2022/2023 access and
+full coverage still need confirmation. 2024 is the only in-range season with
+declared team/player game-stat coverage. No paid tier requested.

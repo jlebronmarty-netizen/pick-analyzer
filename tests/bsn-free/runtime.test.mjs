@@ -62,3 +62,20 @@ test('large archived queue stops at 20 per batch and 60 per day without refetchi
  const urls=store.rows.filter(r=>r.source!==BATCH_SOURCE).map(r=>r.source);
  assert.equal(new Set(urls).size,urls.length);
 });
+test('verified V1 season denial narrows the queue without rewriting receipts or retrying blocked years',async()=>{
+ reset();
+ const root={id:1,slot:'2026-11-11T00:00:00.000Z',source:BATCH_SOURCE,state:'ERROR',evidence:{code:'PROVIDER_REPORTED_ERRORS'}};
+ function receipt(id,source,body,code=null){
+  const bytes=Buffer.from(JSON.stringify(body));
+  return {id,slot:new Date(Date.parse(root.slot)+id-1).toISOString(),source,state:code?'ERROR':'OK',evidence:{code,sha256:createHash('sha256').update(bytes).digest('hex'),payloadGzip:gzipSync(bytes).toString('base64')}};
+ }
+ const old=[root,
+  receipt(2,BASE+'/leagues?id=76',{errors:[],results:1,response:[{id:76,country:{code:'PR'},seasons:Array.from({length:12},(_,i)=>({season:2015+i}))}]}),
+  receipt(3,BASE+'/games?league=76&season=2024',{errors:[],results:0,response:[]}),
+  receipt(4,BASE+'/games?league=76&season=2025',{parameters:{league:'76',season:'2025'},errors:{plan:'Free plans do not have access to this season, try from 2022 to 2024.'},results:0,response:[]},'PROVIDER_REPORTED_ERRORS')];
+ store.rows.push(...structuredClone(old));
+ const h=await getBsnArchiveHealth();assert.deepEqual(h.accessibleSeasons,[2024,2023,2022]);assert.equal(h.planDeniedRequests,1);assert.equal(h.remainingTasks,2);
+ const r=await runBsnArchive({...opts,clock:new Date('2026-11-11T10:00:00Z')});assert.equal(r.providerCalls,2);
+ assert.deepEqual(store.rows.slice(0,4),old);
+ assert.deepEqual(store.rows.slice(5).map(r=>r.source),[2023,2022].map(y=>BASE+'/games?league=76&season='+y));
+});

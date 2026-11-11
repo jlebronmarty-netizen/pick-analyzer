@@ -1,7 +1,8 @@
 import 'server-only';
 import {createHash} from 'node:crypto';
 import {gzipSync,gunzipSync} from 'node:zlib';
-import {BASE,VERSION,BATCH_SOURCE,SEASONS,envelope,auditGames,auditTeamStats,auditPlayers,buildTasks} from '../../scripts/bsn-free/archive-contract.mjs';
+import {BASE,BATCH_SOURCE,SEASONS,envelope,freeSeasonRange,auditGames,auditTeamStats,auditPlayers,buildTasks} from '../../scripts/bsn-free/archive-contract.mjs';
+const VERSION='BSN_APISPORTS_ARCHIVE_V2_FREE_SEASONS';
 const TABLE='free_sports_runs_v1',CAP=20;
 const admin=async()=> (await import('../lib/supabase-admin')).supabaseAdmin;
 export function bsnKeyState(){
@@ -34,11 +35,34 @@ async function context(db,rows){
   if(!league||!Array.isArray(league.seasons))throw Error('BSN_CATALOG_INVALID');
   seasons=SEASONS.filter(y=>league.seasons.some(s=>Number(s.season)===y));
  }
- for(const year of seasons){
+ const ranges=[],planErrors=new Set();
+ for(const row of rows.filter(r=>r.state==='ERROR'&&['PROVIDER_REPORTED_ERRORS','FREE_SEASON_UNAVAILABLE'].includes(r.code))){
+  const prefix=BASE+'/games?league=76&season=';
+  if(!row.source.startsWith(prefix))continue;
+  const season=Number(row.source.slice(prefix.length));
+  if(!SEASONS.includes(season))continue;
+  const range=freeSeasonRange(await payload(db,row),season);
+  if(range){ranges.push(range);planErrors.add(row.id);}
+ }
+ const accessibleSeasons=seasons.filter(y=>ranges.every(r=>y>=r.from&&y<=r.to));
+ for(const year of accessibleSeasons){
   const row=rows.find(r=>r.source===BASE+'/games?league=76&season='+year&&r.state==='OK');
   if(row)games.push(...auditGames(envelope(await payload(db,row)),year).accepted);
  }
- return {seasons,games};
+ return {seasons,accessibleSeasons,planErrors,games};
+}
+function requiresReview(rows,ctx){
+ return rows.some(r=>{
+  if(r.state!=='ERROR'||ctx.planErrors.has(r.id))return false;
+  if(r.source!==BATCH_SOURCE)return true;
+  if(r.code==='PROVIDER_RESERVE_REACHED')return false;
+  // Recognize the original stopped batch only when its exact child receipt
+  // supplies the verified free-plan season denial. Leave both receipts intact.
+  return !['PROVIDER_REPORTED_ERRORS','FREE_SEASON_UNAVAILABLE'].includes(r.code)||!rows.some(child=>{
+   const offset=Date.parse(child.slot)-Date.parse(r.slot);
+   return ctx.planErrors.has(child.id)&&offset>0&&offset<=CAP;
+  });
+ });
 }
 async function finish(db,id,state,evidence,observed=null){
  const r=await db.rpc('finish_free_sports_run_v1',{p_run:id,p_state:state,p_observed:observed,p_evidence:evidence,p_forecasts:[],p_results:[]});
@@ -62,9 +86,11 @@ export async function runBsnArchive({clock=new Date(),pause=ms=>new Promise(r=>s
  if(bsnKeyState()!=='CONFIGURED')return {status:bsnKeyState(),providerCalls:0};
  const db=await admin(),before=await ledger(db);
  if(before.some(r=>r.state==='RUNNING'))return {status:'INTERRUPTED_RECEIPT_REQUIRES_REVIEW',providerCalls:0};
- if(before.some(r=>r.state==='ERROR'))return {status:'SOURCE_OR_QUOTA_REVIEW_REQUIRED',providerCalls:0};
  const ctx=await context(db,before),attempted=new Set(before.map(r=>r.source));
- const pending=buildTasks(ctx.seasons.length?ctx.seasons:SEASONS,ctx.games).filter(t=>!attempted.has(t.url));
+ if(requiresReview(before,ctx))return {status:'SOURCE_OR_QUOTA_REVIEW_REQUIRED',providerCalls:0};
+ const today=clock.toISOString().slice(0,10);
+ if(before.some(r=>r.source===BATCH_SOURCE&&r.code==='PROVIDER_RESERVE_REACHED'&&r.slot.startsWith(today)))return {status:'PROVIDER_RESERVE_REACHED',providerCalls:0};
+ const pending=buildTasks(ctx.seasons.length?ctx.accessibleSeasons:SEASONS,ctx.games).filter(t=>!attempted.has(t.url));
  if(!pending.length)return {status:'CURRENT_QUEUE_CAPTURED_REVIEW_REQUIRED',providerCalls:0,modelActive:false};
  // Exactly three disjoint 8h slots/day; each reserves 20 calls. A concurrent
  // worker loses the unique claim before sending a request. Crash => review.
@@ -90,7 +116,10 @@ export async function runBsnArchive({clock=new Date(),pause=ms=>new Promise(r=>s
     observed=new Date().toISOString();
     evidence.sha256=createHash('sha256').update(response.buffer).digest('hex');
     evidence.payloadGzip=gzipSync(response.buffer).toString('base64');
-    const body=JSON.parse(response.buffer.toString('utf8')),records=envelope(body);
+    const body=JSON.parse(response.buffer.toString('utf8'));
+    const range=t.kind==='games'?freeSeasonRange(body,t.season):null;
+    if(range){evidence.audit={freeSeasonRange:range};throw Error('FREE_SEASON_UNAVAILABLE');}
+    const records=envelope(body);
     evidence.records=records.length;
     if(t.kind==='leagues'){
      if(!records.some(r=>r.id===76&&r.country?.code==='PR'&&Array.isArray(r.seasons)))throw Error('BSN_CATALOG_INVALID');
@@ -114,13 +143,14 @@ export async function getBsnArchiveHealth(){
  const configuration=bsnKeyState();
  try{
   const db=await admin(),rows=await ledger(db),ctx=await context(db,rows),attempted=new Set(rows.map(r=>r.source));
-  const tasks=buildTasks(ctx.seasons,ctx.games),today=new Date().toISOString().slice(0,10);
+  const tasks=buildTasks(ctx.seasons.length?ctx.accessibleSeasons:SEASONS,ctx.games),today=new Date().toISOString().slice(0,10);
+  const remainingTasks=tasks.filter(t=>!attempted.has(t.url)).length;
   const roots=rows.filter(r=>r.source===BATCH_SOURCE);
   const last=roots.at(-1);
-  return {status:rows.some(r=>r.state==='RUNNING')?'RUNNING_OR_INTERRUPTED':rows.some(r=>r.state==='ERROR')?'REVIEW_REQUIRED':ctx.games.length?'ARCHIVE_IN_PROGRESS':'WAITING_FIRST_CAPTURE',
-   configuration,seasons:ctx.seasons,games:ctx.games.length,bySeason:ctx.seasons.map(season=>({season,acceptedFinals:ctx.games.filter(g=>g.season===season).length})),
+  return {status:rows.some(r=>r.state==='RUNNING')?'RUNNING_OR_INTERRUPTED':requiresReview(rows,ctx)?'REVIEW_REQUIRED':ctx.games.length?(remainingTasks?'ARCHIVE_IN_PROGRESS':'ARCHIVE_CAPTURED_REVIEW_PENDING'):'WAITING_FIRST_CAPTURE',
+   configuration,seasons:ctx.seasons,accessibleSeasons:ctx.accessibleSeasons,planExcludedSeasons:ctx.seasons.filter(y=>!ctx.accessibleSeasons.includes(y)),games:ctx.games.length,bySeason:ctx.accessibleSeasons.map(season=>({season,acceptedFinals:ctx.games.filter(g=>g.season===season).length})),
    requests:rows.filter(r=>r.source!==BATCH_SOURCE).length,failedRequests:rows.filter(r=>r.source!==BATCH_SOURCE&&r.state==='ERROR').length,
-   remainingTasks:tasks.filter(t=>!attempted.has(t.url)).length,lastBatchAt:last?.slot??null,lastCode:last?.code??null,
+   remainingTasks,planDeniedRequests:ctx.planErrors.size,lastBatchAt:last?.slot??null,lastCode:last?.code??null,
    reservedToday:CAP*roots.filter(r=>r.slot.slice(0,10)===today).length,maxDailyCalls:60,batchCap:CAP,
    coverageCertified:false,modelActive:false,forecastsIssued:0,roi:null,providerCalls:0,databaseWrites:0};
  }catch{return {status:'ARCHIVE_UNAVAILABLE',configuration,modelActive:false,providerCalls:0,databaseWrites:0};}
