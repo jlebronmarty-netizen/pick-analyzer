@@ -1,8 +1,8 @@
 import 'server-only';
 import {createHash} from 'node:crypto';
 import {gzipSync,gunzipSync} from 'node:zlib';
-import {BASE,BATCH_SOURCE,SEASONS,envelope,freeSeasonRange,auditGames,auditTeamStats,auditPlayers,buildTasks} from '../../scripts/bsn-free/archive-contract.mjs';
-const VERSION='BSN_APISPORTS_ARCHIVE_V2_FREE_SEASONS';
+import {BASE,BATCH_SOURCE,SEASONS,TARGET_SEASONS,envelope,freeSeasonRange,auditGames,auditTeamStats,auditPlayers,buildTasks} from '../../scripts/bsn-free/archive-contract.mjs';
+const VERSION='BSN_APISPORTS_ARCHIVE_V2_TARGET_SEASONS';
 const TABLE='free_sports_runs_v1',CAP=20;
 const admin=async()=> (await import('../lib/supabase-admin')).supabaseAdmin;
 export function bsnKeyState(){
@@ -44,12 +44,13 @@ async function context(db,rows){
   const range=freeSeasonRange(await payload(db,row),season);
   if(range){ranges.push(range);planErrors.add(row.id);}
  }
- const accessibleSeasons=seasons.filter(y=>ranges.every(r=>y>=r.from&&y<=r.to));
+ const accessibleSeasons=TARGET_SEASONS.filter(y=>seasons.includes(y)&&ranges.every(r=>y>=r.from&&y<=r.to));
+ const planExcludedSeasons=TARGET_SEASONS.filter(y=>ranges.some(r=>y<r.from||y>r.to));
  for(const year of accessibleSeasons){
   const row=rows.find(r=>r.source===BASE+'/games?league=76&season='+year&&r.state==='OK');
   if(row)games.push(...auditGames(envelope(await payload(db,row)),year).accepted);
  }
- return {seasons,accessibleSeasons,planErrors,games};
+ return {seasons,accessibleSeasons,planExcludedSeasons,planErrors,games};
 }
 function requiresReview(rows,ctx){
  return rows.some(r=>{
@@ -90,7 +91,8 @@ export async function runBsnArchive({clock=new Date(),pause=ms=>new Promise(r=>s
  if(requiresReview(before,ctx))return {status:'SOURCE_OR_QUOTA_REVIEW_REQUIRED',providerCalls:0};
  const today=clock.toISOString().slice(0,10);
  if(before.some(r=>r.source===BATCH_SOURCE&&r.code==='PROVIDER_RESERVE_REACHED'&&r.slot.startsWith(today)))return {status:'PROVIDER_RESERVE_REACHED',providerCalls:0};
- const pending=buildTasks(ctx.seasons.length?ctx.accessibleSeasons:SEASONS,ctx.games).filter(t=>!attempted.has(t.url));
+ const pending=buildTasks(ctx.seasons.length?ctx.accessibleSeasons:TARGET_SEASONS,ctx.games).filter(t=>!attempted.has(t.url));
+ if(ctx.planExcludedSeasons.length===TARGET_SEASONS.length)return {status:'TARGET_SEASONS_NOT_IN_FREE_PLAN',providerCalls:0,modelActive:false};
  if(!pending.length)return {status:'CURRENT_QUEUE_CAPTURED_REVIEW_REQUIRED',providerCalls:0,modelActive:false};
  // Exactly three disjoint 8h slots/day; each reserves 20 calls. A concurrent
  // worker loses the unique claim before sending a request. Crash => review.
@@ -143,12 +145,12 @@ export async function getBsnArchiveHealth(){
  const configuration=bsnKeyState();
  try{
   const db=await admin(),rows=await ledger(db),ctx=await context(db,rows),attempted=new Set(rows.map(r=>r.source));
-  const tasks=buildTasks(ctx.seasons.length?ctx.accessibleSeasons:SEASONS,ctx.games),today=new Date().toISOString().slice(0,10);
+  const tasks=buildTasks(ctx.seasons.length?ctx.accessibleSeasons:TARGET_SEASONS,ctx.games),today=new Date().toISOString().slice(0,10);
   const remainingTasks=tasks.filter(t=>!attempted.has(t.url)).length;
   const roots=rows.filter(r=>r.source===BATCH_SOURCE);
   const last=roots.at(-1);
-  return {status:rows.some(r=>r.state==='RUNNING')?'RUNNING_OR_INTERRUPTED':requiresReview(rows,ctx)?'REVIEW_REQUIRED':ctx.games.length?(remainingTasks?'ARCHIVE_IN_PROGRESS':'ARCHIVE_CAPTURED_REVIEW_PENDING'):'WAITING_FIRST_CAPTURE',
-   configuration,seasons:ctx.seasons,accessibleSeasons:ctx.accessibleSeasons,planExcludedSeasons:ctx.seasons.filter(y=>!ctx.accessibleSeasons.includes(y)),games:ctx.games.length,bySeason:ctx.accessibleSeasons.map(season=>({season,acceptedFinals:ctx.games.filter(g=>g.season===season).length})),
+  return {status:rows.some(r=>r.state==='RUNNING')?'RUNNING_OR_INTERRUPTED':requiresReview(rows,ctx)?'REVIEW_REQUIRED':ctx.planExcludedSeasons.length===TARGET_SEASONS.length?'TARGET_SEASONS_NOT_IN_FREE_PLAN':ctx.games.length?(remainingTasks?'ARCHIVE_IN_PROGRESS':'ARCHIVE_CAPTURED_REVIEW_PENDING'):'WAITING_FIRST_CAPTURE',
+   configuration,targetSeasons:TARGET_SEASONS,seasons:ctx.seasons,accessibleSeasons:ctx.accessibleSeasons,planExcludedSeasons:ctx.planExcludedSeasons,games:ctx.games.length,bySeason:ctx.accessibleSeasons.map(season=>({season,acceptedFinals:ctx.games.filter(g=>g.season===season).length})),
    requests:rows.filter(r=>r.source!==BATCH_SOURCE).length,failedRequests:rows.filter(r=>r.source!==BATCH_SOURCE&&r.state==='ERROR').length,
    remainingTasks,planDeniedRequests:ctx.planErrors.size,lastBatchAt:last?.slot??null,lastCode:last?.code??null,
    reservedToday:CAP*roots.filter(r=>r.slot.slice(0,10)===today).length,maxDailyCalls:60,batchCap:CAP,

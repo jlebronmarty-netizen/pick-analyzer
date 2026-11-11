@@ -1,5 +1,5 @@
 export const BASE='https://v1.basketball.api-sports.io';
-export const VERSION='BSN_APISPORTS_ARCHIVE_V1';
+export const TARGET_SEASONS=[2025,2026];
 export const SEASONS=[2024,2025,2026,2023,2022,2021,2020,2019,2018,2017,2016,2015];
 export const BATCH_SOURCE='bsn:apisports:archive-v1';
 const int=n=>Number.isInteger(n)&&n>=0;

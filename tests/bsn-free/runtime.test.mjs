@@ -22,7 +22,7 @@ globalThis.fetch=async(url,options)=>{
 const opts={clock:new Date('2026-11-11T02:00:00Z'),pause:async()=>{}};
 test('missing key has no claims or calls',async()=>{reset();delete process.env.BSN_APISPORTS_KEY;assert.equal((await runBsnArchive(opts)).status,'MISSING');assert.equal(store.rows.length,0);});
 test('resumable catalogue/season captures retain replayable bodies and no secrets in health',async()=>{
- reset();const r=await runBsnArchive(opts);assert.equal(r.providerCalls,13);assert.equal(store.calls,13);
+ reset();const r=await runBsnArchive(opts);assert.equal(r.providerCalls,3);assert.equal(store.calls,3);
  assert.equal((await runBsnArchive(opts)).providerCalls,0);
  const row=store.rows.find(x=>x.source===BASE+'/leagues?id=76');
  assert.equal(JSON.parse(gunzipSync(Buffer.from(row.evidence.payloadGzip,'base64'))).response[0].id,76);
@@ -50,9 +50,9 @@ test('large archived queue stops at 20 per batch and 60 per day without refetchi
   const bytes=Buffer.from(JSON.stringify({errors:[],results:body.length,response:body}));
   store.rows.push({id:store.rows.length+1,source,state:'OK',slot:'2026-11-10T00:00:00.00'+store.rows.length+'Z',evidence:{sha256:createHash('sha256').update(bytes).digest('hex'),payloadGzip:gzipSync(bytes).toString('base64')}});
  }
- seed(BASE+'/leagues?id=76',[{id:76,country:{code:'PR'},seasons:[{season:2024}]}]);
- const games=Array.from({length:740},(_,i)=>({id:i+1,date:'2024-04-04T00:00:00Z',timestamp:1712188800,league:{id:76,season:2024},status:{short:'FT'},teams:{home:{id:1,name:'A'},away:{id:2,name:'B'}},scores:{home:{total:90},away:{total:80}}}));
- seed(BASE+'/games?league=76&season=2024',games);
+ seed(BASE+'/leagues?id=76',[{id:76,country:{code:'PR'},seasons:[{season:2025}]}]);
+ const games=Array.from({length:740},(_,i)=>({id:i+1,date:'2025-04-04T00:00:00Z',timestamp:1743724800,league:{id:76,season:2025},status:{short:'FT'},teams:{home:{id:1,name:'A'},away:{id:2,name:'B'}},scores:{home:{total:90},away:{total:80}}}));
+ seed(BASE+'/games?league=76&season=2025',games);
  for(const hour of ['02','10','18']){
   const r=await runBsnArchive({...opts,clock:new Date('2026-11-11T'+hour+':00:00Z')});assert.equal(r.providerCalls,20);
  }
@@ -74,8 +74,8 @@ test('verified V1 season denial narrows the queue without rewriting receipts or 
   receipt(3,BASE+'/games?league=76&season=2024',{errors:[],results:0,response:[]}),
   receipt(4,BASE+'/games?league=76&season=2025',{parameters:{league:'76',season:'2025'},errors:{plan:'Free plans do not have access to this season, try from 2022 to 2024.'},results:0,response:[]},'PROVIDER_REPORTED_ERRORS')];
  store.rows.push(...structuredClone(old));
- const h=await getBsnArchiveHealth();assert.deepEqual(h.accessibleSeasons,[2024,2023,2022]);assert.equal(h.planDeniedRequests,1);assert.equal(h.remainingTasks,2);
- const r=await runBsnArchive({...opts,clock:new Date('2026-11-11T10:00:00Z')});assert.equal(r.providerCalls,2);
- assert.deepEqual(store.rows.slice(0,4),old);
- assert.deepEqual(store.rows.slice(5).map(r=>r.source),[2023,2022].map(y=>BASE+'/games?league=76&season='+y));
+ const h=await getBsnArchiveHealth();assert.deepEqual(h.accessibleSeasons,[]);assert.deepEqual(h.targetSeasons,[2025,2026]);assert.deepEqual(h.planExcludedSeasons,[2025,2026]);assert.equal(h.planDeniedRequests,1);assert.equal(h.remainingTasks,0);assert.equal(h.games,0);
+ const r=await runBsnArchive({...opts,clock:new Date('2026-11-11T10:00:00Z')});assert.equal(r.providerCalls,0);assert.equal(r.status,'TARGET_SEASONS_NOT_IN_FREE_PLAN');
+ assert.deepEqual(store.rows,old);
+ assert.equal(store.calls,0);
 });

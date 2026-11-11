@@ -4306,11 +4306,12 @@ No model activation, predictions, betting prices or ROI; prior pilot and all
 other sports preserved. See scripts/bsn-free/README.md for replay and limitations.
 
 
-### BSN archive — verified free-plan restriction
+### BSN archive — 2025–2026 research scope
 
-Production first capture: catalogue HTTP 200; 2024 has 250 validated finals,
-exactly matching the supplied Live Demo payload. 2025 returned a provider plan
-error specifying 2022–2024. Preserve the original denial; narrow remaining
-requests to the verified range. 2022/23 access still pending, per-game team and
-player data only advertised for 2024 within that range. No paid tier, model,
-picks or ROI activated.
+The first production capture returned 250 internally consistent 2024 finals,
+exactly matching the supplied Live Demo response. 2025 returned a plan error
+specifying 2022–2024. Both receipts and the 2024 archive remain intact. User
+scope is 2025 and 2026 only; no 2022/2023 calls, no paid tier. BSN schedule
+paused; source status explains that both target seasons require an alternate
+permitted source. Research will track date-effective player team membership
+and only use availability known before each game. See scripts/bsn-free/README.md.

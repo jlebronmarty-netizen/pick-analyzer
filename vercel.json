@@ -31,10 +31,6 @@
     {
       "path": "/api/cron/tennis-source",
       "schedule": "13 0 * * *"
-    },
-    {
-      "path": "/api/cron/bsn-archive",
-      "schedule": "53 1,9,17 * * *"
     }
   ],
   "git": {
