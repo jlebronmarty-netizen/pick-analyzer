@@ -1,3 +1,4 @@
+import {getBsnArchiveHealth} from '@/services/bsn-archive.service.mjs';
 import {notFound} from 'next/navigation';
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import {getTennisSourceHealth} from '@/services/tennis-source-preflight.service.mjs';
@@ -13,6 +14,7 @@ export default async function FreeSportPage({params}:{params:Promise<{sport:stri
  const {sport:slug}=await params;
  if(!Object.hasOwn(SPORT_LEAGUES,slug))notFound();
  const sport=slug as Sport;
+ const bsnHealth=sport==='bsn'?await getBsnArchiveHealth():null;
  const sourceHealth=sport==='tennis'?await getTennisSourceHealth():null;
  const reports=await Promise.all(SPORT_LEAGUES[sport].map(getFreeLeagueReport));
  const total=metrics(reports.flatMap(r=>r.rows));
@@ -29,7 +31,13 @@ export default async function FreeSportPage({params}:{params:Promise<{sport:stri
    <div className="rounded-xl border border-slate-700 bg-slate-900 p-4"><p>Seguimiento</p><strong className="text-2xl">{complete?total.pending:'—'}</strong><p className="text-sm text-slate-400">{complete?'Pendientes · '+total.excluded+' excluidas · '+total.review+' en revisión':'Sin lectura completa'}</p></div>
   </section>
   <p className="text-sm text-slate-300">Accuracy = ganadas ÷ (ganadas + perdidas). El ROI simula 1 unidad por selección con cuota archivada antes del inicio. Empates, retiros, cancelaciones y casos en revisión quedan fuera. Una muestra vacía se muestra como «—».</p>
-  {sport==='bsn'&&<p className="rounded-xl border border-amber-400/40 p-4 text-sm text-amber-200">Pick conserva resultados históricos de BSN. Para emitir pronósticos hace falta un calendario autorizado o un CSV con origen atestado. No hay una fuente de cuotas aprobada para este módulo.</p>}
+  {bsnHealth&&<section aria-label="Archivo de investigación BSN" className="rounded-xl border border-amber-400/40 p-4 text-sm text-amber-200">
+   <h2 className="font-semibold">BSN · recopilación histórica</h2>
+   <p>{bsnHealth.status==='REVIEW_REQUIRED'?'Hay capturas pendientes de revisión.':bsnHealth.status==='RUNNING_OR_INTERRUPTED'?'Hay un lote abierto; su cierre está pendiente.':bsnHealth.status==='ARCHIVE_IN_PROGRESS'?'Recopilando y verificando datos históricos.':bsnHealth.status==='ARCHIVE_UNAVAILABLE'?'No se pudo consultar el archivo.':'Esperando la primera captura.'} {bsnHealth.configuration==='CONFIGURED'?'Clave configurada; el acceso se confirma al recibir datos.':'Falta configurar una clave válida para la conexión.'}</p>
+   {'games' in bsnHealth&&<><p>{bsnHealth.games} resultados aceptados provisionalmente · {bsnHealth.requests} consultas registradas · {bsnHealth.failedRequests} fallidas · {bsnHealth.remainingTasks} tareas identificadas pendientes.</p>
+    <p>{bsnHealth.bySeason?.map(r=>r.season+': '+r.acceptedFinals).join(' · ')}</p></>}
+   <p className="mt-2">Descarga gratuita por lotes, máximo 60 consultas diarias desde Pick. Las estadísticas inconsistentes se conservan para revisión. La cobertura completa aún no está certificada; faltan validación del modelo y cuotas históricas para medir ROI. Esta recopilación no emite picks.</p>
+  </section>}
   {sourceHealth&&<p className="rounded-xl border border-slate-700 p-4 text-sm">Conexión gratuita: {sourceHealth.status==='CAPTURED_PENDING_HISTORY_AND_TERMS'?'Captura recibida; falta validar el historial antes de emitir pronósticos.':sourceHealth.status==='SOURCE_REVIEW_REQUIRED'?'La captura necesita revisión técnica.':'Esperando clave o primera comprobación.'} La comprobación no emite picks. Se conserva el intento fallido y solo se permite una comprobación adicional para diagnosticar un fallo de transporte.</p>}
   {sport==='tennis'&&<p className="rounded-xl border border-slate-700 p-4 text-sm">ATP y WTA están preparados para medir accuracy. La emisión está en espera de una fuente autorizada para el calendario y los resultados. El ROI requiere además cuotas prepartido verificadas.</p>}
   {sport==='nfl'&&<p className="text-sm text-slate-300">Calendario y resultados: <a href="https://github.com/nflverse/nflverse-data/releases/tag/schedules" className="text-teal-300 underline">nflverse</a>, <a href="https://creativecommons.org/licenses/by/4.0/" className="text-teal-300 underline">CC BY 4.0</a>. Los datos se filtran y el modelo genera sus propias proyecciones. El calendario abierto no acredita precios prepartido.</p>}
