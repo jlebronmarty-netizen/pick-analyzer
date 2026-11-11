@@ -36,12 +36,12 @@ function evaluate(sport:string,model:string,input:Rec[]):Eval{
 async function mlb():Promise<Rec[]>{
  const q=await db.from('mlb_2026_forward_master_ledger_v1').select('target_date,model_probability,result').eq('model_id','EQUILIZER_ML_V2_E2_STABLE6').order('target_date',{ascending:true}).limit(2000);
  if(q.error)throw Error('MLB_CALIBRATION_READ_FAILED');
- return (q.data??[]).filter(r=>valid(r.model_probability)&&(win(r.result)||loss(r.result))).map(r=>({at:String(r.target_date)+'T12:00:00Z',p:Number(r.model_probability),y:win(r.result)?1:0 as 0|1}));
+ return (q.data??[]).filter(r=>valid(r.model_probability)&&(win(r.result)||loss(r.result))).map(r=>({at:String(r.target_date)+'T12:00:00Z',p:Number(r.model_probability),y:(win(r.result)?1:0) as 0|1}));
 }
 async function nba():Promise<Rec[]>{
  const q=await db.from('prediction_history').select('commence_time,model_probability,result,feature_snapshot').eq('sport_key','basketball_nba').eq('prediction_origin','CURRENT_ERA_SHADOW').eq('feature_snapshot->>goatProviderPolicy','NBA_GOAT_ARCHIVE_SHADOW_V1').order('commence_time',{ascending:true}).limit(2000);
  if(q.error)throw Error('NBA_CALIBRATION_READ_FAILED');
- return (q.data??[]).filter(r=>valid(r.model_probability)&&(win(r.result)||loss(r.result))).map(r=>({at:r.commence_time,p:Number(r.model_probability),y:win(r.result)?1:0 as 0|1}));
+ return (q.data??[]).filter(r=>valid(r.model_probability)&&(win(r.result)||loss(r.result))).map(r=>({at:r.commence_time,p:Number(r.model_probability),y:(win(r.result)?1:0) as 0|1}));
 }
 async function nhl():Promise<Rec[]>{
  const [p,o]=await Promise.all([
@@ -65,7 +65,7 @@ async function edgeSingle():Promise<Rec[]>{
   db.from('edge_lab_outcomes_v1').select('forecast_id,status').limit(5000)
  ]);if(f.error||o.error)throw Error('SOCCER_CALIBRATION_READ_FAILED');
  const om=new Map((o.data??[]).map(x=>[x.forecast_id,x.status]));
- return (f.data??[]).filter(r=>r.status==='FORECAST'&&valid(r.probability)&&(win(om.get(r.id))||loss(om.get(r.id)))).map(r=>({at:r.scheduled_at,p:Number(r.probability),y:win(om.get(r.id))?1:0 as 0|1}));
+ return (f.data??[]).filter(r=>r.status==='FORECAST'&&valid(r.probability)&&(win(om.get(r.id))||loss(om.get(r.id)))).map(r=>({at:r.scheduled_at,p:Number(r.probability),y:(win(om.get(r.id))?1:0) as 0|1}));
 }
 async function edgeMulti(sport:string):Promise<Rec[]>{
  const [f,o]=await Promise.all([
@@ -73,7 +73,7 @@ async function edgeMulti(sport:string):Promise<Rec[]>{
   db.from('edge_lab_multi_outcomes_v1').select('forecast_id,status').limit(8000)
  ]);if(f.error||o.error)throw Error(sport+'_CALIBRATION_READ_FAILED');
  const om=new Map((o.data??[]).map(x=>[x.forecast_id,x.status]));
- return (f.data??[]).filter(r=>r.status==='FORECAST'&&valid(r.probability)&&(win(om.get(r.id))||loss(om.get(r.id)))).map(r=>({at:r.scheduled_at,p:Number(r.probability),y:win(om.get(r.id))?1:0 as 0|1}));
+ return (f.data??[]).filter(r=>r.status==='FORECAST'&&valid(r.probability)&&(win(om.get(r.id))||loss(om.get(r.id)))).map(r=>({at:r.scheduled_at,p:Number(r.probability),y:(win(om.get(r.id))?1:0) as 0|1}));
 }
 
 async function persist(e:Eval){
