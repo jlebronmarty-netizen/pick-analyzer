@@ -26,10 +26,11 @@ function evaluate(sport:string,model:string,input:Rec[]):Eval{
  if(alpha===1)return {sport,model,records:rows.length,state:'NO_IMPROVEMENT',alpha,baseline,challenger,reason:'La calibración original fue la mejor en train; no hay propuesta.'};
  const vb=baseline.validation.brier!-challenger.validation.brier!,hb=baseline.holdout.brier!-challenger.holdout.brier!;
  const vl=baseline.validation.logLoss!-challenger.validation.logLoss!,hl=baseline.holdout.logLoss!-challenger.holdout.logLoss!;
- const passed=vb>=.003&&hb>=.003&&vl>0&&hl>0;
+ const boundary=alpha===alphas[0]||alpha===alphas[alphas.length-1];
+ const passed=vb>=.003&&hb>=.003&&vl>0&&hl>0&&!boundary;
  return {sport,model,records:rows.length,state:passed?'VALIDATED_CANDIDATE':'CHALLENGER_TEST',alpha,baseline,challenger,reason:passed
   ?`Recalibración alpha=${alpha.toFixed(1)} mejora Brier validation ${vb.toFixed(4)} y holdout ${hb.toFixed(4)}, y también mejora log loss en ambos bloques. No cambia la selección; solo propone recalibrar confianza.`
-  :`Señal en train con alpha=${alpha.toFixed(1)}, pero no supera simultáneamente los gates de validation/holdout (ΔBrier ${vb.toFixed(4)} / ${hb.toFixed(4)}).`};
+  :boundary?`La señal favorece alpha=${alpha.toFixed(1)}, pero el óptimo cae en el borde del rango probado. Requiere ampliar/definir el challenger antes de considerarlo validado.`:`Señal en train con alpha=${alpha.toFixed(1)}, pero no supera simultáneamente los gates de validation/holdout (ΔBrier ${vb.toFixed(4)} / ${hb.toFixed(4)}).`};
 }
 
 async function mlb():Promise<Rec[]>{
@@ -84,7 +85,7 @@ async function persist(e:Eval){
   sport:e.sport,model_version:e.model,hypothesis_key:key,title:'Recalibración de confianza probabilística',
   state:e.state,baseline_sample:e.records,validation_sample:e.baseline.validation.n,holdout_sample:e.baseline.holdout.n,
   baseline_metric:e.baseline,challenger_metric:e.challenger,
-  validation_evidence:{method:'chronological_60_20_20',alpha:e.alpha,selection_changed:false,gate:{min_total:100,min_validation:20,min_holdout:20,min_brier_improvement_each:.003,log_loss_must_improve_each:true}},
+  validation_evidence:{method:'chronological_60_20_20',alpha:e.alpha,selection_changed:false,gate:{min_total:100,min_validation:20,min_holdout:20,min_brier_improvement_each:.003,log_loss_must_improve_each:true,boundary_optimum_cannot_validate:true}},
   reason:e.reason,updated_at:new Date().toISOString(),
  };
  const q=old.data?.id?await db.from('model_learning_candidates_v1').update(payload).eq('id',old.data.id):await db.from('model_learning_candidates_v1').insert(payload);
