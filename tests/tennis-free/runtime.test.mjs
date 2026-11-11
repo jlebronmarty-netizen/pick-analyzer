@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {gunzipSync} from 'node:zlib';
-import {runTennisSourcePreflight,getTennisSourceHealth,safeSourceError,keyHeaderIssue} from '../../src/services/tennis-source-preflight.service.mjs';
+import {runTennisSourcePreflight,getTennisSourceHealth,safeSourceError,keyHeaderIssue,normalizeApiKey} from '../../src/services/tennis-source-preflight.service.mjs';
 const store={rows:[],requests:0,body:null,status:200};
 function reset(){store.rows=[];store.requests=0;store.status=200;store.body={hasNextPage:false,matches:[]};process.env.TENNIS_RAPIDAPI_KEY='isolated-fixture-value';process.env.VERCEL_DEPLOYMENT_ID='test-deployment';}
 globalThis.__tennisPreflightDb={
@@ -76,4 +76,18 @@ test('header validation does not invent provider key syntax or expose characters
  assert.equal(keyHeaderIssue('value with spaces'),null);
  assert.equal(keyHeaderIssue('line1\nline2'),'LINE_BREAK_IN_VALUE');
  assert.equal(keyHeaderIssue('non-http-😀'),'UNSUPPORTED_HTTP_HEADER_CHARACTER');
+});
+
+test('only line-wrapped standalone tokens receive normalization; never header/code fragments',async()=>{
+ reset();
+ assert.deepEqual(normalizeApiKey('abc.def+\r\nghi/='),{key:'abc.def+ghi/=',normalization:'REMOVED_LINE_WRAPPING'});
+ for(const value of ['X-RapidAPI-Key: abc\nX-Host: other','curl --header abc\ndef',"'abc\ndef'",'abc def\nghi'])
+  assert.equal(normalizeApiKey(value).normalization,'NONE');
+ process.env.TENNIS_RAPIDAPI_KEY='isolated-fixture-\nvalue';
+ assert.equal((await runTennisSourcePreflight()).state,'SOURCE_CAPTURED_MODEL_DISABLED');
+ assert.equal(store.requests,1);
+ const h=await getTennisSourceHealth();
+ assert.equal(h.headerCompatible,true);assert.equal(h.credentialNormalization,'REMOVED_LINE_WRAPPING');
+ assert.ok(!JSON.stringify(h).includes('isolated-fixture'));
+ assert.equal(store.rows[0].evidence.credentialNormalization,'REMOVED_LINE_WRAPPING');
 });
