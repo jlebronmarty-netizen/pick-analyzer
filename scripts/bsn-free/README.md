@@ -1,4 +1,4 @@
-# BSN API-Sports archive V2
+# BSN API-Sports archive V3
 
 Scope: source acquisition and quality audit only. No model activation, forecasts,
 Official Picks, settlement changes, or ROI claims. Frozen 38-game pilot retained.
@@ -9,9 +9,8 @@ through connectors or expose credentials in logs, responses or artifacts.
 
 ## Acquisition
 
-Authenticated production route: /api/cron/bsn-archive. The BSN scheduler is
-paused because the authorized study scope (2025 and 2026 only) is outside the
-verified free-plan range. Other sports retain their schedules.
+Authenticated production route: /api/cron/bsn-archive. Free research archive
+scheduled at 00:05, 08:05 and 16:05 UTC for 2022–2024 only. No paid plan.
 A unique 8h batch claim reserves at most 20 calls; disjoint child receipt slots
 are claimed before each request. At most 60 requests per UTC day from this
 collector, leaving 40 of the advertised 100/day for manual/other account use.
@@ -23,7 +22,7 @@ remaining queue without deleting or rewriting either request or batch receipt.
 A provider quota reserve stops all further batches that UTC day.
 
 Catalogue /leagues?id=76. Any future API-Sports acquisition under this study
-uses /games?league=76&season=YYYY for 2025 or 2026 only. Per-game team/player stats in
+uses /games?league=76&season=YYYY for 2022–2024. Per-game team/player stats for 2024 in
 batches of <=20 exact game ids via the documented ids parameter. Season
 catalogue is validated; metadata/availability does not prove full coverage.
 Game-list captures precede statistics; the next scheduled batch reconstructs
@@ -84,12 +83,12 @@ ea2090e5072ba7e4cf16f03be03b5b3384cfe07137b974c257262b447ea85825.
 The 2025 call returned HTTP 200 with a provider plan error explicitly giving
 2022–2024. V1 receipts are retained. V2 verifies the archived error hash and
 uses the stated interval to determine that neither 2025 nor 2026 is accessible
-on this free plan. No 2022/2023 calls were made. The 250 games of 2024 are
-preserved outside the study. No paid tier requested.
+on this free plan. No 2022/2023 calls were made in the first batch. The 250
+games of 2024 remain archived and are reused by the free collection.
 
-## Target data and roster-aware research
+## Future roster-aware study (2025–2026)
 
-Only BSN 2025 and 2026. Prioritize a permissioned season export from BSN with
+For this separate study, Prioritize a permissioned season export from BSN with
 calendar, final scores, venue/phase, per-game team and player rows, player IDs,
 transaction announcements and registration/effective dates. RealGM has public
 box score examples from both years but disallows automated extraction; it is
@@ -106,3 +105,10 @@ means unknown. Compare the roster model to an identical chronological team-only
 baseline on common games, including games after roster changes. Develop on
 2025 and reserve 2026 for a chronological evaluation when data are available.
 ROI requires separately verified historical prices and market contracts.
+
+## Free acquisition resumed
+
+The user authorized collection of 2022–2024 while evaluating plans for 2025–2026.
+Reuse the existing 2024 results and preserve the 2025 denial receipt. Request
+2022/2023 results plus the 2024 team/player game statistics supported by the
+catalogue. The previous 2025–2026 roster study remains a separate future phase.
