@@ -4290,3 +4290,17 @@ local regex. No new request allowance is introduced by the validation fix.
 Tennis configuration resilience: normalize standalone token line wrapping
 without rewriting secrets or interpreting pasted commands. Provider acceptance
 and source/model readiness remain separate gates.
+
+
+## 2026-11-11 — BSN free archive acquisition V1
+
+Added BSN_APISPORTS_KEY server-only collector, source health and BSN research
+progress panel. League 76, catalogue/results 2015-2026, team/player statistics
+2024-2026 in documented 20-game batches. Three 8h claims/day x20 max; >=6.5s
+spacing and persistent per-request receipt before fetch. Raw gzip/SHA256 retained
+privately in existing RLS ledger. No new schema or public raw data.
+Game/team quality quarantine; player statistics remain preliminary and are not
+admitted for modeling. HTTP/provider/schema failures or interrupted receipts
+stop acquisition for review. Public reads have zero provider calls.
+No model activation, predictions, betting prices or ROI; prior pilot and all
+other sports preserved. See scripts/bsn-free/README.md for replay and limitations.
