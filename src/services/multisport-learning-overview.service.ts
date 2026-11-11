@@ -108,14 +108,27 @@ async function mlb():Promise<SportLearning>{
 }
 
 export async function getMultisportLearningOverview(){
- const results=await Promise.allSettled([mlb(),nba(),nhl(),ncaab(),soccer(),ufc(),edgeSports()]);
+ const [results,candidatesR]=await Promise.all([
+  Promise.allSettled([mlb(),nba(),nhl(),ncaab(),soccer(),ufc(),edgeSports()]),
+  db.from('model_learning_candidates_v1').select('sport,model_version,title,state,reason,validation_sample,holdout_sample,validation_evidence,updated_at').in('state',['PATTERN','CHALLENGER_TEST','VALIDATED_CANDIDATE']).order('updated_at',{ascending:false}).limit(100),
+ ]);
  const sports:SportLearning[]=[];
  const errors:string[]=[];
  for(const r of results){
   if(r.status==='fulfilled'){if(Array.isArray(r.value))sports.push(...r.value);else sports.push(r.value);}
   else errors.push(r.reason instanceof Error?r.reason.message:'LEARNING_READ_FAILED');
  }
- const alerts=sports.filter(s=>s.state==='VALIDATED_CANDIDATE'&&s.candidate);
+ const candidates=candidatesR.error?[]:(candidatesR.data??[]);
+ const validated=candidates.filter((x:any)=>x.state==='VALIDATED_CANDIDATE'&&Number(x.validation_sample)>=20&&Number(x.holdout_sample)>=20);
+ const alerts=validated.map((x:any)=>({
+  sport:x.sport,
+  model:x.model_version,
+  candidate:{title:x.title,reason:x.reason,validation:`validation n=${x.validation_sample} · holdout n=${x.holdout_sample}`,requiresApproval:true as const},
+ }));
+ for(const s of sports){
+  const x=validated.find((c:any)=>c.sport===s.sport||c.model_version===s.model);
+  if(x){s.state='VALIDATED_CANDIDATE';s.candidate={title:x.title,reason:x.reason,validation:`validation n=${x.validation_sample} · holdout n=${x.holdout_sample}`,requiresApproval:true};s.summary='Existe una mejora candidata validada. Requiere evaluación humana antes de cualquier implementación.';}
+ }
  return {
   status:errors.length?'PARTIAL':'AVAILABLE',
   generatedAt:new Date().toISOString(),
@@ -126,7 +139,8 @@ export async function getMultisportLearningOverview(){
    minimumRule:'A pattern is not a candidate. A candidate requires explicit out-of-sample/holdout improvement evidence.',
   },
   alerts,
+  candidates,
   sports:sports.sort((a,b)=>a.sport.localeCompare(b.sport)),
-  errors,
+  errors:[...errors,...(candidatesR.error?['LEARNING_CANDIDATE_REGISTRY_UNAVAILABLE']:[])],
  };
 }
