@@ -15,7 +15,7 @@ allows **one request per UTC day**, even if the four-hour cron is run again.
 It requests the mixed-tour singles calendar once with bounded metadata;
 does not follow provider links, request its model probabilities, fetch past
 odds, or create predictions. HTTP 401/403/429 stop automatic retries within
-that deployment. Redirects are not followed; timeout 25 seconds; cap 2 MiB. A preserved V1 SOURCE_FAILED before any HTTP response can receive exactly one diagnostic receipt at UTC 01:00, without modifying the original. No retry for HTTP denials or schema failures. The daily tennis-source cron at 22:47 UTC shares this same guard with the four-hour job.
+that deployment. Redirects are not followed; timeout 25 seconds; cap 2 MiB. A preserved V1 SOURCE_FAILED before any HTTP response can receive exactly one diagnostic receipt at UTC 01:00, without modifying the original. No retry for HTTP denials or schema failures. The daily tennis-source cron at 00:13 UTC shares this same guard with the four-hour job.
 
 All requests use a claim in `free_sports_runs_v1` before the provider call.
 The service-only receipt keeps a hash and gzip payload for replay. Auth headers
@@ -50,3 +50,9 @@ provider-specific alphabet or minimum length: the standard Headers constructor
 checks whether the value can be sent. Only a provider response can establish
 acceptance or denial. Health reports categorical configuration issues only,
 never the value, its fragments or character positions.
+
+Copy/paste normalization removes only CR/LF wrapping if the remainder is
+one token68-style value. It does not change the stored environment variable,
+strip other whitespace/quotes, parse pasted headers or disclose any value.
+Health reports only whether this formatting repair was applied. This is
+separate from provider authentication. Request limits remain unchanged.

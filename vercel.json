@@ -30,7 +30,7 @@
     },
     {
       "path": "/api/cron/tennis-source",
-      "schedule": "47 22 * * *"
+      "schedule": "13 0 * * *"
     }
   ],
   "git": {

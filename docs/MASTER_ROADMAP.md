@@ -4286,3 +4286,7 @@ diagnostic; do not activate predictions from an unverified capture.
 Tennis credential status: header compatibility and provider authentication are
 distinct. Do not ask the operator to replace a valid key based on an invented
 local regex. No new request allowance is introduced by the validation fix.
+
+Tennis configuration resilience: normalize standalone token line wrapping
+without rewriting secrets or interpreting pasted commands. Provider acceptance
+and source/model readiness remain separate gates.

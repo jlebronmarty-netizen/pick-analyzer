@@ -3463,3 +3463,9 @@ not a verified provider key contract and must not establish invalid credentials.
 Use standard HTTP Headers compatibility, report only categorical configuration
 issues, and retain provider acceptance as unverified until an actual response.
 The existing diagnostic tick moves to 22:47 UTC with the same request guard.
+
+Tennis wrapped-token repair: repeated configuration checks showed an internal
+line break. Remove CR/LF wrapping only if the remainder is a standalone token;
+reject pasted headers, code, quotes or spaced fragments. Preserve the stored
+environment value and all receipts. Report only a normalization flag. The
+existing daily source tick moves to 00:13 UTC, with the same request limits.
