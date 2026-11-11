@@ -48,17 +48,28 @@ async function nhl():Promise<SportLearning>{
  ]);
  if(p.error||o.error)throw Error('NHL_LEARNING_READ_FAILED');
  const outcomes=new Map((o.data??[]).map(x=>[x.event_id,x]));
- const rows=(p.data??[]).map(x=>({p:x,o:outcomes.get(x.event_id)})).filter(x=>x.o);
- const wl=rows.map(x=>resultWL((x.o as any)?.body?.settlement?.outcome??(x.o as any)?.body?.outcome)).filter(Boolean),wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length;
- const recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'NHL',model:'NHL MODEL_ONLY',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Probabilidad ML y resultado final almacenados','Cuota exacta cuando existe','Goalie/xG/PP-PK causal attribution aún parcial'],candidate:null});
+ const rows=(p.data??[]).map(x=>({p:x,o:outcomes.get(x.event_id)})).filter(x=>x.o).map(({p,o}:any)=>{
+  const pb=p.body??{},ob=o.body??{},pred=Number(pb.awayProbability)>=Number(pb.homeProbability)?Number(pb.awayId):Number(pb.homeId);
+  const actual=Number(ob.awayScore)>Number(ob.homeScore)?Number(ob.awayId):Number(ob.homeId);
+  return pred===actual?'W':'L';
+ });
+ const wins=rows.filter(x=>x==='W').length,losses=rows.filter(x=>x==='L').length,recent=rows.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
+ return stateFor({sport:'NHL',model:'NHL MODEL_ONLY',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Probabilidad ML y resultado final almacenados','Cuota exacta cuando existe','Goalie/xG/PP-PK causal attribution aún parcial'],candidate:null});
 }
 
 async function ncaab():Promise<SportLearning>{
- const q=await db.from('ncaab_daily_predictions_v1').select('event_id,scheduled_at,body').order('scheduled_at',{ascending:false}).limit(1000);
- if(q.error)throw Error('NCAAB_LEARNING_READ_FAILED');
- const rows=q.data??[];const settled=rows.map(r=>(r.body as any)?.settlement?.outcome).filter(Boolean);const wins=settled.filter(x=>x==='WIN').length,losses=settled.filter(x=>x==='LOSS').length;
- const recent=settled.slice(0,25),rw=recent.filter(x=>x==='WIN').length,rl=recent.filter(x=>x==='LOSS').length;
+ const [p,o]=await Promise.all([
+  db.from('ncaab_daily_predictions_v1').select('event_id,scheduled_at,body').order('scheduled_at',{ascending:false}).limit(1000),
+  db.from('ncaab_daily_outcomes_v1').select('event_id,observed_at,body').order('observed_at',{ascending:false}).limit(1000)
+ ]);
+ if(p.error||o.error)throw Error('NCAAB_LEARNING_READ_FAILED');
+ const om=new Map((o.data??[]).map(x=>[x.event_id,x]));
+ const rows=(p.data??[]).map(x=>({p:x,o:om.get(x.event_id)})).filter(x=>x.o).map(({p,o}:any)=>{
+  const pb=p.body??{},ob=o.body??{};const predicted=String(pb.predicted_winner??'');
+  const actual=Number(ob.home_score)>Number(ob.away_score)?String(ob.home_id):String(ob.away_id);
+  return predicted&&actual?predicted===actual?'W':'L':null;
+ }).filter(Boolean);
+ const wins=rows.filter(x=>x==='W').length,losses=rows.filter(x=>x==='L').length,recent=rows.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
  return stateFor({sport:'NCAAB',model:'NCAAB_PRESEASON_V1',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Forecast prospectivo congelado','Resultado ESPN reconciliado por event ID','Pace/eficiencia postgame aún no clasificados causalmente'],candidate:null});
 }
 
