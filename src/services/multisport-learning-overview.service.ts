@@ -38,7 +38,7 @@ async function nba():Promise<SportLearning>{
  if(q.error)throw Error('NBA_LEARNING_READ_FAILED');
  const rows=q.data??[], wl=rows.map(r=>resultWL(r.result)).filter(Boolean), wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length;
  const recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'NBA',model:'NBA GOAT',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Pregame freeze + settlement archivado','Resultado final y mercado conservados','Play-by-play/lineups aún no forman parte del diagnóstico causal automático'],candidate:null});
+ return stateFor({sport:'NBA',model:'NBA GOAT',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Pregame freeze + settlement archivado','NBA Causal Learning V1 usa resultado y parciales por cuarto','PBP/lineup real/player-game stats actuales siguen pendientes para corroboración causal'],candidate:null});
 }
 
 async function nhl():Promise<SportLearning>{
