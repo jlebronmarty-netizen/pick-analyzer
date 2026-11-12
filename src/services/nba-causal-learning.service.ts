@@ -169,8 +169,11 @@ export async function runNbaCausalDiagnostics(){
 }
 
 export async function getNbaCausalLearningReport(){
- const r=await db.from('nba_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(500);
- if(r.error)throw Error('NBA_CAUSAL_REPORT_READ_FAILED');
+ const [r,o]=await Promise.all([
+  db.from('nba_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(500),
+  db.from('nba_matchup_observations_v3').select('game_id,game_date,offensive_player_id,defender_player_id,offensive_player_name,defender_player_name,matchup_seconds,player_points,fgm,fga,fg_pct').order('game_date',{ascending:false}).limit(5000),
+ ]);
+ if(r.error||o.error)throw Error('NBA_CAUSAL_REPORT_READ_FAILED');
  const rows=r.data??[];
  const settled=rows.filter(x=>['win','loss','push'].includes(String(x.outcome)));
  const wins=settled.filter(x=>x.outcome==='win').length,losses=settled.filter(x=>x.outcome==='loss').length;
@@ -182,6 +185,9 @@ export async function getNbaCausalLearningReport(){
   }
  }
  const patterns=[...labelMap.entries()].map(([label,v])=>({label,...v,lossRate:v.wins+v.losses?v.losses/(v.wins+v.losses):null})).sort((a,b)=>b.count-a.count);
+ const pairMap=new Map<string,any>();
+ for(const x of o.data??[]){const key=String(x.offensive_player_id)+'|'+String(x.defender_player_id),v=pairMap.get(key)??{offensivePlayerId:x.offensive_player_id,defenderPlayerId:x.defender_player_id,offensivePlayer:x.offensive_player_name,defender:x.defender_player_name,games:new Set<string>(),seconds:0,points:0,fgm:0,fga:0};v.games.add(x.game_id);v.seconds+=Number(x.matchup_seconds??0);v.points+=Number(x.player_points??0);v.fgm+=Number(x.fgm??0);v.fga+=Number(x.fga??0);pairMap.set(key,v);}
+ const matchupProfiles=[...pairMap.values()].map(v=>({offensivePlayerId:v.offensivePlayerId,defenderPlayerId:v.defenderPlayerId,offensivePlayer:v.offensivePlayer,defender:v.defender,games:v.games.size,seconds:v.seconds,points:v.points,fgm:v.fgm,fga:v.fga,fgPct:v.fga?v.fgm/v.fga:null})).filter(v=>v.games>=2).sort((a,b)=>b.games-a.games||b.seconds-a.seconds).slice(0,50);
  return {
   status:'AVAILABLE',generatedAt:new Date().toISOString(),
   sample:{settled:settled.length,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,brier:briers.length?briers.reduce((a,b)=>a+b,0)/briers.length:null},
@@ -196,7 +202,7 @@ export async function getNbaCausalLearningReport(){
    matchupTrackingCurrent:rows.some(x=>x.observed_evidence?.missingConfirmedMatchup===false),
    matchupGames:rows.filter(x=>x.observed_evidence?.missingConfirmedMatchup===false).length,
   },
-  patterns,recent:rows.slice(0,50),
+  patterns,matchupProfiles,recent:rows.slice(0,50),
   policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,pbpCallsPerRunCap:3,v2ContextGamesPerRunCap:3,v2ContextProviderCallsPerRunCap:3,v3MatchupGamesPerRunCap:1,v3ProviderCallsPerRunCap:2,v3RetryHours:12},
  };
 }
