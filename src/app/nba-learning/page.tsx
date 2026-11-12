@@ -38,6 +38,14 @@ export default async function NbaLearningPage(){
    </article>
   </section>
   <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-6">
+   <h2 className="text-2xl font-black text-white">Historial jugador vs defensor</h2>
+   <p className="mt-2 text-sm text-slate-400">Solo aparecen pares con 2+ juegos confirmados en el ledger V3. Es descriptivo; no se usa automáticamente como probabilidad futura.</p>
+   <div className="mt-4 grid gap-3 lg:grid-cols-2">{data.matchupProfiles?.length?data.matchupProfiles.slice(0,20).map((m:any)=><article key={String(m.offensivePlayerId)+'-'+String(m.defenderPlayerId)} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+    <p className="font-black text-white">{m.offensivePlayer??m.offensivePlayerId} vs {m.defender??m.defenderPlayerId}</p>
+    <p className="mt-2 text-sm text-slate-400">{m.games} juegos · {Math.round(m.seconds)}s matchup · {m.fgm}-{m.fga} FG · {m.fgPct!=null?(m.fgPct*100).toFixed(1)+'%':'N/A'} · {m.points} pts</p>
+   </article>):<p className="text-sm text-slate-400">Todavía no hay pares repetidos suficientes.</p>}</div>
+  </section>
+  <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-6">
    <h2 className="text-2xl font-black text-white">Diagnósticos recientes</h2>
    <div className="mt-4 grid gap-3">{data.recent.map(r=><article key={r.prediction_id} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
     <div className="flex flex-wrap justify-between gap-2"><p className="font-black text-white">{r.selection}</p><p className={r.outcome==='win'?'text-emerald-300':'text-rose-300'}>{String(r.outcome).toUpperCase()}</p></div>
