@@ -26,18 +26,19 @@ function topPlayerIds(context:any){
  for(const arr of byTeam.values())ids.push(...arr.sort((a,b)=>b.min-a.min).slice(0,5).map(x=>x.id));
  return [...new Set(ids)];
 }
-function matchupStats(row:any){
+function matchupStats(row:any,nameMap:Map<number,string>){
  const s=row?.stats??row;
+ const offensivePlayerId=Number(row?.player_id??row?.player?.id) || null,defenderId=Number(row?.opponent_player_id??row?.opponent_player?.id) || null;
  return {
-  offensivePlayerId:Number(row?.player_id??row?.player?.id) || null,
-  defenderId:Number(row?.opponent_player_id??row?.opponent_player?.id) || null,
-  offensivePlayer:playerName(row?.player) || row?.player_name || null,
-  defender:playerName(row?.opponent_player) || row?.opponent_player_name || null,
+  offensivePlayerId,
+  defenderId,
+  offensivePlayer:playerName(row?.player) || row?.player_name || (offensivePlayerId?nameMap.get(offensivePlayerId):null) || null,
+  defender:playerName(row?.opponent_player) || row?.opponent_player_name || (defenderId?nameMap.get(defenderId):null) || null,
   seconds:finite(s?.matchup_seconds),
   pts:finite(s?.matchup_player_points??s?.player_points??s?.pts),
   fgm:finite(s?.matchup_field_goals_made??s?.matchup_fgm??s?.fgm),
   fga:finite(s?.matchup_field_goals_attempted??s?.matchup_fga??s?.fga),
-  fgPct:finite(s?.matchup_field_goal_percentage??s?.matchup_fg_pct??s?.fg_pct),
+  fgPct:finite(s?.matchup_field_goals_percentage??s?.matchup_field_goal_percentage??s?.matchup_fg_pct??s?.fg_pct),
   turnovers:finite(s?.matchup_turnovers??s?.turnovers),
   shootingFouls:finite(s?.shooting_fouls),
  };
@@ -117,8 +118,10 @@ export async function syncNbaCausalV3Matchups({cap=1}:{cap?:number}={}){
  return {status:failures.length?'PARTIAL':'COMPLETED',planned:eligible.length,provider_calls:calls,written,failures};
 }
 
-export function getNbaCausalV3Evidence(context:any,selection:string,playerGame:any){
- const mRows=(Array.isArray(context?.matchups?.data)?context.matchups.data:[]).map(matchupStats).filter((x:any)=>x.offensivePlayerId&&x.defenderId);
+export function getNbaCausalV3Evidence(context:any,selection:string,playerGame:any,v2Context:any){
+ const nameMap=new Map<number,string>();
+ for(const r of Array.isArray(v2Context?.player_stats?.data)?v2Context.player_stats.data:[]){const id=Number(r?.player?.id??r?.player_id);if(Number.isSafeInteger(id))nameMap.set(id,playerName(r?.player)||String(r?.player_name??id));}
+ const mRows=(Array.isArray(context?.matchups?.data)?context.matchups.data:[]).map((r:any)=>matchupStats(r,nameMap)).filter((x:any)=>x.offensivePlayerId&&x.defenderId);
  const aRows=(Array.isArray(context?.advanced_stats?.data)?context.advanced_stats.data:[]).map(advancedStats);
  const top=playerGame?.topScorers?.[0]??null,topId=Number(top?.id);
  const topMatchups=Number.isSafeInteger(topId)?mRows.filter((x:any)=>x.offensivePlayerId===topId).sort((a:any,b:any)=>(b.seconds??0)-(a.seconds??0)):[];
