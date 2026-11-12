@@ -11,6 +11,8 @@ test('NBA causal V3 uses confirmed matchup and advanced tracking endpoints',()=>
   assert.match(s,/PRIMARY_DEFENDER_EXPLOITED/);
   assert.match(s,/HIGH_SWITCH_DEFENSE/);
   assert.match(s,/HIGH_CONTEST_VOLUME/);
+  assert.match(s,/nba_matchup_observations_v3/);
+  assert.match(s,/opponent_player_ids\[\]/);
 });
 
 test('NBA causal V3 is bounded, cooldown-protected and postgame only',()=>{
@@ -37,4 +39,11 @@ test('NBA cron adds V3 to existing pipeline without adding a new scheduler',()=>
   assert.match(s,/v3MatchupCalls/);
   const v=fs.readFileSync('vercel.json','utf8');
   assert.equal((v.match(/nba-current-era-shadow/g)||[]).length,1);
+});
+
+test('NBA learning report exposes repeated matchup profiles as descriptive evidence',()=>{
+  const s=fs.readFileSync('src/services/nba-causal-learning.service.ts','utf8');
+  assert.match(s,/matchupProfiles/);
+  assert.match(s,/games>=2/);
+  assert.match(s,/nba_matchup_observations_v3/);
 });
