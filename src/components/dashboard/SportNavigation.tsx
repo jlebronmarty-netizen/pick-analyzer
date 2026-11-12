@@ -3,6 +3,7 @@ import Link from 'next/link'
 const sports = [
   ['/today', 'MLB'],
   ['/nba-market-data', 'NBA'],
+  ['/nba-learning', 'NBA Learning'],
   ['/nhl', 'NHL'],
   ['/ufc', 'UFC'],
   ['/table-tennis', 'Tenis de mesa'],
