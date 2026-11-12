@@ -8,8 +8,8 @@ export default async function NbaLearningPage(){
  return <DashboardShell>
   <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-6 md:p-8">
    <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-300">NBA Learning</p>
-   <h1 className="mt-3 text-4xl font-black text-white">NBA Causal Learning V1</h1>
-   <p className="mt-4 max-w-4xl text-base leading-7 text-slate-300">Diagnóstico postgame usando la predicción GOAT congelada, resultado final y parciales por cuarto almacenados. Las etiquetas actuales son hipótesis observadas; no se presentan como causas demostradas hasta incorporar play-by-play, lineup real y player-game stats actuales.</p>
+   <h1 className="mt-3 text-4xl font-black text-white">NBA Causal Learning V2</h1>
+   <p className="mt-4 max-w-4xl text-base leading-7 text-slate-300">Diagnóstico postgame usando la predicción GOAT congelada, Q1-Q4, play-by-play, projected lineup pregame, lineup real y player-game stats cuando estén disponibles. Las etiquetas siguen siendo hipótesis observadas hasta demostrar un patrón fuera de muestra.</p>
   </section>
   <section className="grid gap-4 md:grid-cols-4">
    <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><p className="text-xs text-slate-500">Evaluados</p><p className="mt-2 text-3xl font-black text-white">{data.sample.settled}</p></div>
@@ -22,8 +22,8 @@ export default async function NbaLearningPage(){
    <div className="mt-4 grid gap-3 md:grid-cols-4">
     <p className="rounded-lg bg-slate-950/70 p-3 text-sm text-slate-300">Parciales por cuarto: {data.evidence.quarterArchive}</p>
     <p className="rounded-lg bg-slate-950/70 p-3 text-sm text-slate-300">PBP actual: {data.evidence.pbpCurrent?'Sí':'Pendiente'}</p>
-    <p className="rounded-lg bg-slate-950/70 p-3 text-sm text-slate-300">Lineup real actual: {data.evidence.lineupTruthCurrent?'Sí':'Pendiente'}</p>
-    <p className="rounded-lg bg-slate-950/70 p-3 text-sm text-slate-300">Player-game stats actuales: {data.evidence.playerGameStatsCurrent?'Sí':'Pendiente'}</p>
+    <p className="rounded-lg bg-slate-950/70 p-3 text-sm text-slate-300">Lineup esperado vs real: {data.evidence.lineupTruthCurrent?`Sí · ${data.evidence.lineupGames??0} juegos`:'Pendiente'}</p>
+    <p className="rounded-lg bg-slate-950/70 p-3 text-sm text-slate-300">Player-game stats: {data.evidence.playerGameStatsCurrent?`Sí · ${data.evidence.playerStatGames??0} juegos`:'Pendiente'}</p>
    </div>
   </section>
   <section className="grid gap-4 lg:grid-cols-2">
@@ -42,6 +42,7 @@ export default async function NbaLearningPage(){
     <div className="flex flex-wrap justify-between gap-2"><p className="font-black text-white">{r.selection}</p><p className={r.outcome==='win'?'text-emerald-300':'text-rose-300'}>{String(r.outcome).toUpperCase()}</p></div>
     <p className="mt-2 text-sm text-slate-400">Margen real: {r.actual_margin??'N/A'} · Q1 {r.q1_margin??'N/A'} · Q2 {r.q2_margin??'N/A'} · Q3 {r.q3_margin??'N/A'} · Q4 {r.q4_margin??'N/A'}</p>
     <p className="mt-2 text-sm text-slate-300">{Array.isArray(r.observed_labels)&&r.observed_labels.length?r.observed_labels.join(' · '):'Sin etiqueta diagnóstica fuerte'}</p>
+    <div className="mt-2 grid gap-1 text-xs text-slate-400"><p>Cambios de starters: {r.observed_evidence?.lineupComparison?.starterChanges??'N/A'}</p><p>Top scorer: {r.observed_evidence?.playerGameStats?.topScorers?.[0]?.name??'N/A'} {r.observed_evidence?.playerGameStats?.topScorers?.[0]?.pts!=null?`· ${r.observed_evidence.playerGameStats.topScorers[0].pts} pts`:''}</p><p>Turnovers equipo: {r.observed_evidence?.playerGameStats?.totals?.tov??'N/A'}</p></div>
     <p className="mt-2 text-xs text-amber-200">Estado causal: {r.causal_status}</p>
    </article>)}</div>
   </section>
