@@ -4,6 +4,7 @@ import {getNbaGoatRuntimeStatus,runNbaGoatShadowScheduler} from '@/services/nba-
 import {syncNbaGoatTeamStatsIfStale} from '@/services/nba-goat-team-stats.service';
 import {reconcileNbaGoatShadowResults} from '@/services/nba-goat-results.service';
 import {runSharedNbaArchive} from '@/services/nba-shared-storage.service';
+import {runNbaCausalDiagnostics} from '@/services/nba-causal-learning.service';
 export const dynamic='force-dynamic';export const revalidate=0;export const maxDuration=300;
 function authorized(r:NextRequest){const s=process.env.CRON_SECRET;return Boolean(s)&&(r.headers.get('authorization')==='Bearer '+s||r.nextUrl.searchParams.get('secret')===s);}
 const safe=async<T>(fn:()=>Promise<T>,failure:string)=>{try{return await fn();}catch{return {status:'FAILED',error:failure} as const;}};
@@ -16,9 +17,10 @@ async function handle(r:NextRequest){
    safe(()=>syncNbaGoatTeamStatsIfStale(),'NBA_GOAT_TEAM_STATS_FAILED'),
    safe(()=>reconcileNbaGoatShadowResults(),'NBA_GOAT_RESULT_RECONCILIATION_FAILED'),
   ]);
+  const causal=await safe(()=>runNbaCausalDiagnostics(),'NBA_CAUSAL_DIAGNOSTICS_FAILED');
   const shadow=await safe(()=>runNbaGoatShadowScheduler(),'NBA_GOAT_SHADOW_FAILED');
-  console.log('NBA_GOAT_PIPELINE',JSON.stringify({marketStatus:(marketDataArchive as any).status,teamStatsStatus:(teamStats as any).status,resultStatus:(results as any).status,shadowStatus:(shadow as any).finalClassification??(shadow as any).status,legacyOddsApiCalls:0}));
-  return apiOk({marketDataArchive,teamStats,results,shadow,legacyOddsApiCalls:0},id);
+  console.log('NBA_GOAT_PIPELINE',JSON.stringify({marketStatus:(marketDataArchive as any).status,teamStatsStatus:(teamStats as any).status,resultStatus:(results as any).status,causalStatus:(causal as any).status,shadowStatus:(shadow as any).finalClassification??(shadow as any).status,legacyOddsApiCalls:0}));
+  return apiOk({marketDataArchive,teamStats,results,causal,shadow,legacyOddsApiCalls:0},id);
  }catch{return apiError({id,code:'INTERNAL_ERROR',message:'NBA GOAT market archive failed; downstream model stages were not assumed complete',status:500});}
 }
 export async function GET(r:NextRequest){return handle(r);}export async function POST(r:NextRequest){return handle(r);}
