@@ -2,6 +2,7 @@ import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {NBA_GOAT_POLICY} from '@/lib/nba/goat-provider-policy.mjs';
 import {getNbaCausalV2Evidence} from '@/services/nba-causal-v2-context.service';
+import {getNbaCausalV3Evidence} from '@/services/nba-causal-v3-matchup.service';
 
 const SPORT='basketball_nba',ORIGIN='CURRENT_ERA_SHADOW',PBP_VERSION='NBA_BDL_PBP_V1';
 const prob=(v:unknown)=>{const n=Number(v);if(!Number.isFinite(n))return null;return n>1?n/100:n;};
@@ -99,13 +100,14 @@ export async function syncNbaCausalPbpForSettled({cap=3}:{cap?:number}={}){
 }
 
 export async function runNbaCausalDiagnostics(){
- const [predR,schedR,pbpR,ctxR]=await Promise.all([
+ const [predR,schedR,pbpR,ctxR,v3R]=await Promise.all([
   db.from('prediction_history').select('id,game_id,market,team,selection,model_version,model_probability,result,settled_at,feature_snapshot,settlement_details').eq('sport_key',SPORT).eq('prediction_origin',ORIGIN).eq('feature_snapshot->>goatProviderPolicy',NBA_GOAT_POLICY).not('settled_at','is',null).order('settled_at',{ascending:false}).limit(500),
   db.from('nba_market_schedules_v1').select('snapshot_id,date_local,source_received_at,payload').order('source_received_at',{ascending:false}).limit(300),
   db.from('nba_pbp_snapshots_v1').select('game_id,captured_at,play_count,payload,source_version').limit(1000),
   db.from('nba_game_context_v2').select('game_id,projected_lineups,projected_captured_at,actual_lineups,actual_lineups_captured_at,player_stats,player_stats_captured_at,source_version').limit(1000),
+  db.from('nba_matchup_context_v3').select('game_id,matchups,advanced_stats,coverage_status,attempt_count,source_version').limit(1000),
  ]);
- if(predR.error||schedR.error||pbpR.error||ctxR.error)throw Error('NBA_CAUSAL_READ_FAILED');
+ if(predR.error||schedR.error||pbpR.error||ctxR.error||v3R.error)throw Error('NBA_CAUSAL_READ_FAILED');
  const latest=new Map<number,{game:any,snapshotId:string,received:number}>();
  for(const row of schedR.data??[]){
   const received=Date.parse(row.source_received_at??'');if(!Number.isFinite(received))continue;
@@ -118,6 +120,7 @@ export async function runNbaCausalDiagnostics(){
  }
  const pbpMap=new Map((pbpR.data??[]).map(x=>[x.game_id,x]));
  const ctxMap=new Map((ctxR.data??[]).map(x=>[x.game_id,x]));
+ const v3Map=new Map((v3R.data??[]).map(x=>[x.game_id,x]));
  const rows:any[]=[];
  for(const p of predR.data??[]){
   const gid=providerGameId(p.game_id);if(gid===null)continue;
@@ -132,8 +135,9 @@ export async function runNbaCausalDiagnostics(){
   const halftime=q?q[0]+q[1]:null,secondHalf=q?q[2]+q[3]:null;
   const pbpRow=pbpMap.get(p.game_id),pbp=pbpRow?summarizePbp(pbpRow.payload,selection,snap.game.home_team.full_name,snap.game.visitor_team.full_name):null;
   const v2=getNbaCausalV2Evidence(ctxMap.get(p.game_id),selection);
-  const observedLabels=[...new Set([...labels({outcome,p:probability,actualMargin,q,featureSnapshot:p.feature_snapshot,pbp}),...v2.labels])];
-  const evidenceQuality=v2.quality==='HIGH'&&pbp&&q&&actualMargin!==null?'HIGH':pbp&&q&&actualMargin!==null?'HIGH':q&&actualMargin!==null?'MEDIUM':'LOW';
+  const v3=getNbaCausalV3Evidence(v3Map.get(p.game_id),selection,v2.playerStats,ctxMap.get(p.game_id));
+  const observedLabels=[...new Set([...labels({outcome,p:probability,actualMargin,q,featureSnapshot:p.feature_snapshot,pbp}),...v2.labels,...v3.labels])];
+  const evidenceQuality=v3.quality==='HIGH'&&v2.quality==='HIGH'&&pbp&&q&&actualMargin!==null?'HIGH':pbp&&q&&actualMargin!==null?'HIGH':q&&actualMargin!==null?'MEDIUM':'LOW';
   rows.push({
    prediction_id:p.id,game_id:p.game_id,model_version:p.model_version,market:p.market,selection,
    predicted_probability:probability,outcome,actual_margin:actualMargin,brier,
@@ -148,11 +152,12 @@ export async function runNbaCausalDiagnostics(){
     quarterMargins:q,pbp,
     lineupComparison:v2.lineups,
     playerGameStats:v2.playerStats,
+    matchupTracking:v3,
     featureQualityScore:p.feature_snapshot?.featureQualityScore??null,
     dataSufficiencyScore:p.feature_snapshot?.dataSufficiencyScore??null,
-    missingCurrentPbp:!pbp,missingCurrentLineupTruth:!v2.lineups?.complete,missingCurrentPlayerGameStats:!v2.playerStats?.complete,
+    missingCurrentPbp:!pbp,missingCurrentLineupTruth:!v2.lineups?.complete,missingCurrentPlayerGameStats:!v2.playerStats?.complete,missingConfirmedMatchup:v3.quality!=='HIGH',
    },
-   causal_status:'HYPOTHESIS_ONLY',source_snapshot_ids:[snap.snapshotId,...(pbpRow?['pbp:'+p.game_id]:[]),...(ctxMap.get(p.game_id)?['context-v2:'+p.game_id]:[])],analyzed_at:new Date().toISOString(),
+   causal_status:'HYPOTHESIS_ONLY',source_snapshot_ids:[snap.snapshotId,...(pbpRow?['pbp:'+p.game_id]:[]),...(ctxMap.get(p.game_id)?['context-v2:'+p.game_id]:[]),...(v3Map.get(p.game_id)?['context-v3:'+p.game_id]:[])],analyzed_at:new Date().toISOString(),
   });
  }
  let written=0;
@@ -164,8 +169,11 @@ export async function runNbaCausalDiagnostics(){
 }
 
 export async function getNbaCausalLearningReport(){
- const r=await db.from('nba_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(500);
- if(r.error)throw Error('NBA_CAUSAL_REPORT_READ_FAILED');
+ const [r,o]=await Promise.all([
+  db.from('nba_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(500),
+  db.from('nba_matchup_observations_v3').select('game_id,game_date,offensive_player_id,defender_player_id,offensive_player_name,defender_player_name,matchup_seconds,player_points,fgm,fga,fg_pct').order('game_date',{ascending:false}).limit(5000),
+ ]);
+ if(r.error||o.error)throw Error('NBA_CAUSAL_REPORT_READ_FAILED');
  const rows=r.data??[];
  const settled=rows.filter(x=>['win','loss','push'].includes(String(x.outcome)));
  const wins=settled.filter(x=>x.outcome==='win').length,losses=settled.filter(x=>x.outcome==='loss').length;
@@ -177,6 +185,9 @@ export async function getNbaCausalLearningReport(){
   }
  }
  const patterns=[...labelMap.entries()].map(([label,v])=>({label,...v,lossRate:v.wins+v.losses?v.losses/(v.wins+v.losses):null})).sort((a,b)=>b.count-a.count);
+ const pairMap=new Map<string,any>();
+ for(const x of o.data??[]){const key=String(x.offensive_player_id)+'|'+String(x.defender_player_id),v=pairMap.get(key)??{offensivePlayerId:x.offensive_player_id,defenderPlayerId:x.defender_player_id,offensivePlayer:x.offensive_player_name,defender:x.defender_player_name,games:new Set<string>(),seconds:0,points:0,fgm:0,fga:0};v.games.add(x.game_id);v.seconds+=Number(x.matchup_seconds??0);v.points+=Number(x.player_points??0);v.fgm+=Number(x.fgm??0);v.fga+=Number(x.fga??0);pairMap.set(key,v);}
+ const matchupProfiles=[...pairMap.values()].map(v=>({offensivePlayerId:v.offensivePlayerId,defenderPlayerId:v.defenderPlayerId,offensivePlayer:v.offensivePlayer,defender:v.defender,games:v.games.size,seconds:v.seconds,points:v.points,fgm:v.fgm,fga:v.fga,fgPct:v.fga?v.fgm/v.fga:null})).filter(v=>v.games>=2).sort((a,b)=>b.games-a.games||b.seconds-a.seconds).slice(0,50);
  return {
   status:'AVAILABLE',generatedAt:new Date().toISOString(),
   sample:{settled:settled.length,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,brier:briers.length?briers.reduce((a,b)=>a+b,0)/briers.length:null},
@@ -188,8 +199,10 @@ export async function getNbaCausalLearningReport(){
    lineupGames:rows.filter(x=>x.observed_evidence?.missingCurrentLineupTruth===false).length,
    playerGameStatsCurrent:rows.some(x=>x.observed_evidence?.missingCurrentPlayerGameStats===false),
    playerStatGames:rows.filter(x=>x.observed_evidence?.missingCurrentPlayerGameStats===false).length,
+   matchupTrackingCurrent:rows.some(x=>x.observed_evidence?.missingConfirmedMatchup===false),
+   matchupGames:rows.filter(x=>x.observed_evidence?.missingConfirmedMatchup===false).length,
   },
-  patterns,recent:rows.slice(0,50),
-  policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,pbpCallsPerRunCap:3,v2ContextGamesPerRunCap:3,v2ContextProviderCallsPerRunCap:3},
+  patterns,matchupProfiles,recent:rows.slice(0,50),
+  policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,pbpCallsPerRunCap:3,v2ContextGamesPerRunCap:3,v2ContextProviderCallsPerRunCap:3,v3MatchupGamesPerRunCap:1,v3ProviderCallsPerRunCap:2,v3RetryHours:12},
  };
 }
