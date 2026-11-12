@@ -18,13 +18,15 @@ function playerName(p:any){return [p?.first_name,p?.last_name].filter(Boolean).j
 function summarizeLineups(projected:any,actual:any,selection:string){
  const pRows=Array.isArray(projected?.data)?projected.data:[];
  const aRows=Array.isArray(actual?.data)?actual.data:[];
- const projectedTeam=pRows.find((r:any)=>String(r?.team?.full_name??r?.team_name??'')===selection)||pRows.find((r:any)=>Array.isArray(r?.lineup)&&String(r?.team?.full_name??'')===selection);
+ const selectedActual=aRows.find((r:any)=>String(r?.team?.full_name??'')===selection);
+ const selectedTeamId=selectedActual?.team?.id??null;
+ const projectedTeam=pRows.find((r:any)=>selectedTeamId!==null&&Number(r?.team_id)===Number(selectedTeamId));
  const actualStarters=aRows.filter((r:any)=>r?.starter===true&&String(r?.team?.full_name??'')===selection);
  const projectedPlayers=Array.isArray(projectedTeam?.lineup)?projectedTeam.lineup.map((x:any)=>({id:x?.player?.id??null,name:playerName(x?.player),position:x?.position??null})).filter((x:any)=>x.id||x.name):[];
  const actualPlayers=actualStarters.map((x:any)=>({id:x?.player?.id??null,name:playerName(x?.player),position:x?.position??null})).filter((x:any)=>x.id||x.name);
  const pIds=new Set(projectedPlayers.map((x:any)=>String(x.id??x.name))),aIds=new Set(actualPlayers.map((x:any)=>String(x.id??x.name)));
  const added=actualPlayers.filter((x:any)=>!pIds.has(String(x.id??x.name))),removed=projectedPlayers.filter((x:any)=>!aIds.has(String(x.id??x.name)));
- return {projectedStatus:projectedTeam?.status??null,projectedPlayers,actualStarters:actualPlayers,starterChanges:added.length+removed.length,addedStarters:added,removedStarters:removed,complete:projectedPlayers.length===5&&actualPlayers.length===5};
+ return {teamId:selectedTeamId,projectedStatus:projectedTeam?.status??null,projectedPlayers,actualStarters:actualPlayers,starterChanges:added.length+removed.length,addedStarters:added,removedStarters:removed,complete:projectedPlayers.length===5&&actualPlayers.length===5};
 }
 function summarizeStats(stats:any,selection:string){
  const rows=(Array.isArray(stats?.data)?stats.data:[]).filter((r:any)=>String(r?.team?.full_name??'')===selection);
