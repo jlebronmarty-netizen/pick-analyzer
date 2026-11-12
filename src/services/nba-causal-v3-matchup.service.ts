@@ -8,6 +8,8 @@ const providerGameId=(id:unknown)=>{const m=/^bdl_nba_(\d+)$/.exec(String(id??''
 const finite=(v:unknown)=>{const n=Number(v);return Number.isFinite(n)?n:null;};
 const minutes=(v:unknown)=>{const s=String(v??'').trim();if(!s)return 0;if(/^\d+:\d{1,2}$/.test(s)){const [m,sec]=s.split(':');return Number(m)+Number(sec)/60;}const n=Number(s);return Number.isFinite(n)?n:0;};
 const playerName=(p:any)=>[p?.first_name,p?.last_name].filter(Boolean).join(' ').trim();
+function playerNameMap(context:any){const m=new Map<number,string>();for(const r of Array.isArray(context?.player_stats?.data)?context.player_stats.data:[]){const id=Number(r?.player?.id??r?.player_id);if(Number.isSafeInteger(id))m.set(id,playerName(r?.player)||String(r?.player_name??id));}return m;}
+function contextGameDate(context:any){const row=(Array.isArray(context?.player_stats?.data)?context.player_stats.data:[])[0];const d=String(row?.game?.date??'');return /^\d{4}-\d{2}-\d{2}$/.test(d)?d:null;}
 
 async function fetchJson(url:URL,key:string){
  const r=await fetch(url,{headers:{Authorization:key,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(15000)});
@@ -39,7 +41,9 @@ function matchupStats(row:any,nameMap:Map<number,string>){
   fgm:finite(s?.matchup_field_goals_made??s?.matchup_fgm??s?.fgm),
   fga:finite(s?.matchup_field_goals_attempted??s?.matchup_fga??s?.fga),
   fgPct:finite(s?.matchup_field_goals_percentage??s?.matchup_field_goal_percentage??s?.matchup_fg_pct??s?.fg_pct),
+  assists:finite(s?.matchup_assists??s?.assists),
   turnovers:finite(s?.matchup_turnovers??s?.turnovers),
+  switchesOn:finite(s?.switches_on),
   shootingFouls:finite(s?.shooting_fouls),
  };
 }
@@ -114,13 +118,21 @@ export async function syncNbaCausalV3Matchups({cap=1}:{cap?:number}={}){
    provider:'balldontlie',source_version:VERSION,updated_at:capturedAt,
   };
   const w=await db.from('nba_matchup_context_v3').upsert(row,{onConflict:'game_id'}).select('game_id');if(w.error)throw Error('NBA_CAUSAL_V3_WRITE_FAILED');written+=w.data?.length??0;
+  if(matchupRows.length){
+   const names=playerNameMap(c2.get(gameId)),gameDate=contextGameDate(c2.get(gameId));
+   const obs=matchupRows.map((raw:any)=>matchupStats(raw,names)).filter((x:any)=>x.offensivePlayerId&&x.defenderId).map((x:any)=>({
+    game_id:gameId,provider_game_id:gid,game_date:gameDate,offensive_player_id:x.offensivePlayerId,defender_player_id:x.defenderId,
+    offensive_player_name:x.offensivePlayer,defender_player_name:x.defender,matchup_seconds:x.seconds,player_points:x.pts,fgm:x.fgm,fga:x.fga,fg_pct:x.fgPct,
+    assists:x.assists,turnovers:x.turnovers,switches_on:x.switchesOn,shooting_fouls:x.shootingFouls,captured_at:capturedAt,source_version:VERSION,
+   }));
+   if(obs.length){const ow=await db.from('nba_matchup_observations_v3').upsert(obs,{onConflict:'game_id,offensive_player_id,defender_player_id'}).select('game_id');if(ow.error)throw Error('NBA_CAUSAL_V3_OBSERVATION_WRITE_FAILED');}
+  }
  }
  return {status:failures.length?'PARTIAL':'COMPLETED',planned:eligible.length,provider_calls:calls,written,failures};
 }
 
 export function getNbaCausalV3Evidence(context:any,selection:string,playerGame:any,v2Context:any){
- const nameMap=new Map<number,string>();
- for(const r of Array.isArray(v2Context?.player_stats?.data)?v2Context.player_stats.data:[]){const id=Number(r?.player?.id??r?.player_id);if(Number.isSafeInteger(id))nameMap.set(id,playerName(r?.player)||String(r?.player_name??id));}
+ const nameMap=playerNameMap(v2Context);
  const mRows=(Array.isArray(context?.matchups?.data)?context.matchups.data:[]).map((r:any)=>matchupStats(r,nameMap)).filter((x:any)=>x.offensivePlayerId&&x.defenderId);
  const aRows=(Array.isArray(context?.advanced_stats?.data)?context.advanced_stats.data:[]).map(advancedStats);
  const top=playerGame?.topScorers?.[0]??null,topId=Number(top?.id);
