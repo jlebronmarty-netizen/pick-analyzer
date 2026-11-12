@@ -14,7 +14,7 @@ async function fetchJson(url:URL,key:string){
  if(!r.ok||!(r.headers.get('content-type')??'').includes('application/json'))throw Error('NBA_CAUSAL_V3_PROVIDER_FAILED');
  return r.json();
 }
-function topPlayerIds(context:any){
+function topPlayerIds(context:any,perTeam=5){
  const rows=Array.isArray(context?.player_stats?.data)?context.player_stats.data:[];
  const byTeam=new Map<number,any[]>();
  for(const r of rows){
@@ -23,7 +23,7 @@ function topPlayerIds(context:any){
   const arr=byTeam.get(team)??[];arr.push({id,min:minutes(r?.min)});byTeam.set(team,arr);
  }
  const ids:number[]=[];
- for(const arr of byTeam.values())ids.push(...arr.sort((a,b)=>b.min-a.min).slice(0,5).map(x=>x.id));
+ for(const arr of byTeam.values())ids.push(...arr.sort((a,b)=>b.min-a.min).slice(0,perTeam).map(x=>x.id));
  return [...new Set(ids)];
 }
 function matchupStats(row:any,nameMap:Map<number,string>){
@@ -84,10 +84,10 @@ export async function syncNbaCausalV3Matchups({cap=1}:{cap?:number}={}){
  let calls=0,written=0;const failures:string[]=[];
  for(const gameId of eligible){
   const gid=providerGameId(gameId);if(gid===null)continue;
-  const ids=topPlayerIds(c2.get(gameId));if(!ids.length)continue;
+  const ids=topPlayerIds(c2.get(gameId),5),defenderIds=topPlayerIds(c2.get(gameId),10);if(!ids.length||!defenderIds.length)continue;
   let matchups:any={data:[],meta:{}},advanced:any={data:[],meta:{}};
   try{
-   const u=new URL('https://api.balldontlie.io/nba/v1/matchups');u.searchParams.append('game_ids[]',String(gid));for(const id of ids)u.searchParams.append('player_ids[]',String(id));u.searchParams.set('per_page','100');
+   const u=new URL('https://api.balldontlie.io/nba/v1/matchups');u.searchParams.append('game_ids[]',String(gid));for(const id of ids)u.searchParams.append('player_ids[]',String(id));for(const id of defenderIds)u.searchParams.append('opponent_player_ids[]',String(id));u.searchParams.set('per_page','100');
    calls++;matchups=await fetchJson(u,key);
   }catch{failures.push(gameId+':MATCHUPS_FAILED');}
   try{
