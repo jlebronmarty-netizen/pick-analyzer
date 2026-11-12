@@ -135,7 +135,7 @@ export async function runNbaCausalDiagnostics(){
   const halftime=q?q[0]+q[1]:null,secondHalf=q?q[2]+q[3]:null;
   const pbpRow=pbpMap.get(p.game_id),pbp=pbpRow?summarizePbp(pbpRow.payload,selection,snap.game.home_team.full_name,snap.game.visitor_team.full_name):null;
   const v2=getNbaCausalV2Evidence(ctxMap.get(p.game_id),selection);
-  const v3=getNbaCausalV3Evidence(v3Map.get(p.game_id),selection,v2.playerStats);
+  const v3=getNbaCausalV3Evidence(v3Map.get(p.game_id),selection,v2.playerStats,ctxMap.get(p.game_id));
   const observedLabels=[...new Set([...labels({outcome,p:probability,actualMargin,q,featureSnapshot:p.feature_snapshot,pbp}),...v2.labels,...v3.labels])];
   const evidenceQuality=v3.quality==='HIGH'&&v2.quality==='HIGH'&&pbp&&q&&actualMargin!==null?'HIGH':pbp&&q&&actualMargin!==null?'HIGH':q&&actualMargin!==null?'MEDIUM':'LOW';
   rows.push({
