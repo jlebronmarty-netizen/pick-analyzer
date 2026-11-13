@@ -56,14 +56,14 @@ async function persistPlayerOpponent(eventId:string,id:string,payload:any,at:str
 }
 export async function syncNcaafCausalContext({cap=1}:{cap?:number}={}){
  const [fR,oR,cR]=await Promise.all([
-  db.from('edge_lab_multi_forecasts_v1').select('event_id,scheduled_at').eq('sport','NCAAF').order('scheduled_at',{ascending:true}).limit(5000),
+  db.from('edge_lab_multi_forecasts_v1').select('id,event_id,scheduled_at').eq('sport','NCAAF').order('scheduled_at',{ascending:true}).limit(5000),
   db.from('edge_lab_multi_outcomes_v1').select('forecast_id').limit(10000),
   db.from('ncaaf_game_context_v2').select('event_id').limit(5000),
  ]);
  if(fR.error||oR.error||cR.error)throw Error('NCAAF_CAUSAL_PLAN_READ_FAILED');
  const outcomeIds=new Set((oR.data??[]).map(x=>x.forecast_id)),existing=new Set((cR.data??[]).map(x=>x.event_id));
  const settledEvents=new Set<string>();
- for(const f of fR.data??[]){if(existing.has(f.event_id)||!providerId(f.event_id))continue;const ids=(await db.from('edge_lab_multi_forecasts_v1').select('id').eq('sport','NCAAF').eq('event_id',f.event_id)).data??[];if(ids.some(x=>outcomeIds.has(x.id)))settledEvents.add(f.event_id);}
+ for(const f of fR.data??[]){if(existing.has(f.event_id)||!providerId(f.event_id))continue;if(outcomeIds.has(f.id))settledEvents.add(f.event_id);}
  const targets=[...settledEvents].slice(0,Math.max(0,Math.min(cap,1)));
  let calls=0,written=0,matchups=0;const failures:string[]=[];
  for(const eventId of targets){try{const id=providerId(eventId)!;calls++;const payload=await fetchSummary(id),at=new Date().toISOString();const w=await db.from('ncaaf_game_context_v2').upsert({event_id:eventId,provider_event_id:id,summary_payload:payload,captured_at:at,provider:'espn',source_version:CTX_VERSION,updated_at:at},{onConflict:'event_id'}).select('event_id');if(w.error)throw Error('NCAAF_CONTEXT_WRITE_FAILED');written+=w.data?.length??0;matchups+=await persistPlayerOpponent(eventId,id,payload,at);}catch(e){failures.push(eventId+':'+(e instanceof Error?e.message:'NCAAF_CAUSAL_FAILED'));}}
