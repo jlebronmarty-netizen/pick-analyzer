@@ -70,7 +70,7 @@ async function ncaab():Promise<SportLearning>{
   return predicted&&actual?predicted===actual?'W':'L':null;
  }).filter(Boolean);
  const wins=rows.filter(x=>x==='W').length,losses=rows.filter(x=>x==='L').length,recent=rows.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'NCAAB',model:'NCAAB_PRESEASON_V1',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Forecast prospectivo congelado','Resultado ESPN reconciliado por event ID','Pace/eficiencia postgame aún no clasificados causalmente'],candidate:null});
+ return stateFor({sport:'NCAAB',model:'NCAAB_PRESEASON_V1',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Forecast prospectivo congelado','NCAAB Causal Learning V1–V3 usa ESPN PBP + boxscore','V3 es jugador-vs-equipo rival; no se afirma defensor individual'],candidate:null});
 }
 
 async function edgeSports(){
