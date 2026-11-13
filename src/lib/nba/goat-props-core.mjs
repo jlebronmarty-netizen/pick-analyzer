@@ -19,7 +19,9 @@ export function gradeNbaPropStoredQuote(quote,playerStat) {
   if(String(playerStat?.game?.status_state??'').toLowerCase()!=='final')return blocked('FINAL_GAME_UNVERIFIED');
   const minutes=String(playerStat?.min??'').trim();
   if(!minutes||minutes==='0'||minutes==='0:00'||minutes==='00:00'||minutes==='DNP')return blocked('PLAYER_DID_NOT_PLAY_OR_MINUTES_UNVERIFIED');
-  const actual=Number(playerStat[STAT_FIELDS[quote.statistic]]);
+  const rawActual=playerStat[STAT_FIELDS[quote.statistic]];
+  if(rawActual==null||rawActual==='')return blocked('ACTUAL_PLAYER_STAT_UNVERIFIED');
+  const actual=Number(rawActual);
   if(!Number.isSafeInteger(actual)||actual<0)return blocked('ACTUAL_PLAYER_STAT_UNVERIFIED');
   const outcome=actual===line?'push':side==='over'?(actual>line?'win':'loss'):(actual<line?'win':'loss');
   return {status:'STATISTICAL_COMPARISON',outcome,actual,line,statistic:quote.statistic,side,statisticalOnly:true,sportsbookSettlement:false,predictionAccuracy:false};
