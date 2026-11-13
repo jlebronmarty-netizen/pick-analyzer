@@ -70,7 +70,7 @@ async function ncaab():Promise<SportLearning>{
   return predicted&&actual?predicted===actual?'W':'L':null;
  }).filter(Boolean);
  const wins=rows.filter(x=>x==='W').length,losses=rows.filter(x=>x==='L').length,recent=rows.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'NCAAB',model:'NCAAB_PRESEASON_V1',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Forecast prospectivo congelado','Resultado ESPN reconciliado por event ID','Pace/eficiencia postgame aún no clasificados causalmente'],candidate:null});
+ return stateFor({sport:'NCAAB',model:'NCAAB_PRESEASON_V1',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Forecast prospectivo congelado','NCAAB Causal Learning V1–V3 usa ESPN PBP + boxscore','V3 es jugador-vs-equipo rival; no se afirma defensor individual'],candidate:null});
 }
 
 async function edgeSports(){
@@ -84,7 +84,7 @@ async function edgeSports(){
   const rows=(f.data??[]).filter(x=>x.sport===sport).map(x=>({f:x,o:om.get(x.id)})).filter(x=>x.o);
   const wl=rows.map(x=>resultWL((x.o as any).status)).filter(Boolean),wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length;
   const nums=rows.map(x=>Number((x.o as any).absolute_error)).filter(Number.isFinite),recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
-  return stateFor({sport:sport==='TT'?'Tenis de mesa':'NCAAF',model:label,settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:nums.length,mae:average(nums),recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:sport==='TT'?['ML/sets y errores de Total almacenados','Resultados públicos o proveedor con trazabilidad','Secuencia completa punto-a-punto no disponible para todos los partidos']:['Ganador, margen y total pueden evaluarse','ESPN current-season schedules como fuente FREE','Drive-level/play-by-play causal attribution todavía no automatizada'],candidate:null} as any);
+  return stateFor({sport:sport==='TT'?'Tenis de mesa':'NCAAF',model:label,settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:nums.length,mae:average(nums),recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:sport==='TT'?['ML/sets y errores de Total almacenados','TT Causal Learning V1–V3 usa setPoints ya persistidos con 0 llamadas nuevas','V3 es H2H directo jugador-vs-jugador']:['Ganador, margen y total pueden evaluarse','NCAAF Causal Learning V1–V3 usa ESPN summary/drives/boxscore','V3 es jugador/rol vs defensa rival; no assignment defensivo individual'],candidate:null} as any);
  };
  return [one('TT','TT SHADOW'),one('NCAAF','NCAAF PPG V1')];
 }
@@ -97,7 +97,7 @@ async function soccer():Promise<SportLearning>{
  ]);
  if(f.error||o.error)throw Error('SOCCER_LEARNING_READ_FAILED');
  const om=new Map((o.data??[]).map(x=>[x.forecast_id,x])),rows=(f.data??[]).map(x=>({f:x,o:om.get(x.id)})).filter(x=>x.o),wl=rows.map(x=>resultWL((x.o as any).status)).filter(Boolean),wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length,recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'Fútbol',model:'SOCCER_V0_PICK_PORT_1',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['1X2 y Total 2.5 prospectivos','Resultado ESPN almacenado','xG/eventos detallados todavía no alimentan diagnóstico causal'],candidate:null});
+ return stateFor({sport:'Fútbol',model:'SOCCER_V0_PICK_PORT_1',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['1X2 y Total 2.5 prospectivos','Soccer Causal Learning V1–V3 usa ESPN summary/eventos/roster cuando existe','V3 es jugador-vs-rival; no se inventa xG ni defensor individual'],candidate:null});
 }
 
 async function ufc():Promise<SportLearning>{
@@ -108,14 +108,14 @@ async function ufc():Promise<SportLearning>{
  if(p.error||r.error)throw Error('UFC_LEARNING_READ_FAILED');
  const rm=new Map((r.data??[]).map(x=>[x.bout_id,x])),rows=(p.data??[]).map(x=>({p:x,r:rm.get(x.bout_id)})).filter(x=>x.r);
  const wl=rows.map(x=>resultWL((x.r as any)?.body?.outcome??(x.r as any)?.body?.result)).filter(Boolean),wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length,recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'UFC',model:'UFC Elo experimental',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Elo pre-fight almacenado','Resultados se incorporan cuando son inequívocos','Striking/grappling round-level causal attribution pendiente'],candidate:null});
+ return stateFor({sport:'UFC',model:'UFC Elo experimental',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Elo pre-fight almacenado','UFC Causal Learning V1–V3 usa resultado y contexto ESPN cuando existe','V3 es H2H fighter-vs-fighter; striking/grappling no se inventa'],candidate:null});
 }
 
 async function mlb():Promise<SportLearning>{
  const q=await db.from('mlb_2026_forward_master_ledger_v1').select('result,settled_at,model_id,market,target_date').eq('model_id','EQUILIZER_ML_V2_E2_STABLE6').order('target_date',{ascending:false}).limit(1000);
  if(q.error)throw Error('MLB_LEARNING_READ_FAILED');
  const rows=q.data??[],wl=rows.map(x=>resultWL(x.result)).filter(Boolean),wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length,recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'MLB',model:'EQUILIZER_ML_V2_E2_STABLE6',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Cohorte forward congelada y liquidada','Historial separado de otros motores MLB','Learning Brain y auto-tuning legacy no autorizan promoción multideporte'],candidate:null});
+ return stateFor({sport:'MLB',model:'EQUILIZER_ML_V2_E2_STABLE6',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Cohorte forward congelada y liquidada','MLB Causal Learning V1–V3 preparado para 2027 y collector offseason apagado','V3 será batter-vs-pitcher; auto-tuning legacy no autoriza promoción'],candidate:null});
 }
 
 export async function getMultisportLearningOverview(){
