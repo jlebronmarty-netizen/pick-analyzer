@@ -68,3 +68,17 @@ export async function runSoccerCausalDiagnostics(){
  return {status:'COMPLETED',eligible:rows.length,written:rows.length,model_changes:0,auto_promotion:false};
 }
 export async function runSoccerCausalLearning(){const context=await syncSoccerCausalContext({cap:1});const diagnostics=await runSoccerCausalDiagnostics();return {context,diagnostics};}
+
+export async function getSoccerCausalLearningReport(){
+ const [dR,mR,cR]=await Promise.all([
+  db.from('soccer_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(3000),
+  db.from('soccer_player_opponent_v3').select('*').order('game_date',{ascending:false}).limit(10000),
+  db.from('soccer_game_context_v2').select('event_id').limit(5000),
+ ]);
+ if(dR.error||mR.error||cR.error)throw Error('SOCCER_CAUSAL_REPORT_READ_FAILED');
+ const rows=dR.data??[],one=rows.filter(x=>x.market==='1X2'),wins=one.filter(x=>String(x.outcome_status).toUpperCase()==='W').length,losses=one.filter(x=>String(x.outcome_status).toUpperCase()==='L').length;
+ const labels=new Map<string,number>();for(const r of rows)for(const l of Array.isArray(r.observed_labels)?r.observed_labels:[])labels.set(l,(labels.get(l)??0)+1);
+ const pair=new Map<string,any>();for(const x of mR.data??[]){const k=x.player_id+'|'+x.opponent_team_id,v=pair.get(k)??{playerId:x.player_id,player:x.player_name,opponentTeamId:x.opponent_team_id,opponent:x.opponent_team_name,games:0,starts:0,goals:0,assists:0,yellowCards:0,redCards:0};v.games++;if(x.starter)v.starts++;v.goals+=Number(x.goals??0);v.assists+=Number(x.assists??0);v.yellowCards+=Number(x.yellow_cards??0);v.redCards+=Number(x.red_cards??0);pair.set(k,v);}
+ const matchupProfiles=[...pair.values()].filter(x=>x.games>=2).sort((a,b)=>b.games-a.games||b.goals-a.goals).slice(0,100);
+ return {status:'AVAILABLE',generatedAt:new Date().toISOString(),sample:{oneXTwoSettled:wins+losses,wins,losses,accuracy:wins+losses?wins/(wins+losses):null},evidence:{contextGames:cR.data?.length??0,playerOpponentObservations:mR.data?.length??0,directDefenderAssignments:false},patterns:[...labels.entries()].map(([label,count])=>({label,count})).sort((a,b)=>b.count-a.count),matchupProfiles,recent:rows.slice(0,50),policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,contextGamesPerRunCap:1,providerCallsPerRunCap:1,v3Meaning:'PLAYER_VS_OPPONENT_TEAM_NOT_DIRECT_DEFENDER'}};
+}
