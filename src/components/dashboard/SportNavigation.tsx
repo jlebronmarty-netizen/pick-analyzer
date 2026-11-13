@@ -12,6 +12,7 @@ const sports = [
   ['/ncaab', 'NCAAB'],
   ['/ncaab-learning', 'NCAAB Learning'],
   ['/ncaaf', 'NCAAF'],
+  ['/ncaaf-learning', 'NCAAF Learning'],
   ['/sports-shadow/nfl', 'NFL'],
   ['/sports-shadow/bsn', 'BSN'],
   ['/sports-shadow/tennis', 'Tenis'],
