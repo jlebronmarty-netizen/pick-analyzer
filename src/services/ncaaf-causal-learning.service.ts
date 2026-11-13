@@ -95,3 +95,19 @@ export async function runNcaafCausalDiagnostics(){
  return {status:'COMPLETED',eligible:rows.length,written:rows.length,model_changes:0,auto_promotion:false};
 }
 export async function runNcaafCausalLearning(){const context=await syncNcaafCausalContext({cap:1});const diagnostics=await runNcaafCausalDiagnostics();return {context,diagnostics};}
+
+export async function getNcaafCausalLearningReport(){
+ const [dR,mR,cR]=await Promise.all([
+  db.from('ncaaf_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(3000),
+  db.from('ncaaf_player_opponent_v3').select('*').order('game_date',{ascending:false}).limit(10000),
+  db.from('ncaaf_game_context_v2').select('event_id').limit(5000),
+ ]);
+ if(dR.error||mR.error||cR.error)throw Error('NCAAF_CAUSAL_REPORT_READ_FAILED');
+ const rows=dR.data??[],ml=rows.filter(x=>x.market==='MONEYLINE'),wins=ml.filter(x=>String(x.outcome_status).toUpperCase()==='W').length,losses=ml.filter(x=>String(x.outcome_status).toUpperCase()==='L').length;
+ const labels=new Map<string,{count:number,wins:number,losses:number}>();for(const r of rows)for(const l of Array.isArray(r.observed_labels)?r.observed_labels:[]){const v=labels.get(l)??{count:0,wins:0,losses:0};v.count++;if(r.market==='MONEYLINE'){String(r.outcome_status).toUpperCase()==='W'?v.wins++:String(r.outcome_status).toUpperCase()==='L'?v.losses++:0;}labels.set(l,v);}
+ const pair=new Map<string,any>();for(const x of mR.data??[]){const k=x.athlete_id+'|'+x.opponent_team_id+'|'+x.category,v=pair.get(k)??{athleteId:x.athlete_id,athlete:x.athlete_name,opponentTeamId:x.opponent_team_id,opponent:x.opponent_team_name,category:x.category,games:new Set<string>(),yards:0,touchdowns:0,interceptions:0,attempts:0,carries:0,receptions:0};v.games.add(x.event_id);v.yards+=Number(x.yards??0);v.touchdowns+=Number(x.touchdowns??0);v.interceptions+=Number(x.interceptions??0);v.attempts+=Number(x.attempts??0);v.carries+=Number(x.carries??0);v.receptions+=Number(x.receptions??0);pair.set(k,v);}
+ const matchupProfiles=[...pair.values()].map(v=>({...v,games:v.games.size})).filter(v=>v.games>=2).sort((a,b)=>b.games-a.games||b.yards-a.yards).slice(0,100);
+ const patterns=[...labels.entries()].map(([label,v])=>({label,...v,lossRate:v.wins+v.losses?v.losses/(v.wins+v.losses):null})).sort((a,b)=>b.count-a.count);
+ const margin=rows.filter(x=>x.market==='POINT_MARGIN'&&Number.isFinite(Number(x.absolute_error))).map(x=>Number(x.absolute_error)),total=rows.filter(x=>x.market==='TOTAL_POINTS'&&Number.isFinite(Number(x.absolute_error))).map(x=>Number(x.absolute_error));
+ return {status:'AVAILABLE',generatedAt:new Date().toISOString(),sample:{mlSettled:wins+losses,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,marginMae:margin.length?margin.reduce((a,b)=>a+b,0)/margin.length:null,totalMae:total.length?total.reduce((a,b)=>a+b,0)/total.length:null},evidence:{contextGames:cR.data?.length??0,playerOpponentObservations:mR.data?.length??0,directDefenderAssignments:false},patterns,matchupProfiles,recent:rows.slice(0,50),policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,contextGamesPerRunCap:1,providerCallsPerRunCap:1,v3Meaning:'PLAYER_OR_UNIT_VS_OPPONENT_NOT_DIRECT_DEFENDER'}};
+}
