@@ -552,6 +552,9 @@ export function buildNbaCurrentEraShadowPredictionRow({
     feature_set_version: NBA_CURRENT_ERA_SHADOW_FEATURE_VERSION,
     feature_snapshot: {
       ...currentEraFeatureSnapshot(event, odds, generatedAt),
+      featureQualityScore: modelPrediction.featureQualityScore,
+      dataSufficiencyScore: modelPrediction.dataSufficiencyScore,
+      pregameFeatureScoresCaptured: true,
       projectedLine: modelPrediction.projectedLine,
       smartScore: modelPrediction.smartScore,
       adaptiveScore: modelPrediction.adaptiveScore,
