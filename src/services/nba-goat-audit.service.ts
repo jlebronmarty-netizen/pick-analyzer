@@ -29,6 +29,7 @@ export async function getNbaGoatAuditReport(){
   return {market,settled:xs.length,wins,losses,pushes,accuracy:wins+losses?wins/(wins+losses):null,averageModelProbability:avg(probs)};
  });
  const legacyPending=(legacyR.data??[]).filter((x:any)=>!(x.prediction_origin===ORIGIN&&x.feature_snapshot?.goatProviderPolicy===NBA_GOAT_POLICY)).length;
+ const mlSettled=settled.filter(x=>x.market==='moneyline');const mlProbabilities=[...new Set(mlSettled.map(x=>Number(x.model_probability)).filter(Number.isFinite))];const mlWins=mlSettled.filter(x=>resultKey(x.result)==='win').length;const mlLosses=mlSettled.filter(x=>resultKey(x.result)==='loss').length;const mlObserved=mlWins+mlLosses?mlWins/(mlWins+mlLosses):null;
  const capturedScores=rows.filter((x:any)=>x.feature_snapshot?.pregameFeatureScoresCaptured===true).length;
  const legacyMissingScores=rows.length-capturedScores;
  const latestArchive:any=archive.last_run?.summary??{};
@@ -40,6 +41,7 @@ export async function getNbaGoatAuditReport(){
  if(!latestPregame)warnings.push('GOAT pregame injuries/projected-lineup archive has not captured its first snapshot yet.');
  if(legacyMissingScores)warnings.push(legacyMissingScores+' historical GOAT rows predate the feature-score persistence fix; their zero quality scores are treated as unavailable, not as true zero-quality inputs.');
  if(learning.sample.settled<30)warnings.push('GOAT settled sample is below 30 markets; accuracy/calibration remain directional.');
+ if(mlSettled.length>=5&&mlProbabilities.length===1)warnings.push('GOAT moneyline probability is collapsed to a single value ('+mlProbabilities[0]+'%) across '+mlSettled.length+' settled ML markets; investigate calibration in challenger research before any production formula change.');
  if(latestPregame)warnings.push('Fresh GOAT injuries/projected lineups are archived as pregame evidence but remain excluded from model scoring until separately validated and approved.');else warnings.push('Fresh GOAT player injuries and projected lineups are available from the subscription but are not yet direct scoring inputs; stale legacy injury/lineup rows remain excluded from confidence lift.');
  return {
   status:issues.length?'ATTENTION':'READY_WITH_MONITORING',
@@ -52,7 +54,7 @@ export async function getNbaGoatAuditReport(){
    pregameFeatureScores:{captured:capturedScores,legacyUnavailable:legacyMissingScores,futureFixActive:true},
    pregameContext:{latestSnapshot:latestPregame,freshPlayerInjuriesCaptured:Boolean(latestPregame),freshProjectedLineupsCaptured:Boolean(latestPregame),freshPlayerInjuriesInScoring:false,freshProjectedLineupsInScoring:false,postgameLineupTruthAvailable:learning.evidence.lineupTruthCurrent,postgamePlayerStatsAvailable:learning.evidence.playerGameStatsCurrent,postgameMatchupsAvailable:learning.evidence.matchupTrackingCurrent},
   },
-  learning:{sample:learning.sample,evidence:learning.evidence,patterns:learning.patterns.slice(0,20),candidateAutoApply:false},
+  learning:{sample:learning.sample,evidence:learning.evidence,patterns:learning.patterns.slice(0,20),candidateAutoApply:false,calibrationAudit:{moneylineSettled:mlSettled.length,distinctMoneylineProbabilities:mlProbabilities,observedMoneylineAccuracy:mlObserved,productionFormulaChanged:false}},
   settlement:{goatPending:pending.length,directGameFallback:{enabled:true,maxCallsPerRun:1,minimumAgeHours:6},legacyPendingExcludedFromGoatHealth:legacyPending},
   costControls:{
    archiveGatewayRequestsLatest:Number(latestArchive.gateway_requests??0),
