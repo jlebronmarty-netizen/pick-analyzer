@@ -1,0 +1,25 @@
+name: NBA GOAT Safe Regression
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nba/goat-*.mjs'
+      - 'src/services/nba-goat-*.ts'
+      - 'src/services/nba-current-era-shadow-canary.service.ts'
+      - 'tests/nba-goat-*.test.mjs'
+      - '.github/workflows/nba-goat-readiness-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: NBA GOAT evidence/contract/statistical-only regression
+        run: node --test tests/nba-goat-*.test.mjs tests/nba-production-audit-20261113.test.mjs
