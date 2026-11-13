@@ -113,7 +113,7 @@ export async function runNhlCausalDiagnostics(){
   if((pbp?.maxDeficit??0)<=-2&&win)labels.push('MULTI_GOAL_COMEBACK_WIN');
   if((pbp?.leadChanges??0)>=3)labels.push('HIGH_LEAD_CHANGE_GAME');
   if((box?.totals?.giveaways??0)>=12)labels.push('HIGH_GIVEAWAY_GAME');
-  if(box?.primaryGoalie?.savePctg!==null&&box?.primaryGoalie?.savePctg<0.88)labels.push('LOW_GOALIE_SAVE_PCT');
+  if(typeof box?.primaryGoalie?.savePctg==='number'&&box.primaryGoalie.savePctg<0.88)labels.push('LOW_GOALIE_SAVE_PCT');
   if((pbp?.powerPlayGoals??0)>=2)labels.push('MULTI_POWER_PLAY_GOALS');
   const brier=(sel.p-(win?1:0))**2;
   rows.push({prediction_id:p.id,event_id:p.event_id,model:'DRATINGS_PUBLIC_ARGMAX_V1',selection:sel.team,predicted_probability:sel.p,outcome:win?'win':'loss',actual_margin:actualMargin,brier,period_margins:pbp?.periods??[],observed_labels:[...new Set(labels)],observed_evidence:{disclaimer:'Observed labels are postgame hypotheses, not causal proof.',pbp,boxscore:box,missingPbp:!pbp,missingBoxscore:!box},evidence_quality:pbp&&box?.complete?'HIGH':pbp||box?'MEDIUM':'LOW',causal_status:'HYPOTHESIS_ONLY',analyzed_at:new Date().toISOString()});
