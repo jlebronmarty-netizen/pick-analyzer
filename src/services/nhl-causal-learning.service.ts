@@ -13,7 +13,7 @@ async function fetchOfficial(gameId:number,path:'play-by-play'|'boxscore'){
  if(!r.ok||!(r.headers.get('content-type')??'').includes('application/json'))throw Error('NHL_CAUSAL_PROVIDER_FAILED');
  return r.json();
 }
-function selectedTeam(pred:any){
+function selectedTeam(pred:any):{team:string;teamId:number;p:number;side:'away'|'home'}{
  const away=Number(pred?.awayProbability)>Number(pred?.homeProbability);
  return {team:away?String(pred?.away):String(pred?.home),teamId:Number(away?pred?.awayId:pred?.homeId),p:Number(away?pred?.awayProbability:pred?.homeProbability),side:away?'away':'home'};
 }
