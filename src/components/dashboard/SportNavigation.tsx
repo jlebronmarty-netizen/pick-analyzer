@@ -2,13 +2,17 @@ import Link from 'next/link'
 
 const sports = [
   ['/today', 'MLB'],
+  ['/mlb-learning', 'MLB Learning'],
   ['/nba-market-data', 'NBA'],
   ['/nba-learning', 'NBA Learning'],
   ['/nhl', 'NHL'],
   ['/nhl-learning', 'NHL Learning'],
   ['/ufc', 'UFC'],
+  ['/ufc-learning', 'UFC Learning'],
   ['/table-tennis', 'Tenis de mesa'],
+  ['/table-tennis-learning', 'TT Learning'],
   ['/soccer', 'Fútbol'],
+  ['/soccer-learning', 'Fútbol Learning'],
   ['/ncaab', 'NCAAB'],
   ['/ncaab-learning', 'NCAAB Learning'],
   ['/ncaaf', 'NCAAF'],
