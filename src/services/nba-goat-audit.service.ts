@@ -1,6 +1,7 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
-import {NBA_GOAT_POLICY} from '@/lib/nba/goat-provider-policy.mjs';
+import {NBA_GOAT_POLICY,NBA_GOAT_CONTINUOUS_DAILY_ROW_CAP} from '@/lib/nba/goat-provider-policy.mjs';
+import {wilsonInterval,nbaGoatLearningReadiness} from '@/lib/nba/goat-calibration-core.mjs';
 import {getNbaGoatRuntimeStatus} from '@/services/nba-goat-runtime.service';
 import {getNbaGoatTeamStatsStatus} from '@/services/nba-goat-team-stats.service';
 import {getNbaCausalLearningReport} from '@/services/nba-causal-learning.service';
@@ -27,7 +28,7 @@ export async function getNbaGoatAuditReport(){
  const byMarket=[...new Set(rows.map(x=>String(x.market??'unknown')))].sort().map(market=>{
   const xs=settled.filter(x=>x.market===market),wins=xs.filter(x=>resultKey(x.result)==='win').length,losses=xs.filter(x=>resultKey(x.result)==='loss').length,pushes=xs.filter(x=>resultKey(x.result)==='push').length;
   const probs=xs.map(x=>Number(x.model_probability)).filter(Number.isFinite);
-  return {market,settled:xs.length,wins,losses,pushes,accuracy:wins+losses?wins/(wins+losses):null,averageModelProbability:avg(probs)};
+  return {market,settled:xs.length,wins,losses,pushes,accuracy:wins+losses?wins/(wins+losses):null,averageModelProbability:avg(probs),wilson95:wins+losses?wilsonInterval(wins,losses):null};
  });
  const legacyPending=(legacyR.data??[]).filter((x:any)=>!(x.prediction_origin===ORIGIN&&x.feature_snapshot?.goatProviderPolicy===NBA_GOAT_POLICY)).length;
  const mlSettled=settled.filter(x=>x.market==='moneyline');const mlProbabilities=[...new Set(mlSettled.map(x=>Number(x.model_probability)).filter(Number.isFinite))];const mlWins=mlSettled.filter(x=>resultKey(x.result)==='win').length;const mlLosses=mlSettled.filter(x=>resultKey(x.result)==='loss').length;const mlObserved=mlWins+mlLosses?mlWins/(mlWins+mlLosses):null;
@@ -53,10 +54,10 @@ export async function getNbaGoatAuditReport(){
    archive:{lastRunStatus:archive.last_run?.status??null,lastRunCompletedAt:archive.last_run?.completed_at??null,lastSchedule:archive.last_schedule??null,lastSnapshot:archive.last_snapshot??null,latestGatewayRequests:Number(latestArchive.gateway_requests??0),latestPlanned:Number(latestArchive.planned??0),latestCompleted:Number(latestArchive.completed??0),latestErrors:Array.isArray(latestArchive.errors)?latestArchive.errors:[]},
    teamStats,
    pregameFeatureScores:{captured:capturedScores,legacyUnavailable:legacyMissingScores,futureFixActive:true},
-   props:{archivedQuotes:propR.count??0,certifiedPredictionCohort:false,accuracyAvailable:false,note:'FanDuel prop market data is archived, but no certified NBA prop prediction/settlement cohort exists in prediction_history yet.'},
+   props:{archivedQuotes:propR.count??0,certifiedPredictionCohort:false,accuracyAvailable:false,researchAuditEndpoint:'/api/nba/goat/props-research',note:'Archived props now have a bounded statistical-only historical grading pilot. No certified prospective prop prediction or settlement cohort exists.'},
    pregameContext:{latestSnapshot:latestPregame,freshPlayerInjuriesCaptured:Boolean(latestPregame),freshProjectedLineupsCaptured:Boolean(latestPregame),freshPlayerInjuriesInScoring:false,freshProjectedLineupsInScoring:false,postgameLineupTruthAvailable:learning.evidence.lineupTruthCurrent,postgamePlayerStatsAvailable:learning.evidence.playerGameStatsCurrent,postgameMatchupsAvailable:learning.evidence.matchupTrackingCurrent},
   },
-  learning:{sample:learning.sample,evidence:learning.evidence,patterns:learning.patterns.slice(0,20),candidateAutoApply:false,calibrationAudit:{moneylineSettled:mlSettled.length,distinctMoneylineProbabilities:mlProbabilities,observedMoneylineAccuracy:mlObserved,productionFormulaChanged:false},formulaAudit:{injuryImpactSign:{status:'PATTERN_REQUIRES_CHALLENGER',finding:'NBA caller passes injuryImpact as a negative penalty while V3/V4 subtract injuryImpact; the effective adjustment can become positive.',productionFormulaChanged:false,hypothesisKey:'nba_injury_penalty_sign_v1'}}},
+  learning:{sample:learning.sample,evidence:learning.evidence,patterns:learning.patterns.slice(0,20),candidateAutoApply:false,readiness:nbaGoatLearningReadiness({settledMarkets:settled.length,settledMoneyline:mlSettled.length,distinctMoneylineProbabilities:mlProbabilities,featureScoresCaptured:capturedScores}),calibrationAudit:{moneylineSettled:mlSettled.length,distinctMoneylineProbabilities:mlProbabilities,observedMoneylineAccuracy:mlObserved,moneylineWilson95:wilsonInterval(mlWins,mlLosses),productionFormulaChanged:false},formulaAudit:{injuryImpactSign:{status:'PATTERN_REQUIRES_CHALLENGER',finding:'NBA caller passes injuryImpact as a negative penalty while V3/V4 subtract injuryImpact; the effective adjustment can become positive.',productionFormulaChanged:false,hypothesisKey:'nba_injury_penalty_sign_v1'}}},
   settlement:{goatPending:pending.length,directGameFallback:{enabled:true,maxCallsPerRun:1,minimumAgeHours:6},legacyPendingExcludedFromGoatHealth:legacyPending},
   costControls:{
    archiveGatewayRequestsLatest:Number(latestArchive.gateway_requests??0),
@@ -66,6 +67,7 @@ export async function getNbaGoatAuditReport(){
    v2ContextMaxCallsPerRun:3,
    v3MatchupMaxCallsPerRun:2,
    resultFallbackMaxCallsPerRun:1,
+   dailyShadowOnlyRowCap:NBA_GOAT_CONTINUOUS_DAILY_ROW_CAP,
    note:'Backfill calls stop once each game context is stored; audit/report endpoints make zero provider calls.',
   },
   issues,warnings,

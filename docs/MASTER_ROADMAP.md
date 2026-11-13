@@ -4323,3 +4323,12 @@ User authorized free historical acquisition while evaluating 2025–2026 access.
 Resume the BSN archive schedule for 2022–2024 only, reusing the 250 archived 2024
 finals and preserving the plan denial. Pending: 2022/2023 game results and 2024
 team/player box scores. No paid plan, models, forecasts or changes to other sports.
+
+## 2026-11-13 — NBA GOAT: current-slate recovery and four-pending follow-up
+
+- Identified two independent quote-contract blockers: archived yesterday schedule may be written after today's archive, while the single-row reader picked the wrong day; and valid 2026 NBA Cup Group Play games were rejected as non-regular-season. Fix uses latest received schedule evidence per provider game ID across six archive snapshots; explicitly allows only East/West Group A-C for group-stage regular-season scoring. Other unknown stages, postseason, late/stale quote evidence and ambiguous contracts still fail closed.
+- Pregame injuries/projected-lineups use all near-term scheduled games across the same archived window, with source snapshot IDs retained. Data remain evidence-only, not model scoring. External provider calls remain capped at two per refresh.
+- Bounded GOAT SHADOW expansion: nine new rows per UTC day, at most three per run, fairer selection across distinct games, no provider calls introduced by shadow scoring; never official recommendations. Actual future coverage requires contract, quality and exact model/price match gates.
+- Calibration readiness: 15 historical GOAT markets, 14 games, 11 wins/4 losses; ML 9/12 at a uniform model value of 88%. Wilson intervals and shortfall-to-directional-sample are reported, not a claim of statistical calibration or validated challenger. Injury-penalty-sign hypothesis stays PATTERN only; no V3/V4 changes or retrospective fabricated feature scores.
+- NBA props: historical settlement helper grades ONLY statistical comparisons for points, rebounds, assists and threes from exact player/game identities and valid pregame lines. The /api/nba/goat/props-research route is bounded/read-only and reports linkage/coverage without marking any row a certified prediction, sportsbook settlement or prediction accuracy. Historical matches cannot be treated as forecast performance. Pending a prospective model, exact prop source contract / DNP certification, validation & holdout.
+- Affected domain: NBA GOAT only. No other sports, legacy results, champion weights, official picks, user alerts, or auto-promotion touched. Verify preview build, tests, latest health, then deploy.

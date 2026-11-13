@@ -3,10 +3,10 @@ import {createHash} from 'node:crypto';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {NBA_GOAT_PROVIDER,NBA_GOAT_POLICY,nbaGoatQuoteChecks,nbaGoatGate,isExactGoatModelMatch,nbaGoatDerivedContext} from '@/lib/nba/goat-provider-policy.mjs';
 import {teamStatsFresh} from '@/lib/nba/goat-team-stats-core.mjs';
+import {mergeNbaScheduleGames} from '@/lib/nba/goat-schedule-core.mjs';
 const SPORT='basketball_nba',ORIGIN='CURRENT_ERA_SHADOW';
 function rows(r:any){if(r.error)throw Error('NBA_GOAT_READ_FAILED');return r.data??[];}
 function yearAndSeason(now=new Date()){const year=now.getUTCMonth()>=9?now.getUTCFullYear():now.getUTCFullYear()-1;return {year,season:String(year)+'-'+String(year+1).slice(-2)};}
-function scheduleMap(row:any){const games=row?.payload?.data?.games;if(!Array.isArray(games))return new Map<number,any>();return new Map<number,any>(games.filter((g:any)=>Number.isSafeInteger(g?.id)).map((g:any)=>[g.id,g] as [number,any]));}
 function providerGameId(id:string){const m=/^bdl_nba_(\d+)$/.exec(id);return m?Number(m[1]):null;}
 async function load(){
  const now=new Date(),checkedAt=now.toISOString(),info=yearAndSeason(now),year=info.year,season=info.season;
@@ -17,17 +17,18 @@ async function load(){
   db.from('prediction_history').select('id,game_id,market,team,line,sportsbook,model_version,result,created_at,prediction_origin,feature_snapshot').eq('sport_key',SPORT).eq('prediction_origin',ORIGIN).order('id').limit(1000),
   db.from('sports_sync_jobs').select('id,job_type,status,started_at,records_inserted,metadata').eq('sport_key',SPORT).in('job_type',['nba_current_era_shadow_scheduler_canary_v1','nba_goat_shadow_v1']).order('started_at',{ascending:false}).limit(1000),
   db.from('nba_market_sync_runs_v1').select('status,completed_at,summary').order('started_at',{ascending:false}).limit(1),
-  db.from('nba_market_schedules_v1').select('snapshot_id,date_local,source_received_at,payload').order('source_received_at',{ascending:false}).limit(1),
+  db.from('nba_market_schedules_v1').select('snapshot_id,date_local,source_received_at,payload').order('source_received_at',{ascending:false}).limit(6),
   db.from('nba_pregame_context_v1').select('snapshot_id,captured_at,game_ids,team_ids,coverage').order('captured_at',{ascending:false}).limit(1),
  ]);
- const events=rows(ev),quotes=rows(od),stats=rows(st),history=rows(ph),runs=rows(jobs),lastArchive=rows(archive)[0]??null,lastSchedule=rows(schedule)[0]??null,lastPregameContext=rows(pregameContextR)[0]??null;
+ const events=rows(ev),quotes=rows(od),stats=rows(st),history=rows(ph),runs=rows(jobs),lastArchive=rows(archive)[0]??null,scheduleRows=rows(schedule),lastPregameContext=rows(pregameContextR)[0]??null;
+ const lastSchedule=scheduleRows.find((s:any)=>Array.isArray(s?.payload?.data?.games)&&s.payload.data.games.some((g:any)=>Number.isFinite(Date.parse(g?.datetime??''))&&Date.parse(g.datetime)>now.getTime()&&String(g?.status_state??'').toLowerCase()==='scheduled'))??scheduleRows[0]??null;
  if(events.length>=25)throw Error('NBA_GOAT_EVENT_WINDOW_REVIEW_REQUIRED');
  if(history.length>=1000||runs.length>=1000||quotes.length>=2000)throw Error('NBA_GOAT_SCAN_LIMIT_REVIEW_REQUIRED');
- const rawGames=scheduleMap(lastSchedule),eventMap=new Map<string,any>(events.map((e:any)=>[e.id,e] as [string,any])),seen=new Set<string>(),candidates:any[]=[];
+ const rawGames=mergeNbaScheduleGames(scheduleRows),eventMap=new Map<string,any>(events.map((e:any)=>[e.id,e] as [string,any])),seen=new Set<string>(),candidates:any[]=[];
  for(const q of quotes){
   const e=eventMap.get(q.event_id);if(!e)continue;
   const key=[q.event_id,q.market,q.outcome,q.line,q.sportsbook].join('|');if(seen.has(key))continue;seen.add(key);
-  const gid=providerGameId(e.id),g=gid===null?null:rawGames.get(gid),context=nbaGoatDerivedContext(e,q,g,lastSchedule?.source_received_at,checkedAt);
+  const gid=providerGameId(e.id),archivedGame=gid===null?null:rawGames.get(gid),context=nbaGoatDerivedContext(e,q,archivedGame?.game,archivedGame?.sourceReceivedAt,checkedAt);
   candidates.push({event:e,quote:q,context,check:nbaGoatQuoteChecks(e,q,checkedAt,context)});
  }
  const pendingRows=history.filter((p:any)=>!p.result||p.result==='pending'),goatPendingRows=pendingRows.filter((p:any)=>p.feature_snapshot?.goatProviderPolicy===NBA_GOAT_POLICY),legacyPendingRows=pendingRows.filter((p:any)=>p.feature_snapshot?.goatProviderPolicy!==NBA_GOAT_POLICY);
@@ -64,7 +65,9 @@ export async function runNbaGoatShadowScheduler(){
   const result=await generateNbaPredictions({persist:false,limit:25});
   const eventCounts=new Map<string,number>(),marketCounts=new Map<string,number>();
   for(const p of history){eventCounts.set(p.game_id,(eventCounts.get(p.game_id)??0)+1);const key=p.game_id+'|'+p.market;marketCounts.set(key,(marketCounts.get(key)??0)+1);}
-  for(const c of candidates){
+  // Rotate eligible quotes across games rather than using all daily slots on one matchup.
+  const balancedCandidates=[...candidates].sort((a:any,b:any)=>(eventCounts.get(a.event.id)??0)-(eventCounts.get(b.event.id)??0)||String(a.event.start_time).localeCompare(String(b.event.start_time)));
+  for(const c of balancedCandidates){
    if(inserted>=status.gate.perRunWriteCap)break;if(!c.check.writeEligible)continue;
    const e=c.event,q=c.quote,key=e.id+'|'+q.market;
    if((eventCounts.get(e.id)??0)>=6||(marketCounts.get(key)??0)>=3)continue;
