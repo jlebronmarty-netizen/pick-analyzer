@@ -109,8 +109,8 @@ export async function runNhlCausalDiagnostics(){
   const labels:string[]=[];
   if(!win&&sel.p>=0.65)labels.push('HIGH_CONFIDENCE_MISS');
   if(!win&&actualMargin<=-3)labels.push('MULTI_GOAL_MISS');
-  if(pbp?.maxLead>=2&&!win)labels.push('MULTI_GOAL_LEAD_LOST');
-  if(pbp?.maxDeficit<=-2&&win)labels.push('MULTI_GOAL_COMEBACK_WIN');
+  if((pbp?.maxLead??0)>=2&&!win)labels.push('MULTI_GOAL_LEAD_LOST');
+  if((pbp?.maxDeficit??0)<=-2&&win)labels.push('MULTI_GOAL_COMEBACK_WIN');
   if((pbp?.leadChanges??0)>=3)labels.push('HIGH_LEAD_CHANGE_GAME');
   if((box?.totals?.giveaways??0)>=12)labels.push('HIGH_GIVEAWAY_GAME');
   if(box?.primaryGoalie?.savePctg!==null&&box?.primaryGoalie?.savePctg<0.88)labels.push('LOW_GOALIE_SAVE_PCT');
