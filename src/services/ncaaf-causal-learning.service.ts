@@ -50,7 +50,7 @@ function playerRows(payload:any){
 }
 async function persistPlayerOpponent(eventId:string,id:string,payload:any,at:string){
  const t=teams(payload),date=/^\d{4}-\d{2}-\d{2}/.exec(String(payload?.header?.competitions?.[0]?.date??''))?.[0]??null;
- const rows=playerRows(payload).map(r=>{const opp=r.teamId===t.homeId?{id:t.awayId,name:t.awayName}:r.teamId===t.awayId?{id:t.homeId,name:t.homeName}:null;if(!opp)return null;return {event_id:eventId,provider_event_id:id,game_date:date,athlete_id:r.athleteId,athlete_name:r.athleteName,team_id:r.teamId,opponent_team_id:opp.id,opponent_team_name:opp.name,category:r.category,attempts:r.attempts,completions:r.completions,yards:r.yards,touchdowns:r.touchdowns,interceptions:r.interceptions,carries:r.carries,receptions:r.receptions,targets:r.targets,captured_at:at,source_version:MATCHUP_VERSION};}).filter(Boolean);
+ const rows=playerRows(payload).flatMap(r=>{const opp=r.teamId===t.homeId?{id:t.awayId,name:t.awayName}:r.teamId===t.awayId?{id:t.homeId,name:t.homeName}:null;if(!opp)return [];return [{event_id:eventId,provider_event_id:id,game_date:date,athlete_id:r.athleteId,athlete_name:r.athleteName,team_id:r.teamId,opponent_team_id:opp.id,opponent_team_name:opp.name,category:r.category,attempts:r.attempts,completions:r.completions,yards:r.yards,touchdowns:r.touchdowns,interceptions:r.interceptions,carries:r.carries,receptions:r.receptions,targets:r.targets,captured_at:at,source_version:MATCHUP_VERSION}];});
  if(!rows.length)return 0;
  const w=await db.from('ncaaf_player_opponent_v3').upsert(rows,{onConflict:'event_id,athlete_id,opponent_team_id,category'}).select('event_id');if(w.error)throw Error('NCAAF_MATCHUP_WRITE_FAILED');return w.data?.length??0;
 }
