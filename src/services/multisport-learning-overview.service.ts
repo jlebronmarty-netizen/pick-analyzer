@@ -54,7 +54,7 @@ async function nhl():Promise<SportLearning>{
   return pred===actual?'W':'L';
  });
  const wins=rows.filter(x=>x==='W').length,losses=rows.filter(x=>x==='L').length,recent=rows.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'NHL',model:'NHL MODEL_ONLY',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Probabilidad ML y resultado final almacenados','Cuota exacta cuando existe','Goalie/xG/PP-PK causal attribution aún parcial'],candidate:null});
+ return stateFor({sport:'NHL',model:'NHL MODEL_ONLY',settled:wins+losses,wins,losses,pushes:0,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Probabilidad ML y resultado final almacenados','NHL Causal Learning V1–V3 usa PBP oficial, boxscore y goalie real','Shooter-vs-goalie confirmado se acumula históricamente cuando el PBP lo identifica'],candidate:null});
 }
 
 async function ncaab():Promise<SportLearning>{
