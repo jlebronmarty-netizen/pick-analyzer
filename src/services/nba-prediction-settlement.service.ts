@@ -39,6 +39,7 @@ type PredictionRow = {
   odds_timestamp: string | null
   generated_at: string | null
   cutoff_at: string | null
+  prediction_origin: string | null
 }
 
 type EventRow = {
@@ -710,12 +711,18 @@ export async function getNbaSettlementBacklog() {
       reason: event?.status === 'cancelled' ? 'ready_to_void' : 'ready_to_settle',
     }))
 
+  const goatRows=backlog.filter((item)=>{const row=pendingRows.find((x)=>x.id===item.id);return row?.prediction_origin==='CURRENT_ERA_SHADOW'&&(row?.feature_snapshot as any)?.goatProviderPolicy==='NBA_GOAT_ARCHIVE_SHADOW_V1';})
   return {
     success: true,
     mode: 'nba_prediction_settlement_backlog_v1',
     generatedAt: new Date().toISOString(),
     count: backlog.length,
     backlog,
+    scopes:{
+      goatCurrentEra:{count:goatRows.length,backlog:goatRows},
+      legacyAndOther:{count:Math.max(0,backlog.length-goatRows.length)},
+    },
+    note:'Legacy/other backlog is reported separately and does not imply GOAT current-era settlement failure.',
   }
 }
 

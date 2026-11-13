@@ -17,6 +17,12 @@ function selectedQuarterMargins(game:any,selection:string){
  if([...hs,...as].some(v=>v===null))return null;
  return hs.map((h,i)=>selection===home?Number(h)-Number(as[i]):Number(as[i])-Number(h));
 }
+function quarterTotals(game:any){
+ const hs=[game?.home_q1,game?.home_q2,game?.home_q3,game?.home_q4].map(finite);
+ const as=[game?.visitor_q1,game?.visitor_q2,game?.visitor_q3,game?.visitor_q4].map(finite);
+ if([...hs,...as].some(v=>v===null))return null;
+ return hs.map((h,i)=>Number(h)+Number(as[i]));
+}
 function clockSeconds(v:unknown){
  const s=String(v??'').trim();if(!s)return null;
  if(/^\d+:\d{1,2}(?:\.\d+)?$/.test(s)){const [m,sec]=s.split(':');return Number(m)*60+Number(sec);}
@@ -51,12 +57,24 @@ function summarizePbp(payload:any,selection:string,home:string,away:string){
   finalMargin:margins.at(-1)?.margin??null,
  };
 }
-function labels({outcome,p,actualMargin,q,featureSnapshot,pbp}:{outcome:string,p:number|null,actualMargin:number|null,q:number[]|null,featureSnapshot:any,pbp:any}){
+function labels({market,outcome,p,actualValue,q,quarterTotalPoints,featureSnapshot,pbp,projectedLine}:{market:string,outcome:string,p:number|null,actualValue:number|null,q:number[]|null,quarterTotalPoints:number[]|null,featureSnapshot:any,pbp:any,projectedLine:number|null}){
  const out:string[]=[];
  const loss=outcome==='loss',win=outcome==='win';
  if(loss&&p!==null&&p>=0.75)out.push('HIGH_CONFIDENCE_MISS');
- if(loss&&actualMargin!==null&&actualMargin<=-15)out.push('BLOWOUT_MISS');
- if(win&&actualMargin!==null&&actualMargin>=15)out.push('STRONG_MARGIN_WIN');
+ if(market==='moneyline'){
+  if(loss&&actualValue!==null&&actualValue<=-15)out.push('BLOWOUT_MISS');
+  if(win&&actualValue!==null&&actualValue>=15)out.push('STRONG_MARGIN_WIN');
+ }
+ if(market==='spread'){
+  if(loss&&actualValue!==null&&actualValue<=-10)out.push('SPREAD_MISS_10_PLUS');
+  if(win&&actualValue!==null&&actualValue>=10)out.push('SPREAD_COVER_10_PLUS');
+ }
+ if(market==='total'&&actualValue!==null&&projectedLine!==null){
+  const err=Math.abs(projectedLine-actualValue);
+  if(err>=15)out.push('TOTAL_PROJECTION_ERROR_15_PLUS');
+  else if(err>=10)out.push('TOTAL_PROJECTION_ERROR_10_PLUS');
+  if(quarterTotalPoints&&quarterTotalPoints[0]+quarterTotalPoints[1]>=120)out.push('HIGH_FIRST_HALF_SCORING');
+ }
  if(q){
   const halftime=q[0]+q[1],final=q.reduce((a,b)=>a+b,0);
   if(halftime!==0&&final!==0&&Math.sign(halftime)!==Math.sign(final))out.push('SECOND_HALF_REVERSAL');
@@ -70,7 +88,10 @@ function labels({outcome,p,actualMargin,q,featureSnapshot,pbp}:{outcome:string,p
   if(loss&&pbp.q4MarginAtSix!==null&&pbp.q4MarginAtSix>=5)out.push('LATE_Q4_LEAD_LOST');
   if(pbp.leadChanges>=8)out.push('HIGH_LEAD_CHANGE_GAME');
  }
- if(Number(featureSnapshot?.featureQualityScore??0)<=0||Number(featureSnapshot?.dataSufficiencyScore??0)<=0)out.push('PREGAME_CONTEXT_GAP');
+ const fq=finite(featureSnapshot?.featureQualityScore),ds=finite(featureSnapshot?.dataSufficiencyScore);
+ const captured=featureSnapshot?.pregameFeatureScoresCaptured===true||(fq!==null&&fq>0&&ds!==null&&ds>=35);
+ if(!captured)out.push('PREGAME_QUALITY_SCORE_UNAVAILABLE');
+ else if((fq??0)<=0||(ds??0)<35)out.push('PREGAME_CONTEXT_GAP');
  return [...new Set(out)];
 }
 
@@ -101,7 +122,7 @@ export async function syncNbaCausalPbpForSettled({cap=3}:{cap?:number}={}){
 
 export async function runNbaCausalDiagnostics(){
  const [predR,schedR,pbpR,ctxR,v3R]=await Promise.all([
-  db.from('prediction_history').select('id,game_id,market,team,selection,model_version,model_probability,result,settled_at,feature_snapshot,settlement_details').eq('sport_key',SPORT).eq('prediction_origin',ORIGIN).eq('feature_snapshot->>goatProviderPolicy',NBA_GOAT_POLICY).not('settled_at','is',null).order('settled_at',{ascending:false}).limit(500),
+  db.from('prediction_history').select('id,game_id,market,team,selection,line,model_version,model_probability,result,settled_at,feature_snapshot,settlement_details').eq('sport_key',SPORT).eq('prediction_origin',ORIGIN).eq('feature_snapshot->>goatProviderPolicy',NBA_GOAT_POLICY).not('settled_at','is',null).order('settled_at',{ascending:false}).limit(500),
   db.from('nba_market_schedules_v1').select('snapshot_id,date_local,source_received_at,payload').order('source_received_at',{ascending:false}).limit(300),
   db.from('nba_pbp_snapshots_v1').select('game_id,captured_at,play_count,payload,source_version').limit(1000),
   db.from('nba_game_context_v2').select('game_id,projected_lineups,projected_captured_at,actual_lineups,actual_lineups_captured_at,player_stats,player_stats_captured_at,source_version').limit(1000),
@@ -125,22 +146,27 @@ export async function runNbaCausalDiagnostics(){
  for(const p of predR.data??[]){
   const gid=providerGameId(p.game_id);if(gid===null)continue;
   const snap=latest.get(gid);if(!snap)continue;
-  const selection=String(p.team??p.selection??'').trim();if(!selection)continue;
-  const q=selectedQuarterMargins(snap.game,selection);
-  const actualMargin=finite(p.settlement_details?.actual);
+  const market=String(p.market??'').toLowerCase(),selection=String(p.team??p.selection??'').trim();if(!selection)continue;
+  const teamMarket=market==='moneyline'||market==='spread';
+  const q=teamMarket?selectedQuarterMargins(snap.game,selection):null;
+  const qTotals=market==='total'?quarterTotals(snap.game):null;
+  const actualValue=finite(p.settlement_details?.actual);
+  const projectedLine=finite(p.feature_snapshot?.projectedLine);
   const probability=prob(p.model_probability);
   const outcome=String(p.result??'').toLowerCase();
   const y=outcome==='win'?1:outcome==='loss'?0:null;
   const brier=probability!==null&&y!==null?(probability-y)**2:null;
   const halftime=q?q[0]+q[1]:null,secondHalf=q?q[2]+q[3]:null;
-  const pbpRow=pbpMap.get(p.game_id),pbp=pbpRow?summarizePbp(pbpRow.payload,selection,snap.game.home_team.full_name,snap.game.visitor_team.full_name):null;
-  const v2=getNbaCausalV2Evidence(ctxMap.get(p.game_id),selection);
-  const v3=getNbaCausalV3Evidence(v3Map.get(p.game_id),selection,v2.playerStats,ctxMap.get(p.game_id));
-  const observedLabels=[...new Set([...labels({outcome,p:probability,actualMargin,q,featureSnapshot:p.feature_snapshot,pbp}),...v2.labels,...v3.labels])];
-  const evidenceQuality=v3.quality==='HIGH'&&v2.quality==='HIGH'&&pbp&&q&&actualMargin!==null?'HIGH':pbp&&q&&actualMargin!==null?'HIGH':q&&actualMargin!==null?'MEDIUM':'LOW';
+  const pbpRow=pbpMap.get(p.game_id),pbp=teamMarket&&pbpRow?summarizePbp(pbpRow.payload,selection,snap.game.home_team.full_name,snap.game.visitor_team.full_name):null;
+  const ctx=ctxMap.get(p.game_id);
+  const v2=teamMarket?getNbaCausalV2Evidence(ctx,selection):{lineups:null,playerStats:null,labels:[] as string[],quality:ctx?'MEDIUM':'LOW'};
+  const v3=teamMarket?getNbaCausalV3Evidence(v3Map.get(p.game_id),selection,v2.playerStats,ctx):{labels:[] as string[],quality:'LOW',confirmed:false};
+  const observedLabels=[...new Set([...labels({market,outcome,p:probability,actualValue,q,quarterTotalPoints:qTotals,featureSnapshot:p.feature_snapshot,pbp,projectedLine}),...v2.labels,...v3.labels])];
+  const evidenceQuality=market==='total'?(pbpRow&&qTotals&&actualValue!==null?'HIGH':qTotals&&actualValue!==null?'MEDIUM':'LOW'):(v3.quality==='HIGH'&&v2.quality==='HIGH'&&pbp&&q&&actualValue!==null?'HIGH':pbp&&q&&actualValue!==null?'HIGH':q&&actualValue!==null?'MEDIUM':'LOW');
+  const marketEvaluation={market,selection,line:finite(p.line),projected:projectedLine,actual:actualValue,projectionError:actualValue!==null&&projectedLine!==null?Math.abs(projectedLine-actualValue):null,quarterTotalPoints:qTotals};
   rows.push({
    prediction_id:p.id,game_id:p.game_id,model_version:p.model_version,market:p.market,selection,
-   predicted_probability:probability,outcome,actual_margin:actualMargin,brier,
+   predicted_probability:probability,outcome,actual_margin:actualValue,brier,
    q1_margin:q?.[0]??null,q2_margin:q?.[1]??null,q3_margin:q?.[2]??null,q4_margin:q?.[3]??null,
    halftime_margin:halftime,second_half_margin:secondHalf,
    max_quarter_deficit:q?Math.min(...q):null,max_quarter_advantage:q?Math.max(...q):null,
@@ -149,15 +175,19 @@ export async function runNbaCausalDiagnostics(){
     disclaimer:'Observed labels are postgame hypotheses, not causal proof.',
     provider:'balldontlie schedule archive',
     finalScore:{home:snap.game.home_team_score,away:snap.game.visitor_team_score},
-    quarterMargins:q,pbp,
-    lineupComparison:v2.lineups,
-    playerGameStats:v2.playerStats,
-    matchupTracking:v3,
+    marketEvaluation,quarterMargins:q,pbpAvailable:Boolean(pbpRow),pbp,
+    lineupComparison:teamMarket?v2.lineups:null,
+    playerGameStats:teamMarket?v2.playerStats:null,
+    matchupTracking:teamMarket?v3:null,
     featureQualityScore:p.feature_snapshot?.featureQualityScore??null,
     dataSufficiencyScore:p.feature_snapshot?.dataSufficiencyScore??null,
-    missingCurrentPbp:!pbp,missingCurrentLineupTruth:!v2.lineups?.complete,missingCurrentPlayerGameStats:!v2.playerStats?.complete,missingConfirmedMatchup:v3.quality!=='HIGH',
+    pregameFeatureScoresCaptured:p.feature_snapshot?.pregameFeatureScoresCaptured===true,
+    missingCurrentPbp:!pbpRow,
+    missingCurrentLineupTruth:teamMarket?!v2.lineups?.complete:null,
+    missingCurrentPlayerGameStats:teamMarket?!v2.playerStats?.complete:null,
+    missingConfirmedMatchup:teamMarket?v3.quality!=='HIGH':null,
    },
-   causal_status:'HYPOTHESIS_ONLY',source_snapshot_ids:[snap.snapshotId,...(pbpRow?['pbp:'+p.game_id]:[]),...(ctxMap.get(p.game_id)?['context-v2:'+p.game_id]:[]),...(v3Map.get(p.game_id)?['context-v3:'+p.game_id]:[])],analyzed_at:new Date().toISOString(),
+   causal_status:'HYPOTHESIS_ONLY',source_snapshot_ids:[snap.snapshotId,...(pbpRow?['pbp:'+p.game_id]:[]),...(ctx?['context-v2:'+p.game_id]:[]),...(v3Map.get(p.game_id)?['context-v3:'+p.game_id]:[])],analyzed_at:new Date().toISOString(),
   });
  }
  let written=0;
@@ -185,22 +215,28 @@ export async function getNbaCausalLearningReport(){
   }
  }
  const patterns=[...labelMap.entries()].map(([label,v])=>({label,...v,lossRate:v.wins+v.losses?v.losses/(v.wins+v.losses):null})).sort((a,b)=>b.count-a.count);
+ const marketMap=new Map<string,{settled:number,wins:number,losses:number,pushes:number,briers:number[]}>();
+ for(const row of settled){const k=String(row.market??'unknown'),v=marketMap.get(k)??{settled:0,wins:0,losses:0,pushes:0,briers:[]};v.settled++;if(row.outcome==='win')v.wins++;else if(row.outcome==='loss')v.losses++;else if(row.outcome==='push')v.pushes++;const b=finite(row.brier);if(b!==null)v.briers.push(b);marketMap.set(k,v);}
+ const markets=[...marketMap.entries()].map(([market,v])=>({market,settled:v.settled,wins:v.wins,losses:v.losses,pushes:v.pushes,accuracy:v.wins+v.losses?v.wins/(v.wins+v.losses):null,brier:v.briers.length?v.briers.reduce((a,b)=>a+b,0)/v.briers.length:null})).sort((a,b)=>a.market.localeCompare(b.market));
+ const uniqueGameCount=(xs:any[])=>new Set(xs.map(x=>x.game_id)).size;
  const pairMap=new Map<string,any>();
  for(const x of o.data??[]){const key=String(x.offensive_player_id)+'|'+String(x.defender_player_id),v=pairMap.get(key)??{offensivePlayerId:x.offensive_player_id,defenderPlayerId:x.defender_player_id,offensivePlayer:x.offensive_player_name,defender:x.defender_player_name,games:new Set<string>(),seconds:0,points:0,fgm:0,fga:0};v.games.add(x.game_id);v.seconds+=Number(x.matchup_seconds??0);v.points+=Number(x.player_points??0);v.fgm+=Number(x.fgm??0);v.fga+=Number(x.fga??0);pairMap.set(key,v);}
  const matchupProfiles=[...pairMap.values()].map(v=>({offensivePlayerId:v.offensivePlayerId,defenderPlayerId:v.defenderPlayerId,offensivePlayer:v.offensivePlayer,defender:v.defender,games:v.games.size,seconds:v.seconds,points:v.points,fgm:v.fgm,fga:v.fga,fgPct:v.fga?v.fgm/v.fga:null})).filter(v=>v.games>=2).sort((a,b)=>b.games-a.games||b.seconds-a.seconds).slice(0,50);
  return {
   status:'AVAILABLE',generatedAt:new Date().toISOString(),
-  sample:{settled:settled.length,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,brier:briers.length?briers.reduce((a,b)=>a+b,0)/briers.length:null},
+  sample:{settled:settled.length,uniqueGames:uniqueGameCount(settled),wins,losses,accuracy:wins+losses?wins/(wins+losses):null,brier:briers.length?briers.reduce((a,b)=>a+b,0)/briers.length:null,markets},
   evidence:{
-   quarterArchive:rows.filter(x=>x.evidence_quality==='MEDIUM'||x.evidence_quality==='HIGH').length,
+   quarterArchiveGames:uniqueGameCount(rows.filter(x=>x.evidence_quality==='MEDIUM'||x.evidence_quality==='HIGH')),
    pbpCurrent:rows.some(x=>x.observed_evidence?.missingCurrentPbp===false),
-   pbpGames:rows.filter(x=>x.observed_evidence?.missingCurrentPbp===false).length,
+   pbpGames:uniqueGameCount(rows.filter(x=>x.observed_evidence?.missingCurrentPbp===false)),
    lineupTruthCurrent:rows.some(x=>x.observed_evidence?.missingCurrentLineupTruth===false),
-   lineupGames:rows.filter(x=>x.observed_evidence?.missingCurrentLineupTruth===false).length,
+   lineupGames:uniqueGameCount(rows.filter(x=>x.observed_evidence?.missingCurrentLineupTruth===false)),
    playerGameStatsCurrent:rows.some(x=>x.observed_evidence?.missingCurrentPlayerGameStats===false),
-   playerStatGames:rows.filter(x=>x.observed_evidence?.missingCurrentPlayerGameStats===false).length,
+   playerStatGames:uniqueGameCount(rows.filter(x=>x.observed_evidence?.missingCurrentPlayerGameStats===false)),
    matchupTrackingCurrent:rows.some(x=>x.observed_evidence?.missingConfirmedMatchup===false),
-   matchupGames:rows.filter(x=>x.observed_evidence?.missingConfirmedMatchup===false).length,
+   matchupGames:uniqueGameCount(rows.filter(x=>x.observed_evidence?.missingConfirmedMatchup===false)),
+   pregameFeatureScoresCaptured:rows.filter(x=>x.observed_evidence?.pregameFeatureScoresCaptured===true).length,
+   pregameFeatureScoresLegacyUnavailable:rows.filter(x=>x.observed_evidence?.pregameFeatureScoresCaptured!==true).length,
   },
   patterns,matchupProfiles,recent:rows.slice(0,50),
   policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,pbpCallsPerRunCap:3,v2ContextGamesPerRunCap:3,v2ContextProviderCallsPerRunCap:3,v3MatchupGamesPerRunCap:1,v3ProviderCallsPerRunCap:2,v3RetryHours:12},
