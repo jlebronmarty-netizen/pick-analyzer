@@ -16,7 +16,7 @@ export async function getNbaGoatPropsResearchAudit() {
     .select('quote_id,provider_game_id,player_id,market,statistic,side,line,contract,period,phase,source_received_at')
     .eq('market','props').eq('phase','PREGAME').in('side',['over','under'])
     .in('provider_game_id',gameIds)
-    .order('source_received_at',{ascending:false}).limit(2500);
+    .order('source_received_at',{ascending:false}).limit(1000);
   if(quoteR.error)throw Error('NBA_PROPS_RESEARCH_QUOTES_READ_FAILED');
   const actualMap=new Map<string,any>();
   for(const context of contexts){
@@ -43,7 +43,7 @@ export async function getNbaGoatPropsResearchAudit() {
   return {
     status:'HISTORICAL_SETTLEMENT_RESEARCH_ONLY',
     providerCalls:0,databaseWrites:0,
-    archivedQuotesExamined:quotes.length,scanCapped:quotes.length===2500,
+    archivedQuotesExamined:quotes.length,scanCapped:quotes.length>=1000,
     gamesWithPlayerTruth:contexts.length,gamesWithMatchingProps:gameCoverage.size,
     matchedPregameQuotes:matched,statisticallyGradableQuotes:gradable,ungradableQuotes:ungradable,
     byStatistic:totals,
