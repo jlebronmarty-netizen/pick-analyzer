@@ -82,10 +82,10 @@ export async function runNcaafCausalDiagnostics(){
   if(f.market==='MONEYLINE'&&status==='L'&&Number(f.probability)>=0.7)labels.push('HIGH_CONFIDENCE_MISS');
   if(f.market==='POINT_MARGIN'&&Number(o.absolute_error)>=14)labels.push('LARGE_MARGIN_MISS');
   if(f.market==='TOTAL_POINTS'&&Number(o.absolute_error)>=17)labels.push('LARGE_TOTAL_MISS');
-  if((ds?.turnoverDrives??0)>=3)labels.push('MULTI_TURNOVER_DRIVES');
-  if((ds?.threeAndOutLike??0)>=4)labels.push('OFFENSIVE_STALLS');
-  if((ts?.turnovers??0)>=3)labels.push('HIGH_TURNOVER_GAME');
-  if((ts?.sacks??0)>=4)labels.push('HIGH_SACK_PRESSURE');
+  if(Number(ds?.turnoverDrives??0)>=3)labels.push('MULTI_TURNOVER_DRIVES');
+  if(Number(ds?.threeAndOutLike??0)>=4)labels.push('OFFENSIVE_STALLS');
+  if(Number(ts?.turnovers??0)>=3)labels.push('HIGH_TURNOVER_GAME');
+  if(Number(ts?.sacks??0)>=4)labels.push('HIGH_SACK_PRESSURE');
   const missing=Array.isArray(proj?.missing_features)?proj.missing_features:[];
   if(missing.includes('verified_starting_QB'))labels.push('PREGAME_QB_UNKNOWN');
   if(missing.includes('pregame_weather'))labels.push('PREGAME_WEATHER_UNKNOWN');
