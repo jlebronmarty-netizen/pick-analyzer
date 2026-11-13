@@ -5,6 +5,7 @@ const sports = [
   ['/nba-market-data', 'NBA'],
   ['/nba-learning', 'NBA Learning'],
   ['/nhl', 'NHL'],
+  ['/nhl-learning', 'NHL Learning'],
   ['/ufc', 'UFC'],
   ['/table-tennis', 'Tenis de mesa'],
   ['/soccer', 'Fútbol'],
