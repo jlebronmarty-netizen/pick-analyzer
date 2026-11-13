@@ -17,12 +17,16 @@ export function nbaGoatDerivedContext(event,quote,scheduleGame,scheduleReceivedA
  const at=time(now),received=time(scheduleReceivedAt),gid=providerId(event),scheduled=String(scheduleGame?.status_state??'').toLowerCase()==='scheduled';
  const identity=gid!==null&&scheduleGame?.id===gid&&scheduleGame?.home_team?.full_name===event?.home_team&&scheduleGame?.visitor_team?.full_name===event?.away_team;
  const scheduleFresh=at!==null&&received!==null&&received<=at&&at-received<=3600000;
- const phaseVerified=Boolean(identity&&scheduleFresh&&scheduled&&scheduleGame?.postponed===false&&scheduleGame?.postseason===false&&scheduleGame?.ist_stage==null&&Number(scheduleGame?.season)===Number(String(event?.season??'').slice(0,4)));
+ // NBA Cup Group Play counts in regular-season standings; do not certify unknown stages or the Final.
+ const istStage=scheduleGame?.ist_stage;
+ const cupGroup=typeof istStage==='string'&&/^(East|West) Group [ABC]$/.test(istStage);
+ const regularSeasonStage=istStage==null||cupGroup;
+ const phaseVerified=Boolean(identity&&scheduleFresh&&scheduled&&scheduleGame?.postponed===false&&scheduleGame?.postseason===false&&regularSeasonStage&&Number(scheduleGame?.season)===Number(String(event?.season??'').slice(0,4)));
  const contract=quote?.metadata?.contract,period=quote?.metadata?.period;
  const contractVerified=String(quote?.sportsbook??'').toLowerCase()==='fanduel'&&period==='FULL_GAME_LABEL_OT_UNVERIFIED'&&marketContract[quote?.market]?.has(contract)===true;
  return {
   seasonPhaseVerified:phaseVerified,
-  seasonPhaseEvidence:phaseVerified?{provider:'balldontlie',providerGameId:gid,season:Number(scheduleGame.season),postseason:false,istStage:null,statusState:'scheduled',scheduleReceivedAt}:null,
+  seasonPhaseEvidence:phaseVerified?{provider:'balldontlie',providerGameId:gid,season:Number(scheduleGame.season),postseason:false,istStage:cupGroup?istStage:null,regularSeasonStage:cupGroup?'NBA_CUP_GROUP_PLAY':'STANDARD',statusState:'scheduled',scheduleReceivedAt}:null,
   contractScopeVerified:contractVerified,
   contractEvidence:contractVerified?{...FANDUEL_NBA_FULL_GAME_RULE,market:quote.market,contract,period,statisticalOnly:true,userJurisdictionSettlementNotCertified:true}:null,
  };
