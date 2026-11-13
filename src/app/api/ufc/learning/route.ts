@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';import {getUfcCausalLearningReport} from '@/services/ufc-causal-learning.service';export const dynamic='force-dynamic';export async function GET(){try{return NextResponse.json(await getUfcCausalLearningReport(),{headers:{'Cache-Control':'private, no-store'}});}catch{return NextResponse.json({status:'UNAVAILABLE'},{status:503});}}
