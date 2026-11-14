@@ -68,7 +68,7 @@ export async function getNbaPropsProspectiveShadowReadiness(){
    result.readyShadowHypotheses++;if(byStat)byStat.ready++;
   }else{
    result.rejectedContracts++;
-   const reason=hypothesis.reason??'UNKNOWN';result.notReadyReasons[reason]=(result.notReadyReasons[reason]??0)+1;
+   const reason='reason' in hypothesis?String(hypothesis.reason):'UNKNOWN';result.notReadyReasons[reason]=(result.notReadyReasons[reason]??0)+1;
   }
  }
  if(result.quoteScanCapped)result.warning+=' Scan capped at 1000 newest archived quote rows; metrics do not claim full slate coverage.';
