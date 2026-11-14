@@ -3,6 +3,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {runNhlFree} from '@/services/nhl-free.service';
 import {runNhlCausalLearning} from '@/services/nhl-causal-learning.service';
 import {syncNhlMainMarketHistory} from '@/services/nhl-main-market-history-backfill.service';
+import {runNhlChallengerShadowFreeze} from '@/services/nhl-challenger-freeze-writer.service';
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
 export const maxDuration=300;
@@ -15,6 +16,8 @@ export async function GET(request:NextRequest){
  try{const core=await runNhlFree();const learning=await runNhlCausalLearning();
   // Opt-in historical context after existing model-free source, outcome settlement and causal stages.
   const researchHistory=await syncNhlMainMarketHistory().catch(()=>({status:'FAILED',providerCalls:0,written:0}));
-  console.log('NHL_CAUSAL_PIPELINE',JSON.stringify({coreStatus:(core as any).status,contextStatus:(learning as any).context?.status,providerCalls:(learning as any).context?.provider_calls??0,diagnosticStatus:(learning as any).diagnostics?.status,researchHistoryStatus:researchHistory.status,researchHistoryCalls:researchHistory.providerCalls}));
-  return NextResponse.json({...core,learning,researchHistory},{headers:{'Cache-Control':'no-store'}});}catch{return NextResponse.json({status:'NHL_RUN_FAILED',warning:'Consultar registro persistente de ejecuciones.'},{status:500,headers:{'Cache-Control':'no-store'}});}
+  // Additive opt-in SHADOW-only row freeze; not coupled to moneyline or other sports.
+  const challengerFreeze=await runNhlChallengerShadowFreeze().catch(()=>({status:'FAILED',sourceCalls:0,written:0}));
+  console.log('NHL_CAUSAL_PIPELINE',JSON.stringify({coreStatus:(core as any).status,contextStatus:(learning as any).context?.status,providerCalls:(learning as any).context?.provider_calls??0,diagnosticStatus:(learning as any).diagnostics?.status,researchHistoryStatus:researchHistory.status,researchHistoryCalls:researchHistory.providerCalls,challengerFreezeStatus:challengerFreeze.status,challengerRows:challengerFreeze.written}));
+  return NextResponse.json({...core,learning,researchHistory,challengerFreeze},{headers:{'Cache-Control':'no-store'}});}catch{return NextResponse.json({status:'NHL_RUN_FAILED',warning:'Consultar registro persistente de ejecuciones.'},{status:500,headers:{'Cache-Control':'no-store'}});}
 }
