@@ -121,20 +121,35 @@ export async function runNhlCausalDiagnostics(){
  if(rows.length){const w=await db.from('nhl_causal_diagnostics_v1').upsert(rows,{onConflict:'prediction_id'}).select('prediction_id');if(w.error)throw Error('NHL_DIAGNOSTIC_WRITE_FAILED');}
  return {status:'COMPLETED',eligible:rows.length,written:rows.length,model_changes:0,auto_promotion:false};
 }
+// Read entire capped shooter–goalie ledger, not just the first Supabase 1000 rows.
+// No provider calls; deterministic pagination preserves repeated-pair evidence.
+async function readNhlMatchupsForReport(){
+ const pageSize=500,maxRows=5000,all:any[]=[];
+ for(let offset=0;offset<maxRows;offset+=pageSize){
+  const r=await db.from('nhl_matchup_observations_v3').select('*')
+   .order('event_id',{ascending:true}).order('shooting_player_id',{ascending:true}).order('goalie_id',{ascending:true})
+   .range(offset,offset+pageSize-1);
+  if(r.error)throw Error('NHL_MATCHUP_PAGINATION_FAILED');
+  all.push(...(r.data??[]));if((r.data??[]).length<pageSize)break;
+ }
+ const countR=await db.from('nhl_matchup_observations_v3').select('event_id',{count:'exact',head:true});
+ if(countR.error)throw Error('NHL_MATCHUP_COUNT_FAILED');
+ return {rows:all,total:countR.count??all.length,scanCapped:(countR.count??all.length)>all.length};
+}
 export async function getNhlCausalLearningReport(){
- const [dR,mR,cR]=await Promise.all([
+ const [dR,matchups,cR]=await Promise.all([
   db.from('nhl_causal_diagnostics_v1').select('*').order('analyzed_at',{ascending:false}).limit(500),
-  db.from('nhl_matchup_observations_v3').select('*').order('game_date',{ascending:false}).limit(5000),
+  readNhlMatchupsForReport(),
   db.from('nhl_game_context_v2').select('event_id,play_by_play,boxscore').limit(1000),
  ]);
- if(dR.error||mR.error||cR.error)throw Error('NHL_CAUSAL_REPORT_READ_FAILED');
+ if(dR.error||cR.error)throw Error('NHL_CAUSAL_REPORT_READ_FAILED');
  const rows=dR.data??[],wins=rows.filter(x=>x.outcome==='win').length,losses=rows.filter(x=>x.outcome==='loss').length,briers=rows.map(x=>finite(x.brier)).filter((x):x is number=>x!==null);
  const labels=new Map<string,{count:number,wins:number,losses:number}>();
  for(const r of rows)for(const l of Array.isArray(r.observed_labels)?r.observed_labels:[]){const v=labels.get(l)??{count:0,wins:0,losses:0};v.count++;r.outcome==='win'?v.wins++:v.losses++;labels.set(l,v);}
  const pair=new Map<string,any>();
- for(const x of mR.data??[]){const k=x.shooting_player_id+'|'+x.goalie_id,v=pair.get(k)??{shooterId:x.shooting_player_id,goalieId:x.goalie_id,shooter:x.shooting_player_name,goalie:x.goalie_name,games:new Set<string>(),shots:0,goals:0};v.games.add(x.event_id);v.shots+=Number(x.shots??0);v.goals+=Number(x.goals??0);pair.set(k,v);}
+ for(const x of matchups.rows){const k=x.shooting_player_id+'|'+x.goalie_id,v=pair.get(k)??{shooterId:x.shooting_player_id,goalieId:x.goalie_id,shooter:x.shooting_player_name,goalie:x.goalie_name,games:new Set<string>(),shots:0,goals:0};v.games.add(x.event_id);v.shots+=Number(x.shots??0);v.goals+=Number(x.goals??0);pair.set(k,v);}
  const matchupProfiles=[...pair.values()].map(v=>({shooterId:v.shooterId,goalieId:v.goalieId,shooter:v.shooter,goalie:v.goalie,games:v.games.size,shots:v.shots,goals:v.goals,shootingPct:v.shots?v.goals/v.shots:null})).filter(v=>v.games>=2).sort((a,b)=>b.games-a.games||b.shots-a.shots).slice(0,50);
  const patterns=[...labels.entries()].map(([label,v])=>({label,...v,lossRate:v.wins+v.losses?v.losses/(v.wins+v.losses):null})).sort((a,b)=>b.count-a.count);
- return {status:'AVAILABLE',generatedAt:new Date().toISOString(),sample:{settled:rows.length,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,brier:briers.length?briers.reduce((a,b)=>a+b,0)/briers.length:null},evidence:{contextGames:cR.data?.length??0,pbpGames:(cR.data??[]).filter(x=>x.play_by_play).length,boxscoreGames:(cR.data??[]).filter(x=>x.boxscore).length,shooterGoalieObservations:mR.data?.length??0},patterns,matchupProfiles,recent:rows.slice(0,50),policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,contextGamesPerRunCap:1,providerCallsPerRunCap:2}};
+ return {status:'AVAILABLE',generatedAt:new Date().toISOString(),sample:{settled:rows.length,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,brier:briers.length?briers.reduce((a,b)=>a+b,0)/briers.length:null},evidence:{contextGames:cR.data?.length??0,pbpGames:(cR.data??[]).filter(x=>x.play_by_play).length,boxscoreGames:(cR.data??[]).filter(x=>x.boxscore).length,shooterGoalieObservations:matchups.total,shooterGoalieObservationsScanned:matchups.rows.length,matchupReadCapped:matchups.scanCapped},patterns,matchupProfiles,recent:rows.slice(0,50),policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,contextGamesPerRunCap:1,providerCallsPerRunCap:2}};
 }
 export async function runNhlCausalLearning(){const context=await syncNhlCausalContext({cap:1});const diagnostics=await runNhlCausalDiagnostics();return {context,diagnostics};}
