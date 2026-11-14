@@ -1,0 +1,24 @@
+name: NBA Props Research Safety
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nba/goat-props-*.mjs'
+      - 'src/services/nba-goat-props-*.ts'
+      - 'src/app/api/nba/goat/props-shadow-readiness/**'
+      - 'src/app/api/cron/nba-current-era-shadow/**'
+      - 'tests/nba-props-*.test.mjs'
+      - '.github/workflows/nba-props-research.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify no-lookahead, contracts, cost caps, and disabled official picks
+        run: node --test tests/nba-props-*.test.mjs tests/nba-goat-props-research-20261113.test.mjs
