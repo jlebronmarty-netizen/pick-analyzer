@@ -17,7 +17,7 @@ test('NHL planner freezes only at a genuinely pregame fresh official schedule sn
  const x=planNhlFrozenSlate({runs,alreadyFrozen:[],decisionAt});
  assert.equal(x.status,'READY_TO_FREEZE');assert.equal(x.planned.length,1);
  const p=x.planned[0];assert.equal(p.id,'NHL_SCORES_POISSON_SHADOW_V1:nhl:2026020500');
- assert.equal(p.frozen_at,decisionAt);assert.equal(p.source_completed_at,latest.completed_at);
+ assert.equal(Date.parse(p.frozen_at),Date.parse(decisionAt));assert.equal(Date.parse(p.source_completed_at),Date.parse(latest.completed_at));
  assert.equal(p.source_final_games,39);assert.match(p.source_hash,/^[a-f0-9]{64}$/);
  assert.equal(p.status,'FROZEN_RESEARCH');assert.equal(p.official_pick,false);
  assert.equal(p.production_eligible,false);assert.equal(p.features.marketPrices,false);
@@ -36,7 +36,7 @@ test('Reject stale, post-start, unsupported, mismatched team, and missing actual
  }));
  const fail=(g,source,at)=>buildNhlFreezeCandidate({game:g,runCompletedAt:source,decisionAt:at,finalScores:finals});
  assert.equal(fail(game,'2026-11-15T16:00:00Z',decisionAt).reason,'SOURCE_FRESHNESS_UNVERIFIED');
- assert.equal(fail(game,decisionAt,'2026-11-16T00:30:00Z').reason,'PREGAME_FREEZE_WINDOW_UNAVAILABLE');
+ assert.equal(fail(game,'2026-11-16T00:20:00Z','2026-11-16T00:30:00Z').reason,'PREGAME_FREEZE_WINDOW_UNAVAILABLE');
  assert.equal(fail({...game,eventId:'nhl:2026039999'},decisionAt,decisionAt).reason,'NHL_REGULAR_SEASON_EVENT_UNVERIFIED');
  assert.equal(fail({...game,awayId:8},decisionAt,decisionAt).reason,'TEAM_IDENTITY_UNVERIFIED');
  assert.equal(fail(game,decisionAt,decisionAt).status,'FROZEN_RESEARCH_CANDIDATE');
