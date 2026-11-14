@@ -87,9 +87,9 @@ async function collect(path,params,paged){
  }
  throw Error('PAGE_BOUND_EXCEEDED');
 }
-async function archive(game,key,payload){
+async function archive(game,key,payload,originalCaptureAt=null){
  const record={season,provider_game_id:Number(game.id),dataset_key:key,provider:'balldontlie',
-  source_captured_at:new Date().toISOString(),game_date:game.date,response_sha256:sha(payload),data_count:payload.length,payload};
+  source_captured_at:originalCaptureAt??new Date().toISOString(),game_date:game.date,response_sha256:sha(payload),data_count:payload.length,payload};
  const {error}=await db.from('nba_goat_season_archive_v1').upsert(record,{onConflict:'season,provider_game_id,dataset_key'});
  if(error)throw Error('ARCHIVE_DB_WRITE_FAILED_'+error.code);
 }
@@ -119,6 +119,15 @@ outer:for(const game of eligible.slice(0,maxGames)){
  for(const spec of selected){
   try{
    if(await already(game.id,spec.key)){skipped++;continue;}
+   if(spec.key==='player_stats'){
+    const {data:prior,error:priorError}=await db.from('nba_game_context_v2').select('player_stats,player_stats_captured_at').eq('game_id','bdl_nba_'+game.id).maybeSingle();
+    if(priorError)throw Error('EXISTING_CONTEXT_READ_FAILED_'+priorError.code);
+    const history=prior?.player_stats?.data;
+    if(Array.isArray(history)&&history.length>=10&&history.every(s=>Number(s?.game?.id)===Number(game.id))){
+      await archive(game,spec.key,history,prior.player_stats_captured_at);
+      stored++;skipped++;continue;
+    }
+   }
    const data=await collect(spec.url,{[spec.filter]:game.id,...(spec.params??{})},spec.paged);
    await archive(game,spec.key,data);stored++;
    if(spec.key==='player_stats'&&data.length){await fillExistingPlayerContext(game,data);filled++;}
