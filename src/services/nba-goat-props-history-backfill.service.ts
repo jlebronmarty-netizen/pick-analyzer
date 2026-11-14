@@ -22,7 +22,7 @@ export async function syncNbaPropsPlayerHistory(){
  ]);
  const schedules=rows(schedulesR),contexts=rows(contextsR);
  if(schedules.length>=1000||contexts.length>=500)return {status:'SCAN_BOUND_REVIEW_REQUIRED',providerCalls:0,written:0};
- const complete=new Set<number>(contexts.filter((c:any)=>Array.isArray(c.player_stats?.data)&&c.player_stats.data.length>=10).map((c:any)=>Number(c.provider_game_id)));
+ const complete=new Set<number>(contexts.filter((c:any)=>Array.isArray(c.player_stats?.data)&&c.player_stats.data.length>0).map((c:any)=>Number(c.provider_game_id)));
  const candidate=selectNbaPropsHistoryBackfillGame(schedules,complete,now.getTime(),season);
  if(!candidate)return {status:'NO_VERIFIED_FINAL_BACKFILL',providerCalls:0,written:0};
  const gid=candidate.providerGameId,gameId='bdl_nba_'+gid,slot=Math.floor(now.getTime()/1800000);
