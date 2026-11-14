@@ -42,6 +42,7 @@ export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalSco
   status:'FROZEN_RESEARCH',official_pick:false,production_eligible:false
  }};
 }
+/** @param {{runs:any[],alreadyFrozen?:string[],decisionAt:string,maxWrites?:number}} input */
 export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3}){
  const now=ms(decisionAt);
  if(now===null||!Number.isInteger(maxWrites)||maxWrites<1||maxWrites>3)
