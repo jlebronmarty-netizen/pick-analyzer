@@ -146,3 +146,49 @@ export function walkForwardNhlChallenger(finalScores,{minEvaluatedGames=30}={}){
   approvedForOfficialUse:false,
   warning:'Strict as-of source timestamps. No results are backfilled as if known before a forecast. No edge/ROI claim.'};
 }
+
+
+export function pairedNhlChallengerBenchmark(finalScores,dratingsRows){
+ const finalMap=new Map((Array.isArray(finalScores)?finalScores:[]).map(g=>[g.eventId,g]));
+ let paired=0,withMarket=0,invalid=0,challengerBrier=0,dratingsBrier=0,
+  marketBrier=0,marketMatchedChallengerBrier=0,marketMatchedDratingsBrier=0;
+ const pairedIds=new Set();
+ for(const row of Array.isArray(dratingsRows)?dratingsRows:[]){
+  const source=row?.body??row,truth=finalMap.get(source?.eventId);
+  if(!truth||pairedIds.has(truth.eventId))continue;
+  const start=dateMs(source?.scheduledAt),seen=dateMs(source?.capturedAt);
+  if(start===null||seen===null||seen>=start-10*60000||start!==dateMs(truth.scheduledAt)||
+   source.homeId!==truth.homeId||source.awayId!==truth.awayId){invalid++;continue;}
+  const homeP=Number(source.homeProbability),awayP=Number(source.awayProbability);
+  if(!Number.isFinite(homeP)||!Number.isFinite(awayP)||homeP<=0||awayP<=0||
+   homeP>=1||awayP>=1||Math.abs(homeP+awayP-1)>0.002){invalid++;continue;}
+  const challenger=forecastNhlChallenger({homeId:truth.homeId,awayId:truth.awayId,
+   scheduledAt:truth.scheduledAt,asOf:source.capturedAt,finalScores});
+  if(challenger.status!=='UNVALIDATED_SHADOW_CHALLENGER')continue;
+  const actual=Number(truth.homeGoals>truth.awayGoals);
+  const challengerP=challenger.markets.homeMoneylineProxy;
+  paired++;pairedIds.add(truth.eventId);
+  challengerBrier+=brier(challengerP,actual);dratingsBrier+=brier(homeP,actual);
+  if(source.sportsbook!=='CIRCA'||!Number.isSafeInteger(source.homeOdds)||
+   !Number.isSafeInteger(source.awayOdds)||Math.abs(source.homeOdds)<100||
+   Math.abs(source.awayOdds)<100)continue;
+  const implied=o=>o>0?100/(100+o):(-o)/(100-o);
+  const hm=implied(source.homeOdds),am=implied(source.awayOdds),marketP=hm/(hm+am);
+  withMarket++;marketBrier+=brier(marketP,actual);
+  marketMatchedChallengerBrier+=brier(challengerP,actual);
+  marketMatchedDratingsBrier+=brier(homeP,actual);
+ }
+ return {status:'UNVALIDATED_PAIRED_BENCHMARK',model:NHL_CHALLENGER_VERSION,
+  pairedChallengerAndDratings:paired,pairedWithCircaMarket:withMarket,
+  invalidSourcePairs:invalid,
+  brierOnSameGames:{
+   challenger:paired?round(challengerBrier/paired):null,
+   dratings:paired?round(dratingsBrier/paired):null},
+  brierOnPricedGames:{
+   challenger:withMarket?round(marketMatchedChallengerBrier/withMarket):null,
+   dratings:withMarket?round(marketMatchedDratingsBrier/withMarket):null,
+   circaNoVig:withMarket?round(marketBrier/withMarket):null},
+  minimumDirectionalSample:30,validationPassed:false,holdoutPassed:false,
+  officialRecommendationEligible:false,
+  note:'Matching event, teams and frozen pregame source. Strict captured-at prevents using later backfilled final scores.'};
+}
