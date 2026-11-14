@@ -11,7 +11,9 @@ export function selectNbaPropsHistoryBackfillGame(snapshots,existingIds,nowMs=Da
    if(!Number.isSafeInteger(gameId)||seen.has(gameId))continue;
    seen.add(gameId);
    if(!Number.isFinite(start)||start>nowMs-4*3600000)continue;
-   if(String(game?.status_state??'').toLowerCase()!=='final'||Number(game?.season)!==season||game?.postseason===true||game?.postponed===true)continue;
+   if(String(game?.status_state??'').toLowerCase()!=='final'||Number(game?.season)!==season||game?.postseason!==false||game?.postponed!==false)continue;
+   const stage=game?.ist_stage;
+   if(stage!=null&&!(typeof stage==='string'&&/^(East|West) Group [ABC]$/.test(stage)))continue;
    if(existingIds.has(gameId))continue;
    candidates.push({providerGameId:gameId,startTime:game.datetime,sourceScheduleReceivedAt:snap.source_received_at});
   }
