@@ -23,7 +23,7 @@ export async function syncNbaPropsPlayerHistory(){
  const complete=new Set<number>(contexts.filter((c:any)=>Array.isArray(c.player_stats?.data)&&c.player_stats.data.length>0).map((c:any)=>Number(c.provider_game_id)));
  // Inspect only the freshest schedule for each archived local day. One query per day, stop at first missing final.
  // This avoids the unbounded snapshot-row scans caused by half-hourly history accumulation.
- let candidate:ReturnType<typeof selectNbaPropsHistoryBackfillGame>=null;
+ let candidate:ReturnType<typeof selectNbaPropsHistoryBackfillGame>|null=null;
  for(let dayOffset=0;dayOffset<30;dayOffset++){
   const date=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()-dayOffset)).toISOString().slice(0,10);
   const schedule=rows(await db.from('nba_market_schedules_v1').select('source_received_at,payload')
