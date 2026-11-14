@@ -1,0 +1,30 @@
+name: NHL Prospective Frozen Shadow Ledger
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nhl-challenger-freeze-core.mjs'
+      - 'src/services/nhl-challenger-freeze-writer.service.ts'
+      - 'src/services/nhl-challenger-frozen-ledger-audit.service.ts'
+      - 'src/app/api/nhl/frozen-shadow-audit/**'
+      - 'src/app/api/cron/nhl-free/route.ts'
+      - 'supabase/migrations/20261115012000_nhl_challenger_shadow_v1.sql'
+      - 'tests/nhl-frozen-forward-ledger-*.test.mjs'
+      - '.github/workflows/nhl-frozen-ledger.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Confirm frozen-cutoff, append-only idempotency and other NHL regression safety
+        run: node --test tests/nhl-*.test.mjs
+      - name: Install project dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check TypeScript strictness
+        run: npx tsc --noEmit --pretty false
