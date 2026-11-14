@@ -37,14 +37,14 @@ export async function getNhlPoissonChallengerAudit(){
    asOf:at,finalScores});
   return {
    eventId:g.eventId,scheduledAt:g.scheduledAt,status:result.status,
-   reason:result.reason??null,
-   projection:result.status==='UNVALIDATED_SHADOW_CHALLENGER'?result.projection:null,
-   researchProbabilities:result.status==='UNVALIDATED_SHADOW_CHALLENGER'?result.markets:null,
+   reason:'reason' in result?String(result.reason):null,
+   projection:result.status==='UNVALIDATED_SHADOW_CHALLENGER'&&'projection' in result?result.projection:null,
+   researchProbabilities:result.status==='UNVALIDATED_SHADOW_CHALLENGER'&&'markets' in result?result.markets:null,
    officialPick:false,productionEligible:false,calibrated:false,
    warning:'Descriptive, uncalibrated model research; market lines are generic testing lines, not FanDuel quotes.'
   };
  });
- const ready=candidates.filter(x=>x.status==='UNVALIDATED_SHADOW_CHALLENGER').length;
+ const ready=candidates.filter((x:any)=>x.status==='UNVALIDATED_SHADOW_CHALLENGER').length;
  return {
   status:capped?'ARCHIVE_SCAN_CAPPED':walk.evaluatedGames<30?'RESEARCH_NEEDS_FORWARD_SAMPLE':'RESEARCH_UNVALIDATED',
   version:NHL_CHALLENGER_VERSION,generatedAt:at,mode:'READ_ONLY_SHADOW_CHALLENGER',
