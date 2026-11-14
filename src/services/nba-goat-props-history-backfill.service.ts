@@ -14,16 +14,24 @@ export async function syncNbaPropsPlayerHistory(){
  const key=process.env.BALLDONTLIE_API_KEY?.trim();
  if(!key)return {status:'KEY_UNAVAILABLE',providerCalls:0,written:0};
  const now=new Date(),at=now.toISOString(),dayStart=at.slice(0,10)+'T00:00:00.000Z',season=now.getUTCMonth()>=9?now.getUTCFullYear():now.getUTCFullYear()-1;
+ // Schedule at most four six-hour research windows; avoid querying a 30-day archive every half hour.
+ if(now.getUTCHours()%6!==0||now.getUTCMinutes()>=30)return {status:'OUTSIDE_BOUNDED_RESEARCH_WINDOW',providerCalls:0,written:0};
  const prior=rows(await db.from('sports_sync_jobs').select('id').eq('job_type','nba_props_player_history_v1').gte('started_at',dayStart).limit(DAILY_PROVIDER_CALL_CAP+1));
  if(prior.length>=DAILY_PROVIDER_CALL_CAP)return {status:'DAILY_PROVIDER_CALL_CAP',providerCalls:0,written:0,callBudgetRemaining:0};
- const [schedulesR,contextsR]=await Promise.all([
-  db.from('nba_market_schedules_v1').select('source_received_at,payload').order('source_received_at',{ascending:false}).limit(1000),
-  db.from('nba_game_context_v2').select('provider_game_id,player_stats').limit(500)
- ]);
- const schedules=rows(schedulesR),contexts=rows(contextsR);
- if(schedules.length>=1000||contexts.length>=500)return {status:'SCAN_BOUND_REVIEW_REQUIRED',providerCalls:0,written:0};
+ const contexts=rows(await db.from('nba_game_context_v2').select('provider_game_id,player_stats').limit(500));
+ if(contexts.length>=500)return {status:'SCAN_BOUND_REVIEW_REQUIRED',providerCalls:0,written:0};
  const complete=new Set<number>(contexts.filter((c:any)=>Array.isArray(c.player_stats?.data)&&c.player_stats.data.length>0).map((c:any)=>Number(c.provider_game_id)));
- const candidate=selectNbaPropsHistoryBackfillGame(schedules,complete,now.getTime(),season);
+ // Inspect only the freshest schedule for each archived local day. One query per day, stop at first missing final.
+ // This avoids the unbounded snapshot-row scans caused by half-hourly history accumulation.
+ let candidate:ReturnType<typeof selectNbaPropsHistoryBackfillGame>=null;
+ for(let dayOffset=0;dayOffset<30;dayOffset++){
+  const date=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()-dayOffset)).toISOString().slice(0,10);
+  const schedule=rows(await db.from('nba_market_schedules_v1').select('source_received_at,payload')
+   .eq('date_local',date).order('source_received_at',{ascending:false}).limit(1));
+  if(!schedule.length)continue;
+  candidate=selectNbaPropsHistoryBackfillGame(schedule,complete,now.getTime(),season);
+  if(candidate)break;
+ }
  if(!candidate)return {status:'NO_VERIFIED_FINAL_BACKFILL',providerCalls:0,written:0};
  const gid=candidate.providerGameId,gameId='bdl_nba_'+gid,slot=Math.floor(now.getTime()/1800000);
  const jobId=hashId(VERSION+':'+String(gid)+':'+String(slot));
