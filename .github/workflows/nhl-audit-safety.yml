@@ -1,0 +1,28 @@
+name: NHL Audit Safety
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nhl-audit-core.mjs'
+      - 'src/services/nhl-production-audit.service.ts'
+      - 'src/services/nhl-causal-learning.service.ts'
+      - 'src/app/api/nhl/audit/**'
+      - 'tests/nhl-*.test.mjs'
+      - '.github/workflows/nhl-audit-safety.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: NHL source-only causal and audit regression
+        run: node --test tests/nhl-*.test.mjs
+      - name: Install and verify strict TypeScript
+        run: npm ci --no-audit --no-fund
+      - name: TypeScript check
+        run: npx tsc --noEmit --pretty false
