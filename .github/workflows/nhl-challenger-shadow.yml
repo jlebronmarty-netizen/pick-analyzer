@@ -1,0 +1,27 @@
+name: NHL Challenger Shadow Research
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nhl-challenger-poisson-core.mjs'
+      - 'src/services/nhl-poisson-challenger-audit.service.ts'
+      - 'src/app/api/nhl/challenger-research/**'
+      - 'tests/nhl-poisson-challenger-shadow-*.test.mjs'
+      - '.github/workflows/nhl-challenger-shadow.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: All NHL research, causal learning and audit regression
+        run: node --test tests/nhl-*.test.mjs
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Strict TypeScript
+        run: npx tsc --noEmit --pretty false
