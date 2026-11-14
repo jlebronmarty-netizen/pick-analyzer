@@ -33,6 +33,9 @@ test('Dedicated collector is opt-in, provider-bounded, isolated and cannot promo
  const cron=readFileSync(new URL('../src/app/api/cron/nba-current-era-shadow/route.ts',import.meta.url),'utf8');
  assert.match(service,/NBA_PROPS_HISTORY_BACKFILL_ENABLED/);
  assert.match(service,/DAILY_PROVIDER_CALL_CAP=4/);
+ assert.match(service,/getUTCHours\(\)%6/);
+ assert.match(service,/eq\('date_local',date\)/);
+ assert.match(service,/order\('source_received_at',\{ascending:false\}\).limit\(1\)/);
  assert.match(service,/per_page','100'/);
  assert.match(service,/is\('player_stats',null\)/);
  assert.match(service,/officialPickDelta:0,modelChanged:false/);
