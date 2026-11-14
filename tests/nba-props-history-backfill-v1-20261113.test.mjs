@@ -18,6 +18,11 @@ test('Current season, future, postponed and postseason games are strictly exclud
  const rows=[snap('2026-11-13T03:00:00Z',[{...g(50),season:2025},g(51,'final','2026-11-14T01:00:00Z'),{...g(52),postseason:true},{...g(53),postponed:true}])];
  assert.equal(selectNbaPropsHistoryBackfillGame(rows,new Set(),at),null);
 });
+test('NBA Cup group-play is permitted but Final or unknown stages are not',()=>{
+ const rows=[snap('2026-11-13T03:00:00Z',[{...g(90),ist_stage:'Final'},{...g(91),ist_stage:'West Group A'}])];
+ assert.equal(selectNbaPropsHistoryBackfillGame(rows,new Set(),at)?.providerGameId,91);
+ assert.equal(selectNbaPropsHistoryBackfillGame(rows,new Set([91]),at),null);
+});
 test('Backfill chooses most recent eligible final, never overwrites existing player stats',()=>{
  const rows=[snap('2026-11-13T03:00:00Z',[g(40,'final','2026-11-12T01:00:00Z'),g(41,'final','2026-11-13T01:00:00Z')])];
  assert.equal(selectNbaPropsHistoryBackfillGame(rows,new Set(),at)?.providerGameId,41);
