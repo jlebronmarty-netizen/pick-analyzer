@@ -22,3 +22,7 @@ jobs:
           node-version: '24'
       - name: Verify no-lookahead, contracts, cost caps, and disabled official picks
         run: node --test tests/nba-props-*.test.mjs tests/nba-goat-props-research-20261113.test.mjs
+      - name: Install dependencies for TypeScript validation
+        run: npm ci --no-audit --no-fund
+      - name: TypeScript compile safety check
+        run: npx tsc --noEmit --pretty false
