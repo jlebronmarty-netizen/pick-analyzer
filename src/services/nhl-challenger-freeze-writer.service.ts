@@ -38,8 +38,13 @@ export async function runNhlChallengerShadowFreeze(){
  const boxscoreRows=(goalieR.data??[]).map(x=>({
   eventId:x.event_id,boxscore:x.boxscore,capturedAt:x.boxscore_captured_at
  }));
+ const ppR=await db.from('nhl_special_teams_asof_v1')
+  .select('id,captured_at,source_version,source_hash,season_id,teams')
+  .lte('captured_at',at).order('captured_at',{ascending:false}).limit(3);
+ // Special-teams data missing or source unavailable MUST NOT stop score-only freeze.
+ const specialTeamsSnapshots=ppR.error?[]:(ppR.data??[]);
  const plan=planNhlFrozenSlate({runs,alreadyFrozen:(frozenR.data??[]).map(x=>x.id),
-  decisionAt:at,maxWrites:3,boxscoreRows});
+  decisionAt:at,maxWrites:3,boxscoreRows,specialTeamsSnapshots});
  if(plan.status!=='READY_TO_FREEZE')
   return {status:plan.status,sourceCalls:0,written:0,blocked:plan.blocked?.length??0};
  const w=await db.from('nhl_challenger_shadow_v1')

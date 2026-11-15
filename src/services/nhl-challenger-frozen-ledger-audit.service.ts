@@ -29,6 +29,7 @@ export async function getNhlFrozenShadowAudit(){
  const contextV2=rows.filter((r:any)=>r.features?.pregameContextV2?.status==='RESEARCH_CONTEXT_ONLY');
  const withGoalieEvidence=contextV2.filter((r:any)=>r.features?.pregameContextV2?.coverage?.historicalGoalieTeams===2);
  const withRestEvidence=contextV2.filter((r:any)=>r.features?.pregameContextV2?.coverage?.restEvidenceTeams===2);
+ const specialTeamsV3=rows.filter((r:any)=>r.features?.specialTeamsV3?.status==='ASOF_SPECIAL_TEAMS_EVIDENCE');
  return {
   status:graded.invalid?'REVIEW_INVALID_FROZEN_RECORDS':graded.settled<30?'PROSPECTIVE_SAMPLE_PENDING':'RESEARCH_STILL_UNVALIDATED',
   version:NHL_FREEZE_LEDGER_VERSION,readOnly:true,providerCalls:0,databaseWrites:0,
@@ -43,6 +44,8 @@ export async function getNhlFrozenShadowAudit(){
    gamesWithPriorRestEvidenceForBothTeams:withRestEvidence.length,
    confirmedStartingGoaliePredictions:0,modelFormulaAdjusted:false,
    historicalGoalieIsNotNextGameStarter:true},
+  specialTeamsV3:{recordsWithVerifiedPregamePPPK:specialTeamsV3.length,
+   source:'OFFICIAL_NHL_TEAM_SUMMARY',modelScoringAdjusted:false,sourceMustPredateFreeze:true},
   nextSteps:['Restore Supabase Data API health','Apply append-only ledger migration',
    'Enable freeze flag only after database and contract audit','Accumulate prospective outcomes and holdout'],
   policy:{autoPromotion:false,modelChanged:false,officialPicksModified:false,
