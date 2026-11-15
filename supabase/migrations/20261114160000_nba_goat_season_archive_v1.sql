@@ -26,5 +26,6 @@ create index if not exists nba_goat_season_archive_date_idx
   on public.nba_goat_season_archive_v1(season,game_date);
 alter table public.nba_goat_season_archive_v1 enable row level security;
 revoke all on public.nba_goat_season_archive_v1 from anon,authenticated;
+grant select,insert,update on public.nba_goat_season_archive_v1 to service_role;
 comment on table public.nba_goat_season_archive_v1 is
   'NBA GOAT season backfill metadata only. Original gzipped JSON is in a private Storage bucket; service role only. No model or pick writes.';
