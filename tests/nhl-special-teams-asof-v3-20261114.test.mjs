@@ -89,3 +89,11 @@ test('Research audit is read-only; PP/PK is only historical evidence, not a new 
  assert.match(route,/getNhlSpecialTeamsResearchStatus/);
  assert.match(frozen,/sourceMustPredateFreeze:true/);
 });
+
+test('One-off NHL PP/PK source schema probe cannot run in production or write data',()=>{
+ const probe=fs.readFileSync('src/app/api/nhl/special-teams-source-probe/route.ts','utf8');
+ assert.match(probe,/process\.env\.VERCEL_ENV!=='preview'/);
+ assert.match(probe,/providerCalls:1,databaseWrites:0/);
+ assert.ok(!/\.insert\(|\.update\(|\.upsert\(|\.delete\(/.test(probe));
+ assert.match(probe,/parseNhlOfficialSpecialTeams/);
+});
