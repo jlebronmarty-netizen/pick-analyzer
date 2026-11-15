@@ -8,14 +8,14 @@ Create a truly prospective and immutable NHL SHADOW experiment for Moneyline, ho
 ## Why staging is required
 At the time of this change, Supabase project Pick Analyzer reports ACTIVE_HEALTHY but Data API 5xx error rate is persistently high (the adviser showed 100% errors in the sampled requests). Basic read-only SELECT 1 failed with connection timeout, and the public NHL research and overview endpoints returned HTTP 503. This is a database incident; a healthy deployment alone does not prove that its APIs are functioning.
 
-No migration is applied and no prospective freeze writes are activated until the database passes read-only health checks and a safe migration. The flag NHL_CHALLENGER_FREEZE_ENABLED is deliberately absent (defaults to OFF). This branch is not approved to merge or deploy while database access is unverified.
+On 2026-11-15 01:04 UTC, Supabase read-only SELECT 1 succeeded, the project health advisor returned zero alerts, and NHL Overview and Challenger APIs returned HTTP 200. Before applying the migration, recheck database health and confirm the exact PR review and CI; do not infer ongoing health solely from earlier success. The flag NHL_CHALLENGER_FREEZE_ENABLED is deliberately absent (defaults to OFF) until after the migration, deployed code and DB permissions are verified. No official prediction models are modified.
 
 ## What is implemented
 - Pure, deterministic candidate planner builds a frozen record from the latest **previously completed** official NHL schedule snapshot. It rejects stale evidence (>90 minutes old), mismatched event or team IDs, non-regular-season event IDs, and start times less than 60 minutes from the decision or more than 36 hours away.
 - The separate Poisson research baseline must independently pass its minimum league and each-team history gates, using only first-observed official FINAL scores whose capture times precede the freeze.
 - One immutable event/model ID; sha256 lineage digest of source scores; frozen_time, source_completed_at, team identities, projections and research-only market proxies.
-- Migration creates a restricted, append-only service-only research table nhl_challenger_shadow_v1. No UPDATE/DELETE privilege for service_role, RLS enabled, hard checks reject late freezing and official or production-eligible flags.
-- Existing NHL cron invokes the new writer last, only behind environment flag NHL_CHALLENGER_FREEZE_ENABLED=true; four/five UTC time windows, max 3 rows per run, no new provider calls, no new schedule. Any Supabase error fails closed without changing model formulas.
+- Migration creates a restricted, append-only service-only research table nhl_challenger_shadow_v1. No UPDATE/DELETE/TRUNCATE privilege for service_role, RLS enabled, hard checks reject both late *freeze timestamps* and late *database insertion times*, plus any official or production-eligible flags.
+- Existing NHL cron invokes the new writer last, only behind environment flag NHL_CHALLENGER_FREEZE_ENABLED=true; five UTC hour windows (11,15,18,20,22), max 3 rows per run, no new provider calls or cron schedule. Historical runs are read in 500-row bounded pages, failing closed at a 2,000-row scan cap. Any Supabase error fails closed without changing model formulas.
 - Read-only /api/nhl/frozen-shadow-audit evaluates frozen projections against later observed final scores, without rewriting freeze records, making sportsbook settlement claims or reporting edge/ROI.
 
 ## Validation gates
