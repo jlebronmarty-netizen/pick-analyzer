@@ -1,12 +1,13 @@
 // NHL forward-only SHADOW freeze and statistical evaluation. No bookmaker odds or official picks.
 import {createHash} from 'node:crypto';
 import {NHL_CHALLENGER_VERSION,extractNhlFrozenFinalScores,forecastNhlChallenger} from './nhl-challenger-poisson-core.mjs';
+import {buildNhlAsOfPregameContext} from './nhl-asof-goalie-rest-core.mjs';
 export const NHL_FREEZE_LEDGER_VERSION='NHL_CHALLENGER_FROZEN_V1';
 const ms=v=>{const t=Date.parse(String(v??''));return Number.isFinite(t)?t:null;};
 const block=(reason,meta={})=>({status:'NOT_READY',reason,...meta});
 const round=(n,d=4)=>Number(n.toFixed(d));
 const brier=(p,y)=>(p-y)**2;
-export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalScores}){
+export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalScores,boxscoreRows=[]}){
  const now=ms(decisionAt),start=ms(game?.scheduledAt),source=ms(runCompletedAt);
  if(now===null||start===null||source===null||source>now||now-source>90*60000)
   return block('SOURCE_FRESHNESS_UNVERIFIED');
@@ -28,6 +29,8 @@ export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalSco
   .map(g=>[g.eventId,g.scheduledAt,g.capturedAt,g.homeId,g.awayId,g.homeGoals,g.awayGoals]);
  const digest=createHash('sha256').update(JSON.stringify(earlier)).digest('hex');
  if(earlier.length<prediction.priorLeagueGames)return block('FEATURE_EVIDENCE_INCONSISTENT');
+ const pregameContext=buildNhlAsOfPregameContext({game,asOf:decisionAt,finalScores,boxscoreRows});
+ if(pregameContext.status!=='RESEARCH_CONTEXT_ONLY')return block('PREGAME_CONTEXT_EVIDENCE_FAILED');
  const id=NHL_CHALLENGER_VERSION+':'+game.eventId;
  return {status:'FROZEN_RESEARCH_CANDIDATE',record:{
   id,event_id:game.eventId,model_version:NHL_CHALLENGER_VERSION,
@@ -38,12 +41,13 @@ export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalSco
   features:{...prediction.features,priorHomeGames:prediction.priorHomeGames,
    priorAwayGames:prediction.priorAwayGames,priorLeagueGames:prediction.priorLeagueGames,
    sourceEarliestObservedFinal:true,modelVersion:NHL_CHALLENGER_VERSION,
-   referenceMarketLinesAreNotSportsbookPrices:true},
+   referenceMarketLinesAreNotSportsbookPrices:true,
+   pregameContextV2:pregameContext},
   status:'FROZEN_RESEARCH',official_pick:false,production_eligible:false
  }};
 }
-/** @param {{runs:any[],alreadyFrozen?:string[],decisionAt:string,maxWrites?:number}} input */
-export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3}){
+/** @param {{runs:any[],alreadyFrozen?:string[],decisionAt:string,maxWrites?:number,boxscoreRows?:any[]}} input */
+export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3,boxscoreRows=[]}){
  const now=ms(decisionAt);
  if(now===null||!Number.isInteger(maxWrites)||maxWrites<1||maxWrites>3)
   return {status:'INVALID_PLAN',planned:[],blocked:[]};
@@ -57,7 +61,7 @@ export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3
  const frozen=new Set(alreadyFrozen),seen=new Set(),planned=[],blocked=[];
  for(const game of Array.isArray(latest.games)?latest.games:[]){
   if(seen.has(game.eventId))continue;seen.add(game.eventId);
-  const result=buildNhlFreezeCandidate({game,runCompletedAt:latest.completed_at,decisionAt,finalScores:observed.games});
+  const result=buildNhlFreezeCandidate({game,runCompletedAt:latest.completed_at,decisionAt,finalScores:observed.games,boxscoreRows});
   if(result.status!=='FROZEN_RESEARCH_CANDIDATE'){blocked.push({eventId:game.eventId,reason:result.reason,modelReason:result.modelReason??null});continue;}
   if(frozen.has(result.record.id))continue;
   planned.push(result.record);
