@@ -65,6 +65,8 @@ test('NHL shadow freeze is opt-in, additive and cannot modify current engines',(
  const writer=fs.readFileSync('src/services/nhl-challenger-freeze-writer.service.ts','utf8');
  assert.match(writer,/NHL_CHALLENGER_FREEZE_ENABLED/);
  assert.match(writer,/SLOT_HOURS=new Set/);
+ assert.match(writer,/PAGE_SIZE=500/);
+ assert.match(writer,/\.range\(offset,offset\+PAGE_SIZE-1\)/);
  assert.match(writer,/maxWrites:3/);
  assert.match(writer,/ignoreDuplicates:true/);
  assert.ok(cron.indexOf('const core=await runNhlFree()')<cron.indexOf('const learning=await runNhlCausalLearning()'));
@@ -79,6 +81,8 @@ test('Migration is append-only for service role and fail-closed on official flag
  assert.ok(!/grant\s+(?:update|delete|all).*service_role/i.test(sql));
  assert.match(sql,/nhl_shadow_never_official_check/);
  assert.match(sql,/nhl_shadow_freeze_time_check/);
+ assert.match(sql,/created_at <= scheduled_at - interval '60 minutes'/);
+ assert.match(sql,/revoke update,delete,truncate on public\.nhl_challenger_shadow_v1 from service_role/);
  assert.match(sql,/unique\(event_id,model_version\)/);
 });
 test('Frozen audit route reads only; it cannot persist or promote models',()=>{
