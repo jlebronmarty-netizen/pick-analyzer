@@ -44,7 +44,7 @@ export async function POST(req:NextRequest){
   for(let page=0;page<30;page++){
    if(calls>=MAX_CALLS)throw Error('CALL_BUDGET_EXHAUSTED');calls++;
    const u=new URL('https://api.balldontlie.io/nba/v2/stats/advanced');u.searchParams.append('game_ids[]',String(gid));u.searchParams.set('period','0');u.searchParams.set('per_page','100');if(cursor!==null)u.searchParams.set('cursor',String(cursor));
-   const response=await fetch(u,{headers:{Authorization:key,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(20000)});
+   const response=await fetch(u,{headers:{Authorization:key!,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(20000)});
    if(!response.ok)throw Error('PROVIDER_HTTP_'+response.status);
    const payload=await response.json();if(!Array.isArray(payload?.data))throw Error('INVALID_PROVIDER_DATA');
    rows.push(...payload.data);const next=payload.meta?.next_cursor??null;if(next===null)return rows;
@@ -58,7 +58,7 @@ export async function POST(req:NextRequest){
   if(error||!Array.isArray(stats)||stats.length<10||stats.some((x:any)=>Number(x.game?.id)!==gid||x.game?.status_state!=='final'||x.game?.date!=='2026-11-08')){
    errors.push({gameId:gid,reason:'HISTORIC_GAME_NOT_VERIFIED'});continue;
   }
-  try{await save(gid,'2026-11-08','player_stats',stats,data.player_stats_captured_at);}catch(e){errors.push({gameId:gid,dataset:'player_stats',reason:(e as Error).message});continue;}
+  try{await save(gid,'2026-11-08','player_stats',stats,data?.player_stats_captured_at??undefined);}catch(e){errors.push({gameId:gid,dataset:'player_stats',reason:(e as Error).message});continue;}
   try{const result=await advanced(gid);if(result.some((x:any)=>Number(x?.game?.id)!==gid||Number(x?.period)!==0))throw Error('ADVANCED_GAME_OR_PERIOD_MISMATCH');await save(gid,'2026-11-08','advanced_v2',result);}catch(e){errors.push({gameId:gid,dataset:'advanced_v2',reason:(e as Error).message});if(calls>=MAX_CALLS)break;}
  }
  return NextResponse.json({status:errors.length?'PARTIAL':'COMPLETED',environment:'goat-research',games:GAMES,callsUsed:calls,callsMax:MAX_CALLS,files,errors,officialModelsUnchanged:true},{headers:{'Cache-Control':'no-store'}});
