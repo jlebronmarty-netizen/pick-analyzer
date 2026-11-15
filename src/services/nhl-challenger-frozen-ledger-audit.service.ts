@@ -6,7 +6,7 @@ const MAX_ROWS=2000,PAGE_SIZE=500;
 export async function getNhlFrozenShadowAudit(){
  const at=new Date().toISOString();
  const frozenR=await db.from('nhl_challenger_shadow_v1')
-   .select('id,event_id,model_version,scheduled_at,frozen_at,source_completed_at,home_team_id,away_team_id,market_proxies,projection,official_pick,production_eligible')
+   .select('id,event_id,model_version,scheduled_at,frozen_at,source_completed_at,home_team_id,away_team_id,market_proxies,projection,features,official_pick,production_eligible')
    .order('frozen_at',{ascending:false}).limit(300);
  if(frozenR.error?.code==='42P01')
   return {status:'SCHEMA_PENDING',version:NHL_FREEZE_LEDGER_VERSION,readOnly:true,providerCalls:0,databaseWrites:0};
@@ -26,6 +26,9 @@ export async function getNhlFrozenShadowAudit(){
  if(runs.length>=MAX_ROWS)return {status:'SOURCE_SCAN_CAP_REACHED',readOnly:true,providerCalls:0,databaseWrites:0};
  const finals=extractNhlFrozenFinalScores(runs,at);
  const graded=gradeNhlFrozenSnapshots({frozenRows:rows,finalScores:finals.games});
+ const contextV2=rows.filter((r:any)=>r.features?.pregameContextV2?.status==='RESEARCH_CONTEXT_ONLY');
+ const withGoalieEvidence=contextV2.filter((r:any)=>r.features?.pregameContextV2?.coverage?.historicalGoalieTeams===2);
+ const withRestEvidence=contextV2.filter((r:any)=>r.features?.pregameContextV2?.coverage?.restEvidenceTeams===2);
  return {
   status:graded.invalid?'REVIEW_INVALID_FROZEN_RECORDS':graded.settled<30?'PROSPECTIVE_SAMPLE_PENDING':'RESEARCH_STILL_UNVALIDATED',
   version:NHL_FREEZE_LEDGER_VERSION,readOnly:true,providerCalls:0,databaseWrites:0,
@@ -35,6 +38,11 @@ export async function getNhlFrozenShadowAudit(){
    earliestFrozenAt:rows.at(-1)?.frozen_at??null,freezeWindowMinutes:60,
    notOfficialPicks:true,calibrated:false},
   grading:graded,
+  pregameContextV2:{recordsWithAsOfEvidence:contextV2.length,
+   gamesWithHistoricalGoalieEvidenceForBothTeams:withGoalieEvidence.length,
+   gamesWithPriorRestEvidenceForBothTeams:withRestEvidence.length,
+   confirmedStartingGoaliePredictions:0,modelFormulaAdjusted:false,
+   historicalGoalieIsNotNextGameStarter:true},
   nextSteps:['Restore Supabase Data API health','Apply append-only ledger migration',
    'Enable freeze flag only after database and contract audit','Accumulate prospective outcomes and holdout'],
   policy:{autoPromotion:false,modelChanged:false,officialPicksModified:false,
