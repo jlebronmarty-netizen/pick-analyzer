@@ -59,7 +59,7 @@ export async function POST(req:NextRequest){
    errors.push({gameId:gid,reason:'HISTORIC_GAME_NOT_VERIFIED'});continue;
   }
   try{await save(gid,'2026-11-08','player_stats',stats,data.player_stats_captured_at);}catch(e){errors.push({gameId:gid,dataset:'player_stats',reason:(e as Error).message});continue;}
-  try{const result=await advanced(gid);await save(gid,'2026-11-08','advanced_v2',result);}catch(e){errors.push({gameId:gid,dataset:'advanced_v2',reason:(e as Error).message});if(calls>=MAX_CALLS)break;}
+  try{const result=await advanced(gid);if(result.some((x:any)=>Number(x?.game?.id)!==gid||Number(x?.period)!==0))throw Error('ADVANCED_GAME_OR_PERIOD_MISMATCH');await save(gid,'2026-11-08','advanced_v2',result);}catch(e){errors.push({gameId:gid,dataset:'advanced_v2',reason:(e as Error).message});if(calls>=MAX_CALLS)break;}
  }
  return NextResponse.json({status:errors.length?'PARTIAL':'COMPLETED',environment:'goat-research',games:GAMES,callsUsed:calls,callsMax:MAX_CALLS,files,errors,officialModelsUnchanged:true},{headers:{'Cache-Control':'no-store'}});
 }
