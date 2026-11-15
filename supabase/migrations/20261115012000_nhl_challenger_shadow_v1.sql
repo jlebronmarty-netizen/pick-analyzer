@@ -29,6 +29,7 @@ create table if not exists public.nhl_challenger_shadow_v1 (
     frozen_at <= scheduled_at - interval '60 minutes'
     and source_completed_at <= frozen_at
     and created_at >= frozen_at - interval '10 seconds'
+    and created_at <= scheduled_at - interval '60 minutes'
   ),
   constraint nhl_shadow_hash_check check (source_hash ~ '^[0-9a-f]{64}$'),
   constraint nhl_shadow_source_count_check check (source_final_games >= 25),
