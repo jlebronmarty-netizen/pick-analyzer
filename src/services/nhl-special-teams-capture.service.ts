@@ -6,8 +6,8 @@ import {parseNhlOfficialSpecialTeams,NHL_SPECIAL_TEAMS_VERSION} from '@/lib/nhl-
 
 export const NHL_SPECIAL_TEAMS_SOURCE_URL='https://api.nhle.com/stats/rest/en/team/summary?cayenneExp=seasonId%3D20262027%20and%20gameTypeId%3D2&isAggregate=true&isGame=false&limit=40';
 const JOB='nhl_special_teams_asof_v3';
-const sha=s=>createHash('sha256').update(s).digest('hex');
-const uuid=s=>{const h=sha(s);return h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20,32);};
+const sha=(s:string)=>createHash('sha256').update(s).digest('hex');
+const uuid=(s:string)=>{const h=sha(s);return h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20,32);};
 
 // Only one FREE, pregame, season-to-date official summary request daily.
 // This is not an automatic model input. Strict opt-in and no retries.
@@ -55,24 +55,25 @@ export async function syncNhlSpecialTeamsResearchSnapshot(){
   if(Date.parse(capturedAt)-capturedBeforeFetch.getTime()>25000)throw Error('OFFICIAL_TEAM_SOURCE_EXPIRED');
   const normalized=parseNhlOfficialSpecialTeams({payload:JSON.parse(raw),directory,
    capturedAt,seasonId:20262027});
-  if(normalized.status!=='VALIDATED_SOURCE_SCHEMA')throw Error('OFFICIAL_TEAM_SOURCE_SCHEMA_UNVERIFIED');
+  const teams='teams' in normalized&&Array.isArray(normalized.teams)?normalized.teams:null;
+  if(normalized.status!=='VALIDATED_SOURCE_SCHEMA'||!teams)throw Error('OFFICIAL_TEAM_SOURCE_SCHEMA_UNVERIFIED');
   const rowId=sha(NHL_SPECIAL_TEAMS_VERSION+':'+day+':'+sha(raw));
   const write=await db.from('nhl_special_teams_asof_v1').insert({
    id:rowId,snapshot_day:day,captured_at:capturedAt,source_version:NHL_SPECIAL_TEAMS_VERSION,
    season_id:20262027,source_url:NHL_SPECIAL_TEAMS_SOURCE_URL,source_hash:sha(raw),
-   teams:normalized.teams,team_count:normalized.teams.length,used_by_official_model:false
+   teams,team_count:teams.length,used_by_official_model:false
   }).select('id');
   if(write.error&&write.error.code!=='23505')throw Error('SPECIAL_TEAMS_SNAPSHOT_INSERT_FAILED');
   const written=write.data?.length??0;
   const audit=await db.from('sports_sync_jobs').update({
    status:'completed',completed_at:new Date().toISOString(),records_inserted:written,
-   metadata:{version:NHL_SPECIAL_TEAMS_VERSION,providerCalls,teamCount:normalized.teams.length,
+   metadata:{version:NHL_SPECIAL_TEAMS_VERSION,providerCalls,teamCount:teams.length,
     sourceSha256:sha(raw),officialPickDelta:0,modelWeightDelta:0,
     researchOnly:true,capturedAt}
   }).eq('id',id);
   if(audit.error)throw Error('SPECIAL_TEAMS_AUDIT_FINALIZATION_FAILED');
   return {status:written?'SOURCE_CAPTURED_RESEARCH_ONLY':'ALREADY_STORED',
-   providerCalls,written,teamCount:normalized.teams.length,officialPicksChanged:false,
+   providerCalls,written,teamCount:teams.length,officialPicksChanged:false,
    modelChanged:false};
  }catch{
   await db.from('sports_sync_jobs').update({
