@@ -39,6 +39,7 @@ create table if not exists public.nhl_challenger_shadow_v1 (
 create index if not exists nhl_challenger_shadow_scheduled_idx on public.nhl_challenger_shadow_v1(scheduled_at desc);
 alter table public.nhl_challenger_shadow_v1 enable row level security;
 revoke all on public.nhl_challenger_shadow_v1 from anon,authenticated;
+revoke update,delete,truncate on public.nhl_challenger_shadow_v1 from service_role;
 grant select,insert on public.nhl_challenger_shadow_v1 to service_role;
 comment on table public.nhl_challenger_shadow_v1 is
 'Immutable, prospectively captured NHL research forecasts. Independent Poisson three-market proxies; not sportsbook-certified, not official picks or profitability evidence.';
