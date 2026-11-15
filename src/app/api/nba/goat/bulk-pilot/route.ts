@@ -1,5 +1,5 @@
 import {NextRequest,NextResponse} from 'next/server';
-import {createHash,createHmac,timingSafeEqual} from 'node:crypto';
+import {createHash,createHmac,timingSafeEqual,randomBytes} from 'node:crypto';
 import {gzipSync} from 'node:zlib';
 import {createClient} from '@supabase/supabase-js';
 export const runtime='nodejs';export const dynamic='force-dynamic';export const revalidate=0;export const maxDuration=300;
@@ -10,9 +10,9 @@ const sign=(ts:string)=>createHmac('sha256',process.env.CRON_SECRET!).update('nb
 function valid(token:unknown){if(typeof token!=='string')return false;const m=/^([0-9]{13})\.([0-9a-f]{64})$/.exec(token);if(!m||Math.abs(Date.now()-Number(m[1]))>600000)return false;return timingSafeEqual(Buffer.from(m[2],'hex'),Buffer.from(sign(m[1]),'hex'));}
 export async function GET(){
  if(!researchOnly())return deny();
- const t=String(Date.now()),csrf=t+'.'+sign(t);
+ const t=String(Date.now()),csrf=t+'.'+sign(t),nonce=randomBytes(16).toString('base64');
  const html='<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Piloto GOAT privado</title><body style="font:16px system-ui;max-width:650px;margin:4rem auto;padding:1rem"><h2>NBA GOAT — piloto privado</h2><p>Entorno protegido goat-research. Solo tres partidos del 8 de noviembre; máximo 30 consultas. No cambia modelos, predicciones ni crons.</p><form method="post" id="go"><button type="submit">Ejecutar piloto privado</button></form><pre id="out" style="white-space:pre-wrap"></pre><script>document.getElementById("go").onsubmit=async(e)=>{e.preventDefault();if(!confirm("¿Ejecutar piloto de tres partidos y hasta 30 consultas GOAT?"))return;const button=e.target.querySelector("button");button.disabled=true;const out=document.getElementById("out");out.textContent="Ejecutando...";try{const r=await fetch(location.pathname,{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({csrf:"'+csrf+'"})});out.textContent=JSON.stringify(await r.json(),null,2)}catch{out.textContent="Error de conexión"}};</script></body></html>';
- return new NextResponse(html,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'"}});
+ return new NextResponse(html,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-"+nonce+"'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'"}});
 }
 export async function POST(req:NextRequest){
  if(!researchOnly())return deny();
