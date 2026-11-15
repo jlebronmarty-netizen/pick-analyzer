@@ -28,7 +28,18 @@ export async function runNhlChallengerShadowFreeze(){
   if((page.data??[]).length<PAGE_SIZE)break;
  }
  if(runs.length>=MAX_RUN_ARCHIVE)return {status:'SOURCE_SCAN_CAP_REACHED',sourceCalls:0,written:0};
- const plan=planNhlFrozenSlate({runs,alreadyFrozen:(frozenR.data??[]).map(x=>x.id),decisionAt:at,maxWrites:3});
+ // Pre-existing official final boxscores only. No new NHL provider calls.
+ const goalieR=await db.from('nhl_game_context_v2')
+  .select('event_id,boxscore,boxscore_captured_at')
+  .gte('boxscore_captured_at',from)
+  .order('boxscore_captured_at',{ascending:false}).limit(500);
+ if(goalieR.error)return {status:'GOALIE_CONTEXT_UNAVAILABLE',sourceCalls:0,written:0};
+ if((goalieR.data??[]).length>=500)return {status:'GOALIE_CONTEXT_SCAN_CAP',sourceCalls:0,written:0};
+ const boxscoreRows=(goalieR.data??[]).map(x=>({
+  eventId:x.event_id,boxscore:x.boxscore,capturedAt:x.boxscore_captured_at
+ }));
+ const plan=planNhlFrozenSlate({runs,alreadyFrozen:(frozenR.data??[]).map(x=>x.id),
+  decisionAt:at,maxWrites:3,boxscoreRows});
  if(plan.status!=='READY_TO_FREEZE')
   return {status:plan.status,sourceCalls:0,written:0,blocked:plan.blocked?.length??0};
  const w=await db.from('nhl_challenger_shadow_v1')
