@@ -122,23 +122,11 @@ async function already(gameId,key){
  if(error)throw Error('ARCHIVE_DB_READ_FAILED_'+error.code);
  return Boolean(data);
 }
-async function fillExistingPlayerContext(game,stats){
- if(!stats.length||stats.some(s=>Number(s.game?.id)!==Number(game.id)))throw Error('INVALID_GAME_PLAYER_STATS');
- const id='bdl_nba_'+game.id;
- const {data:existing,error:readError}=await db.from('nba_game_context_v2').select('game_id,player_stats').eq('game_id',id).maybeSingle();
- if(readError)throw Error('CONTEXT_READ_FAILED_'+readError.code);
- if(existing?.player_stats?.data?.length)return 'PRESERVED_EXISTING';
- const value={player_stats:{data:stats},player_stats_captured_at:new Date().toISOString(),updated_at:new Date().toISOString()};
- const result=existing
- ?await db.from('nba_game_context_v2').update(value).eq('game_id',id).is('player_stats',null)
- :await db.from('nba_game_context_v2').insert({game_id:id,provider_game_id:Number(game.id),provider:'balldontlie',source_version:'NBA_GOAT_SEASON_BULK_ARCHIVE_V1',...value});
- if(result.error)throw Error('CONTEXT_WRITE_FAILED_'+result.error.code);
- return 'FILLED_MISSING_ONLY';
-}
+
 const games=await collect('/v1/games',{'seasons[]':season,start_date:from,end_date:through},true);
 const eligible=[...new Map(games.filter(g=>Number(g.season)===season&&g.date>=from&&g.date<=through&&g.status_state==='final'&&g.postseason===false&&g.postponed===false).map(g=>[Number(g.id),g])).values()].sort((a,b)=>String(a.date).localeCompare(String(b.date))||Number(a.id)-Number(b.id));
 emit('INVENTORY',{season,from,through,allListed:games.length,verifiedFinal:eligible.length,processedCap:maxGames,selectedDatasets:selected.length,requestsUsed:calls});
-const errors=[];let completed=0,skipped=0,stored=0,filled=0;
+const errors=[];let completed=0,skipped=0,stored=0;
 outer:for(const game of eligible.slice(0,maxGames)){
  for(const spec of selected){
   try{
@@ -154,7 +142,7 @@ outer:for(const game of eligible.slice(0,maxGames)){
    }
    const data=await collect(spec.url,{[spec.filter]:game.id,...(spec.params??{})},spec.paged);
    await archive(game,spec.key,data);stored++;
-   if(spec.key==='player_stats'&&data.length){await fillExistingPlayerContext(game,data);filled++;}
+   // Bulk archive is research-only. No writes to nba_game_context_v2 or operational model data.
   }catch(err){
    const reason=String(err?.message??err);
    errors.push({gameId:game.id,dataset:spec.key,reason});
@@ -165,5 +153,5 @@ outer:for(const game of eligible.slice(0,maxGames)){
  completed++;
  emit('GAME_PROGRESS',{gameId:game.id,gameDate:game.date,completed,requestsUsed:calls,stored,skipped,failed:errors.length});
 }
-emit('SUMMARY',{season,through,completed,stored,skipped,filledContexts:filled,failed:errors.length,errors:errors.slice(0,50),requestsUsed:calls,requestCap:maxRequests,mode,noOfficialModelOrPickWrites:true});
+emit('SUMMARY',{season,through,completed,stored,skipped,operationalTableWrites:0,failed:errors.length,errors:errors.slice(0,50),requestsUsed:calls,requestCap:maxRequests,mode,noOfficialModelOrPickWrites:true});
 if(errors.length)process.exitCode=2;
