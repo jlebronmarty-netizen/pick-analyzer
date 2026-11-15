@@ -30,3 +30,15 @@ Supabase Pro project Pick Analyzer has 27 GB disk provisioned, 15.44 GB used (14
 
 ## Small upgrade checkpoint (14-Nov evening)
 User upgraded Pick Analyzer to Supabase Small. Project API reported ACTIVE_HEALTHY. SQL read succeeded, shared_buffers=512MB, 23 existing game contexts with player stats, 0 mass-archive manifests, and verified private 20MB bucket. The Supabase project API response itself does not explicitly state the compute class; verify Small under Infrastructure before reporting it as directly confirmed. Full season pilot remains NOT EXECUTED. Check recent backups/restorability and spend-cap before executing.
+
+## Safe Vercel pilot execution path (prepared, not launched)
+
+- Vercel Pro project **pick-analyzer** has 1 allowed custom environment slot and currently no custom environments; do not edit Production or Preview default variables.
+- Create a **custom environment named exactly `goat-research`** in Vercel Project > Settings > Environments, importing existing Production environment variables into that custom environment. This reuses credential values inside Vercel without passing them through chat or copying plaintext into a sandbox.
+- Keep the environment isolated from public custom domains and select only Git branch `feat/nba-goat-2026-full-season-bulk-archive`. Verify Deployment Protection (Vercel Authentication) is active on the generated deployment URL.
+- The new route `/api/nba/goat/bulk-pilot` is inaccessible except if VERCEL_ENV=preview and VERCEL_TARGET_ENV=goat-research and CRON_SECRET exists. GET shows a confirmation UI; POST has a short-lived HMAC token, origin check and one-time Storage lock. No GET request triggers provider work.
+- POST is capped at 30 BALLDONTLIE calls, validates three final NBA games of 8 Nov 2026 using cached boxscores, then fetches advanced metrics. It writes only compressed private objects and archive manifests. It NEVER calls Official Picks, writes to nba_game_context_v2, or changes model/crons.
+- A real custom-environment preview deployment must be built, verified against production alias, and authenticated using the owner's Vercel account BEFORE the owner clicks the button. Do not auto-promote/merge this research PR.
+- Existing Production credentials should stay scoped to Production; do not add them to generic Preview. The single custom environment is the isolated route.
+- Backups of PostgreSQL do not include bucket objects; Storage must be backed up separately before treating the archive as durable.
+- If the lock exists after partial failure, stop and review manually. Never auto-remove lock or rerun a failed batch blindly.
