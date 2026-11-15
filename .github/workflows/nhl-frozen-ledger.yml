@@ -7,6 +7,7 @@ on:
       - 'src/lib/nhl-special-teams-asof-core.mjs'
       - 'src/services/nhl-special-teams-*.ts'
       - 'src/app/api/nhl/special-teams-research/**'
+      - 'src/app/api/nhl/special-teams-source-probe/**'
       - 'supabase/migrations/20261115023500_nhl_special_teams_asof_v1.sql'
       - 'tests/nhl-special-teams-asof-v3-*.test.mjs'
       - 'tests/nhl-asof-goalie-rest-v2-*.test.mjs'
