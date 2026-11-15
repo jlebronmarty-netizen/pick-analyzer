@@ -61,7 +61,7 @@ test('Never import a postgame goalie snapshot captured after the pregame cutoff'
  assert.equal(c.coverage.historicalGoalieTeams,0);
  assert.equal(c.home.lastObservedHistoricalStarter,null);
  assert.ok(c.home.hoursSincePreviousGame!==null);
- const late=buildNhlAsOfPregameContext({game:upcoming,asOf:'2026-11-16T00:30:00Z',finalScores:finals,boxscoreRows});
+ const late=buildNhlAsOfPregameContext({game:upcoming,asOf:'2026-11-16T00:30:00Z',finalScores:finals,boxscoreRows:boxRows});
  assert.equal(late.reason,'NOT_FROZEN_60M_BEFORE_START');
 });
 test('V2 evidence is frozen with existing V1 probabilities, no formula adjustment',()=>{
