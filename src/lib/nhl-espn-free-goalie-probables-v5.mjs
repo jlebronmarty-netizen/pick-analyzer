@@ -11,7 +11,8 @@ function goalie(competitor){
  if(!Array.isArray(probable)||probable.length!==1)return null;
  const p=probable[0],a=p?.athlete,id=positiveId(a?.id);
  const name=String(a?.displayName??'').trim();
- if(!id||name.length<5||name.length>100||a?.position?.abbreviation!=='G')return null;
+ if(!id||name.length<5||name.length>100||p?.name!=='probableStartingGoalie'||p?.abbreviation!=='SG'||
+  (a?.position?.abbreviation&&a.position.abbreviation!=='G'))return null;
  return {sourceAthleteId:id,displayName:name,status:'PROBABLE_ONLY',
   sourceAthleteIdIsNhlPlayerId:false,sourceConfirmationVerified:false};
 }
