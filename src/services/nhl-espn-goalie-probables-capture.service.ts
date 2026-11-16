@@ -63,14 +63,15 @@ export async function captureNhlFreeEspnProbableGoalies(){
   const capturedAt=new Date().toISOString();
   const parsed=parseEspnNhlFreeProbables({payload:JSON.parse(raw),
    officialSchedule:schedule,capturedAt});
-  if(parsed.status!=='FREE_PREGAME_PROBABLES_OBSERVED'||!Array.isArray(parsed.games)||
-    parsed.games.length<1||parsed.games.length>16)
+  const games='games' in parsed&&Array.isArray(parsed.games)?parsed.games:null;
+  if(parsed.status!=='FREE_PREGAME_PROBABLES_OBSERVED'||!games||
+    games.length<1||games.length>16)
    throw Error('ESPN_UNVERIFIED_PREGAME_MATCHUP');
   const rowId=hash(JOB+':'+date+':'+hash(raw));
   const saved=await db.from('nhl_espn_goalie_probables_v1').insert({
    id:rowId,sports_date:date.slice(0,4)+'-'+date.slice(4,6)+'-'+date.slice(6),
    captured_at:capturedAt,source_url:src,source_version:NHL_ESPN_GOALIE_VERSION,
-   raw_sha256:hash(raw),games:parsed.games,game_count:parsed.games.length,
+   raw_sha256:hash(raw),games,game_count:games.length,
    is_confirmed_starter:false,used_by_official_model:false
   }).select('id');
   if(saved.error&&saved.error.code!=='23505')throw Error('ESPN_GOALIE_SNAPSHOT_WRITE_FAILED');
@@ -78,12 +79,12 @@ export async function captureNhlFreeEspnProbableGoalies(){
   const log=await db.from('sports_sync_jobs').update({
    status:'completed',completed_at:new Date().toISOString(),records_inserted:inserted,
    metadata:{version:NHL_ESPN_GOALIE_VERSION,providerCalls,
-    totalGames:parsed.games.length,pregameProbableOnly:true,confirmedGoalies:0,
+    totalGames:games.length,pregameProbableOnly:true,confirmedGoalies:0,
     sourceHash:hash(raw),officialPickChanges:0,modelWeightChanges:0}
   }).eq('id',id);
   if(log.error)throw Error('ESPN_GOALIE_AUDIT_WRITE_FAILED');
   return {status:inserted?'PREGAME_PROBABLES_RESEARCH_CAPTURED':'SOURCE_ALREADY_STORED',
-   providerCalls,written:inserted,games:parsed.games.length,
+   providerCalls,written:inserted,games:games.length,
    confirmedStarters:0,officialPicksChanged:false,modelAdjusted:false};
  }catch{
   await db.from('sports_sync_jobs').update({
