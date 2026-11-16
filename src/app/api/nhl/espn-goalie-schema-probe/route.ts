@@ -49,6 +49,16 @@ export async function GET(){
     eventId:trim(e.id),eventName:trim(e.name),date:trim(e.date),
     status:trim(e.status?.type?.name),competitionKeys:keys(e.competitions?.[0]),
     competitorKeys:keys(e.competitions?.[0]?.competitors?.[0]),
+    goalieRows:(e.competitions?.[0]?.competitors??[]).slice(0,2).map((c:any)=>({
+      homeAway:trim(c.homeAway),teamId:trim(c.team?.id),teamName:trim(c.team?.displayName),
+      goalieCount:Array.isArray(c.probables)?c.probables.length:0,
+      goalie:(Array.isArray(c.probables)?c.probables:[]).slice(0,1).map((p:any)=>({
+       entryKeys:keys(p),entryPrimitives:Object.fromEntries(Object.entries(p)
+        .filter(([k,v])=>typeof v!=='object').slice(0,14).map(([k,v])=>[k,trim(v)])),
+       athleteId:trim(p.athlete?.id),athleteName:trim(p.athlete?.displayName),
+       athletePosition:trim(p.athlete?.position?.abbreviation)
+      }))
+    })),
     goalieRelatedPaths:goalieFieldPaths(e)
    })),
    notes:'Diagnostic only. Post-start JSON is NOT proof of pregame goalie confirmation. No direct starter IDs accepted until verified source timestamps and team crosswalk.'
