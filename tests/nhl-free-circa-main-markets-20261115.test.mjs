@@ -33,18 +33,18 @@ test('Frac unicode and HTML entity on totals are normalized to exact 6.5',()=>{
  assert.equal(p.observations.find(o=>o.market==='total').under.line,6.5);
 });
 test('Do not compare unmatched total 6 versus 6.5 and do not manufacture a total quote',()=>{
- const p=parseNhlCircaFreeMainMarkets(html.replace('u6-115','u6½-115'),forecast);
+ const p=parseNhlCircaFreeMainMarkets(html.replace('<td>u6-115</td><td>u6-115</td>','<td>u6-115</td><td>u6½-115</td>'),forecast);
  assert.equal(p.observations.length,1);
  assert.ok(p.rejected.includes('UNPAIRED_CIRCA_TOTAL_LINE'));
 });
 test('Reject mismatched teams, handicaps, incomplete odds, or imaginary Circa column',()=>{
- const wrongTeam=html.replace('<td>Philadelphia</td>','<td>Dallas</td>');
+ const wrongTeam=html.replaceAll('<td>Philadelphia</td>','<td>Dallas</td>');
  const p=parseNhlCircaFreeMainMarkets(wrongTeam,forecast);
  assert.ok(!p.observations.some(o=>o.market==='spread'));
- const wrongHandicap=html.replace('+1½-200','+2½-200');
+ const wrongHandicap=html.replaceAll('+1½-200','+2½-200');
  const h=parseNhlCircaFreeMainMarkets(wrongHandicap,forecast);
  assert.ok(h.rejected.includes('UNPAIRED_CIRCA_PUCK_LINE'));
- const wrongPrice=html.replace('-1½+175','-1½+99');
+ const wrongPrice=html.replace('<td>-1½+175</td><td>-1½+175</td>','<td>-1½+175</td><td>-1½+99</td>');
  const x=parseNhlCircaFreeMainMarkets(wrongPrice,forecast);
  assert.ok(x.rejected.includes('UNPAIRED_CIRCA_PUCK_LINE'));
  const missing=html.replaceAll('<th>Circa</th>','<th>Unknown Book</th>');
