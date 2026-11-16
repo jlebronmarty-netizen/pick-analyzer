@@ -43,8 +43,13 @@ export async function runNhlChallengerShadowFreeze(){
   .lte('captured_at',at).order('captured_at',{ascending:false}).limit(3);
  // Special-teams data missing or source unavailable MUST NOT stop score-only freeze.
  const specialTeamsSnapshots=ppR.error?[]:(ppR.data??[]);
+ // Existing prospectively captured ESPN probable goalies only; absent data is NOT an official lineup.
+ const espnR=await db.from('nhl_espn_goalie_probables_v1')
+  .select('id,captured_at,source_version,raw_sha256,games')
+  .lte('captured_at',at).order('captured_at',{ascending:false}).limit(2);
+ const espnGoalieSnapshots=espnR.error?[]:(espnR.data??[]);
  const plan=planNhlFrozenSlate({runs,alreadyFrozen:(frozenR.data??[]).map(x=>x.id),
-  decisionAt:at,maxWrites:3,boxscoreRows,specialTeamsSnapshots});
+  decisionAt:at,maxWrites:3,boxscoreRows,specialTeamsSnapshots,espnGoalieSnapshots});
  if(plan.status!=='READY_TO_FREEZE')
   return {status:plan.status,sourceCalls:0,written:0,blocked:plan.blocked?.length??0};
  const w=await db.from('nhl_challenger_shadow_v1')

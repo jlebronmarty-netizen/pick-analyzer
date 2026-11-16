@@ -3,12 +3,13 @@ import {createHash} from 'node:crypto';
 import {NHL_CHALLENGER_VERSION,extractNhlFrozenFinalScores,forecastNhlChallenger} from './nhl-challenger-poisson-core.mjs';
 import {buildNhlAsOfPregameContext} from './nhl-asof-goalie-rest-core.mjs';
 import {selectNhlSpecialTeamsAsOf} from './nhl-special-teams-asof-core.mjs';
+import {selectEspnNhlProbablesAsOf} from './nhl-espn-free-goalie-probables-v5.mjs';
 export const NHL_FREEZE_LEDGER_VERSION='NHL_CHALLENGER_FROZEN_V1';
 const ms=v=>{const t=Date.parse(String(v??''));return Number.isFinite(t)?t:null;};
 const block=(reason,meta={})=>({status:'NOT_READY',reason,...meta});
 const round=(n,d=4)=>Number(n.toFixed(d));
 const brier=(p,y)=>(p-y)**2;
-export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalScores,boxscoreRows=[],specialTeamsSnapshots=[]}){
+export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalScores,boxscoreRows=[],specialTeamsSnapshots=[],espnGoalieSnapshots=[]}){
  const now=ms(decisionAt),start=ms(game?.scheduledAt),source=ms(runCompletedAt);
  if(now===null||start===null||source===null||source>now||now-source>90*60000)
   return block('SOURCE_FRESHNESS_UNVERIFIED');
@@ -33,6 +34,7 @@ export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalSco
  const pregameContext=buildNhlAsOfPregameContext({game,asOf:decisionAt,finalScores,boxscoreRows});
  if(pregameContext.status!=='RESEARCH_CONTEXT_ONLY')return block('PREGAME_CONTEXT_EVIDENCE_FAILED');
  const specialTeamsV3=selectNhlSpecialTeamsAsOf({snapshots:specialTeamsSnapshots,game,asOf:decisionAt});
+ const goalieProbablesV5=selectEspnNhlProbablesAsOf({snapshots:espnGoalieSnapshots,game,decisionAt});
  const id=NHL_CHALLENGER_VERSION+':'+game.eventId;
  return {status:'FROZEN_RESEARCH_CANDIDATE',record:{
   id,event_id:game.eventId,model_version:NHL_CHALLENGER_VERSION,
@@ -44,12 +46,12 @@ export function buildNhlFreezeCandidate({game,runCompletedAt,decisionAt,finalSco
    priorAwayGames:prediction.priorAwayGames,priorLeagueGames:prediction.priorLeagueGames,
    sourceEarliestObservedFinal:true,modelVersion:NHL_CHALLENGER_VERSION,
    referenceMarketLinesAreNotSportsbookPrices:true,
-   pregameContextV2:pregameContext,specialTeamsV3},
+   pregameContextV2:pregameContext,specialTeamsV3,goalieProbablesV5},
   status:'FROZEN_RESEARCH',official_pick:false,production_eligible:false
  }};
 }
-/** @param {{runs:any[],alreadyFrozen?:string[],decisionAt:string,maxWrites?:number,boxscoreRows?:any[],specialTeamsSnapshots?:any[]}} input */
-export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3,boxscoreRows=[],specialTeamsSnapshots=[]}){
+/** @param {{runs:any[],alreadyFrozen?:string[],decisionAt:string,maxWrites?:number,boxscoreRows?:any[],specialTeamsSnapshots?:any[],espnGoalieSnapshots?:any[]}} input */
+export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3,boxscoreRows=[],specialTeamsSnapshots=[],espnGoalieSnapshots=[]}){
  const now=ms(decisionAt);
  if(now===null||!Number.isInteger(maxWrites)||maxWrites<1||maxWrites>3)
   return {status:'INVALID_PLAN',planned:[],blocked:[]};
@@ -63,7 +65,7 @@ export function planNhlFrozenSlate({runs,alreadyFrozen=[],decisionAt,maxWrites=3
  const frozen=new Set(alreadyFrozen),seen=new Set(),planned=[],blocked=[];
  for(const game of Array.isArray(latest.games)?latest.games:[]){
   if(seen.has(game.eventId))continue;seen.add(game.eventId);
-  const result=buildNhlFreezeCandidate({game,runCompletedAt:latest.completed_at,decisionAt,finalScores:observed.games,boxscoreRows,specialTeamsSnapshots});
+  const result=buildNhlFreezeCandidate({game,runCompletedAt:latest.completed_at,decisionAt,finalScores:observed.games,boxscoreRows,specialTeamsSnapshots,espnGoalieSnapshots});
   if(result.status!=='FROZEN_RESEARCH_CANDIDATE'){blocked.push({eventId:game.eventId,reason:result.reason,modelReason:result.modelReason??null});continue;}
   if(frozen.has(result.record.id))continue;
   planned.push(result.record);
