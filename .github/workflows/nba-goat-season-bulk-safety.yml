@@ -5,6 +5,11 @@ on:
       - 'scripts/nba-goat-season-2026-bulk-archive.mjs'
       - 'src/app/api/nba/goat/bulk-pilot/route.ts'
       - 'src/app/api/nba/goat/season-core-batch/route.ts'
+      - 'src/app/api/nba/goat/materialize-props-research/route.ts'
+      - 'src/services/nba-goat-props-shadow-readiness.service.ts'
+      - 'src/lib/nba/goat-research-compact-core.mjs'
+      - 'tests/nba-goat-research-compact-core.test.mjs'
+      - 'supabase/migrations/20261115211500_nba_goat_player_game_research_v1.sql'
       - 'supabase/migrations/20261114160000_nba_goat_season_archive_v1.sql'
       - 'docs/NBA_GOAT_2026_FULL_SEASON_BULK_ARCHIVE.md'
       - '.github/workflows/nba-goat-season-bulk-safety.yml'
@@ -25,5 +30,7 @@ jobs:
         run: node --check scripts/nba-goat-season-2026-bulk-archive.mjs
       - name: Ensure no-call dry-run with no credentials
         run: node scripts/nba-goat-season-2026-bulk-archive.mjs --mode=core --max-requests=30 --max-games=3
+      - name: Compact GOAT research fact unit tests
+        run: node --test tests/nba-goat-research-compact-core.test.mjs
       - name: TypeScript validation including protected pilot route
         run: npx tsc --noEmit --pretty false
