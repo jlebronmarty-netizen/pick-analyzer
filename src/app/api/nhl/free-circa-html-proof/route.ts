@@ -25,7 +25,7 @@ export async function GET(){
    const html=unpacked.toString('utf8');
    const idValues=[...html.matchAll(/id=["'](scroll-(?:money|spread|total|totals|overunder|ou)[^"']*)["']/gi)]
     .slice(0,30).map(x=>x[1]);
-   const sections=['scroll-money','scroll-spread','scroll-total','scroll-totals','scroll-overunder'];
+   const sections=['scroll-money','scroll-spread','scroll-ou','scroll-total','scroll-totals','scroll-overunder'];
    const results=Object.fromEntries(sections.map(k=>{
     const pattern=new RegExp('id=["\\x27]'+k+'["\\x27]([\\s\\S]*?)(?=id=["\\x27]scroll-[\\w-]+["\\x27]|$)','i');
     const match=html.match(pattern);
