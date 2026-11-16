@@ -2,6 +2,7 @@ import 'server-only';
 import {createHash,randomUUID} from 'node:crypto';
 import {gzipSync} from 'node:zlib';
 import {parseDratingsUpcoming,parseDratingsCirca,DRATINGS_URL} from '@/lib/nhl-free-source';
+import {parseNhlCircaFreeMainMarkets} from '@/lib/nhl-free-circa-main-markets.mjs';
 import {normalizeNhlScore,normalizeNhlDirectory,matchFreeNhl,freezeNhlForecast,finalNhl,reconcileFreeNhl,freeNhlMetrics,nhlSportsDate,verifyFreeNhlForecast,type NhlGame,type NhlFreeForecast,type NhlFreeFinal,type NhlFreeAvailableReport} from '@/lib/nhl-free';
 import {rankNhlQuoteTargets,nhlQuoteCalendarDates,mergeNhlQuoteSnapshots,nhlQuoteCoverage,sameNhlQuoteIdentity,type NhlQuoteAttempt} from '@/lib/nhl-quotes';
 import {readNhlDirectoryCache} from '@/lib/nhl-directory-cache';
@@ -9,7 +10,7 @@ import type {NhlReport} from '@/lib/nhl-external-report';
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 async function db(){return (await import('@/lib/supabase-admin')).supabaseAdmin;}
 async function rows(table:string){const client=await db(),result:Record<string,unknown>[]=[];let cursor='';for(;;){let q=client.from(table).select('*').order('id').limit(500).abortSignal(AbortSignal.timeout(20000));if(cursor)q=q.gt('id',cursor);const {data,error}=await q;if(error||!data)throw Error('NHL_DATABASE_READ');result.push(...data);if(data.length<500)return result;cursor=String(data.at(-1)!.id);}}
-type RunDetail={games:NhlGame[];forecasts:NhlFreeForecast[];issues:string[];calendarCapturedAt?:string;quoteAttempts?:NhlQuoteAttempt[];cachedDirectory?:boolean;error?:string};
+type RunDetail={games:NhlGame[];forecasts:NhlFreeForecast[];issues:string[];calendarCapturedAt?:string;quoteAttempts?:NhlQuoteAttempt[];marketQuoteObservations?:Record<string,unknown>[];cachedDirectory?:boolean;error?:string};
 const warning='Nueva cohorte prospectiva gratuita. Historial anterior de Sports Edge Hub pendiente de recuperación y verificación; no incluido en estas métricas. MODEL_ONLY / SHADOW, sin Official Picks ni rentabilidad certificada.';
 export async function getNhlFreeReport():Promise<NhlReport>{
  try{
@@ -90,10 +91,29 @@ export async function runNhlFree(){
    const attempts=(previousRuns.data??[]).flatMap(r=>(r.detail as RunDetail).quoteAttempts??[]);
    const ranked=rankNhlQuoteTargets([...targets.values()].map(t=>t.unpriced),qs.map(q=>verifyFreeNhlForecast(q.body as NhlFreeForecast)),attempts,new Date().toISOString());
    detail.quoteAttempts=[];
+   detail.marketQuoteObservations=[];
    for(const target of ranked){
     const {forecast:f,game:g}=targets.get(target.eventId)!;let price:ReturnType<typeof parseDratingsCirca>=null,priceSource:string|null=null;
     if(calls<12&&!blocked.has('www.dratings.com')&&Date.now()-start<210000){
-     try{const q=await fetchSource(f.detailUrl,2000000);priceSource=q.id;price=parseDratingsCirca(q.raw,f);detail.quoteAttempts.push({eventId:g.eventId,capturedAt:new Date().toISOString(),status:price?'PAIRED':'NO_PAIR',sourceId:q.id});}
+     try{
+      const q=await fetchSource(f.detailUrl,2000000);
+      priceSource=q.id;price=parseDratingsCirca(q.raw,f);
+      // Reuse the same FREE fetched detail page to extract matched Circa spread and O/U.
+      // Observation capture is strictly pregame, and does not affect original ML forecasts.
+      if(Date.parse(q.at)+10*60000<Date.parse(g.scheduledAt)){
+       const parsed=parseNhlCircaFreeMainMarkets(q.raw,f);
+       for(const row of parsed.observations){
+        detail.marketQuoteObservations!.push({
+         version:parsed.version,eventId:g.eventId,scheduledAt:g.scheduledAt,
+         home:g.home,away:g.away,homeId:g.homeId,awayId:g.awayId,
+         capturedAt:q.at,sourceId:q.id,forecastSourceId:forecastSource?.id,
+         market:row.market,book:'CIRCA',quote:row,
+         sourceUpdatedAt:null,marketRulesCertified:false,officialPick:false
+        });
+       }
+      }
+      detail.quoteAttempts.push({eventId:g.eventId,capturedAt:new Date().toISOString(),status:price?'PAIRED':'NO_PAIR',sourceId:q.id});
+     }
      catch(e){detail.quoteAttempts.push({eventId:g.eventId,capturedAt:new Date().toISOString(),status:'FAILED',sourceId:null});detail.issues.push(e instanceof Error?e.message:'NHL_PRICE_FAILED');}
     }
     const at=new Date().toISOString(),frozen=freezeNhlForecast(g,f,at,price);if(!frozen)continue;
