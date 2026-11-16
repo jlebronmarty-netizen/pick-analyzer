@@ -24,10 +24,12 @@ export async function GET(req:NextRequest){
 }
 export async function POST(req:NextRequest){
  if(!environmentOK())return json({status:'RESEARCH_ENV_ONLY'},404);
+ const scheduleName=req.headers.get('ce-vssschedulename');
  const scheduled=req.headers.get('ce-type')==='com.vercel.schedule.v1beta'&&
-  req.headers.get('ce-vssschedulename')==='nba-goat-core-daily-research'&&
+  ['nba-goat-core-daily-research','nba-goat-advanced-retry-research'].includes(scheduleName??'')&&
   req.headers.get('authorization')===('Bearer '+process.env.CRON_SECRET);
- let body:any={};
+ // A separate bounded daily job rechecks only previously unverified advanced records.
+ let body:any={retryUnverified:scheduled&&scheduleName==='nba-goat-advanced-retry-research'};
  if(!scheduled){
   if(req.headers.get('origin')!==req.nextUrl.origin||req.headers.get('content-type')?.split(';')[0]!=='application/json')return json({status:'FORBIDDEN'},403);
   try{body=await req.json()}catch{return json({status:'BAD_REQUEST'},400)}
