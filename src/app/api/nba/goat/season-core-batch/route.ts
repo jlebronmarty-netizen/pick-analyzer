@@ -4,8 +4,8 @@ import {gzipSync,gunzipSync} from 'node:zlib';
 import {createClient} from '@supabase/supabase-js';
 
 export const runtime='nodejs';export const dynamic='force-dynamic';export const revalidate=0;export const maxDuration=300;
-const BUCKET='nba-goat-2026-private',SEASON=2026,FIRST='2026-10-20',LAST='2026-11-15';
-const CALL_CAP=50,GAME_CAP=10,MAX_PAGES=20,MAX_JSON=100*1024*1024,MAX_GZIP=20*1024*1024;
+const BUCKET='nba-goat-2026-private',SEASON=2026,FIRST='2026-10-20',LAST=new Date().toLocaleDateString('en-CA',{timeZone:'America/Puerto_Rico'});
+const CALL_CAP=50,GAME_CAP=10,MAX_PAGES=30,MAX_JSON=100*1024*1024,MAX_GZIP=20*1024*1024;
 const environmentOK=()=>process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_TARGET_ENV==='goat-research'&&Boolean(process.env.CRON_SECRET);
 const json=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store'}});
 const secretSign=(ts:string)=>createHmac('sha256',process.env.CRON_SECRET!).update('goat-season-core-2026:'+ts).digest('hex');
@@ -24,16 +24,27 @@ export async function GET(req:NextRequest){
 }
 export async function POST(req:NextRequest){
  if(!environmentOK())return json({status:'RESEARCH_ENV_ONLY'},404);
- if(req.headers.get('origin')!==req.nextUrl.origin||req.headers.get('content-type')?.split(';')[0]!=='application/json')return json({status:'FORBIDDEN'},403);
- let body:any;try{body=await req.json()}catch{return json({status:'BAD_REQUEST'},400)}
- if(!authorizedToken(body?.ticket))return json({status:'FORBIDDEN'},403);
+ const scheduled=req.headers.get('ce-type')==='com.vercel.schedule.v1beta'&&
+  req.headers.get('ce-vssschedulename')==='nba-goat-core-daily-research'&&
+  req.headers.get('authorization')===('Bearer '+process.env.CRON_SECRET);
+ let body:any={};
+ if(!scheduled){
+  if(req.headers.get('origin')!==req.nextUrl.origin||req.headers.get('content-type')?.split(';')[0]!=='application/json')return json({status:'FORBIDDEN'},403);
+  try{body=await req.json()}catch{return json({status:'BAD_REQUEST'},400)}
+  if(!authorizedToken(body?.ticket))return json({status:'FORBIDDEN'},403);
+ }
  const key=process.env.BALLDONTLIE_API_KEY?.trim(),url=process.env.NEXT_PUBLIC_SUPABASE_URL?.trim(),role=process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
  if(!key||!url||!role)return json({status:'SERVER_CREDENTIALS_UNAVAILABLE'},503);
  const db=createClient(url,role,{auth:{persistSession:false,autoRefreshToken:false}}),store=db.storage.from(BUCKET);
  const {data:bucket,error:bErr}=await db.storage.getBucket(BUCKET);
  if(bErr||!bucket||bucket.public!==false||bucket.file_size_limit!==20971520)return json({status:'PRIVATE_ARCHIVE_BUCKET_UNVERIFIED'},503);
- const {data:prior,error:mErr}=await db.from('nba_goat_season_archive_v1').select('provider_game_id,dataset_key').eq('season',SEASON).in('dataset_key',['player_stats','advanced_v2','advanced_v2_unverified']).limit(1000);
- if(mErr||!prior||prior.length===1000)return json({status:'ARCHIVE_MANIFEST_READ_UNAVAILABLE'},503);
+ const prior:{provider_game_id:number,dataset_key:string}[]=[];
+ for(let offset=0;offset<6000;offset+=1000){
+  const {data,error}=await db.from('nba_goat_season_archive_v1').select('provider_game_id,dataset_key').eq('season',SEASON).in('dataset_key',['player_stats','advanced_v2','advanced_v2_unverified']).order('provider_game_id',{ascending:true}).order('dataset_key',{ascending:true}).range(offset,offset+999);
+  if(error||!data)return json({status:'ARCHIVE_MANIFEST_READ_UNAVAILABLE'},503);
+  prior.push(...data);if(data.length<1000)break;
+  if(offset===5000)return json({status:'ARCHIVE_MANIFEST_PAGINATION_BOUND'},503);
+ }
  const completed=new Set(prior.map(r=>r.provider_game_id+':'+r.dataset_key));
  let calls=0;
  const dataGet=async(path:string,params:Record<string,string>,maxRows=10000)=>{
@@ -56,7 +67,7 @@ export async function POST(req:NextRequest){
  };
  let games:any[];
  try{
-  games=await dataGet('/v1/games',{'seasons[]':'2026',start_date:FIRST,end_date:LAST},1000);
+  games=await dataGet('/v1/games',{'seasons[]':'2026',start_date:scheduled?new Date(Date.now()-10*86400000).toISOString().slice(0,10):FIRST,end_date:LAST},1600);
  }catch(e){return json({status:'INVENTORY_FAILED',callsUsed:calls,reason:String((e as Error).message).slice(0,90)},502)}
  const finals=[...new Map(games.filter(g=>Number(g.id)>0&&Number(g.season)===SEASON&&g.date>=FIRST&&g.date<=LAST&&String(g.status_state).toLowerCase()==='final'&&g.postponed===false&&g.postseason===false).map(g=>[Number(g.id),g])).values()].sort((a,b)=>a.date.localeCompare(b.date)||Number(a.id)-Number(b.id));
  const reviewGames=finals.filter(g=>!completed.has(g.id+':advanced_v2')&&completed.has(g.id+':advanced_v2_unverified')).map(g=>Number(g.id));
