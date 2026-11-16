@@ -15,12 +15,12 @@
 
 ### Captura incremental por día (archivo separado)
 
-En el entorno Vercel aislado `goat-research`, la rama prepara dos **Vercel Schedules estáticos** (beta):
+Para automatización diaria en `goat-research`, se evaluaron dos tareas separadas (todavía **NO activadas**):
 
 1. `nba-goat-core-daily-research`: 09:35 Puerto Rico, ventana de 10 días; solo juegos finales, boxscores y avanzado, máximo 10 juegos y 50 llamadas por ejecución.
 2. `nba-goat-advanced-retry-research`: 16:45 Puerto Rico, solo respuestas `advanced_v2_unverified`, máximo 10 juegos y 50 llamadas por ejecución, con bloqueo único por día. Jamás etiquetar registros vacíos como completos.
 
-Vercel inicia nuevos schedules de Preview y entornos personalizados en estado **inactivo** por defecto: código desplegado NO equivale a tarea diaria activa. Verificar primero su presencia en la pestaña Schedules, ejecución privada, protección, permisos y consumo. Un usuario autorizado debe activarlos en Vercel para iniciar la programación. No asociarlos a dominios públicos ni fusionar la rama solamente para activar la tarea.
+**El manifiesto `vercel.json` se restauró exactamente a `main` después de que la suite de regresión detectó la modificación:** NO hay una nueva tarea GOAT diaria configurada por este PR. La lógica protegida puede ser invocada manualmente en `goat-research`, pero no se debe afirmar automatización futura hasta diseñar, activar y comprobar una vía autorizada y compatible con la protección de cron del repositorio. No asociar dominios públicos ni fusionar la rama solamente para activar la tarea.
 
 ### Incorporación correcta a proyecciones
 
@@ -51,3 +51,10 @@ Derivar bajo `decision_cutoff`: L5/L10/L20, minutos/uso, frecuencia de superar l
 
 **Criterios para considerar completa la conexión:**
 (1) schedule activo y observado al menos dos días con registro de cobertura; (2) tabla compacta actualizada y con validación de SHA/filas; (3) experimentos shadow usando esa tabla, no simplemente indicando Storage; (4) prueba de corte pregame sin leakage; (5) comparativa contra baseline y reporte de mejora/retroceso; (6) promoción deliberada tras autorización, nunca implícita.
+
+## Avance de integración compacta
+- Nueva tabla privada `nba_goat_player_game_research_v1` para filas de hechos de jugador, sin JSON original, RLS habilitado y solamente service-role. Aplicada como migración aditiva; permanece vacía hasta ejecutar la importación protegida.
+- `src/lib/nba/goat-research-compact-core.mjs` valida identidad, fechas, minutos, DNP y checksum de origen.
+- La página de investigación `/api/nba/goat/materialize-props-research` importa secuencialmente hasta 10 juegos verificados por solicitud, sin escribir en Official Picks, modelos ni tablas operativas. Los datos se conservan en Storage y solamente métricas compactas se escriben en la nueva tabla.
+- La preparación de props de rama `goat-research` usa esa tabla y conserva los gates de `source_captured_at <= quote.source_received_at` y juego anterior al cutoff. L5/L10/L20 son descriptivos; no implican probabilidades calibradas ni producción.
+- La importación no se realiza mediante `GET` y requiere acción autenticada del dueño en la página protegida. No afirmar que los 5,323 registros estén materializados hasta verificar la tabla real.
