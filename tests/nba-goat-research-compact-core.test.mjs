@@ -25,3 +25,21 @@ test('DNP rows retained but excluded from projection eligibility',()=>{
  assert.equal(output[11].minutes_played,0);assert.equal(output[11].projection_eligible,false);
  assert.equal(playedMinutes('12:30'),12.5);
 });
+
+test('research shadow refuses history not yet captured at frozen quote time',async()=>{
+ const {buildNbaPropShadowHypothesis}=await import('../src/lib/nba/goat-props-shadow-core.mjs');
+ const sample=Array.from({length:6},(_,i)=>({
+   season:2026,provider_game_id:30000+i,player_id:800000,game_datetime:new Date(Date.UTC(2026,9,21+i,0,0)).toISOString(),
+   source_captured_at:'2026-11-16T02:00:00.000Z',minutes_played:24,pts:20,reb:8,ast:6,fg3m:2
+ }));
+ const quote={quote_id:'q1',provider_game_id:999999,player_id:800000,market:'props',statistic:'points',side:'over',line:15.5,american_odds:-110,period:'FULL_GAME_LABEL_OT_UNVERIFIED',contract:'STRICT_GREATER_THAN',phase:'PREGAME',source_received_at:'2026-11-15T23:45:00.000Z'};
+ const event={id:'bdl_nba_999999',start_time:'2026-11-16T01:00:00.000Z'};
+ const late=buildNbaPropShadowHypothesis({quote,event,playerGameStats:syntheticGoatPropInputs(sample),asOf:'2026-11-15T23:50:00.000Z'});
+ assert.equal(late.status,'NOT_READY');assert.equal(late.reason,'INSUFFICIENT_PRIOR_GAMES');
+ const eligible=sample.map(x=>({...x,source_captured_at:'2026-11-10T00:00:00.000Z'}));
+ const ready=buildNbaPropShadowHypothesis({quote,event,playerGameStats:syntheticGoatPropInputs(eligible),asOf:'2026-11-15T23:50:00.000Z'});
+ assert.equal(ready.status,'SHADOW_HYPOTHESIS_ONLY');
+ assert.equal(ready.descriptiveLineHitRateL5,100);
+ assert.equal(ready.descriptiveLineHitRateL20,100);
+ assert.equal(ready.productionEligible,false);
+});
