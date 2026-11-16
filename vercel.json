@@ -53,6 +53,13 @@
       "jitter": 5,
       "path": "/api/nba/goat/season-core-batch",
       "requestMethod": "POST"
+    },
+    "nba-goat-advanced-retry-research": {
+      "schedule": "45 16 * * *",
+      "timezone": "America/Puerto_Rico",
+      "jitter": 5,
+      "path": "/api/nba/goat/season-core-batch",
+      "requestMethod": "POST"
     }
   }
 }
