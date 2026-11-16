@@ -4,7 +4,7 @@ export function playedMinutes(value) {
  if(value===null||value===undefined)return 0;
  const s=String(value).trim();
  if(!s||s.toUpperCase()==='DNP')return 0;
- if(/^\\d+:\\d{1,2}$/.test(s)){
+ if(/^\d+:\d{1,2}$/.test(s)){
   const [m,sec]=s.split(':').map(Number);return sec<60&&m>=0?m+sec/60:0;
  }
  const n=Number(s);return Number.isFinite(n)&&n>=0?n:0;
