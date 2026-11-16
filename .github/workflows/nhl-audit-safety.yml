@@ -4,6 +4,7 @@ on:
     paths:
       - 'src/lib/nhl-audit-core.mjs'
       - 'src/lib/nhl-free-circa-main-markets.mjs'
+      - 'src/app/api/nhl/espn-goalie-schema-probe/**'
       - 'src/services/nhl-free.service.ts'
       - 'src/services/nhl-free-circa-market-audit.service.ts'
       - 'src/app/api/nhl/free-main-market-coverage/**'
