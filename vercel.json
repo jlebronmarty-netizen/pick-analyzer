@@ -45,5 +45,14 @@
     "deploymentEnabled": {
       "research/*": false
     }
+  },
+  "schedules": {
+    "nba-goat-core-daily-research": {
+      "schedule": "35 9 * * *",
+      "timezone": "America/Puerto_Rico",
+      "jitter": 5,
+      "path": "/api/nba/goat/season-core-batch",
+      "requestMethod": "POST"
+    }
   }
 }
