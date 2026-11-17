@@ -1,0 +1,7 @@
+league,event_date,market_ticker,contract_team,public_result,final_score,public_source_url,verified_game_start_utc,trade_download_status
+"NBA","2026-11-13","KXNBAGAME-26NOV13GSWSAS-SAS","SAS","yes","GSW 85 SAS 123","https://kalshi.com/markets/kxnbagame/nba-game/kxnbagame-26nov13gswsas","","NOT_DOWNLOADED"
+"NBA","2026-11-11","KXNBAGAME-26NOV11GSWHOU-HOU","HOU","yes","GSW 108 HOU 115","https://kalshi.com/markets/kxnbagame/nba-game/kxnbagame-26nov11gswhou","","NOT_DOWNLOADED"
+"NBA","2026-11-11","KXNBAGAME-26NOV11LALMIL-LAL","LAL","yes","LAL 123 MIL 112","https://kalshi.com/markets/kxnbagame/lakers-vs-bucks/kxnbagame-26nov11lalmil","","NOT_DOWNLOADED"
+"NHL","2026-11-11","KXNHLGAME-26NOV11TBBUF-BUF","BUF","no","TB 8 BUF 3","https://kalshi.com/markets/kxnhlgame/nhl-game/kxnhlgame-26nov11tbbuf?op_market_ticker=KXNHLGAME-26NOV11TBBUF-BUF","","NOT_DOWNLOADED"
+"NHL","2026-11-11","KXNHLGAME-26NOV11NYRCGY-CGY","CGY","no","NYR 3 CGY 1","https://kalshi.com/markets/kxnhlgame/nhl-game/kxnhlgame-26nov11nyrcgy?op_market_ticker=KXNHLGAME-26NOV11NYRCGY-CGY","","NOT_DOWNLOADED"
+"NHL","2026-11-11","KXNHLGAME-26NOV11PHIEDM-EDM","EDM","yes","PHI 2 EDM 3","https://kalshi.com/markets/kxnhlgame/philadelphia-vs-edmonton/kxnhlgame-26nov11phiedm","","NOT_DOWNLOADED"
