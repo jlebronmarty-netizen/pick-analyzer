@@ -56,7 +56,6 @@ function matchGame(info,events){
  const seasonType=e.season?.type ?? null;
  const match={espn_event_id:e.id,game_start_utc:e.date,season_type:seasonType,game_status:e.status?.type?.name||null,
   winner_code:winner?normalize(info.league,winner.team?.abbreviation):null};
- const suffix=normalize(info.league,(e._contractTeam||''));
  return {match};
 }
 const files=(await readdir(dir)).filter(x=>x.endsWith('.manifest.json')).sort();
@@ -96,7 +95,7 @@ for(let i=0;i<files.length;i++){
  row.window_60m_trades=lastHour.length;
  row.window_60m_quantity=lastHour.reduce((sum,t)=>sum+t.qty,0);
  row.window_60m_price_change=lastHour.length>1?Number((lastHour.at(-1).price-lastHour[0].price).toFixed(4)):null;
- row.large_trade_max_quantity=pre.length?Math.max(...pre.map(t=>t.qty)):null;
+ row.large_trade_max_quantity=pre.length?pre.reduce((max,t)=>Math.max(max,t.qty),0):null;
  for(let window=24;window>0;window--){
   const end=start-(window-1)*900000,begin=end-900000;
   const ts=pre.filter(t=>t.ms>=begin&&t.ms<end);
