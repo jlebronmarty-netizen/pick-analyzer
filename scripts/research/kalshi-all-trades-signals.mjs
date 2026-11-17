@@ -62,7 +62,7 @@ for(const [index,r] of eligible.entries()){
    prints_15m:windows[0],prints_30m:windows[1],prints_60m:windows[2],
    acceleration_15m:windows[1]>windows[0]?(windows[0]/(windows[1]-windows[0])):null,
    median_notional_usd:percentile(amounts,.5),p90_notional_usd:percentile(amounts,.9),
-   max_notional_usd:Math.max(...amounts),median_contracts:percentile(q,.5),
+   max_notional_usd:amounts.reduce((mx,v)=>Math.max(mx,v),0),median_contracts:percentile(q,.5),
    top_10pct_volume_share:sum(last.filter(t=>t.qty>=percentile(q,.9)),'qty')/sum(last,'qty'),
    price_momentum_60m:last.at(-1).px-last[0].px,
    price_volatility_60m:stdev(last.slice(1).map((t,i)=>t.px-last[i].px)),
