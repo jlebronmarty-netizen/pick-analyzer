@@ -8,6 +8,9 @@ on:
       - 'src/lib/nba/goat-formula-lab-core.mjs'
       - 'src/lib/nba/goat-formula-lab-v2.mjs'
       - 'src/lib/nba/goat-formula-lab-v3.mjs'
+      - 'src/lib/nba/goat-formula-v3-frozen-validation.mjs'
+      - 'tests/nba-goat-formula-v3-frozen-validation.test.mjs'
+      - 'scripts/nba-goat-prop-frozen-v3-watch.mjs'
       - 'tests/nba-goat-formula-lab-v3.test.mjs'
       - 'scripts/nba-goat-prop-formula-lab-v3.mjs'
       - 'tests/nba-goat-formula-lab-v2.test.mjs'
@@ -53,5 +56,9 @@ jobs:
         run: node --test tests/nba-goat-formula-lab-v3.test.mjs
       - name: NBA V3 no-network research dry-run
         run: node scripts/nba-goat-prop-formula-lab-v3.mjs
+      - name: Frozen GOAT V3 future-evidence tests
+        run: node --test tests/nba-goat-formula-v3-frozen-validation.test.mjs
+      - name: Frozen GOAT V3 watcher no-network dry run
+        run: node scripts/nba-goat-prop-frozen-v3-watch.mjs
       - name: TypeScript validation including protected pilot route
         run: npx tsc --noEmit --pretty false
