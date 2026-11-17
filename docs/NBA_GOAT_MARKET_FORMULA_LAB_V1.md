@@ -71,3 +71,30 @@ Una consulta read-only contra `nba_market_quotes_v1` + tabla compacta, seleccion
 - Un dataset antiguo de MLB o NBA que se descargó en 2026 puede ser útil para entrenar parámetros offline, pero sus predicciones retrospectivas nunca deben presentarse como realmente emitidas antes del partido.
 
 **Implicación:** iniciar *shadow forward* inmediato mientras hacemos investigación offline con los archivos reconstruidos; posponer afirmaciones de ROI, precisión certificada o fórmula validada hasta acumular decisiones futuras y holdout. Para ML/spread/total aplicar la misma política de datos pregame congelados.
+
+## Primer experimento V1 ejecutado — reconstruido (16 nov 2026)
+
+El motor puro `src/lib/nba/goat-formula-lab-core.mjs` y el CLI de solo lectura `scripts/nba-goat-prop-formula-lab.mjs` implementan:
+- 4 mercados: puntos, rebotes, asistencias, triples;
+- 11 combinaciones predeterminadas: predicción = w × media L5 + (1−w) × media L10, w=0,0.1,…,1;
+- mismo subconjunto de casos con **10 partidos anteriores** para comparar pesos justamente;
+- selección **solo en TRAIN** del 8 al 12 noviembre, prueba posterior separada del 13 al 15 noviembre, mismo mercado;
+- resultados `EXPLORATORY_RECONSTRUCTED_FORMULA_CANDIDATE` o `INSUFFICIENT_INDEPENDENT_SAMPLE`, **nunca certificados**, sin simulación de ROI ni Official Picks;
+- bandera `PROSPECTIVE_ASOF_VERIFIED` que exige que cada partido del historial estuviera capturado antes del cutoff de 30 minutos, además de ser anterior al partido objetivo.
+
+La consulta SQL read-only aplicó esas 11 ponderaciones sobre los mismos ejemplos elegibles y confirmó:
+
+| Mercado | TRAIN 8–12 nov | Juegos TRAIN | Peso L5 seleccionado por MAE TRAIN | HOLDOUT 13–15 nov | Juegos HOLDOUT | MAE baseline L10 HOLDOUT | MAE seleccionado HOLDOUT | Mejora |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Puntos | 183 | 26 | 0.0 | 256 | 22 | 5.4250 | 5.4250 | 0 |
+| Rebotes | 183 | 26 | 0.0 | 256 | 22 | 2.0805 | 2.0805 | 0 |
+| Asistencias | 183 | 26 | 0.0 | 256 | 22 | 1.5707 | 1.5707 | 0 |
+| Triples | 183 | 26 | 0.0 | 256 | 22 | 1.0738 | 1.0738 | 0 |
+
+**Interpretación:** los datos de TRAIN prefirieron media L10 sin componente L5 en los cuatro mercados; eso reproduce exactamente el baseline L10 en el holdout. **No hubo mejora** y no hay fundamento para cambiar fórmulas oficiales. Es un resultado nulo útil, no una señal para ajustar pesos a posteriori mirando el holdout.
+
+Estos 256 casos de holdout por mercado son **jugador-partido**, agrupados en 22 partidos NBA; están correlacionados. Además, la mayoría de los registros GOAT fueron capturados retrospectivamente: esta evaluación es `RETROSPECTIVE_RECONSTRUCTED`, no una prueba prospectiva real. Las 183 observaciones de train provienen de 26 juegos. Los períodos de training y holdout no se solapan. No reportar los 4×256 como 1,024 apuestas independientes ni inferir ROI.
+
+**Siguiente experimento permitido:** ampliar la familia de hipótesis predefinidas (EWMA, tasa/minuto con minutos proyectados, ajustes rival/eficiencia/uso pregame, shrinkage), conservar un **nuevo** holdout futuro sin inspeccionar, y comparar la calidad contra L10. Para juegos de 2026-11-16 en adelante, recolectar data pregame real para el cohort PROSPECTIVE. La selección de variables no puede utilizar resultados posteriores, noticias tardías ni cuotas live.
+
+El CLI tiene `--execute` explícito y es de **solo lectura** (requiere credenciales de backend); sin `--execute` emite únicamente DRY_RUN. No se ha ejecutado el CLI con claves reales ni se ha creado ninguna tarea programada nueva en este PR.
