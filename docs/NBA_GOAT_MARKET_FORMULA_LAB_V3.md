@@ -59,3 +59,16 @@ These intervals are conditional on the already selected formulas and observed te
 ### Why this matters
 
 Unlike earlier searches that returned only L10, V3 reveals a plausible **small** robust adjustment in rebounding/three-point prediction MAE. It is not yet validated, its effect is tiny relative to the natural game-to-game variability, and we must not confuse maximizing historical accuracy with finding a real actionable sportsbook edge.
+
+## Frozen V3 future-evidence watchdog
+
+Frozen in code (research-only; no production activation):
+
+- `src/lib/nba/goat-formula-v3-frozen-validation.mjs` holds `rebounds = MEAN_Q35_50`, `threes = MEAN_MED10_25`.
+- Future eligibility requires target date **on/after 2026-11-16** and **PROSPECTIVE_ASOF_VERIFIED** source historical capture before each cutoff; 13–15 Nov results categorically excluded.
+- Paired baseline = L10 on the same player-game; 3,000 deterministic game-cluster resamples. Existence of gain only permits `POSITIVE_ASOF_REPLAY_REQUIRES_HUMAN_REVIEW` once 30 distinct NBA games and 200 player-game observations per market exist and the game-cluster interval is positive. A replay is not evidence of an actual frozen pregame decision.
+- `scripts/nba-goat-prop-frozen-v3-watch.mjs` is read-only and defaults to a **no-network dry-run**. The run with `--execute` requires authorized backend credentials and reads only the compact fact table. It does not write or request GOAT data.
+- `tests/nba-goat-formula-v3-frozen-validation.test.mjs` checks no historical-window reuse, game-cluster calculations, no automatic model certification.
+- Separate daily ChatGPT condition-watch task checks for newly archived future facts and defensible improvements. It is *not* a new Vercel cron and does not cause data collection; without new archive data, it should stay silent except for a persistently broken collection process.
+
+**Current blocker**: No games dated after Nov 15 exist yet in compact archive; no genuinely new holdout is available. Do not continue selecting weights by repeatedly peeking at the already-inspected Nov 13–15 period.
