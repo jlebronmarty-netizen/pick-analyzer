@@ -9,7 +9,7 @@
 - 64 completed games had two-sided Circa ML quotes captured before the game start.
 - **On the paired 64 only:** DRatings Brier 0.2403, Circa normalized no-vig Brier 0.2291; DRatings 37/64 directional, Circa 41/64.
 - Mean paired Brier difference `DRatings - Circa` 0.01114. Simple IID-normal approximate 95% CI 0.00154 to 0.02073, **not** a formal validation certificate: game correlation, nonrandom coverage, repeated hypothesis exploration, source bias and limited season coverage make uncertainty larger.
-- Frozen ex-ante 70% Circa / 30% DRatings blend: Brier 0.2322; worse than pure Circa in the same paired cohort.
+- Fixed-weight exploratory 70% Circa / 30% DRatings blend (not preregistered): Brier 0.2322; worse than pure Circa in the same paired cohort.
 - Chronological halves, not model selection: earlier n=32 DRatings 0.2097, Circa 0.2067, blend 0.2074; later n=32 DRatings 0.2708, Circa 0.2516, blend 0.2569.
 - Disagreement grouped after inspection (exploratory): <3pp n=32 DRatings 0.2161, market 0.2147; 3–7pp n=27 0.2473 vs 0.2392; >=7pp n=5 0.3569 vs 0.2673. **Do not turn five games into a betting rule.**
 - Seven Poisson challenger SHADOW entries: all frozen before game start, zero eligible official picks. Five outcomes available at audit; directional ML 2/5, research Over 5.5 3/5, hypothetical home -1.5 3/5. These are proxies, *not* validated real contracts.
