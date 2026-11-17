@@ -108,7 +108,7 @@ for(let i=0;i<files.length;i++){
 }
 function csv(rows){
  const cols=Object.keys(rows[0]||{ticker:'',reason:''});
- return [cols.join(','),...rows.map(r=>cols.map(k=>'"'+String(r[k]??'').replaceAll('"','""')+'"').join(',')).join('\n')].join('\n')+'\n';
+ return [cols.join(','),...rows.map(r=>cols.map(k=>'"'+String(r[k]??'').replaceAll('"','""')+'"').join(',')).join(','))].join('\n')+'\n';
 }
 await writeFile(join(output,'espn-verified-market-summary.csv'),csv(summary));
 await writeFile(join(output,'espn-verified-15m-buckets.csv'),csv(buckets));
