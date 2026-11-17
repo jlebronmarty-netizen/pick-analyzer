@@ -87,3 +87,29 @@ For a game with latest *pregame* Circa no-vig home probability `p`, collect othe
 **Interpretation:** interesting evidence of an empirical bias-correction candidate but **not a validated improvement**. It was proposed after inspecting overlapping historical data and is subject to selection bias; these 38 outcomes do not constitute an untouched independent holdout. It is not a real sportsbook bet, ROI proof, or production-ready calibration. The prior bias may be unstable over time.
 
 **Next gate:** lock V0's formula, minimum 20 outcomes, pseudo-count 50 and source-matching rules, then collect a genuinely prospective independent cohort with exact cutoff-available prices and outcome timestamps. Measure Brier, log loss, accuracy, calibration, sample size and market contract on the same games. No official model/pick promotion, no cron additions or paid providers until criteria are met.
+
+## Third experiment: Poisson prior-rest adjustment (Nov 17, 2026)
+
+Source: `sql/research/nhl_frozen_rest_ablation_source_v0.sql` was fetched back from this branch and executed against the Pick Analyzer database; it yielded **7** completed frozen predictions whose rest context was captured no later than frozen time. Of the 17 total frozen SHADOW rows at inspection, 7 had outcomes, 7/7 had paired previous-game rest and **historical** goalie save-rate fields, only **2/7** had as-of official PP/PK snapshots, and **0/7** had validated next-game confirmed or probable starter identity. Do **not** treat previous-game starter as upcoming goalie or reuse Nov 16 PP/PK snapshots for earlier fixtures.
+
+Research-only reproducible pure computation helper: `src/lib/nhl-context-ablation-research.mjs`, with unit test definitions `tests/nhl-context-ablation-research.test.mjs`. The evaluator rejects predictions frozen later than ten minutes before puck drop, observations with missing/misdated context, outcomes not captured after puck drop, and invalid inputs. The helper and test files are isolated on the research branch, not included in production imports. Tests have been authored but not yet executed in GitHub Actions, so do not describe CI as passed.
+
+A counterfactual adjustment was tested: multiply each team's frozen Poisson mean by `1 - penalty` if the team's recorded `hoursSincePreviousGame < 36`. Fixed research Over 5.5, home -1.5 and tied-score-50/50 ML **proxies**, evaluated with independent-Poisson distribution truncated at 18 goals per team. The tested penalties were 0%, 2.5%, 5%, 7.5%, 10%; this is a post-hoc sensitivity experiment, not a registered holdout.
+
+| Rest penalty | ML Brier | Home -1.5 proxy Brier | Over 5.5 proxy Brier |
+|---:|---:|---:|---:|
+| 0% baseline | 0.30501 | 0.30229 | 0.27611 |
+| 2.5% | 0.30875 | 0.30528 | 0.27750 |
+| 5% | 0.31258 | 0.30831 | 0.27943 |
+| 7.5% | 0.31651 | 0.31139 | 0.28192 |
+| 10% | 0.32054 | 0.31452 | 0.28500 |
+
+**Decision:** no tested uniform rest penalty improved any of the three Brier measures; reject automatic adoption of this rest-only adjustment. Do not infer that rest has no effect generally. All seven matches are from a very narrow time range, three-market contracts remain unverified, and OT/SO scoring is unmodeled. A future candidate may use **relative rest**, opponent and verified future starter status, but must undergo independent chronological prospective holdout.
+
+### What is genuinely available for new improvements
+
+1. Continue as-of frozen PP/PK capture and independent goalie confirmation verification; do not silently substitute historical starter as the next starter.
+2. Run PP/PK and starter effects only when enough matched, timestamp-verified observations exist (currently 2 and 0 completed respectively).
+3. Verify real book lines for Puck Line and Total and settlement rules; score proxies alone cannot establish financial edge or true sportsbook-market accuracy.
+4. Preserve locked exploratory Circa bias candidate for future prospective validation rather than retuning on this same overlapping cohort.
+5. Do not alter model, main branch, paid API subscriptions, crons, or official pick flags during research.
