@@ -5,6 +5,8 @@ on:
       - 'scripts/nba-goat-season-2026-bulk-archive.mjs'
       - 'scripts/nba-goat-prop-formula-lab.mjs'
       - 'src/lib/nba/goat-formula-lab-core.mjs'
+      - 'src/lib/nba/goat-formula-lab-v2.mjs'
+      - 'tests/nba-goat-formula-lab-v2.test.mjs'
       - 'tests/nba-goat-formula-lab.test.mjs'
       - 'src/app/api/nba/goat/bulk-pilot/route.ts'
       - 'src/app/api/nba/goat/season-core-batch/route.ts'
@@ -37,6 +39,8 @@ jobs:
         run: node --test tests/nba-goat-research-compact-core.test.mjs
       - name: NBA formula search engine unit tests
         run: node --test tests/nba-goat-formula-lab.test.mjs
+      - name: NBA V2 formula lab unit tests
+        run: node --test tests/nba-goat-formula-lab-v2.test.mjs
       - name: NBA formula engine no-credential dry run
         run: node scripts/nba-goat-prop-formula-lab.mjs
       - name: TypeScript validation including protected pilot route
