@@ -26,16 +26,18 @@ export function evaluateFrozenContext(rows,{restPenalty=0.05}={}) {
   for(const row of rows){
     const start=asMillis(row.scheduled_at), frozen=asMillis(row.frozen_at);
     const resultAt=asMillis(row.outcome_observed_at);
-    const homeGoals=finite(Number(row.home_lambda)),awayGoals=finite(Number(row.away_lambda));
-    const hs=finite(Number(row.home_score)),as=finite(Number(row.away_score));
+    const homeGoals=row.home_lambda==null?null:finite(Number(row.home_lambda));
+    const awayGoals=row.away_lambda==null?null:finite(Number(row.away_lambda));
+    const hs=row.home_score==null?null:finite(Number(row.home_score));
+    const as=row.away_score==null?null:finite(Number(row.away_score));
     const rh=row.home_rest_hours==null?null:finite(Number(row.home_rest_hours));
     const ra=row.away_rest_hours==null?null:finite(Number(row.away_rest_hours));
-    const sourceAt=row.rest_context_asof ? asMillis(row.rest_context_asof) : null;
+    const sourceAt=asMillis(row.rest_context_asof);
     if(!row.event_id?.startsWith('nhl:202602')||start==null||frozen==null||
        frozen>=start-10*60*1000||resultAt==null||resultAt<=start||
        homeGoals==null||awayGoals==null||!Number.isInteger(hs)||!Number.isInteger(as)||
        hs===as||rh==null||ra==null||rh<0||ra<0||
-       (sourceAt!==null&&sourceAt>frozen)){rejected++;continue;}
+       sourceAt==null||sourceAt>frozen){rejected++;continue;}
     const base=poissonProxy(homeGoals,awayGoals);
     const shifted=poissonProxy(homeGoals*(rh<36?1-restPenalty:1),awayGoals*(ra<36?1-restPenalty:1));
     if(!base||!shifted){rejected++;continue;}
