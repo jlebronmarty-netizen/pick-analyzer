@@ -7,6 +7,9 @@ on:
       - 'scripts/nba-goat-prop-formula-lab-v2.mjs'
       - 'src/lib/nba/goat-formula-lab-core.mjs'
       - 'src/lib/nba/goat-formula-lab-v2.mjs'
+      - 'src/lib/nba/goat-formula-lab-v3.mjs'
+      - 'tests/nba-goat-formula-lab-v3.test.mjs'
+      - 'scripts/nba-goat-prop-formula-lab-v3.mjs'
       - 'tests/nba-goat-formula-lab-v2.test.mjs'
       - 'tests/nba-goat-formula-lab.test.mjs'
       - 'src/app/api/nba/goat/bulk-pilot/route.ts'
@@ -46,5 +49,9 @@ jobs:
         run: node scripts/nba-goat-prop-formula-lab.mjs
       - name: V2 formula lab no-network dry run
         run: node scripts/nba-goat-prop-formula-lab-v2.mjs
+      - name: NBA V3 robust formula and game cluster unit tests
+        run: node --test tests/nba-goat-formula-lab-v3.test.mjs
+      - name: NBA V3 no-network research dry-run
+        run: node scripts/nba-goat-prop-formula-lab-v3.mjs
       - name: TypeScript validation including protected pilot route
         run: npx tsc --noEmit --pretty false
