@@ -80,7 +80,7 @@ export function evaluateV2(examples,{mode='RETROSPECTIVE_RECONSTRUCTED',trainFro
   const holdout=marketRows.filter(e=>e.day>=holdoutFrom&&e.day<=holdoutThrough);
   const trainScores=CANDIDATES.map(formula=>({formula,metrics:score(train,formula)}));
   const fullyComparable=trainScores.filter(x=>x.metrics.n===train.length&&train.length>=minTrain);
-  fullyComparable.sort((a,b)=>a.metrics.mae-b.metrics.mae||CANDIDATES.indexOf(a.formula)-CANDIDATES.indexOf(b.formula));
+  fullyComparable.sort((a,b)=>{const diff=a.metrics.mae-b.metrics.mae;return Math.abs(diff)>1e-8?diff:CANDIDATES.indexOf(a.formula)-CANDIDATES.indexOf(b.formula);});
   const selected=fullyComparable[0]??null;
   const baseline=score(holdout,'L10'),choice=selected?score(holdout,selected.formula):null;
   const sufficient=Boolean(selected)&&holdout.length>=minHoldout&&baseline.games>=10&&choice?.n===holdout.length;
