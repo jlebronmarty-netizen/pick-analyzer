@@ -48,7 +48,7 @@ export function buildNbaPropShadowHypothesis({quote,event,playerGameStats,asOf,m
  if(available<minPriorGames)return blocked('INSUFFICIENT_PRIOR_GAMES',{historicalGames:available,minPriorGames});
  const last20=history.slice(0,Math.min(20,available)),recent=last20.slice(0,Math.min(10,available)),lastFive=recent.slice(0,5);
  const avg=items=>items.reduce((sum,item)=>sum+item.value,0)/items.length;
- const mean5=avg(lastFive),mean10=avg(recent),mean20=avg(last20);
+ const mean5=avg(lastFive),mean10=avg(recent),mean20=last20.length===20?avg(last20):null;
  const hitRate=items=>round(100*items.filter(item=>side==='over'?item.value>line:item.value<line).length/items.length);
  const projection=.65*mean5+.35*mean10;
  const variance=recent.reduce((sum,item)=>sum+(item.value-mean10)**2,0)/Math.max(1,recent.length-1);
@@ -57,8 +57,9 @@ export function buildNbaPropShadowHypothesis({quote,event,playerGameStats,asOf,m
   status:'SHADOW_HYPOTHESIS_ONLY',version:NBA_PROPS_SHADOW_VERSION,
   providerGameId:Number(quote.provider_game_id),playerId:Number(quote.player_id),statistic,
   marketLine:line,americanOdds:odds,archivedQuoteId:quote.quote_id??null,quoteCapturedAt:quote.source_received_at,
-  projection:round(projection),rawLastFiveAverage:round(mean5),rawLastTenAverage:round(mean10),rawLastTwentyAverage:round(mean20),
-  descriptiveLineHitRateL5:hitRate(lastFive),descriptiveLineHitRateL10:hitRate(recent),descriptiveLineHitRateL20:hitRate(last20),
+  projection:round(projection),rawLastFiveAverage:round(mean5),rawLastTenAverage:recent.length===10?round(mean10):null,rawLastTwentyAverage:mean20===null?null:round(mean20),
+  recentSampleSizes:{L5:lastFive.length,L10:recent.length,L20:last20.length},
+  descriptiveLineHitRateL5:hitRate(lastFive),descriptiveLineHitRateL10:recent.length===10?hitRate(recent):null,descriptiveLineHitRateL20:last20.length===20?hitRate(last20):null,
   indicativeRange:[round(Math.max(0,projection-1.5*stdev)),round(projection+1.5*stdev)],
   historicalGames:available,gamesUsed:recent.length,lastHistoricalGameAt:new Date(recent[0].at).toISOString(),
   sampleStandardDeviation:round(stdev),projectionMinusLine:round(projection-line),
