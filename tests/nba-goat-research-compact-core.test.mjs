@@ -40,6 +40,9 @@ test('research shadow refuses history not yet captured at frozen quote time',asy
  const ready=buildNbaPropShadowHypothesis({quote,event,playerGameStats:syntheticGoatPropInputs(eligible),asOf:'2026-11-15T23:50:00.000Z'});
  assert.equal(ready.status,'SHADOW_HYPOTHESIS_ONLY');
  assert.equal(ready.descriptiveLineHitRateL5,100);
- assert.equal(ready.descriptiveLineHitRateL20,100);
+ assert.equal(ready.descriptiveLineHitRateL20,null);
+ assert.equal(ready.descriptiveLineHitRateL10,null);
+ assert.equal(ready.rawLastTwentyAverage,null);
+ assert.deepEqual(ready.recentSampleSizes,{L5:5,L10:6,L20:6});
  assert.equal(ready.productionEligible,false);
 });
