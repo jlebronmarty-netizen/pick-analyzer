@@ -61,3 +61,13 @@ Sí se buscarán candidatos como en MLB, pero **con selección separada de valid
 ## Política de costos/producción
 
 No descargar nuevamente los 192 juegos, no ampliar tablas con payload JSON crudo y no modificar crons existentes. La nueva tabla compacta de 1.67 MB basta para empezar props; las familias de tracking/defensa/PBP son una fase posterior con prueba de cobertura. Los actuales schedules de captura diaria adicional no se deben asumir activos: `vercel.json` se restauró a `main` por política de seguridad.
+
+## Hallazgo de auditoría estricta de punto temporal (agregado el 16 Nov)
+
+Una consulta read-only contra `nba_market_quotes_v1` + tabla compacta, seleccionando **una última cuota de puntos por juego/jugador** con al menos 10 min antes de inicio entre 2026-11-05 y 2026-11-15, encontró **841 contratos juego-jugador únicos en 60 juegos**. Exigiendo `prior.game_datetime < quote.source_received_at` y **`prior.source_captured_at <= quote.source_received_at`**, el máximo historial realmente capturado era de **3 partidos** y los elegibles L5/L10/L20 eran **0**. La extracción retrospectiva de fines de semana anteriores no debe convertirse retroactivamente en evidencia de una operación que nunca estuvo disponible en vivo. Esto obliga a separar:
+
+- **RETROSPECTIVE_RECONSTRUCTED (exploratorio)**: permite estudiar la capacidad de fórmula en la secuencia histórica, pero no puede usarse para acreditar decisiones reales o accuracy de una simulación prospectiva; incluye nota de que el histórico fue reconstruido después.
+- **PROSPECTIVE_ASOF_VERIFIED (evidencia principal)**: comienza después de que el histórico GOAT quedó materializado (16 Nov UTC); solo puede usar facts con `source_captured_at` previo al cutoff.
+- Un dataset antiguo de MLB o NBA que se descargó en 2026 puede ser útil para entrenar parámetros offline, pero sus predicciones retrospectivas nunca deben presentarse como realmente emitidas antes del partido.
+
+**Implicación:** iniciar *shadow forward* inmediato mientras hacemos investigación offline con los archivos reconstruidos; posponer afirmaciones de ROI, precisión certificada o fórmula validada hasta acumular decisiones futuras y holdout. Para ML/spread/total aplicar la misma política de datos pregame congelados.
