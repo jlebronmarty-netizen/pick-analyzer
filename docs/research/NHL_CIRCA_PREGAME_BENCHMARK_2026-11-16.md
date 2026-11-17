@@ -70,3 +70,20 @@ FROM losses;
 6. Continue normal free archived ingestion and shadow freezing; monitor provider failures and settled-game reconciliation. Keep all official picks, MLB, NBA, other sports and scheduled jobs unchanged.
 
 **Decision:** There is no currently validated Pick-specific NHL accuracy improvement. The empirical finding supports using Circa as a benchmark and possible probability anchor in research, **not** an official automatic substitute or a claimed profitable betting system.
+
+## Second experiment: previous-outcomes-only rolling Circa bias correction
+
+Executable read-only SQL: [`sql/research/nhl_circa_rolling_bias_v0.sql`](../../sql/research/nhl_circa_rolling_bias_v0.sql). The exact committed SQL file was fetched back and executed against Pick Analyzer Supabase, confirming these values.
+
+For a game with latest *pregame* Circa no-vig home probability `p`, collect other previously played matches only if the official outcome was **recorded before the current game's quote timestamp**. With `n` eligible historical observations and `b = mean(home_won - past_Circa_home_probability)`, test `clip(p + b*n/(n+50), 0.01, 0.99)`. Minimum 20 known prior games. Fixed `50` pseudo-observations are an exploratory shrinkage decision, **not** independently optimized or prespecified.
+
+38 of the 64 paired games reached the 20-known-game cutoff. On those same 38:
+- Circa original: 22/38 directional correct, Brier 0.24458, log loss 0.68405.
+- Bias correction: 23/38 directional correct, Brier 0.23180, log loss 0.65607.
+- DRatings: Brier 0.26026 on this identical 38-game subset.
+- Mean paired `Circa Brier − corrected Brier` 0.01278; naive IID 95% CI **-0.00129 to 0.02685**, crossing zero.
+- Daily corrected versus market Brier: Nov 11 0.2052 vs 0.2073 (n=6), Nov 12 0.2175 vs 0.2230 (n=11), Nov 13 0.2132 vs 0.2424 (n=2), Nov 14 0.2205 vs 0.2520 (n=14), Nov 15 **0.3343 vs 0.3170** (n=5), showing nonuniform results.
+
+**Interpretation:** interesting evidence of an empirical bias-correction candidate but **not a validated improvement**. It was proposed after inspecting overlapping historical data and is subject to selection bias; these 38 outcomes do not constitute an untouched independent holdout. It is not a real sportsbook bet, ROI proof, or production-ready calibration. The prior bias may be unstable over time.
+
+**Next gate:** lock V0's formula, minimum 20 outcomes, pseudo-count 50 and source-matching rules, then collect a genuinely prospective independent cohort with exact cutoff-available prices and outcome timestamps. Measure Brier, log loss, accuracy, calibration, sample size and market contract on the same games. No official model/pick promotion, no cron additions or paid providers until criteria are met.
