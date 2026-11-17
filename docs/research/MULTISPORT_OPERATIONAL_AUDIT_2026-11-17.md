@@ -39,3 +39,9 @@
 5. Conservar NBA/GOAT y NHL en sus flujos existentes y MLB cerrado. Sin suscripciones adicionales ni cambios a `main` sin pruebas y autorización de release.
 
 **Estado:** auditoría de datos y fuentes completada parcialmente; toda mutación correctiva o deployment permanece pendiente de implementación y verificación.
+
+## Existing reconciliation guard found in code history
+
+The Nov 10 NCAAB settlement repair (`c8fd2748396457f1ffb74015a412b925b84b2dcd`) explicitly allows only exact ESPN event identity, equal unordered pair of teams and scheduling drift <=2h (with home-away normalization). Longer postponements cannot be automatically settled by that rule. That is a **correct safety guard** against mismatched games, not evidence of broken ordinary FINAL reconciliation. Proposed status-handling repair must retain it and add separate explicit POSTPONED/RESCHEDULED classification; never silently raise the time-shift tolerance, overwrite locked forecasts or attribute a rescheduled game's final to an older event.
+
+Further checks should prove exact event status and canonical mapping before introducing a new terminal status, with dedicated tests for no-score and schedule-drift cases.
