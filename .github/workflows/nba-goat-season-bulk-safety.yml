@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/nba-goat-season-2026-bulk-archive.mjs'
       - 'scripts/nba-goat-prop-formula-lab.mjs'
+      - 'scripts/nba-goat-prop-formula-lab-v2.mjs'
       - 'src/lib/nba/goat-formula-lab-core.mjs'
       - 'src/lib/nba/goat-formula-lab-v2.mjs'
       - 'tests/nba-goat-formula-lab-v2.test.mjs'
@@ -43,5 +44,7 @@ jobs:
         run: node --test tests/nba-goat-formula-lab-v2.test.mjs
       - name: NBA formula engine no-credential dry run
         run: node scripts/nba-goat-prop-formula-lab.mjs
+      - name: V2 formula lab no-network dry run
+        run: node scripts/nba-goat-prop-formula-lab-v2.mjs
       - name: TypeScript validation including protected pilot route
         run: npx tsc --noEmit --pretty false
