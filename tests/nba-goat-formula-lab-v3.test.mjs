@@ -20,7 +20,7 @@ test('formula medians and 35th percentile use ten prior games only',()=>{
  assert.equal(preds.L10,3);
  assert.equal(preds.MED10,2);
  assert.equal(preds.MEAN_MED10_25,2.75);
- assert.equal(preds.MEAN_Q35_50,2);
+ assert.equal(preds.MEAN_Q35_50,2.075);
 });
 test('target outcomes and same-game minutes do not become features',()=>{
  const rows=Array.from({length:12},(_,i)=>f(i+1,1,i===11?99:10));
