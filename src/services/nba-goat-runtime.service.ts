@@ -16,7 +16,7 @@ async function load(){
   db.from('team_stats').select('team_name,season,updated_at,raw_data').eq('sport_key',SPORT).eq('season',String(year)),
   db.from('prediction_history').select('id,game_id,market,team,line,sportsbook,model_version,result,created_at,prediction_origin,feature_snapshot').eq('sport_key',SPORT).eq('prediction_origin',ORIGIN).order('id').limit(1000),
   db.from('sports_sync_jobs').select('id,job_type,status,started_at,records_inserted,metadata').eq('sport_key',SPORT).in('job_type',['nba_current_era_shadow_scheduler_canary_v1','nba_goat_shadow_v1']).order('started_at',{ascending:false}).limit(1000),
-  db.from('nba_market_sync_runs_v1').select('status,completed_at,summary').order('started_at',{ascending:false}).limit(1),
+  db.from('nba_market_sync_runs_v1').select('status,completed_at,summary').not('slot','like','research:%').order('started_at',{ascending:false}).limit(1),
   db.from('nba_market_schedules_v1').select('snapshot_id,date_local,source_received_at,payload').order('source_received_at',{ascending:false}).limit(6),
   db.from('nba_pregame_context_v1').select('snapshot_id,captured_at,game_ids,team_ids,coverage').order('captured_at',{ascending:false}).limit(1),
  ]);

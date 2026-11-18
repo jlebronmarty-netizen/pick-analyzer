@@ -15,6 +15,7 @@ export async function getNbaGoatPropsResearchAudit() {
   const quoteR=await db.from('nba_market_quotes_v1')
     .select('quote_id,provider_game_id,player_id,market,statistic,side,line,contract,period,phase,source_received_at')
     .eq('market','props').eq('phase','PREGAME').in('side',['over','under'])
+    .eq('period','FULL_GAME_LABEL_OT_UNVERIFIED').in('statistic',NBA_PROP_RESEARCH_MARKETS)
     .in('provider_game_id',gameIds)
     .order('source_received_at',{ascending:false}).limit(1000);
   if(quoteR.error)throw Error('NBA_PROPS_RESEARCH_QUOTES_READ_FAILED');

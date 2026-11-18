@@ -27,12 +27,12 @@ export async function archiveStatus(){
  const [snap,quote,run,schedule]=await Promise.all([
   supabaseAdmin.from('nba_market_snapshots_v1').select('snapshot_id,source_received_at,recorded_at,provider_game_id',{count:'exact'}).order('recorded_at',{ascending:false}).limit(1),
   supabaseAdmin.from('nba_market_quotes_v1').select('quote_id',{count:'exact',head:true}),
-  supabaseAdmin.from('nba_market_sync_runs_v1').select('run_id,started_at,completed_at,status,summary').order('started_at',{ascending:false}).limit(1),
+  supabaseAdmin.from('nba_market_sync_runs_v1').select('run_id,started_at,completed_at,status,summary').not('slot','like','research:%').order('started_at',{ascending:false}).limit(1),
   supabaseAdmin.from('nba_market_schedules_v1').select('date_local,source_received_at').order('source_received_at',{ascending:false}).limit(1)])
  if(snap.error||quote.error||run.error||schedule.error)throw new Error('ARCHIVE_STATUS_UNAVAILABLE')
  return {module:'NBA_SHARED_ARCHIVE_V1',durable:true,snapshots:snap.count,quotes:quote.count,last_snapshot:snap.data?.[0]??null,last_run:run.data?.[0]??null,last_schedule:schedule.data?.[0]??null,models_written:false,settlement_performed:false,checked_at:new Date().toISOString()}
 }
-export async function runSharedNbaArchive(token:string,mode:'cron'|'manual'='cron',day=localDay()){
+export async function runSharedNbaArchive(token:string,mode:'cron'|'manual'='cron',day=localDay(),{captureProps=true}:{captureProps?:boolean}={}){
  if(!archiveEnabled())return {status:'DISABLED',success:false}
  const started=new Date().toISOString(),deadline=Date.now()+45000
  const slot=mode==='cron'?`cron:${Math.floor(Date.now()/1800000)}`:`manual:${Math.floor(Date.now()/60000)}`
@@ -49,7 +49,9 @@ export async function runSharedNbaArchive(token:string,mode:'cron'|'manual'='cro
   const s=await sourceRead(new URLSearchParams({action:'games',date:day}),token,deadline)
   await archiveEnvelope(s);summary.schedule_days.push(day)
   const plan=syncPlan(s.data.games);summary.eligible=plan.eligible
-  const tasks=[...plan.main.map((g:{id:number})=>({action:'quote',game_id:String(g.id),group:'main'})),...plan.props.map((g:{game_id:number,prop_type:string})=>({action:'quote',game_id:String(g.game_id),group:'props',prop_type:g.prop_type}))]
+  // The direct research collector requests all prop types once per game.
+  // Avoid the former four calls per selected game through the filtered gateway.
+  const tasks=[...plan.main.map((g:{id:number})=>({action:'quote',game_id:String(g.id),group:'main'})),...(captureProps?plan.props.map((g:{game_id:number,prop_type:string})=>({action:'quote',game_id:String(g.game_id),group:'props',prop_type:g.prop_type})):[])]
   summary.planned=tasks.length
   if(plan.not_selected)summary.errors.push('COVERAGE_LIMIT_REACHED')
   let index=0

@@ -151,8 +151,9 @@ async function ensureWeights(sportKey: string) {
   }
 }
 
-export async function getModelWeights(sportKey = 'baseball_mlb') {
-  await ensureWeights(sportKey)
+export async function getModelWeights(sportKey = 'baseball_mlb', {initialize = true}: {initialize?: boolean} = {}) {
+  // Read-only consumers must not reset persisted learned weights to defaults.
+  if (initialize) await ensureWeights(sportKey)
 
   const { data, error } = await supabaseAdmin
     .from('model_weights')

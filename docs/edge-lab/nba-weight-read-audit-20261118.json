@@ -1,0 +1,19 @@
+{
+  "observed_date": "2026-11-18",
+  "observation_time_note": "Exact database row update times are below; no pre-request weight snapshot is available.",
+  "source": "Read-only Supabase query: public.model_weights, model_versions, model_weight_history",
+  "sport_key": "basketball_nba",
+  "trigger_get_generated_at": "2026-11-18T16:55:16Z",
+  "rows": [
+    {"factor":"homeAwayAdvantage","weight":1.05,"default_weight":1.05,"sample_size":0,"win_rate":0,"roi":0,"updated_at":"2026-11-18T16:55:15.884Z"},
+    {"factor":"headToHeadAdvantage","weight":1.15,"default_weight":1.15,"sample_size":0,"win_rate":0,"roi":0,"updated_at":"2026-11-18T16:55:16.117Z"},
+    {"factor":"pitcherAdvantage","weight":1.45,"default_weight":1.45,"sample_size":0,"win_rate":0,"roi":0,"updated_at":"2026-11-18T16:55:16.232Z"},
+    {"factor":"injuryImpact","weight":1.3,"default_weight":1.3,"sample_size":0,"win_rate":0,"roi":0,"updated_at":"2026-11-18T16:55:16.336Z"},
+    {"factor":"weatherImpact","weight":0.75,"default_weight":0.75,"sample_size":0,"win_rate":0,"roi":0,"updated_at":"2026-11-18T16:55:16.403Z"}
+  ],
+  "prior_model_versions": [],
+  "prior_weight_history": [],
+  "pre_get_weights_known": false,
+  "restoration_performed": false,
+  "correction": "NBA invokes getModelWeights with initialize:false; formulas and persisted historical predictions are unchanged."
+}
