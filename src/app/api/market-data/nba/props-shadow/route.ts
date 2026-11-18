@@ -30,8 +30,8 @@ export async function GET(request:NextRequest){
  const ids=[...new Set(q.data.map(x=>Number(x.player_id)).filter(Number.isSafeInteger))];
  if(!ids.length)return reply({status:'NO_FRESH_VERIFIED_PROP_QUOTES',version:PANEL_VERSION,rows:[],checkedAt:at});
  const facts:any[]=[];
- for(let i=0;i<ids.length;i+=100){
-  const chunk=ids.slice(i,i+100);
+ for(let i=0;i<ids.length;i+=30){
+  const chunk=ids.slice(i,i+30);
   // Filter per player to avoid a full raw archive scan. 2026 compact facts only.
   const r=await db.from('nba_goat_player_game_research_v1')
    .select('player_id,provider_game_id,game_datetime,source_captured_at,projection_eligible,pts,reb,ast,fg3m')
