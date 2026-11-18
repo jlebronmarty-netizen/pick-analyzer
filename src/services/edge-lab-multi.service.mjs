@@ -25,8 +25,8 @@ async function collectTt(db,request,summary){
  const existing=await readAll(db,T.forecasts,'TT'),outcomes=await readAll(db,T.outcomes),storedBefore=await readAll(db,T.finals);
  const attempts=checked(await db.from(T.runs).select('sport,started_at,summary').eq('sport','TT').order('started_at',{ascending:false}).limit(1000),'RECOVERY_RUNS');
  const plan=planTtRecovery(existing,outcomes,canonicalTtHistory(storedBefore.map(r=>r.payload)).finals,attempts);
- summary.recovery_backlog_events=plan.backlog_events;summary.recovery_skipped=plan.skipped;
- const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V4';summary.provider_spacing_ms=1200;
+ summary.recovery_backlog_events=plan.backlog_events;summary.recovery_skipped=plan.skipped;summary.recovery_strategy=plan.strategy;
+ const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V5';summary.provider_spacing_ms=1200;
  const recentPages=plan.backlog_events>10?0:plan.target?1:2;summary.settlement_priority=plan.backlog_events>10;
  for(let page=1;page<=recentPages;page++){
   const response=await paced(()=>paidRead(db,request,'results',page,summary)),parsed=normalizeTtResultPage(response.data,response.received_at,page);
@@ -68,9 +68,9 @@ async function collectTt(db,request,summary){
  summary.forecasts_inserted=await insertRows(db,T.forecasts,forecasts.rows);summary.forecasts_reused=forecasts.rows.length-summary.forecasts_inserted;summary.status_counts=Object.fromEntries(['FORECAST','PROJECTION','ABSTAIN'].map(s=>[s,forecasts.rows.filter(r=>r.status===s).length]));
  if(!coverage.verified)summary.warnings.push('PREMATCH_COVERAGE_UNVERIFIED');else if(coverage.hasNextPage)summary.warnings.push('PREMATCH_PAGE_BUDGET_REACHED');
  }catch(e){summary.warnings.push('PREMATCH_REFRESH_FAILED');summary.errors.push(e instanceof Error?e.message:'TT_PREMATCH_FAILED');summary.operational_state='SETTLEMENT_RECOVERY';return 'PARTIAL';}
- if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(summary.skipped?.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
+ if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(summary.skipped?.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');if(plan.backlog_events>10)summary.warnings.push('TT_SETTLEMENT_BACKLOG');
  if(!history.finals.length&&allIncoming.length===0)summary.warnings.push('NO_VERIFIED_FINALS_AVAILABLE');
- summary.warnings=[...new Set(summary.warnings)];summary.operational_state=summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';
+ summary.warnings=[...new Set(summary.warnings)];summary.operational_state=plan.backlog_events>10?'SETTLEMENT_BACKLOG':summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';
  return summary.warnings.length?'PARTIAL':'SUCCESS';
 }
 async function getMlb(url){if(!url.startsWith('https://statsapi.mlb.com/api/v1/schedule?'))throw Error('SOURCE_NOT_ALLOWED');const r=await fetch(url,{redirect:'error',cache:'no-store',signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error('MLB_SOURCE_HTTP_'+r.status);const text=await r.text();if(text.length>12000000)throw Error('MLB_SOURCE_TOO_LARGE');return {games:parseMlbSchedule(JSON.parse(text)),digest:digest(text),url};}
