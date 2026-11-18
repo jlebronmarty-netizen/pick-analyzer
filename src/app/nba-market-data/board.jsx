@@ -46,6 +46,7 @@ export default function Board({archiveControls=false}){
  <p><label><input type="checkbox" checked={automatic} onChange={e=>setAutomatic(e.target.checked)}/> Actualización automática</label> · Mercado cada 60 s; calendario cada 5 min, mientras esta pantalla esté visible.</p><p>El servicio central sigue su propio horario. Un error o una fecha antigua se muestran explícitamente.</p></section>
  {scheduleError&&<p role="alert" style={box}>{scheduleError}</p>}{error&&<p role="alert" style={{...box,color:'#fbbf24'}}>{error}</p>}
  {game&&!result&&!error&&<p role="status">Cargando cotizaciones…</p>}
+ <PropsShadowPanel gameId={game} market={market} quotes={result?.data?.quotes||[]}/>
  {result&&<section style={box}><h2>{event?.visitor_team?.full_name} @ {event?.home_team?.full_name}</h2><p>{result.data.phase} · {result.meta.status} · {result.meta.quote_count} cotizaciones · Recibido {time(result.meta.source_received_at)}</p>
  {result.meta.persistence&&<p>Archivo permanente: {result.meta.persistence.status}. {result.meta.persistence.error||''}</p>}
  <label>Filtrar jugador <input aria-label="Filtrar jugador" value={filter} style={input} onChange={e=>setFilter(e.target.value)}/></label>
@@ -53,7 +54,7 @@ export default function Board({archiveControls=false}){
  const age=(clock-Date.parse(q.provider_updated_at))/1000;const status=!q.provider_updated_at||!Number.isFinite(age)?'Hora desconocida':age<0?'Hora inconsistente':age<=180?'Reciente':age<=300?'Envejeciendo':'ANTIGUA';
  return <tr key={q.quote_id}><td>{q.player_name||(q.player_id?`Jugador ${q.player_id} sin resolver`:q.side==='home'?event.home_team.full_name:q.side==='away'?event.visitor_team.full_name:'Total')}</td><td>{types[q.statistic]||q.statistic}<br/>{q.period}</td><td>{q.side} {q.line??''}<br/>{q.contract}</td><td>{price(q.american_odds)}</td><td>{time(q.provider_updated_at)}</td><td>{status} · {Number.isFinite(age)?Math.round(age):'?'} s</td></tr>;
  })}</tbody></table></div>{!quotes.length&&<p>No hay cuotas en esta respuesta o filtro. Esto no confirma una baja ni ausencia de mercados en FanDuel.</p>}<p>Captura: {result.meta.snapshot_id}</p>{result.meta.warnings?.length>0&&<p role="alert">{result.meta.warnings.join(', ')}</p>}</section>}
- <PropsShadowPanel gameId={game} market={market} quotes={result?.data?.quotes||[]}/>
+
  {archiveControls&&<section style={box}><h2>Archivo y sincronización</h2><button style={input} disabled={archiving} onClick={()=>archiveAction(false)}>Ver estado del archivo</button><button style={input} disabled={archiving} onClick={()=>archiveAction(true)}>Archivar jornada ahora</button><p>El proceso NBA existente archiva automáticamente cada 30 min. Consultar cuotas aquí también conserva la captura. No reconstruye precios pasados ni liquida apuestas.</p>{archiving&&<p role="status">Consultando archivo…</p>}{archive&&<pre style={{whiteSpace:'pre-wrap',fontSize:12}}>{JSON.stringify(archive,null,2)}</pre>}</section>}
  <p style={{marginTop:20}}>Los Player Props de esta pantalla son cotizaciones, no recomendaciones. No se certifican el menú completo, precio regional, prórroga ni SGP. Un prop publicado no confirma participación. Las proyecciones de puntos, rebotes, asistencias y triples requieren validación prospectiva antes de aparecer como selecciones SHADOW calificadas.</p></section>;
 }
