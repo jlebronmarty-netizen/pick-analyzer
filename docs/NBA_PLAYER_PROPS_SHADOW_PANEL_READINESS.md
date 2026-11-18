@@ -24,3 +24,13 @@ Estas cifras son un diagnóstico de disponibilidad cambiante, no una garantía d
 `tests/nba-props-shadow-panel.test.mjs` cubre muestreo L5/L10, tiempo de captura, ausencia de fuga de datos del partido objetivo, duplicados de quotes, alcance temporal y bloqueo de apuestas. CI `nba-props-visibility-safety.yml` ejecuta pruebas, `tsc --noEmit` y verifica que no se modificaron `vercel.json` ni servicios del modelo.
 
 **No fusionar ni habilitar como pick oficial** sin revisión de la privacidad, prueba de UI en entorno protegido y comprobación de cuotas/proyecciones reales. Como el gate actual `nba-production-feed.enabled` restringe las ramas preview que pueden acceder al feed, el PR no habilita por sí mismo el tablero en una Preview alternativa; no afirmar que se probó visualmente ahí. No se han modificado accesos ni activado nuevos servicios.
+
+## Evaluación direccional de investigación (V1, sin picks)
+
+El usuario necesita una fila única por jugador/mercado/línea que no duplique la presentación Over/Under. La nueva función pura `buildDirectionalResearchRows` toma los props descriptivos, comprueba ambos lados de una misma línea y cotización dentro de 5 minutos, **10 partidos previos completos**, cuota fresca y momento de captura anterior al precio. Su salida por jugador/línea es exclusivamente `OVER_TENDENCY`, `UNDER_TENDENCY` o `PASS`.
+
+- Los umbrales de distancia frente a la línea (puntos 2, rebotes 1, asistencias 1, triples 0.6) son **heurísticos exploratorios no entrenados**, no probabilidad, edge, índice de confianza, EV ni recomendaciones. No promueven fórmula ni activan Official Picks.
+- PASS si la diferencia es inferior al umbral, hay menos de 10 juegos, falta una contraparte de cuota, o los lados no son temporalmente comparables.
+- Las dos cuotas completas quedan disponibles solamente en el detalle diagnóstico; el panel de investigación muestra la dirección y la cuota correspondiente **solo como observación**.
+- El panel de evaluación está antes de la tabla de cuotas para evitar que el usuario confunda dos cotizaciones con dos recomendaciones.
+- Una vez acumulados datos prospectivos, comparar resultados reales y precios contratables por mercado; **no** convertir esta dirección heurística en una apuesta con probabilidad/ROI sin calibración walk-forward y holdout nuevo.
