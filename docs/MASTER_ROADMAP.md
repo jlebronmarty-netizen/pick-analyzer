@@ -1,3 +1,9 @@
+## NBA HoopsAPI quarter/half quote source trial (2026-11-18)
+
+- Private Vercel Preview-only endpoint and manual UI for a single HoopsAPI NBA slate request, preserving period, market, bookmaker and source identity. The free provider returns 429 after 10 requests in a rolling 24 hours.
+- NEXT: collect actual response in a protected Preview; verify FanDuel Q1-Q4/H1-H2 totals, spreads, moneylines and team totals, matching games to GOAT and Puerto Rico app availability. Only then design a durable quota ledger, immutable capture and optional scheduler.
+- No production model, odds ingest, recommendation, cron, prediction-history or Supabase mutation in this trial. See `docs/edge-lab/nba-hoopsapi-private-preview-20261118.md`.
+
 ## MLB historical OPEN repair — 2026-10-17
 
 - Applied a guarded research-only repair to all 75 pending observations: two frozen MIL +1.5 Run Line model rows graded WIN from verified final evidence; 73 props retain OPEN with specific participation/postponement contract-review reasons.
