@@ -58,3 +58,13 @@ Derivar bajo `decision_cutoff`: L5/L10/L20, minutos/uso, frecuencia de superar l
 - La página de investigación `/api/nba/goat/materialize-props-research` importa secuencialmente hasta 10 juegos verificados por solicitud, sin escribir en Official Picks, modelos ni tablas operativas. Los datos se conservan en Storage y solamente métricas compactas se escriben en la nueva tabla.
 - La preparación de props de rama `goat-research` usa esa tabla y conserva los gates de `source_captured_at <= quote.source_received_at` y juego anterior al cutoff. L5/L10/L20 son descriptivos; no implican probabilidades calibradas ni producción.
 - La importación no se realiza mediante `GET` y requiere acción autenticada del dueño en la página protegida. No afirmar que los 5,323 registros estén materializados hasta verificar la tabla real.
+
+## 18 noviembre 2026 — Programaciones privadas propuestas en esta rama (no producción)
+
+Se añadieron en el `vercel.json` de esta rama **tres Vercel Schedules**, sin modificar las diez entradas existentes de `crons`. Solo deberían ejecutarse en el entorno personalizado `goat-research`, cuya rama está limitada a `feat/nba-goat-2026-full-season-bulk-archive`, con Vercel Authentication habilitada. Horario `America/Puerto_Rico`: 09:35 archivo Core de finales (ventana de 10 días); 10:10 materialización de hasta 10 juegos ya archivados sin llamadas GOAT; 16:45 reintento de advanced incompleto. Los dos horarios de captura Core tienen un máximo programado de 20 solicitudes a GOAT por ejecución. No activan modelos, Official Picks ni nuevos crons de producción.
+
+El endpoint Core verifica cabeceras de Vercel Schedules, `CRON_SECRET`, entorno Preview personalizado, bucket privado y un bloqueo de lote. El materializador también valida nombre de schedule y autorización. Los errores permanecen explícitos y NO liberan bloqueos automáticamente.
+
+**Estado verificable**: código agregado al PR #340, NO fusionado. La existencia de Schedules en el JSON o una compilación READY no demuestra que Vercel haya registrado los tres trabajos para el entorno correcto, que se hayan ejecutado, ni que los archivos se estén actualizando diariamente. Antes de considerarlo operativo: comprobar despliegue protegido, registros de cada schedule, consumo por ejecución, ausencia de tareas de investigación en producción, actualizaciones de manifest/compact y al menos dos días de ejecución sin duplicar llamadas. No disparar peticiones GOAT a modo de prueba sin comprobar presupuesto.
+
+El archivo histórico sigue con último corte comprobado el 16 de noviembre UTC (192 partidos/5,323 player-games); `nba_game_context_v2` sigue capturando boxscores operativos aparte. Nunca convertir una captura reconstruida después del partido en evidencia pregame histórica.
