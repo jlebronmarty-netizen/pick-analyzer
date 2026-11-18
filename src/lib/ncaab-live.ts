@@ -2,7 +2,7 @@ import profile from '@/data/ncaab-profile-2027.json' with {type:'json'};
 import type {NcaabCheckpoint} from './ncaab-checkpoint';
 export const NCAAB_MODEL='NCAAB_PRESEASON_V1';
 export type Observation=NcaabCheckpoint['observations'][number];
-export type LiveObservation=Omit<Observation,'settlement'|'review_required'> & {settlement:null|{home_score:number;away_score:number;outcome:'WIN'|'LOSS'|null;observed_at:string};review_required:boolean;review_reason?:string|null};
+export type LiveObservation=Omit<Observation,'settlement'|'review_required'> & {settlement:null|{home_score:number;away_score:number;outcome:'WIN'|'LOSS'|null;observed_at:string};review_required:boolean;review_reason?:string|null;source_lifecycle?:'POSTPONED'|'RESCHEDULED'|'CANCELLED'|'SCHEDULED'|'REVIEW_SOURCE'|'REVIEW_IDENTITY'|'REVIEW_FINAL';source_lifecycle_captured_at?:string;source_lifecycle_scheduled_at?:string};
 export type Final={event_id:string;home_id:string;away_id:string;scheduled_at:string;home_score:number;away_score:number;captured_at:string;status:string};
 export type Schedule={event_id:string;home_id:string;away_id:string;home_name:string|null;away_name:string|null;scheduled_at:string;season_ending_year:number;phase:string;time_verified:boolean;neutral_site:boolean|null;status:string;captured_at:string};
 // Convergent Taylor series for erf. The frozen model's conservative sigma keeps
