@@ -5,8 +5,10 @@ import {buildPropPanelRows,PANEL_VERSION} from '@/lib/nba/nba-props-panel-core.m
 export const dynamic='force-dynamic';export const runtime='nodejs';export const revalidate=0;export const maxDuration=60;
 const reply=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 export async function GET(request:NextRequest){
- if(process.env.VERCEL_ENV!=='production'||!privateHost(request,process.env)||!request.headers.get('x-vercel-oidc-token'))
-  return reply({status:'PRIVATE_PRODUCTION_REQUIRED'},401);
+ const env=process.env;
+ const permitted=env.VERCEL_ENV==='production'||env.VERCEL_ENV==='preview'&&env.VERCEL_GIT_COMMIT_REF==='feat/nba-props-visibility-20261117';
+ if(!permitted||!privateHost(request,env)||!request.headers.get('x-vercel-oidc-token'))
+  return reply({status:'PRIVATE_DEPLOYMENT_REQUIRED'},401);
  const id=Number(request.nextUrl.searchParams.get('game_id'));
  if(!Number.isSafeInteger(id)||id<1||request.nextUrl.searchParams.size!==1)return reply({status:'INVALID_GAME_ID'},400);
  const at=new Date().toISOString(),cutoff=new Date(Date.now()-48*3600000).toISOString();
