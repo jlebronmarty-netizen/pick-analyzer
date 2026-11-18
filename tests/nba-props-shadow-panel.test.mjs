@@ -75,10 +75,10 @@ test('NBA panel UI and private API remain strictly research-only',()=>{
 test('private preview is restricted to a single review branch and never allows public host',()=>{
  const feed=readFileSync('src/lib/nba-production-feed.mjs','utf8');
  const route=readFileSync('src/app/api/market-data/nba/props-shadow/route.ts','utf8');
- assert.match(feed,/feat\/nba-props-visibility-20261117/);
+ assert.match(feed,/feat\/nba-props-ui-reconciled-20261118/);
  assert.match(feed,/NBA_SHARED_FEED_ENABLED/);
  assert.match(route,/VERCEL_ENV==='preview'/);
- assert.match(route,/VERCEL_GIT_COMMIT_REF==='feat\/nba-props-visibility-20261117'/);
+ assert.match(route,/VERCEL_GIT_COMMIT_REF==='feat\/nba-props-ui-reconciled-20261118'/);
  assert.match(route,/privateHost\(request,env\)/);
  assert.match(route,/x-vercel-oidc-token/);
 });
