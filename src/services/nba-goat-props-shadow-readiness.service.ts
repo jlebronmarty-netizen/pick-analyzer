@@ -1,6 +1,7 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {buildNbaPropShadowHypothesis,NBA_PROPS_SHADOW_STATS,NBA_PROPS_MIN_PRIOR_GAMES,NBA_PROPS_SHADOW_VERSION} from '@/lib/nba/goat-props-shadow-core.mjs';
+import {syntheticGoatPropInputs} from '@/lib/nba/goat-research-compact-core.mjs';
 
 // Read-only prospective readiness board. It NEVER outputs Official Picks or stores predictions.
 export async function getNbaPropsProspectiveShadowReadiness(){
@@ -30,9 +31,38 @@ export async function getNbaPropsProspectiveShadowReadiness(){
    const games=playersWithGames.get(pid)??new Set<number>();games.add(gid);playersWithGames.set(pid,games);
   }
  }
+ // Research preview consumes a compact validated archive only; production/main behavior stays unchanged.
+ const useCompact=process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_TARGET_ENV==='goat-research';
+ let compactRows=0,compactGames=0;
+ if(useCompact){
+  const distinctGames=new Set<number>();
+  // Strict 10k-row bound and stable ordering; no raw Storage files are loaded at quote-time.
+  for(let page=0;page<12;page++){
+   const {data,error}=await db.from('nba_goat_player_game_research_v1')
+    .select('provider_game_id,player_id,game_datetime,source_captured_at,minutes_played,pts,reb,ast,fg3m,projection_eligible')
+    .eq('season',season).eq('projection_eligible',true)
+    .order('provider_game_id',{ascending:true}).order('player_id',{ascending:true})
+    .range(page*1000,page*1000+999);
+   if(error||!data)throw Error('NBA_GOAT_COMPACT_RESEARCH_UNAVAILABLE');
+   for(const row of data){
+    const pid=Number(row.player_id),gid=Number(row.provider_game_id);
+    if(!Number.isSafeInteger(pid)||!Number.isSafeInteger(gid))continue;
+    const prior=histories.get(pid)??[];
+    if(prior.some(x=>Number(x.stat?.game?.id)===gid))continue;
+    const converted=syntheticGoatPropInputs([row]);
+    prior.push(...converted);histories.set(pid,prior);
+    const games=playersWithGames.get(pid)??new Set<number>();games.add(gid);playersWithGames.set(pid,games);
+    distinctGames.add(gid);compactRows++;
+   }
+   if(data.length<1000)break;
+   if(page===11)throw Error('NBA_GOAT_COMPACT_RESEARCH_SCAN_BOUND');
+  }
+  compactGames=distinctGames.size;
+ }
  const ids=events.map(e=>Number(/^bdl_nba_(\d+)$/.exec(String(e.id))?.[1])).filter(Number.isSafeInteger);
  const result:any={status:'READ_ONLY_PROSPECTIVE_RESEARCH',version:NBA_PROPS_SHADOW_VERSION,checkedAt:at,
-  source:'ARCHIVED_PLAYER_BOXSCORES_AND_PREGAME_PROPS',providerCalls:0,databaseWrites:0,
+  source:useCompact?'GOAT_COMPACT_VERIFIED_ARCHIVE_PLUS_OPERATIONAL_CONTEXT':'ARCHIVED_PLAYER_BOXSCORES_AND_PREGAME_PROPS',providerCalls:0,databaseWrites:0,
+  compactResearchEnabled:useCompact,compactPlayerGameRowsRead:compactRows,compactDistinctGamesRead:compactGames,
   scope:['points','rebounds','assists','threes'],minPriorPlayerGames:NBA_PROPS_MIN_PRIOR_GAMES,
   futureGames:ids.length,postgamePlayerTruthGames:contexts.length,rawPlayerGameRows:rawBoxscoreRows,
   uniquePlayersWithTruth:playersWithGames.size,

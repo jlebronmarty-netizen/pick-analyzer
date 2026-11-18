@@ -1,0 +1,68 @@
+name: NBA GOAT 2026 bulk archive safety
+on:
+  pull_request:
+    paths:
+      - 'scripts/nba-goat-season-2026-bulk-archive.mjs'
+      - 'scripts/nba-goat-prop-formula-lab.mjs'
+      - 'scripts/nba-goat-prop-formula-lab-v2.mjs'
+      - 'src/lib/nba/goat-formula-lab-core.mjs'
+      - 'src/lib/nba/goat-formula-lab-v2.mjs'
+      - 'src/lib/nba/goat-formula-lab-v3.mjs'
+      - 'src/lib/nba/goat-formula-v3-frozen-validation.mjs'
+      - 'tests/nba-goat-formula-v3-frozen-validation.test.mjs'
+      - 'scripts/nba-goat-prop-frozen-v3-watch.mjs'
+      - 'tests/nba-goat-formula-lab-v3.test.mjs'
+      - 'scripts/nba-goat-prop-formula-lab-v3.mjs'
+      - 'tests/nba-goat-formula-lab-v2.test.mjs'
+      - 'tests/nba-goat-formula-lab.test.mjs'
+      - 'src/app/api/nba/goat/bulk-pilot/route.ts'
+      - 'src/app/api/nba/goat/season-core-batch/route.ts'
+      - 'src/app/api/nba/goat/materialize-props-research/route.ts'
+      - 'src/services/nba-goat-props-shadow-readiness.service.ts'
+      - 'src/lib/nba/goat-research-compact-core.mjs'
+      - 'tests/nba-goat-research-compact-core.test.mjs'
+      - 'supabase/migrations/20261115211500_nba_goat_player_game_research_v1.sql'
+      - 'supabase/migrations/20261114160000_nba_goat_season_archive_v1.sql'
+      - 'docs/NBA_GOAT_2026_FULL_SEASON_BULK_ARCHIVE.md'
+      - '.github/workflows/nba-goat-season-bulk-safety.yml'
+      - 'vercel.json'
+      - 'tests/nba-goat-daily-schedules-20261118.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-provider-call-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --no-audit --no-fund
+      - name: Syntax validation
+        run: node --check scripts/nba-goat-season-2026-bulk-archive.mjs
+      - name: Ensure no-call dry-run with no credentials
+        run: node scripts/nba-goat-season-2026-bulk-archive.mjs --mode=core --max-requests=30 --max-games=3
+      - name: Verify schedules have research-only auth, bounded provider calls and preserved production cron
+        run: node --test tests/nba-goat-daily-schedules-20261118.test.mjs
+      - name: Compact GOAT research fact unit tests
+        run: node --test tests/nba-goat-research-compact-core.test.mjs
+      - name: NBA formula search engine unit tests
+        run: node --test tests/nba-goat-formula-lab.test.mjs
+      - name: NBA V2 formula lab unit tests
+        run: node --test tests/nba-goat-formula-lab-v2.test.mjs
+      - name: NBA formula engine no-credential dry run
+        run: node scripts/nba-goat-prop-formula-lab.mjs
+      - name: V2 formula lab no-network dry run
+        run: node scripts/nba-goat-prop-formula-lab-v2.mjs
+      - name: NBA V3 robust formula and game cluster unit tests
+        run: node --test tests/nba-goat-formula-lab-v3.test.mjs
+      - name: NBA V3 no-network research dry-run
+        run: node scripts/nba-goat-prop-formula-lab-v3.mjs
+      - name: Frozen GOAT V3 future-evidence tests
+        run: node --test tests/nba-goat-formula-v3-frozen-validation.test.mjs
+      - name: Frozen GOAT V3 watcher no-network dry run
+        run: node scripts/nba-goat-prop-frozen-v3-watch.mjs
+      - name: TypeScript validation including protected pilot route
+        run: npx tsc --noEmit --pretty false

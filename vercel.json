@@ -45,5 +45,25 @@
     "deploymentEnabled": {
       "research/*": false
     }
+  },
+  "schedules": {
+    "nba-goat-core-daily-research": {
+      "schedule": "35 9 * * *",
+      "timezone": "America/Puerto_Rico",
+      "path": "/api/nba/goat/season-core-batch",
+      "requestMethod": "POST"
+    },
+    "nba-goat-compact-daily-research": {
+      "schedule": "10 10 * * *",
+      "timezone": "America/Puerto_Rico",
+      "path": "/api/nba/goat/materialize-props-research",
+      "requestMethod": "POST"
+    },
+    "nba-goat-advanced-retry-research": {
+      "schedule": "45 16 * * *",
+      "timezone": "America/Puerto_Rico",
+      "path": "/api/nba/goat/season-core-batch",
+      "requestMethod": "POST"
+    }
   }
 }
