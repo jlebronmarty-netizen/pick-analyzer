@@ -64,5 +64,5 @@ export default function Board({archiveControls=false}){
   {capturing&&<p role="status">Capturando y comprobando los datos…</p>}
   {capture&&<div role="status"><p>{capture.status==='completed'?'Captura completada':capture.status==='ALREADY_CLAIMED'?'Esta captura ya se solicitó en el intervalo actual':capture.status==='partial'?'Captura parcial':'Captura pendiente o no disponible'}. {capture.quotes??0} cotizaciones nuevas, {capture.history_games??0} partidos históricos y {capture.stats_games??0} partidos con estadísticas nuevas.</p>{capture.errors?.length>0&&<p>Faltan datos por verificar: {capture.errors.join(', ')}</p>}{capture.remaining_after_batch>0&&<p>Quedan {capture.remaining_after_batch} partidos para la siguiente captura de estadísticas.</p>}</div>}
  </section>}
- <p style={{marginTop:20}}>No se certifican el menú completo, precio regional, prórroga ni SGP. Un prop publicado no confirma participación. Las tendencias SHADOW no son recomendaciones certificadas. La fase de temporada no se deduce de un precio.</p></section>;
+ <p style={{marginTop:20}}>No se certifican el menú completo, precio regional, prórroga ni SGP. Un prop publicado no confirma participación. Las tendencias SHADOW son investigación: no recomendaciones certificadas. La fase de temporada no se deduce de un precio.</p></section>;
 }
