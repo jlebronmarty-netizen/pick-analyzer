@@ -26,6 +26,26 @@ export default function Probe() {
     } catch { setError('La conexión no respondió. No repitas la consulta hasta revisar el estado del proveedor.'); }
     finally { setBusy(false); }
   }
+  // Export only the already-captured response. Neither button invokes the provider.
+  function saveFile(filename, content, mime) {
+    const url = URL.createObjectURL(new Blob([content], {type: mime}));
+    const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = filename; document.body.appendChild(anchor); anchor.click();
+    anchor.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function downloadCapture(kind) {
+    if (!data || !Array.isArray(data.quotes) || !data.coverage) return;
+    const stamp = String(data.captured_at ?? 'unknown').replace(/[^0-9TZ-]/g, '_');
+    if (kind === 'json') {
+      saveFile('hoopsapi_nba_preview_' + stamp + '.json', JSON.stringify(data, null, 2), 'application/json;charset=utf-8');
+      return;
+    }
+    const cols = ['provider_game_id','period','market','side','team_side','line','decimal_odds','american_odds_approx',
+      'source_received_at','provider_updated_at','regional_price_verified','capture_version'];
+    const csv = [cols, ...data.quotes.map(row => cols.map(k => row[k]))]
+      .map(row => row.map(value => '"' + String(value ?? '').replaceAll('"', '""') + '"').join(',')).join('\r\n');
+    saveFile('hoopsapi_nba_preview_' + stamp + '.csv', '\uFEFF' + csv, 'text/csv;charset=utf-8');
+  }
   const quotes = (data?.quotes || []).filter(q => (period === 'all' || q.period === period) && (market === 'all' || q.market === market));
   return <main className="mx-auto max-w-7xl space-y-6 px-4 py-7 text-slate-100">
     <header className="rounded-xl border border-slate-600 p-5">
@@ -33,11 +53,17 @@ export default function Probe() {
       <h1 className="mt-3 text-2xl font-bold">HoopsAPI · prueba privada NBA</h1>
       <p className="mt-2 text-sm text-slate-300">Preview solamente. Una consulta por pulsación para todos los juegos NBA y sus mercados principales por período. Sin capturas automáticas ni escrituras a Supabase; no se crea ningún pick.</p>
       <p className="mt-2 text-sm text-amber-200">El proveedor limita la cuenta gratuita a 10 consultas cada 24 horas. Esta fase NO tiene un contador duradero propio; no pulses repetidamente.</p>
-      <button type="button" disabled={busy} onClick={run}
+      <button type="button" disabled={busy || data !== null} onClick={run}
         className="mt-4 rounded-lg bg-sky-700 px-4 py-2 font-semibold text-white disabled:opacity-50">
         {busy ? 'Consultando una vez…' : 'Probar HoopsAPI (gasta 1 consulta)'}
       </button>
       {error && <p role="alert" className="mt-3 text-amber-200">{error}</p>}
+      {data?.quotes?.length > 0 && <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" onClick={() => downloadCapture('csv')} className="rounded bg-emerald-700 px-3 py-2 text-white">Descargar todas las líneas (CSV)</button>
+        <button type="button" onClick={() => downloadCapture('json')} className="rounded bg-slate-700 px-3 py-2 text-white">Guardar captura y procedencia (JSON)</button>
+      </div>}
+      {data !== null && <p className="mt-2 text-xs text-slate-300">Esta página no permitirá otra llamada mientras esté abierta. Descarga la respuesta antes de cerrarla.</p>}
+
     </header>
     {data && <section className="rounded-xl border border-slate-600 p-5 space-y-2">
       <h2 className="text-xl font-semibold">{data.status || 'Resultado'}</h2>
