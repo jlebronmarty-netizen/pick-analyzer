@@ -21,14 +21,29 @@ export async function GET(request:NextRequest){
  if(!game)return reply({status:'NO_VERIFIED_GAME_IN_RECENT_ARCHIVE',version:PANEL_VERSION,rows:[],checkedAt:at});
  if(game.status_state!=='scheduled'||Date.parse(game.datetime)-Date.now()<600000)
   return reply({status:'NO_VERIFIED_UPCOMING_PREGAME_GAME',version:PANEL_VERSION,rows:[],checkedAt:at});
+ // Get the latest pregame capture first; a 30-minute raw history can contain
+ // thousands of repeated snapshots, not thousands of distinct betting contracts.
+ const newest=await db.from('nba_market_quotes_v1')
+  .select('source_received_at')
+  .eq('provider_game_id',id).eq('market','props').eq('phase','PREGAME')
+  .in('statistic',['points','rebounds','assists','threes'])
+  .gte('source_received_at',new Date(Date.now()-30*60000).toISOString())
+  .order('source_received_at',{ascending:false}).limit(1);
+ if(newest.error)return reply({status:'GOAT_PROPS_PRICE_ARCHIVE_UNAVAILABLE'},503);
+ if(!newest.data?.length)return reply({status:'NO_FRESH_VERIFIED_PROP_QUOTES',version:PANEL_VERSION,rows:[],checkedAt:at});
+ const latestAt=Date.parse(newest.data[0].source_received_at);
+ if(!Number.isFinite(latestAt)||latestAt>Date.now()+1000)return reply({status:'INVALID_LATEST_QUOTE_TIMESTAMP',version:PANEL_VERSION,rows:[],checkedAt:at},503);
+ // 90-second batch accommodates provider stat groups captured a few seconds apart.
+ // Never silently accept partial, capped batches; fall back to PASS/no evaluation.
+ const batchStart=new Date(latestAt-90000).toISOString();
  const q=await db.from('nba_market_quotes_v1')
   .select('quote_id,provider_game_id,player_id,market,statistic,side,line,american_odds,contract,period,phase,source_received_at')
   .eq('provider_game_id',id).eq('market','props').eq('phase','PREGAME')
   .in('statistic',['points','rebounds','assists','threes']).in('side',['over','under'])
-  .gte('source_received_at',new Date(Date.now()-30*60000).toISOString())
+  .gte('source_received_at',batchStart).lte('source_received_at',newest.data[0].source_received_at)
   .order('source_received_at',{ascending:false}).limit(1000);
  if(q.error||!q.data)return reply({status:'GOAT_PROPS_PRICE_ARCHIVE_UNAVAILABLE'},503);
- if(q.data.length>=1000)return reply({status:'QUOTE_SCAN_LIMIT_REVIEW_REQUIRED',version:PANEL_VERSION,rows:[],checkedAt:at},503);
+ if(q.data.length>=1000)return reply({status:'QUOTE_BATCH_LIMIT_REVIEW_REQUIRED',version:PANEL_VERSION,rows:[],checkedAt:at},503);
  const ids=[...new Set(q.data.map(x=>Number(x.player_id)).filter(Number.isSafeInteger))];
  if(!ids.length)return reply({status:'NO_FRESH_VERIFIED_PROP_QUOTES',version:PANEL_VERSION,rows:[],checkedAt:at});
  const facts:any[]=[];
@@ -45,6 +60,6 @@ export async function GET(request:NextRequest){
  }
  const research=buildPropPanelRows({game,quotes:q.data,facts,asOf:at});
  return reply({...research,version:PANEL_VERSION,directionVersion:DIRECTION_VERSION,directionalRows:buildDirectionalResearchRows(research.rows),providerGameId:id,checkedAt:at,
-  archivedQuoteCount:q.data.length,historyRowsExamined:facts.length,providerCalls:0,databaseWrites:0,
+  archivedQuoteCount:q.data.length,latestQuoteAt:newest.data[0].source_received_at,quoteBatchWindowSeconds:90,historyRowsExamined:facts.length,providerCalls:0,databaseWrites:0,
   warning:'SHADOW descriptive tendencies (OVER/UNDER/PASS) only, never betting recommendations. The distance thresholds are exploratory, not trained or validated. Price feeds are not verified regional book menus. No calibrated probabilities, EV, recommended picks, injury adjustment or sportsbook settlement certification.'});
 }
