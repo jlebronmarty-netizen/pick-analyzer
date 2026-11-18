@@ -2,6 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {privateHost} from '@/lib/nba-production-feed.mjs';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {buildPropPanelRows,buildDirectionalResearchRows,PANEL_MARKETS,PANEL_VERSION,DIRECTION_VERSION} from '@/lib/nba/nba-props-panel-core.mjs';
+import {compactCapturedGameContexts,mergeCapturedGoatFacts} from '@/lib/nba/nba-props-context-fallback.mjs';
 export const dynamic='force-dynamic';export const runtime='nodejs';export const revalidate=0;export const maxDuration=60;
 const reply=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 export async function GET(request:NextRequest){
@@ -60,8 +61,24 @@ export async function GET(request:NextRequest){
   if(r.data.length>=900)return reply({status:'PLAYER_HISTORY_SCAN_LIMIT_REVIEW_REQUIRED',version:PANEL_VERSION,rows:[],checkedAt:at},503);
   facts.push(...r.data);
  }
- const research=buildPropPanelRows({game,quotes:q.data,facts,asOf:at});
+ // Reuse already-archived GOAT player_stats in NBA operational context.
+ // This does NOT download new provider data or write research/official tables.
+ const manifest=await db.from('nba_goat_season_archive_v1')
+  .select('source_captured_at').eq('season',2026).eq('dataset_key','player_stats')
+  .order('source_captured_at',{ascending:false}).limit(1).maybeSingle();
+ if(manifest.error||!manifest.data)return reply({status:'GOAT_SOURCE_PROVENANCE_UNAVAILABLE',rows:[],version:PANEL_VERSION,checkedAt:at},503);
+ const since=new Date(Date.parse(manifest.data.source_captured_at)-24*3600000).toISOString();
+ const context=await db.from('nba_game_context_v2')
+  .select('provider_game_id,player_stats,player_stats_captured_at')
+  .not('player_stats','is',null).gte('player_stats_captured_at',since)
+  .order('player_stats_captured_at',{ascending:false}).limit(121);
+ if(context.error||!context.data)return reply({status:'CAPTURED_OPERATIONAL_CONTEXT_UNAVAILABLE',rows:[],version:PANEL_VERSION,checkedAt:at},503);
+ if(context.data.length>=121)return reply({status:'CAPTURED_OPERATIONAL_CONTEXT_BOUND_REVIEW',rows:[],version:PANEL_VERSION,checkedAt:at},503);
+ const operational=compactCapturedGameContexts(context.data);
+ const relevant=new Set(ids);
+ const combined=mergeCapturedGoatFacts(facts,operational.filter(row=>relevant.has(row.player_id)));
+ const research=buildPropPanelRows({game,quotes:q.data,facts:combined,asOf:at});
  return reply({...research,version:PANEL_VERSION,directionVersion:DIRECTION_VERSION,directionalRows:buildDirectionalResearchRows(research.rows),providerGameId:id,checkedAt:at,
-  archivedQuoteCount:q.data.length,latestQuoteAt:newest.data[0].source_received_at,quoteBatchWindowSeconds:90,selectedMarket:market,historyRowsExamined:facts.length,providerCalls:0,databaseWrites:0,
+  archivedQuoteCount:q.data.length,latestQuoteAt:newest.data[0].source_received_at,quoteBatchWindowSeconds:90,selectedMarket:market,historyRowsExamined:combined.length,operationalContextGamesRead:context.data.length,operationalPlayerFactsConsidered:operational.length,providerCalls:0,databaseWrites:0,
   warning:'SHADOW descriptive tendencies (OVER/UNDER/PASS) only, never betting recommendations. The distance thresholds are exploratory, not trained or validated. Price feeds are not verified regional book menus. No calibrated probabilities, EV, recommended picks, injury adjustment or sportsbook settlement certification.'});
 }
