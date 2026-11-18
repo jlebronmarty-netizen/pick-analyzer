@@ -8,7 +8,7 @@ const ROOT='https://external-api.kalshi.com/trade-api/v2';
 const argv=process.argv.slice(2);
 const arg=(n,d)=>argv.includes(n)?argv[argv.indexOf(n)+1]:d;
 const games=Number(arg('--games','200')), pages=Number(arg('--discovery-pages','40'));
-if(!Number.isInteger(games)||games<2||games>400||!Number.isInteger(pages)||pages<1||pages>200) throw Error('Invalid --games (2..400) or --discovery-pages (1..200)');
+if(!Number.isInteger(games)||games<2||games>1200||!Number.isInteger(pages)||pages<1||pages>200) throw Error('Invalid --games (2..1200) or --discovery-pages (1..200)');
 const out=resolve(arg('--out','tmp/kalshi-market-intelligence-expanded'));
 await mkdir(out,{recursive:true});
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
