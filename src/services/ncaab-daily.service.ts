@@ -12,15 +12,15 @@ async function readAll(table:string){const client=await db();const rows:Record<s
 // Existing immutable checkpoint remains independently available; live failure is explicit.
 export async function getNcaabDailyReport():Promise<NcaabReport>{
  try{
-  const client=await db();const [ps,os,latest]=await Promise.all([readAll('ncaab_daily_predictions_v1'),readAll('ncaab_daily_outcomes_v1'),client.from('ncaab_daily_runs_v1').select('status,completed_at,provider_calls,detail').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(60)]);
+  const client=await db();const [ps,os,latest,lifecycleHistory]=await Promise.all([readAll('ncaab_daily_predictions_v1'),readAll('ncaab_daily_outcomes_v1'),client.from('ncaab_daily_runs_v1').select('status,completed_at,provider_calls,detail').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(1),client.from('ncaab_daily_runs_v1').select('lifecycle_updates:detail->lifecycle_updates').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(80)]);
   if(latest.error)throw Error('NCAAB_RUN_READ_FAILED');
   if(!ps.length)return {status:'UNAVAILABLE',warning:'NCAAB: historial diario todavía no inicializado.'};
   const outcomes=new Map<string,Final[]>();for(const o of os){const a=outcomes.get(String(o.event_id))??[];a.push(o.body as Final);outcomes.set(String(o.event_id),a);}
   // Reporting-only review: use statuses previously captured by the ordinary
   // cron. Never mark postponed/rescheduled fixtures as a W/L or rewrite rows.
   const life=new Map<string,{kind:LiveObservation['source_lifecycle'];source_captured_at:string;source_scheduled_at:string}>();
-  for(const run of latest.data??[]){
-   const updates=(run.detail as {lifecycle_updates?:Array<{event_id:string;kind:LiveObservation['source_lifecycle'];source_captured_at:string;source_scheduled_at:string}>}|null)?.lifecycle_updates??[];
+  for(const run of lifecycleHistory.error?[]:(lifecycleHistory.data??[])){
+   const updates=(run.lifecycle_updates as Array<{event_id:string;kind:LiveObservation['source_lifecycle'];source_captured_at:string;source_scheduled_at:string}>|null)??[];
    for(const u of updates){
     if(u?.event_id&&u.kind&&!life.has(u.event_id))life.set(u.event_id,u);
    }
