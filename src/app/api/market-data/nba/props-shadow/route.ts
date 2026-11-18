@@ -1,7 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {privateHost} from '@/lib/nba-production-feed.mjs';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
-import {buildPropPanelRows,buildDirectionalResearchRows,PANEL_VERSION,DIRECTION_VERSION} from '@/lib/nba/nba-props-panel-core.mjs';
+import {buildPropPanelRows,buildDirectionalResearchRows,PANEL_MARKETS,PANEL_VERSION,DIRECTION_VERSION} from '@/lib/nba/nba-props-panel-core.mjs';
 export const dynamic='force-dynamic';export const runtime='nodejs';export const revalidate=0;export const maxDuration=60;
 const reply=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 export async function GET(request:NextRequest){
@@ -10,7 +10,9 @@ export async function GET(request:NextRequest){
  if(!permitted||!privateHost(request,env)||!request.headers.get('x-vercel-oidc-token'))
   return reply({status:'PRIVATE_DEPLOYMENT_REQUIRED'},401);
  const id=Number(request.nextUrl.searchParams.get('game_id'));
- if(!Number.isSafeInteger(id)||id<1||request.nextUrl.searchParams.size!==1)return reply({status:'INVALID_GAME_ID'},400);
+ const market=request.nextUrl.searchParams.get('market');
+ if(!Number.isSafeInteger(id)||id<1||!PANEL_MARKETS.includes(market as string)||request.nextUrl.searchParams.size!==2)
+  return reply({status:'INVALID_GAME_OR_MARKET'},400);
  const at=new Date().toISOString(),cutoff=new Date(Date.now()-48*3600000).toISOString();
  // Reuse stored GOAT schedule; no provider call, historical rescan, or missing-game inference.
  const schedules=await db.from('nba_market_schedules_v1').select('payload,source_received_at')
@@ -26,7 +28,7 @@ export async function GET(request:NextRequest){
  const newest=await db.from('nba_market_quotes_v1')
   .select('source_received_at')
   .eq('provider_game_id',id).eq('market','props').eq('phase','PREGAME')
-  .in('statistic',['points','rebounds','assists','threes'])
+  .eq('statistic',market!)
   .gte('source_received_at',new Date(Date.now()-30*60000).toISOString())
   .order('source_received_at',{ascending:false}).limit(1);
  if(newest.error)return reply({status:'GOAT_PROPS_PRICE_ARCHIVE_UNAVAILABLE'},503);
@@ -39,7 +41,7 @@ export async function GET(request:NextRequest){
  const q=await db.from('nba_market_quotes_v1')
   .select('quote_id,provider_game_id,player_id,market,statistic,side,line,american_odds,contract,period,phase,source_received_at')
   .eq('provider_game_id',id).eq('market','props').eq('phase','PREGAME')
-  .in('statistic',['points','rebounds','assists','threes']).in('side',['over','under'])
+  .eq('statistic',market!).in('side',['over','under'])
   .gte('source_received_at',batchStart).lte('source_received_at',newest.data[0].source_received_at)
   .order('source_received_at',{ascending:false}).limit(1000);
  if(q.error||!q.data)return reply({status:'GOAT_PROPS_PRICE_ARCHIVE_UNAVAILABLE'},503);
@@ -60,6 +62,6 @@ export async function GET(request:NextRequest){
  }
  const research=buildPropPanelRows({game,quotes:q.data,facts,asOf:at});
  return reply({...research,version:PANEL_VERSION,directionVersion:DIRECTION_VERSION,directionalRows:buildDirectionalResearchRows(research.rows),providerGameId:id,checkedAt:at,
-  archivedQuoteCount:q.data.length,latestQuoteAt:newest.data[0].source_received_at,quoteBatchWindowSeconds:90,historyRowsExamined:facts.length,providerCalls:0,databaseWrites:0,
+  archivedQuoteCount:q.data.length,latestQuoteAt:newest.data[0].source_received_at,quoteBatchWindowSeconds:90,selectedMarket:market,historyRowsExamined:facts.length,providerCalls:0,databaseWrites:0,
   warning:'SHADOW descriptive tendencies (OVER/UNDER/PASS) only, never betting recommendations. The distance thresholds are exploratory, not trained or validated. Price feeds are not verified regional book menus. No calibrated probabilities, EV, recommended picks, injury adjustment or sportsbook settlement certification.'});
 }
