@@ -14,11 +14,23 @@ export function parseTeamSchedule(body,team,season,capture,conference=null){
  const group=body.team?.groups;const fbs=conference?conference.verified_parent==='80'&&[String(group?.id),String(group?.parent?.id)].includes(conference.id):String(group?.id)==='80'||String(group?.parent?.id)==='80';
  if(!fbs)throw Error('TEAM_NOT_VERIFIED_FBS');
  const rows=[],excluded=[],seen=new Set();for(const e of body.events){
-  const eid=id(e.id);if(!eid||seen.has(eid)||e.season?.year!==season||e.competitions?.length!==1)throw Error('EVENT_IDENTITY_MISMATCH');seen.add(eid);
+  // Preserve the existing fail-closed contract while recording which event
+  // invalidated a whole team schedule; this does not skip or accept bad games.
+  const mismatch=diagnostic=>{const error=new Error('EVENT_IDENTITY_MISMATCH');error.event_id=id(e?.id)??'INVALID';error.diagnostic=diagnostic;throw error;};
+  const eid=id(e.id);
+  if(!eid)mismatch('INVALID_EVENT_ID');
+  if(seen.has(eid))mismatch('DUPLICATE_EVENT_ID');
+  if(e.season?.year!==season)mismatch('EVENT_SEASON_MISMATCH');
+  if(e.competitions?.length!==1)mismatch('EVENT_COMPETITION_COUNT');
+  seen.add(eid);
   const c=e.competitions[0],h=c.competitors?.find(x=>x.homeAway==='home'),a=c.competitors?.find(x=>x.homeAway==='away'),st=c.status?.type;
   const hi=id(h?.id),ai=id(a?.id),tip=Date.parse(e.date);
   if(st?.state==='pre'&&st?.name==='STATUS_SCHEDULED'&&c.timeValid===false&&(!hi||!ai)){excluded.push({event_id:'espn:'+eid,scheduled_at:e.date,reason:'UNASSIGNED_FUTURE_OPPONENT'});continue;}
-  if(!hi||!ai||hi===ai||![hi,ai].includes(team)||id(c.id)!==eid||!Number.isFinite(tip)||!h.team?.displayName||!a.team?.displayName)throw Error('EVENT_IDENTITY_MISMATCH');
+  if(!hi||!ai||hi===ai)mismatch('INVALID_PARTICIPANTS');
+  if(![hi,ai].includes(team))mismatch('REQUESTED_TEAM_NOT_IN_EVENT');
+  if(id(c.id)!==eid)mismatch('COMPETITION_ID_CONFLICT');
+  if(!Number.isFinite(tip))mismatch('INVALID_KICKOFF');
+  if(!h.team?.displayName||!a.team?.displayName)mismatch('MISSING_TEAM_NAME');
   const hs=score(h.score),as=score(a.score),complete=st?.completed===true&&st.state==='post'&&st.name==='STATUS_FINAL';
   const valid=complete&&hs!==null&&as!==null&&hs!==as&&h.winner===(hs>as)&&a.winner===(as>hs)&&tip<Date.parse(capture.captured_at);
   rows.push({event_id:'espn:'+eid,sport:'NCAAF',season,home_id:hi,away_id:ai,home_name:h.team.displayName,away_name:a.team.displayName,home_score:complete?hs:null,away_score:complete?as:null,scheduled_at:new Date(tip).toISOString(),captured_at:capture.captured_at,capture_id:capture.id,source_team:team,status:complete?'FINAL':st?.state==='pre'&&st?.name==='STATUS_SCHEDULED'?'SCHEDULED':'OTHER',outcome_validation:valid?'PASS':'NOT_FINAL_OR_INVALID',time_verified:c.timeValid===true,neutral_site:typeof c.neutralSite==='boolean'?c.neutralSite:null});
@@ -51,7 +63,10 @@ export async function loadNcaafSchedules({now=new Date(),fetchFn=fetch,sleep=ms=
  for(const group of groups){const meta=await get(`${CORE}/seasons/${season}/types/2/groups/${group}`),conf=verifyConference(meta.body,group,season);const roster=await get(`${CORE}/seasons/${season}/types/2/groups/${group}/teams?limit=1000`);const teams=parseFbsMembers(roster.body,season);conferences.push({...conf,teams,captured_at:roster.capture.captured_at});for(const team of teams){if(membership.has(team))throw Error('FBS_MEMBERSHIP_CONFLICT');membership.set(team,conf);}}
  const members=[...membership.keys()].sort((a,b)=>Number(a)-Number(b));if(!members.length||members.length>180)throw Error('FBS_UNIVERSE_INCOMPLETE');
  const membershipCapture={id:sourceHash(conferences),captured_at:new Date().toISOString(),source:'ESPN same-season conferences with parent80'},schedules=[];
- for(const team of members){try{const response=await get(`${SITE}/teams/${team}/schedule?season=${season}&seasontype=2`);schedules.push(parseTeamSchedule(response.body,team,season,response.capture,membership.get(team)));}catch(e){const reason=/^[A-Z0-9_]+$/.test(e.message)?e.message:'NCAAF_SOURCE_FAILED';errors.push({team,reason});if(reason==='NCAAF_SOURCE_BUDGET_REACHED')break;}}
+ for(const team of members){try{const response=await get(`${SITE}/teams/${team}/schedule?season=${season}&seasontype=2`);schedules.push(parseTeamSchedule(response.body,team,season,response.capture,membership.get(team)));}catch(e){const reason=/^[A-Z0-9_]+$/.test(e.message)?e.message:'NCAAF_SOURCE_FAILED';const event_id=typeof e?.event_id==='string'?e.event_id:null;
+ const diagnostic=typeof e?.diagnostic==='string'?e.diagnostic:null;
+ errors.push({team,reason,...(reason==='EVENT_IDENTITY_MISMATCH'&&event_id?{event_id,diagnostic}: {})});
+ if(reason==='NCAAF_SOURCE_BUDGET_REACHED')break;}}
  const joined=reconcileSchedules(schedules,members,membershipCapture),captured_at=new Date().toISOString(),excluded=[...new Map(schedules.flatMap(s=>s.excluded).map(e=>[e.event_id,e])).values()];
  return {season,captured_at,membership:members,conferences,membership_capture:membershipCapture,successful_teams:schedules.map(s=>({id:s.team,name:s.name,conference_id:s.conference_id})),events:joined.events,captures,errors,conflicts:joined.conflicts,excluded,coverage:{source:'ESPN verified FBS conferences and team schedules; no scoreboard truncation',expected_teams:members.length,successful_teams:schedules.length,complete:schedules.length===members.length&&errors.length===0&&joined.conflicts.length===0,unique_events:joined.events.length,unassigned_future_events:excluded.length},requests};
 }

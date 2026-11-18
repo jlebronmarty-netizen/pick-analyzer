@@ -1,0 +1,31 @@
+name: NCAAF invalid source evidence diagnostics
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/edge-lab/ncaaf-sources.mjs'
+      - 'tests/edge-lab-ncaaf-identity-diagnostics.test.mjs'
+      - '.github/workflows/ncaaf-fbs-source-diagnostics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: NCAAF source identity regressions
+        run: node --test tests/edge-lab-ncaaf.test.mjs tests/edge-lab-ncaaf-identity-diagnostics.test.mjs
+      - name: TypeScript check
+        run: npx tsc --noEmit --pretty false
