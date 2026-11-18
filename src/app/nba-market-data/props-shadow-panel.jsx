@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useState} from 'react';
-const markets={points:'Puntos',rebounds:'Rebotes',assists:'Asistencias',threes:'Triples'};
+const markets={points:'Puntos',rebounds:'Rebotes',assists:'Asistencias',threes:'Triples',points_rebounds_assists:'Puntos + rebotes + asistencias (PRA)',points_rebounds:'Puntos + rebotes',points_assists:'Puntos + asistencias',rebounds_assists:'Rebotes + asistencias'};
 const fmt=n=>typeof n==='number'?n.toFixed(2):'—';
 const price=n=>typeof n==='number'?(n>0?'+'+n:String(n)):'—';
 const time=x=>x&&Number.isFinite(Date.parse(x))?new Date(x).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'}):'No verificada';
@@ -15,7 +15,7 @@ export default function PropsShadowPanel({gameId,market,quotes=[]}){
    controller=new AbortController();if(active)setLoading(true);
    const timeout=setTimeout(()=>controller?.abort(),20000);
    try{
-    const r=await fetch('/api/market-data/nba/props-shadow?game_id='+encodeURIComponent(gameId),
+    const r=await fetch('/api/market-data/nba/props-shadow?game_id='+encodeURIComponent(gameId)+'&market='+encodeURIComponent(market),
       {cache:'no-store',credentials:'same-origin',signal:controller.signal});
     const body=await r.json();
     if(!r.ok)throw Error(body.status||'ARCHIVE_UNAVAILABLE');
@@ -32,7 +32,7 @@ export default function PropsShadowPanel({gameId,market,quotes=[]}){
  const directions=(data?.directionalRows??[]).filter(r=>r.statistic===market);
  return <section aria-label="Proyecciones descriptivas Player Props SHADOW" className="rounded-xl border border-slate-700 bg-slate-950 p-4 mt-5">
   <h2 className="text-lg font-bold">Evaluación de Player Props · {markets[market]} · SHADOW</h2>
-  <p className="mt-2 text-sm text-slate-300">Comparación informativa con cuotas <strong>archivadas</strong> recientes, no apuestas ni recomendaciones. L5 y L10 solo usan partidos anteriores con captura verificada antes de la cuota. La diferencia es proyección menos línea, no una probabilidad ni una ventaja calibrada.</p>
+  <p className="mt-2 text-sm text-slate-300">Comparación informativa con cuotas <strong>archivadas</strong> recientes, no apuestas ni recomendaciones. Los mercados combinados se calculan sumando estadísticas de cada partido previo del mismo jugador, sin tratar sus componentes como independientes. L5 y L10 solo usan partidos anteriores con captura verificada antes de la cuota. La diferencia es proyección menos línea, no una probabilidad ni una ventaja calibrada.</p>
   {loading&&<p role="status">Verificando datos históricos…</p>}
   {error&&<p role="alert" className="text-amber-300">{error}</p>}
   {data&&<p className="text-xs text-slate-400">Estado: {data.status} · Revisado: {time(data.checkedAt)} · Cuotas verificadas: {data.archivedQuoteCount??'—'} · Sin llamadas adicionales a GOAT</p>}
