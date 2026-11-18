@@ -56,7 +56,7 @@ export function buildPropPanelRows({game,quotes,facts,asOf,playerNames={}}){
    formula:has10?'L10':valid?'L5_DESCRIPTIVE':'INSUFFICIENT_CAPTURED_PRIOR_GAMES',
    status:projection===null?'INSUFFICIENT_CAPTURED_PRIOR_GAMES':'DESCRIPTIVE_SHADOW_ONLY',
    modelProbability:null,expectedValue:null,confidence:null,recommendedPick:false,
-   productionEligible:false,validated:false,source:'GOAT_COMPACT_ASOF_VERIFIED'});
+   productionEligible:false,validated:false,source:'GOAT_CAPTURED_ASOF_VERIFIED'});
  }
  return {status:rows.length?'READ_ONLY_DESCRIPTIVE_SHADOW':'NO_FRESH_VERIFIED_PROP_QUOTES',rows};
 }
