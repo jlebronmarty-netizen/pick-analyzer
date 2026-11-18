@@ -52,3 +52,49 @@ export function buildPropPanelRows({game,quotes,facts,asOf,playerNames={}}){
  }
  return {status:rows.length?'READ_ONLY_DESCRIPTIVE_SHADOW':'NO_FRESH_VERIFIED_PROP_QUOTES',rows};
 }
+
+
+// Model-direction research display: exactly one row per player/stat/line,
+// with an explicit PASS whenever data quality or evidence is insufficient.
+// It DOES NOT produce a calibrated edge, EV, probability or betting recommendation.
+export const DIRECTION_VERSION='NBA_PROPS_DIRECTIONAL_RESEARCH_V1';
+const minDistance=Object.freeze({points:2,rebounds:1,assists:1,threes:.6});
+export function buildDirectionalResearchRows(rows,{maxPairMinutes=5}={}){
+ if(!Array.isArray(rows)||!Number.isFinite(maxPairMinutes)||maxPairMinutes<0||maxPairMinutes>30)
+  throw Error('INVALID_DIRECTIONAL_INPUT');
+ const groups=new Map();
+ for(const r of rows){
+  const key=[r.playerId,r.statistic,r.line].join('|');
+  const g=groups.get(key)??{over:null,under:null};
+  if(r.side==='over'||r.side==='under'){
+   if(!g[r.side]||date(r.sourceReceivedAt)>date(g[r.side].sourceReceivedAt))g[r.side]=r;
+   groups.set(key,g);
+  }
+ }
+ const result=[];
+ for(const {over,under} of groups.values()){
+  const base=over??under;
+  if(!base)continue;
+  const hasBoth=Boolean(over&&under),pairTime=hasBoth?Math.abs(date(over.sourceReceivedAt)-date(under.sourceReceivedAt)):Infinity;
+  const enough=base.formula==='L10'&&base.availablePriorGames>=10&&Number.isFinite(base.projection);
+  const spread=enough?base.projection-base.line:null;
+  const threshold=minDistance[base.statistic]??Infinity;
+  let tendency='PASS',reason='MISSING_BOTH_VERIFIED_SIDES';
+  if(hasBoth&&pairTime<=maxPairMinutes*60000){
+   if(!enough)reason='INSUFFICIENT_L10_PRIOR_GAMES';
+   else if(!Number.isFinite(spread)||Math.abs(spread)<threshold)reason='MARGIN_BELOW_EXPLORATORY_THRESHOLD';
+   else if(spread>0){tendency='OVER_TENDENCY';reason='DESCRIPTIVE_PROJECTION_ABOVE_LINE'}
+   else{tendency='UNDER_TENDENCY';reason='DESCRIPTIVE_PROJECTION_BELOW_LINE'}
+  }else if(hasBoth)reason='SIDES_NOT_TIME_COMPARABLE';
+  const selected=tendency==='OVER_TENDENCY'?over:tendency==='UNDER_TENDENCY'?under:null;
+  result.push({version:DIRECTION_VERSION,playerId:base.playerId,playerName:base.playerName??null,
+   statistic:base.statistic,line:base.line,projection:base.projection,delta:base.delta,
+   l5:base.l5,l10:base.l10,availablePriorGames:base.availablePriorGames,
+   tendency,reason,exploratoryThreshold:threshold,
+   observedOverOdds:over?.americanOdds??null,observedUnderOdds:under?.americanOdds??null,
+   selectedSideOdds:selected?.americanOdds??null,quoteCapturedAt:selected?.sourceReceivedAt??base.sourceReceivedAt,
+   modelProbability:null,expectedValue:null,confidence:null,recommendedPick:false,
+   validated:false,productionEligible:false,comparisonOnly:true});
+ }
+ return result.sort((a,b)=>a.statistic.localeCompare(b.statistic)||a.playerId-b.playerId||a.line-b.line);
+}
