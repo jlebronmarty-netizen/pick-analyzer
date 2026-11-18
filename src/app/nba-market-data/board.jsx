@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {createPoller,preserveSelection} from './polling.mjs';
+import PropsShadowPanel from './props-shadow-panel';
 const types={points:'Puntos',rebounds:'Rebotes',assists:'Asistencias',threes:'Triples',blocks:'Tapones',steals:'Robos',points_rebounds_assists:'Puntos + rebotes + asistencias',points_rebounds:'Puntos + rebotes',points_assists:'Puntos + asistencias',rebounds_assists:'Rebotes + asistencias'};
 const price=n=>n>0?`+${n}`:String(n);
 const time=x=>x&&Number.isFinite(Date.parse(x))?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'medium'}).format(new Date(x)):'No verificada';
@@ -29,12 +30,23 @@ export default function Board({archiveControls=false}){
  const box={border:'1px solid #475569',borderRadius:12,padding:16,marginTop:18};const input={padding:10,margin:'5px 5px 5px 0',border:'1px solid #64748b',borderRadius:6,background:'#0f172a',color:'#f1f5f9',maxWidth:'100%'};
  return <section aria-label="NBA FanDuel" className="mlb-ui sport-standard mx-auto max-w-7xl space-y-6 text-slate-200">
  <header className="sport-standard-hero"><a href="/today">← Todos los deportes</a><p className="sport-standard-eyebrow">NBA · GOAT · SHADOW / MODEL_ONLY</p><h1>Cuotas, selecciones y resultados</h1><p>BALLDONTLIE / GOAT · FanDuel · Cuotas actuales separadas de Official Picks y picks congelados.</p></header>
+ <section style={box} aria-label="Acceso rápido a mercados NBA">
+  <h2>Mercados disponibles · NBA</h2>
+  <p>Las líneas FanDuel son <strong>cotizaciones del proveedor</strong>, no predicciones ni picks del modelo. Selecciona un partido y consulta cada grupo:</p>
+  <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+   <button style={input} aria-pressed={market==='main'} onClick={()=>setMarket('main')}>ML · Spread · Total</button>
+   {['points','rebounds','assists','threes'].map(type=><button key={type} style={input} aria-pressed={market===type} onClick={()=>setMarket(type)}>{types[type]}</button>)}
+  </div>
+  <p role="note" style={{marginTop:8}}>Estado de proyecciones individuales: <strong>SHADOW / INVESTIGACIÓN</strong>. Las cuotas de props sí se reciben, pero todavía no están certificadas las probabilidades, las líneas proyectadas ni el EV para recomendar jugadas. El historial GOAT continúa en validación separada.</p>
+  {!game&&<p>Selecciona un partido más abajo para ver las cuotas del mercado elegido.</p>}
+ </section>
  <section style={box}><label>Fecha de Puerto Rico <input aria-label="Fecha" type="date" value={date} style={input} onChange={e=>{autoDate.current=false;setGame('');setGames([]);setResult(null);setDate(e.target.value);}}/></label><button style={input} onClick={()=>{autoDate.current=true;setDate(today());scheduleLoop.current?.refresh();}}>Hoy</button><button style={input} onClick={()=>scheduleLoop.current?.refresh()}>Actualizar jornada</button><p>{games.length} partidos recibidos. La fecha corresponde a Puerto Rico.</p>
  <label>Partido <select aria-label="Partido" style={input} value={game} onChange={e=>setGame(e.target.value)}><option value="">Selecciona un partido</option>{games.map(g=><option key={g.id} value={g.id}>{g.visitor_team?.full_name} @ {g.home_team?.full_name} · {time(g.datetime)}</option>)}</select></label>
  <label>Mercado <select aria-label="Mercado" style={input} value={market} onChange={e=>setMarket(e.target.value)}><option value="main">Moneyline / spread / total</option>{Object.entries(types).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></label><button style={input} disabled={!game} onClick={()=>quoteLoop.current?.refresh()}>Actualizar cuotas</button>
  <p><label><input type="checkbox" checked={automatic} onChange={e=>setAutomatic(e.target.checked)}/> Actualización automática</label> · Mercado cada 60 s; calendario cada 5 min, mientras esta pantalla esté visible.</p><p>El servicio central sigue su propio horario. Un error o una fecha antigua se muestran explícitamente.</p></section>
  {scheduleError&&<p role="alert" style={box}>{scheduleError}</p>}{error&&<p role="alert" style={{...box,color:'#fbbf24'}}>{error}</p>}
  {game&&!result&&!error&&<p role="status">Cargando cotizaciones…</p>}
+ <PropsShadowPanel gameId={game} market={market} quotes={result?.data?.quotes||[]}/>
  {result&&<section style={box}><h2>{event?.visitor_team?.full_name} @ {event?.home_team?.full_name}</h2><p>{result.data.phase} · {result.meta.status} · {result.meta.quote_count} cotizaciones · Recibido {time(result.meta.source_received_at)}</p>
  {result.meta.persistence&&<p>Archivo permanente: {result.meta.persistence.status}. {result.meta.persistence.error||''}</p>}
  <label>Filtrar jugador <input aria-label="Filtrar jugador" value={filter} style={input} onChange={e=>setFilter(e.target.value)}/></label>
@@ -42,6 +54,7 @@ export default function Board({archiveControls=false}){
  const age=(clock-Date.parse(q.provider_updated_at))/1000;const status=!q.provider_updated_at||!Number.isFinite(age)?'Hora desconocida':age<0?'Hora inconsistente':age<=180?'Reciente':age<=300?'Envejeciendo':'ANTIGUA';
  return <tr key={q.quote_id}><td>{q.player_name||(q.player_id?`Jugador ${q.player_id} sin resolver`:q.side==='home'?event.home_team.full_name:q.side==='away'?event.visitor_team.full_name:'Total')}</td><td>{types[q.statistic]||q.statistic}<br/>{q.period}</td><td>{q.side} {q.line??''}<br/>{q.contract}</td><td>{price(q.american_odds)}</td><td>{time(q.provider_updated_at)}</td><td>{status} · {Number.isFinite(age)?Math.round(age):'?'} s</td></tr>;
  })}</tbody></table></div>{!quotes.length&&<p>No hay cuotas en esta respuesta o filtro. Esto no confirma una baja ni ausencia de mercados en FanDuel.</p>}<p>Captura: {result.meta.snapshot_id}</p>{result.meta.warnings?.length>0&&<p role="alert">{result.meta.warnings.join(', ')}</p>}</section>}
+
  {archiveControls&&<section style={box}><h2>Archivo y sincronización</h2><button style={input} disabled={archiving} onClick={()=>archiveAction(false)}>Ver estado del archivo</button><button style={input} disabled={archiving} onClick={()=>archiveAction(true)}>Archivar jornada ahora</button><p>El proceso NBA existente archiva automáticamente cada 30 min. Consultar cuotas aquí también conserva la captura. No reconstruye precios pasados ni liquida apuestas.</p>{archiving&&<p role="status">Consultando archivo…</p>}{archive&&<pre style={{whiteSpace:'pre-wrap',fontSize:12}}>{JSON.stringify(archive,null,2)}</pre>}</section>}
- <p style={{marginTop:20}}>No se certifican el menú completo, precio regional, prórroga ni SGP. Un prop publicado no confirma participación. La fase de temporada no se deduce de un precio. No hay recomendaciones nuevas en esta pantalla.</p></section>;
+ <p style={{marginTop:20}}>Los Player Props de esta pantalla son cotizaciones, no recomendaciones. No se certifican el menú completo, precio regional, prórroga ni SGP. Un prop publicado no confirma participación. Las proyecciones de puntos, rebotes, asistencias y triples requieren validación prospectiva antes de aparecer como selecciones SHADOW calificadas.</p></section>;
 }
