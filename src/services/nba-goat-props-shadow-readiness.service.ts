@@ -50,11 +50,13 @@ export async function getNbaPropsProspectiveShadowReadiness(){
  const quotesR=await db.from('nba_market_quotes_v1')
   .select('quote_id,provider_game_id,player_id,market,statistic,side,line,american_odds,contract,period,phase,source_received_at')
   .eq('market','props').eq('phase','PREGAME').in('side',['over','under'])
+  .eq('period','FULL_GAME_LABEL_OT_UNVERIFIED').in('statistic',Object.keys(NBA_PROPS_SHADOW_STATS))
+  .gte('provider_updated_at',new Date(now.getTime()-1800000).toISOString()).lte('provider_updated_at',at)
   .in('provider_game_id',ids).order('source_received_at',{ascending:false}).limit(1000);
  if(quotesR.error)throw Error('NBA_PROPS_SHADOW_QUOTES_READ_FAILED');
  const quotes=quotesR.data??[],latest=new Map<string,any>();
  for(const q of quotes){
-  const key=[q.provider_game_id,q.player_id,q.statistic,q.side,q.line].join('|');
+  const key=[q.provider_game_id,q.player_id,q.statistic,q.period,q.contract,q.side,q.line].join('|');
   if(!latest.has(key))latest.set(key,q);
  }
  const eventMap=new Map(events.map(e=>[Number(/^bdl_nba_(\d+)$/.exec(String(e.id))?.[1]),e]));

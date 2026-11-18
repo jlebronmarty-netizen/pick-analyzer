@@ -682,7 +682,7 @@ export async function generateNbaPredictions({
   const season = resolveNbaSeason()
   const [{ events, stats, odds, injuryLineup }, learnedWeights] = await Promise.all([
     loadInputs({ season, limit }),
-    getModelWeights(NBA_SPORT_KEY),
+    getModelWeights(NBA_SPORT_KEY, {initialize: false}),
   ])
 
   const featureSets = events.map((event) => buildFeatures(event, stats, injuryLineup))

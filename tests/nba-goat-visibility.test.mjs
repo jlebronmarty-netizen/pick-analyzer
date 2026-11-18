@@ -4,4 +4,11 @@ test('NBA model report is private and read-only',()=>{const s=fs.readFileSync('s
 test('NBA model report excludes legacy by GOAT policy and Official Picks flags',()=>{const s=fs.readFileSync('src/services/nba-goat-model-read.service.ts','utf8');assert.match(s,/goatProviderPolicy/);assert.match(s,/NBA_GOAT_ARCHIVE_SHADOW_V1/);assert.match(s,/recommended_pick!==false/);assert.match(s,/production_eligible!==false/);});
 test('NBA headline uses Moneyline only; spread and total remain details',()=>{const s=fs.readFileSync('src/services/nba-goat-model-read.service.ts','utf8');assert.match(s,/market==='moneyline'/);assert.match(s,/metricLabel:'Moneyline'/);assert.match(s,/Spread/);assert.match(s,/Total/);});
 test('NBA detailed table labels SHADOW and does not claim Official Picks',()=>{const s=fs.readFileSync('src/app/nba-market-data/model-report.jsx','utf8');assert.match(s,/selecciones GOAT SHADOW/);assert.match(s,/No son Official Picks/);assert.match(s,/Accuracy = W\/\(W\+L\)/);});
-test('NBA GOAT runtime schedule correction does not change shared model formulas or cron config',()=>{const d=execFileSync('git',['diff','--name-only','origin/main','HEAD','--','vercel.json','src/services/nba-prediction-engine.service.ts','src/utils/prediction-engine-v4.ts'],{encoding:'utf8'});assert.equal(d,'');const runtime=fs.readFileSync('src/services/nba-goat-runtime.service.ts','utf8');assert.match(runtime,/mergeNbaScheduleGames/);});
+test('NBA GOAT preserves model formulas and cron config while allowing the exact read-only weight call',()=>{
+ const d=execFileSync('git',['diff','--name-only','origin/main','HEAD','--','vercel.json','src/utils/prediction-engine-v4.ts'],{encoding:'utf8'});assert.equal(d,'');
+ const path='src/services/nba-prediction-engine.service.ts';
+ const baseline=execFileSync('git',['show','origin/main:'+path],{encoding:'utf8'}),current=fs.readFileSync(path,'utf8');
+ const normalizeWeightRead=s=>s.replace('getModelWeights(NBA_SPORT_KEY, {initialize: false})','getModelWeights(NBA_SPORT_KEY)');
+ assert.equal(normalizeWeightRead(current),normalizeWeightRead(baseline),'Any engine change beyond the reviewed read-only weight invocation needs separate review');
+ const runtime=fs.readFileSync('src/services/nba-goat-runtime.service.ts','utf8');assert.match(runtime,/mergeNbaScheduleGames/);
+});

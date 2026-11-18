@@ -1,3 +1,10 @@
+## NBA FanDuel research capture — 2026-11-18
+
+- Added bounded capture of all GOAT-provided NBA prop types for the remaining current slate, with exact period/side/contract identity and full parsed responses. Historical game scores stay in a separate research run payload, preserving live schedule readers; missing player truth is fetched only after checking stored, reconciled box scores.
+- Existing NBA cron, private operations route and page controls expose capture with a 16-request claim. Pregame injury/lineup pagination is bounded and incomplete responses remain explicitly incomplete. These observations are not additional model inputs or official picks.
+- Fixed the NBA prediction reader's unexpected weight initialization by opting into a database-read-only weight load. Existing formulas and default values are unchanged. No unsupported quarter/team-total prices or calibrated probabilities are manufactured.
+- All 93 NBA regression tests, webpack compilation and TypeScript pass. Local page-data collection requires the existing Supabase environment; configured Vercel build and live capture verification remain separate gates. Details: `docs/edge-lab/nba-fanduel-research-capture-20261118.md`.
+
 ## MLB historical OPEN repair — 2026-10-17
 
 - Applied a guarded research-only repair to all 75 pending observations: two frozen MIL +1.5 Run Line model rows graded WIN from verified final evidence; 73 props retain OPEN with specific participation/postponement contract-review reasons.
