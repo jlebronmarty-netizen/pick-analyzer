@@ -29,12 +29,29 @@ export default function PropsShadowPanel({gameId,market,quotes=[]}){
  if(!gameId||!Object.hasOwn(markets,market))return null;
  const names=new Map(quotes.filter(q=>q.player_id&&q.player_name).map(q=>[String(q.player_id),q.player_name]));
  const rows=(data?.rows??[]).filter(r=>r.statistic===market);
+ const directions=(data?.directionalRows??[]).filter(r=>r.statistic===market);
  return <section aria-label="Proyecciones descriptivas Player Props SHADOW" className="rounded-xl border border-slate-700 bg-slate-950 p-4 mt-5">
-  <h2 className="text-lg font-bold">Proyecciones descriptivas · {markets[market]} · SHADOW</h2>
+  <h2 className="text-lg font-bold">Evaluación de Player Props · {markets[market]} · SHADOW</h2>
   <p className="mt-2 text-sm text-slate-300">Comparación informativa con cuotas <strong>archivadas</strong> recientes, no apuestas ni recomendaciones. L5 y L10 solo usan partidos anteriores con captura verificada antes de la cuota. La diferencia es proyección menos línea, no una probabilidad ni una ventaja calibrada.</p>
   {loading&&<p role="status">Verificando datos históricos…</p>}
   {error&&<p role="alert" className="text-amber-300">{error}</p>}
   {data&&<p className="text-xs text-slate-400">Estado: {data.status} · Revisado: {time(data.checkedAt)} · Cuotas verificadas: {data.archivedQuoteCount??'—'} · Sin llamadas adicionales a GOAT</p>}
+  <h3 className="mt-5 font-bold">Evaluación única por jugador y línea · Experimento (no recomendación)</h3>
+  <p className="text-sm text-slate-300">OVER / UNDER indica una tendencia estadística no validada, no una selección para apostar. PASS significa que el modelo no tiene evidencia suficiente o el margen es pequeño. Sin probabilidad calibrada ni valor esperado no se puede certificar una ventaja contra la cuota.</p>
+  <div className="overflow-x-auto mt-3"><table className="w-full text-left text-sm border-separate border-spacing-2">
+    <thead><tr>{['Jugador','Línea','Proyección','Diferencia','Tendencia experimental','Cuota del lado','Motivo','Muestra'].map(h=><th key={h}>{h}</th>)}</tr></thead>
+    <tbody>{directions.map((r,i)=><tr key={'direction-'+r.playerId+'-'+r.line+'-'+i}>
+      <td>{names.get(String(r.playerId))||r.playerName||'Jugador '+r.playerId}</td>
+      <td>{r.line}</td><td>{fmt(r.projection)}</td><td>{fmt(r.delta)}</td>
+      <td><strong>{r.tendency==='OVER_TENDENCY'?'OVER (sin validar)':r.tendency==='UNDER_TENDENCY'?'UNDER (sin validar)':'PASS'}</strong></td>
+      <td>{price(r.selectedSideOdds)}</td>
+      <td>{r.reason==='INSUFFICIENT_L10_PRIOR_GAMES'?'Muestra menor a 10 juegos':r.reason==='MARGIN_BELOW_EXPLORATORY_THRESHOLD'?'Margen pequeño':r.reason==='MISSING_BOTH_VERIFIED_SIDES'?'No hay ambos lados verificados':r.reason==='SIDES_NOT_TIME_COMPARABLE'?'Las cuotas no son comparables en tiempo':'Diferencia descriptiva frente a la línea'}</td>
+      <td>{r.availablePriorGames} juegos</td>
+    </tr>)}</tbody>
+   </table></div>
+  {data&&!directions.length&&<p role="status">Todavía no hay una evaluación direccional verificable para este partido y mercado. No se presume que la falta de registros signifique que no haya cuotas.</p>}
+  <details className="mt-5"><summary>Ver ambas cuotas Over / Under y el historial completo (diagnóstico)</summary>
+  <p className="text-sm text-slate-400">Las siguientes filas muestran cotizaciones por lado. Son datos de mercado, no pronósticos duplicados.</p>
   <div className="overflow-x-auto mt-3"><table className="w-full text-left text-sm border-separate border-spacing-2">
    <thead><tr>{['Jugador','Línea archivada','Cuota','L5','L10','Proyección','Diferencia','Juegos previos','Última cuota'].map(h=><th key={h}>{h}</th>)}</tr></thead>
    <tbody>{rows.map((r,i)=><tr key={r.quoteId??String(r.playerId)+'-'+r.side+'-'+r.line+'-'+i}>
@@ -47,6 +64,7 @@ export default function PropsShadowPanel({gameId,market,quotes=[]}){
     <td>{time(r.sourceReceivedAt)}</td>
    </tr>)}</tbody>
   </table></div>
+  </details>
   {data&&!rows.length&&<p role="status">No hay proyecciones descriptivas verificables para este mercado y partido. Puede deberse a falta de cinco juegos capturados antes de la cuota, ausencia de precios recientes o a que el partido comenzó. No significa que FanDuel no tenga ese mercado.</p>}
   <p className="text-xs text-slate-400 mt-3">SIN PROBABILIDADES · SIN EV · SIN PICKS. No ajusta lesiones, minutos previstos ni defensa rival. Las reglas de prórroga y DNP siguen sin certificarse.</p>
  </section>;
