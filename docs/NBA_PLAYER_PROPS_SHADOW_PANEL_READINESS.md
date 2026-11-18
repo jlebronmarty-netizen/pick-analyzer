@@ -34,3 +34,13 @@ El usuario necesita una fila única por jugador/mercado/línea que no duplique l
 - Las dos cuotas completas quedan disponibles solamente en el detalle diagnóstico; el panel de investigación muestra la dirección y la cuota correspondiente **solo como observación**.
 - El panel de evaluación está antes de la tabla de cuotas para evitar que el usuario confunda dos cotizaciones con dos recomendaciones.
 - Una vez acumulados datos prospectivos, comparar resultados reales y precios contratables por mercado; **no** convertir esta dirección heurística en una apuesta con probabilidad/ROI sin calibración walk-forward y holdout nuevo.
+
+## 18 noviembre 2026 — Eliminación de truncación y ampliación de mercado
+
+- `props-shadow` ahora requiere `game_id` y `market` estrictamente válido. Busca el último snapshot pregame **solo para ese mercado** y lee el lote de 90 segundos anterior. No intenta procesar los miles de quotes repetidos del partido: si un lote aun excede 1,000, se detiene explícitamente con revisión, sin truncar un ranking y llamarlo completo.
+- Se añadieron 4 mercados combinados: PRA, puntos+rebotes, puntos+asistencias y rebotes+asistencias. Cada observación del historial se calcula a partir de **la suma por partido anterior**, sin independencia artificial entre componentes. Solo muestran tendencia experimental PASS/OVER/UNDER no calibrada.
+- `nba_game_context_v2` ya conserva boxscores nuevos automáticamente dentro de producción. Se añadió fallback read-only `nba-props-context-fallback.mjs` para convertir SOLO datos finales que ya estaban capturados, respetando `player_stats_captured_at`, identidad jugador/partido y cero minutos DNP. Deduplica por juego-jugador con la captura más temprana verificada; nunca usa un dato con captura posterior a la cuota.
+- Una revisión read-only en Supabase confirmó **18 contextos con boxscores fuera del archivo compacto**; 32 contextos capturados desde 15 Nov comprenden 1,093 filas jugador, cero IDs de partido incorrectos, cero no-finales, cero jugadores sin ID y cero fechas del partido posteriores a la captura. Esto es evidencia de cobertura, no validación de probabilidad.
+- Como la consulta de fallback es temporal y read-only, **no equivale al respaldo diario permanente de GOAT en Storage**. Ese trabajo debe cerrarse en PR #340 o un proceso de archivo aprobado; no introducir crons duplicados ni modificar producción.
+- La API conserva filtros de precios pregame recientes, contrato, dos lados comparables, muestras L10 y separación entre información descriptiva y apuesta oficial.
+- No certificar FanDuel regional, ROI, EV, probabilidad modelo, injury/lineup adjustment o accuracy de props antes de la validación prospectiva.
