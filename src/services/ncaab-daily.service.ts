@@ -4,6 +4,7 @@ import {predictNcaab,reconcileNcaab,ncaabMetrics,type LiveObservation,type Sched
 import {getNcaabCheckpoint} from './ncaab-checkpoint-read.service';
 import type {NcaabReport} from '@/lib/ncaab-checkpoint';
 import profile from '@/data/ncaab-profile-2027.json' with {type:'json'};
+import {ncaabSourceLifecycle} from '@/lib/ncaab-source-lifecycle.mjs';
 const BASE='https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard';
 const hash=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 async function db(){return (await import('@/lib/supabase-admin')).supabaseAdmin;}
@@ -11,15 +12,27 @@ async function readAll(table:string){const client=await db();const rows:Record<s
 // Existing immutable checkpoint remains independently available; live failure is explicit.
 export async function getNcaabDailyReport():Promise<NcaabReport>{
  try{
-  const client=await db();const [ps,os,latest]=await Promise.all([readAll('ncaab_daily_predictions_v1'),readAll('ncaab_daily_outcomes_v1'),client.from('ncaab_daily_runs_v1').select('status,completed_at,provider_calls,detail').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(1)]);
+  const client=await db();const [ps,os,latest]=await Promise.all([readAll('ncaab_daily_predictions_v1'),readAll('ncaab_daily_outcomes_v1'),client.from('ncaab_daily_runs_v1').select('status,completed_at,provider_calls,detail').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(60)]);
   if(latest.error)throw Error('NCAAB_RUN_READ_FAILED');
   if(!ps.length)return {status:'UNAVAILABLE',warning:'NCAAB: historial diario todavía no inicializado.'};
   const outcomes=new Map<string,Final[]>();for(const o of os){const a=outcomes.get(String(o.event_id))??[];a.push(o.body as Final);outcomes.set(String(o.event_id),a);}
-  const rows=ps.map(p=>reconcileNcaab(p.body as LiveObservation,outcomes.get(String(p.event_id))??[]));const metrics=ncaabMetrics(rows);const checkpoint=getNcaabCheckpoint();if(checkpoint.status!=='AVAILABLE')throw Error('NCAAB_CHECKPOINT_INVALID');
+  // Reporting-only review: use statuses previously captured by the ordinary
+  // cron. Never mark postponed/rescheduled fixtures as a W/L or rewrite rows.
+  const life=new Map<string,{kind:LiveObservation['source_lifecycle'];source_captured_at:string;source_scheduled_at:string}>();
+  for(const run of latest.data??[]){
+   const updates=(run.detail as {lifecycle_updates?:Array<{event_id:string;kind:LiveObservation['source_lifecycle'];source_captured_at:string;source_scheduled_at:string}>}|null)?.lifecycle_updates??[];
+   for(const u of updates){
+    if(u?.event_id&&u.kind&&!life.has(u.event_id))life.set(u.event_id,u);
+   }
+  }
+  const rows=ps.map(p=>reconcileNcaab(p.body as LiveObservation,outcomes.get(String(p.event_id))??[]));
+  const displayRows=rows.map(r=>{const e=life.get(r.event_id);return e&&!r.settlement?
+    {...r,source_lifecycle:e.kind,source_lifecycle_captured_at:e.source_captured_at,source_lifecycle_scheduled_at:e.source_scheduled_at}:r;});
+  const metrics=ncaabMetrics(rows);const checkpoint=getNcaabCheckpoint();if(checkpoint.status!=='AVAILABLE')throw Error('NCAAB_CHECKPOINT_INVALID');
   const last=latest.data?.[0];const detail=last?.detail as {abstentions?:LiveObservation[]}|undefined;
   const seen=new Set(rows.map(x=>x.event_id));const abstentions=(detail?.abstentions??[]).filter(x=>!seen.has(x.event_id));
   const lastCompleted=last?.completed_at as string|null;const stale=!lastCompleted||Date.now()-Date.parse(lastCompleted)>26*3600000;
-  return {status:'AVAILABLE',data:{...checkpoint.data,connection:'DAILY_FREE_PIPELINE',continuousSync:true,hostedPipelineReady:true,generatedAt:lastCompleted??checkpoint.data.generatedAt,observations:[...rows,...abstentions].sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)||a.event_id.localeCompare(b.event_id)),models:[{...metrics,abstentions:abstentions.length},{id:'NCAAB_FREE_SCORE_V1_1',forecasts:0,abstentions:0,settled:0,wins:0,losses:0,winnerDenominator:0,accuracy:null}],lastRun:{status:last?.status??'NOT_RUN',completedAt:lastCompleted??null,providerCalls:Number(last?.provider_calls??0)},warning:stale?'Proceso diario sin ejecución completada reciente; revisar estado.':last?.status!=='PASS'?'Última ejecución incompleta; historial preservado.':undefined}};
+  return {status:'AVAILABLE',data:{...checkpoint.data,connection:'DAILY_FREE_PIPELINE',continuousSync:true,hostedPipelineReady:true,generatedAt:lastCompleted??checkpoint.data.generatedAt,observations:[...displayRows,...abstentions].sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)||a.event_id.localeCompare(b.event_id)),models:[{...metrics,abstentions:abstentions.length},{id:'NCAAB_FREE_SCORE_V1_1',forecasts:0,abstentions:0,settled:0,wins:0,losses:0,winnerDenominator:0,accuracy:null}],lastRun:{status:last?.status??'NOT_RUN',completedAt:lastCompleted??null,providerCalls:Number(last?.provider_calls??0)},warning:stale?'Proceso diario sin ejecución completada reciente; revisar estado.':last?.status!=='PASS'?'Última ejecución incompleta; historial preservado.':undefined}};
  }catch{return {status:'UNAVAILABLE',warning:'NCAAB: no se pudo leer el historial diario. No se sustituyen métricas por ceros.'};}
 }
 type EspnTeam={id:string;homeAway:string;score?:string;team:{displayName?:string}};
@@ -42,7 +55,10 @@ export async function runNcaabDaily(){
   const denied=await client.from('ncaab_daily_runs_v1').select('id').eq('status','ACCESS_DENIED').limit(1);if(denied.error)throw Error('NCAAB_DENIAL_GUARD_FAILED');if(denied.data?.length)return {status:'BLOCKED_ACCESS_DENIED_REVIEW',providerCalls:0};
   const begin=await client.from('ncaab_daily_runs_v1').insert({id:slot,status:'RUNNING'});if(begin.error)throw Error('NCAAB_RUN_CREATE_FAILED');
   const original=await readAll('ncaab_daily_predictions_v1');if(!original.length)throw Error('NCAAB_SEED_REQUIRED');
-  const known=new Set(original.map(p=>String(p.event_id)));const allOutcomes=await readAll('ncaab_daily_outcomes_v1');
+  const known=new Set(original.map(p=>String(p.event_id)));
+  const originalByEvent=new Map(original.map(p=>[String(p.event_id),p.body as LiveObservation]));
+  const lifecycleUpdates=new Map<string,ReturnType<typeof ncaabSourceLifecycle>>();
+  const allOutcomes=await readAll('ncaab_daily_outcomes_v1');
   const settled=new Set(allOutcomes.map(o=>String(o.event_id)));
   const day=(d:Date)=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(d).replaceAll('-','');
   const dates=new Set([-1,0,1].map(offset=>day(new Date(started+offset*86400000))));
@@ -63,13 +79,20 @@ export async function runNcaabDaily(){
      const {captured_at:ignored,...identity}=final;void ignored;
      const saved=await client.from('ncaab_daily_outcomes_v1').upsert({id:hash(identity),event_id:final.event_id,source_id:sourceId,observed_at:capturedAt,body:final},{onConflict:'id',ignoreDuplicates:true});if(saved.error)throw Error('NCAAB_FINAL_SAVE_FAILED');outcomes++;
     }
-    if(known.has(schedule.event_id))continue;
+    if(known.has(schedule.event_id)){
+     if(!settled.has(schedule.event_id)){
+      const frozen=originalByEvent.get(schedule.event_id);
+      const evidence=ncaabSourceLifecycle(frozen,schedule);
+      if(evidence)lifecycleUpdates.set(schedule.event_id,evidence);
+     }
+     continue;
+    }
     const f=predictNcaab(schedule,new Date().toISOString());
     if(f.state==='ABSTAIN'){abstentions.push(f);continue;}
     const saved=await client.from('ncaab_daily_predictions_v1').upsert({id:NCAAB_MODEL+':'+f.event_id,event_id:f.event_id,scheduled_at:f.scheduled_at,created_at:f.created_at,source_id:sourceId,body:{...f,model:NCAAB_MODEL,profile_sha256:'4fd07cc48ade1b1accd1ebb0f00c0ea414e93a2991567d70ed4ac890c88fdbf4'}},{onConflict:'id',ignoreDuplicates:true});if(saved.error)throw Error('NCAAB_FORECAST_SAVE_FAILED');known.add(f.event_id);forecasts++;
    }
   }
-  const done=await client.from('ncaab_daily_runs_v1').update({status:'PASS',completed_at:new Date().toISOString(),provider_calls:calls,detail:{forecasts,outcomes,abstentions}}).eq('id',slot);if(done.error)throw Error('NCAAB_RUN_CLOSE_FAILED');
+  const done=await client.from('ncaab_daily_runs_v1').update({status:'PASS',completed_at:new Date().toISOString(),provider_calls:calls,detail:{forecasts,outcomes,abstentions,lifecycle_updates:[...lifecycleUpdates.values()]}}).eq('id',slot);if(done.error)throw Error('NCAAB_RUN_CLOSE_FAILED');
   return {status:'PASS',providerCalls:calls,forecasts,outcomes,abstentions:abstentions.length,officialPicksModified:false};
  }catch(error){const message=error instanceof Error?error.message:'NCAAB_RUN_FAILED';await client.from('ncaab_daily_runs_v1').update({status:message==='ACCESS_DENIED'?'ACCESS_DENIED':'FAILED',completed_at:new Date().toISOString(),provider_calls:calls,detail:{error:message,forecasts,outcomes,abstentions}}).eq('id',slot);throw Error(message);
  }finally{await client.from('ncaab_daily_lock_v1').update({expires_at:new Date().toISOString()}).eq('owner',id);}
