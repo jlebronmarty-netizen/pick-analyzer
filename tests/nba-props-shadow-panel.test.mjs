@@ -11,7 +11,7 @@ const f=(i,more={})=>({player_id:42,provider_game_id:i,pts:18,reb:7,ast:4,fg3m:2
  game_datetime:'2026-11-'+String(i).padStart(2,'0')+'T01:00:00Z',
  source_captured_at:'2026-11-16T04:00:00Z',projection_eligible:true,...more});
 test('panel supports four props markets without certifying picks or EV',()=>{
- assert.deepEqual(PANEL_MARKETS,['points','rebounds','assists','threes']);
+ assert.deepEqual(PANEL_MARKETS,['points','rebounds','assists','threes','points_rebounds_assists','points_rebounds','points_assists','rebounds_assists']);
  const x=buildPropPanelRows({game,quotes:[quote()],facts:Array.from({length:10},(_,i)=>f(i+1)),asOf:at});
  assert.equal(x.status,'READ_ONLY_DESCRIPTIVE_SHADOW');
  assert.equal(x.rows.length,1);
@@ -142,4 +142,39 @@ test('newest quote batch excludes repeated historical snapshots before selecting
  assert.match(route,/QUOTE_BATCH_LIMIT_REVIEW_REQUIRED/);
  assert.match(route,/quoteBatchWindowSeconds:90/);
  assert.doesNotMatch(route,/QUOTE_SCAN_LIMIT_REVIEW_REQUIRED/);
+});
+
+
+test('combined PRA L10 is mean of per-game point/rebound/assist sums, not an independent-bet probability',()=>{
+ const facts=Array.from({length:10},(_,i)=>f(i+1,{pts:20+i,reb:4,ast:3}));
+ const q=quote({statistic:'points_rebounds_assists',line:32.5});
+ const result=buildPropPanelRows({game,quotes:[q],facts,asOf:at});
+ assert.equal(result.rows.length,1);
+ assert.equal(result.rows[0].l10,31.5);
+ assert.equal(result.rows[0].delta,-1);
+ assert.equal(result.rows[0].modelProbability,null);
+});
+test('all three two-stat combo markets are valid and independently summed per prior game',()=>{
+ const facts=Array.from({length:10},(_,i)=>f(i+1,{pts:20,reb:6,ast:4}));
+ for(const [market,expected] of [['points_rebounds',26],['points_assists',24],['rebounds_assists',10]]){
+  const row=buildPropPanelRows({game,quotes:[quote({statistic:market,line:20.5})],facts,asOf:at}).rows[0];
+  assert.equal(row.l10,expected,market);
+ }
+});
+test('a missing component in a combo game is not silently treated as zero',()=>{
+ const facts=Array.from({length:10},(_,i)=>f(i+1,{pts:20,reb:6,ast:4}));
+ facts[9].reb=null;
+ const row=buildPropPanelRows({game,quotes:[quote({statistic:'points_rebounds_assists',line:30.5})],facts,asOf:at}).rows[0];
+ assert.equal(row.availablePriorGames,9);
+ assert.equal(row.l10,null);
+});
+test('selected-market API reads only requested props and retains quote cap',()=>{
+ const route=readFileSync('src/app/api/market-data/nba/props-shadow/route.ts','utf8');
+ const ui=readFileSync('src/app/nba-market-data/props-shadow-panel.jsx','utf8');
+ assert.match(route,/const market=request\.nextUrl\.searchParams\.get\('market'\)/);
+ assert.match(route,/PANEL_MARKETS\.includes\(market as string\)/);
+ assert.match(route,/\.eq\('statistic',market!\)/);
+ assert.match(route,/QUOTE_BATCH_LIMIT_REVIEW_REQUIRED/);
+ assert.match(ui,/encodeURIComponent\(market\)/);
+ assert.match(ui,/Puntos \+ rebotes \+ asistencias \(PRA\)/);
 });
