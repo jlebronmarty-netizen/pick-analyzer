@@ -35,6 +35,7 @@ export async function POST(req:NextRequest){
   try{body=await req.json()}catch{return json({status:'BAD_REQUEST'},400)}
   if(!authorizedToken(body?.ticket))return json({status:'FORBIDDEN'},403);
  }
+ const callCap=scheduled?20:CALL_CAP;
  const key=process.env.BALLDONTLIE_API_KEY?.trim(),url=process.env.NEXT_PUBLIC_SUPABASE_URL?.trim(),role=process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
  if(!key||!url||!role)return json({status:'SERVER_CREDENTIALS_UNAVAILABLE'},503);
  const db=createClient(url,role,{auth:{persistSession:false,autoRefreshToken:false}}),store=db.storage.from(BUCKET);
@@ -52,7 +53,7 @@ export async function POST(req:NextRequest){
  const dataGet=async(path:string,params:Record<string,string>,maxRows=10000)=>{
   let cursor:string|null=null;const seen=new Set<string>(),rows:any[]=[];
   for(let page=0;page<MAX_PAGES;page++){
-   if(calls>=CALL_CAP)throw Error('PROVIDER_CALL_CAP');calls++;
+   if(calls>=callCap)throw Error('PROVIDER_CALL_CAP');calls++;
    const endpoint=new URL(path,'https://api.balldontlie.io');
    for(const [k,v] of Object.entries(params))endpoint.searchParams.append(k,v);
    endpoint.searchParams.set('per_page','100');if(cursor!==null)endpoint.searchParams.set('cursor',cursor);
@@ -137,5 +138,5 @@ export async function POST(req:NextRequest){
    }
   }
  }
- return json({status:errors.length?'PARTIAL':warnings.length?'COMPLETED_WITH_REVIEW':'COMPLETED',batchGameIds:batch.map(g=>g.id),season:SEASON,dateRange:[FIRST,LAST],inventoryFinals:finals.length,remainingBefore:pending.length,callsUsed:calls,callsMax:CALL_CAP,files:results,errors,warnings,unverifiedGames:[...new Set([...reviewGames.filter(id=>!results.some(r=>r.dataset==='advanced_v2'&&Number(r.gameId)===id)),...warnings.map(w=>w.gameId)])],productionModelsChanged:false,operationalTablesWritten:false});
+ return json({status:errors.length?'PARTIAL':warnings.length?'COMPLETED_WITH_REVIEW':'COMPLETED',batchGameIds:batch.map(g=>g.id),season:SEASON,dateRange:[FIRST,LAST],inventoryFinals:finals.length,remainingBefore:pending.length,callsUsed:calls,callsMax:callCap,files:results,errors,warnings,unverifiedGames:[...new Set([...reviewGames.filter(id=>!results.some(r=>r.dataset==='advanced_v2'&&Number(r.gameId)===id)),...warnings.map(w=>w.gameId)])],productionModelsChanged:false,operationalTablesWritten:false});
 }
