@@ -28,7 +28,20 @@ export function planTtRecovery(forecasts,outcomes,finals,runs,now=new Date()){
   candidates.push({event_id,team,participant_name:participant,page,side,scheduled_at:f.scheduled_at,previous_attempt_at:latest?.started_at??null});
  }
  candidates.sort((a,b)=>(a.previous_attempt_at??'').localeCompare(b.previous_attempt_at??'')||a.scheduled_at.localeCompare(b.scheduled_at)||a.event_id.localeCompare(b.event_id));
- return {target:candidates[0]??null,targets:candidates.slice(0,2),backlog_events:events.size,skipped};
+ // With a large backlog, archive one oldest and one recent untried match.
+ // This trades neither source quota nor settlement evidence for new predictions.
+ // The oldest target always advances; the second is recent to avoid missing
+ // short-lived provider result pages. Only prior attempt timestamps decide
+ // whether a target has been searched, never its eventual outcome.
+ let targets=candidates.slice(0,2),strategy='FAIR_OLDEST_FIRST';
+ if(events.size>100&&candidates.length>2){
+  const recent=[...candidates].sort((a,b)=>
+   Number(a.previous_attempt_at!==null)-Number(b.previous_attempt_at!==null)
+   ||b.scheduled_at.localeCompare(a.scheduled_at)||a.event_id.localeCompare(b.event_id)
+  ).find(x=>x.event_id!==candidates[0].event_id);
+  if(recent){targets=[candidates[0],recent];strategy='OLDEST_AND_RECENT_UNTRIED';}
+ }
+ return {target:targets[0]??null,targets,strategy,backlog_events:events.size,skipped};
 }
 export function recoveryCursor(target,coverage){
  const advance=coverage?.verified===true&&coverage.hasNextPage===true&&target.page<100;
