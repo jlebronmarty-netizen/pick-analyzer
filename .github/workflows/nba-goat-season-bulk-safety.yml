@@ -25,6 +25,8 @@ on:
       - 'supabase/migrations/20261114160000_nba_goat_season_archive_v1.sql'
       - 'docs/NBA_GOAT_2026_FULL_SEASON_BULK_ARCHIVE.md'
       - '.github/workflows/nba-goat-season-bulk-safety.yml'
+      - 'vercel.json'
+      - 'tests/nba-goat-daily-schedules-20261118.test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +44,8 @@ jobs:
         run: node --check scripts/nba-goat-season-2026-bulk-archive.mjs
       - name: Ensure no-call dry-run with no credentials
         run: node scripts/nba-goat-season-2026-bulk-archive.mjs --mode=core --max-requests=30 --max-games=3
+      - name: Verify schedules have research-only auth, bounded provider calls and preserved production cron
+        run: node --test tests/nba-goat-daily-schedules-20261118.test.mjs
       - name: Compact GOAT research fact unit tests
         run: node --test tests/nba-goat-research-compact-core.test.mjs
       - name: NBA formula search engine unit tests
