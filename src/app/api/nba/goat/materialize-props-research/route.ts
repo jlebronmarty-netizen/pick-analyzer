@@ -48,9 +48,14 @@ export async function GET(req:NextRequest){
 }
 export async function POST(req:NextRequest){
  if(!guard())return reply({status:'RESEARCH_ENV_ONLY'},404);
- if(req.headers.get('origin')!==req.nextUrl.origin||req.headers.get('content-type')?.split(';')[0]!=='application/json')return reply({status:'FORBIDDEN'},403);
- let body:any;try{body=await req.json()}catch{return reply({status:'BAD_REQUEST'},400)}
- if(!valid(body?.ticket))return reply({status:'FORBIDDEN'},403);
+ const scheduled=req.headers.get('ce-type')==='com.vercel.schedule.v1beta'&&
+  req.headers.get('ce-vssschedulename')==='nba-goat-compact-daily-research'&&
+  Boolean(process.env.CRON_SECRET)&&req.headers.get('authorization')==='Bearer '+process.env.CRON_SECRET;
+ if(!scheduled){
+  if(req.headers.get('origin')!==req.nextUrl.origin||req.headers.get('content-type')?.split(';')[0]!=='application/json')return reply({status:'FORBIDDEN'},403);
+  let body:any;try{body=await req.json()}catch{return reply({status:'BAD_REQUEST'},400)}
+  if(!valid(body?.ticket))return reply({status:'FORBIDDEN'},403);
+ }
  let db:ReturnType<typeof client>,inv:Awaited<ReturnType<typeof inventory>>;
  try{db=client();inv=await inventory(db)}catch{return reply({status:'RESEARCH_INVENTORY_UNAVAILABLE'},503)}
  if(!inv.pending.length)return reply({status:'COMPLETED',gamesWritten:0,rowsWritten:0,pendingAfter:0});
