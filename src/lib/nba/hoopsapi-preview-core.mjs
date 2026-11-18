@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 export const HOOPS_PERIODS = Object.freeze(['ft', 'h1', 'h2', 'q1', 'q2', 'q3', 'q4']);
 export const HOOPS_MARKETS = Object.freeze(['moneyline', 'spread', 'total', 'team_total_home', 'team_total_away']);
-export const HOOPS_CAPTURE_VERSION = 'NBA_HOOPSAPI_PREVIEW_READ_ONLY_V1';
+export const HOOPS_CAPTURE_VERSION = 'NBA_HOOPSAPI_DURABLE_PREVIEW_V2';
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const decimal = value => typeof value === 'number' && Number.isFinite(value) && value > 1 && value <= 100 ? value : null;
 const line = value => typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 500 ? value : null;
@@ -80,7 +80,7 @@ export function normalizeHoopsNbaList(payload, capturedAt = new Date().toISOStri
       'No FanDuel Puerto Rico jurisdiction or bet placement verified.',
       'Only main lines from provider list endpoint, not alternate lines.',
       'No model probabilities, expected value, predictions, settlement or recommendations.',
-      'No database writes. Result remains only in this private preview response.',
+      'Raw evidence and normalized quotes are archived only when capture_persisted is true.',
       'Full-game overtime and period settlement rules not independently certified.',
     ],
     coverage: {
@@ -91,3 +91,4 @@ export function normalizeHoopsNbaList(payload, capturedAt = new Date().toISOStri
     }, games, quotes,
   };
 }
+

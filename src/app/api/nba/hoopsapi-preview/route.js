@@ -1,31 +1,48 @@
-import {getHoopsPreviewStatus, testHoopsPreviewOnce, HOOPS_API_PREVIEW_CONFIRM} from '@/services/nba-hoopsapi-preview.service.mjs';
+import {getHoopsPreviewStatus, readHoopsPreviewState, captureHoopsPreviewDurably, HOOPS_API_PREVIEW_CONFIRM} from '@/services/nba-hoopsapi-preview.service.mjs';
+import {createHoopsDurableStore} from '@/lib/nba/hoopsapi-durable-store.mjs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 30;
+export const maxDuration = 45;
 const respond = (body, status = 200) => Response.json(body, {status, headers: {'Cache-Control': 'private, no-store'}});
-export async function GET() {
-  const status = getHoopsPreviewStatus();
-  return respond(status, status.enabled ? 200 : 404);
+async function storage() {
+  const {supabaseAdmin} = await import('@/lib/supabase-admin');
+  return createHoopsDurableStore(supabaseAdmin);
+}
+export async function GET(request) {
+  const configuration = getHoopsPreviewStatus();
+  if (!configuration.enabled) return respond(configuration, 404);
+  if (!request.headers.get('x-vercel-oidc-token')) return respond({status:'PRIVATE_VERCEL_AUTH_REQUIRED'},401);
+  if (!configuration.capture_configured) return respond(configuration);
+  try {
+    const state = await readHoopsPreviewState({store: await storage(), accountScope: process.env.HOOPS_API_ACCOUNT_SCOPE});
+    return respond(state, state.status === 'HOOPSAPI_LEDGER_UNAVAILABLE' ? 503 : 200);
+  } catch { return respond({status:'HOOPSAPI_LEDGER_UNAVAILABLE',capture_enabled:false,provider_calls_made:0},503); }
 }
 export async function POST(request) {
-  if (process.env.VERCEL_ENV !== 'preview') return respond({status: 'PREVIEW_ONLY'}, 404);
-  if (!request.headers.get('x-vercel-oidc-token')) return respond({status: 'PRIVATE_VERCEL_AUTH_REQUIRED'}, 401);
+  const configuration = getHoopsPreviewStatus();
+  if (!configuration.enabled) return respond({status:'PREVIEW_ONLY'},404);
+  if (!request.headers.get('x-vercel-oidc-token')) return respond({status:'PRIVATE_VERCEL_AUTH_REQUIRED'},401);
   if (request.headers.get('origin') !== new URL(request.url).origin ||
       request.headers.get('sec-fetch-site') !== 'same-origin' ||
-      !request.headers.get('content-type')?.startsWith('application/json')) return respond({status: 'SAME_ORIGIN_REQUIRED'}, 403);
+      !request.headers.get('content-type')?.startsWith('application/json')) return respond({status:'SAME_ORIGIN_REQUIRED'},403);
+  if (!configuration.capture_configured) return respond({status:'DURABLE_CAPTURE_DISABLED',provider_calls_made:0},503);
   const raw = await request.text();
-  if (raw.length > 256) return respond({status: 'INVALID_REQUEST'}, 400);
+  if (raw.length > 256) return respond({status:'INVALID_REQUEST'},400);
   let body;
-  try { body = JSON.parse(raw); } catch { return respond({status: 'INVALID_JSON'}, 400); }
+  try { body = JSON.parse(raw); } catch { return respond({status:'INVALID_JSON'},400); }
   if (!body || typeof body !== 'object' || Array.isArray(body) ||
-      Object.keys(body).some(key => key !== 'confirm') || body.confirm !== HOOPS_API_PREVIEW_CONFIRM) return respond({status: 'CONFIRMATION_REQUIRED'}, 400);
+      Object.keys(body).some(key => !['confirm','request_id'].includes(key)) ||
+      body.confirm !== HOOPS_API_PREVIEW_CONFIRM ||
+      typeof body.request_id !== 'string' ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.request_id))
+    return respond({status:'CONFIRMATION_AND_REQUEST_ID_REQUIRED'},400);
   try {
-    const result = await testHoopsPreviewOnce({key: process.env.HOOPS_API_KEY});
-    return respond(result, result.status === 'HOOPSAPI_RATE_LIMITED' ? 429 : result.status === 'HOOPSAPI_PROVIDER_UNAVAILABLE' ? 502 : 200);
-  } catch (error) {
-    const status = error instanceof Error && [
-      'HOOPSAPI_RESPONSE_TOO_LARGE', 'HOOPSAPI_RESPONSE_INVALID',
-      'HOOPSAPI_GAME_IDENTITY_INVALID', 'HOOPSAPI_QUOTE_LIMIT_EXCEEDED', 'HOOPSAPI_RESPONSE_NOT_JSON',
-    ].includes(error.message) ? error.message : 'HOOPSAPI_PREVIEW_FAILED';
-    return respond({status}, 503);
-  }
+    const result = await captureHoopsPreviewDurably({
+      key:process.env.HOOPS_API_KEY,store:await storage(),accountScope:process.env.HOOPS_API_ACCOUNT_SCOPE,requestId:body.request_id,
+    });
+    const status = result.capture_persisted ? 200 :
+      ['HOOPSAPI_RATE_LIMITED','APP_QUOTA_EXHAUSTED','ACCOUNT_COOLDOWN'].includes(result.status) ? 429 :
+      ['ALREADY_CLAIMED','REQUEST_IN_PROGRESS_OR_UNCERTAIN','DISPATCH_DENIED'].includes(result.status) ? 409 : 503;
+    return respond(result,status);
+  } catch { return respond({status:'HOOPSAPI_CAPTURE_UNAVAILABLE',provider_calls_made:0,capture_persisted:false},503); }
 }
+

@@ -1,3 +1,9 @@
+## NBA HoopsAPI durable research capture (2026-11-18)
+
+- Private Preview now includes account-level atomic reservation/dispatch, immutable evidence and recovery GET, with app-only quota provenance and zero automatic provider requests.
+- Additive schema, rollback-only SQL verification and known-request ledger initialization passed. NEXT: verify the protected Preview build, then persist the next authorized manual response. Preserve source identities and period contract gaps before model comparisons. No scheduling or model promotion is included.
+- See `docs/edge-lab/nba-hoopsapi-private-preview-20261118.md` and its schema/rollback/initialization scripts.
+
 ## NBA HoopsAPI quarter/half quote source trial (2026-11-18)
 
 - Private Vercel Preview-only endpoint and manual UI for a single HoopsAPI NBA slate request, preserving period, market, bookmaker and source identity. The free provider returns 429 after 10 requests in a rolling 24 hours.

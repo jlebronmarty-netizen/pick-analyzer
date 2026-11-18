@@ -3,10 +3,12 @@ on:
   pull_request:
     paths:
       - 'src/lib/nba/hoopsapi-preview-core.mjs'
+      - 'src/lib/nba/hoopsapi-durable-store.mjs'
       - 'src/services/nba-hoopsapi-preview.service.mjs'
       - 'src/app/api/nba/hoopsapi-preview/**'
       - 'src/app/nba-hoopsapi-preview/**'
       - 'tests/nba-hoopsapi-preview.test.mjs'
+      - 'docs/edge-lab/nba-hoopsapi-durable-preview-*.sql'
       - '.github/workflows/nba-hoopsapi-preview.yml'
   workflow_dispatch:
 permissions:
@@ -20,10 +22,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Check period markets, price normalization and free-plan call boundary
+      - name: Check period markets, durable capture, recovery and quota call boundary
         run: node --test tests/nba-hoopsapi-preview.test.mjs
       - name: Ensure no credentials appear in committed preview code
         run: |
           if grep -R -n -E 'hoops_[A-Za-z0-9]{14,}' src/lib/nba/hoopsapi-preview-core.mjs src/services/nba-hoopsapi-preview.service.mjs src/app/api/nba/hoopsapi-preview src/app/nba-hoopsapi-preview tests/nba-hoopsapi-preview.test.mjs; then
             echo 'Unexpected hardcoded provider credential'; exit 1;
           fi
+

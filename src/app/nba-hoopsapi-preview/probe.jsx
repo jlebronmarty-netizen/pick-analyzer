@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 const periods = ['all', 'q1', 'q2', 'q3', 'q4', 'h1', 'h2', 'ft'];
 const markets = ['all', 'total', 'spread', 'moneyline', 'team_total_home', 'team_total_away'];
 const time = x => x && Number.isFinite(Date.parse(x))
@@ -7,23 +7,46 @@ const time = x => x && Number.isFinite(Date.parse(x))
   : 'Fecha no verificada';
 const format = v => v === null || v === undefined ? '—' : Number.isFinite(Number(v)) ? String(v) : '—';
 export default function Probe() {
+  const attemptLock = useRef(false);
+  const [attempted, setAttempted] = useState(false);
+  const [state, setState] = useState(null);
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [period, setPeriod] = useState('all');
   const [market, setMarket] = useState('all');
+  async function restore() {
+    try {
+      const response = await fetch('/api/nba/hoopsapi-preview', {cache:'no-store'});
+      const payload = await response.json();
+      setState(payload);
+      if (payload.capture) setData(previous => !previous?.captured_at ||
+        Date.parse(payload.capture.captured_at) >= Date.parse(previous.captured_at) ? payload.capture : previous);
+      if (!response.ok) setError(payload.status || 'No se pudo leer la captura guardada');
+    } catch { setState(null); setError('No se pudo verificar el registro. La consulta al proveedor permanece bloqueada.'); }
+  }
+  useEffect(() => {
+    try {
+      const stamp = Number(sessionStorage.getItem('nba_hoopsapi_attempted_at_v2'));
+      if (stamp > 0 && Date.now() - stamp < 86400000) { attemptLock.current = true; setAttempted(true); }
+    } catch { /* Immediate ref lock still prevents duplicate clicks in this page. */ }
+    void restore(); // Database GET only; never calls HoopsAPI.
+  }, []);
   async function run() {
-    if (busy) return;
-    setBusy(true); setError(''); setData(null);
+    if (busy || attemptLock.current || !state?.capture_enabled) return;
+    attemptLock.current = true; setAttempted(true);
+    try { sessionStorage.setItem('nba_hoopsapi_attempted_at_v2', String(Date.now())); } catch { /* Ref remains locked. */ }
+    setBusy(true); setError('');
     try {
       const response = await fetch('/api/nba/hoopsapi-preview', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({confirm: 'HOOPS_NBA_SINGLE_MANUAL_REQUEST'}), cache: 'no-store',
+        body: JSON.stringify({confirm: 'HOOPS_NBA_SINGLE_MANUAL_REQUEST', request_id: crypto.randomUUID()}), cache: 'no-store',
       });
       const payload = await response.json();
-      setData(payload);
+      if (Array.isArray(payload.quotes)) setData(payload);
       if (!response.ok) setError(payload.status || 'No se pudo consultar HoopsAPI');
-    } catch { setError('La conexión no respondió. No repitas la consulta hasta revisar el estado del proveedor.'); }
+      await restore();
+    } catch { setError('La conexión no respondió. Usa Recuperar última captura; no repitas la consulta al proveedor.'); }
     finally { setBusy(false); }
   }
   // Export only the already-captured response. Neither button invokes the provider.
@@ -40,10 +63,18 @@ export default function Probe() {
       saveFile('hoopsapi_nba_preview_' + stamp + '.json', JSON.stringify(data, null, 2), 'application/json;charset=utf-8');
       return;
     }
-    const cols = ['provider_game_id','period','market','side','team_side','line','decimal_odds','american_odds_approx',
-      'source_received_at','provider_updated_at','regional_price_verified','capture_version'];
-    const csv = [cols, ...data.quotes.map(row => cols.map(k => row[k]))]
-      .map(row => row.map(value => '"' + String(value ?? '').replaceAll('"', '""') + '"').join(',')).join('\r\n');
+    const cols = ['capture_id','quote_id','provider','sportsbook','provider_game_id','home_team','away_team','start_time',
+      'period','market','side','team_side','line','decimal_odds','american_odds_approx',
+      'source_received_at','provider_updated_at','regional_price_verified','capture_version','response_sha256'];
+    const csv = [cols, ...data.quotes.map(row => {
+      const game = data.games.find(g => g.provider_game_id === row.provider_game_id) || {};
+      const complete = {...game,...row,capture_id:data.capture_id,response_sha256:data.response_sha256};
+      return cols.map(k => complete[k]);
+    })].map(row => row.map(value => {
+      const text = String(value ?? '');
+      const safe = typeof value === 'string' && /^[=+@-]/.test(text) ? "'" + text : text;
+      return '"' + safe.replaceAll('"','""') + '"';
+    }).join(',')).join('\r\n');
     saveFile('hoopsapi_nba_preview_' + stamp + '.csv', '\uFEFF' + csv, 'text/csv;charset=utf-8');
   }
   const quotes = (data?.quotes || []).filter(q => (period === 'all' || q.period === period) && (market === 'all' || q.market === market));
@@ -51,24 +82,27 @@ export default function Probe() {
     <header className="rounded-xl border border-slate-600 p-5">
       <a href="/nba-market-data" className="text-sky-300 underline">← NBA FanDuel / GOAT</a>
       <h1 className="mt-3 text-2xl font-bold">HoopsAPI · prueba privada NBA</h1>
-      <p className="mt-2 text-sm text-slate-300">Preview solamente. Una consulta por pulsación para todos los juegos NBA y sus mercados principales por período. Sin capturas automáticas ni escrituras a Supabase; no se crea ningún pick.</p>
-      <p className="mt-2 text-sm text-amber-200">El proveedor limita la cuenta gratuita a 10 consultas cada 24 horas. Esta fase NO tiene un contador duradero propio; no pulses repetidamente.</p>
-      <button type="button" disabled={busy || data !== null} onClick={run}
+      <p className="mt-2 text-sm text-slate-300">Una consulta manual guarda la respuesta y los mercados principales por período. La captura se puede recuperar al volver a abrir la página. No hay capturas automáticas.</p>
+      <p className="mt-2 text-sm text-amber-200">Límite de la aplicación: hasta 10 intentos por cuenta en 24 horas móviles. Las consultas realizadas fuera de esta integración también consumen el cupo del proveedor.</p>
+      <p className="mt-2 text-sm text-slate-300">Registro: {state?.quota?.status || state?.status || 'Verificando…'} · Intentos registrados en 24 h: {state?.quota?.charged_attempts_24h ?? '—'} · Cupos de la aplicación: {state?.quota?.remaining_app_reservations ?? '—'}{state?.quota?.blocked_until ? ' · Bloqueado hasta ' + time(state.quota.blocked_until) : ''}</p>
+      <button type="button" disabled={busy || attempted || !state?.capture_enabled} onClick={run}
         className="mt-4 rounded-lg bg-sky-700 px-4 py-2 font-semibold text-white disabled:opacity-50">
-        {busy ? 'Consultando una vez…' : 'Probar HoopsAPI (gasta 1 consulta)'}
+        {busy ? 'Capturando una vez…' : 'Capturar HoopsAPI (gasta 1 consulta)'}
       </button>
+      <button type="button" disabled={busy} onClick={restore} className="ml-3 mt-4 rounded-lg bg-slate-700 px-4 py-2 disabled:opacity-50">Recuperar última captura (sin consulta)</button>
       {error && <p role="alert" className="mt-3 text-amber-200">{error}</p>}
       {data?.quotes?.length > 0 && <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" onClick={() => downloadCapture('csv')} className="rounded bg-emerald-700 px-3 py-2 text-white">Descargar todas las líneas (CSV)</button>
         <button type="button" onClick={() => downloadCapture('json')} className="rounded bg-slate-700 px-3 py-2 text-white">Guardar captura y procedencia (JSON)</button>
       </div>}
-      {data !== null && <p className="mt-2 text-xs text-slate-300">Esta página no permitirá otra llamada mientras esté abierta. Descarga la respuesta antes de cerrarla.</p>}
+      {attempted && <p className="mt-2 text-xs text-slate-300">El intento quedó bloqueado en esta pestaña, incluso si la conexión falló. Recuperar y descargar no consumen consultas.</p>}
 
     </header>
     {data && <section className="rounded-xl border border-slate-600 p-5 space-y-2">
       <h2 className="text-xl font-semibold">{data.status || 'Resultado'}</h2>
+      <p className={data.capture_persisted ? 'text-emerald-300' : 'text-amber-200'}>{data.capture_persisted ? 'Captura guardada y recuperable.' : 'Guardado no confirmado. Descarga esta respuesta y revisa la recuperación.'}</p>
       <p>Recibido: {time(data.captured_at)} · {data.coverage?.nba_games ?? 0} partidos NBA · {data.coverage?.normalized_quote_sides ?? 0} lados de cuota · {data.coverage?.missing_fanduel_games ?? 0} partidos sin FanDuel.</p>
-      <p>Períodos sin precio FanDuel: {data.coverage?.periods_without_fanduel_prices?.join(', ') || 'ninguno'}</p>
+      <p>Períodos sin precio en ningún partido de la respuesta: {data.coverage?.periods_without_fanduel_prices?.join(', ') || 'ninguno'}</p>
       <p className="text-sm text-amber-200">La disponibilidad para apostar en FanDuel Puerto Rico no está verificada. Las cuotas americanas son conversiones aproximadas desde precios decimales.</p>
       <div className="flex flex-wrap gap-4 pt-3">
         <label>Período <select value={period} onChange={e => setPeriod(e.target.value)} className="ml-2 rounded bg-slate-800 p-2">{periods.map(p => <option key={p} value={p}>{p}</option>)}</select></label>
@@ -92,3 +126,4 @@ export default function Probe() {
     </section>}
   </main>;
 }
+
