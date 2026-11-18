@@ -62,3 +62,28 @@ NCAAF has 5 distinct `DISPUTE` game IDs (15 market-level diagnostic rows: ML, ma
 **Important:** A final scoreboard in `ncaaf_game_context_v2` is not sufficient evidence to override `DISPUTE`: need to verify forecast ID, participants, orientation, schedule, source versions, and contradictory captured finals before computing settlement. All five still require reconciliation; no rows were edited or backfilled.
 
 Status: SQL audit verified; GitHub documentation only in isolated research branch. No changes to production, prediction engines, cron, frozen decisions, or model promotions.
+
+## 17 Nov follow-up: implementation prepared in isolated research branch, **not deployed**
+
+### NCAAB postponed/rescheduled review
+
+- `src/lib/ncaab-unsettled-lifecycle-research.mjs`: pure, read-only classification. Explicit `REVIEW_POSTPONED`, `REVIEW_RESCHEDULED`, `REVIEW_CANCELLED`, `REVIEW_SOURCE_CONFLICT`, `PENDING_FINAL`, `REVIEW_FINAL_EXISTING_RECONCILER` statuses. Never grades, never changes probabilities, and never overwrites a frozen forecast.
+- `sql/research/ncaab_unsettled_lifecycle_triage_v0.sql` fetched back from GitHub and executed as read-only in Supabase. Its **five** overdue historical cases were classified: 3 POSTPONED (Cornell–UNC Greensboro, Pacific–Air Force, Oregon–Pepperdine) and 2 RESCHEDULED (Utah–Washington; North Dakota–SIU Edwardsville). These are provider-snapshot classifications of original event IDs, **not** claims about whether separate newly scheduled event IDs were played. The existing two-hour immutable settlement guard is not weakened.
+
+### NCAAF dispute root cause and safe triage
+
+- All five disputed event IDs retained frozen team identities and neutral-site flags in the stored final evidence, with two captured schedule variants per event. Original `ncaafOutcome` in `src/lib/edge-lab/ncaaf-ppg.mjs` requires exact kickoff equality; all five stored `DISPUTE` reasons are `EVENT_CONTRACT_CHANGED`.
+- Read-only `sql/research/ncaaf_disputed_finals_triage_v0.sql` fetched back and executed. All five have 5–6 final captures with one score and venue; **two are RESEARCH REVIEW_CANDIDATE** for a 15-minute and a 75-minute kickoff shift (`espn:401860917`, `espn:401858521`), and **three MANUAL_REVIEW** for 150–255-minute shifts. Repeated ESPN captures do not count as independent news providers or certify sportsbook settlement.
+- `src/lib/edge-lab/ncaaf-dispute-review-research.mjs` isolates same ID/team/venue/season/timestamp and contradictory-FINAL guards. Its result is `gradeAllowed:false`, `databaseWriteAllowed:false`, `officialPick:false` even for review candidates. **No existing `DISPUTE` row was changed**. A later dedicated, tested production reconciliation path is required if approved.
+
+### NCAAB calibration research: clear tradeoff, no automatic model promotion
+
+- The exact SQL `sql/research/ncaab_asof_calibration_candidate_v0.sql` was fetched back and executed (538 as-of-eligible, identity-verified games). Baseline home-probability Brier **0.19383**, log loss **0.57662**, 416/538 correct ML sides. Blindly shifting all probabilities by historical home bias reduced Brier to **0.16915**, log loss to **0.51520**, but lost eight directional wins (408/538). **Reject all-sides correction** for a selection-accuracy-focused model.
+- After analyzing that overlap, tested *post-hoc* constrained adjustment keeping model's selected side: Brier **0.16570**, log loss **0.50810**, 416/538 directional wins. It still worsened later-cohort away-favorite probabilities.
+- New additional post-hoc candidate adjusts **only original home favorites**, leaving away-favorite probabilities and the actual winner selection unchanged: exact reproducible `sql/research/ncaab_home_favorite_calibration_v1.sql`, verified against Supabase: **Brier 0.16525**, **log loss 0.50715**, still **416/538** directional hits. It uses previously observed official finals before each forecast and fixed research shrinkage of `n/(n+100)`, minimum 50 prior games; it does not use same-game result as a feature. This is NOT preregistered or an untouched holdout, and there is no proved ROI or sportsbook quote edge. Do not claim validated accuracy uplift (directional accuracy is unchanged).
+- A simple naive independent-observations CI on the paired Brier improvement is not a certified interval (matches are temporally clustered and multiple candidate formulas were investigated). Fix the candidate now, then evaluate its **future** frozen forecasts on a separated untouched cohort with properly timed evidence, directional wins, Brier, log loss, calibration and real-quote EV before any promotion. Do not write calibrated probabilities back to official tables.
+
+### Tests and verification
+
+- `tests/multisport-ncaab-ncaaf-lifecycle-research.test.mjs`: **nine local Node.js tests passed**, exercising postponed, rescheduled, status review, identity conflict, score conflict and time cutoffs. Local tested source files and committed files have identical Git blob hashes (NCAAB `883d67a20d26a60f73903ac7da7750d166e3b5b9`, NCAAF `12cf34c31ed51e7edf2fcd39a57d8749c887418f`, tests `13d0bbb1e4ff9661d6d5582f80a395e0529f8a6a`). This is a **module test**, not a full TypeScript build, integration test, or production deployment.
+- Main branch, database, crons, provider billing and existing model outputs untouched. Do not merge until integrated against full NCAAB/NCAAF services, CI checked and appropriate deployment validation completed.
