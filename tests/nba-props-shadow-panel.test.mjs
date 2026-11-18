@@ -132,3 +132,14 @@ test('panel renders experimental direction table before both-side quote diagnost
  assert.ok(board.indexOf('<PropsShadowPanel')<board.indexOf('result&&<section'));
  assert.match(route,/directionalRows:buildDirectionalResearchRows/);
 });
+
+test('newest quote batch excludes repeated historical snapshots before selecting one per line',()=>{
+ const route=readFileSync('src/app/api/market-data/nba/props-shadow/route.ts','utf8');
+ assert.match(route,/const newest=await db\.from\('nba_market_quotes_v1'\)/);
+ assert.match(route,/const latestAt=Date\.parse\(newest\.data\[0\]\.source_received_at\)/);
+ assert.match(route,/const batchStart=new Date\(latestAt-90000\)/);
+ assert.match(route,/\.gte\('source_received_at',batchStart\)\.lte\('source_received_at',newest\.data\[0\]\.source_received_at\)/);
+ assert.match(route,/QUOTE_BATCH_LIMIT_REVIEW_REQUIRED/);
+ assert.match(route,/quoteBatchWindowSeconds:90/);
+ assert.doesNotMatch(route,/QUOTE_SCAN_LIMIT_REVIEW_REQUIRED/);
+});
