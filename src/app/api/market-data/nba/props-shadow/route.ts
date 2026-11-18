@@ -1,7 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {privateHost} from '@/lib/nba-production-feed.mjs';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
-import {buildPropPanelRows,PANEL_VERSION} from '@/lib/nba/nba-props-panel-core.mjs';
+import {buildPropPanelRows,buildDirectionalResearchRows,PANEL_VERSION,DIRECTION_VERSION} from '@/lib/nba/nba-props-panel-core.mjs';
 export const dynamic='force-dynamic';export const runtime='nodejs';export const revalidate=0;export const maxDuration=60;
 const reply=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:{'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 export async function GET(request:NextRequest){
@@ -44,7 +44,7 @@ export async function GET(request:NextRequest){
   facts.push(...r.data);
  }
  const research=buildPropPanelRows({game,quotes:q.data,facts,asOf:at});
- return reply({...research,version:PANEL_VERSION,providerGameId:id,checkedAt:at,
+ return reply({...research,version:PANEL_VERSION,directionVersion:DIRECTION_VERSION,directionalRows:buildDirectionalResearchRows(research.rows),providerGameId:id,checkedAt:at,
   archivedQuoteCount:q.data.length,historyRowsExamined:facts.length,providerCalls:0,databaseWrites:0,
-  warning:'SHADOW descriptive only. Price feeds are not verified regional book menus. No calibrated probabilities, EV, recommended picks, injury adjustment or sportsbook settlement certification.'});
+  warning:'SHADOW descriptive tendencies (OVER/UNDER/PASS) only, never betting recommendations. The distance thresholds are exploratory, not trained or validated. Price feeds are not verified regional book menus. No calibrated probabilities, EV, recommended picks, injury adjustment or sportsbook settlement certification.'});
 }
