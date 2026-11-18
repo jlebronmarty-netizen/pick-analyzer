@@ -97,3 +97,15 @@ Read-only database audit of `edge_lab_multi_runs_v1` found Table Tennis with 23 
 A source-level comparison against the committed GitHub blob verified that the invalid reference was absent, the safe reference present, and `summary.skipped=forecasts.skipped` still assigned in the capture `try`. `tests/tt-prematch-scope-regression.test.mjs` contains targeted regression assertions; it has NOT been run in a full CI workspace here. Do not claim TT fixed live until these and existing sport regressions pass and the authorized deployment's next provider-free health checks plus normal scheduled cycle show a valid `SUCCESS` or justified `PARTIAL` run and overdue settlements decrease. Never trigger paid retrieval just to verify this fix.
 
 No production deployment or database mutation occurred in this investigation.
+
+## Final additional read-only check: Soccer (18 Nov UTC)
+
+The separate `edge_lab_runs_v1` collector is active: 625 `SUCCESS`, 4 `PARTIAL`; latest `SUCCESS` 2026-11-18 01:15 UTC. Soccer has 40 forecast-market rows, 18 associated results (10 W / 8 L across its 1X2 and Total 2.5 markets), and **0 overdue (>12h) non-ABSTAIN forecast-market rows**. These correspond to only nine settled games in the causal diagnostic tables, so not enough data to validate performance or profitability. Soccer remains **operational for observed ingestion/settlement, limited historical coverage**; no production changes.
+
+Priority across remaining sports after these checks:
+1. Restore Table Tennis collector from verified one-line scope fix on isolated branch, subject to full regression/preview/release approval. Audit 267 market-level overdue rows, and review provider allowance before any live fetch.
+2. NCAAB/NCAAF classification integration and validation gates; avoid changing frozen official results on uncertain identities and changed schedules.
+3. Soccer: widen source coverage/competition support only with verified free sources and timestamped contracts; do not treat nine games as enough to refit.
+4. MLB remains paused; NBA and NHL unchanged.
+
+No new source-provider calls or deployed changes were made to collect these findings.
