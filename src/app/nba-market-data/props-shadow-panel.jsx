@@ -8,6 +8,7 @@ export default function PropsShadowPanel({gameId,market,quotes=[]}){
  const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(false);
  useEffect(()=>{
   if(!gameId||!Object.hasOwn(markets,market)){setData(null);setError('');return;}
+  setData(null);setError('');
   let active=true,controller=null;
   async function load(){
    if(document.hidden||controller)return;
@@ -19,7 +20,7 @@ export default function PropsShadowPanel({gameId,market,quotes=[]}){
     const body=await r.json();
     if(!r.ok)throw Error(body.status||'ARCHIVE_UNAVAILABLE');
     if(active){setData(body);setError('');}
-   }catch(e){if(active)setError('No se pudo confirmar el historial o la cuota archivada. '+String(e.message||e));}
+   }catch(e){if(active){setData(null);setError('No se pudo confirmar el historial o la cuota archivada. '+String(e.message||e));}}
    finally{clearTimeout(timeout);controller=null;if(active)setLoading(false);}
   }
   load();const id=setInterval(load,120000);
