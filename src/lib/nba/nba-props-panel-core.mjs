@@ -1,11 +1,19 @@
 // NBA GOAT props display — read-only descriptive baselines, not model picks.
 // All samples used for a row were actually captured before its frozen quote.
-export const PANEL_MARKETS=Object.freeze(['points','rebounds','assists','threes']);
+export const PANEL_MARKETS=Object.freeze(['points','rebounds','assists','threes','points_rebounds_assists','points_rebounds','points_assists','rebounds_assists']);
 export const PANEL_VERSION='NBA_PROPS_DESCRIPTIVE_SHADOW_V1';
 const date=x=>Date.parse(String(x??''));
 const numeric=x=>x===null||x===undefined||x===''?null:Number(x);
 const round=x=>Number(x.toFixed(2));
-const stats=Object.freeze({points:'pts',rebounds:'reb',assists:'ast',threes:'fg3m'});
+const stats=Object.freeze({points:['pts'],rebounds:['reb'],assists:['ast'],threes:['fg3m'],
+ points_rebounds_assists:['pts','reb','ast'],points_rebounds:['pts','reb'],
+ points_assists:['pts','ast'],rebounds_assists:['reb','ast']});
+function statValue(f,market){
+ const fields=stats[market];if(!fields)return null;
+ let sum=0;
+ for(const field of fields){const v=numeric(f[field]);if(v===null||!Number.isSafeInteger(v)||v<0)return null;sum+=v;}
+ return sum;
+}
 export function buildPropPanelRows({game,quotes,facts,asOf,playerNames={}}){
  const now=date(asOf),start=date(game?.datetime);
  if(!Number.isFinite(now)||!Number.isFinite(start)||game?.status_state!=='scheduled'||now>=start-600000)
@@ -32,12 +40,12 @@ export function buildPropPanelRows({game,quotes,facts,asOf,playerNames={}}){
   const key=[playerId,market,side,line].join('|');if(seen.has(key))continue;seen.add(key);
   const selectedHistory=[...(history.get(String(playerId))??[])].filter(f=>
     date(f.game_datetime)<quoteAt&&date(f.source_captured_at)<=quoteAt&&
-    numeric(f[stats[market]])!==null&&Number.isInteger(numeric(f[stats[market]]))&&numeric(f[stats[market]])>=0);
+    statValue(f,market)!==null);
   const games=new Map();
   for(const f of selectedHistory)games.set(Number(f.provider_game_id),f);
   const prior=[...games.values()].sort((a,b)=>date(b.game_datetime)-date(a.game_datetime));
   const sample=prior.slice(0,10),last5=sample.slice(0,5);
-  const avg=x=>x.reduce((s,f)=>s+Number(f[stats[market]]),0)/x.length;
+  const avg=x=>x.reduce((s,f)=>s+statValue(f,market),0)/x.length;
   const valid=last5.length>=5,has10=sample.length>=10;
   const projection=valid?(has10?avg(sample):avg(last5)):null;
   rows.push({playerId,playerName:String(playerNames[String(playerId)]??'')||null,statistic:market,side,line,americanOdds:odds,
@@ -58,7 +66,7 @@ export function buildPropPanelRows({game,quotes,facts,asOf,playerNames={}}){
 // with an explicit PASS whenever data quality or evidence is insufficient.
 // It DOES NOT produce a calibrated edge, EV, probability or betting recommendation.
 export const DIRECTION_VERSION='NBA_PROPS_DIRECTIONAL_RESEARCH_V1';
-const minDistance=Object.freeze({points:2,rebounds:1,assists:1,threes:.6});
+const minDistance=Object.freeze({points:2,rebounds:1,assists:1,threes:.6,points_rebounds_assists:3,points_rebounds:2.5,points_assists:2.5,rebounds_assists:1.5});
 export function buildDirectionalResearchRows(rows,{maxPairMinutes=5}={}){
  if(!Array.isArray(rows)||!Number.isFinite(maxPairMinutes)||maxPairMinutes<0||maxPairMinutes>30)
   throw Error('INVALID_DIRECTIONAL_INPUT');
