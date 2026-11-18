@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {buildPropPanelRows,PANEL_MARKETS} from '../src/lib/nba/nba-props-panel-core.mjs';
+import {buildPropPanelRows,buildDirectionalResearchRows,PANEL_MARKETS} from '../src/lib/nba/nba-props-panel-core.mjs';
 const at='2026-11-17T23:00:00Z';
 const game={id:300000,datetime:'2026-11-18T01:00:00Z',status_state:'scheduled'};
 const quote=(more={})=>({quote_id:'sample',provider_game_id:300000,player_id:42,market:'props',
@@ -81,4 +81,54 @@ test('private preview is restricted to a single review branch and never allows p
  assert.match(route,/VERCEL_GIT_COMMIT_REF==='feat\/nba-props-visibility-20261117'/);
  assert.match(route,/privateHost\(request,env\)/);
  assert.match(route,/x-vercel-oidc-token/);
+});
+
+
+test('both prices become one directional research line, never a certified pick',()=>{
+ const facts=Array.from({length:10},(_,i)=>f(i+1,{reb:10}));
+ const quotes=[quote({quote_id:'over-source',american_odds:-115}),quote({quote_id:'under-source',side:'under',contract:'STRICT_LESS_THAN',american_odds:-105})];
+ const raw=buildPropPanelRows({game,quotes,facts,asOf:at});
+ assert.equal(raw.rows.length,2);
+ const result=buildDirectionalResearchRows(raw.rows);
+ assert.equal(result.length,1);
+ assert.equal(result[0].tendency,'OVER_TENDENCY');
+ assert.equal(result[0].selectedSideOdds,-115);
+ assert.equal(result[0].projection,10);
+ assert.equal(result[0].modelProbability,null);
+ assert.equal(result[0].expectedValue,null);
+ assert.equal(result[0].recommendedPick,false);
+});
+test('no reliable counterpart or less than ten prior games yields PASS',()=>{
+ const quotes=[quote(),quote({quote_id:'under',side:'under',contract:'STRICT_LESS_THAN',american_odds:105})];
+ const seven=buildPropPanelRows({game,quotes,facts:Array.from({length:7},(_,i)=>f(i+1,{reb:10})),asOf:at});
+ assert.equal(buildDirectionalResearchRows(seven.rows)[0].tendency,'PASS');
+ const onlyOver=buildPropPanelRows({game,quotes:[quote()],facts:Array.from({length:10},(_,i)=>f(i+1,{reb:10})),asOf:at});
+ assert.equal(buildDirectionalResearchRows(onlyOver.rows)[0].reason,'MISSING_BOTH_VERIFIED_SIDES');
+});
+test('negligible margin yields PASS even with both prices and ten games',()=>{
+ const quotes=[quote(),quote({quote_id:'under',side:'under',contract:'STRICT_LESS_THAN'})];
+ const ten=buildPropPanelRows({game,quotes,facts:Array.from({length:10},(_,i)=>f(i+1,{reb:8})),asOf:at});
+ const d=buildDirectionalResearchRows(ten.rows)[0];
+ assert.equal(d.tendency,'PASS');
+ assert.equal(d.reason,'MARGIN_BELOW_EXPLORATORY_THRESHOLD');
+});
+test('under tendency selects under price once, but remains unvalidated',()=>{
+ const quotes=[quote({american_odds:-106}),quote({quote_id:'under',side:'under',contract:'STRICT_LESS_THAN',american_odds:-114})];
+ const ten=buildPropPanelRows({game,quotes,facts:Array.from({length:10},(_,i)=>f(i+1,{reb:5})),asOf:at});
+ const d=buildDirectionalResearchRows(ten.rows)[0];
+ assert.equal(d.tendency,'UNDER_TENDENCY');
+ assert.equal(d.selectedSideOdds,-114);
+ assert.equal(d.productionEligible,false);
+});
+test('panel renders experimental direction table before both-side quote diagnostic',()=>{
+ const ui=readFileSync('src/app/nba-market-data/props-shadow-panel.jsx','utf8');
+ const board=readFileSync('src/app/nba-market-data/board.jsx','utf8');
+ const route=readFileSync('src/app/api/market-data/nba/props-shadow/route.ts','utf8');
+ assert.match(ui,/Evaluación única por jugador y línea/);
+ assert.match(ui,/PASS/);
+ assert.match(ui,/OVER \(sin validar\)/);
+ assert.match(ui,/UNDER \(sin validar\)/);
+ assert.ok(ui.indexOf('Evaluación única por jugador y línea')<ui.indexOf('Ver ambas cuotas Over'));
+ assert.ok(board.indexOf('<PropsShadowPanel')<board.indexOf('result&&<section'));
+ assert.match(route,/directionalRows:buildDirectionalResearchRows/);
 });
