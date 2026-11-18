@@ -38,7 +38,7 @@ export function gradeFrozenProp(decision, final, options = {}) {
   const frozen = timestamp(decision.frozenAt), tip = timestamp(decision.gameStartAt);
   const captured = timestamp(final.source_captured_at);
   if (![frozen,tip,captured].every(Number.isFinite) ||
-      frozen >= tip - 600000 || captured < tip || timestamp(decision.quoteCapturedAt) > frozen)
+      frozen >= tip - 600000 || captured < tip || !Number.isFinite(timestamp(decision.quoteCapturedAt)) || timestamp(decision.quoteCapturedAt) > frozen)
     return pending('TIMESTAMP_OR_PREGAME_CUTOFF_INVALID');
   if (final.final_verified !== true) return pending('FINAL_NOT_VERIFIED');
   if (final.corrected_or_disputed === true) return pending('FINAL_DISPUTED');
