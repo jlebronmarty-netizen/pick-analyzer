@@ -8,6 +8,8 @@ on:
       - 'src/app/nba-market-data/props-shadow-panel.jsx'
       - 'src/app/api/market-data/nba/props-shadow/route.ts'
       - 'src/lib/nba/nba-props-panel-core.mjs'
+      - 'src/lib/nba/nba-props-context-fallback.mjs'
+      - 'tests/nba-props-context-fallback.test.mjs'
       - '.github/workflows/nba-props-visibility-safety.yml'
 permissions:
   contents: read
@@ -28,5 +30,7 @@ jobs:
         run: node --test tests/nba-props-shadow-panel.test.mjs
       - name: Install dependencies and validate TypeScript
         run: npm ci --no-audit --no-fund && npx tsc --noEmit --pretty false
+      - name: Captured GOAT daily context fallback evidence tests
+        run: node --test tests/nba-props-context-fallback.test.mjs
       - name: Confirm production cron and model unmodified
         run: git diff --exit-code origin/main...HEAD -- vercel.json src/services/nba-prediction-engine.service.ts src/services/nba-goat-runtime.service.ts
