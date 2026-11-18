@@ -68,7 +68,7 @@ async function collectTt(db,request,summary){
  summary.forecasts_inserted=await insertRows(db,T.forecasts,forecasts.rows);summary.forecasts_reused=forecasts.rows.length-summary.forecasts_inserted;summary.status_counts=Object.fromEntries(['FORECAST','PROJECTION','ABSTAIN'].map(s=>[s,forecasts.rows.filter(r=>r.status===s).length]));
  if(!coverage.verified)summary.warnings.push('PREMATCH_COVERAGE_UNVERIFIED');else if(coverage.hasNextPage)summary.warnings.push('PREMATCH_PAGE_BUDGET_REACHED');
  }catch(e){summary.warnings.push('PREMATCH_REFRESH_FAILED');summary.errors.push(e instanceof Error?e.message:'TT_PREMATCH_FAILED');summary.operational_state='SETTLEMENT_RECOVERY';return 'PARTIAL';}
- if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(forecasts.skipped.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
+ if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');if(summary.skipped?.length)summary.warnings.push('SOME_EVENTS_NOT_VERIFIABLE');if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
  if(!history.finals.length&&allIncoming.length===0)summary.warnings.push('NO_VERIFIED_FINALS_AVAILABLE');
  summary.warnings=[...new Set(summary.warnings)];summary.operational_state=summary.status_counts.FORECAST+summary.status_counts.PROJECTION===0&&summary.status_counts.ABSTAIN>0?'WARMUP':'COLLECTED';
  return summary.warnings.length?'PARTIAL':'SUCCESS';
