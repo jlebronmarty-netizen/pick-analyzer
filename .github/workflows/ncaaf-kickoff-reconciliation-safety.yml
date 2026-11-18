@@ -1,0 +1,31 @@
+name: NCAAF kickoff reconciliation safety
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/edge-lab/ncaaf-ppg.mjs'
+      - 'tests/edge-lab-ncaaf*.test.mjs'
+      - '.github/workflows/ncaaf-kickoff-reconciliation-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Existing NCAAF and kickoff drift regressions
+        run: node --test tests/edge-lab-ncaaf.test.mjs tests/edge-lab-ncaaf-kickoff-reconcile.test.mjs
+      - name: TypeScript safety
+        run: npx tsc --noEmit --pretty false

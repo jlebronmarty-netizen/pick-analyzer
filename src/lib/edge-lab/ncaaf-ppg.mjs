@@ -53,11 +53,22 @@ export function ncaafForecastRows(games,history,cutoff,sourceId){
  return {rows,skipped};
 }
 export function ncaafOutcome(f,g){
- if(!g)return {status:'PENDING'};const original=f.payload.input;
- if(g.event_id!==f.event_id||g.home_id!==original.home_id||g.away_id!==original.away_id||g.season!==original.season||Date.parse(g.scheduled_at)!==Date.parse(f.scheduled_at)||g.neutral_site!==original.neutral_site)return {status:'DISPUTE',reason:'EVENT_CONTRACT_CHANGED'};
+ if(!g)return {status:'PENDING'};const original=f.payload?.input;
+ const scheduled=Date.parse(f.scheduled_at),observed=Date.parse(g.scheduled_at),emitted=Date.parse(f.emitted_at),captured=Date.parse(g.captured_at);
+ const drift=Math.abs(observed-scheduled);
+ // ESPN sometimes corrects kickoff by <=120 minutes while retaining the same
+ // event ID and both teams. Never settle a new game, swapped teams/venue, or a
+ // change that makes the frozen pregame forecast post-start.
+ if(!original||g.event_id!==f.event_id||original.event_id!==f.event_id||
+    g.home_id!==original.home_id||g.away_id!==original.away_id||
+    g.season!==original.season||g.neutral_site!==original.neutral_site||
+    Date.parse(original.scheduled_at)!==scheduled||
+    ![scheduled,observed,emitted,captured].every(Number.isFinite)||
+    drift>2*3600000||emitted>=Math.min(scheduled,observed)-10*60000)
+   return {status:'DISPUTE',reason:'EVENT_CONTRACT_CHANGED'};
  if(g.status!=='FINAL')return {status:'PENDING'};
  if(g.outcome_validation!=='PASS'||!Number.isInteger(g.home_score)||!Number.isInteger(g.away_score)||g.home_score===g.away_score)return {status:'NOT_VERIFIABLE',reason:'FINAL_NOT_VERIFIED'};
- if(Date.parse(g.captured_at)<=Date.parse(f.emitted_at))return {status:'DISPUTE',reason:'FINAL_KNOWN_AT_EMISSION'};
+ if(captured<=emitted||captured<=observed)return {status:'DISPUTE',reason:'FINAL_TIMING_INVALID'};
  const p=f.payload.projection,errors={home:Math.abs(p.home_score-g.home_score),away:Math.abs(p.away_score-g.away_score),margin:Math.abs(p.projected_margin-(g.home_score-g.away_score)),total:Math.abs(p.projected_total-(g.home_score+g.away_score))};
  if(f.market==='MONEYLINE')return {status:f.selection===(g.home_score>g.away_score?'HOME':'AWAY')?'W':'L',final:g,numeric_errors:errors};
  const actual=f.market==='POINT_MARGIN'?g.home_score-g.away_score:f.market==='TOTAL_POINTS'?g.home_score+g.away_score:null;
