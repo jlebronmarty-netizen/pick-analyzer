@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import ts from 'typescript';
+import {stripTypeScriptTypes} from 'node:module';
 import {buildResearchPropEnvelopes,propScope,collectCursorPages,historyDateRange,normalizeHistoryGamePages,finalPlayerStatsComplete} from '../src/lib/nba/goat-research-capture-core.mjs';
 
 const game={id:21718131,date:'2026-11-18',datetime:'2026-11-19T00:00:00Z',season:2026,status:'8:00 PM ET',status_state:'scheduled',period:0,postponed:false,home_team:{id:6,abbreviation:'CLE',full_name:'Cleveland Cavaliers'},visitor_team:{id:15,abbreviation:'MEM',full_name:'Memphis Grizzlies'}};
@@ -53,8 +53,11 @@ test('Final player truth requires exact players and team score reconciliation',(
 });
 test('NBA weight read preserves stored learned weights and never calls upsert',async()=>{
  let writes=0;const db={from:()=>({upsert:async()=>{writes++;return {};},select:()=>({eq:async()=>({data:[{factor:'homeAwayAdvantage',weight:1.2345}],error:null})})})};
- const source=fs.readFileSync('src/services/model-learning.service.ts','utf8'),js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
- const exports={};vm.runInNewContext(js,{exports,require:name=>name==='@/lib/supabase-admin'?{supabaseAdmin:db}:{},console});
+ // This workflow intentionally uses only Node's standard library. Execute the
+ // actual type-stripped function with a mocked DB; no package install is needed.
+ const source=fs.readFileSync('src/services/model-learning.service.ts','utf8');
+ const js=stripTypeScriptTypes(source,{mode:'strip'}).replace(/^import[^\n]+\n/gm,'').replace(/^export (?=async function|function|const|let|var)/gm,'');
+ const exports={};vm.runInNewContext(js+'\nexports.getModelWeights = getModelWeights;',{exports,supabaseAdmin:db,console});
  const result=await exports.getModelWeights('basketball_nba',{initialize:false});assert.equal(writes,0);assert.equal(result.homeAwayAdvantage,1.2345);assert.equal(result.injuryImpact,1.3);
  const engine=fs.readFileSync('src/services/nba-prediction-engine.service.ts','utf8');assert.match(engine,/getModelWeights\(NBA_SPORT_KEY, \{initialize: false\}\)/);
 });

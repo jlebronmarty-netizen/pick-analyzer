@@ -51,3 +51,11 @@ After the earlier GET at 16:55:16 UTC on 2026-11-18, the five NBA weight rows ha
 - Full NBA GOAT and production-audit regression: 93 tests passed.
 - Local Next webpack compilation and TypeScript passed. Full page-data collection is blocked by the existing `/api/ai/copilot/chat` import requiring `NEXT_PUBLIC_SUPABASE_URL`; this isolated worktree has no environment file or copied credentials. The configured Vercel build remains the deployment gate.
 - Production capture counts require a separate execution receipt and are not inferred from local tests.
+
+### PR 352 CI follow-up
+
+The first NBA workflow run failed because the new test imported TypeScript while this workflow deliberately runs without installing dependencies. The test now uses Node 24's built-in `stripTypeScriptTypes` to execute the same actual weight-reading function against a mocked database. A second existing test pinned the whole NBA engine to `origin/main`; it now compares the entire file while normalizing only the exact reviewed `initialize:false` invocation. All other formula or configuration changes still fail the assertion. The complete 93-test suite passes with these fixes.
+
+The separate MLB release-readiness job fails on an existing source-certificate mismatch. It was reproduced on untouched base commit `ca205f3556b6b4a0282e7d95a9b1e70664e9a9c2` in a separate worktree. Base and PR have the same five mismatches in `MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json`: `src/app/globals.css`, `src/app/layout.tsx`, `src/components/dashboard/DashboardShell.tsx`, `src/components/dashboard/DashboardShellClient.tsx`, and `src/components/pick2/CanonicalDashboardBoundary.tsx`. None of these files changes in this PR. The canonical R3 certificate has zero source mismatches on both trees.
+
+Observed first mismatch on both trees: globals.css expected `8c3a114dbe4abac7ba89566f21e4a0071860113b7085499645e04771fb0c0a0b`, actual `e2486bb4a4d6f225d0e691b8d8a9f72e32e4d07c9d8f1a8590963c3dbe0617ac`. The failed jobs were NBA regression `134985458852` and MLB verify `134985458076`. No certificate hashes or release gates were changed to suppress this failure.
