@@ -45,3 +45,20 @@
 The Nov 10 NCAAB settlement repair (`c8fd2748396457f1ffb74015a412b925b84b2dcd`) explicitly allows only exact ESPN event identity, equal unordered pair of teams and scheduling drift <=2h (with home-away normalization). Longer postponements cannot be automatically settled by that rule. That is a **correct safety guard** against mismatched games, not evidence of broken ordinary FINAL reconciliation. Proposed status-handling repair must retain it and add separate explicit POSTPONED/RESCHEDULED classification; never silently raise the time-shift tolerance, overwrite locked forecasts or attribute a rescheduled game's final to an older event.
 
 Further checks should prove exact event status and canonical mapping before introducing a new terminal status, with dedicated tests for no-score and schedule-drift cases.
+
+## Follow-up: strict NCAAB scoring and NCAAF disputes
+
+The SQL audit committed at `sql/research/ncaab_verified_accuracy_audit_20261117.sql` was fetched back from GitHub and executed in read-only mode against the Pick Analyzer database. It returned 611 verified paired matches, 480 winner calls correct (78.560%), Brier 0.1912, margin MAE 13.031, total MAE 14.482. On those 611, average forecast home probability 0.5876 versus observed home win frequency 0.7578. This is an **observed calibration discrepancy** deserving time-split and cohort audit; it must not trigger automatic correction, as selection and coverage may be nonrandom.
+
+All 616 initial NCAAB matched rows: 606 identical home/away orientation, 9 home-away swapped, one conflict in at least one participating team ID. Five fixtures had scheduled start drift >2 hours: four otherwise same team orientation, one an identity conflict. Exclude the latter five from the verified metrics, retain immutable source evidence, and do not silently settle or fix source data. The prior naive score (484/616) should not be used as the verified headline despite its numerically similar percentage.
+
+NCAAF has 5 distinct `DISPUTE` game IDs (15 market-level diagnostic rows: ML, margin, total). Stored ESPN summaries list these games as FINAL, with these scoreboards:
+- `espn:401856886` Mississippi State 9–Auburn 41
+- `espn:401858521` Michigan State 14–Washington 21
+- `espn:401860917` Washington State 73–Colorado State 7
+- `espn:401862826` Tulsa 38–Florida Atlantic 21
+- `espn:401862828` Rice 17–Tulane 20
+
+**Important:** A final scoreboard in `ncaaf_game_context_v2` is not sufficient evidence to override `DISPUTE`: need to verify forecast ID, participants, orientation, schedule, source versions, and contradictory captured finals before computing settlement. All five still require reconciliation; no rows were edited or backfilled.
+
+Status: SQL audit verified; GitHub documentation only in isolated research branch. No changes to production, prediction engines, cron, frozen decisions, or model promotions.
