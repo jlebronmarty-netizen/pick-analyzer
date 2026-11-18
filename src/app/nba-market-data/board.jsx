@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {createPoller,preserveSelection} from './polling.mjs';
+import PropsShadowPanel from './props-shadow-panel';
 const types={points:'Puntos',rebounds:'Rebotes',assists:'Asistencias',threes:'Triples',blocks:'Tapones',steals:'Robos',points_rebounds_assists:'Puntos + rebotes + asistencias',points_rebounds:'Puntos + rebotes',points_assists:'Puntos + asistencias',rebounds_assists:'Rebotes + asistencias'};
 const price=n=>n>0?`+${n}`:String(n);
 const time=x=>x&&Number.isFinite(Date.parse(x))?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'medium'}).format(new Date(x)):'No verificada';
@@ -52,6 +53,7 @@ export default function Board({archiveControls=false}){
  const age=(clock-Date.parse(q.provider_updated_at))/1000;const status=!q.provider_updated_at||!Number.isFinite(age)?'Hora desconocida':age<0?'Hora inconsistente':age<=180?'Reciente':age<=300?'Envejeciendo':'ANTIGUA';
  return <tr key={q.quote_id}><td>{q.player_name||(q.player_id?`Jugador ${q.player_id} sin resolver`:q.side==='home'?event.home_team.full_name:q.side==='away'?event.visitor_team.full_name:'Total')}</td><td>{types[q.statistic]||q.statistic}<br/>{q.period}</td><td>{q.side} {q.line??''}<br/>{q.contract}</td><td>{price(q.american_odds)}</td><td>{time(q.provider_updated_at)}</td><td>{status} · {Number.isFinite(age)?Math.round(age):'?'} s</td></tr>;
  })}</tbody></table></div>{!quotes.length&&<p>No hay cuotas en esta respuesta o filtro. Esto no confirma una baja ni ausencia de mercados en FanDuel.</p>}<p>Captura: {result.meta.snapshot_id}</p>{result.meta.warnings?.length>0&&<p role="alert">{result.meta.warnings.join(', ')}</p>}</section>}
+ <PropsShadowPanel gameId={game} market={market} quotes={result?.data?.quotes||[]}/>
  {archiveControls&&<section style={box}><h2>Archivo y sincronización</h2><button style={input} disabled={archiving} onClick={()=>archiveAction(false)}>Ver estado del archivo</button><button style={input} disabled={archiving} onClick={()=>archiveAction(true)}>Archivar jornada ahora</button><p>El proceso NBA existente archiva automáticamente cada 30 min. Consultar cuotas aquí también conserva la captura. No reconstruye precios pasados ni liquida apuestas.</p>{archiving&&<p role="status">Consultando archivo…</p>}{archive&&<pre style={{whiteSpace:'pre-wrap',fontSize:12}}>{JSON.stringify(archive,null,2)}</pre>}</section>}
  <p style={{marginTop:20}}>Los Player Props de esta pantalla son cotizaciones, no recomendaciones. No se certifican el menú completo, precio regional, prórroga ni SGP. Un prop publicado no confirma participación. Las proyecciones de puntos, rebotes, asistencias y triples requieren validación prospectiva antes de aparecer como selecciones SHADOW calificadas.</p></section>;
 }
