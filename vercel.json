@@ -39,6 +39,10 @@
     {
       "path": "/api/cron/model-learning-evaluate",
       "schedule": "25 11 * * *"
+    },
+    {
+      "path": "/api/cron/nba-hoopsapi",
+      "schedule": "15 15,21,23 * * *"
     }
   ],
   "git": {

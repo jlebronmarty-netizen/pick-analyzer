@@ -1,3 +1,15 @@
+## NBA HoopsAPI durable private Preview (2026-11-18)
+
+- Added immutable raw/normalized capture, read-only recovery and an atomic account-scoped rolling-24h request ledger. Duplicate, concurrent, database-uncertain and archive-uncertain attempts fail closed before another provider call; all failed/unknown dispatches remain charged.
+- Twelve Node tests pass. Additive migration `nba_hoopsapi_durable_preview_v1` and rollback-only database contract verification passed; the known prior manual request is recorded as external evidence and private branch-only Preview configuration is ready. Local full build is unavailable because restored Next dependencies are missing; Vercel build verification remains required.
+- No cron, production merge, model/prediction/settlement write or additional provider call. See `docs/edge-lab/nba-hoopsapi-private-preview-20261118.md`.
+
+## HoopsAPI NBA quarter/half odds private Preview (2026-11-18)
+
+- Added a Preview-only, Vercel-authenticated, one-click research probe for one free-tier HoopsAPI NBA list request. It normalizes FanDuel main period markets without implying Puerto Rico availability, official picks, probability or EV.
+- No scheduler, database writes, model changes, auto retries, or production credentials. The provider limits its Free plan to 10 calls per rolling 24 hours; an application-side ledger and real coverage verification are pending before any automation.
+- Unit fixtures cover period lines, home/away spread sign, missing book, invalid odds and quota response. See `docs/edge-lab/nba-hoopsapi-private-preview-20261118.md`.
+
 ## NBA FanDuel research capture — 2026-11-18
 
 - Added bounded capture of all GOAT-provided NBA prop types for the remaining current slate, with exact period/side/contract identity and full parsed responses. Historical game scores stay in a separate research run payload, preserving live schedule readers; missing player truth is fetched only after checking stored, reconciled box scores.
