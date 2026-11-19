@@ -1,10 +1,10 @@
 // Read-only projection of the immutable Edge Lab ledger. No providers or writers.
+import {reportDatePR as datePR} from './report-calendar.mjs';
 const configs=[
  {sport:'SOCCER',key:'soccer',label:'Soccer · LaLiga',cohort:'EDGE_LAB_RESTART_20261104',primary:'1X2',versions:{'1X2':'SOCCER_V0_PICK_PORT_1',TOTAL_2_5:'SOCCER_V0_PICK_PORT_1'},labels:{'1X2':'Ganador / empate (1X2)',TOTAL_2_5:'Over / Under 2.5'},note:'Nueva cohorte prospectiva de LaLiga. No incluye el checkpoint antiguo. Los mercados se evalúan por separado.'},
  {sport:'TT',key:'table-tennis',label:'Tenis de mesa',cohort:'EDGE_LAB_LIVE_20261104',primary:'MONEYLINE',versions:{MONEYLINE:'TT_ML_V1_PICK_PORT_1',SETS_ODD_EVEN:'TT_SETS_OE_V1_PICK_PORT_1',TOTAL_POINTS:'TT_TOTAL_V1_PICK_PORT_1'},labels:{MONEYLINE:'Ganador',SETS_ODD_EVEN:'Sets par / impar',TOTAL_POINTS:'Total de puntos'},note:'Seguimiento nuevo en Pick; cobertura parcial del proveedor. Los resultados no localizados siguen pendientes.'},
  {sport:'NCAAF',key:'ncaaf',label:'NCAAF · PPG',cohort:'NCAAF_PPG_PICK_20261105',primary:'MONEYLINE',versions:{MONEYLINE:'NCAAF_PPG_V1_PICK_PORT_1',POINT_MARGIN:'NCAAF_PPG_V1_PICK_PORT_1',TOTAL_POINTS:'NCAAF_PPG_V1_PICK_PORT_1'},labels:{MONEYLINE:'Ganador',POINT_MARGIN:'Margen de puntos',TOTAL_POINTS:'Total de puntos'},note:'PPG experimental; Ridge no está activo. Margen y total son proyecciones numéricas, no apuestas spread/O-U.'},
 ];
-const datePR=value=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
 const validTime=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
 const percent=x=>x===null?'N/A':(x*100).toFixed(2)+'%';
 function empty(c,reason,checkedAt){return {key:c.key,label:c.label,href:'/edge-lab?sport='+c.sport,classification:'SHADOW / MODEL_ONLY',metricLabel:c.labels[c.primary],linkLabel:'Ver selecciones, accuracy y resultados →',checkedAt,detailLines:[reason],cohorts:[{key:c.cohort,label:c.cohort,available:false,wins:null,losses:null,pending:null,pushes:null,voids:null,models:null,accuracy:null,note:'Lectura no verificada. No se sustituye por cero ni por un checkpoint antiguo.'}]};}
@@ -36,7 +36,7 @@ export function buildEdgeLabOverviewCard(sport,report,checkedAt=new Date().toISO
   const detailLines=metrics.filter(m=>m.market!==c.primary).map(m=>m.numericN?`${m.label}: MAE ${m.mae.toFixed(2)} puntos · n=${m.numericN} · ${m.pending} pendientes`:m.market==='TOTAL_POINTS'||m.market==='POINT_MARGIN'?`${m.label}: MAE N/A · ${m.pending} pendientes`:`${m.label}: ${percent(m.accuracy)} · ${m.wins} W / ${m.losses} L · ${m.pending} pendientes`);
   detailLines.unshift(`Ganadores: ${todayN} selecciones con fecha de hoy · ${futureN} futuras sin resultado.`);
   detailLines.push(`PASAR: ${primary.abstentions} · Disputas: ${primary.disputes} · No verificables: ${primary.notVerifiable} · PUSH: ${primary.pushes}.`);
-  const omitted=report.rows.filter(r=>r.sport===sport&&!relevant.includes(r)).length;
+  const relevantRows=new Set(relevant),omitted=report.rows.filter(r=>r.sport===sport&&!relevantRows.has(r)).length;
   if(omitted)detailLines.push(`${omitted} registros de otra cohorte/versión no se mezclan aquí.`);
   return {key:c.key,label:c.label,href:'/edge-lab?sport='+c.sport,classification:'SHADOW / MODEL_ONLY',metricLabel:c.labels[c.primary],linkLabel:'Ver selecciones, accuracy y resultados →',checkedAt,detailLines,marketMetrics:metrics,cohorts:[{key:c.cohort,label:c.versions[c.primary],available:true,wins:primary.wins,losses:primary.losses,pending:primary.pending,pushes:primary.pushes,voids:0,models:1,accuracy:primary.accuracy,note:c.note}]};
  }catch{return empty(c,'Registros requieren revisión de identidad, emisión o duplicados.',checkedAt);}

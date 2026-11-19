@@ -3,6 +3,8 @@ import {createClient} from '@supabase/supabase-js';
 import {randomUUID} from 'node:crypto';
 import {COHORT,SOCCER_MODEL,statisticalOutcome,metric} from '../lib/edge-lab/engines.mjs';
 import {loadSoccer,forecastRows,sha} from '../lib/edge-lab/sources.mjs';
+import {groupReportRowsByDate} from '../lib/edge-lab/report-calendar.mjs';
+import {readEdgeLabOverviewLedger} from './edge-lab-overview-ledger.mjs';
 const PROJECT='ynuocvexviorgdjrfthw';
 function client(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||new URL(url).hostname!==PROJECT+'.supabase.co'||!key)throw Error('DESTINATION_NOT_CONFIGURED');return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
 const safe=e=>typeof e?.message==='string'&&/^[A-Z0-9_]+$/.test(e.message)?e.message:'EDGE_LAB_OPERATION_FAILED';
@@ -34,12 +36,12 @@ export async function runEdgeSoccer(){
  }catch(e){summary.errors.push({error:safe(e)});throw Error(safe(e));}
  finally{try{checked(await db.from('edge_lab_runs_v1').update({status,finished_at:new Date().toISOString(),summary}).eq('id',runId));}finally{checked(await db.from('edge_lab_lock_v1').update({lease_until:new Date().toISOString()}).eq('singleton',true).eq('run_id',runId));}}
 }
+export async function readEdgeLabOverview(){return readEdgeLabOverviewLedger(client(),'SOCCER');}
 export async function readEdgeLab(){
  const db=client(),forecasts=(await all(db,'edge_lab_forecasts_v1')).filter(r=>r.cohort===COHORT),outcomes=await all(db,'edge_lab_outcomes_v1');
  const runs=checked(await db.from('edge_lab_runs_v1').select('*').order('started_at',{ascending:false}).limit(5));
  const byId=new Map(outcomes.map(r=>[r.forecast_id,r])),rows=forecasts.map(r=>({...r,outcome:byId.get(r.id)??null})).sort((a,b)=>a.scheduled_at.localeCompare(b.scheduled_at)||a.market.localeCompare(b.market));
  const metrics=['1X2','TOTAL_2_5'].map(m=>{const eligible=rows.filter(r=>r.market===m&&r.status==='FORECAST');return {market:m,...metric(eligible.flatMap(r=>r.outcome?[r.outcome]:[])),pending:eligible.filter(r=>!r.outcome).length,disputes:eligible.filter(r=>r.outcome?.status==='DISPUTE').length,not_verifiable:eligible.filter(r=>r.outcome?.status==='NOT_VERIFIABLE').length,abstentions:rows.filter(r=>r.market===m&&r.status==='ABSTAIN').length};});
- const dates=[...new Set(rows.map(r=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))))];
- const daily=dates.flatMap(date=>['1X2','TOTAL_2_5'].map(m=>{const subset=rows.filter(r=>r.market===m&&r.status==='FORECAST'&&new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))===date);return {date,market:m,...metric(subset.flatMap(r=>r.outcome?[r.outcome]:[])),pending:subset.filter(r=>!r.outcome).length};}));
+ const daily=[...groupReportRowsByDate(rows)].flatMap(([date,dayRows])=>['1X2','TOTAL_2_5'].map(m=>{const subset=dayRows.filter(r=>r.market===m&&r.status==='FORECAST');return {date,market:m,...metric(subset.flatMap(r=>r.outcome?[r.outcome]:[])),pending:subset.filter(r=>!r.outcome).length};}));
  return {status:runs[0]?.status??'NOT_RUN',checked_at:new Date().toISOString(),cohort:COHORT,phase:'NEW_PROSPECTIVE_RESEARCH',model:SOCCER_MODEL,runs,metrics,daily,rows,table_tennis:{status:'ENGINE_TESTED_SOURCE_NOT_CONNECTED',forecasts:0,accuracy:null,reason:'No se inventan resultados para reconstruir los ratings.'},mlb_edge:{status:'ENGINE_TESTED_INPUT_SERVING_PENDING',reason:'Pesos conservados; no se alteraron gates, picks ni workers MLB existentes.'},nhl:{status:'EXCLUDED_OTHER_CHAT'},nba:{status:'EXISTING_MARKET_DATA_MODULE',href:'/nba-market-data'},ncaab:{status:'EXISTING_SEPARATE_PIPELINE',href:'/ncaab'},ncaaf:{status:'HOSTED_INTEGRATION_PENDING'}};
 }

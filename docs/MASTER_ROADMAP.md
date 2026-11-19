@@ -1,3 +1,10 @@
+## Homepage availability repair (2026-11-19)
+
+- Replace unnecessary full-history Edge Lab report construction on the homepage with bounded, minimal-column read projections. Preserve all card validation and historical accounting.
+- Daily report grouping now formats each row once and reuses its date formatter; synthetic output parity and source-immutability tests pass.
+- Shared multisport sections now isolate failed/slow sources with a 28-second presentation deadline and explicit warnings. This deadline is not universal I/O cancellation; the narrow Edge Lab reads retain their own 15-second abort signal.
+- Verification: 121 targeted Edge Lab tests, 98 dashboard tests and the full Next.js production build pass. NEXT: inspect the protected Preview deployment and confirm both the performance section and the connected-sports calendar finish loading. Record recovered live behavior separately from local benchmark evidence; production has not been changed. See `docs/product/HOMEPAGE_LOADING_REPAIR_20261119.md`.
+
 ## NBA HoopsAPI durable research capture (2026-11-18)
 
 - Private Preview now includes account-level atomic reservation/dispatch, immutable evidence and recovery GET, with app-only quota provenance and zero automatic provider requests.
