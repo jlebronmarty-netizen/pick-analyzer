@@ -68,20 +68,76 @@ export function sportsApiTtFinals(body,{leagueId,capturedAt,requestedDay}){
  return {rows,excluded,providerCount:body.data.length,verifiedCount:rows.length};
 }
 
+// SportsAPI sometimes publishes "Brud S." instead of "Szymon Brud".
+// Resolve only an exact two-token full name or exact surname + first initial.
+// No approximate edit distance, common nickname dictionary, or time-only match.
+const nameTokens=value=>{
+ if(typeof value!=='string'||value.length>120)return [];
+ const norm=value.normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[łŁ]/g,'l').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ return norm?norm.split(/\s+/):[];
+};
+export function sportsApiTtPlayerMatches(frozen,reported){
+ const f=nameTokens(frozen),r=nameTokens(reported);
+ if(f.length<2||r.length<2)return false;
+ if(f.length===r.length&&[...f].sort().join('|')===[...r].sort().join('|'))return true;
+ if(f.length!==2||r.length!==2||r[0].length<3||r[1].length!==1||f.some(t=>t.length<2))return false;
+ return (r[0]===f[0]&&r[1]===f[1][0])||(r[0]===f[1]&&r[1]===f[0][0]);
+}
+export function sportsApiTtMatchesFrozenEvent(f,x){
+ const scheduled=Date.parse(String(f?.scheduled_at??'')),at=Date.parse(String(x?.scheduledAt??''));
+ if(!Number.isFinite(scheduled)||!Number.isFinite(at)||Math.abs(scheduled-at)>300000)return false;
+ return (sportsApiTtPlayerMatches(f.participant_a,x.playerA)&&sportsApiTtPlayerMatches(f.participant_b,x.playerB))||
+  (sportsApiTtPlayerMatches(f.participant_a,x.playerB)&&sportsApiTtPlayerMatches(f.participant_b,x.playerA));
+}
+
+// A provider final is eligible only when it belongs to exactly one frozen
+// event, and that event matches exactly one provider final. Cross-book IDs
+// are never assumed identical. All conflicting aliases remain unresolved.
+export function sportsApiTtUniqueAssignments(forecasts,finals){
+ if(!Array.isArray(forecasts)||!Array.isArray(finals))throw Error('SPORTSAPI_TT_ASSIGNMENT_INPUT');
+ const events=new Map(),conflicted=new Set();
+ for(const f of forecasts){
+  if(f?.sport!=='TT'||!['FORECAST','PROJECTION'].includes(f.status))continue;
+  const id=f.event_id;
+  if(typeof id!=='string'||!id)continue;
+  const prev=events.get(id);
+  if(prev&&(prev.scheduled_at!==f.scheduled_at||
+   prev.participant_a!==f.participant_a||prev.participant_b!==f.participant_b)){
+   conflicted.add(id);continue;
+  }
+  if(!prev)events.set(id,f);
+ }
+ for(const id of conflicted)events.delete(id);
+ const proposed=new Map(),finalUse=new Map();
+ let ambiguousEvents=conflicted.size;
+ for(const [id,f] of events){
+  const matches=finals.filter(r=>sportsApiTtMatchesFrozenEvent(f,r));
+  if(matches.length>1){ambiguousEvents++;continue;}
+  if(matches.length!==1)continue;
+  const match=matches[0],sourceKey=match.source+':'+match.sourceMatchId;
+  proposed.set(id,match);
+  finalUse.set(sourceKey,(finalUse.get(sourceKey)??0)+1);
+ }
+ const byEvent=new Map();
+ for(const [id,r] of proposed){
+  if(finalUse.get(r.source+':'+r.sourceMatchId)!==1){ambiguousEvents++;continue;}
+  byEvent.set(id,[r]);
+ }
+ return {byEvent,matchedEvents:byEvent.size,ambiguousEvents};
+}
+
 export function ttSportsApiOutcome(f,finals){
  const scheduled=Date.parse(String(f?.scheduled_at??'')),issued=Date.parse(String(f?.emitted_at??''));
  if(!Number.isFinite(scheduled)||!Number.isFinite(issued)||issued>=scheduled||!Array.isArray(finals))
   return {status:'PENDING'};
- const a=playerKey(f.participant_a),b=playerKey(f.participant_b);
- const matches=finals.filter(x=>Math.abs(Date.parse(x.scheduledAt)-scheduled)<=300000&&
-  ((playerKey(x.playerA)===a&&playerKey(x.playerB)===b)||
-   (playerKey(x.playerA)===b&&playerKey(x.playerB)===a)));
+ const matches=finals.filter(x=>sportsApiTtMatchesFrozenEvent(f,x));
  if(!matches.length)return {status:'PENDING'};
  if(matches.length!==1)return {status:'DISPUTE',reason:'SPORTSAPI_AMBIGUOUS_CROSS_BOOK_MATCH'};
  const x=matches[0],observed=Date.parse(x.capturedAt);
  if(!Number.isFinite(observed)||observed<=issued||observed<=Date.parse(x.scheduledAt))
   return {status:'DISPUTE',reason:'SPORTSAPI_FINAL_TIMING_INVALID'};
- const same=playerKey(x.playerA)===a;
+ const same=sportsApiTtPlayerMatches(f.participant_a,x.playerA)&&sportsApiTtPlayerMatches(f.participant_b,x.playerB);
  if(f.market==='MONEYLINE'){
   if(!['A','B'].includes(f.selection))return {status:'NOT_VERIFIABLE',reason:'INVALID_SELECTION'};
   const winner=(x.setsA>x.setsB)===same?'A':'B';
