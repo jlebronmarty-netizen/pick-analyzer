@@ -41,7 +41,11 @@ export function sportsApiTtFinals(body,{leagueId,capturedAt,requestedDay}){
  if(!Array.isArray(body?.data)||body?.meta?.hasNextPage!==false||
     body?.meta?.complete===false||body?.meta?.date!==requestedDay)
   throw Error('SPORTSAPI_TT_RESPONSE_INCOMPLETE');
- const rows=[],excluded={},seen=new Set();
+ const rows=[],excluded={},seen=new Set(),counts=new Map();
+ for(const item of body.data){
+  if(item?.sport==='table-tennis'&&item?.league?.id===leagueId&&int(item.id)!==null)
+   counts.set(item.id,(counts.get(item.id)??0)+1);
+ }
  for(const x of body.data){
   if(x?.sport!=='table-tennis'||x?.league?.id!==leagueId||String(x.league?.name??'').toLowerCase().trim()!=='tt elite series')continue;
   if(x.status?.type!=='finished')continue;
@@ -53,7 +57,7 @@ export function sportsApiTtFinals(body,{leagueId,capturedAt,requestedDay}){
   else if(Date.parse(at)>=Date.parse(capturedAt))why='NOT_YET_PLAYED';
   else if(hs===null||as===null||!((hs===3&&as<3)||(as===3&&hs<3)))why='INVALID_DECISIVE_SETS';
   else if(x.winner&&x.winner!==(hs>as?'home':'away'))why='WINNER_CONFLICT';
-  else if(seen.has(id))why='DUPLICATE_FIXTURE_ID';
+  else if(counts.get(id)!==1||seen.has(id))why='DUPLICATE_FIXTURE_ID';
   if(why){excluded[why]=(excluded[why]??0)+1;continue;}
   seen.add(id);
   const points=extractSetScores(x.homeScore,x.awayScore,hs,as);
