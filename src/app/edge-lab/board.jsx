@@ -5,6 +5,7 @@ import {useLedgerView} from './ledger-filters';
 import SportRecommendationCard from '@/components/dashboard/SportRecommendationCard';
 import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
 import SportDecisionBoard from '@/components/dashboard/SportDecisionBoard';
+import {ttOddEvenBaseline} from '@/lib/edge-lab/tt-odd-even-baseline.mjs';
 const box={border:'1px solid #334155',borderRadius:12,padding:18,marginTop:16};const pct=v=>typeof v==='number'?(v*100).toFixed(1)+'%':'N/A';const num=v=>typeof v==='number'?v.toFixed(2):'N/A';const date=v=>v?new Date(v).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'}):'Sin ejecución';
 const names={SOCCER:'Soccer · LaLiga',TT:'Tenis de mesa · TT Elite',MLB:'MLB · motores Edge',NCAAF:'NCAAF'};
 const marketName={MONEYLINE:'Ganador',TOTAL_POINTS:'Total de puntos',SETS_ODD_EVEN:'Sets par/impar',HOME_TEAM_RUNS:'Carreras local',AWAY_TEAM_RUNS:'Carreras visitante','1X2':'Local / empate / visitante',TOTAL_2_5:'Total de goles 2.5'};
@@ -17,19 +18,28 @@ export default function Board({initialSport='SOCCER'}){
  useEffect(()=>{refresh();const timer=setInterval(()=>{if(!document.hidden)refresh();},300000);return()=>{clearInterval(timer);const previous=request.current;request.current=null;previous?.abort();};},[refresh]);
  const isSoccer=sport==='SOCCER',data=isSoccer?soccer:multi,rows=isSoccer?soccer?.rows??[]:(multi?.rows??[]).filter(r=>r.sport===sport),metrics=isSoccer?soccer?.metrics??[]:(multi?.metrics??[]).filter(m=>m.sport===sport),runs=isSoccer?soccer?.runs??[]:(multi?.runs??[]).filter(r=>r.sport===sport),last=runs[0];
  const ledgerView=useLedgerView(rows);
- const decisionRows=ledgerView.rows.filter(r=>r.status!=='ABSTAIN'&&r.selection).flatMap(r=>{
-  const market=['MONEYLINE','1X2'].includes(r.market)?'ml':
+ const parityBenchmark=sport==='TT'?ttOddEvenBaseline(rows):null;
+ const decisionRows=ledgerView.rows.filter(r=>r.status==='FORECAST'||r.status==='PROJECTION').flatMap(r=>{
+  const market=r.market==='1X2'?'oneXTwo':r.market==='MONEYLINE'?'ml':
+   r.market==='SETS_ODD_EVEN'?'special':
    ['TOTAL_POINTS','TOTAL_2_5','HOME_TEAM_RUNS','AWAY_TEAM_RUNS'].includes(r.market)?'total':null;
   if(!market)return [];
-  const label=selection(r);
-  if(!label||label==='PASAR'||label==='Proyección numérica')return [];
+  const isNumeric=r.market==='TOTAL_POINTS'&&r.status==='PROJECTION'&&typeof r.projection==='number'&&Number.isFinite(r.projection);
+  const label=isNumeric?'Total proyectado (no apuesta Over/Under)':selection(r);
+  if(!label||label==='PASAR'||(label==='Proyección numérica'&&!isNumeric))return [];
+  const special=r.market==='SETS_ODD_EVEN';
+  const oneXTwo=r.market==='1X2';
   return [{id:String(r.id),market,matchup:(r.participant_a??r.home_name)+' vs '+(r.participant_b??r.away_name),
-   selection:label,status:'SHADOW',startsAt:r.scheduled_at,capturedAt:r.created_at??null,
-   probability:typeof r.probability==='number'?r.probability:null,
-   projection:typeof r.projection==='number'?r.projection.toFixed(2):null,
+   selection:label,status:'SHADOW',startsAt:r.scheduled_at,capturedAt:r.emitted_at??r.created_at??null,
+   probability:typeof r.probability==='number'&&Number.isFinite(r.probability)?r.probability:null,
+   projection:isNumeric?r.projection.toFixed(2)+' pts':typeof r.projection==='number'?r.projection.toFixed(2):null,
    odds:null,line:typeof r.line==='number'?r.line:null,gap:null,eligible:false,
-   evidence:'Modelo experimental sin ventaja positiva frente a precio exacto validada para esta vista.',
-   note:'El registro original, su settlement y el mercado de origen siguen disponibles más abajo. No es una recomendación oficial.'}];
+   evidence:isNumeric?'Proyección numérica de puntos: sin línea ni cuota registrada. Se evalúa por MAE, no por Over/Under.':
+    oneXTwo?'1X2 de fútbol (local, empate o visitante) · 90 minutos más descuento; no equivale a ML de dos resultados.':
+    special?'Paridad de sets de tenis de mesa · pronóstico experimental sin oferta o precio verificado.':
+    'Selección experimental sin ventaja positiva frente a precio exacto validada.',
+   note:'La captura del modelo, su settlement y los contratos de origen siguen en el historial técnico. No es una recomendación oficial.'
+  }];
  });
  const daily=(isSoccer?soccer?.daily??[]:multi?.daily??[]).filter(r=>isSoccer||r.sport===sport),cohort=isSoccer?soccer?.cohort:multi?.cohort;
  const operation=multi?.states?.find(s=>s.sport===sport),paused=operation?.state==='OFFSEASON_PAUSED';
@@ -37,7 +47,17 @@ export default function Board({initialSport='SOCCER'}){
  return <main className="mlb-ui sport-standard mx-auto max-w-7xl space-y-6 text-slate-200">
  <header className="sport-standard-hero"><a href="/sports">← Todos los deportes</a><p className="sport-standard-eyebrow">PICK ANALYZER · EDGE LAB</p><h1>Proyecciones, resultados y operación</h1><p>Investigación independiente. No son apuestas ni liquidaciones del sportsbook. Los modelos e históricos existentes de Pick permanecen separados.</p></header>
  <SportDecisionNavigation current={sport==='SOCCER'?'SOCCER':sport==='TT'?'TABLE_TENNIS':sport} compact/>
- {sport!=='NCAAF'&&<SportDecisionBoard sport={names[sport]??sport} rows={decisionRows} marketNotes={{ml:sport==='SOCCER'?"1X2 registrado solo como pronóstico SHADOW; sin equivalencia de Moneyline de dos lados ni cuotas actuales verificadas.":"Ganador del modelo registrado; no está certificado como oferta de sportsbook.",total:sport==='SOCCER'?"Los totales de goles se muestran únicamente si existen contratos Over/Under registrados. Sin línea y precio exacto no se declara edge.":"Solo totales de puntos registrados con contrato de mercado verificable; no se infieren cuotas.",props:"No hay player props confiables en la fuente conectada.",periods:"No hay contratos por mitades/períodos certificados para este deporte."}} description="Vistas uniformes para modelos Edge Lab: solo se muestran selecciones emitidas con mercado comparable. Sin cuotas pareadas y validadas no se promocionan al Top ni se declara edge."/>}
+ {sport!=='NCAAF'&&<SportDecisionBoard key={sport} sport={names[sport]??sport} rows={decisionRows} marketNotes={{ml:sport==='SOCCER'?"No equivale a 1X2 (incluye empate). Consulta la pestaña 1X2 para fútbol.":"Ganador del modelo registrado; no está certificado como oferta de sportsbook.",oneXTwo:"Fútbol: tres resultados (local/empate/visitante), dentro del tiempo reglamentario más añadido; sin cotización verificable no se calcula edge.",special:"Tenis de mesa: par/impar de sets como contrato experimental independiente, sin cuota y reglas verificadas.",total:sport==='SOCCER'?"Los totales de goles se muestran únicamente si existen contratos Over/Under registrados. Sin línea y precio exacto no se declara edge.":"Solo totales de puntos registrados con contrato de mercado verificable; no se infieren cuotas.",props:"No hay player props confiables en la fuente conectada.",periods:"No hay contratos por mitades/períodos certificados para este deporte."}} description="Vistas uniformes para modelos Edge Lab: solo se muestran selecciones emitidas con mercado comparable. Sin cuotas pareadas y validadas no se promocionan al Top ni se declara edge."/>}
+ {sport==='TT'&&parityBenchmark&&<section aria-label="Comparación de Par/Impar vs referencia sencilla" className="rounded-xl border border-slate-700 bg-slate-900 p-4">
+  <h2 className="font-semibold text-slate-100">Par/Impar · comparador obligatorio</h2>
+  <p className="mt-2 text-xs text-slate-400">Se comparan los pronósticos originales contra seleccionar siempre Impar sobre exactamente los mismos partidos liquidados. No son apuestas reales.</p>
+  <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+   <div className="rounded-lg bg-slate-950 p-3"><p className="text-xs text-slate-400">Modelo actual</p><p className="mt-1 text-xl font-semibold">{parityBenchmark.games?(100*parityBenchmark.modelAccuracy).toFixed(1)+'%':'—'}</p><p className="text-xs text-slate-400">{parityBenchmark.modelWins}/{parityBenchmark.games} juegos</p></div>
+   <div className="rounded-lg bg-slate-950 p-3"><p className="text-xs text-slate-400">Siempre Impar</p><p className="mt-1 text-xl font-semibold">{parityBenchmark.games?(100*parityBenchmark.alwaysOddAccuracy).toFixed(1)+'%':'—'}</p><p className="text-xs text-slate-400">{parityBenchmark.alwaysOddWins}/{parityBenchmark.games} juegos</p></div>
+   <div className="col-span-2 rounded-lg bg-slate-950 p-3 sm:col-span-1"><p className="text-xs text-slate-400">Mejora frente a Impar</p><p className="mt-1 text-xl font-semibold">{parityBenchmark.games?(100*parityBenchmark.edgeOverBaseline).toFixed(1)+' pp':'—'}</p><p className="text-xs text-slate-400">Solo accuracy, no EV ni ROI</p></div>
+  </div>
+  <p className="mt-3 text-xs text-amber-200">{parityBenchmark.games&&parityBenchmark.edgeOverBaseline<=0?'El modelo NO supera la referencia siempre Impar en esta cohorte. No promocionar apuestas.':'La muestra todavía no demuestra una ventaja validada contra el baseline.'} Se eligió Impar {parityBenchmark.oddSelected} veces y Par {parityBenchmark.evenSelected} veces.</p>
+ </section>}
  <div role="tablist" aria-label="Deporte de Edge Lab" style={{display:'flex',gap:8,flexWrap:'wrap'}}>{Object.entries(names).map(([id,label])=><button key={id} role="tab" aria-selected={sport===id} onClick={()=>{setSport(id);window.history.replaceState(null,'','/edge-lab?sport='+id);}} style={{padding:12,border:'1px solid '+(sport===id?'#67e8f9':'#475569'),borderRadius:8,background:sport===id?'#164e63':'transparent'}}>{label}</button>)}</div>
  <p><button onClick={refresh} disabled={busy} style={{padding:10,border:'1px solid #64748b',borderRadius:8}}>{busy?'Consultando…':'Actualizar estado'}</button> La actualización de pantalla consulta el archivo; no consume consultas del proveedor de tenis de mesa.</p>
  {errors.map(e=><p role="alert" key={e} style={{color:'#fda4af'}}>{e}. Los datos previos visibles no se certifican como actuales.</p>)}

@@ -1,7 +1,7 @@
 'use client';
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 
-export type SportDecisionMarket='ml'|'spread'|'total'|'props'|'periods';
+export type SportDecisionMarket='ml'|'oneXTwo'|'spread'|'total'|'special'|'props'|'periods';
 export type SportDecisionRow={
  id:string;market:SportDecisionMarket;matchup:string;selection:string;
  status:'SHADOW'|'MODEL_ONLY'|'EXPERIMENTAL';
@@ -10,14 +10,22 @@ export type SportDecisionRow={
  probability?:number|null;gap?:number|null;gapUnit?:string|null;
  evidence?:string|null;note?:string|null;eligible:boolean;
 };
-const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['spread','Spread'],['total','Total'],['props','Player props'],['periods','Cuartos / Mitades']];
+const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['oneXTwo','1X2'],['spread','Spread'],['total','Total'],['special','Par/Impar sets'],['props','Player props'],['periods','Cuartos / Mitades']];
 const isNumber=(n:number|null|undefined):n is number=>typeof n==='number'&&Number.isFinite(n);
 const date=(iso?:string|null)=>iso?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(iso)):'Sin fecha';
 export default function SportDecisionBoard({sport,rows,description,marketNotes={}}:{
  sport:string;rows:SportDecisionRow[];description?:string;marketNotes?:Partial<Record<SportDecisionMarket,string>>;
 }){
- const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
+ const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':['ml','oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
  const [expanded,setExpanded]=useState(false);
+ // Async sport ledgers can arrive after initial render. Select their first populated market
+ // without making unsupported markets look like available predictions.
+ useEffect(()=>{
+  if(!rows.length)return;
+  setTab(current=>current==='ml'&&!rows.some(r=>r.market==='ml')
+   ?(rows.some(r=>r.eligible)?'top':['oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??current)
+   :current);
+ },[rows]);
  const counts=useMemo(()=>Object.fromEntries(tabs.slice(1).map(([id])=>[id,rows.filter(x=>x.market===id).length])),[rows]);
  const visible=useMemo(()=>{
   const input=(tab==='top'?rows.filter(r=>r.eligible):rows.filter(r=>r.market===tab))
@@ -36,7 +44,7 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
    </div>
    <p className="text-xs text-amber-200">Oportunidad ≠ probabilidad calibrada ni EV demostrado</p>
   </div>
-  <div role="tablist" aria-label={'Mercados '+sport} className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
+  <div role="tablist" aria-label={'Mercados '+sport} className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-8">
    {tabs.map(([id,label])=><button key={id} type="button" role="tab" aria-selected={tab===id}
     onClick={()=>setTab(id)}
     className={`rounded-xl border px-3 py-3 text-left text-sm font-semibold ${tab===id?'border-teal-400 bg-teal-500/10':'border-slate-700 bg-slate-900'}`}>
