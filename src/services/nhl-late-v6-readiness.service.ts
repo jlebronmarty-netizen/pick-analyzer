@@ -21,7 +21,8 @@ export async function getNhlLateV6Readiness(){
  let scored=0,unscored=0,invalid=0,nP=0,nC=0,nD=0,nM=0;
  let sumP=0,sumC=0,sumD=0,sumM=0,lossP=0,lossC=0,lossD=0,lossM=0;
  let candidateHits=0,marketHits=0,poissonHits=0,dratingsHits=0,homeWins=0;
- let withGoalies=0,withPP=0,eligible=0;
+ let withGoalies=0,withPP=0,eligible=0,withPairedPriorForm=0,withPartialPriorForm=0,
+  withPriorShots50Home=0,withPriorShots50Away=0;
  for(const row of rows){
   const scheduled=stamp(row.scheduled_at),freeze=stamp(row.frozen_at);
   const g=row.goalie_evidence;
@@ -30,6 +31,11 @@ export async function getNhlLateV6Readiness(){
    freeze>scheduled-60*60000||g?.status!=='PREGAME_PROBABLE_SOURCE_ONLY'||
    g?.isConfirmedStarter!==false||g?.goalieAdjustmentApplied!==false){invalid++;continue;}
   if(g?.home&&g?.away)withGoalies++;
+  const history=g?.historicalFormV7;
+  if(history?.status==='BOTH_PRIOR_FORMS_AVAILABLE')withPairedPriorForm++;
+  else if(history?.status==='PARTIAL_PRIOR_GOALIE_FORM')withPartialPriorForm++;
+  if(history?.home?.status==='PRIOR_FORM_EVIDENCE')withPriorShots50Home++;
+  if(history?.away?.status==='PRIOR_FORM_EVIDENCE')withPriorShots50Away++;
   if(row.special_teams_evidence?.status==='ASOF_SPECIAL_TEAMS_EVIDENCE')withPP++;
   if(row.calibration?.status==='PROSPECTIVE_TEST_ONLY')eligible++;
   const o=truth.get(row.event_id) as any;
@@ -65,6 +71,10 @@ export async function getNhlLateV6Readiness(){
    minimumInitialHoldout:30,prospectiveHoldoutPassed:false,
    independentEvaluationRequired:true,calibratedModelPromoted:false,
    bookmakerSettlementCertified:false},
+  goalieHistoricalFormV7:{pairedWithMinimum50PriorShots:withPairedPriorForm,
+   partiallyAvailable:withPartialPriorForm,homeWith50PriorShots:withPriorShots50Home,
+   awayWith50PriorShots:withPriorShots50Away,goalieModelAdjustmentApplied:false,
+   independentlyCertifiedCrosswalk:false,allEvidenceObservedBeforeLateFreeze:true},
   policy:{confirmedStartingGoalieEvidence:false,goalieProbableIsNotConfirmed:true,
    modelGoalieAdjustmentApplied:false,officialPickChanges:0,paidCalls:0},
   warning:'Separate late pregame shadow. ESPN probable is unconfirmed; rolling Circa bias was selected in earlier exploratory data, not an approved betting model.'};
