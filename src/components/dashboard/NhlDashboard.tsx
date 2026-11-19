@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
+import SportDecisionBoard, {type SportDecisionRow} from '@/components/dashboard/SportDecisionBoard';
 import { useState } from "react";
 import type { NhlReport } from "@/lib/nhl-external-report";
 import { filterNhlHistory, nhlDate, nhlOpportunities } from "@/lib/nhl-view";
@@ -17,6 +18,21 @@ export default function NhlDashboard({report}:{report:NhlReport}){
   const today=r.history.filter(p=>nhlDate(p.scheduledAt)===r.date).sort((a,b)=>a.scheduledAt.localeCompare(b.scheduledAt)||a.eventId.localeCompare(b.eventId)),opportunities=nhlOpportunities(r);
   const quoteCoverage='quoteCoverage' in r?r.quoteCoverage:undefined;
   const laterQuotes=new Map(('laterPriceObservations' in r?r.laterPriceObservations??[]:[]).map(q=>[q.predictionId,q]));
+  const decisionRows:SportDecisionRow[]=r.forecasts.map(f=>{
+   const positive=opportunities.find(o=>o.key===f.id+':AWAY'||o.key===f.id+':HOME');
+   const away=positive?positive.key.endsWith(':AWAY'):f.awayProbability>f.homeProbability;
+   const selection=(away?f.away:f.home)+' ML';
+   return {
+    id:f.id,market:'ml',matchup:f.eventName,selection,status:'MODEL_ONLY',
+    startsAt:f.scheduledAt,capturedAt:f.capturedAt,
+    odds:away?f.awayOdds:f.homeOdds,projection:null,
+    probability:away?f.awayProbability:f.homeProbability,
+    gap:positive?.edgePp??null,gapUnit:positive?'pp':null,
+    eligible:Boolean(positive),
+    evidence:positive?'Edge positivo frente a precio Circa pareado y captura prepartido reciente':'Pronóstico MODEL_ONLY; sin edge reciente verificable, no constituye una oportunidad',
+    note:'Modelo externo DRatings. Confirmar disponibilidad de la cuota y del mercado; no es un Official Pick ni una probabilidad calibrada.'
+   };
+  });
   return <section className="mlb-ui mx-auto max-w-7xl space-y-6 text-slate-200">
     <header className="rounded-2xl border border-teal-400/30 bg-slate-900 p-5">
       <p className="text-xs font-bold uppercase tracking-widest text-teal-300">Pick · fuentes gratuitas · SHADOW</p>
@@ -26,6 +42,7 @@ export default function NhlDashboard({report}:{report:NhlReport}){
       <nav aria-label="NHL navigation" className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-teal-300"><Link href="/today">Today</Link><Link href="/mlb/overview">MLB general</Link><a href="https://www.dratings.com/predictor/nhl-hockey-predictions/" target="_blank" rel="noreferrer">Fuente de probabilidades ↗</a></nav>
     </header>
     <SportDecisionNavigation current="NHL" compact/>
+    <SportDecisionBoard sport="NHL" rows={decisionRows} description="Top solo muestra un lado con edge positivo y captura prepartido verificada; Moneyline puede mostrar pronósticos MODEL_ONLY sin recomendación. Puckline, totales y props permanecen sin mercado validado en esta vista."/>
     <section aria-label="NHL source health" className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-sm">
       <p>Operación: <strong>{r.health.status}</strong> · Último ciclo: {r.health.runStatus??"Sin dato"} · Cobertura futura: {r.health.coverage??"—"}/{r.health.eligible??"—"}</p>
       <p className="mt-2 text-xs text-slate-400">Último ciclo: {time(r.health.latestRunAt)} · Lectura: {time(r.readAt)}. La fuente actualiza cada 30 minutos; esta página muestra snapshots.</p>
