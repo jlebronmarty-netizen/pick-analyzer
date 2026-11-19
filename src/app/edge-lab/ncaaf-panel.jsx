@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {useLedgerView} from './ledger-filters';
 import SportRecommendationCard from '@/components/dashboard/SportRecommendationCard';
+import SportDecisionBoard from '@/components/dashboard/SportDecisionBoard';
 const box={border:'1px solid #334155',borderRadius:12,padding:18,marginTop:16},date=v=>v&&Number.isFinite(Date.parse(v))?new Date(v).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'}):'No disponible',pct=v=>typeof v==='number'?(v*100).toFixed(1)+'%':'N/A',num=v=>typeof v==='number'?v.toFixed(2):'N/A';
 const market={MONEYLINE:'Ganador',POINT_MARGIN:'Margen de puntos',TOTAL_POINTS:'Total de puntos'};
 export default function NcaafPanel(){
@@ -9,8 +10,18 @@ export default function NcaafPanel(){
  async function refresh(){if(active.current)return;const c=new AbortController();active.current=c;setBusy(true);const timeout=setTimeout(()=>c.abort(),25000);try{const r=await fetch('/api/edge-lab/ncaaf',{cache:'no-store',signal:c.signal}),b=await r.json();if(!r.ok)throw Error(b.status??'Error de lectura');if(active.current===c){setData(b);setError('');}}catch(e){if(active.current!==c)return;setError(e.name==='AbortError'?'Consulta excedida o cancelada':e.message);}finally{clearTimeout(timeout);if(active.current===c){active.current=null;setBusy(false);}}}
  useEffect(()=>{refresh();const id=setInterval(()=>{if(!document.hidden)refresh();},300000);return()=>{clearInterval(id);const previous=active.current;active.current=null;previous?.abort();};},[]);
  const ledgerView=useLedgerView(data?.rows??[]);
+ const decisionRows=ledgerView.rows.filter(r=>r.status==='FORECAST'&&['HOME','AWAY'].includes(r.selection)&&typeof r.probability==='number').map(r=>({
+  id:String(r.id),market:'ml',matchup:r.participant_b+' @ '+r.participant_a,
+  selection:(r.selection==='HOME'?r.participant_a:r.participant_b)+' · ganador proyectado',
+  status:'EXPERIMENTAL',startsAt:r.scheduled_at,capturedAt:r.created_at??null,
+  probability:r.probability,projection:typeof r.projection==='number'?r.projection.toFixed(2):null,
+  odds:null,line:null,gap:null,eligible:false,
+  evidence:'Ganador proyectado PPG sin cuota ni línea verificables; no es recomendación de apuesta.',
+  note:'Margen y total permanecen como proyecciones numéricas (MAE), no spread ni Over/Under de una casa.'
+ }));
  const latest=data?.runs?.[0],coverage=latest?.summary?.coverage;
  return <>
+ <SportDecisionBoard sport="NCAAF" rows={decisionRows} description="Moneyline proyectado PPG; las estimaciones de puntos y total sin línea verificable no se presentan como apuestas. Sin edge o cuotas, el Top queda vacío." />
  <section style={box}><h2>NCAAF · PPG experimental</h2><p>Estado: <strong>{data?.status??'Comprobando…'}</strong> · Último ciclo: {date(latest?.started_at)} · Próximo habilitado: {date(data?.next_due)}.</p><p>Conserva las ecuaciones PPG originales en una versión adaptada a Pick. Usa hasta seis finales anteriores, mínimo tres, y distingue cancha neutral. No está ajustado por rivales, quarterback, lesiones o clima. Confianza original: baja y sin calibración.</p><p><strong>Ridge no está activo:</strong> falta un perfil congelado válido para la semana actual. PPG no se presenta como Ridge.</p><p>Fuente: ESPN, calendarios de equipos FBS de la temporada regular. Frecuencia: cada 12 horas mediante el proceso existente. Actualizar esta pantalla no consulta al proveedor.</p><button onClick={refresh} disabled={busy} style={{padding:10,border:'1px solid #64748b',borderRadius:8}}>{busy?'Consultando…':'Actualizar NCAAF'}</button>
  {error&&<p role="alert" style={{color:'#fda4af'}}>{error}. Los datos anteriores no se certifican como actuales.</p>}
  {coverage&&<p>Cobertura: {coverage.successful_teams}/{coverage.expected_teams} calendarios de equipos; {coverage.unique_events} eventos únicos de la temporada. {coverage.complete?'Universo de la fuente reconciliado.':'COBERTURA PARCIAL: revisa las incidencias.'}</p>}
