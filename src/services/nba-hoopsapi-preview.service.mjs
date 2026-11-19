@@ -26,12 +26,12 @@ export async function readHoopsPreviewState({store, accountScope, env = process.
   } catch { return {...configuration, status: 'HOOPSAPI_LEDGER_UNAVAILABLE', capture_enabled: false}; }
 }
 // No unguarded exported provider-fetch method.
-export async function captureHoopsPreviewDurably({key, store, accountScope, requestId,
+export async function captureHoopsPreviewDurably({key, store, accountScope, requestId, claimMode = 'manual',
   fetcher = fetch, now = () => new Date().toISOString()}) {
-  if (typeof key !== 'string' || key.length < 10 || !store || !account(accountScope) || !uuid(requestId))
+  if (typeof key !== 'string' || key.length < 10 || !store || !account(accountScope) || !uuid(requestId) || !['manual','scheduled'].includes(claimMode))
     return {status: 'HOOPSAPI_CAPTURE_CONFIGURATION_INVALID', provider_calls_made: 0, capture_persisted: false};
   let claim;
-  try { claim = await store.claim(accountScope, requestId); }
+  try { claim = await (claimMode === 'scheduled' ? store.claimScheduled(accountScope,requestId) : store.claim(accountScope, requestId)); }
   catch { return {status: 'HOOPSAPI_LEDGER_UNAVAILABLE', provider_calls_made: 0, capture_persisted: false}; }
   if (claim.status !== 'RESERVED') {
     if (claim.status === 'ALREADY_CLAIMED' && claim.capture_id) {

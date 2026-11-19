@@ -17,6 +17,7 @@ export function createHoopsDurableStore(db) {
   return {
     status: account => rpc('read_nba_hoopsapi_quota_v1', {p_account: account}),
     claim: (account, requestId) => rpc('claim_nba_hoopsapi_capture_v1', {p_account: account, p_request_id: requestId}),
+    claimScheduled: (account, requestId) => rpc('claim_nba_hoopsapi_scheduled_capture_v1', {p_account: account, p_request_id: requestId}),
     dispatch: (account, attemptId) => rpc('dispatch_nba_hoopsapi_capture_v1', {p_account: account, p_attempt_id: attemptId}),
     complete: (account, attemptId, evidence) => rpc('complete_nba_hoopsapi_capture_v1', {
       p_account: account, p_attempt_id: attemptId, p_received_at: evidence.receivedAt,
