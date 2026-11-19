@@ -4,6 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {COHORT_MULTI,digest,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../lib/edge-lab/multisport.mjs';
 import {readTtPagination,normalizeTtResultPage,makeProviderPacer,multiOperationalState} from '../lib/edge-lab/tt-coverage.mjs';
 import {planTtRecovery,recoveryCursor} from '../lib/edge-lab/tt-pending-recovery.mjs';
+import {ttSettlementCallPlan} from '../lib/edge-lab/tt-settlement-first.mjs';
 const GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/source-gateway';
 const RECOVERY_GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/results-recovery';
 const T={sources:'edge_lab_multi_sources_v1',forecasts:'edge_lab_multi_forecasts_v1',outcomes:'edge_lab_multi_outcomes_v1',finals:'edge_lab_tt_finals_v1',runs:'edge_lab_multi_runs_v1',locks:'edge_lab_multi_locks_v1',budget:'edge_lab_tt_request_budget_v1'};
@@ -26,8 +27,10 @@ async function collectTt(db,request,summary){
  const attempts=checked(await db.from(T.runs).select('sport,started_at,summary').eq('sport','TT').order('started_at',{ascending:false}).limit(1000),'RECOVERY_RUNS');
  const plan=planTtRecovery(existing,outcomes,canonicalTtHistory(storedBefore.map(r=>r.payload)).finals,attempts);
  summary.recovery_backlog_events=plan.backlog_events;summary.recovery_skipped=plan.skipped;summary.recovery_strategy=plan.strategy;
- const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_PENDING_RECOVERY_V5';summary.provider_spacing_ms=1200;
- const recentPages=plan.backlog_events>10?0:plan.target?1:2;summary.settlement_priority=plan.backlog_events>10;
+ const paced=makeProviderPacer();let allIncoming=[];const resultIds=new Set();summary.collector_version='TT_SETTLEMENT_FIRST_V6';summary.provider_spacing_ms=1200;
+ const callPlan=ttSettlementCallPlan(plan.backlog_events,plan.targets?.length??(plan.target?1:0));
+ summary.source_call_plan=callPlan;const recentPages=callPlan.resultPages;summary.settlement_priority=plan.backlog_events>10;
+ summary.collector_version='TT_SETTLEMENT_FIRST_V6';
  for(let page=1;page<=recentPages;page++){
   const response=await paced(()=>paidRead(db,request,'results',page,summary)),parsed=normalizeTtResultPage(response.data,response.received_at,page);
   for(const row of parsed.rows){const key=row.source+':'+row.sourceMatchId;if(resultIds.has(key))summary.warnings.push('RESULT_PAGE_OVERLAP');resultIds.add(key);}
@@ -57,6 +60,21 @@ async function collectTt(db,request,summary){
  const stored=await readAll(db,T.finals),history=canonicalTtHistory(stored.map(r=>r.payload));summary.history_finals=history.finals.length;summary.history_conflicts=history.conflicts;summary.history_latest=history.finals.length?history.finals.map(r=>r.scheduledAt).sort().at(-1):null;
  await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
  for(const recovery of summary.recoveries){const contracts=existing.filter(f=>f.event_id===recovery.event_id&&f.status!=='ABSTAIN');recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(recovery.contract_evaluations.length&&recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
+ // Backlog recovery mode: no more new forecasters, same maximum three billed
+ // result calls. Keep already archived prematch forecasts and models immutable.
+ if(callPlan.pauseNewForecasts){
+  summary.new_forecasts_paused=true;
+  summary.forecasts_inserted=0;
+  summary.forecasts_reused=0;
+  summary.status_counts={FORECAST:0,PROJECTION:0,ABSTAIN:0};
+  summary.warnings.push('TT_NEW_FORECASTS_PAUSED_TO_CLEAR_BACKLOG');
+  summary.warnings.push('TT_SETTLEMENT_BACKLOG');
+  if(history.conflicts.length)summary.warnings.push('CONFLICTED_FINALS_EXCLUDED');
+  if(plan.skipped.length)summary.warnings.push('RECOVERY_NAMES_UNSUPPORTED');
+  summary.warnings=[...new Set(summary.warnings)];
+  summary.operational_state='SETTLEMENT_RECOVERY_NO_NEW_FORECASTS';
+  return 'PARTIAL';
+ }
  try{
  const response=await paced(()=>paidRead(db,request,'prematch',1,summary)),asOf=new Date().toISOString();
  const rawEvents=Array.isArray(response.data.events)?response.data.events:Array.isArray(response.data.results)?response.data.results:null;if(!rawEvents)throw Error('TT_PREMATCH_SCHEMA_CHANGED');
