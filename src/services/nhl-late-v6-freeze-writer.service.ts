@@ -62,7 +62,7 @@ export async function runNhlLateV6ShadowFreeze(){
    finalScores:extracted.games,probableSnapshots:goals,
    ppPkSnapshots:pp.error?[]:pp.data??[],
    dratingsRows:p.data??[],quoteRows,outcomeRows:d.data??[]});
-  if(v.status!=='LATE_RESEARCH_CANDIDATE'){const why=v.reason??'NO_EVIDENCE';
+  if(!('record' in v)){const why='reason' in v&&typeof v.reason==='string'?v.reason:'NO_EVIDENCE';
    reasons[why]=(reasons[why]??0)+1;continue;}
   records.push(v.record);
   if(records.length>=MAX_WRITES)break;
