@@ -4401,3 +4401,10 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 - Soccer/Table Tennis: se distingue ledger experimental de selección publicable. Sin precio y reglas certificadas los mercados siguen investigación.
 - Ordenamiento por gap se etiqueta explícitamente como sin dato cuando no hay brecha verificada.
 - No se altera el calendario, los crons, acceso, modelo, cuota congelada, scoring o liquidación. Mercado NHL investigador accesible solo bajo clic explícito, con datos almacenados.
+
+## NHL Spread/Total: evaluación con línea exacta y cohortes congeladas (2026-11-19)
+- Auditoría Supabase solo lectura del archivo de 21 días: 1,005 capturas Spread y 1,005 Total para 32 juegos únicos por mercado; cero registros con reglas certificadas y cero timestamps publicados de origen de Circa.
+- Congelaciones tempranas: 31 juegos; 26 juegos con quotes as-of <=60 minutos antes del freeze y freeze >=60 min antes de inicio; 15 de los pareados con resultado almacenado. Los criterios de identidad/reglas dentro del evaluador pueden reducir ese denominador.
+- V6 tardío: 11 juegos congelados, 11 pareados en ambos mercados, 0 con resultado almacenado en la auditoría. No inferir mejora de accuracy todavía.
+- Se incorporó a NHL panel una auditoría bajo demanda, sin proveedores ni escrituras, reutilizando `/api/nhl/exact-circa-market-research`. Muestra Brier y LogLoss sobre los mismos contratos y partidos para Poisson V1 y V6, incluyendo PUSH y ausencia de muestra prospectiva.
+- Prohibido recomendar basándose únicamente en el proxy Poisson, pues no están certificados la inclusión de OT/SO, reglas exactas, hora original de cuota, mercado FanDuel o holdout. No alterar ML, porteros, calibración ni liquidaciones.
