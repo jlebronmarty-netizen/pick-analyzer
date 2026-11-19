@@ -1,4 +1,5 @@
 // NBA Decision Board V1: read-only, evidence-driven, non-calibrated.
+import {rankNbaPreferredSides} from './decision-preference-core.mjs';
 export const BOARD_VERSION='NBA_DECISION_BOARD_SHADOW_V1';
 export const BOARD_PERIODS=Object.freeze(['ft','q1','q2','q3','q4','h1','h2']);
 const supportedStats=Object.freeze({
@@ -213,18 +214,20 @@ export function buildNbaDecisionBoard({
    r.qualityScore=round(50+Math.min(30,Math.max(0,gap)*14)+(historic===null?0:historic*14)+Math.min(6,r.sample/3));
   }
  }
- const top=all.filter(r=>r.classification==='VIGILAR')
-  .sort((a,b)=>(b.qualityScore??0)-(a.qualityScore??0)).slice(0,25);
+ const ranked=rankNbaPreferredSides(rows,asOf);
  const counts=Object.fromEntries(Object.entries(rows).map(([k,v])=>[k,v.length]));
  return {version:BOARD_VERSION,asOf,day,summary:{
-  games:games.length,historyGames:history.length,markets:counts,watchCandidates:top.length,
+  games:games.length,historyGames:history.length,markets:counts,preferredMarkets:ranked.summary.preferredByMarket,
+  rawSideCount:ranked.summary.evaluatedSides,withoutPreferredContract:ranked.summary.withNoPreferredContract,
+  watchCandidates:ranked.top25.length,
   calibratedPicks:0,matchedHoopsGames:hoopsMap.size,unmatchedHoopsGameIds:unmatched,
   latestHoopsCapture:sourceHoops.captured_at??null,
   providerCalls:0,dbWrites:0,sourcePolicy:'ARCHIVED_ONLY',noAutomaticPromotion:true
  },games:games.map(g=>({id:g.id,home:g.home_team.full_name,away:g.visitor_team.full_name,
    startsAt:g.datetime,status:g.status_state,projection:projected[g.id]})),
- rows,top25:top,warnings:[
-  'Orden de revisión SHADOW basado en brecha e historial, no en probabilidades calibradas.',
+ rows,preferredRows:ranked.rows,preferenceVersion:ranked.version,top25:ranked.top25,warnings:[
+  'Solo se muestra un lado preferido por contrato con una señal estadística favorable; los contratos sin señal se omiten y cuentan como PASAR.',
+  'Orden de revisión SHADOW basado en condiciones verificables, no en probabilidades calibradas.',
   'No son picks oficiales; sin demostración de valor esperado ni disponibilidad en FanDuel Puerto Rico.',
   'Cuotas y lesiones pueden cambiar; las capturas se muestran con su hora.',
   'Player props Q1 y mercados especiales sin historial equivalente quedan sin predicción.',

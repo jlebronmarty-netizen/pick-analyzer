@@ -22,16 +22,16 @@ function humanReason(row){
  if(row.reason==='UNVALIDATED_NUMERIC_GAP')return 'Brecha y contexto histórico favorables, sin validación de EV';
  return row.reason??'Sin evidencia suficiente';
 }
-function Row({row}){
+function Row({row,rank}){
  const [expanded,setExpanded]=useState(false);
  return <article className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
   <div className="flex flex-wrap items-start justify-between gap-3">
    <div className="min-w-0 flex-1">
     <p className="text-xs text-slate-400">{row.matchup} · {periodLabels[row.period]??row.period} · {markets[row.market]??row.market}</p>
-    <p className="mt-1 font-semibold text-slate-100">{row.label}</p>
+    <p className="mt-1 font-semibold text-slate-100">{rank!=null&&<span className="mr-2 rounded bg-sky-950 px-2 py-0.5 text-sm text-sky-300">#{rank}</span>}{row.label}</p>
     <p className="mt-1 text-xs text-slate-400">Precio capturado {date(row.capturedAt)} · {row.source} · {row.quoteFreshness==='RECENT'?'Reciente':'Desactualizado'}</p>
    </div>
-   <span className={'rounded-full px-2 py-1 text-xs font-medium '+(row.classification==='VIGILAR'?'bg-amber-950 text-amber-200':'bg-slate-800 text-slate-300')}>{row.classification}</span>
+   <span className="rounded-full bg-amber-950 px-2 py-1 text-xs font-medium text-amber-200">PREFERENCIA SHADOW</span>
   </div>
   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
    <div><p className="text-xs text-slate-400">FanDuel / Línea</p><p className="font-semibold tabular-nums">{row.line===null?'ML':decimal(row.line)} <span className="text-sky-200">{odds(row.odds)}</span></p></div>
@@ -39,18 +39,20 @@ function Row({row}){
    <div><p className="text-xs text-slate-400">Brecha favorable</p><p className="font-semibold tabular-nums">{row.advantage===null?'—':(row.advantage>0?'+':'')+decimal(row.advantage,2)}</p></div>
    <div><p className="text-xs text-slate-400">L5 / L10</p><p className="font-semibold tabular-nums">{decimal(row.l5)}/{decimal(row.l10)}</p></div>
    <div><p className="text-xs text-slate-400">Historial / aciertos</p><p className="font-semibold tabular-nums">{row.hit10!=null?row.hit10+'/'+row.sample:row.sample!=null?row.sample+' partidos':'—'}</p></div>
-   <div><p className="text-xs text-slate-400">Probabilidad / EV</p><p className="font-semibold text-amber-200">Sin calibrar</p></div>
+   <div><p className="text-xs text-slate-400">Condiciones a favor</p><p className="font-semibold text-sky-200">{row.preference?.favorableCount??0}/{row.preference?.conditionCount??0}</p><p className="text-xs text-amber-200">Probabilidad sin calibrar</p></div>
   </div>
   <div className="mt-3 flex items-center justify-between gap-2">
-   <p className="text-xs text-slate-300">{humanReason(row)}</p>
+   <p className="text-xs text-slate-300">{row.preference?.favorableReasons?.slice(0,2).join(' · ')??humanReason(row)}</p>
    <button type="button" onClick={()=>setExpanded(!expanded)} aria-expanded={expanded} className="shrink-0 rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-100">{expanded?'Ocultar':'Ver contexto'}</button>
   </div>
   {expanded&&<div className="mt-3 rounded-lg bg-slate-950 p-3 text-sm leading-6 text-slate-200">
    <p><strong>Modelo:</strong> {row.method??'Sin modelo aplicable a este contrato.'}</p>
+   <p><strong>Condiciones favorables ({row.preference?.favorableCount}/{row.preference?.conditionCount}):</strong> {row.preference?.favorableReasons?.join(' · ')??'No evaluadas'}</p>
+   {row.preference?.cautions?.length>0&&<p><strong>Condiciones no confirmadas:</strong> {row.preference.cautions.join(' · ')}</p>}
    {row.playerId!=null&&<p><strong>Jugador:</strong> {row.playerName} (ID GOAT {row.playerId}). Minutos L5/L10: {decimal(row.minutesL5)}/{decimal(row.minutesL10)}.</p>}
    {row.hit5!=null&&<p><strong>Frecuencia histórica al umbral de hoy:</strong> {row.hit5}/5 y {row.hit10}/{row.sample}; no es probabilidad futura.</p>}
    <p><strong>Riesgo:</strong> lesiones, descansos, cambios de rotación, disponibilidad regional y movimientos de cuota no están cuantificados en esta proyección.</p>
-   <p><strong>Decisión:</strong> {row.classification==='VIGILAR'?'Investigar y confirmar antes de apostar.':'PASAR hasta tener evidencia suficiente.'}</p>
+   <p><strong>Estado:</strong> Preferencia estadística SHADOW para revisión; no es una jugada validada ni asegura que ocurra.</p>
   </div>}
  </article>;
 }
@@ -73,7 +75,7 @@ export default function DecisionBoard(){
  useEffect(()=>{void refresh();},[]);
  const entries=useMemo(()=>{
   if(!data)return [];
-  const input=tab==='top'?data.top25:data.rows[tab]??[];
+  const input=tab==='top'?data.top25:data.preferredRows?.[tab]??[];
   return input.filter(x=>(gameId==='all'||String(x.gameId)===gameId)&&
    (tab!=='periods'||period==='all'||x.period===period)&&
    (!search||(x.label+' '+x.matchup+' '+x.market).toLowerCase().includes(search.toLowerCase())));
@@ -84,7 +86,7 @@ export default function DecisionBoard(){
    <div className="flex flex-wrap justify-between gap-3">
     <div><p className="text-xs font-bold uppercase tracking-widest text-sky-300">Pick Analyzer · NBA</p>
      <h1 className="mt-2 text-2xl font-bold">Decision Board</h1>
-     <p className="mt-2 text-sm text-slate-300">Un solo panel para comparar proyecciones, FanDuel e historial. Todas las recomendaciones son SHADOW hasta calibrarse.</p>
+     <p className="mt-2 text-sm text-slate-300">Se muestra solo el lado con señales favorables por contrato, de mayor a menor respaldo descriptivo. No son probabilidades calibradas ni apuestas oficiales.</p>
     </div>
     <div className="flex flex-wrap items-start gap-2">
      <a href="/nba-market-data" className="inline-flex h-9 items-center rounded-lg border border-slate-600 px-4 text-sm text-slate-200">Vista técnica GOAT</a>
@@ -154,11 +156,12 @@ export default function DecisionBoard(){
     <input aria-label="Buscar jugador, mercado o equipo" value={search} onChange={e=>{setSearch(e.target.value);setLimit(30);}} placeholder="Buscar jugador, equipo o mercado" className="min-w-56 flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"/>
    </div>
    <div className="flex flex-wrap justify-between gap-2"><h2 className="text-lg font-semibold">{NAV.find(t=>t.id===tab)?.title} <span className="text-sm font-normal text-slate-400">({entries.length})</span></h2>
-    {tab==='top'&&<p className="text-sm text-amber-200">Orden de revisión · NO es ranking de probabilidades certificadas</p>}
+    <p className="text-sm text-amber-200">Ordenado por condiciones favorables · No representa probabilidad de ganar</p>
    </div>
+   {!error&&!loading&&<p className="text-xs text-slate-400">Únicamente un lado por contrato; las alternativas y los mercados sin señal se excluyen de esta lista y se consideran PASAR. El registro original permanece intacto para backtesting.</p>}
    {error&&<p role="alert" className="rounded-xl border border-rose-700 bg-rose-950 p-4 text-sm">No pude cargar el panel: {error}</p>}
-   {!loading&&!error&&entries.length===0&&<p role="status" className="rounded-xl border border-slate-700 p-6 text-slate-300">No hay selecciones con evidencia suficiente para este filtro. Se mantiene PASAR.</p>}
-   {entries.slice(0,limit).map(r=><Row key={r.id} row={r}/>)}
+   {!loading&&!error&&entries.length===0&&<p role="status" className="rounded-xl border border-slate-700 p-6 text-slate-300">No hay lados con señales suficientemente favorables en este filtro. Se mantiene PASAR; no se fuerza una recomendación.</p>}
+   {entries.slice(0,limit).map((r,i)=><Row key={r.id} row={r} rank={i+1}/>)}
    {entries.length>limit&&<button type="button" onClick={()=>setLimit(x=>x+30)} className="rounded-xl border border-sky-500 px-4 py-2 text-sm text-sky-200">Ver 30 selecciones más</button>}
   </section>
   <footer className="border-t border-slate-700 py-4 text-xs text-slate-400">
