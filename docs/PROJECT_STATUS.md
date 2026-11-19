@@ -1,3 +1,10 @@
+## NBA Decision Board Preview + prospective SHADOW learning (2026-11-19)
+
+- Six-tab private NBA Decision Board validated by HTTP 200: Top 25, ML, spread, total, player props, Q1-Q4/H1/H2. Verified 4 games, 662 prop selection sides and 224 period quotes on the reviewed slate, with 25 exploratory study candidates and no calibrated recommendations.
+- Source crosswalk rejects unknown HoopsAPI/GOAT game identity; props require exact player ID and prior captured stats; refreshed board makes zero provider calls and zero model writes.
+- Additive SQL research-only immutable NBA Decision SHADOW forecast/outcome tables deployed and rollback-fixture security tests passed; scheduled freeze/settle endpoints are OFF in production until verified/activated. Existing GOAT accuracy displayed separately.
+- Research PR #366 remains review-gated; no production model promotion or other-sport changes. See docs/edge-lab/nba-decision-board-v1-20261119.md and docs/edge-lab/nba-decision-shadow-learning-20261119.md.
+
 ## Homepage loading repair (2026-11-19)
 
 - Investigated a production homepage that rendered its shell but stalled both shared multisport sections; Vercel recorded a 300-second timeout. Identified unnecessary full Edge Lab historical report work in the homepage aggregate.

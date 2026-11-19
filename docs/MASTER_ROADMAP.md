@@ -1,3 +1,10 @@
+## Unified sports Decision Boards — NBA first (2026-11-19)
+
+- Implement six-tab NBA board in protected Preview, using archived GOAT/HoopsAPI lines, game/player histories and cautious SHADOW context. No daily Excel is needed for this view.
+- Prospective immutable freeze and statistical settlement modules have separate tables and gated Vercel crons; next verify one scheduled freeze and postgame settlement before declaring active learning.
+- Maintain baseline/challenger evidence by market, period and version; require 100+ independent games plus holdout/calibration/price validation before any suggested model promotion. No automatic champion replacement.
+- After NBA observational evidence is stable, replicate the same source/identity/contract/projection/freeze/outcome/card adapters independently for NHL, NCAAB, NCAAF, Soccer, TT, UFC etc. Never pool sport-specific accuracy.
+
 ## Homepage availability repair (2026-11-19)
 
 - Replace unnecessary full-history Edge Lab report construction on the homepage with bounded, minimal-column read projections. Preserve all card validation and historical accounting.
