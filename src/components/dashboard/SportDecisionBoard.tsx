@@ -13,8 +13,8 @@ export type SportDecisionRow={
 const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['spread','Spread'],['total','Total'],['props','Player props'],['periods','Cuartos / Mitades']];
 const isNumber=(n:number|null|undefined):n is number=>typeof n==='number'&&Number.isFinite(n);
 const date=(iso?:string|null)=>iso?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(iso)):'Sin fecha';
-export default function SportDecisionBoard({sport,rows,description}:{
- sport:string;rows:SportDecisionRow[];description?:string;
+export default function SportDecisionBoard({sport,rows,description,marketNotes={}}:{
+ sport:string;rows:SportDecisionRow[];description?:string;marketNotes?:Partial<Record<SportDecisionMarket,string>>;
 }){
  const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
  const [expanded,setExpanded]=useState(false);
@@ -40,7 +40,7 @@ export default function SportDecisionBoard({sport,rows,description}:{
    {tabs.map(([id,label])=><button key={id} type="button" role="tab" aria-selected={tab===id}
     onClick={()=>setTab(id)}
     className={`rounded-xl border px-3 py-3 text-left text-sm font-semibold ${tab===id?'border-teal-400 bg-teal-500/10':'border-slate-700 bg-slate-900'}`}>
-     {label}<span className="mt-1 block text-xs font-normal text-slate-400">{id==='top'?rows.filter(r=>r.eligible).length:(counts[id]||'Sin mercado verificado')}</span>
+     {label}<span className="mt-1 block text-xs font-normal text-slate-400">{id==='top'?rows.filter(r=>r.eligible).length:counts[id]?counts[id]+' registros':marketNotes[id as SportDecisionMarket]?'En investigación':'Sin contratos'}</span>
     </button>)}
   </div>
   <div className="flex flex-wrap items-center gap-3">
@@ -52,6 +52,7 @@ export default function SportDecisionBoard({sport,rows,description}:{
      <option value="gap">Brecha / edge descendente</option><option value="probability">Probabilidad de modelo descendente</option><option value="date">Hora de inicio</option>
     </select></label>
   </div>
+  {tab!=='top'&&marketNotes[tab as SportDecisionMarket]&&<p role="note" className="rounded-lg border border-amber-400/20 bg-slate-900/60 p-3 text-xs leading-5 text-amber-200">{marketNotes[tab as SportDecisionMarket]}</p>}
   {visible.length?<div className="grid gap-3 lg:grid-cols-2">
    {visible.map(r=><article key={r.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4">
     <div className="flex flex-wrap justify-between gap-2"><div className="min-w-0">
@@ -67,7 +68,7 @@ export default function SportDecisionBoard({sport,rows,description}:{
     <p className="mt-2 text-xs text-amber-200">{r.evidence??'Evidencia de modelo sin certificación de valor.'}</p>
     {r.note&&<details className="mt-2 text-xs text-slate-300"><summary className="cursor-pointer text-teal-300">Ver contexto</summary><p className="mt-2 leading-5">{r.note}</p></details>}
    </article>)}
-  </div>:<p role="status" className="rounded-xl border border-slate-700 p-5 text-sm text-slate-300">{tab==='top'?'No hay oportunidades con edge positivo y evidencia vigente en este deporte. No se fuerza una selección.':'Este mercado no tiene contratos o proyecciones verificadas para mostrar aquí.'}</p>}
+  </div>:<p role="status" className="rounded-xl border border-slate-700 p-5 text-sm text-slate-300">{tab==='top'?'No hay oportunidades elegibles y verificadas en este deporte. No se fuerza una selección.':marketNotes[tab as SportDecisionMarket]?'Sin selecciones publicables en este mercado. Consulta el estado de investigación indicado arriba.':'Este mercado no tiene contratos o proyecciones verificadas para mostrar aquí.'}</p>}
   <button type="button" onClick={()=>setExpanded(!expanded)} className="text-xs font-semibold text-teal-300">{expanded?'Ocultar condiciones':'Cómo interpretar estos resultados'}</button>
   {expanded&&<p className="text-xs leading-5 text-slate-400">Top oportunidades solo incluye filas marcadas favorables por evidencia del deporte. Las otras pestañas pueden mostrar pronósticos de investigación que NO son recomendaciones. Probabilidad del modelo no implica probabilidad calibrada. Sin línea original no se declara edge ni ROI. Las métricas de precisión y liquidaciones continúan en el registro del deporte.</p>}
  </section>;
