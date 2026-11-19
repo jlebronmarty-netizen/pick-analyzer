@@ -2,10 +2,10 @@ import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {NHL_LATE_V6} from '@/lib/nhl-late-v6-core.mjs';
 
-const validNumber=x=>typeof x==='number'&&Number.isFinite(x)&&x>0&&x<1;
+const validNumber=(x:unknown)=>typeof x==='number'&&Number.isFinite(x)&&x>0&&x<1;
 const brier=(p:number,y:number)=>(p-y)**2;
 const safeAvg=(n:number,sum:number)=>n?Number((sum/n).toFixed(5)):null;
-const stamp=x=>Date.parse(String(x??''));
+const stamp=(x:unknown)=>Date.parse(String(x??''));
 export async function getNhlLateV6Readiness(){
  const [frozen,outcomes]=await Promise.all([
   db.from('nhl_late_shadow_v6').select('*').order('frozen_at',{ascending:false}).limit(250),
