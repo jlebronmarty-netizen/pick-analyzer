@@ -5,7 +5,9 @@ import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {extractNhlFrozenFinalScores} from '@/lib/nhl-challenger-poisson-core.mjs';
 import {buildNhlV6LateCandidate,NHL_LATE_V6} from '@/lib/nhl-late-v6-core.mjs';
 
-const PAGE=500,MAX_RUNS=2000,MAX_QUOTES=3500,MAX_WRITES=16;
+// 16-day archive may exceed 3500 half-hourly quotes; bounded pagination
+// prevents silently cutting off earlier verified calibration evidence.
+const PAGE=500,MAX_RUNS=2000,MAX_QUOTES=8000,MAX_WRITES=16;
 const readPages=async(table:string,select:string,field:string,from:string,until:string,limit:number)=>{
  const rows:any[]=[];
  for(let offset=0;offset<limit;offset+=PAGE){

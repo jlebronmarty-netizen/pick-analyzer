@@ -1,6 +1,7 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {NHL_LATE_V6} from '@/lib/nhl-late-v6-core.mjs';
+import {evaluateNhlV6Paired} from '@/lib/nhl-v6-prospective-validation.mjs';
 
 const validNumber=(x:unknown)=>typeof x==='number'&&Number.isFinite(x)&&x>0&&x<1;
 const brier=(p:number,y:number)=>(p-y)**2;
@@ -16,6 +17,7 @@ export async function getNhlLateV6Readiness(){
   return {status:'SCHEMA_PENDING',version:NHL_LATE_V6,readOnly:true,providerCalls:0,databaseWrites:0};
  if(frozen.error||outcomes.error)throw Error('NHL_LATE_V6_READ_NOT_VERIFIED');
  const rows=frozen.data??[],truth=new Map((outcomes.data??[]).map(x=>[x.event_id,x]));
+ const pairedValidation=evaluateNhlV6Paired({frozenRows:rows,finalRows:outcomes.data??[]});
  let scored=0,unscored=0,invalid=0,nP=0,nC=0,nD=0,nM=0;
  let sumP=0,sumC=0,sumD=0,sumM=0,lossP=0,lossC=0,lossD=0,lossM=0;
  let candidateHits=0,marketHits=0,poissonHits=0,dratingsHits=0,homeWins=0;
@@ -49,6 +51,7 @@ export async function getNhlLateV6Readiness(){
  return {status:invalid?'REVIEW_INVALID_FROZEN_RECORDS':scored<30?
   'PROSPECTIVE_SAMPLE_PENDING':'RESEARCH_HOLDOUT_EVALUATION_REQUIRED',
   version:NHL_LATE_V6,readOnly:true,providerCalls:0,databaseWrites:0,
+  prospectiveFourWayValidation:pairedValidation,
   ledger:{frozen:rows.length,pending:unscored,settled:scored,invalid,
    pairedProbableGoalies:withGoalies,confirmedGoalies:0,
    withAsOfSpecialTeams:withPP,calibrationCandidateEligible:eligible,
