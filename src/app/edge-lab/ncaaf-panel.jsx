@@ -10,15 +10,30 @@ export default function NcaafPanel(){
  async function refresh(){if(active.current)return;const c=new AbortController();active.current=c;setBusy(true);const timeout=setTimeout(()=>c.abort(),25000);try{const r=await fetch('/api/edge-lab/ncaaf',{cache:'no-store',signal:c.signal}),b=await r.json();if(!r.ok)throw Error(b.status??'Error de lectura');if(active.current===c){setData(b);setError('');}}catch(e){if(active.current!==c)return;setError(e.name==='AbortError'?'Consulta excedida o cancelada':e.message);}finally{clearTimeout(timeout);if(active.current===c){active.current=null;setBusy(false);}}}
  useEffect(()=>{refresh();const id=setInterval(()=>{if(!document.hidden)refresh();},300000);return()=>{clearInterval(id);const previous=active.current;active.current=null;previous?.abort();};},[]);
  const ledgerView=useLedgerView(data?.rows??[]);
- const decisionRows=ledgerView.rows.filter(r=>r.status==='FORECAST'&&['HOME','AWAY'].includes(r.selection)&&typeof r.probability==='number').map(r=>({
-  id:String(r.id),market:'ml',matchup:r.participant_b+' @ '+r.participant_a,
-  selection:(r.selection==='HOME'?r.participant_a:r.participant_b)+' · ganador proyectado',
-  status:'EXPERIMENTAL',startsAt:r.scheduled_at,capturedAt:r.created_at??null,
-  probability:r.probability,projection:typeof r.projection==='number'?r.projection.toFixed(2):null,
-  odds:null,line:null,gap:null,eligible:false,
-  evidence:'Ganador proyectado PPG sin cuota ni línea verificables; no es recomendación de apuesta.',
-  note:'Margen y total permanecen como proyecciones numéricas (MAE), no spread ni Over/Under de una casa.'
- }));
+ const decisionRows=ledgerView.rows.filter(r=>r.status==='FORECAST'||r.status==='PROJECTION').flatMap(r=>{
+  const matchup=r.participant_b+' @ '+r.participant_a;
+  const common={id:String(r.id),matchup,status:'EXPERIMENTAL',startsAt:r.scheduled_at,
+   capturedAt:r.emitted_at??null,odds:null,line:null,gap:null,eligible:false,probability:null};
+  if(r.market==='MONEYLINE'&&r.status==='FORECAST'&&['HOME','AWAY'].includes(r.selection)&&typeof r.probability==='number'){
+   return [{...common,market:'ml',probability:r.probability,
+    selection:(r.selection==='HOME'?r.participant_a:r.participant_b)+' · ganador proyectado',
+    projection:null,evidence:'PPG sin cuota Moneyline verificable. No es recomendación.',
+    note:'Probabilidad experimental sin calibración certificada; el pronóstico original queda congelado.'}];
+  }
+  if(r.market==='POINT_MARGIN'&&r.status==='PROJECTION'&&typeof r.projection==='number'&&Number.isFinite(r.projection)){
+   return [{...common,market:'spread',selection:'Margen local proyectado · no spread',
+    projection:r.projection.toFixed(2)+' pts',
+    evidence:'Estimación numérica de puntos. No hay línea de spread ni precio verificable.',
+    note:'Positivo indica ventaja de local; negativo indica ventaja visitante. Se evalúa por MAE.'}];
+  }
+  if(r.market==='TOTAL_POINTS'&&r.status==='PROJECTION'&&typeof r.projection==='number'&&Number.isFinite(r.projection)){
+   return [{...common,market:'total',selection:'Total de puntos proyectado · no Over/Under',
+    projection:r.projection.toFixed(2)+' pts',
+    evidence:'Estimación numérica. No hay línea de total ni cuota verificable.',
+    note:'No es una selección Over/Under. Se evalúa por MAE y no por win/loss de apuestas.'}];
+  }
+  return [];
+ });
  const latest=data?.runs?.[0],coverage=latest?.summary?.coverage;
  return <>
  <SportDecisionBoard sport="NCAAF" rows={decisionRows} marketNotes={{spread:"PPG genera margen numérico, no una recomendación spread; falta una línea con precio verificable.",total:"PPG genera total numérico, no apuesta Over/Under; falta línea de una casa y validación del contrato.",props:"Sin props universitarios con datos y modelos certificados.",periods:"Sin pronósticos congelados por cuartos o mitades y sin línea de mercado."}} description="Moneyline proyectado PPG; las estimaciones de puntos y total sin línea verificable no se presentan como apuestas. Sin edge o cuotas, el Top queda vacío." />

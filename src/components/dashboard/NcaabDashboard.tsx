@@ -7,6 +7,7 @@ import type {NcaabReport} from '@/lib/ncaab-checkpoint';
 import {ncaabDate} from '@/lib/ncaab-checkpoint';
 import {ncaabTeamName} from '@/lib/ncaab-team-display';
 import NcaabForecastSummary from './NcaabForecastSummary';
+import {collegeScoreAccuracy} from '@/lib/college-score-accuracy.mjs';
 const pct=(n:number|null)=>n===null?'—':(n*100).toFixed(2)+'%';
 const time=(iso:string)=>new Intl.DateTimeFormat('es',{timeZone:'America/Puerto_Rico',dateStyle:'medium',timeStyle:'short'}).format(new Date(iso));
 const reasons:Record<string,string>={UNVERIFIED_TIP:'Horario sin verificar',MISSING_TEAM_HISTORY:'Sin historial de equipo',INSUFFICIENT_PREVIOUS_SEASON_HISTORY:'Historial previo insuficiente'};
@@ -14,20 +15,44 @@ export default function NcaabDashboard({report}:{report:NcaabReport}){
  const [model,setModel]=useState('NCAAB_PRESEASON_V1'),[state,setState]=useState('FORECAST'),[date,setDate]=useState(()=>report.status==='AVAILABLE'&&report.data.continuousSync?ncaabDate(new Date().toISOString()):'ALL');
  if(report.status==='UNAVAILABLE')return <section className="mlb-ui p-6"><h1 className="text-3xl font-bold">NCAAB</h1><p role="alert" className="mt-5 text-amber-300">{report.warning}</p><Link href="/today">Volver al dashboard</Link></section>;
  const global=report.data.models.reduce((a,m)=>({w:a.w+m.wins,l:a.l+(m.losses??m.winnerDenominator-m.wins)}),{w:0,l:0});
+ const numeric=collegeScoreAccuracy(report.data.observations);
  const s=report.data,m=s.models.find(m=>m.id===model)!,rows=model==='NCAAB_PRESEASON_V1'?s.observations.filter(r=>(state==='ALL'||r.state===state)&&(date==='ALL'||ncaabDate(r.scheduled_at)===date)).sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)||a.event_id.localeCompare(b.event_id)):[];
  const decisionRows:SportDecisionRow[]=rows.filter(r=>r.state==='FORECAST'&&r.predicted_winner!==null)
-  .map(r=>{
+  .flatMap(r=>{
    const home=r.predicted_winner===r.home_id;
-   return {id:r.event_id,market:'ml',matchup:ncaabTeamName(r.away_id,r.away_name)+' @ '+ncaabTeamName(r.home_id,r.home_name),
+   const matchup=ncaabTeamName(r.away_id,r.away_name)+' @ '+ncaabTeamName(r.home_id,r.home_name);
+   const common={matchup,status:'EXPERIMENTAL' as const,startsAt:r.scheduled_at,capturedAt:r.created_at,
+    odds:null,line:null,gap:null,eligible:false};
+   const result:SportDecisionRow[]=[{...common,id:r.event_id+':winner',market:'ml',
     selection:ncaabTeamName(home?r.home_id:r.away_id,home?r.home_name:r.away_name)+' · ganador proyectado',
-    status:'EXPERIMENTAL' as const,startsAt:r.scheduled_at,capturedAt:r.created_at,
-    probability:home?r.home_win_probability:r.away_win_probability,projection:r.away_score!=null&&r.home_score!=null?r.away_score.toFixed(1)+' – '+r.home_score.toFixed(1):null,
-    odds:null,gap:null,eligible:false,evidence:'Proyección del modelo sin línea o cuota de sportsbook verificada: NO es recomendación de apuesta.',
-    note:'Margen modelado '+(r.projected_margin?.toFixed(2)??'—')+'; total modelado '+(r.projected_total?.toFixed(2)??'—')+'. Sin edge ni EV calculable.'
-   };
+    probability:home?r.home_win_probability:r.away_win_probability,
+    projection:r.away_score!=null&&r.home_score!=null?r.away_score.toFixed(1)+' – '+r.home_score.toFixed(1):null,
+    evidence:'Proyección de ganador sin cuota de sportsbook verificable; no es una recomendación.',
+    note:'Margen '+(r.projected_margin?.toFixed(2)??'—')+'; total '+(r.projected_total?.toFixed(2)??'—')+'. Sin EV verificable.'
+   }];
+   if(typeof r.projected_margin==='number'&&Number.isFinite(r.projected_margin))result.push({...common,
+    id:r.event_id+':margin',market:'spread',
+    selection:'Margen estimado del local (no spread de casa)',projection:r.projected_margin.toFixed(2)+' pts',
+    probability:null,evidence:'Proyección numérica para medir MAE. No hay handicap ni cuota de sportsbook.',
+    note:'Valor positivo favorece al local. Valor negativo favorece al visitante. Requiere línea exacta y reglas para evaluar una apuesta.'
+   });
+   if(typeof r.projected_total==='number'&&Number.isFinite(r.projected_total))result.push({...common,
+    id:r.event_id+':total',market:'total',
+    selection:'Total de puntos estimado (no Over/Under)',projection:r.projected_total.toFixed(2)+' pts',
+    probability:null,evidence:'Proyección numérica para medir MAE. No hay línea Over/Under ni cuota.',
+    note:'No confundir un total estimado con una selección Over o Under; falta el precio del contrato.'
+   });
+   return result;
   });
  return <div className="mlb-ui space-y-6 p-4 sm:p-6">
   <header className="rounded-2xl border border-violet-400/30 bg-slate-900 p-6"><Link href="/today" className="text-sm text-teal-300">← Todos los deportes</Link><p className="mt-5 text-xs font-bold uppercase tracking-widest text-teal-300">NCAAB · experimental</p><h1 className="mt-2 text-3xl font-bold">Modelos, proyecciones y resultados</h1><p className="mt-3 text-sm text-slate-300">Accuracy prospectivo global: <strong>{pct(global.w+global.l?global.w/(global.w+global.l):null)}</strong> · {global.w} W / {global.l} L · {s.models.reduce((n,m)=>n+m.forecasts-m.settled-(m.review??0),0)} observaciones pendientes.</p><p className="mt-3 text-sm text-slate-400">Última actualización {time(s.generatedAt)} · Puerto Rico. {s.continuousSync?'Proceso diario gratuito habilitado.':'Sin sincronización continua.'} Los marcadores son proyecciones, no resultados ni líneas de mercado.</p>{s.warning&&<p role="alert" className="mt-3 text-amber-300">{s.warning}</p>}{s.lastRun&&<p className="mt-2 text-xs text-slate-400">Última ejecución: {s.lastRun.status} · {s.lastRun.providerCalls} consultas FREE</p>}</header>
+  <section aria-label="Exactitud numérica NCAAB" className="rounded-xl border border-slate-700 bg-slate-900 p-4">
+   <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-semibold">Error de proyecciones numéricas</h2><p className="text-xs text-amber-200">Solo finales válidos · Sin líneas de apuestas</p></div>
+   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+    {[['Partidos evaluados',numeric.games],['MAE margen',numeric.marginMae===null?'—':numeric.marginMae.toFixed(2)+' pts'],['MAE total',numeric.totalMae===null?'—':numeric.totalMae.toFixed(2)+' pts']].map(([k,v])=><div key={k} className="rounded-lg bg-slate-950 p-3"><p className="text-xs text-slate-400">{k}</p><p className="mt-1 text-xl font-semibold">{v}</p></div>)}
+   </div>
+   <p className="mt-2 text-xs text-slate-400">Promedio del error absoluto en las proyecciones prepartido que ya tienen resultado válido y no requieren revisión. Se excluyen PASAR, resultados conflictivos y eventos sin liquidación. No mide desempeño contra cuotas de sportsbook.</p>
+  </section>
   <SportDecisionNavigation current="NCAAB" compact/>
   <SportDecisionBoard sport="NCAAB" rows={decisionRows} marketNotes={{spread:"Existe margen numérico proyectado, pero no una línea spread con cuota y reglas verificadas para comparar.",total:"Existe total de puntos proyectado, pero sin línea Over/Under de sportsbook no hay brecha ni EV verificables.",props:"No existe un pipeline de player props validado para este modelo.",periods:"No existen contratos de cuartos o mitades certificados para NCAAB."}} description="Ganador y puntuación estimada del modelo experimental. Sin precios de casa verificables no hay Top favorable, spread, total ni props recomendables; las proyecciones permanecen informativas."/>
   <aside role="status" className="rounded-xl border border-amber-400/30 p-5 text-sm leading-6 text-amber-200">Los modelos conservan su estado experimental. Roster, transferencias y cambios de entrenador sin verificar; probabilidades e intervalos sin calibración confirmada. No hay cuotas, edge, ROI ni recomendaciones oficiales certificados. El historial retrospectivo no aporta al accuracy prospectivo.</aside>
