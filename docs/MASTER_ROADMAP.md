@@ -4377,3 +4377,8 @@ team/player box scores. No paid plan, models, forecasts or changes to other spor
 GOAT current props are captured without a prop-type filter, retaining Q1, first-three-minute and milestone distinctions. The existing private NBA page and cron use bounded, auditable requests. Historical game-period scores are separate research data, and player-stat completion preserves existing contexts. Pending verification is exact live coverage; this work does not certify the full regional FanDuel menu or create a calibrated prop/quarter model.
 
 NBA prediction reads now explicitly skip weight initialization, preserving stored weights. Injury/projected-lineup pagination records actual completeness. The model formulas, official history, daily SHADOW cap and recommendation policy are unchanged. See `docs/edge-lab/nba-fanduel-research-capture-20261118.md` for request budgets, persistence and tests.
+
+## NBA Decision Board — protección visual adicional (2026-11-19)
+- Las seis pestañas (Top 25, ML, Spread, Total, Props, Cuartos/Mitades) aplican una segunda validación exclusivamente visual sobre preferencias SHADOW: nunca mostrar PASAR, filas sin evidencia válida ni los dos lados de un mismo contrato.
+- Se mantiene la selección original del servidor y el archivo de ambos lados para evaluación y liquidaciones. No se cambian modelos, cuotas, crons ni proveedores.
+- La interfaz identifica la versión de preferencias para ayudar a detectar enlaces a despliegues antiguos. Tests `tests/nba-decision-visible.test.mjs` integrados a CI.
