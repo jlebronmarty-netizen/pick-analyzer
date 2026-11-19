@@ -31,8 +31,8 @@ export async function getNhlLateV6Readiness(){
   const o=truth.get(row.event_id) as any;
   if(!o){unscored++;continue;}
   const b=o.body??{},h=b.homeScore,a=b.awayScore;
-  if(b.scheduledAt!==row.scheduled_at||b.homeId!==row.home_team_id||
-   b.awayId!==row.away_team_id||!Number.isSafeInteger(h)||!Number.isSafeInteger(a)||
+  if(stamp(b.scheduledAt)!==scheduled||Number(b.homeId)!==Number(row.home_team_id)||
+   Number(b.awayId)!==Number(row.away_team_id)||!Number.isSafeInteger(h)||!Number.isSafeInteger(a)||
    h===a||stamp(o.observed_at)<=scheduled){invalid++;continue;}
   scored++;const y=h>a?1:0,cal=row.calibration,market=cal?.circaPrice;
   if(validNumber(row.market_proxies?.homeMoneylineProxy)){nP++;sumP+=brier(row.market_proxies.homeMoneylineProxy,y);}
