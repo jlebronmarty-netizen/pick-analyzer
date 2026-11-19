@@ -3562,3 +3562,13 @@ team/player box scores. No paid plan, models, forecasts or changes to other spor
 - Las seis pestañas (Top 25, ML, Spread, Total, Props, Cuartos/Mitades) aplican una segunda validación exclusivamente visual sobre preferencias SHADOW: nunca mostrar PASAR, filas sin evidencia válida ni los dos lados de un mismo contrato.
 - Se mantiene la selección original del servidor y el archivo de ambos lados para evaluación y liquidaciones. No se cambian modelos, cuotas, crons ni proveedores.
 - La interfaz identifica la versión de preferencias para ayudar a detectar enlaces a despliegues antiguos. Tests `tests/nba-decision-visible.test.mjs` integrados a CI.
+
+## Today + tableros por deporte — unificación visual V1 (2026-11-19)
+- Today mantiene las tarjetas originales de accuracy por deporte arriba y mueve los partidos/selecciones debajo de la navegación deportiva común.
+- NBA compacta Seguimiento y aprendizaje en un panel desplegable; preserva el ranking y los seis mercados originales.
+- NHL incorpora Decision Board de Moneyline con un lado por partido; Top requiere edge Circa positivo reciente y verificable, los demás pronósticos siguen MODEL_ONLY.
+- NCAAB y NCAAF incorporan las vistas de ganador experimental sin inventar precios, margen frente a línea o EV; otros mercados siguen pendientes.
+- Soccer y Table Tennis incorporan tarjetas compartidas de selecciones del ledger sin promoverlas al Top en ausencia de edge verificado; su histórico original permanece disponible.
+- MLB conserva el Decision Board y la pausa fuera de temporada.
+- Seguimiento pendiente: adaptadores completos para spread/total/props por deporte, conciliación de contratos y pruebas de calibración/settlement; protección y dominio canónico se tratan por separado.
+- No se modificaron modelos, pagos, crons, proveedores ni predicciones congeladas.
