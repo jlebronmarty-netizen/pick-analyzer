@@ -1,0 +1,40 @@
+name: NBA Decision Board Private Preview
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nba/decision-board-core.mjs'
+      - 'src/services/nba-decision-board.service.ts'
+      - 'src/app/api/nba/decision-board/**'
+      - 'src/app/nba-decision-board/**'
+      - 'tests/nba-decision-board.test.mjs'
+      - 'tests/nba-decision-learning.test.mjs'
+      - 'src/lib/nba/decision-learning-core.mjs'
+      - 'src/lib/nba/decision-cron-auth.mjs'
+      - 'src/services/nba-decision-learning.service.ts'
+      - 'src/app/api/cron/nba-decision-freeze/**'
+      - 'src/app/api/cron/nba-decision-settle/**'
+      - 'src/app/api/nba/decision-learning/**'
+      - 'supabase/migrations/20261119185000_nba_decision_shadow_freeze_v1.sql'
+      - 'vercel.json'
+      - 'docs/edge-lab/nba-decision-shadow-learning-20261119.md'
+      - 'docs/edge-lab/nba-decision-board-v1-20261119.md'
+      - '.github/workflows/nba-decision-board.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test archived-only contracts, missing-data blocking and cross-provider IDs
+        run: node --test tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs
+      - name: Ensure no unapproved provider call or official pick mutation
+        run: |
+          if grep -R -n -E 'prediction_history.*(insert|upsert|update)|recommendedPick: true' src/lib/nba/decision-board-core.mjs src/lib/nba/decision-learning-core.mjs src/services/nba-decision-board.service.ts src/services/nba-decision-learning.service.ts src/app/api/nba/decision-board; then
+            echo 'Unexpected official model mutation'; exit 1;
+          fi

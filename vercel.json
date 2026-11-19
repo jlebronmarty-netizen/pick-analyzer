@@ -43,6 +43,14 @@
     {
       "path": "/api/cron/nba-hoopsapi",
       "schedule": "15 15,21,23 * * *"
+    },
+    {
+      "path": "/api/cron/nba-decision-freeze",
+      "schedule": "35 15,23 * * *"
+    },
+    {
+      "path": "/api/cron/nba-decision-settle",
+      "schedule": "15 12 * * *"
     }
   ],
   "git": {
