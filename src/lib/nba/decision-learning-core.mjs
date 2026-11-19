@@ -82,6 +82,7 @@ function periodScore(final,side,period){
 const statsMap={points:['pts'],rebounds:['reb'],assists:['ast'],threes:['fg3m'],
   points_rebounds:['pts','reb'],points_assists:['pts','ast'],rebounds_assists:['reb','ast'],
   points_rebounds_assists:['pts','reb','ast']};
+/** @param {any} forecast @param {any} sources */
 export function settleNbaShadowForecast(forecast,{game,sourceReceivedAt,playerStat=null,playerStatReceivedAt=null}={}){
  if(!forecast||!okTime(sourceReceivedAt)||!okTime(forecast.game_start_at)||
     Date.parse(sourceReceivedAt)<=Date.parse(forecast.game_start_at))return null;
