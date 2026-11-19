@@ -147,3 +147,68 @@ export function forecastNhlRegulationV8({game,decisionAt,boxscoreRows,minTeamGam
   winnerProbabilityCalibrated:false,holdoutValidated:false,
   warning:'Regulation history and assumed even OT/SO win; exploratory, no demonstrated Brier improvement on historical cohort.'};
 }
+
+export function gradeNhlRegulationV8Retrospective({frozenRows,boxscoreRows,outcomeRows}){
+ if(!Array.isArray(frozenRows)||!Array.isArray(boxscoreRows)||!Array.isArray(outcomeRows))
+  return fail('MISSING_ARCHIVE_FOR_COMPARISON');
+ const outcomes=new Map(),contradictory=new Set();
+ for(const o of outcomeRows){
+  const id=o?.event_id??o?.body?.eventId;
+  if(!id||contradictory.has(id))continue;
+  if(outcomes.has(id)){outcomes.delete(id);contradictory.add(id);}
+  else outcomes.set(id,o);
+ }
+ let paired=0,rejected=0,missing=0,earlyML=0,v8ML=0,
+ earlyTotal=0,v8Total=0,earlyHits=0,v8Hits=0;
+ const reasons={};
+ for(const frozen of frozenRows){
+  const tip=stamp(frozen?.scheduled_at),decision=stamp(frozen?.frozen_at),
+   observed=outcomes.get(frozen?.event_id),final=observed?.body??observed;
+  const yi=Number(final?.homeScore>final?.awayScore);
+  if(frozen?.model_version!=='NHL_SCORES_POISSON_SHADOW_V1'||
+   frozen?.official_pick!==false||frozen?.production_eligible!==false||
+   tip===null||decision===null||tip-decision<3600000||
+   !validInt(frozen?.home_team_id)||!validInt(frozen?.away_team_id)||
+   frozen.home_team_id===frozen.away_team_id){
+   rejected++;reasons.INVALID_ORIGINAL_FREEZE=(reasons.INVALID_ORIGINAL_FREEZE??0)+1;continue;
+  }
+  if(!observed){missing++;continue;}
+  if(contradictory.has(frozen.event_id)||stamp(observed.observed_at)===null||
+   stamp(observed.observed_at)<=tip||stamp(final?.scheduledAt)!==tip||
+   final?.homeId!==frozen.home_team_id||
+   final?.awayId!==frozen.away_team_id||
+   !validInt(final?.homeScore)||!validInt(final?.awayScore)||
+   final.homeScore===final.awayScore){
+   rejected++;reasons.FINAL_IDENTITY_OR_TIME=(reasons.FINAL_IDENTITY_OR_TIME??0)+1;continue;
+  }
+  const p=frozen.market_proxies,oldML=p?.homeMoneylineProxy,
+   oldOver=p?.overGoalsProxy;
+  if(![oldML,oldOver].every(v=>typeof v==='number'&&v>0&&v<1)){
+   rejected++;reasons.INVALID_ORIGINAL_PROBABILITIES=(reasons.INVALID_ORIGINAL_PROBABILITIES??0)+1;continue;
+  }
+  const fresh=forecastNhlRegulationV8({game:{eventId:frozen.event_id,
+   scheduledAt:frozen.scheduled_at,homeId:frozen.home_team_id,
+   awayId:frozen.away_team_id},decisionAt:frozen.frozen_at,boxscoreRows});
+  if(fresh.status!=='UNVALIDATED_REGULATION_CHALLENGER'){
+   reasons[fresh.reason]=(reasons[fresh.reason]??0)+1;continue;
+  }
+  const newML=fresh.fullGameResearchProxies.homeMoneylineProxy,
+   newOver=fresh.fullGameResearchProxies.overGoalsProxy;
+  const y=final.homeScore>final.awayScore?1:0,
+   total=final.homeScore+final.awayScore>5.5?1:0;
+  paired++;earlyML+=(oldML-y)**2;v8ML+=(newML-y)**2;
+  earlyTotal+=(oldOver-total)**2;v8Total+=(newOver-total)**2;
+  earlyHits+=Number((oldML>=.5)===Boolean(y));
+  v8Hits+=Number((newML>=.5)===Boolean(y));
+ }
+ return {status:'RETROSPECTIVE_RESEARCH_NOT_VALIDATED',model:NHL_REGULATION_V8,
+  pairedGames:paired,missingResults:missing,invalidRecords:rejected,reasons,
+  brier:{originalMoneyline:paired?round(earlyML/paired):null,
+   regulationMoneyline:paired?round(v8ML/paired):null,
+   originalOver5p5:paired?round(earlyTotal/paired):null,
+   regulationOver5p5:paired?round(v8Total/paired):null},
+  winnerHits:{original:earlyHits,regulation:v8Hits},
+  noProviderCalls:true,officialPicksChanged:false,
+  exploratorySampleOnly:true,holdoutPassed:false,modelPromotionAllowed:false,
+  note:'This is a retrospective overlapping sample, not evidence of profitable or improved forecasting.'};
+}
