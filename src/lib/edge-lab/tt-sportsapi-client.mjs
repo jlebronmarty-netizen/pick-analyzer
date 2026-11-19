@@ -7,14 +7,17 @@ import {sportsApiTtLeagueId,sportsApiTtFinals,ttSportsApiTargetDays} from './tt-
 const root='https://api.sportsapi.app';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 function errorCode(status){return status===401?'AUTH_INVALID':status===403?'PLAN_NOT_ALLOWED':status===429?'QUOTA_OR_RATE_LIMIT':status>=500?'PROVIDER_UNAVAILABLE':'BAD_RESPONSE';}
-export async function sportsApiTtSupplement({key,leagueId=null,forecasts,outcomes,now=new Date().toISOString(),fetchFn=fetch}){
+export async function sportsApiTtSupplement({key,leagueId=null,forecasts,outcomes,now=new Date().toISOString(),fetchFn=fetch,maxCalls=3}){
+ if(!Number.isSafeInteger(maxCalls)||maxCalls<0||maxCalls>3)throw Error('SPORTSAPI_TT_CALL_CONFIG_INVALID');
  if(typeof key!=='string'||!key.trim()||!Array.isArray(forecasts)||!Array.isArray(outcomes))
   throw Error('SPORTSAPI_TT_NOT_CONFIGURED');
  const days=ttSportsApiTargetDays(forecasts,outcomes,now,2);
  const out={status:'NO_ELIGIBLE_RECENT_GAMES',calls:0,days,leagueId:null,finals:[],receipts:[],errors:[]};
  if(!days.length)return out;
+ if(maxCalls===0){out.status='DAILY_CALL_CAP';return out;}
+ if(maxCalls===1&&!leagueId){out.status='INSUFFICIENT_CALL_BUDGET_FOR_DISCOVERY';return out;}
  const get=async(path)=>{
-  if(out.calls>=3)throw Error('SPORTSAPI_TT_CALL_CAP');
+  if(out.calls>=maxCalls)throw Error('SPORTSAPI_TT_CALL_CAP');
   const url=new URL(path,root);
   if(url.protocol!=='https:'||url.host!=='api.sportsapi.app'||!['/v2/search','/v2/fixtures'].includes(url.pathname))
    throw Error('SPORTSAPI_TT_URL_REJECTED');
@@ -43,7 +46,7 @@ export async function sportsApiTtSupplement({key,leagueId=null,forecasts,outcome
     raw:discovery.body});
   }
   out.leagueId=id;
-  for(const date of days){
+  for(const date of days.slice(0,Math.max(0,maxCalls-out.calls))){
    try{
     const received=await get('/v2/fixtures?date='+date+'&league='+id);
     const normalized=sportsApiTtFinals(received.body,{leagueId:id,capturedAt:received.capturedAt,requestedDay:date});
