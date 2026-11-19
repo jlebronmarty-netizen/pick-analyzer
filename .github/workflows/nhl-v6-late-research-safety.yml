@@ -1,0 +1,36 @@
+name: NHL V6 late probable and calibration research safety
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nhl-late-v6-core.mjs'
+      - 'src/services/nhl-late-v6-freeze-writer.service.ts'
+      - 'src/services/nhl-late-v6-readiness.service.ts'
+      - 'src/app/api/nhl/late-v6-readiness/route.ts'
+      - 'src/app/api/cron/nhl-free/route.ts'
+      - 'supabase/migrations/20261119230700_nhl_late_shadow_v6.sql'
+      - 'tests/nhl-v6-late-probable-calibration.test.mjs'
+      - '.github/workflows/nhl-v6-late-research-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: NHL late V6 safety, frozen V1, ESPN V5 contracts
+        run: node --test tests/nhl-v6-late-probable-calibration.test.mjs tests/nhl-free-espn-goalie-probables-v5-20261115.test.mjs tests/nhl-frozen-forward-ledger-20261114.test.mjs tests/nhl-poisson-challenger-shadow-20261113.test.mjs
+      - name: TypeScript safety
+        run: npx tsc --noEmit --pretty false
