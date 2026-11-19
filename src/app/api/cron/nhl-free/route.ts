@@ -6,6 +6,7 @@ import {syncNhlMainMarketHistory} from '@/services/nhl-main-market-history-backf
 import {runNhlChallengerShadowFreeze} from '@/services/nhl-challenger-freeze-writer.service';
 import {syncNhlSpecialTeamsResearchSnapshot} from '@/services/nhl-special-teams-capture.service';
 import {captureNhlFreeEspnProbableGoalies} from '@/services/nhl-espn-goalie-probables-capture.service';
+import {runNhlLateV6ShadowFreeze} from '@/services/nhl-late-v6-freeze-writer.service';
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
 export const maxDuration=300;
@@ -24,6 +25,9 @@ export async function GET(request:NextRequest){
   // Optional one free NHL-wide ESPN pregame probable-goalie source call per day; no confirmed starter claims.
   const espnGoalies=await captureNhlFreeEspnProbableGoalies().catch(()=>({status:'FAILED',providerCalls:0,written:0}));
   const challengerFreeze=await runNhlChallengerShadowFreeze().catch(()=>({status:'FAILED',sourceCalls:0,written:0}));
-  console.log('NHL_CAUSAL_PIPELINE',JSON.stringify({coreStatus:(core as any).status,contextStatus:(learning as any).context?.status,providerCalls:(learning as any).context?.provider_calls??0,diagnosticStatus:(learning as any).diagnostics?.status,researchHistoryStatus:researchHistory.status,researchHistoryCalls:researchHistory.providerCalls,challengerFreezeStatus:challengerFreeze.status,challengerRows:challengerFreeze.written,specialTeamsCaptureStatus:specialTeamsCapture.status,specialTeamsCalls:specialTeamsCapture.providerCalls,espnProbableStatus:espnGoalies.status,espnProbableCalls:espnGoalies.providerCalls}));
-  return NextResponse.json({...core,learning,researchHistory,challengerFreeze,specialTeamsCapture,espnGoalies},{headers:{'Cache-Control':'no-store'}});}catch{return NextResponse.json({status:'NHL_RUN_FAILED',warning:'Consultar registro persistente de ejecuciones.'},{status:500,headers:{'Cache-Control':'no-store'}});}
+  // Strictly after the one-free-ESPN probable call. New independent research row;
+  // never rewrites or supersedes earlier immutable Poisson/DRatings decisions.
+  const lateV6=await runNhlLateV6ShadowFreeze().catch(()=>({status:'FAILED',providerCalls:0,written:0}));
+  console.log('NHL_CAUSAL_PIPELINE',JSON.stringify({coreStatus:(core as any).status,contextStatus:(learning as any).context?.status,providerCalls:(learning as any).context?.provider_calls??0,diagnosticStatus:(learning as any).diagnostics?.status,researchHistoryStatus:researchHistory.status,researchHistoryCalls:researchHistory.providerCalls,challengerFreezeStatus:challengerFreeze.status,challengerRows:challengerFreeze.written,specialTeamsCaptureStatus:specialTeamsCapture.status,specialTeamsCalls:specialTeamsCapture.providerCalls,espnProbableStatus:espnGoalies.status,espnProbableCalls:espnGoalies.providerCalls,lateV6Status:lateV6.status,lateV6Rows:lateV6.written,lateV6ProviderCalls:lateV6.providerCalls}));
+  return NextResponse.json({...core,learning,researchHistory,challengerFreeze,specialTeamsCapture,espnGoalies,lateV6},{headers:{'Cache-Control':'no-store'}});}catch{return NextResponse.json({status:'NHL_RUN_FAILED',warning:'Consultar registro persistente de ejecuciones.'},{status:500,headers:{'Cache-Control':'no-store'}});}
 }
