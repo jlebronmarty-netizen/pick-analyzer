@@ -1,13 +1,21 @@
-name: NCAAB archived lifecycle safety
+name: College archived evaluation safety
 
 on:
   pull_request:
     paths:
       - 'src/lib/ncaab-source-lifecycle.mjs'
       - 'src/lib/ncaab-live.ts'
+      - 'src/lib/college-score-accuracy.mjs'
+      - 'src/lib/college-numeric-evaluation.mjs'
       - 'src/services/ncaab-daily.service.ts'
+      - 'src/services/ncaaf-causal-learning.service.ts'
       - 'src/components/dashboard/NcaabDashboard.tsx'
+      - 'src/app/edge-lab/ncaaf-panel.jsx'
+      - 'src/app/ncaaf-learning/page.tsx'
       - 'tests/ncaab-source-lifecycle.test.mjs'
+      - 'tests/college-score-accuracy.test.mjs'
+      - 'tests/college-numeric-evaluation.test.mjs'
+      - 'tests/dashboard-multisport/ncaab-daily.test.mjs'
       - '.github/workflows/ncaab-archived-lifecycle.yml'
   workflow_dispatch:
 
@@ -28,8 +36,8 @@ jobs:
           cache: npm
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
-      - name: NCAAB lifecycle regression
-        run: node --test tests/ncaab-source-lifecycle.test.mjs
+      - name: College archived evaluation regression
+        run: node --test tests/ncaab-source-lifecycle.test.mjs tests/college-score-accuracy.test.mjs tests/college-numeric-evaluation.test.mjs
       - name: Dashboard multisport regression
         run: npm run test:dashboard-multisport
       - name: TypeScript verification

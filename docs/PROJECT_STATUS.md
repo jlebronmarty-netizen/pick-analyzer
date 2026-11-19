@@ -3614,3 +3614,11 @@ team/player box scores. No paid plan, models, forecasts or changes to other spor
 - Se prepara un manifiesto versionado con 110 fuentes: conserva las 107 anteriores y añade las dos dependencias de navegación y el manifiesto previo. Los certificados y las evidencias anteriores se conservan; no se omiten controles ni se actualizan hashes sin revisión.
 - Validación local: 37 fuentes R3 y 110 operativas verificadas; 31 pruebas de guardas/paginación y 98 pruebas dashboard aprobadas. Compilación y Preview se registran en el PR antes de publicación. Véase `docs/product/MLB_SOURCE_REVIEW_20261119.md`.
 - La respuesta de producción de 2026-11-19 19:26 PR mantiene MLB en `OFFSEASON_PAUSED`. La actualización del certificado elimina el bloqueo por deriva de fuentes, pero no ejecuta ni autoriza un tick operativo. No se cambian calendarios, activación, entorno, modelos o proveedores. Rama preparada; no integrada en main en este registro.
+
+## NCAAB/NCAAF: integridad de evaluación y denominadores — 2026-11-19
+
+- NCAAF Learning: se corrige la conversión de errores nulos a cero. Solo resultados `NUMERIC` con error numérico finito y no negativo entran al MAE; cada métrica muestra su denominador real. En el snapshot de las 19:32 PR, margen pasa de 13.161/108 filas a 13.800/103 válidas y total de 12.525/110 a 13.248/104 al excluir cinco y seis disputas, respectivamente. Son diagnósticos cargados, distintos del ledger completo.
+- El panel NCAAF separa evaluados W/L y evaluados MAE; la cifra de error y su muestra se calculan con el mismo criterio. No se reinterpretan proyecciones como apuestas.
+- NCAAB: el lector exige identidad exacta y emisión previa tanto al horario original como al corregido; no reescribe finales ni pronósticos. Se añaden sesgo margen/total y desglose visible de la cohorte. El archivo actual no mostró emisiones inválidas por la corrección de horario auditada.
+- Validación local: 17 pruebas numéricas/lifecycle y 101 dashboard aprobadas, incluyendo los 73 pronósticos congelados originales. Pruebas numéricas conectadas a CI. Build/Preview se verifican antes de publicación; rama pendiente de integración.
+- Detalle, cohortes y SQL reproducible: `docs/product/COLLEGE_EVALUATION_INTEGRITY_20261119.md`. Sin llamadas nuevas a proveedores, cambios de modelos, crons, DB o historial.

@@ -1,5 +1,6 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
+import {collegeNumericEvaluation} from '@/lib/college-numeric-evaluation.mjs';
 
 const BASE='https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary';
 const CTX_VERSION='NCAAF_CAUSAL_CONTEXT_V2',MATCHUP_VERSION='NCAAF_CAUSAL_MATCHUPS_V3';
@@ -108,6 +109,6 @@ export async function getNcaafCausalLearningReport(){
  const pair=new Map<string,any>();for(const x of mR.data??[]){const k=x.athlete_id+'|'+x.opponent_team_id+'|'+x.category,v=pair.get(k)??{athleteId:x.athlete_id,athlete:x.athlete_name,opponentTeamId:x.opponent_team_id,opponent:x.opponent_team_name,category:x.category,games:new Set<string>(),yards:0,touchdowns:0,interceptions:0,attempts:0,carries:0,receptions:0};v.games.add(x.event_id);v.yards+=Number(x.yards??0);v.touchdowns+=Number(x.touchdowns??0);v.interceptions+=Number(x.interceptions??0);v.attempts+=Number(x.attempts??0);v.carries+=Number(x.carries??0);v.receptions+=Number(x.receptions??0);pair.set(k,v);}
  const matchupProfiles=[...pair.values()].map(v=>({...v,games:v.games.size})).filter(v=>v.games>=2).sort((a,b)=>b.games-a.games||b.yards-a.yards).slice(0,100);
  const patterns=[...labels.entries()].map(([label,v])=>({label,...v,lossRate:v.wins+v.losses?v.losses/(v.wins+v.losses):null})).sort((a,b)=>b.count-a.count);
- const margin=rows.filter(x=>x.market==='POINT_MARGIN'&&Number.isFinite(Number(x.absolute_error))).map(x=>Number(x.absolute_error)),total=rows.filter(x=>x.market==='TOTAL_POINTS'&&Number.isFinite(Number(x.absolute_error))).map(x=>Number(x.absolute_error));
- return {status:'AVAILABLE',generatedAt:new Date().toISOString(),sample:{mlSettled:wins+losses,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,marginMae:margin.length?margin.reduce((a,b)=>a+b,0)/margin.length:null,totalMae:total.length?total.reduce((a,b)=>a+b,0)/total.length:null},evidence:{contextGames:cR.data?.length??0,playerOpponentObservations:mR.data?.length??0,directDefenderAssignments:false},patterns,matchupProfiles,recent:rows.slice(0,50),policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,contextGamesPerRunCap:1,providerCallsPerRunCap:1,v3Meaning:'PLAYER_OR_UNIT_VS_OPPONENT_NOT_DIRECT_DEFENDER'}};
+ const margin=collegeNumericEvaluation(rows,'POINT_MARGIN'),total=collegeNumericEvaluation(rows,'TOTAL_POINTS');
+ return {status:'AVAILABLE',generatedAt:new Date().toISOString(),sample:{mlSettled:wins+losses,wins,losses,accuracy:wins+losses?wins/(wins+losses):null,marginMae:margin.mae,totalMae:total.mae,marginN:margin.n,totalN:total.n},numericEvaluation:{scope:'LOADED_DIAGNOSTICS',margin,total},evidence:{contextGames:cR.data?.length??0,playerOpponentObservations:mR.data?.length??0,directDefenderAssignments:false},patterns,matchupProfiles,recent:rows.slice(0,50),policy:{labelsAreHypotheses:true,autoModelChanges:false,validatedCandidateRequiresHoldout:true,contextGamesPerRunCap:1,providerCallsPerRunCap:1,v3Meaning:'PLAYER_OR_UNIT_VS_OPPONENT_NOT_DIRECT_DEFENDER'}};
 }
