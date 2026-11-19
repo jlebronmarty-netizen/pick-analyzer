@@ -1,3 +1,9 @@
+## NBA period projection SHADOW research — 2026-11-18
+
+- Reproducible chronological retrospective Q1–Q4, H1, H2 (+ OT) and full-game experiment. 210 complete BALLDONTLIE finals, backfilled 2026-11-18; 13 candidate formulas, November development/holdout, MAE/RMSE and paired uncertainty.
+- Strict past-date features prevent same-day postgame leakage; no probability/EV inference or model promotion. Private Preview-only read-only API /api/nba/period-research and research page /nba-period-research.
+- No changes to GOAT official models, HoopsAPI acquisition, existing sports crons or prediction history. See docs/edge-lab/nba-period-projection-research-20261118.md.
+
 ## NBA HoopsAPI durable private Preview (2026-11-18)
 
 - Added immutable raw/normalized capture, read-only recovery and an atomic account-scoped rolling-24h request ledger. Duplicate, concurrent, database-uncertain and archive-uncertain attempts fail closed before another provider call; all failed/unknown dispatches remain charged.

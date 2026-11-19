@@ -1,0 +1,30 @@
+name: NBA Period Forecast Shadow Research
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nba/period-research-core.mjs'
+      - 'src/services/nba-period-research.service.ts'
+      - 'src/app/api/nba/period-research/**'
+      - 'src/app/nba-period-research/**'
+      - 'tests/nba-period-research.test.mjs'
+      - 'docs/edge-lab/nba-period-projection-research-20261118.md'
+      - '.github/workflows/nba-period-research.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retrospective-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Leak-safe period history, OT scope, chronological holdout and baseline checks
+        run: node --test tests/nba-period-research.test.mjs
+      - name: Guard official model and provider boundaries
+        run: |
+          if grep -E 'fetch[(]|captureHoopsPreviewDurably|prediction_history.*insert|recommendedPick: true' src/lib/nba/period-research-core.mjs src/services/nba-period-research.service.ts; then
+            echo 'Unapproved provider/model change in period research'; exit 1;
+          fi
