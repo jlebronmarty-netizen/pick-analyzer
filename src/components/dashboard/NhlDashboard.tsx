@@ -2,6 +2,7 @@
 import Link from "next/link";
 import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
 import SportDecisionBoard, {type SportDecisionRow} from '@/components/dashboard/SportDecisionBoard';
+import NhlMarketResearchCoverage from '@/components/dashboard/NhlMarketResearchCoverage';
 import { useState } from "react";
 import type { NhlReport } from "@/lib/nhl-external-report";
 import { filterNhlHistory, nhlDate, nhlOpportunities } from "@/lib/nhl-view";
@@ -42,7 +43,8 @@ export default function NhlDashboard({report}:{report:NhlReport}){
       <nav aria-label="NHL navigation" className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-teal-300"><Link href="/today">Today</Link><Link href="/mlb/overview">MLB general</Link><a href="https://www.dratings.com/predictor/nhl-hockey-predictions/" target="_blank" rel="noreferrer">Fuente de probabilidades ↗</a></nav>
     </header>
     <SportDecisionNavigation current="NHL" compact/>
-    <SportDecisionBoard sport="NHL" rows={decisionRows} description="Top solo muestra un lado con edge positivo y captura prepartido verificada; Moneyline puede mostrar pronósticos MODEL_ONLY sin recomendación. Puckline, totales y props permanecen sin mercado validado en esta vista."/>
+    <SportDecisionBoard sport="NHL" rows={decisionRows} marketNotes={{spread:"Puck line: pares Circa archivados para investigación. Faltan certificación de reglas/contrato, probabilidades y validación prospectiva; no se publican selecciones.",total:"Total de goles: existen pares de investigación en el archivo. Sin certificación del mercado ni holdout no son recomendaciones.",props:"Shots on goal y goalie saves están en investigación; sin contratos de cuotas y proyecciones verificadas para publicación."}} description="Top solo muestra un lado de ML con edge positivo, captura prepartido reciente y cobertura saludable. Los demás pronósticos permanecen MODEL_ONLY."/>
+    <NhlMarketResearchCoverage/>
     <section aria-label="NHL source health" className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-sm">
       <p>Operación: <strong>{r.health.status}</strong> · Último ciclo: {r.health.runStatus??"Sin dato"} · Cobertura futura: {r.health.coverage??"—"}/{r.health.eligible??"—"}</p>
       <p className="mt-2 text-xs text-slate-400">Último ciclo: {time(r.health.latestRunAt)} · Lectura: {time(r.readAt)}. La fuente actualiza cada 30 minutos; esta página muestra snapshots.</p>
