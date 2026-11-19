@@ -44,12 +44,15 @@ test('all six tabs have rows, prices and never claim calibration',()=>{
  assert.equal(report.summary.dbWrites,0);
 });
 test('past scores only: change or add future finals and current projections remain identical',()=>{
- const h=history(),before=projectedPeriod(g,h.map(x=>x.game),'q1');
+ const h=history();
+ const before=buildNbaDecisionBoard({scheduleGames:[g],historyFinals:h,goatMainQuotes:prices,asOf:ASOF})
+   .rows.total[0].projection;
  const future={...h[0].game,id:9000,date:'2026-11-21',datetime:'2026-11-22T01:00:00Z',
-  home_q1:99,home_team_score:179};
- const after=projectedPeriod(g,[...h.map(x=>x.game),future],'q1');
- assert.deepEqual(before,after);
- assert.equal(before.ready,true);
+  home_q1:40,home_team_score:120};
+ const after=buildNbaDecisionBoard({scheduleGames:[g],historyFinals:[...h,{game:future}],
+  goatMainQuotes:prices,asOf:ASOF}).rows.total[0].projection;
+ assert.equal(before,after);
+ assert.notEqual(before,null);
 });
 test('HoopsAPI provider IDs require exact teams and start within 30m and unique crosswalk',()=>{
  const source={normalized:{games:[{provider_game_id:'x',home_team:'Memphis Grizzlies',away_team:'Golden State Warriors',

@@ -1,8 +1,8 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
-const stamp=v=>Date.parse(String(v??''));
-const prDate=date=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
+const stamp=(v:unknown)=>Date.parse(String(v??''));
+const prDate=(date:Date)=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
 const check=(r:any,name:string)=>{if(r.error)throw new Error(name);return r.data??[];};
 function accuracy(rows:any[]){
  const result:any={};
@@ -28,16 +28,13 @@ function accuracy(rows:any[]){
 }
 export async function readNbaDecisionBoard({now=new Date()}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
- const [slate,archived,hoops,historyRows,settlementRows,contexts]=await Promise.all([
+ const [slate,archived,hoops,settlementRows,contexts]=await Promise.all([
   db.from('nba_market_schedules_v1').select('source_received_at,payload,date_local').eq('date_local',day)
     .order('source_received_at',{ascending:false}).limit(1).abortSignal(AbortSignal.timeout(10000)),
   db.from('nba_market_sync_runs_v1').select('run_id,started_at,summary').like('slot','research:history:%')
     .eq('status','completed').order('started_at',{ascending:false}).limit(1).abortSignal(AbortSignal.timeout(12000)),
   db.from('nba_hoopsapi_captures_v1').select('capture_id,source_received_at,normalized').order('source_received_at',{ascending:false})
     .limit(1).abortSignal(AbortSignal.timeout(8000)),
-  db.from('nba_goat_player_game_research_v1').select('provider_game_id,player_id,team_id,game_datetime,source_captured_at,minutes_played,pts,reb,ast,fg3m')
-    .gte('game_datetime',new Date(now.getTime()-42*86400000).toISOString()).lt('game_datetime',asOf)
-    .order('game_datetime',{ascending:false}).limit(1000).abortSignal(AbortSignal.timeout(12000)),
   db.from('prediction_history').select('market,result,model_version,feature_snapshot,settlement_details,created_at')
     .eq('sport_key','basketball_nba').eq('prediction_origin','CURRENT_ERA_SHADOW')
     .order('created_at',{ascending:false}).limit(500).abortSignal(AbortSignal.timeout(8000)),
@@ -48,7 +45,6 @@ export async function readNbaDecisionBoard({now=new Date()}={}){
  const schedule=check(slate,'NBA_DECISION_SCHEDULE_FAILED')[0]??null;
  const archive=check(archived,'NBA_DECISION_ARCHIVE_FAILED')[0]??null;
  const hoop=check(hoops,'NBA_DECISION_HOOPS_ARCHIVE_FAILED')[0]??null;
- const playerHistory=check(historyRows,'NBA_DECISION_PLAYER_HISTORY_FAILED');
  const settled=check(settlementRows,'NBA_DECISION_ACCURACY_FAILED');
  const nameRows=check(contexts,'NBA_DECISION_NAMES_FAILED');
  const games=(schedule?.payload?.data?.games??[]).filter((g:any)=>g?.date===day);
