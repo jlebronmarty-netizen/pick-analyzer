@@ -1,5 +1,5 @@
 'use client';
-import {useMemo,useState} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 
 export type SportDecisionMarket='ml'|'oneXTwo'|'spread'|'total'|'special'|'props'|'periods';
 export type SportDecisionRow={
@@ -18,6 +18,14 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
 }){
  const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':['ml','oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
  const [expanded,setExpanded]=useState(false);
+ // Async sport ledgers can arrive after initial render. Select their first populated market
+ // without making unsupported markets look like available predictions.
+ useEffect(()=>{
+  if(!rows.length)return;
+  setTab(current=>current==='ml'&&!rows.some(r=>r.market==='ml')
+   ?(rows.some(r=>r.eligible)?'top':['oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??current)
+   :current);
+ },[rows]);
  const counts=useMemo(()=>Object.fromEntries(tabs.slice(1).map(([id])=>[id,rows.filter(x=>x.market===id).length])),[rows]);
  const visible=useMemo(()=>{
   const input=(tab==='top'?rows.filter(r=>r.eligible):rows.filter(r=>r.market===tab))
