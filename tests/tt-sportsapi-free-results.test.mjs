@@ -94,6 +94,18 @@ test('client makes max three free calls, no credential echoed in returned receip
  assert.ok(!JSON.stringify(out).includes('SECRET_TEST_TOKEN'));
  assert.equal(urls[1],'https://api.sportsapi.app/v2/fixtures?date=2026-11-18&league=42');
 });
+test('free daily quota guard makes no calls if remaining allowance is zero',async()=>{
+ let called=0;
+ const r=await sportsApiTtSupplement({key:'SECRET_TEST_TOKEN',forecasts:[forecast()],outcomes:[],
+  now:'2026-11-19T02:00:00Z',maxCalls:0,fetchFn:async()=>{called++;throw Error('MUST_NOT_CALL');}});
+ assert.equal(r.status,'DAILY_CALL_CAP');assert.equal(r.calls,0);assert.equal(called,0);
+});
+test('one remaining call without pinned league id cannot waste discovery-only quota',async()=>{
+ let called=0;
+ const r=await sportsApiTtSupplement({key:'SECRET_TEST_TOKEN',forecasts:[forecast()],outcomes:[],
+  now:'2026-11-19T02:00:00Z',maxCalls:1,fetchFn:async()=>{called++;throw Error('MUST_NOT_CALL');}});
+ assert.equal(r.status,'INSUFFICIENT_CALL_BUDGET_FOR_DISCOVERY');assert.equal(called,0);
+});
 test('provider errors fail closed without retry or hidden extra calls',async()=>{
  const result=await sportsApiTtSupplement({key:'SECRET_TEST_TOKEN',forecasts:[forecast()],outcomes:[],
   now:'2026-11-19T02:00:00Z',fetchFn:async()=>({ok:false,status:429})});
@@ -103,7 +115,7 @@ test('provider errors fail closed without retry or hidden extra calls',async()=>
 });
 test('source integration remains flag/key gated and keeps PulseScore prematch untouched',()=>{
  const service=fs.readFileSync('src/services/edge-lab-multi.service.mjs','utf8');
- assert.ok(service.includes("process.env.SPORTSAPI_TT_RESULTS_ENABLED==='true'"));
+ assert.ok(service.includes("process.env.SPORTSAPI_TT_RESULTS_MODE??'OFF'"));
  assert.ok(service.includes('process.env.SPORTSAPI_TT_API_KEY'));
  assert.ok(service.includes("source:'SportsAPI.app v2 TT Elite Series (results only)'"));
  assert.ok(service.includes('const original=ttOutcome(f,history.finals)'));
