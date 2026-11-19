@@ -1,3 +1,8 @@
+## NBA: only one preferred side (2026-11-19)
+- Present up to 25 distinct SHADOW study opportunities sorted by explicit favorable conditions; each market tab only shows one eligible side per contract, otherwise PASAR.
+- Keep all original quote sides in the research archive, freeze/settlement input unchanged; never equate a ranking position with calibrated probability or positive expected value.
+- After first prospective freeze and settlement, revisit ranking thresholds only with independent out-of-sample validation; replicate UX pattern sport-by-sport.
+
 ## NBA prospective self-evaluation and eventual multisport reuse — V2 (2026-11-19)
 
 - Gate 1: six-tab NBA board released; GOAT/HoopsAPI historical comparisons stored as research-only hypotheses.

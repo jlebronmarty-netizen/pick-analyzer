@@ -1,3 +1,8 @@
+## NBA Decision Board: preferred side per contract (2026-11-19)
+- New research-only preferredRows selects ONE side per game/market/period/contract using historical evidence gates, L5/L10 agreement where meaningful, captured FanDuel odds, and stable minute evidence for props.
+- Rank by count of favorable conditions, not win probabilities; omit unqualified contracts as PASAR. No fake EV, sportsbook availability, model promotion or changes to underlying frozen forecasts/settlement.
+- Technical design and tests: docs/edge-lab/nba-decision-preferred-side-20261119.md.
+
 ## NBA Decision Board: controlled prospective learning V2 (2026-11-19)
 
 - Retained the six-tab production Decision Board; immutable pregame statistical SHADOW records and postgame outcomes remain separate from official models/picks.
