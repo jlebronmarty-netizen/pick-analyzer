@@ -47,3 +47,18 @@ Official docs:
 - **Coverage unverified:** SportsAPI's public site lists TT Elite Series, but without a user-created SportsAPI key we have not tested that its actual results match our NetBet/PulseScore event names, timing or set-score completeness. Don't promise any number of recovered games or call the integration operational until a real SHADOW pilot succeeds.
 - Older-than-seven-day matches cannot be recovered through Free history, regardless of the number of requests. Explore separately a rights-compatible authorized archive for the residual cohort.
 - An account/provider subscription is **not** created automatically; the user controls registration and key installation. Do not log, echo, or store key material in Supabase.
+
+## 2026-11-19 production SHADOW finding — surname/initials mismatch and candidate verification
+
+Production environment `SPORTSAPI_TT_API_KEY` and `SPORTSAPI_TT_RESULTS_MODE` were already configured. The 2026-11-19 16:50 UTC due cycle was `PARTIAL` without SportsAPI errors; its receipt recorded league ID **185**, **628** complete finals from Nov 17-18, **3 Free calls** and **0** matched candidates before this fix.
+
+Root cause proven from archived source evidence: SportsAPI lists many participants as `Brud S.`, `Lewczuk M.`, `Kukawka M.` while NetBet/PulseScore frozen forecasts store full `Szymon Brud`, `Miroslaw Lewczuk`, `Milosz Kukawka`. Exact sorted full-name matching failed despite same UTC kickoff.
+
+Read-only retrospective SQL analysis against the existing archive (no new API/provider calls or DB writes):
+- **62** still-pending unique NetBet event IDs in the two downloaded days had exactly one candidate SportsAPI fixture using surname + first initial (or full-token equality), **±5 minute kickoff** and either side orientation. This is a *potential* count, not a settlement count.
+- The same method identified **13** previously settled, one-to-one event matches independently present in PulseScore records: **13/13 decisive winners and 13/13 complete point totals agreed**, **0 contradictions**. That is an encouraging small validation cohort, not proof of all provider results.
+- Global one-to-one assignment rules were added: a SportsAPI final must match *exactly one* NetBet frozen event and vice versa. Any initials collision, duplicated fixture ID, or time/team ambiguity remains PENDING in the fallback. The existing PulseScore result retains first priority.
+- SHADOW is still the intended production mode, so these fixes produce diagnostic `summary.sportsapi.shadow_candidates` only; **no SportsAPI-driven settlement** until a subsequent real cycle confirms the normalized pairing. Only validated `W/L/PUSH/NUMERIC` values qualify for future ACTIVE mode.
+
+The immediate release gate is to pass all existing and new tests, TypeScript and Preview; merge with no environment changes; then inspect the normal TT scheduled run and ensure nonzero verified candidates without extra paid calls. The remaining overdue queue can include events outside the Free 7-day retention; don't invent settlements for them.
+
