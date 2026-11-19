@@ -7,8 +7,8 @@ export async function readNbaPeriodResearch() {
   const result=await supabaseAdmin.from('nba_market_sync_runs_v1')
     .select('run_id,started_at,status,summary')
     .like('slot','research:history:%').eq('status','completed')
-    .order('started_at',{ascending:false}).limit(1).maybeSingle()
-    .abortSignal(AbortSignal.timeout(12000));
+    .order('started_at',{ascending:false}).limit(1)
+    .abortSignal(AbortSignal.timeout(12000)).maybeSingle();
   if(result.error||!result.data)throw new Error('NBA_PERIOD_ARCHIVED_HISTORY_UNAVAILABLE');
   const source=result.data.summary?.history_capture;
   if(!source||source.complete!==true||!Array.isArray(source.games))

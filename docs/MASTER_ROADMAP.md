@@ -1,3 +1,10 @@
+## NBA quarters and halves forecast accuracy research — 2026-11-18
+
+- SHADOW phase: 210 period-complete GOAT historical games, strict time-ordered prior-only predictors, 13 exploratory formulas, 2026-11-04–11 development and 2026-11-12–17 holdout by Q1–Q4/H1/H2/FT.
+- Added private Preview-only, read-only research dashboard; reports point total/spread MAE and candidate-minus-baseline paired intervals. Does not certify betting edge or improve official production predictions.
+- NEXT: acquire larger multi-season historical cohort, record genuinely prospective pregame period predictions linked to verified HoopsAPI contracts, settle against final scores, and gate any champion promotion on independent reproducible holdout evidence.
+- Preserve all official GOAT NBA, HoopsAPI quote capture, model weights, crons, and other sports unmodified.
+
 ## NBA HoopsAPI durable research capture (2026-11-18)
 
 - Private Preview now includes account-level atomic reservation/dispatch, immutable evidence and recovery GET, with app-only quota provenance and zero automatic provider requests.
