@@ -55,7 +55,7 @@ function Row({row}){
  </article>;
 }
 export default function DecisionBoard(){
- const [data,setData]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(true);
+ const [data,setData]=useState(null),[learning,setLearning]=useState(null),[error,setError]=useState(''),[loading,setLoading]=useState(true);
  const [tab,setTab]=useState('top'),[search,setSearch]=useState(''),[gameId,setGameId]=useState('all');
  const [period,setPeriod]=useState('all'),[limit,setLimit]=useState(30);
  async function refresh(){
@@ -63,6 +63,11 @@ export default function DecisionBoard(){
   try{const res=await fetch('/api/nba/decision-board',{cache:'no-store'});
    const out=await res.json();if(!res.ok)throw Error(out.status??'NO_DATA');
    setData(out);
+   try {
+    const lr=await fetch('/api/nba/decision-learning',{cache:'no-store'});
+    if(lr.ok)setLearning(await lr.json());
+    else setLearning(null);
+   } catch {setLearning(null);}
   }catch(e){setError(e?.message??'NO_DATA');}finally{setLoading(false);}
  }
  useEffect(()=>{void refresh();},[]);
@@ -105,7 +110,15 @@ export default function DecisionBoard(){
      <p className="text-xs text-slate-400">Liquidaciones: {a?.settled??0} · MAE: {decimal(a?.projectionMae,2)}</p>
     </div>})}
    </div>
-   <p className="mt-2 text-xs text-amber-200">Las muestras pequeñas no certifican probabilidad; props y cuartos aún requieren seguimiento prospectivo congelado.</p>
+   {learning&&<div className="mt-3 rounded-lg border border-sky-800 p-3 text-sm">
+    <p className="font-semibold text-sky-200">Aprendizaje prospectivo SHADOW</p>
+    <p className="mt-1 text-slate-300">Predicciones congeladas: {learning.frozenRowsSeen}. Resultados evaluados: {learning.outcomesSeen}. Ajustes automáticos a modelos oficiales: 0.</p>
+    {learning.metrics?.length>0&&<div className="mt-2 flex flex-wrap gap-2">
+     {learning.metrics.slice(0,8).map((r,i)=><span key={i} className="rounded-lg bg-slate-950 px-2 py-1 text-xs text-slate-300">{r.market} {periodLabels[r.period]??r.period}: MAE {decimal(r.mae,2)} · {r.uniqueGames} juegos</span>)}
+    </div>}
+    {!learning.fullHistoryExhaustive&&<p className="text-amber-200">Muestra paginada; no es el acumulado completo.</p>}
+   </div>}
+   <p className="mt-2 text-xs text-amber-200">Las muestras pequeñas no certifican probabilidad; props y cuartos requieren seguimiento prospectivo congelado, liquidaciones y validación independiente.</p>
   </section>
   <section className="space-y-3">
    <div className="flex flex-wrap items-center gap-2">
