@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
  reconstructNhlRegulationFinal,extractNhlRegulationAsOf,
- nhlRegulationToFinalScoreDistribution,forecastNhlRegulationV8
+ nhlRegulationToFinalScoreDistribution,forecastNhlRegulationV8,
+ gradeNhlRegulationV8Retrospective
 } from '../src/lib/nhl-regulation-shootout-v8-research.mjs';
 import {nhlScoreDistribution} from '../src/lib/nhl-challenger-poisson-core.mjs';
 
@@ -92,4 +93,32 @@ test('no new vendor calls, model coefficients, wagers, Official Picks or cron tr
  assert.ok(!/\bfetch\(|the_odds_api|paidRead|\.upsert\(|\.insert\(|savePrediction|placeBet/.test(s));
  assert.match(s,/captured<=scheduled/);assert.match(s,/stamp\(f.capturedAt\)>now/);
  assert.match(s,/holdoutValidated:false/);assert.match(s,/officialPick:false/);
+});
+
+test('retrospective paired scoring never alters V1 originals or claims holdout',()=>{
+ const start=Date.parse('2026-10-05T20:00:00Z');
+ const history=Array.from({length:40},(_,i)=>mk(i,i%3===0?'REG':i%3===1?'OT':'SO',
+  new Date(start+i*86400000).toISOString(),
+  new Date(start+i*86400000+5*3600000).toISOString()));
+ const gameId='nhl:2026020999',tip='2026-11-20T00:00:00Z',frozenAt=now;
+ const frozen={event_id:gameId,model_version:'NHL_SCORES_POISSON_SHADOW_V1',
+  home_team_id:1,away_team_id:2,scheduled_at:tip,frozen_at:frozenAt,
+  official_pick:false,production_eligible:false,
+  market_proxies:{homeMoneylineProxy:0.55,overGoalsProxy:0.51}};
+ const outcome={event_id:gameId,observed_at:'2026-11-20T03:30:00Z',
+  body:{eventId:gameId,scheduledAt:tip,homeId:1,awayId:2,
+   homeScore:4,awayScore:2}};
+ const x=gradeNhlRegulationV8Retrospective({
+  frozenRows:[frozen],boxscoreRows:history,outcomeRows:[outcome]});
+ assert.equal(x.pairedGames,1);
+ assert.ok(x.brier.regulationMoneyline>=0);
+ assert.equal(x.holdoutPassed,false);
+ assert.equal(x.officialPicksChanged,false);
+ assert.equal(x.modelPromotionAllowed,false);
+ assert.equal(frozen.market_proxies.homeMoneylineProxy,0.55);
+ const ungraded=gradeNhlRegulationV8Retrospective({
+  frozenRows:[frozen],boxscoreRows:history,
+  outcomeRows:[{...outcome,observed_at:'2026-11-19T21:00:00Z'}]});
+ assert.equal(ungraded.pairedGames,0);
+ assert.equal(ungraded.invalidRecords,1);
 });
