@@ -61,14 +61,19 @@ async function collectTt(db,request,summary){
  // paid provider quota and historical model inputs are never changed.
  // No key / disabled => zero SportsAPI HTTP calls.
  let supplementalFinals=[];
- summary.sportsapi={status:'DISABLED',calls:0,finals:0,candidate_settlements:0,enabled:false};
- if(process.env.SPORTSAPI_TT_RESULTS_ENABLED==='true'){
+ const sportsapiMode=String(process.env.SPORTSAPI_TT_RESULTS_MODE??'OFF').toUpperCase();
+ summary.sportsapi={status:'DISABLED',mode:sportsapiMode,calls:0,finals:0,candidate_settlements:0,shadow_candidates:0};
+ if(['SHADOW','ACTIVE'].includes(sportsapiMode)){
   const key=process.env.SPORTSAPI_TT_API_KEY;
-  if(!key)summary.sportsapi={status:'MISSING_KEY',calls:0,finals:0,candidate_settlements:0,enabled:true};
+  const today=new Date().toISOString().slice(0,10);
+  const alreadyUsed=attempts.filter(r=>String(r.started_at??'').slice(0,10)===today)
+   .reduce((total,r)=>total+(Number.isSafeInteger(r.summary?.sportsapi?.calls)?r.summary.sportsapi.calls:0),0);
+  const quotaLeft=Math.max(0,9-alreadyUsed);
+  if(!key)summary.sportsapi={status:'MISSING_KEY',mode:sportsapiMode,calls:0,finals:0,candidate_settlements:0,shadow_candidates:0};
+  else if(quotaLeft===0)summary.sportsapi={status:'DAILY_CALL_CAP',mode:sportsapiMode,calls:0,finals:0,candidate_settlements:0,shadow_candidates:0};
   else try{
    const extra=await sportsApiTtSupplement({key,leagueId:process.env.SPORTSAPI_TT_LEAGUE_ID??null,
-    forecasts:existing,outcomes,now:new Date().toISOString()});
-   supplementalFinals=extra.finals;
+    forecasts:existing,outcomes,now:new Date().toISOString(),maxCalls:Math.min(3,quotaLeft)});
    const providerRows=extra.receipts.map(r=>({
     id:digest(['SPORTSAPI_TT_RESULT_EVIDENCE_V1',r.kind,r.sourceDigest,r.capturedAt]),
     sport:'TT',source:'SportsAPI.app v2 TT Elite Series (results only)',
@@ -78,12 +83,17 @@ async function collectTt(db,request,summary){
      raw:r.raw,normalized:r.normalized??null,statistical_only:true,sportsbook_settlement:false}
    }));
    if(providerRows.length)await insertRows(db,T.sources,providerRows);
-   summary.sportsapi={enabled:true,status:extra.status,calls:extra.calls,
+   const done=new Set(outcomes.map(o=>o.forecast_id));
+   const shadowCandidates=existing.filter(f=>f.status!=='ABSTAIN'&&!done.has(f.id)&&
+    ttOutcome(f,history.finals).status==='PENDING'&&
+    ['W','L','PUSH','NUMERIC'].includes(ttSportsApiOutcome(f,extra.finals).status)).length;
+   if(sportsapiMode==='ACTIVE')supplementalFinals=extra.finals;
+   summary.sportsapi={mode:sportsapiMode,status:extra.status,calls:extra.calls,
     finals:extra.finals.length,days:extra.days,league_id:extra.leagueId,
-    errors:extra.errors,candidate_settlements:0};
+    errors:extra.errors,shadow_candidates:shadowCandidates,candidate_settlements:0};
    if(extra.errors.length)summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
   }catch(e){
-   summary.sportsapi={status:'ERROR',enabled:true,calls:0,finals:0,candidate_settlements:0};
+   summary.sportsapi={status:'ERROR',mode:sportsapiMode,calls:0,finals:0,candidate_settlements:0,shadow_candidates:0};
    summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
   }
  }
