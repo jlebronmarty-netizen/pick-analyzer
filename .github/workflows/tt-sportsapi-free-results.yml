@@ -7,6 +7,10 @@ on:
       - 'src/lib/edge-lab/tt-sportsapi-client.mjs'
       - 'src/services/edge-lab-multi.service.mjs'
       - 'tests/tt-sportsapi-free-results.test.mjs'
+      - 'src/lib/edge-lab/tt-odd-even-baseline.mjs'
+      - 'tests/tt-odd-even-baseline.test.mjs'
+      - 'src/app/edge-lab/board.jsx'
+      - 'src/components/dashboard/SportDecisionBoard.tsx'
       - '.github/workflows/tt-sportsapi-free-results.yml'
   workflow_dispatch:
 
@@ -28,7 +32,7 @@ jobs:
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
       - name: SportsAPI adapter and existing TT settlement guards
-        run: node --test tests/tt-sportsapi-free-results.test.mjs tests/edge-lab-multi.test.mjs tests/tt-recovery-priority-status.test.mjs tests/tt-prematch-scope-regression.test.mjs
+        run: node --test tests/tt-sportsapi-free-results.test.mjs tests/tt-odd-even-baseline.test.mjs tests/edge-lab-multi.test.mjs tests/tt-recovery-priority-status.test.mjs tests/tt-prematch-scope-regression.test.mjs
       - name: Dashboard multisport regressions
         run: npm run test:dashboard-multisport
       - name: TypeScript verification
