@@ -123,6 +123,7 @@ function baseRow(g,market,period,side,source,q,projection,advantage,extra={}){
   classification:'PASAR',reason:'PROJECTION_NOT_CALIBRATED',qualityScore:null,
   calibration:'UNVALIDATED_SHADOW',regionVerified:false,executionAvailable:false,...extra};
 }
+/** @param {any} input */
 export function buildNbaDecisionBoard({
  scheduleGames=[],historyFinals=[],goatMainQuotes=[],goatPropQuotes=[],playerHistory=[],playerNames={},
  hoopsCapture=null,asOf=new Date().toISOString()
