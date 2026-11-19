@@ -4414,3 +4414,10 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 - NCAAB Decision Board: pestañas Spread/Total ahora enseñan solamente margen y total proyectado con indicador experimental, línea/cuota/edge nulos. El cálculo de MAE en UI solo usa pronósticos con final validado sin revisión ni filtrado retrospectivo del dato prepartido. No representa apuestas spread/O-U.
 - NCAAF Decision Board: lee las filas PROJECTION existentes POINT_MARGIN y TOTAL_POINTS y las muestra como proyección numérica con la etiqueta explícita 'no spread' o 'no Over/Under'; no genera jugadas oficiales, odds ni EV.
 - Se añadieron pruebas puras de cálculo, deduplicación y ausencia de fuga temporal; histórico y crons intactos. Próxima fase: conectar líneas exactas verificadas por proveedor para evaluar spread/total contra una casa en el mismo as-of, o mantener PASAR.
+
+## Soccer + tenis de mesa — mercados nativos en Decision Board (2026-11-19)
+- Soccer (LaLiga): 1X2 se muestra en una pestaña específica de tres resultados (home/draw/away, 90 minutos + descuento), **no** en Moneyline de dos resultados. Total 2.5 permanece separado; fuentes sin precio no se convierten en EV.
+- Tenis de mesa (TT): MONEYLINE, SETS_ODD_EVEN (pestaña Par/Impar sets) y TOTAL_POINTS numérico sin línea quedan diferenciados. El total numérico no es Over/Under con cuota.
+- Auditoría SQL del archivo Pick: Soccer tiene 19 pronósticos FORECAST de 1X2 y 19 de Total 2.5, 9 liquidados por mercado (5 W/4 L en cada uno). TT tiene 436 pronósticos de ML, 436 de par/impar y 436 proyecciones de puntos. Hay 259 resultados pareados: ML 133 W/126 L; par/impar 173 W/86 L; total de puntos MAE descriptivo 14.474. Sin odds verificadas no se infiere ROI ni rentabilidad.
+- El componente compartido se inicia en el primer mercado disponible, y al cambiar de deporte reinicia correctamente su estado de pestaña. No cambia el contenido de las predicciones ni el settlement.
+- Investigación futura: comprobar criterios de validación independientes, cobertura de contrapartida par/impar, mercados de puntos efectivamente ofrecidos y timestamp original, sin consumir suscripciones nuevas.
