@@ -4392,3 +4392,12 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 - MLB conserva el Decision Board y la pausa fuera de temporada.
 - Seguimiento pendiente: adaptadores completos para spread/total/props por deporte, conciliación de contratos y pruebas de calibración/settlement; protección y dominio canónico se tratan por separado.
 - No se modificaron modelos, pagos, crons, proveedores ni predicciones congeladas.
+
+## Decision Board multideporte V2: cobertura y criterios por mercado (2026-11-19)
+- Las pestañas comunes distinguen claramente mercados sin contratos, mercados en investigación y selecciones con evidencia publicable; no deducen EV ni certifican probabilidades a partir de un simple pronóstico.
+- NHL: acceso voluntario a la auditoría de cuotas Circa puck line/total ya archivadas mediante la ruta de lectura existente `/api/nhl/free-main-market-coverage` (sin llamadas a proveedores, sin escrituras); reporta observaciones, juegos distintos y ausencia de certificación de reglas y precios FanDuel.
+- En NHL permanecen solo las oportunidades Moneyline con edge positivo y vigencia comprobada dentro del Top. Spread, total y props no se promocionan desde la evidencia exploratoria.
+- NCAAB/NCAAF: margen y total son proyecciones numéricas, no apuestas spread/O-U; sin línea y cuota verificable no se genera lado favorable.
+- Soccer/Table Tennis: se distingue ledger experimental de selección publicable. Sin precio y reglas certificadas los mercados siguen investigación.
+- Ordenamiento por gap se etiqueta explícitamente como sin dato cuando no hay brecha verificada.
+- No se altera el calendario, los crons, acceso, modelo, cuota congelada, scoring o liquidación. Mercado NHL investigador accesible solo bajo clic explícito, con datos almacenados.
