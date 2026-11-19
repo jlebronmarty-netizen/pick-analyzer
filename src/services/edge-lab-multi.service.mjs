@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {COHORT_MULTI,digest,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../lib/edge-lab/multisport.mjs';
 import {readTtPagination,normalizeTtResultPage,makeProviderPacer,multiOperationalState} from '../lib/edge-lab/tt-coverage.mjs';
 import {planTtRecovery,recoveryCursor} from '../lib/edge-lab/tt-pending-recovery.mjs';
-import {ttSportsApiOutcome} from '../lib/edge-lab/tt-sportsapi-results.mjs';
+import {ttSportsApiOutcome,sportsApiTtUniqueAssignments} from '../lib/edge-lab/tt-sportsapi-results.mjs';
 import {sportsApiTtSupplement} from '../lib/edge-lab/tt-sportsapi-client.mjs';
 import {groupReportRowsByDate} from '../lib/edge-lab/report-calendar.mjs';
 import {readEdgeLabOverviewLedger} from './edge-lab-overview-ledger.mjs';
@@ -62,7 +62,7 @@ async function collectTt(db,request,summary){
  // Optional free SportsAPI results supplement. The existing TT forecaster,
  // paid provider quota and historical model inputs are never changed.
  // No key / disabled => zero SportsAPI HTTP calls.
- let supplementalFinals=[];
+ let supplementalAssignments=new Map();
  const sportsapiMode=String(process.env.SPORTSAPI_TT_RESULTS_MODE??'OFF').toUpperCase();
  summary.sportsapi={status:'DISABLED',mode:sportsapiMode,calls:0,finals:0,candidate_settlements:0,shadow_candidates:0};
  if(['SHADOW','ACTIVE'].includes(sportsapiMode)){
@@ -89,12 +89,17 @@ async function collectTt(db,request,summary){
      raw:r.raw,normalized:r.normalized??null,statistical_only:true,sportsbook_settlement:false}
    }));
    if(providerRows.length)await insertRows(db,T.sources,providerRows);
+   // Enforce a global one-to-one event↔provider-final identity constraint,
+   // not just an independent within-game surname/initial match.
+   const assignments=sportsApiTtUniqueAssignments(existing,extra.finals);
    const done=new Set(outcomes.map(o=>o.forecast_id));
    const shadowCandidates=existing.filter(f=>f.status!=='ABSTAIN'&&!done.has(f.id)&&
     ttOutcome(f,history.finals).status==='PENDING'&&
-    ['W','L','PUSH','NUMERIC'].includes(ttSportsApiOutcome(f,extra.finals).status)).length;
-   if(sportsapiMode==='ACTIVE')supplementalFinals=extra.finals;
+    ['W','L','PUSH','NUMERIC'].includes(ttSportsApiOutcome(f,assignments.byEvent.get(f.event_id)??[]).status)).length;
+   if(sportsapiMode==='ACTIVE')supplementalAssignments=assignments.byEvent;
    summary.sportsapi.shadow_candidates=shadowCandidates;
+   summary.sportsapi.matched_events=assignments.matchedEvents;
+   summary.sportsapi.ambiguous_events=assignments.ambiguousEvents;
    if(extra.errors.length)summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
   }catch(e){
    summary.sportsapi={...summary.sportsapi,status:'ERROR',mode:sportsapiMode};
@@ -104,8 +109,11 @@ async function collectTt(db,request,summary){
  await settle(db,existing,outcomes,f=>{
   const original=ttOutcome(f,history.finals);
   if(original.status!=='PENDING')return original;
-  const alternative=ttSportsApiOutcome(f,supplementalFinals);
-  if(alternative.status!=='PENDING')summary.sportsapi.candidate_settlements++;
+  const alternative=ttSportsApiOutcome(f,supplementalAssignments.get(f.event_id)??[]);
+  // Never convert an uncertain alternative into a permanent DISPUTE or a
+  // win/loss. Only unambiguous validated finished results can be recorded.
+  if(!['W','L','PUSH','NUMERIC'].includes(alternative.status))return {status:'PENDING'};
+  summary.sportsapi.candidate_settlements++;
   return alternative;
  },summary);
  for(const recovery of summary.recoveries){const contracts=existing.filter(f=>f.event_id===recovery.event_id&&f.status!=='ABSTAIN');recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(recovery.contract_evaluations.length&&recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
