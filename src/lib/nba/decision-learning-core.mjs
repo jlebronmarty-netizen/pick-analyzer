@@ -17,10 +17,10 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
   if(!game||!okTime(game.startsAt)||time>=Date.parse(game.startsAt)-10*60000)reason='NOT_PREGAME';
   else if(!allowedMarkets.has(row.market)||!allowedPeriods.has(row.period))reason='UNSUPPORTED_MARKET_PERIOD';
   else if(row.projection===null||!Number.isFinite(row.projection)||row.sample<5)reason='NO_PROJECTION_HISTORY';
-  else if(!okTime(row.capturedAt)||Date.parse(row.capturedAt)>time+120000||
+  else if(row.quoteFreshness!=='RECENT'||!okTime(row.capturedAt)||Date.parse(row.capturedAt)>time+120000||
     time-Date.parse(row.capturedAt)>3*3600000)reason='STALE_OR_FUTURE_PRICE';
   else if(!row.quoteId||!['GOAT','HoopsAPI'].includes(row.source))reason='QUOTE_SOURCE_NOT_ARCHIVED';
-  else if(!['home','away','Over','Under'].includes(row.selection)&&row.market!=='props'&&
+  else if(!['home','away','Over','Under',game.home,game.away].includes(row.selection)&&row.market!=='props'&&
       !['team_total_home','team_total_away'].includes(row.market))reason='UNVERIFIED_SIDE';
   else if(!Number.isFinite(row.odds)||Math.abs(row.odds)<100)reason='INVALID_PRICE';
   else if(row.market!=='moneyline' && !Number.isFinite(row.line))reason='INVALID_LINE';
