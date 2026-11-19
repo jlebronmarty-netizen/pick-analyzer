@@ -119,7 +119,26 @@ export default function DecisionBoard(){
     {learning.metrics?.length>0&&<div className="mt-2 flex flex-wrap gap-2">
      {learning.metrics.slice(0,8).map((r,i)=><span key={i} className="rounded-lg bg-slate-950 px-2 py-1 text-xs text-slate-300">{r.market} {periodLabels[r.period]??r.period}: MAE {decimal(r.mae,2)} · {r.uniqueGames} juegos</span>)}
     </div>}
-    {!learning.fullHistoryExhaustive&&<p className="text-amber-200">Muestra paginada; no es el acumulado completo.</p>}
+    <div className="mt-3 rounded-lg border border-slate-700 bg-slate-950/60 p-3">
+     <p className="font-semibold text-slate-100">Comparación de fórmulas candidatas · investigación prospectiva</p>
+     <p className="mt-1 text-xs text-slate-400">Se comparan contra el modelo actual en los mismos partidos. Delta MAE negativo significa menos error. Los intervalos agrupan predicciones por partido y son exploratorios; ninguna fórmula se promociona automáticamente.</p>
+     {learning.challengerMetrics?.length>0?<div className="mt-3 overflow-x-auto">
+      <table className="min-w-full text-left text-xs">
+       <thead><tr>{['Mercado','Candidato','Juegos únicos','MAE actual','MAE candidato','Diferencia','IC 95%','Estado'].map(h=><th key={h} className="border-b border-slate-700 p-2 whitespace-nowrap">{h}</th>)}</tr></thead>
+       <tbody>{learning.challengerMetrics.slice(0,16).map((c,i)=><tr key={c.candidateVersion+'-'+c.market+'-'+c.period+'-'+c.statistic+'-'+i}>
+        <td className="border-b border-slate-800 p-2">{c.market} {periodLabels[c.period]??c.period} {c.statistic??''}</td>
+        <td className="border-b border-slate-800 p-2">{c.candidateVersion}</td>
+        <td className="border-b border-slate-800 p-2">{c.independentGames}</td>
+        <td className="border-b border-slate-800 p-2">{decimal(c.baselineMae,2)}</td>
+        <td className="border-b border-slate-800 p-2">{decimal(c.candidateMae,2)}</td>
+        <td className="border-b border-slate-800 p-2">{decimal(c.deltaMae,2)}</td>
+        <td className="border-b border-slate-800 p-2">[{decimal(c.ci95?.[0],2)}, {decimal(c.ci95?.[1],2)}]</td>
+        <td className="border-b border-slate-800 p-2 text-amber-200">{c.independentGames<100?'Muestra insuficiente':'Requiere prueba independiente'}</td>
+       </tr>)}</tbody>
+      </table>
+     </div>:<p className="mt-2 text-xs text-slate-300">Todavía no existen resultados congelados suficientes para comparar candidatos.</p>}
+    </div>
+    {!learning.fullHistoryExhaustive&&<p className="text-amber-200">Muestra incompleta: no usar como acumulado final.</p>}
    </div>}
    <p className="mt-2 text-xs text-amber-200">Las muestras pequeñas no certifican probabilidad; props y cuartos requieren seguimiento prospectivo congelado, liquidaciones y validación independiente.</p>
   </section>

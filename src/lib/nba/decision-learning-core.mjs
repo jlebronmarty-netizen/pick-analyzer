@@ -6,6 +6,64 @@ const hash=obj=>createHash('sha256').update(JSON.stringify(obj)).digest('hex');
 const round=x=>Math.round(x*1000)/1000;
 const allowedMarkets=new Set(['moneyline','spread','total','props','team_total_home','team_total_away']);
 const allowedPeriods=new Set(['ft','q1','q2','q3','q4','h1','h2']);
+
+export const NBA_SHADOW_FREEZE_MAX_PER_RUN=240;
+const round2=x=>Math.round(x*100)/100;
+function plannedChallengers(row) {
+ const l5=number(row.l5),l10=number(row.l10),baseline=number(row.projection);
+ if(l5===null||l10===null||baseline===null)return [];
+ if(row.market==='props'&&row.period==='ft'){
+  return [
+   {id:'NBA_PROP_BALANCED_50_50_V1',projection:round2(.5*l5+.5*l10)},
+   {id:'NBA_PROP_STABLE_35_65_V1',projection:round2(.35*l5+.65*l10)}
+  ];
+ }
+ if(row.market==='total'&&allowedPeriods.has(row.period)){
+  return [
+   {id:'NBA_TOTAL_TREND_PLUS10_V1',projection:round2(baseline+.1*(l5-l10))},
+   {id:'NBA_TOTAL_TREND_MINUS10_V1',projection:round2(baseline-.1*(l5-l10))}
+  ];
+ }
+ return [];
+}
+// Equal-game quota first; within each game cycle market/period groups to avoid props dominance.
+// Max 240 hypotheses per scheduled slot, 480/day, within two settlement batches of 400 each.
+export function balanceFrozenForecasts(candidates,maxPerRun=NBA_SHADOW_FREEZE_MAX_PER_RUN){
+ if(!Array.isArray(candidates)||!Number.isSafeInteger(maxPerRun)||maxPerRun<1||maxPerRun>240)
+  throw new Error('NBA_DECISION_INVALID_FREEZE_CAP');
+ const games=[...new Set(candidates.map(f=>String(f.game_id)))].sort();
+ if(!games.length)return [];
+ const perGame=Math.min(60,Math.floor(maxPerRun/games.length));
+ const result=[];
+ for(let index=0;index<games.length;index++){
+  const id=games[index], groups=new Map();
+  const gameRows=candidates.filter(f=>String(f.game_id)===id);
+  for(const f of gameRows){
+   const key=f.market==='props'?'props|'+String(f.statistic):f.market+'|'+f.period;
+   if(!groups.has(key))groups.set(key,[]);
+   groups.get(key).push(f);
+  }
+  const mainKeys=['moneyline|ft','spread|ft','total|ft'];
+  const otherKeys=[...groups.keys()].filter(k=>!mainKeys.includes(k)).sort();
+  const offset=otherKeys.length?(index*7)%otherKeys.length:0;
+  const keys=[...mainKeys.filter(k=>groups.has(k)),...otherKeys.slice(offset),...otherKeys.slice(0,offset)];
+  for(const group of groups.values())group.sort((a,b)=>
+    b.historical_n-a.historical_n||
+    Math.abs(Number(b.evidence?.estimated_gap??0))-Math.abs(Number(a.evidence?.estimated_gap??0))||
+    a.forecast_id.localeCompare(b.forecast_id));
+  let count=0,progress=true;
+  while(count<perGame&&progress){
+   progress=false;
+   for(const key of keys){
+    if(count>=perGame)break;
+    const next=groups.get(key)?.shift();
+    if(next){result.push(next);count++;progress=true;}
+   }
+  }
+ }
+ return result.slice(0,maxPerRun);
+}
+
 export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
  const time=Date.parse(asOf);
  if(!Number.isFinite(time)||!board||!Array.isArray(board.games)||!board.rows)return {status:'INVALID_SHADOW_INPUT',rows:[]};
@@ -50,12 +108,16 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
     source_contract:'STATISTICAL_ONLY',quote_freshness:row.quoteFreshness,
     estimated_gap:row.advantage??null,
     player_name:row.playerName??null,matchup:row.matchup??null,
+    challenger_projections:plannedChallengers(row),
    }
   });
  }
  selected.sort((a,b)=>a.game_id-b.game_id||a.market.localeCompare(b.market)||a.forecast_id.localeCompare(b.forecast_id));
+ const balanced=balanceFrozenForecasts(selected);
  return {version:NBA_DECISION_LEARNING_VERSION,status:'SHADOW_PREVIEW_FREEZE_PLAN',
-  rows:selected,excluded,provider_calls:0,official_model_writes:0};
+  rows:balanced,eligible_before_cap:selected.length,cap:NBA_SHADOW_FREEZE_MAX_PER_RUN,
+  excluded:{...excluded,FAIR_SAMPLING_CAP:selected.length-balanced.length},
+  provider_calls:0,official_model_writes:0};
 }
 function validatedFinal(raw,forecast){
  const g=raw?.game??raw;

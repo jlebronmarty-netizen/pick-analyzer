@@ -1,3 +1,11 @@
+## NBA Decision Board: controlled prospective learning V2 (2026-11-19)
+
+- Retained the six-tab production Decision Board; immutable pregame statistical SHADOW records and postgame outcomes remain separate from official models/picks.
+- New market-balanced selection caps freeze output at 240 per slot; challenger formulas preregistered on the same frozen evidence (props L5/L10 blends and period total small trend variants). No calibrated betting probabilities/EV.
+- Read-only Supabase RPCs now fetch an oldest/newest unsettled queue (350 each) and a grouped 90-day market/period/alternative-formula quality summary by independent NBA game, replacing the 1000-record read ceiling.
+- SQL regression fixture passed and was rolled back without persistent fabricated records. Independent future games and a separate chronological holdout are mandatory before any model promotion; automatic promotion remains disabled.
+- See docs/edge-lab/nba-decision-shadow-learning-20261119.md. Other sports untouched.
+
 ## NBA Decision Board Preview + prospective SHADOW learning (2026-11-19)
 
 - Six-tab private NBA Decision Board validated by HTTP 200: Top 25, ML, spread, total, player props, Q1-Q4/H1/H2. Verified 4 games, 662 prop selection sides and 224 period quotes on the reviewed slate, with 25 exploratory study candidates and no calibrated recommendations.
