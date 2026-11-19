@@ -86,7 +86,10 @@ export default function DecisionBoard(){
      <h1 className="mt-2 text-2xl font-bold">Decision Board</h1>
      <p className="mt-2 text-sm text-slate-300">Un solo panel para comparar proyecciones, FanDuel e historial. Todas las recomendaciones son SHADOW hasta calibrarse.</p>
     </div>
-    <button type="button" onClick={refresh} disabled={loading} className="h-9 rounded-lg border border-sky-600 px-4 text-sm text-sky-200 disabled:opacity-50">{loading?'Actualizando…':'Actualizar sin consumir API'}</button>
+    <div className="flex flex-wrap items-start gap-2">
+     <a href="/nba-market-data" className="inline-flex h-9 items-center rounded-lg border border-slate-600 px-4 text-sm text-slate-200">Vista técnica GOAT</a>
+     <button type="button" onClick={refresh} disabled={loading} className="h-9 rounded-lg border border-sky-600 px-4 text-sm text-sky-200 disabled:opacity-50">{loading?'Actualizando…':'Actualizar sin consumir API'}</button>
+    </div>
    </div>
    <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
     {[['Partidos',data?.summary?.games??'—'],['En observación',data?.summary?.watchCandidates??'—'],['Picks calibrados',data?.summary?.calibratedPicks??0],['Última captura Hoops',data?.summary?.latestHoopsCapture?date(data.summary.latestHoopsCapture):'—']].map(([name,value])=>

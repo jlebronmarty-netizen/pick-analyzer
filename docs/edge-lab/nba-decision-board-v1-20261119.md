@@ -22,9 +22,9 @@ Replace daily Excel workflows with one readable NBA page: Top 25, Moneyline, Spr
 - Next phase: separate append-only prospective shadow forecasts and immutable outcomes tied to provider quote ID, evaluate against final game/quarter stats, and register challenger proposals rather than auto-changing weights. Future cron should be independent, quota-safe and produce zero new provider calls.
 
 ## Routes
-- Protected Preview-only: /nba-decision-board and GET /api/nba/decision-board.
+- Protected Preview and feature-gated Production generated-domain: /nba-decision-board and GET /api/nba/decision-board. Production requires NBA_DECISION_BOARD_ENABLED=true and exact private deployment hostname.
 - API requires the existing Vercel OIDC function token and rejects query parameters; no public endpoint or model write.
-- Production /nba redirect and existing /nba-market-data remain untouched.
+- Production /nba redirects to /nba-decision-board only when NBA_DECISION_BOARD_ENABLED=true; otherwise it retains /nba-market-data. The previous technical page remains available unchanged.
 - No additional subscription or API credit use.
 
 ## Caveats
