@@ -28,7 +28,7 @@ test('read official regular-season final period type and reconstruct regulation 
  assert.equal(ot.regulationHomeGoals,3);assert.equal(ot.regulationAwayGoals,3);
  assert.equal(so.regulationHomeGoals,2);assert.equal(so.regulationAwayGoals,2);
  assert.equal(ot.resultKind,'OT');assert.equal(so.resultKind,'SO');
- assert.equal(so.officialPick,false); // absence of model promotion is deliberate
+ assert.equal(so.originalForecastsChanged,false); // source evidence cannot change V1/V6
 });
 test('reconstruction refuses inconsistent periods, playoff, mismatched IDs and OT margin',()=>{
  const raw=mk(4,'OT');
@@ -90,6 +90,6 @@ test('enough preceding official reconstructed regulation games can forecast inde
 test('no new vendor calls, model coefficients, wagers, Official Picks or cron triggers',()=>{
  const s=fs.readFileSync('src/lib/nhl-regulation-shootout-v8-research.mjs','utf8');
  assert.ok(!/\bfetch\(|the_odds_api|paidRead|\.upsert\(|\.insert\(|savePrediction|placeBet/.test(s));
- assert.match(s,/captured<=scheduled/);assert.match(s,/capture>now/);
+ assert.match(s,/captured<=scheduled/);assert.match(s,/stamp\(f.capturedAt\)>now/);
  assert.match(s,/holdoutValidated:false/);assert.match(s,/officialPick:false/);
 });
