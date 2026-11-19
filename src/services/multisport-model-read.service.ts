@@ -14,8 +14,14 @@ import {getTableTennisReport} from './table-tennis-read.service';
 import {getEdgeLabOverviewCards} from './edge-lab-overview-read.service';
 import {getNbaGoatModelCard} from './nba-goat-model-read.service';
 import {freeSportCards,getFreeSportsReports} from './free-sports.service';
+import {readMultisportInputs} from '@/lib/multisport-report-resilience';
 export const getMultisportModelReport=cache(async()=>{
-  const [research,official,nhl,soccer,tableTennis,ncaab,ufc,edgeLabCards,nbaCard,freeSports]=await Promise.all([getQualifiedPlaysReport({includeEntries:true}),getMlbOfficialPerformance().catch(()=>null),getNhlExternalReport(),getSoccerShadowReport(),getTableTennisReport(),getNcaabDailyReport(),getUfcFreeReport(),getEdgeLabOverviewCards(),getNbaGoatModelCard(),getFreeSportsReports()]);
+  const {research,official,nhl,soccer,tableTennis,ncaab,ufc,edgeLabCards,nbaCard,freeSports,readWarnings}=await readMultisportInputs({
+    research:()=>getQualifiedPlaysReport({includeEntries:true}),official:getMlbOfficialPerformance,
+    nhl:getNhlExternalReport,soccer:getSoccerShadowReport,tableTennis:getTableTennisReport,
+    ncaab:getNcaabDailyReport,ufc:getUfcFreeReport,edgeLabCards:getEdgeLabOverviewCards,
+    nbaCard:getNbaGoatModelCard,freeSports:getFreeSportsReports,
+  });
   const cards:SportModelCard[]=[
     {key:'mlb',label:'MLB',href:'/mlb/overview',classification:'Producción + forward research',cohorts:mlbModelCohorts(research,official)},
     {key:'nhl',label:'NHL',href:'/nhl',classification:'MODEL_ONLY',cohorts:[nhlModelCohort(nhl)]},
@@ -26,5 +32,5 @@ export const getMultisportModelReport=cache(async()=>{
     ...getSportsCenterReport().sports.filter(s=>!['mlb','nhl','soccer','table-tennis','ncaaf','ufc','mma_ufc','nba','nfl','bsn','tennis'].includes(s.key)).map(s=>({key:s.key,label:s.label,href:'/sports-center/'+s.key,classification:s.status,cohorts:[]})),
     {key:'ncaab',label:'NCAAB',href:'/ncaab',classification:'Experimental · proceso diario FREE',cohorts:[ncaabModelCohort(ncaab)]},
   ];
-  return {cards,research,nhl,ncaab,soccer,tableTennis,ufc,freeSports,readAt:new Date().toISOString()};
+  return {cards,research,nhl,ncaab,soccer,tableTennis,ufc,freeSports,readWarnings,readAt:new Date().toISOString()};
 });

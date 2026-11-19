@@ -1,3 +1,10 @@
+## Homepage loading repair (2026-11-19)
+
+- Investigated a production homepage that rendered its shell but stalled both shared multisport sections; Vercel recorded a 300-second timeout. Identified unnecessary full Edge Lab historical report work in the homepage aggregate.
+- Added narrow read-only overview queries with a shared 15-second abort deadline, preserved fail-closed card accounting, and replaced repeated date-formatter construction/daily rescanning with one-pass grouping. A synthetic 4,485-row/16-day parity benchmark reduced peak RSS from 1,297.6 MiB to 49.1 MiB and daily grouping from 6,446.9 ms to 20.7 ms. This does not attribute the entire production timeout to that one computation.
+- Added a 28-second per-source presentation deadline to the shared multisport report: slow/failed sources show unavailable warnings while healthy sports remain visible. This does not cancel every underlying request; the new Edge Lab overview queries separately use a real 15-second `AbortSignal`.
+- All 121 targeted Edge Lab tests, all 98 dashboard tests and the full Next.js production build pass. The local build used a 4 GiB Node heap and the repository's placeholder CI Supabase variables; no production secrets were needed. Existing model/settlement logic, stored data, provider acquisition, crons and MLB pause remain unchanged. Protected Preview/browser verification and production release remain pending. See `docs/product/HOMEPAGE_LOADING_REPAIR_20261119.md`.
+
 ## NBA HoopsAPI durable private Preview (2026-11-18)
 
 - Added immutable raw/normalized capture, read-only recovery and an atomic account-scoped rolling-24h request ledger. Duplicate, concurrent, database-uncertain and archive-uncertain attempts fail closed before another provider call; all failed/unknown dispatches remain charged.

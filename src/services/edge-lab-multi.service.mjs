@@ -6,6 +6,8 @@ import {readTtPagination,normalizeTtResultPage,makeProviderPacer,multiOperationa
 import {planTtRecovery,recoveryCursor} from '../lib/edge-lab/tt-pending-recovery.mjs';
 import {ttSportsApiOutcome} from '../lib/edge-lab/tt-sportsapi-results.mjs';
 import {sportsApiTtSupplement} from '../lib/edge-lab/tt-sportsapi-client.mjs';
+import {groupReportRowsByDate} from '../lib/edge-lab/report-calendar.mjs';
+import {readEdgeLabOverviewLedger} from './edge-lab-overview-ledger.mjs';
 const GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/source-gateway';
 const RECOVERY_GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/results-recovery';
 const T={sources:'edge_lab_multi_sources_v1',forecasts:'edge_lab_multi_forecasts_v1',outcomes:'edge_lab_multi_outcomes_v1',finals:'edge_lab_tt_finals_v1',runs:'edge_lab_multi_runs_v1',locks:'edge_lab_multi_locks_v1',budget:'edge_lab_tt_request_budget_v1'};
@@ -148,6 +150,7 @@ export async function runMultiSports(request){
  }
  return {checked_at:new Date().toISOString(),results};
 }
+export async function readMultiSportsOverview(){return readEdgeLabOverviewLedger(dbClient(),'MULTI');}
 export async function readMultiSports(){
  const db=dbClient(),forecasts=await readAll(db,T.forecasts),outcomes=await readAll(db,T.outcomes),byId=new Map(outcomes.map(r=>[r.forecast_id,r]));
  const rows=forecasts.map(r=>({...r,outcome:byId.get(r.id)??null})).sort((a,b)=>a.scheduled_at.localeCompare(b.scheduled_at)||a.market.localeCompare(b.market));
@@ -155,6 +158,6 @@ export async function readMultiSports(){
  const runs=groups.flatMap(r=>checked(r,'RUNS')).sort((a,b)=>b.started_at.localeCompare(a.started_at));const locks=checked(await db.from(T.locks).select('sport,next_due'),'LOCK_READ');
  const budget=checked(await db.from(T.budget).select('*').order('month',{ascending:false}).limit(1),'BUDGET_READ');
  const states=['TT','MLB'].map(sport=>multiOperationalState(sport,runs.find(r=>r.sport===sport),locks.find(r=>r.sport===sport),process.env.MLB_OFFSEASON_PAUSED==='true'));
- const days=[...new Set(rows.map(r=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))))];
- return {cohort:COHORT_MULTI,checked_at:new Date().toISOString(),rows,metrics:multiMetrics(rows),daily:days.flatMap(date=>multiMetrics(rows.filter(r=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico'}).format(new Date(r.emitted_at))===date)).map(m=>({date,...m}))),runs,budget,states,nhl:'EXCLUDED_OTHER_CHAT',ncaaf:'FROZEN_PYTHON_ENGINE_REVIEW_PENDING'};
+ const days=groupReportRowsByDate(rows);
+ return {cohort:COHORT_MULTI,checked_at:new Date().toISOString(),rows,metrics:multiMetrics(rows),daily:[...days].flatMap(([date,dayRows])=>multiMetrics(dayRows).map(m=>({date,...m}))),runs,budget,states,nhl:'EXCLUDED_OTHER_CHAT',ncaaf:'FROZEN_PYTHON_ENGINE_REVIEW_PENDING'};
 }

@@ -56,7 +56,7 @@ export default function MultisportDayView({day,mlb}:{day:Day;mlb:MlbView}){
    <div className="mt-4 grid grid-cols-2 gap-3">{[{side:'Visitante',team:g.nhl!.away,p:g.nhl!.awayProbability,price:g.nhl!.awayOdds},{side:'Local',team:g.nhl!.home,p:g.nhl!.homeProbability,price:g.nhl!.homeOdds}].map(s=><section key={s.side} aria-label={s.team+' análisis'} className="min-w-0 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">{s.side}</p><h4 className="mt-1 font-bold">{s.team}</h4><p className="mt-3 text-lg font-semibold">{pct(s.p===null?null:s.p*100)}</p><p className="mt-2 text-sm">Circa: {odds(s.price)}</p></section>)}</div>
    <p className="mt-3 text-xs text-slate-400">{g.nhl!.capturedAt?'Captura '+prTime(g.nhl!.capturedAt,true):'Sin pronóstico/precio pareado almacenado para este partido.'}</p>{g.nhl!.selections.map(s=><p key={s} className="mt-3 text-sm text-teal-300">Selección registrada: {s}</p>)}<Link href="/nhl" className="mt-4 inline-block text-sm font-semibold text-teal-300">Ver predicciones y resultados NHL →</Link>
   </article>)}</div>
-  {!games.length&&<p className="rounded-xl border border-slate-700 p-5 text-sm">No hay partidos en el calendario conectado con estos filtros. Una fuente no conectada no implica cero partidos.</p>}
+  {!games.length&&<p className="rounded-xl border border-slate-700 p-5 text-sm">No se pueden mostrar partidos verificados con estos filtros. Revisa los avisos de cobertura; una fuente no disponible no confirma que no haya eventos.</p>}
   <p className="text-xs text-slate-400">Horarios Puerto Rico. Cada deporte conserva sus modelos, contratos y criterios originales.</p>
  </section>;
 }
