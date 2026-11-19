@@ -43,7 +43,7 @@ export function sportsApiTtFinals(body,{leagueId,capturedAt,requestedDay}){
   throw Error('SPORTSAPI_TT_RESPONSE_INCOMPLETE');
  const rows=[],excluded={},seen=new Set();
  for(const x of body.data){
-  if(x?.sport!=='table-tennis'||x?.league?.id!==leagueId)continue;
+  if(x?.sport!=='table-tennis'||x?.league?.id!==leagueId||String(x.league?.name??'').toLowerCase().trim()!=='tt elite series')continue;
   if(x.status?.type!=='finished')continue;
   const id=int(x.id),at=iso(x.startTime),home=label(x.home?.name),away=label(x.away?.name);
   const hs=int(x.homeScore?.current),as=int(x.awayScore?.current);
