@@ -32,7 +32,7 @@ With 20 already settled NHL Poisson V1 frozen records, 18 had enough as-of prior
 | Moneyline Brier | **0.26804** | 0.26928 |
 | Over 5.5 Brier | **0.24593** | 0.26026 |
 
-**No improvement was observed in this small retrospective cohort.** Do not enable a V8 production adjustment, assert statistical confidence, optimize a coefficient to this group, or relabel an unconfirmed goalie as confirmed. The experiment may be valuable for future hypothesis testing, but is not ready for an official model or ROI claim.
+**Cohort selection warning:** among the 20 settled Poisson V1 frozen games, the official boxscore classified only **2 OT, 0 SO, and 18 REG**, so observed overtime/shootout incidence was **10%**, compared with **23/111 (20.7%)** in the broader archive. The V1 early cohort is not representative of the archive's overtime mix. Its average frozen equal-score Poisson probability was **0.16086** versus 0.10000 observed tie-resolution rate; these small numbers do not warrant adjusting OT/SO probabilities.\n\n**No improvement was observed in this small retrospective cohort.** Do not enable a V8 production adjustment, assert statistical confidence, optimize a coefficient to this group, or relabel an unconfirmed goalie as confirmed. The experiment may be valuable for future hypothesis testing, but is not ready for an official model or ROI claim.
 
 ## Exact next gate
 
