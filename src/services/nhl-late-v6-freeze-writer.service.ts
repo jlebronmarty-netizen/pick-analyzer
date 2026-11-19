@@ -43,7 +43,7 @@ export async function runNhlLateV6ShadowFreeze(){
   return {status:'NO_FRESH_NHL_SCHEDULE',providerCalls:0,written:0};
  const extracted=extractNhlFrozenFinalScores(runs,now);
  if(extracted.conflicts)return {status:'CONFLICTED_NHL_FINAL_ARCHIVE',providerCalls:0,written:0};
- const [g,p,d,pp]=await Promise.all([
+ const [g,p,d,pp,history]=await Promise.all([
   db.from('nhl_espn_goalie_probables_v1')
    .select('id,captured_at,source_version,raw_sha256,games')
    .lte('captured_at',now).order('captured_at',{ascending:false}).limit(2),
@@ -53,17 +53,25 @@ export async function runNhlLateV6ShadowFreeze(){
    .select('event_id,observed_at,body').limit(250),
   db.from('nhl_special_teams_asof_v1')
    .select('id,captured_at,source_version,source_hash,season_id,teams')
-   .lte('captured_at',now).order('captured_at',{ascending:false}).limit(2)
+   .lte('captured_at',now).order('captured_at',{ascending:false}).limit(2),
+  // Reuse already archived official NHL postgame boxscores. No provider calls.
+  // Missing historical form degrades only V7 evidence, not current V6 scoring.
+  db.from('nhl_game_context_v2')
+   .select('event_id,boxscore,boxscore_captured_at')
+   .gte('boxscore_captured_at',from).lte('boxscore_captured_at',now)
+   .order('boxscore_captured_at',{ascending:false}).limit(500)
  ]);
  if(g.error||p.error||d.error||(p.data??[]).length===250||(d.data??[]).length===250)
   return {status:'EVIDENCE_NOT_VERIFIABLE',providerCalls:0,written:0};
  const goals=g.data??[],reasons:Record<string,number>={},records:any[]=[];
+ const boxscoreRows=(history.error||(history.data??[]).length>=500?[]:history.data??[])
+  .map(x=>({eventId:x.event_id,boxscore:x.boxscore,capturedAt:x.boxscore_captured_at}));
  for(const game of Array.isArray(latest?.games)?latest.games:[]){
   if(known.has(game.eventId))continue;
   const v=buildNhlV6LateCandidate({game,decisionAt:now,sourceCompletedAt:latest.completed_at,
    finalScores:extracted.games,probableSnapshots:goals,
    ppPkSnapshots:pp.error?[]:pp.data??[],
-   dratingsRows:p.data??[],quoteRows,outcomeRows:d.data??[]});
+   dratingsRows:p.data??[],quoteRows,outcomeRows:d.data??[],boxscoreRows});
   if(!('record' in v)){const why='reason' in v&&typeof v.reason==='string'?v.reason:'NO_EVIDENCE';
    reasons[why]=(reasons[why]??0)+1;continue;}
   records.push(v.record);
