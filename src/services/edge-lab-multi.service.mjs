@@ -4,6 +4,8 @@ import {randomUUID} from 'node:crypto';
 import {COHORT_MULTI,digest,canonicalTtHistory,ttForecasts,ttOutcome,parseMlbSchedule,mlbForecasts,mlbOutcome,multiMetrics} from '../lib/edge-lab/multisport.mjs';
 import {readTtPagination,normalizeTtResultPage,makeProviderPacer,multiOperationalState} from '../lib/edge-lab/tt-coverage.mjs';
 import {planTtRecovery,recoveryCursor} from '../lib/edge-lab/tt-pending-recovery.mjs';
+import {ttSportsApiOutcome} from '../lib/edge-lab/tt-sportsapi-results.mjs';
+import {sportsApiTtSupplement} from '../lib/edge-lab/tt-sportsapi-client.mjs';
 const GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/source-gateway';
 const RECOVERY_GATEWAY='https://sports-edge-hub.vercel.app/api/table-tennis/results-recovery';
 const T={sources:'edge_lab_multi_sources_v1',forecasts:'edge_lab_multi_forecasts_v1',outcomes:'edge_lab_multi_outcomes_v1',finals:'edge_lab_tt_finals_v1',runs:'edge_lab_multi_runs_v1',locks:'edge_lab_multi_locks_v1',budget:'edge_lab_tt_request_budget_v1'};
@@ -55,7 +57,43 @@ async function collectTt(db,request,summary){
  const incoming=[...new Map(allIncoming.map(r=>{const id=digest([r.source,r.sourceMatchId,r.contentDigest]);return [id,{id,source_event_id:r.sourceMatchId,source:r.source,scheduled_at:r.scheduledAt,captured_at:r.capturedAt,content_digest:r.contentDigest,payload:r}];})).values()];
  summary.finals_inserted=await insertRows(db,T.finals,incoming);
  const stored=await readAll(db,T.finals),history=canonicalTtHistory(stored.map(r=>r.payload));summary.history_finals=history.finals.length;summary.history_conflicts=history.conflicts;summary.history_latest=history.finals.length?history.finals.map(r=>r.scheduledAt).sort().at(-1):null;
- await settle(db,existing,outcomes,f=>ttOutcome(f,history.finals),summary);
+ // Optional free SportsAPI results supplement. The existing TT forecaster,
+ // paid provider quota and historical model inputs are never changed.
+ // No key / disabled => zero SportsAPI HTTP calls.
+ let supplementalFinals=[];
+ summary.sportsapi={status:'DISABLED',calls:0,finals:0,candidate_settlements:0,enabled:false};
+ if(process.env.SPORTSAPI_TT_RESULTS_ENABLED==='true'){
+  const key=process.env.SPORTSAPI_TT_API_KEY;
+  if(!key)summary.sportsapi={status:'MISSING_KEY',calls:0,finals:0,candidate_settlements:0,enabled:true};
+  else try{
+   const extra=await sportsApiTtSupplement({key,leagueId:process.env.SPORTSAPI_TT_LEAGUE_ID??null,
+    forecasts:existing,outcomes,now:new Date().toISOString()});
+   supplementalFinals=extra.finals;
+   const providerRows=extra.receipts.map(r=>({
+    id:digest(['SPORTSAPI_TT_RESULT_EVIDENCE_V1',r.kind,r.sourceDigest,r.capturedAt]),
+    sport:'TT',source:'SportsAPI.app v2 TT Elite Series (results only)',
+    captured_at:r.capturedAt,
+    payload:{kind:r.kind,source_url:r.sourceUrl,received_at:r.capturedAt,
+     source_digest:r.sourceDigest,league_id:r.leagueId,day:r.date??null,
+     raw:r.raw,normalized:r.normalized??null,statistical_only:true,sportsbook_settlement:false}
+   }));
+   if(providerRows.length)await insertRows(db,T.sources,providerRows);
+   summary.sportsapi={enabled:true,status:extra.status,calls:extra.calls,
+    finals:extra.finals.length,days:extra.days,league_id:extra.leagueId,
+    errors:extra.errors,candidate_settlements:0};
+   if(extra.errors.length)summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
+  }catch(e){
+   summary.sportsapi={status:'ERROR',enabled:true,calls:0,finals:0,candidate_settlements:0};
+   summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
+  }
+ }
+ await settle(db,existing,outcomes,f=>{
+  const original=ttOutcome(f,history.finals);
+  if(original.status!=='PENDING')return original;
+  const alternative=ttSportsApiOutcome(f,supplementalFinals);
+  if(alternative.status!=='PENDING')summary.sportsapi.candidate_settlements++;
+  return alternative;
+ },summary);
  for(const recovery of summary.recoveries){const contracts=existing.filter(f=>f.event_id===recovery.event_id&&f.status!=='ABSTAIN');recovery.contract_evaluations=contracts.map(f=>({forecast_id:f.id,market:f.market,status:ttOutcome(f,history.finals).status}));if(recovery.contract_evaluations.length&&recovery.contract_evaluations.every(r=>r.status==='PENDING'))summary.warnings.push('TARGET_RESULT_STILL_PENDING');}
  try{
  const response=await paced(()=>paidRead(db,request,'prematch',1,summary)),asOf=new Date().toISOString();
