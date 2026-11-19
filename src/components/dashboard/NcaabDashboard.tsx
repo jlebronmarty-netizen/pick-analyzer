@@ -1,6 +1,8 @@
 'use client';
 import {useState} from 'react';
 import Link from 'next/link';
+import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
+import SportDecisionBoard, {type SportDecisionRow} from '@/components/dashboard/SportDecisionBoard';
 import type {NcaabReport} from '@/lib/ncaab-checkpoint';
 import {ncaabDate} from '@/lib/ncaab-checkpoint';
 import {ncaabTeamName} from '@/lib/ncaab-team-display';
@@ -13,8 +15,21 @@ export default function NcaabDashboard({report}:{report:NcaabReport}){
  if(report.status==='UNAVAILABLE')return <section className="mlb-ui p-6"><h1 className="text-3xl font-bold">NCAAB</h1><p role="alert" className="mt-5 text-amber-300">{report.warning}</p><Link href="/today">Volver al dashboard</Link></section>;
  const global=report.data.models.reduce((a,m)=>({w:a.w+m.wins,l:a.l+(m.losses??m.winnerDenominator-m.wins)}),{w:0,l:0});
  const s=report.data,m=s.models.find(m=>m.id===model)!,rows=model==='NCAAB_PRESEASON_V1'?s.observations.filter(r=>(state==='ALL'||r.state===state)&&(date==='ALL'||ncaabDate(r.scheduled_at)===date)).sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)||a.event_id.localeCompare(b.event_id)):[];
+ const decisionRows:SportDecisionRow[]=rows.filter(r=>r.state==='FORECAST'&&r.predicted_winner!==null)
+  .map(r=>{
+   const home=r.predicted_winner===r.home_id;
+   return {id:r.event_id,market:'ml',matchup:ncaabTeamName(r.away_id,r.away_name)+' @ '+ncaabTeamName(r.home_id,r.home_name),
+    selection:ncaabTeamName(home?r.home_id:r.away_id,home?r.home_name:r.away_name)+' · ganador proyectado',
+    status:'EXPERIMENTAL' as const,startsAt:r.scheduled_at,capturedAt:r.created_at,
+    probability:home?r.home_win_probability:r.away_win_probability,projection:r.away_score!=null&&r.home_score!=null?r.away_score.toFixed(1)+' – '+r.home_score.toFixed(1):null,
+    odds:null,gap:null,eligible:false,evidence:'Proyección del modelo sin línea o cuota de sportsbook verificada: NO es recomendación de apuesta.',
+    note:'Margen modelado '+(r.projected_margin?.toFixed(2)??'—')+'; total modelado '+(r.projected_total?.toFixed(2)??'—')+'. Sin edge ni EV calculable.'
+   };
+  });
  return <div className="mlb-ui space-y-6 p-4 sm:p-6">
   <header className="rounded-2xl border border-violet-400/30 bg-slate-900 p-6"><Link href="/today" className="text-sm text-teal-300">← Todos los deportes</Link><p className="mt-5 text-xs font-bold uppercase tracking-widest text-teal-300">NCAAB · experimental</p><h1 className="mt-2 text-3xl font-bold">Modelos, proyecciones y resultados</h1><p className="mt-3 text-sm text-slate-300">Accuracy prospectivo global: <strong>{pct(global.w+global.l?global.w/(global.w+global.l):null)}</strong> · {global.w} W / {global.l} L · {s.models.reduce((n,m)=>n+m.forecasts-m.settled-(m.review??0),0)} observaciones pendientes.</p><p className="mt-3 text-sm text-slate-400">Última actualización {time(s.generatedAt)} · Puerto Rico. {s.continuousSync?'Proceso diario gratuito habilitado.':'Sin sincronización continua.'} Los marcadores son proyecciones, no resultados ni líneas de mercado.</p>{s.warning&&<p role="alert" className="mt-3 text-amber-300">{s.warning}</p>}{s.lastRun&&<p className="mt-2 text-xs text-slate-400">Última ejecución: {s.lastRun.status} · {s.lastRun.providerCalls} consultas FREE</p>}</header>
+  <SportDecisionNavigation current="NCAAB" compact/>
+  <SportDecisionBoard sport="NCAAB" rows={decisionRows} description="Ganador y puntuación estimada del modelo experimental. Sin precios de casa verificables no hay Top favorable, spread, total ni props recomendables; las proyecciones permanecen informativas."/>
   <aside role="status" className="rounded-xl border border-amber-400/30 p-5 text-sm leading-6 text-amber-200">Los modelos conservan su estado experimental. Roster, transferencias y cambios de entrenador sin verificar; probabilidades e intervalos sin calibración confirmada. No hay cuotas, edge, ROI ni recomendaciones oficiales certificados. El historial retrospectivo no aporta al accuracy prospectivo.</aside>
   <div role="group" aria-label="Modelo NCAAB" className="flex flex-wrap gap-3">{s.models.map(x=><button key={x.id} type="button" aria-pressed={model===x.id} onClick={()=>setModel(x.id)} className={`min-h-11 break-all rounded-xl border p-4 text-left ${model===x.id?'border-teal-300 bg-teal-400/10':'border-slate-700'}`}><span className="block font-semibold">{x.id}</span><span className="mt-2 block text-xs text-slate-400">Accuracy {pct(x.accuracy)} · {x.forecasts} pronósticos · {x.settled} liquidados</span></button>)}</div>
   <section aria-label="Métricas del modelo" className="rounded-xl border border-slate-700 bg-slate-900 p-5"><h2 className="break-all text-xl font-bold">{m.id}</h2><dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">{[['Accuracy W/L',pct(m.accuracy)],['Pronósticos',m.forecasts],['Abstenciones',m.abstentions],['Liquidados',m.settled],['Ganadas',m.wins],['Perdidas',m.losses??m.winnerDenominator-m.wins],['En revisión',m.review??0]].map(([k,v])=><div key={k}><dt className="text-xs text-slate-400">{k}</dt><dd className="mt-2 text-2xl font-bold">{v}</dd></div>)}</dl><p className="mt-4 text-sm text-slate-400">{model==='NCAAB_PRESEASON_V1'?'Pretemporada basada en historial previo congelado. Selecciones nuevas antes del inicio; resultados finales y revisiones se guardan por separado.':'Modelo de temporada: necesita 5 partidos previos distintos de ambos equipos en la temporada actual. En calentamiento; cero pronósticos publicados.'}</p></section>

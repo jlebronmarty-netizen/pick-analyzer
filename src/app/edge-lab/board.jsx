@@ -3,6 +3,8 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import NcaafPanel from './ncaaf-panel';
 import {useLedgerView} from './ledger-filters';
 import SportRecommendationCard from '@/components/dashboard/SportRecommendationCard';
+import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
+import SportDecisionBoard from '@/components/dashboard/SportDecisionBoard';
 const box={border:'1px solid #334155',borderRadius:12,padding:18,marginTop:16};const pct=v=>typeof v==='number'?(v*100).toFixed(1)+'%':'N/A';const num=v=>typeof v==='number'?v.toFixed(2):'N/A';const date=v=>v?new Date(v).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'}):'Sin ejecución';
 const names={SOCCER:'Soccer · LaLiga',TT:'Tenis de mesa · TT Elite',MLB:'MLB · motores Edge',NCAAF:'NCAAF'};
 const marketName={MONEYLINE:'Ganador',TOTAL_POINTS:'Total de puntos',SETS_ODD_EVEN:'Sets par/impar',HOME_TEAM_RUNS:'Carreras local',AWAY_TEAM_RUNS:'Carreras visitante','1X2':'Local / empate / visitante',TOTAL_2_5:'Total de goles 2.5'};
@@ -15,11 +17,27 @@ export default function Board({initialSport='SOCCER'}){
  useEffect(()=>{refresh();const timer=setInterval(()=>{if(!document.hidden)refresh();},300000);return()=>{clearInterval(timer);const previous=request.current;request.current=null;previous?.abort();};},[refresh]);
  const isSoccer=sport==='SOCCER',data=isSoccer?soccer:multi,rows=isSoccer?soccer?.rows??[]:(multi?.rows??[]).filter(r=>r.sport===sport),metrics=isSoccer?soccer?.metrics??[]:(multi?.metrics??[]).filter(m=>m.sport===sport),runs=isSoccer?soccer?.runs??[]:(multi?.runs??[]).filter(r=>r.sport===sport),last=runs[0];
  const ledgerView=useLedgerView(rows);
+ const decisionRows=ledgerView.rows.filter(r=>r.status!=='ABSTAIN'&&r.selection).flatMap(r=>{
+  const market=['MONEYLINE','1X2'].includes(r.market)?'ml':
+   ['TOTAL_POINTS','TOTAL_2_5','HOME_TEAM_RUNS','AWAY_TEAM_RUNS'].includes(r.market)?'total':null;
+  if(!market)return [];
+  const label=selection(r);
+  if(!label||label==='PASAR'||label==='Proyección numérica')return [];
+  return [{id:String(r.id),market,matchup:(r.participant_a??r.home_name)+' vs '+(r.participant_b??r.away_name),
+   selection:label,status:'SHADOW',startsAt:r.scheduled_at,capturedAt:r.created_at??null,
+   probability:typeof r.probability==='number'?r.probability:null,
+   projection:typeof r.projection==='number'?r.projection.toFixed(2):null,
+   odds:null,line:typeof r.line==='number'?r.line:null,gap:null,eligible:false,
+   evidence:'Modelo experimental sin ventaja positiva frente a precio exacto validada para esta vista.',
+   note:'El registro original, su settlement y el mercado de origen siguen disponibles más abajo. No es una recomendación oficial.'}];
+ });
  const daily=(isSoccer?soccer?.daily??[]:multi?.daily??[]).filter(r=>isSoccer||r.sport===sport),cohort=isSoccer?soccer?.cohort:multi?.cohort;
  const operation=multi?.states?.find(s=>s.sport===sport),paused=operation?.state==='OFFSEASON_PAUSED';
  const stale=!paused&&last&&Date.now()-Date.parse(last.started_at)>(isSoccer?90:sport==='TT'?16*60:24*60)*60000;
  return <main className="mlb-ui sport-standard mx-auto max-w-7xl space-y-6 text-slate-200">
  <header className="sport-standard-hero"><a href="/sports">← Todos los deportes</a><p className="sport-standard-eyebrow">PICK ANALYZER · EDGE LAB</p><h1>Proyecciones, resultados y operación</h1><p>Investigación independiente. No son apuestas ni liquidaciones del sportsbook. Los modelos e históricos existentes de Pick permanecen separados.</p></header>
+ <SportDecisionNavigation current={sport==='SOCCER'?'SOCCER':sport==='TT'?'TABLE_TENNIS':sport} compact/>
+ {sport!=='NCAAF'&&<SportDecisionBoard sport={names[sport]??sport} rows={decisionRows} description="Vistas uniformes para modelos Edge Lab: solo se muestran selecciones emitidas con mercado comparable. Sin cuotas pareadas y validadas no se promocionan al Top ni se declara edge."/>}
  <div role="tablist" aria-label="Deporte de Edge Lab" style={{display:'flex',gap:8,flexWrap:'wrap'}}>{Object.entries(names).map(([id,label])=><button key={id} role="tab" aria-selected={sport===id} onClick={()=>{setSport(id);window.history.replaceState(null,'','/edge-lab?sport='+id);}} style={{padding:12,border:'1px solid '+(sport===id?'#67e8f9':'#475569'),borderRadius:8,background:sport===id?'#164e63':'transparent'}}>{label}</button>)}</div>
  <p><button onClick={refresh} disabled={busy} style={{padding:10,border:'1px solid #64748b',borderRadius:8}}>{busy?'Consultando…':'Actualizar estado'}</button> La actualización de pantalla consulta el archivo; no consume consultas del proveedor de tenis de mesa.</p>
  {errors.map(e=><p role="alert" key={e} style={{color:'#fda4af'}}>{e}. Los datos previos visibles no se certifican como actuales.</p>)}

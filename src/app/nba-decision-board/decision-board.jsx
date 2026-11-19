@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
+import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
 import {visibleNbaPreferredRows} from '@/lib/nba/decision-visible-core.mjs';
 
 const NAV=[
@@ -119,14 +120,15 @@ export default function DecisionBoard(){
    </div>
    <p className="mt-3 text-xs text-slate-400">Datos almacenados · {data?.asOf?date(data.asOf):'—'} · Sin llamadas a proveedores ni cambios a modelos oficiales.</p>
   </header>
+  <SportDecisionNavigation current="NBA" compact/>
   <nav aria-label="Mercados NBA" className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
    {NAV.map(t=><button type="button" key={t.id} onClick={()=>activate(t.id)}
     aria-current={tab===t.id?'page':undefined}
     className={'rounded-xl border px-3 py-3 text-left '+(tab===t.id?'border-sky-500 bg-sky-950':'border-slate-700 bg-slate-900')}>
     <p className="font-semibold">{t.title}</p><p className="mt-1 text-xs text-slate-400">{t.subtitle}</p></button>)}
   </nav>
-  <section className="rounded-xl border border-slate-700 bg-slate-900/40 p-4">
-   <h2 className="text-lg font-semibold">Seguimiento y aprendizaje</h2>
+  <details className="group rounded-xl border border-slate-700 bg-slate-900/40 p-4">
+   <summary className="cursor-pointer text-lg font-semibold">Seguimiento y aprendizaje <span className="ml-2 text-xs font-normal text-slate-400">Ver accuracy, MAE y validación de modelos · Expandir/ocultar</span></summary>
    <p className="mt-1 text-sm text-slate-300">Resultados liquidados de los modelos originales (no del Top 25). La mejora automática propone candidatos; nunca modifica pesos sin validación externa.</p>
    <div className="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
     {['moneyline','spread','total','props','periods'].map(m=>{const a=data?.accuracy?.[m];return <div key={m} className="rounded-lg bg-slate-950 p-3">
@@ -163,7 +165,7 @@ export default function DecisionBoard(){
     {!learning.fullHistoryExhaustive&&<p className="text-amber-200">Muestra incompleta: no usar como acumulado final.</p>}
    </div>}
    <p className="mt-2 text-xs text-amber-200">Las muestras pequeñas no certifican probabilidad; props y cuartos requieren seguimiento prospectivo congelado, liquidaciones y validación independiente.</p>
-  </section>
+  </details>
   <section className="space-y-3">
    <div className="flex flex-wrap items-center gap-2">
     <label className="text-xs text-slate-300" htmlFor="nba-game-filter">Partido</label>
