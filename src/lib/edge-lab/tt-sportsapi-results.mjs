@@ -23,7 +23,7 @@ function extractSetScores(home,away,homeSets,awaySets){
  const all=[...new Set([...hk,...ak])].sort((x,y)=>Number(x.slice(6))-Number(y.slice(6)));
  if(all.length<3||all.length>5||hk.length!==all.length||ak.length!==all.length||all.some((k,i)=>k!=='period'+(i+1)))
   return {pointsComplete:false,setPoints:[],totalPoints:null};
- const points=[],winsH=0,winsA=0;let total=0;
+ const points=[];let winsH=0,winsA=0,total=0;
  for(const k of all){
   const x=int(h[k]),y=int(a[k]);
   if(x===null||y===null||x===y||Math.max(x,y)<11||Math.abs(x-y)<2||
