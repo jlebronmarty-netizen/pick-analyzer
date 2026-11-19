@@ -72,6 +72,7 @@ export function nhlV6RollingHomeBias({decisionsAt,priorGames,quoteRows,minPrior=
   shrunkenBias:n?round((residual/n)*n/(n+shrink),6):null,
   shrink,minPrior,calibrationSelectedPostHoc:true,prospectiveHoldoutValidated:false};
 }
+/** @param {{game:any,decisionAt:string,sourceCompletedAt:string,finalScores:any[],probableSnapshots:any[],ppPkSnapshots?:any[],dratingsRows:any[],quoteRows:any[],outcomeRows:any[]}} input */
 export function buildNhlV6LateCandidate({game,decisionAt,sourceCompletedAt,
   finalScores,probableSnapshots,ppPkSnapshots=[],dratingsRows,quoteRows,outcomeRows}){
  const now=asMs(decisionAt),tip=asMs(game?.scheduledAt),source=asMs(sourceCompletedAt);
