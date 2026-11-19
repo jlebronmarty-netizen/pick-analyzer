@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {sportsApiTtLeagueId,sportsApiTtFinals,ttSportsApiOutcome,ttSportsApiTargetDays} from '../src/lib/edge-lab/tt-sportsapi-results.mjs';
+import {sportsApiTtLeagueId,sportsApiTtFinals,ttSportsApiOutcome,ttSportsApiTargetDays,sportsApiTtPlayerMatches,sportsApiTtUniqueAssignments} from '../src/lib/edge-lab/tt-sportsapi-results.mjs';
 import {sportsApiTtSupplement} from '../src/lib/edge-lab/tt-sportsapi-client.mjs';
 
 const captured='2026-11-19T01:00:00Z',date='2026-11-18',league={id:42,name:'TT Elite Series'};
@@ -122,4 +122,60 @@ test('source integration remains flag/key gated and keeps PulseScore prematch un
  assert.ok(service.includes('if(original.status!==\'PENDING\')return original'));
  assert.ok(service.includes("paidRead(db,request,'prematch',1,summary)"));
  assert.ok(service.includes("if(sport==='MLB' && process.env.MLB_OFFSEASON_PAUSED==='true')"));
+});
+
+test('SportsAPI surname + initial matches only supported exact first-initial family name',()=>{
+ assert.equal(sportsApiTtPlayerMatches('Szymon Brud','Brud S.'),true);
+ assert.equal(sportsApiTtPlayerMatches('Brud Szymon','Brud S.'),true);
+ assert.equal(sportsApiTtPlayerMatches('Miroslaw Lewczuk','Lewczuk M.'),true);
+ assert.equal(sportsApiTtPlayerMatches('Łukasz Bladziak','Bladziak L.'),true);
+ assert.equal(sportsApiTtPlayerMatches('Rafal Stapor','Stapor Rafał'),true);
+ assert.equal(sportsApiTtPlayerMatches('Szymon Brud','Brud J.'),false);
+ assert.equal(sportsApiTtPlayerMatches('Szymon Brud','B. S.'),false);
+ assert.equal(sportsApiTtPlayerMatches('Szymon Brud','S.'),false);
+ assert.equal(sportsApiTtPlayerMatches('Szymon Brud','Bru S.'),false);
+});
+test('SHADOW historical-type pair: NetBet full names vs SportsAPI Polish initials',()=>{
+ const f=forecast('MONEYLINE',{
+  event_id:'netbet:1-31605372',
+  scheduled_at:'2026-11-18T20:15:00Z',
+  emitted_at:'2026-11-18T18:00:00Z',
+  participant_a:'Arkadiusz Mugowski',
+  participant_b:'Szymon Brud',
+  selection:'A'});
+ const results=sportsApiTtFinals(body([game({
+  id:1112241,startTime:'2026-11-18T20:15:00Z',
+  home:{name:'Mugowski A.'},away:{name:'Brud S.'},
+  homeScore:{current:3,periods:{period1:11,period2:11,period3:11}},
+  awayScore:{current:0,periods:{period1:5,period2:9,period3:6}}
+ })]),{leagueId:42,capturedAt:captured,requestedDay:date}).rows;
+ assert.equal(results.length,1);
+ assert.equal(ttSportsApiOutcome(f,results).status,'W');
+ assert.equal(ttSportsApiOutcome({...f,market:'TOTAL_POINTS',status:'PROJECTION',projection:53},results).status,'NUMERIC');
+});
+test('two NetBet events with overlapping surname-initial pairs cannot use same final',()=>{
+ const games=sportsApiTtFinals(body([game({home:{name:'Brud S.'},away:{name:'Mugowski A.'}})]),
+  {leagueId:42,capturedAt:captured,requestedDay:date}).rows;
+ const a=forecast('MONEYLINE',{participant_a:'Szymon Brud',participant_b:'Arkadiusz Mugowski'});
+ const b={...a,id:'other',event_id:'netbet:other',participant_a:'Sebastian Brud'};
+ const matches=sportsApiTtUniqueAssignments([a,b],games);
+ assert.equal(matches.matchedEvents,0);
+ assert.equal(matches.ambiguousEvents,2);
+});
+test('two SportsAPI matches at same time for one NetBet match remain unassigned',()=>{
+ const two=sportsApiTtFinals(body([game({home:{name:'Brud S.'},away:{name:'Mugowski A.'}}),
+  game({id:702,home:{name:'Brud S.'},away:{name:'Mugowski A.'}})]),
+  {leagueId:42,capturedAt:captured,requestedDay:date}).rows;
+ const a=forecast('MONEYLINE',{participant_a:'Szymon Brud',participant_b:'Arkadiusz Mugowski'});
+ const result=sportsApiTtUniqueAssignments([a],two);
+ assert.equal(result.matchedEvents,0);assert.equal(result.ambiguousEvents,1);
+});
+test('one unique provider final safely applies across exactly three markets of same frozen event',()=>{
+ const rows=sportsApiTtFinals(body([game({home:{name:'Brud S.'},away:{name:'Mugowski A.'}})]),
+  {leagueId:42,capturedAt:captured,requestedDay:date}).rows;
+ const mk=(market)=>forecast(market,{participant_a:'Szymon Brud',participant_b:'Arkadiusz Mugowski'});
+ const result=sportsApiTtUniqueAssignments(['MONEYLINE','SETS_ODD_EVEN','TOTAL_POINTS'].map(mk),rows);
+ assert.equal(result.matchedEvents,1);
+ for(const m of ['MONEYLINE','SETS_ODD_EVEN','TOTAL_POINTS'])assert.ok(['W','L','NUMERIC'].includes(
+  ttSportsApiOutcome(mk(m),result.byEvent.get(mk(m).event_id)).status));
 });
