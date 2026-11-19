@@ -16,7 +16,7 @@ const date=(iso?:string|null)=>iso?new Intl.DateTimeFormat('es-PR',{timeZone:'Am
 export default function SportDecisionBoard({sport,rows,description,marketNotes={}}:{
  sport:string;rows:SportDecisionRow[];description?:string;marketNotes?:Partial<Record<SportDecisionMarket,string>>;
 }){
- const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
+ const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':['ml','oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
  const [expanded,setExpanded]=useState(false);
  const counts=useMemo(()=>Object.fromEntries(tabs.slice(1).map(([id])=>[id,rows.filter(x=>x.market===id).length])),[rows]);
  const visible=useMemo(()=>{
