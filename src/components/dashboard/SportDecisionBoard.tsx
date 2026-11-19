@@ -49,10 +49,11 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
      className="mt-1 block w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100"/></label>
    <label className="text-xs text-slate-400">Ordenar por
     <select value={sort} onChange={e=>setSort(e.target.value)} className="mt-1 block rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100">
-     <option value="gap">Brecha / edge descendente</option><option value="probability">Probabilidad de modelo descendente</option><option value="date">Hora de inicio</option>
+     <option value="gap">Brecha / edge (solo si existe)</option><option value="probability">Probabilidad del modelo (no calibrada)</option><option value="date">Hora de inicio</option>
     </select></label>
   </div>
   {tab!=='top'&&marketNotes[tab as SportDecisionMarket]&&<p role="note" className="rounded-lg border border-amber-400/20 bg-slate-900/60 p-3 text-xs leading-5 text-amber-200">{marketNotes[tab as SportDecisionMarket]}</p>}
+  {sort==='gap'&&visible.length>0&&!visible.some(r=>isNumber(r.gap))&&<p className="text-xs text-slate-400">Las selecciones visibles no tienen una brecha de mercado validada. Este orden se mantiene estable por identificador; selecciona probabilidad del modelo u hora para comparar.</p>}
   {visible.length?<div className="grid gap-3 lg:grid-cols-2">
    {visible.map(r=><article key={r.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4">
     <div className="flex flex-wrap justify-between gap-2"><div className="min-w-0">
