@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
 import { useState } from "react";
 import type { NhlReport } from "@/lib/nhl-external-report";
 import { filterNhlHistory, nhlDate, nhlOpportunities } from "@/lib/nhl-view";
@@ -24,6 +25,7 @@ export default function NhlDashboard({report}:{report:NhlReport}){
       <p role="status" className="mt-3 text-sm text-amber-200">{r.warning}</p><p className="mt-2 text-xs text-amber-200">Modelo externo sin certificación de rentabilidad. Estas selecciones MODEL_ONLY conservan métricas independientes de los Official Picks de MLB.</p>
       <nav aria-label="NHL navigation" className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-teal-300"><Link href="/today">Today</Link><Link href="/mlb/overview">MLB general</Link><a href="https://www.dratings.com/predictor/nhl-hockey-predictions/" target="_blank" rel="noreferrer">Fuente de probabilidades ↗</a></nav>
     </header>
+    <SportDecisionNavigation current="NHL" compact/>
     <section aria-label="NHL source health" className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-sm">
       <p>Operación: <strong>{r.health.status}</strong> · Último ciclo: {r.health.runStatus??"Sin dato"} · Cobertura futura: {r.health.coverage??"—"}/{r.health.eligible??"—"}</p>
       <p className="mt-2 text-xs text-slate-400">Último ciclo: {time(r.health.latestRunAt)} · Lectura: {time(r.readAt)}. La fuente actualiza cada 30 minutos; esta página muestra snapshots.</p>
