@@ -74,6 +74,10 @@ async function collectTt(db,request,summary){
   else try{
    const extra=await sportsApiTtSupplement({key,leagueId:process.env.SPORTSAPI_TT_LEAGUE_ID??null,
     forecasts:existing,outcomes,now:new Date().toISOString(),maxCalls:Math.min(3,quotaLeft)});
+   // Charge the quota ledger before any archival write can fail.
+   summary.sportsapi={mode:sportsapiMode,status:extra.status,calls:extra.calls,
+    finals:extra.finals.length,days:extra.days,league_id:extra.leagueId,
+    errors:extra.errors,shadow_candidates:0,candidate_settlements:0};
    const providerRows=extra.receipts.map(r=>({
     id:digest(['SPORTSAPI_TT_RESULT_EVIDENCE_V1',r.kind,r.sourceDigest,r.capturedAt]),
     sport:'TT',source:'SportsAPI.app v2 TT Elite Series (results only)',
@@ -88,12 +92,10 @@ async function collectTt(db,request,summary){
     ttOutcome(f,history.finals).status==='PENDING'&&
     ['W','L','PUSH','NUMERIC'].includes(ttSportsApiOutcome(f,extra.finals).status)).length;
    if(sportsapiMode==='ACTIVE')supplementalFinals=extra.finals;
-   summary.sportsapi={mode:sportsapiMode,status:extra.status,calls:extra.calls,
-    finals:extra.finals.length,days:extra.days,league_id:extra.leagueId,
-    errors:extra.errors,shadow_candidates:shadowCandidates,candidate_settlements:0};
+   summary.sportsapi.shadow_candidates=shadowCandidates;
    if(extra.errors.length)summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
   }catch(e){
-   summary.sportsapi={status:'ERROR',mode:sportsapiMode,calls:0,finals:0,candidate_settlements:0,shadow_candidates:0};
+   summary.sportsapi={...summary.sportsapi,status:'ERROR',mode:sportsapiMode};
    summary.warnings.push('SPORTSAPI_TT_SUPPLEMENT_UNAVAILABLE');
   }
  }
