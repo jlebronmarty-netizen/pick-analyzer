@@ -4,6 +4,7 @@ import {createHash} from 'node:crypto';
 import {forecastNhlChallenger} from './nhl-challenger-poisson-core.mjs';
 import {selectEspnNhlProbablesAsOf} from './nhl-espn-free-goalie-probables-v5.mjs';
 import {selectNhlSpecialTeamsAsOf} from './nhl-special-teams-asof-core.mjs';
+import {nhlPairedGoalieAsOfEvidence} from './nhl-goalie-prior-form-asof-v7.mjs';
 export const NHL_LATE_V6='NHL_LATE_PROBABLE_CALIBRATION_SHADOW_V6';
 const asMs=v=>{const x=Date.parse(String(v??''));return Number.isFinite(x)?x:null};
 const positive=x=>Number.isSafeInteger(x)&&x>=0;
@@ -72,9 +73,9 @@ export function nhlV6RollingHomeBias({decisionsAt,priorGames,quoteRows,minPrior=
   shrunkenBias:n?round((residual/n)*n/(n+shrink),6):null,
   shrink,minPrior,calibrationSelectedPostHoc:true,prospectiveHoldoutValidated:false};
 }
-/** @param {{game:any,decisionAt:string,sourceCompletedAt:string,finalScores:any[],probableSnapshots:any[],ppPkSnapshots?:any[],dratingsRows:any[],quoteRows:any[],outcomeRows:any[]}} input */
+/** @param {{game:any,decisionAt:string,sourceCompletedAt:string,finalScores:any[],probableSnapshots:any[],ppPkSnapshots?:any[],dratingsRows:any[],quoteRows:any[],outcomeRows:any[],boxscoreRows?:any[]}} input */
 export function buildNhlV6LateCandidate({game,decisionAt,sourceCompletedAt,
-  finalScores,probableSnapshots,ppPkSnapshots=[],dratingsRows,quoteRows,outcomeRows}){
+  finalScores,probableSnapshots,ppPkSnapshots=[],dratingsRows,quoteRows,outcomeRows,boxscoreRows=[]}){
  const now=asMs(decisionAt),tip=asMs(game?.scheduledAt),source=asMs(sourceCompletedAt);
  if(now===null||tip===null||source===null||source>now||now-source>45*60000||
   tip-now<60*60000||tip-now>8*3600000)return reject('LATE_PREGAME_OR_SOURCE_FRESHNESS_FAILED');
@@ -88,6 +89,8 @@ export function buildNhlV6LateCandidate({game,decisionAt,sourceCompletedAt,
   return reject('NO_PREGAME_PAIRED_GOALIE_PROBABLES',{goalieReason:goalie.reason??goalie.status});
  if(asMs(goalie.observedAt)>now||now-asMs(goalie.observedAt)>45*60000)
   return reject('PROBABLE_SOURCE_NOT_FRESH_AT_LATE_FREEZE');
+ const goalieHistoryV7=nhlPairedGoalieAsOfEvidence({game,goalieEvidence:goalie,
+  decisionAt,boxscoreRows,minShots:50});
  const dr=dratingsRows.filter(x=>sameGame(x,game)&&
   asMs(x.created_at)!==null&&asMs(x.created_at)<now&&
   asMs(x.created_at)<tip-60*60000).sort((a,b)=>asMs(a.created_at)-asMs(b.created_at))[0];
@@ -107,14 +110,16 @@ export function buildNhlV6LateCandidate({game,decisionAt,sourceCompletedAt,
   .filter(x=>asMs(x.capturedAt)<=now)
   .map(x=>[x.eventId,x.capturedAt,x.homeGoals,x.awayGoals])
   .sort((a,b)=>a[0].localeCompare(b[0])),goalieSnapshot:goalie.sourceSnapshotId,
-  priceId:marketReady?price.observationId:null,calibrationPrior:bias.priorGames});
+  priceId:marketReady?price.observationId:null,calibrationPrior:bias.priorGames,
+  goalieHistoryV7});
  return {status:'LATE_RESEARCH_CANDIDATE',record:{
   id:NHL_LATE_V6+':'+game.eventId,event_id:game.eventId,model_version:NHL_LATE_V6,
   scheduled_at:game.scheduledAt,frozen_at:new Date(now).toISOString(),
   source_completed_at:new Date(source).toISOString(),home_team_id:game.homeId,
   away_team_id:game.awayId,source_hash:sourceDigest,
   goalie_snapshot_id:goalie.sourceSnapshotId,
-  goalie_evidence:{...goalie,goalieNhlIdentityCrosswalkVerified:false,
+  goalie_evidence:{...goalie,historicalFormV7:goalieHistoryV7,
+   goalieNhlIdentityCrosswalkVerified:false,
    isConfirmedStarter:false,goalieAdjustmentApplied:false,sourcePublicationTimeVerified:false},
   calibration:{status:candidate===null?'NOT_YET_ELIGIBLE':'PROSPECTIVE_TEST_ONLY',
    originalDratingsHome:drp,dratingsOriginalObservedAt:dr.created_at,
