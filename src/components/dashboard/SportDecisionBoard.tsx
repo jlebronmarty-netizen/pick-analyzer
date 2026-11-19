@@ -1,7 +1,7 @@
 'use client';
 import {useMemo,useState} from 'react';
 
-export type SportDecisionMarket='ml'|'spread'|'total'|'props'|'periods';
+export type SportDecisionMarket='ml'|'oneXTwo'|'spread'|'total'|'special'|'props'|'periods';
 export type SportDecisionRow={
  id:string;market:SportDecisionMarket;matchup:string;selection:string;
  status:'SHADOW'|'MODEL_ONLY'|'EXPERIMENTAL';
@@ -10,7 +10,7 @@ export type SportDecisionRow={
  probability?:number|null;gap?:number|null;gapUnit?:string|null;
  evidence?:string|null;note?:string|null;eligible:boolean;
 };
-const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['spread','Spread'],['total','Total'],['props','Player props'],['periods','Cuartos / Mitades']];
+const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['oneXTwo','1X2'],['spread','Spread'],['total','Total'],['special','Par/Impar sets'],['props','Player props'],['periods','Cuartos / Mitades']];
 const isNumber=(n:number|null|undefined):n is number=>typeof n==='number'&&Number.isFinite(n);
 const date=(iso?:string|null)=>iso?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(iso)):'Sin fecha';
 export default function SportDecisionBoard({sport,rows,description,marketNotes={}}:{
@@ -36,7 +36,7 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
    </div>
    <p className="text-xs text-amber-200">Oportunidad ≠ probabilidad calibrada ni EV demostrado</p>
   </div>
-  <div role="tablist" aria-label={'Mercados '+sport} className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
+  <div role="tablist" aria-label={'Mercados '+sport} className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-8">
    {tabs.map(([id,label])=><button key={id} type="button" role="tab" aria-selected={tab===id}
     onClick={()=>setTab(id)}
     className={`rounded-xl border px-3 py-3 text-left text-sm font-semibold ${tab===id?'border-teal-400 bg-teal-500/10':'border-slate-700 bg-slate-900'}`}>
