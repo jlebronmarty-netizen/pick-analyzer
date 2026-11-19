@@ -123,7 +123,8 @@ export function buildNhlV6LateCandidate({game,decisionAt,sourceCompletedAt,
    candidateAway: candidate===null?null:round(1-candidate),
    candidateParamsFrozenBeforeOutcome:true,statisticalOnly:true,expectedValue:null,
    holdoutPassed:false,officialPromotion:false},
-  projection:forecast.projection,market_proxies:forecast.markets,
+  projection:forecast.projection,
+  market_proxies:{...forecast.markets,frozenTeams:{home:game.home,away:game.away}},
   special_teams_evidence:specialTeams,
   status:'FROZEN_RESEARCH',official_pick:false,production_eligible:false
  }};
