@@ -1,5 +1,6 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
+import {visibleNbaPreferredRows} from '@/lib/nba/decision-visible-core.mjs';
 
 const NAV=[
  {id:'top',title:'Top 25',subtitle:'Oportunidades para revisar'},
@@ -76,7 +77,8 @@ export default function DecisionBoard(){
  const entries=useMemo(()=>{
   if(!data)return [];
   const input=tab==='top'?data.top25:data.preferredRows?.[tab]??[];
-  const visible=input.filter(x=>(gameId==='all'||String(x.gameId)===gameId)&&
+  const preferred=visibleNbaPreferredRows(input);
+  const visible=preferred.filter(x=>(gameId==='all'||String(x.gameId)===gameId)&&
    (tab!=='periods'||period==='all'||x.period===period)&&
    (!search||(x.label+' '+x.matchup+' '+x.market).toLowerCase().includes(search.toLowerCase())));
   // Sort only the presentation copy: original predictions, frozen records and server ranking remain untouched.
@@ -185,6 +187,7 @@ export default function DecisionBoard(){
      </select>
     </div>
    </div>
+   <p className="text-xs text-sky-300">Vista: solo lados favorables · {data?.preferenceVersion??'sin versión de preferencias'} · Se excluyen PASAR y lados opuestos del mismo contrato.</p>
    <p className="text-xs text-amber-200">La brecha se compara en unidades propias de cada mercado (ML: margen estimado; spread/total/props: puntos o estadística). Orden descriptivo, no probabilidad de ganar.</p>
    {!error&&!loading&&<p className="text-xs text-slate-400">Únicamente un lado por contrato; las alternativas y los mercados sin señal se excluyen de esta lista y se consideran PASAR. El registro original permanece intacto para backtesting.</p>}
    {error&&<p role="alert" className="rounded-xl border border-rose-700 bg-rose-950 p-4 text-sm">No pude cargar el panel: {error}</p>}
