@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planNbaShadowFreeze,settleNbaShadowForecast,summarizeShadowLearning}
+import {planNbaShadowFreeze,balanceFrozenForecasts,NBA_SHADOW_FREEZE_MAX_PER_RUN,settleNbaShadowForecast,summarizeShadowLearning}
   from '../src/lib/nba/decision-learning-core.mjs';
 import {checkNbaDecisionCronRequest} from '../src/lib/nba/decision-cron-auth.mjs';
 
@@ -11,7 +11,7 @@ const main={gameId:21718143,matchup:'Golden State Warriors @ Memphis Grizzlies',
  quoteId:'valid-quote-total-0001',capturedAt:captureTime,quoteFreshness:'RECENT',
  source:'GOAT',sample:8,l5:226,l10:221};
 const prop={...main,market:'props',label:'Player A · rebounds OVER',line:7.5,projection:9.1,advantage:1.6,
- playerId:99,playerName:'Player A',statistic:'rebounds',quoteId:'valid-quote-prop-0001'};
+ playerId:99,playerName:'Player A',statistic:'rebounds',quoteId:'valid-quote-prop-0001',l5:9,l10:9.2};
 const ml={...main,market:'moneyline',selection:'Memphis Grizzlies',line:null,projection:6.5,
  advantage:null,quoteId:'valid-quote-ml-0001'};
 const board={version:'NBA_DECISION_BOARD_SHADOW_V1',day:date,asOf,
@@ -94,4 +94,41 @@ test('Cron Authorization and time windows fail closed without invoking services'
  assert.equal(checkNbaDecisionCronRequest({...args,now:'2026-11-19T23:35:00Z'}).status,'RUN_ALLOWED');
  assert.equal(checkNbaDecisionCronRequest({...args,mode:'settle',now:'2026-11-19T12:15:00Z'}).status,'RUN_ALLOWED');
  assert.equal(checkNbaDecisionCronRequest({...args,now:'2026-11-19T20:15:00Z'}).status,'OUTSIDE_SCHEDULE_WINDOW');
+});
+
+test('immutable challenger hypotheses exist only where comparable targets are available',()=>{
+ const frozen=planNbaShadowFreeze(board,asOf);
+ assert.equal(frozen.eligible_before_cap,3);
+ assert.equal(frozen.cap,240);
+ const p=frozen.rows.find(x=>x.market==='props');
+ assert.deepEqual(p.evidence.challenger_projections,[
+  {id:'NBA_PROP_BALANCED_50_50_V1',projection:9.1},
+  {id:'NBA_PROP_STABLE_35_65_V1',projection:9.13}
+ ]);
+ const t=frozen.rows.find(x=>x.market==='total');
+ assert.equal(t.evidence.challenger_projections.length,2);
+ assert.equal(t.evidence.challenger_projections[0].id,'NBA_TOTAL_TREND_PLUS10_V1');
+ assert.equal(frozen.rows.find(x=>x.market==='moneyline').evidence.challenger_projections.length,0);
+ assert.ok(t.evidence.challenger_projections.every(x=>Number.isFinite(x.projection)));
+});
+test('fair freeze sampler caps 240 entries and balances 6 games, market groups and stat categories',()=>{
+ const rows=[];
+ for(let game=0;game<6;game++){
+  for(let i=0;i<250;i++){
+   const market=i%4===0?'total':'props';
+   rows.push({forecast_id:String(game).padStart(2,'0')+'-'+String(i).padStart(4,'0'),
+    game_id:12345+game,market,period:market==='total'?'q'+(i%4+1):'ft',
+    statistic:market==='props'?['points','rebounds','assists','threes'][i%4]:null,
+    historical_n:10-i%5,evidence:{estimated_gap:(i%13)/4}});
+  }
+ }
+ const sample=balanceFrozenForecasts(rows);
+ assert.equal(NBA_SHADOW_FREEZE_MAX_PER_RUN,240);
+ assert.equal(sample.length,240);
+ assert.equal(new Set(sample.map(x=>x.forecast_id)).size,240);
+ for(let game=0;game<6;game++)assert.equal(sample.filter(x=>x.game_id===12345+game).length,40);
+ assert.ok(sample.some(x=>x.market==='props'));
+ assert.ok(sample.some(x=>x.market==='total'));
+ assert.deepEqual(sample,balanceFrozenForecasts(rows));
+ assert.throws(()=>balanceFrozenForecasts(rows,500),/INVALID_FREEZE_CAP/);
 });

@@ -1,3 +1,11 @@
+## NBA prospective self-evaluation and eventual multisport reuse — V2 (2026-11-19)
+
+- Gate 1: six-tab NBA board released; GOAT/HoopsAPI historical comparisons stored as research-only hypotheses.
+- Gate 2: freeze up to 240 time-stamped hypotheses per cron slot with fixed candidate predictions recorded in immutable evidence; no provider calls or official model writes.
+- Gate 3: daily settlement uses anti-starvation oldest/newest SQL queue and reports MAE, statistical W/L, unique games and **paired** challenger deltas/uncertainty over the same outcomes.
+- Gate 4 (pending): confirm real freeze + settlement and collect 100+ independent games by market/period, followed by untouched prospective holdout and formal review. No auto-promote merely on exploratory improvement.
+- Only after NBA Gate 4: reuse typed market, quote freshness, player/game ID crosswalk and contract evidence for NHL, NCAAB and further sports independently.
+
 ## Unified sports Decision Boards — NBA first (2026-11-19)
 
 - Implement six-tab NBA board in protected Preview, using archived GOAT/HoopsAPI lines, game/player histories and cautious SHADOW context. No daily Excel is needed for this view.

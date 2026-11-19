@@ -15,6 +15,7 @@ on:
       - 'src/app/api/cron/nba-decision-settle/**'
       - 'src/app/api/nba/decision-learning/**'
       - 'supabase/migrations/20261119185000_nba_decision_shadow_freeze_v1.sql'
+      - 'supabase/migrations/20261119195000_nba_decision_learning_v2_readers.sql'
       - 'vercel.json'
       - 'docs/edge-lab/nba-decision-shadow-learning-20261119.md'
       - 'docs/edge-lab/nba-decision-board-v1-20261119.md'

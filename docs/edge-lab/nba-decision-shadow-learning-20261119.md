@@ -29,3 +29,13 @@ Goal: advance from descriptive NBA Decision Board charts to auditable, prospecti
 4. Merge reviewed PR only after CI and Vercel build pass; production cron remains OFF until exact endpoint and source readiness are checked.
 5. Enable NBA_DECISION_SHADOW_ENABLED only after production gated verification; do not force out-of-schedule provider calls.
 6. Observe at least one freeze and one settlement from real scheduled runs, verify immutable row counts, and compare against existing GOAT results before considering it fully operational.
+
+## V2: queue and preregistered paired challengers (2026-11-19)
+
+- Preserves the existing versioned baseline and all original immutable evidence.
+- Freeze job writes no more than **240 forecasts per scheduled slot**, shared fairly across slate games and market/period groups. Two slots/day cap model output at 480/day; this prevents unbounded props growth and helps per-game independence.
+- Preregisters a small fixed set of **numeric challenger projections** on each eligible forecast before tipoff. For player props: L5/L10 50/50 and 35/65. For period totals: baseline plus or minus 10% of (L5−L10), with the same source and exact contract. These are stored as immutable evidence, **not promoted forecasts**, and never contain a fabricated win probability.
+- New read-only SQL functions `read_nba_decision_unsettled_v1` (350 oldest + 350 newest, excludes already-settled) and `read_nba_decision_learning_metrics_v1` (90-day aggregate) replace the fragile 1000-row settlement scan and incomplete scoreboard. They do not consume GOAT or HoopsAPI calls.
+- Challenger comparisons are paired on the **same frozen forecast/actual result**, aggregated by independent game before estimating difference and approximate CI. A candidate requires at least 100 distinct games plus further independent holdout and policy review. No automatic learning-weight promotion. Small samples and correlated contracts remain research-only.
+- Rollback-only Supabase test verifies read functions, service-role-only grants, exclusion of settled records, paired challenger columns, and leaves no synthetic rows.
+- Trigger existing production cron only on its normal schedule; no off-schedule provider or model writes to prove operation.

@@ -1,7 +1,7 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
-import {planNbaShadowFreeze,settleNbaShadowForecast,summarizeShadowLearning} from '@/lib/nba/decision-learning-core.mjs';
+import {planNbaShadowFreeze,settleNbaShadowForecast} from '@/lib/nba/decision-learning-core.mjs';
 
 function rows(res:any,label:string){if(res.error)throw new Error(label);return res.data??[];}
 function dayPR(date:Date){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);}
@@ -23,6 +23,7 @@ export async function freezeNbaDecisionShadow(now=new Date()){
  if(!plan.rows.length)return {status:'NO_ELIGIBLE_SHADOW_FORECASTS',excluded:plan.excluded,provider_calls:0,writes:0};
  const attempts=await writeIgnoreDuplicates('nba_decision_shadow_forecasts_v1',plan.rows,'forecast_id');
  return {status:'FORECAST_EVIDENCE_PERSISTED',attempted_idempotent_rows:attempts,
+  eligible_before_cap:plan.eligible_before_cap,freeze_cap:plan.cap,
   excluded:plan.excluded,provider_calls:0,official_model_writes:0,calibrated_picks:0};
 }
 async function loadFinal(gameId:number,day:string){
@@ -38,23 +39,21 @@ async function loadFinal(gameId:number,day:string){
  return null;
 }
 export async function settleNbaDecisionShadow(now=new Date()){
- const latest=new Date(now.getTime()-3*60*60000).toISOString();
- const earliest=new Date(now.getTime()-8*24*3600000).toISOString();
- const r=await db.from('nba_decision_shadow_forecasts_v1')
-  .select('forecast_id,model_version,game_id,game_start_at,game_date_local,market,period,side,statistic,player_id,line,projection')
-  .lte('game_start_at',latest).gte('game_start_at',earliest)
-  .order('game_start_at',{ascending:false}).limit(1000).abortSignal(AbortSignal.timeout(11000));
- const frozen=rows(r,'NBA_DECISION_FORECASTS_UNAVAILABLE');
- if(frozen.length>=1000)return {status:'SHADOW_EVALUATION_SCAN_LIMIT',provider_calls:0,writes:0};
- if(!frozen.length)return {status:'NO_FROZEN_SHADOW_ROWS',provider_calls:0,writes:0};
- const existing=new Set<string>();
- for(let i=0;i<frozen.length;i+=100){
-  const ids=frozen.slice(i,i+100).map((x:any)=>x.forecast_id);
-  const t=await db.from('nba_decision_shadow_outcomes_v1').select('forecast_id').in('forecast_id',ids)
-    .abortSignal(AbortSignal.timeout(8000));
-  for(const row of rows(t,'NBA_DECISION_OUTCOME_EXISTING_READ_FAILED'))existing.add(row.forecast_id);
- }
- const pending=frozen.filter((f:any)=>!existing.has(f.forecast_id)).slice(0,350);
+ const before=new Date(now.getTime()-3*60*60000).toISOString();
+ const after=new Date(now.getTime()-21*24*3600000).toISOString();
+ // Two bounded, fair lanes: prevent stale player stats from blocking newly settled games.
+ // This query EXCLUDES already settled rows in SQL; no 1000-row table-scan ceiling.
+ const [oldest,newest]=await Promise.all(['oldest','newest'].map(p_order=>
+  db.rpc('read_nba_decision_unsettled_v1',{
+   p_after:after,p_before:before,p_order,p_limit:350
+  }).abortSignal(AbortSignal.timeout(12000))));
+ const candidates=[...rows(oldest,'NBA_DECISION_PENDING_OLD_READ_FAILED'),
+   ...rows(newest,'NBA_DECISION_PENDING_NEW_READ_FAILED')];
+ const seen=new Set<string>();
+ const pending=candidates.filter((f:any)=>{
+  if(seen.has(f.forecast_id))return false;seen.add(f.forecast_id);return true;
+ });
+ if(!pending.length)return {status:'NO_UNSETTLED_SHADOW_FORECASTS',provider_calls:0,writes:0};
  if(!pending.length)return {status:'ALL_FROZEN_RESULTS_ALREADY_SETTLED',provider_calls:0,writes:0};
  const gameMap=new Map<string,any>();
  for(const f of pending){
@@ -84,18 +83,20 @@ export async function settleNbaDecisionShadow(now=new Date()){
  const attempts=await writeIgnoreDuplicates('nba_decision_shadow_outcomes_v1',results,'forecast_id');
  return {status:'STATISTICAL_OUTCOMES_PERSISTED',pending_seen:pending.length,
    attempted_idempotent_rows:attempts,awaiting_final_or_player_stats:pending.length-results.length,
+   queue_pending_checked:pending.length,
    provider_calls:0,official_model_writes:0};
 }
 export async function readNbaDecisionLearningStatus(){
- const [f,o]=await Promise.all([
-  db.from('nba_decision_shadow_forecasts_v1')
-   .select('forecast_id,model_version,market,period,game_id').order('inserted_at',{ascending:false}).limit(1000),
-  db.from('nba_decision_shadow_outcomes_v1')
-   .select('forecast_id,actual,absolute_error,statistical_result').order('settled_at',{ascending:false}).limit(1000)
- ]);
- const forecasts=rows(f,'NBA_DECISION_SHADOW_STATUS_FORECASTS'),outcomes=rows(o,'NBA_DECISION_SHADOW_STATUS_OUTCOMES');
- return {version:'NBA_DECISION_STATISTICAL_SHADOW_V1',frozenRowsSeen:forecasts.length,outcomesSeen:outcomes.length,
-  metrics:summarizeShadowLearning(forecasts,outcomes),
-  fullHistoryExhaustive:forecasts.length<1000&&outcomes.length<1000,
-  provider_calls:0,model_promotions:0};
+ const since=new Date(Date.now()-90*86400000).toISOString();
+ const result=await db.rpc('read_nba_decision_learning_metrics_v1',{p_since:since})
+   .abortSignal(AbortSignal.timeout(15000));
+ if(result.error||!result.data||typeof result.data!=='object')
+  throw new Error('NBA_DECISION_LEARNING_METRICS_UNAVAILABLE');
+ const m=result.data;
+ return {version:'NBA_DECISION_STATISTICAL_SHADOW_V2',status:m.status,
+  frozenRowsSeen:Number(m.frozen_rows??0),outcomesSeen:Number(m.outcomes_rows??0),
+  lastFrozenAt:m.last_frozen_at??null,lastSettledAt:m.last_settled_at??null,
+  metrics:m.baseline??[],challengerMetrics:m.challengers??[],
+  fullHistoryExhaustive:true,periodSince:since,
+  uncertaintyMethod:m.method,provider_calls:0,model_promotions:0};
 }
