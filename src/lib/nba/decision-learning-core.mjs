@@ -153,7 +153,9 @@ export function settleNbaShadowForecast(forecast,{game,sourceReceivedAt,playerSt
  let actual=null,source='BALLDONTLIE_FINAL_ARCHIVE';
  if(forecast.market==='props'){
   const cols=statsMap[forecast.statistic]??null;
-  if(!cols||!playerStat||Number(playerStat.player_id)!==forecast.player_id||
+  const minutes=playerStat?.minutes_played;
+  if(!cols||typeof minutes!=='number'||!Number.isFinite(minutes)||minutes<=0||
+     Number(playerStat.player_id)!==forecast.player_id||
      Number(playerStat.provider_game_id)!==forecast.game_id||
      !okTime(playerStatReceivedAt)||Date.parse(playerStatReceivedAt)<=Date.parse(forecast.game_start_at))
     return null;

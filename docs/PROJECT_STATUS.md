@@ -3628,3 +3628,9 @@ team/player box scores. No paid plan, models, forecasts or changes to other spor
 - Do not activate new paid odds sources, generate sportsbook price estimates or promote numerical edges; future sampling needs provider entitlement, event/team identity mapping, verified pregame timestamps, bidirectional market contract rules and settled holdout.
 - TT Par/Impar research-only timeline, pregame `emitted_at < scheduled_at`, frozen FORECAST W/L and exact event identity, as-of Nov 19: 265 unique settled events, 176 model wins vs 184 always-ODD wins. Early before 2026-11-12 04:00Z: model 70/109 vs ODD 68/109. Later: model 106/156 vs ODD 116/156. **Split was selected retrospectively**; cannot call it prospective holdout or prove ROI. Original baseline remains for comparison; temporal audit filters time anomalies and quarantines conflicting duplicate events.
 - New TT panel displays early/later/full sample; CI includes `tests/tt-odd-even-temporal-audit.test.mjs`. No database migrations, provider calls, official-pick changes, sportsbook recommendations, model weights or cron modifications.
+
+## NBA and NHL prospective grading audit (2026-11-20)
+
+The NBA compact player archive contains 1,007 zero-minute lines with zero points across 192 games. Require positive playing time before grading a SHADOW prop from either archived source. Newly recorded prop evidence names the player-stat table. At the audit cutoff all 119 outcomes were team contracts. The compact archive matches all 192 indexed player boxscores by row count. An additional 34 stored game contexts need independent final and provenance checks before archival.
+
+NHL V6 now reads finals by the event IDs of its latest 250 freezes in batches of 50. Production baseline on 11 pairs had candidate Brier 0.23062 and log loss 0.65173.

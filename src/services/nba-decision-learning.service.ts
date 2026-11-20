@@ -66,7 +66,7 @@ export async function settleNbaDecisionShadow(now=new Date()){
  const playerRows:any[]=[];
  if(wanted.length&&games.length){
   const t=await db.from('nba_goat_player_game_research_v1')
-    .select('provider_game_id,player_id,source_captured_at,pts,reb,ast,fg3m')
+    .select('provider_game_id,player_id,source_captured_at,minutes_played,pts,reb,ast,fg3m')
     .in('provider_game_id',games).in('player_id',wanted)
     .limit(1000).abortSignal(AbortSignal.timeout(10000));
   playerRows.push(...rows(t,'NBA_DECISION_PLAYER_RESULT_UNAVAILABLE'));
@@ -100,7 +100,8 @@ export async function settleNbaDecisionShadow(now=new Date()){
   const stat=compact??(f.market==='props'?archivedFinals.get(f.game_id+'|'+f.player_id):null);
   const out=settleNbaShadowForecast(f,{game:final.game,sourceReceivedAt:final.receivedAt,
     playerStat:stat??null,playerStatReceivedAt:stat?.source_captured_at??null});
-  if(out)results.push({...out,evidence:{...out.evidence,source_snapshot_id:final.snapshotId}});
+  if(out)results.push({...out,evidence:{...out.evidence,source_snapshot_id:final.snapshotId,
+    ...(f.market==='props'?{player_stat_table:compact?'nba_goat_player_game_research_v1':'nba_game_context_v2'}:{})}});
  }
  if(!results.length)return {status:'RESULTS_NOT_ARCHIVED_YET',pending:pending.length,provider_calls:0,writes:0};
  const attempts=await writeIgnoreDuplicates('nba_decision_shadow_outcomes_v1',results,'forecast_id');

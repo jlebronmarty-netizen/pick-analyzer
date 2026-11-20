@@ -4445,3 +4445,8 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 - Do not activate new paid odds sources, generate sportsbook price estimates or promote numerical edges; future sampling needs provider entitlement, event/team identity mapping, verified pregame timestamps, bidirectional market contract rules and settled holdout.
 - TT Par/Impar research-only timeline, pregame `emitted_at < scheduled_at`, frozen FORECAST W/L and exact event identity, as-of Nov 19: 265 unique settled events, 176 model wins vs 184 always-ODD wins. Early before 2026-11-12 04:00Z: model 70/109 vs ODD 68/109. Later: model 106/156 vs ODD 116/156. **Split was selected retrospectively**; cannot call it prospective holdout or prove ROI. Original baseline remains for comparison; temporal audit filters time anomalies and quarantines conflicting duplicate events.
 - New TT panel displays early/later/full sample; CI includes `tests/tt-odd-even-temporal-audit.test.mjs`. No database migrations, provider calls, official-pick changes, sportsbook recommendations, model weights or cron modifications.
+
+## Prospective grading checkpoints (2026-11-20)
+
+- NBA: compare the Nov 19 frozen props with new statistical outcomes after the Nov 21 scheduled settlement. Verify the DNP stays pending. Reconcile stored player contexts with independent finals before adding any private GOAT raw receipts.
+- NHL: compare exact-event V6 finals at 30 paired games, then validate on a larger prospective holdout. The report covers up to 250 recent freezes.
