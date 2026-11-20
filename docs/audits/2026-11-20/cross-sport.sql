@@ -53,7 +53,7 @@ with identified as (
  where p.created_at<p.scheduled_at and o.observed_at>p.scheduled_at and o.observed_at<='2026-11-20 23:15Z'
  and p.body->>'homeId'=o.body->>'homeId' and p.body->>'awayId'=o.body->>'awayId' and (o.body->>'homeScore')::int<>(o.body->>'awayScore')::int
  union all
- select 'UFC Elo earliest',p.bout_id,p.captured_at,p.id::text,(p.body->>'probabilityA')::numeric,(p.body#>>'{bout,aId}'=r.body->>'winnerId')::int,p.body->>'selectedId',r.body->>'winnerId'
+ select p.body->>'model',p.bout_id,p.captured_at,p.id::text,(p.body->>'probabilityA')::numeric,(p.body#>>'{bout,aId}'=r.body->>'winnerId')::int,p.body->>'selectedId',r.body->>'winnerId'
  from ufc_free_predictions_v1 p join ufc_free_results_v1 r using(bout_id) where p.captured_at<p.scheduled_at and r.captured_at>p.scheduled_at and r.captured_at<='2026-11-20 23:15Z'
  and r.body->>'winnerId' in(p.body#>>'{bout,aId}',p.body#>>'{bout,bId}') and r.body->>'status'='FINAL'
  union all
@@ -80,7 +80,7 @@ with identified as (
  where p.created_at<p.scheduled_at and o.observed_at>p.scheduled_at and o.observed_at<='2026-11-20 23:15Z'
  and p.body->>'homeId'=o.body->>'homeId' and p.body->>'awayId'=o.body->>'awayId' and (o.body->>'homeScore')::int<>(o.body->>'awayScore')::int
  union all
- select 'UFC Elo earliest',p.bout_id,p.captured_at,p.id::text,(p.body->>'probabilityA')::numeric,(p.body#>>'{bout,aId}'=r.body->>'winnerId')::int,p.body->>'selectedId',r.body->>'winnerId'
+ select p.body->>'model',p.bout_id,p.captured_at,p.id::text,(p.body->>'probabilityA')::numeric,(p.body#>>'{bout,aId}'=r.body->>'winnerId')::int,p.body->>'selectedId',r.body->>'winnerId'
  from ufc_free_predictions_v1 p join ufc_free_results_v1 r using(bout_id) where p.captured_at<p.scheduled_at and r.captured_at>p.scheduled_at and r.captured_at<='2026-11-20 23:15Z'
  and r.body->>'winnerId' in(p.body#>>'{bout,aId}',p.body#>>'{bout,bId}') and r.body->>'status'='FINAL'
  union all
@@ -105,5 +105,8 @@ select p.event_id,p.body from ncaab_daily_predictions_v1 p join ncaab_daily_sour
 
 -- Control de la orientación de jugadores en los recibos con desglose de sets.
 select f.event_id,f.participant_a as a,f.participant_b as b,(o.payload#>>'{final,playerA}') as source_a,(o.payload#>>'{final,playerB}') as source_b,(o.payload#>>'{final,setsA}')::int as sets_a,(o.payload#>>'{final,setsB}')::int as sets_b,o.payload->>'actual_label' label from edge_lab_multi_forecasts_v1 f join edge_lab_multi_outcomes_v1 o on o.forecast_id=f.id where f.sport='TT' and f.market='MONEYLINE' and o.payload#>>'{final,source}'='pulsescore:tipsport' order by f.event_id;
+
+-- ufcModelAudit
+select p.body->>'model' model,count(*) forecasts,count(distinct p.bout_id) bouts,count(r.bout_id) final_rows from ufc_free_predictions_v1 p left join ufc_free_results_v1 r using(bout_id) group by 1;
 
 ROLLBACK;

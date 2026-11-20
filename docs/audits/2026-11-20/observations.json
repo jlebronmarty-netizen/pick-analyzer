@@ -2094,7 +2094,16 @@
       "observed_side_frequency": "0.4324"
     },
     {
-      "model": "UFC Elo earliest",
+      "model": "UFC_ELO_K32_FREE_V1",
+      "independent_events": 9,
+      "correct": 6,
+      "hit_rate": "0.6667",
+      "brier": "0.2580",
+      "mean_side_probability": "0.5043",
+      "observed_side_frequency": "0.3333"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
       "independent_events": 9,
       "correct": 6,
       "hit_rate": "0.6667",
@@ -2182,21 +2191,42 @@
       "observed_frequency": "0.500"
     },
     {
-      "model": "UFC Elo earliest",
+      "model": "UFC_ELO_K32_FREE_V1",
       "bin_0_to_4": 1,
       "independent_events": 1,
       "mean_probability": "0.383",
       "observed_frequency": "0.000"
     },
     {
-      "model": "UFC Elo earliest",
+      "model": "UFC_ELO_K32_FREE_V1",
       "bin_0_to_4": 2,
       "independent_events": 7,
       "mean_probability": "0.498",
       "observed_frequency": "0.429"
     },
     {
-      "model": "UFC Elo earliest",
+      "model": "UFC_ELO_K32_FREE_V1",
+      "bin_0_to_4": 3,
+      "independent_events": 1,
+      "mean_probability": "0.671",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "bin_0_to_4": 1,
+      "independent_events": 1,
+      "mean_probability": "0.383",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "bin_0_to_4": 2,
+      "independent_events": 7,
+      "mean_probability": "0.498",
+      "observed_frequency": "0.429"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
       "bin_0_to_4": 3,
       "independent_events": 1,
       "mean_probability": "0.671",
@@ -2240,5 +2270,19 @@
     "mismatch": 0,
     "reverse": 0,
     "bad": 0
-  }
+  },
+  "ufcModelAudit": [
+    {
+      "model": "UFC_ELO_K32_FREE_V1",
+      "forecasts": 21,
+      "bouts": 21,
+      "final_rows": 10
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "forecasts": 26,
+      "bouts": 26,
+      "final_rows": 10
+    }
+  ]
 }

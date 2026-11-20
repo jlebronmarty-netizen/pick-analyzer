@@ -84,9 +84,10 @@ Primera emisión evaluable por modelo y evento, resultado recibido antes de las 
 | NCAAB preseason | 587/757 | 0.1940 | 58.43% | 74.11% |
 | NHL DRatings | 63/111 | 0.2421 | 53.64% | 43.24% |
 | NFL free | 11/15 | 0.2133 | 47.61% | 33.33% |
-| UFC Elo, primera emisión | 6/9 | 0.2580 | 50.43% | 33.33% |
+| UFC Elo V1 | 6/9 | 0.2580 | 50.43% | 33.33% |
+| UFC Elo V2 Identity | 6/9 | 0.2580 | 50.43% | 33.33% |
 
-Por tramos, en NCAAB el lado local promedió 65.8% de probabilidad en 318 juegos del tramo 60–80%, y ganó en 91.2% de ese grupo. La selección de calendarios, rivales y sedes puede influir; este hallazgo por sí solo no especifica una recalibración. MAE de NCAAF (108 juegos por mercado): 13.654 puntos de margen y 13.188 del total. MAE de Table Tennis (283 juegos): 14.334 puntos en el total. El archivo de resultados contiene el desglose por tramos y los conteos para cada operación. [Consultas de contraste entre deportes](cross-sport.sql) · [Resultados](observations.json)
+Las dos versiones UFC se evaluaron por separado sobre los mismos nueve combates. El denominador de esa comparación es nueve. Por tramos, en NCAAB el lado local promedió 65.8% de probabilidad en 318 juegos del tramo 60–80%, y ganó en 91.2% de ese grupo. La selección de calendarios, rivales y sedes puede influir; este hallazgo por sí solo no especifica una recalibración. MAE de NCAAF (108 juegos por mercado): 13.654 puntos de margen y 13.188 del total. MAE de Table Tennis (283 juegos): 14.334 puntos en el total. El archivo de resultados contiene el desglose por tramos y los conteos para cada operación. [Consultas de contraste entre deportes](cross-sport.sql) · [Resultados](observations.json)
 
 ## Hallazgos, corrección y riesgo residual
 
