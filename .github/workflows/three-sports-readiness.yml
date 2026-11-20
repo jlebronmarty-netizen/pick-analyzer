@@ -1,0 +1,32 @@
+name: Soccer UFC ATP source readiness safety
+on:
+  pull_request:
+    paths:
+      - 'src/lib/three-sports-readiness.mjs'
+      - 'src/services/three-sports-readiness.service.ts'
+      - 'src/app/api/operations/soccer-ufc-atp/route.ts'
+      - 'tests/three-sports-readiness.test.mjs'
+      - '.github/workflows/three-sports-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Three sports readiness and original UFC ATP Soccer safety
+        run: node --test tests/three-sports-readiness.test.mjs tests/tennis-free/contract.test.mjs tests/ufc/identity-v2.test.mjs
+      - name: Dashboard multisport regression
+        run: npm run test:dashboard-multisport
+      - name: TypeScript verification
+        run: npx tsc --noEmit --pretty false
