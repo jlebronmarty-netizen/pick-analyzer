@@ -6,11 +6,18 @@ const date = x => typeof x==='string'&&Number.isFinite(Date.parse(x))?Date.parse
 const minutes = x => x==='0'||x===0?0:typeof x==='string'&&/^\d{1,3}:([0-5]\d)$/.test(x)?
   Number(x.split(':')[0])*60+Number(x.split(':')[1]):null;
 const FIELDS=['pts','reb','ast','fg3m'];
+function teamId(game,side){
+  const field=side==='home'?'home_team_id':'visitor_team_id';
+  const nested=side==='home'?'home_team':'visitor_team';
+  const direct=integer(game?.[field]),embedded=integer(game?.[nested]?.id);
+  if(direct!==null&&embedded!==null&&direct!==embedded)return null;
+  return direct??embedded;
+}
 const sameGame=(a,b)=>integer(a?.id)===integer(b?.id)&&
   a?.date===b?.date && a?.datetime===b?.datetime &&
   a?.status_state==='final'&&b?.status_state==='final' &&
-  integer(a?.home_team_id)===integer(b?.home_team_id)&&
-  integer(a?.visitor_team_id)===integer(b?.visitor_team_id)&&
+  teamId(a,'home')!==null&&teamId(a,'home')===teamId(b,'home')&&
+  teamId(a,'visitor')!==null&&teamId(a,'visitor')===teamId(b,'visitor')&&
   integer(a?.home_team_score)===integer(b?.home_team_score)&&
   integer(a?.visitor_team_score)===integer(b?.visitor_team_score);
 export function verifiedArchivedPlayerFinal({context,final,providerGameId}={}){
@@ -24,7 +31,7 @@ export function verifiedArchivedPlayerFinal({context,final,providerGameId}={}){
      !Number.isSafeInteger(integer(game?.visitor_team_score))||
      integer(game.home_team_score)<0||integer(game.visitor_team_score)<0||
      game.status_state!=='final'||game.postponed===true)return null;
-  const homeId=integer(game.home_team_id),awayId=integer(game.visitor_team_id);
+  const homeId=teamId(game,'home'),awayId=teamId(game,'visitor');
   if(homeId===null||awayId===null||homeId===awayId)return null;
   const seen=new Set(),count=new Map([[homeId,0],[awayId,0]]),
     sum=new Map([[homeId,0],[awayId,0]]),playerRows=new Map();
