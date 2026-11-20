@@ -1,6 +1,8 @@
 // NBA Decision Board V1: read-only, evidence-driven, non-calibrated.
 import {rankNbaPreferredSides} from './decision-preference-core.mjs';
-export const BOARD_VERSION='NBA_DECISION_BOARD_SHADOW_V1';
+import {indexEvidence, teamWindow, playerWindow, readableWindow, marketQuality} from './decision-integrity.mjs';
+import {hasValidatedInputs} from '../data-quality/window.mjs';
+export const BOARD_VERSION='NBA_DECISION_BOARD_SHADOW_V2_INTEGRITY';
 export const BOARD_PERIODS=Object.freeze(['ft','q1','q2','q3','q4','h1','h2']);
 const supportedStats=Object.freeze({
  points:['pts'],rebounds:['reb'],assists:['ast'],threes:['fg3m'],
@@ -21,7 +23,7 @@ function observedGame(entry){
  if(!g||String(g.status_state).toLowerCase()!=='final'||!iso(g.datetime))return null;
  const qh=[g.home_q1,g.home_q2,g.home_q3,g.home_q4].map(num),
  qa=[g.visitor_q1,g.visitor_q2,g.visitor_q3,g.visitor_q4].map(num);
- if([...qh,...qa].some(v=>v===null||v<0))return null;
+ if([...qh,...qa].some(v=>!Number.isSafeInteger(v)||v<0))return null;
  const ho=['home_ot1','home_ot2','home_ot3'].reduce((v,k)=>v+(num(g[k])??0),0);
  const ao=['visitor_ot1','visitor_ot2','visitor_ot3'].reduce((v,k)=>v+(num(g[k])??0),0);
  if(qh.reduce((a,b)=>a+b,0)+ho!==num(g.home_team_score)||
@@ -39,13 +41,13 @@ function periodValue(g,side,period){
  return null;
 }
 function pastScores(history,id,period,currentDay){
- return history.filter(g=>g.day<currentDay&&(g.home===id||g.away===id)).sort((a,b)=>b.t-a.t)
+ return history.filter(g=>g.t<currentDay&&(g.home===id||g.away===id)).sort((a,b)=>b.t-a.t)
    .map(g=>{const own=g.home===id?'home':'away',other=own==='home'?'away':'home';
      return {scored:periodValue(g,own,period),allowed:periodValue(g,other,period)};});
 }
 export function projectedPeriod(game,history,period){
- const h=pastScores(history,num(game.home_team?.id),period,game.date);
- const a=pastScores(history,num(game.visitor_team?.id),period,game.date);
+ const h=pastScores(history,num(game.home_team?.id),period,Date.parse(game.datetime));
+ const a=pastScores(history,num(game.visitor_team?.id),period,Date.parse(game.datetime));
  if(h.length<5||a.length<5)return {ready:false,reason:'INSUFFICIENT_TEAM_HISTORY',nHome:h.length,nAway:a.length};
  const weighted=(xs,key)=>.4*avg(xs.slice(0,5).map(x=>x[key]))+.6*avg(xs.slice(0,10).map(x=>x[key]));
  const home=.5*weighted(h,'scored')+.5*weighted(a,'allowed');
@@ -61,8 +63,17 @@ function eventKey(g){return String(g.id);}
 function sideName(g,side){return side==='home'?g.home_team.full_name:side==='away'?g.visitor_team.full_name:side;}
 function latestUniqueQuotes(list,keyFn){
  const sorted=list.slice().sort((a,b)=>Date.parse(b.source_received_at??'')-Date.parse(a.source_received_at??''));
- const seen=new Set(),res=[];
- for(const q of sorted){const key=keyFn(q);if(seen.has(key))continue;seen.add(key);res.push(q);}
+ const seen=new Map(),res=[];
+ for(const q of sorted){
+  const key=keyFn(q),prior=seen.get(key);
+  if(prior){
+   if(Date.parse(prior.source_received_at)===Date.parse(q.source_received_at) &&
+      (prior.line!==q.line || prior.american_odds!==q.american_odds || prior.contract!==q.contract))
+     prior.ambiguousPrice=true;
+   continue;
+  }
+  const copy={...q};seen.set(key,copy);res.push(copy);
+ }
  return res;
 }
 export function matchHoopsCapture(games,capture){
@@ -83,7 +94,7 @@ export function buildPlayerProjection(quote,playerHistory,gameStart,asOf){
  const parts=supportedStats[statistic];
  const line=num(quote.line),id=num(quote.player_id),side=String(quote.side).toLowerCase();
  if(!parts||!Number.isSafeInteger(id)||line===null||!['over','under'].includes(side)||
-    quote.period!=='FULL_GAME_LABEL_OT_UNVERIFIED' ||
+    !['FULL_GAME_LABEL_OT_UNVERIFIED','FULL_GAME_INCLUDING_OT'].includes(quote.period) ||
     !['STRICT_GREATER_THAN','STRICT_LESS_THAN'].includes(quote.contract) ||
     quote.contract!==(side==='over'?'STRICT_GREATER_THAN':'STRICT_LESS_THAN'))
    return {ready:false,reason:'UNSUPPORTED_PROP_CONTRACT'};
@@ -112,7 +123,7 @@ export function buildPlayerProjection(quote,playerHistory,gameStart,asOf){
 }
 function freshness(capturedAt,now,minutes){
  const age=(now-Date.parse(capturedAt??''))/60000;
- return Number.isFinite(age)&&age>=-2&&age<=minutes?'RECENT':'STALE_OR_FUTURE';
+ return Number.isFinite(age)&&age>=0&&age<=minutes?'RECENT':'STALE_OR_FUTURE';
 }
 function baseRow(g,market,period,side,source,q,projection,advantage,extra={}){
  const label=side==='home'||side==='away'?sideName(g,side):side==='over'?'Over':'Under';
@@ -127,14 +138,19 @@ function baseRow(g,market,period,side,source,q,projection,advantage,extra={}){
 /** @param {any} input */
 export function buildNbaDecisionBoard({
  scheduleGames=[],historyFinals=[],goatMainQuotes=[],goatPropQuotes=[],playerHistory=[],playerNames={},
- hoopsCapture=null,asOf=new Date().toISOString()
+ calendar=null,manifests=[],contexts=[],pregame=null,hoopsCapture=null,asOf=new Date().toISOString()
 }={}){
  const now=Date.parse(asOf);
  if(!Number.isFinite(now))throw new Error('INVALID_ASOF');
  const day=prDay(asOf);
- const games=scheduleGames.filter(g=>g?.date===day&&iso(g.datetime)&&['scheduled','in_progress'].includes(g.status_state))
+ const games=scheduleGames.filter(g=>iso(g?.datetime)&&prDay(g.datetime)===day&&g.postponed!==true&&['scheduled','in_progress'].includes(g.status_state))
     .sort((a,b)=>Date.parse(a.datetime)-Date.parse(b.datetime));
- const history=historyFinals.map(observedGame).filter(Boolean);
+ const evidenceIndex=indexEvidence({calendar,playerHistory,manifests,contexts,pregame,asOf});
+ const history=(calendar?.games??historyFinals).map(observedGame).filter(Boolean);
+ const validFinalIds=new Set(history.map(g=>g.id));
+ const historyEvidence={};
+ const windowKey=(game,player,stat)=>[game.id,player,stat].join('|');
+ const computedPlayers=new Map();
  const rows={ml:[],spread:[],total:[],props:[],periods:[]},projected={};
  const {mapped:hoopsMap,unmatched}=matchHoopsCapture(games,hoopsCapture?.normalized??hoopsCapture);
  const goGameIds=new Set(games.map(g=>String(g.id)));
@@ -144,7 +160,17 @@ export function buildNbaDecisionBoard({
    q=>[q.provider_game_id,q.player_id,q.statistic,q.side,q.line,q.period].join('|'));
  const sourceHoops=hoopsCapture?.normalized??hoopsCapture??{};
  for(const g of games){
-  const p={};for(const period of BOARD_PERIODS)p[period]=projectedPeriod(g,history,period);projected[g.id]=p;
+  const homeWindow=teamWindow(evidenceIndex,g,g.home_team.id,validFinalIds);
+  const awayWindow=teamWindow(evidenceIndex,g,g.visitor_team.id,validFinalIds);
+  const teamKey=windowKey(g,'teams','all');
+  historyEvidence[teamKey]={home:homeWindow,away:awayWindow};
+  const teamWindows=[homeWindow,awayWindow];
+  const priorIds=new Set(teamWindows.flatMap(h=>h.included.map(x=>x.id)));
+  const prior=history.filter(h=>priorIds.has(h.id));
+  const p={};
+  for(const period of BOARD_PERIODS) p[period]=teamWindows.every(readableWindow)
+    ? projectedPeriod(g,prior,period) : {ready:false,reason:teamWindows.find(h=>!readableWindow(h)).status};
+  projected[g.id]=p;
   for(const q of dedupMain.filter(x=>String(x.provider_game_id)===String(g.id))) {
    if(!['moneyline','spread','total'].includes(q.market))continue;
    if(!['home','away','over','under'].includes(q.side))continue;
@@ -158,17 +184,29 @@ export function buildNbaDecisionBoard({
    const row=baseRow(g,q.market,'ft',q.side,'GOAT',q,proj,edge,{method:stat.ready?stat.method:null,
     l5:stat.ready?round((stat.homeL5+stat.awayL5)):null,l10:stat.ready?round(stat.homeL10+stat.awayL10):null,
     sample:stat.ready?Math.min(stat.nHome,stat.nAway):null,reason:stat.ready?'NO_CALIBRATED_PROBABILITY':stat.reason,
+    dataQuality:marketQuality(q,g,evidenceIndex,teamWindows),historyKey:teamKey,
     quoteFreshness:freshness(q.source_received_at,now,180)});
    rows[tab].push(row);
   }
   for(const q of dedupProps.filter(x=>String(x.provider_game_id)===String(g.id))) {
-   if(!['over','under'].includes(q.side)||q.period!=='FULL_GAME_LABEL_OT_UNVERIFIED')continue;
-   const evidence=buildPlayerProjection(q,playerHistory,Date.parse(g.datetime),now);
+   if(!['over','under'].includes(q.side)||!['FULL_GAME_LABEL_OT_UNVERIFIED','FULL_GAME_INCLUDING_OT'].includes(q.period))continue;
+   const key=windowKey(g,q.player_id,q.statistic);
+   if(!computedPlayers.has(key)){
+    const window=playerWindow(evidenceIndex,g,num(q.player_id),supportedStats[q.statistic]??[]);
+    historyEvidence[key]={player:window};
+    const ids=new Set(window.included.map(x=>x.id));
+    computedPlayers.set(key,{window,records:(evidenceIndex.compact.get(num(q.player_id))??[])
+      .filter(r=>ids.has(r.provider_game_id)&&r.season===g.season&&Date.parse(r.materialized_at)<=now)});
+   }
+   const {window,records}=computedPlayers.get(key);
+   const evidence=readableWindow(window)?buildPlayerProjection(q,records,Date.parse(g.datetime),now):
+    {ready:false,reason:window.status,n:window.included.length};
    const teamValid=evidence.ready && [num(g.home_team.id),num(g.visitor_team.id)].includes(evidence.lastTeamId);
    const proj=teamValid?evidence.projection:null,edge=proj===null?null:q.side==='over'?proj-num(q.line):num(q.line)-proj;
    const name=playerNames[String(q.player_id)]??'Jugador ID '+q.player_id;
    const row=baseRow(g,'props','ft',q.side,'GOAT',q,proj,edge,{
     label:name+' · '+q.statistic+' '+q.side.toUpperCase(),playerName:name,playerId:num(q.player_id),
+    historyKey:key,dataQuality:marketQuality(q,g,evidenceIndex,[window]),
     statistic:q.statistic,l5:evidence.ready?evidence.l5:null,l10:evidence.ready?evidence.l10:null,
     minutesL5:evidence.minutesL5??null,minutesL10:evidence.minutesL10??null,
     hit5:evidence.hit5??null,hit10:evidence.hit10??null,sample:evidence.n??null,
@@ -193,6 +231,8 @@ export function buildNbaDecisionBoard({
    sample:period.ready?Math.min(period.nHome,period.nAway):null,
    method:period.ready?period.method:null,
    reason:period.ready?'NO_CALIBRATED_PROBABILITY':period.reason,
+   historyKey:windowKey(g,'teams','all'),
+   dataQuality:marketQuality(q,g,evidenceIndex,Object.values(historyEvidence[windowKey(g,'teams','all')])),
    quoteFreshness:freshness(q.source_received_at,now,360),
    label:(q.market==='team_total_home'?g.home_team.full_name+' ':q.market==='team_total_away'?g.visitor_team.full_name+' ':'')+
      (q.side==='home'||q.side==='away'?sideName(g,q.side):q.side==='over'?'Over':'Under')});
@@ -204,6 +244,7 @@ export function buildNbaDecisionBoard({
  }
  const all=[...rows.ml,...rows.spread,...rows.total,...rows.props,...rows.periods];
  for(const r of all){
+  if(!hasValidatedInputs(r)){r.reason=r.dataQuality.status;continue;}
   if(r.projection===null||r.advantage===null||r.quoteFreshness!=='RECENT'||r.sample<5)continue;
   const historic=typeof r.hit10==='number'&&r.sample>=8?r.hit10/r.sample:null;
   const scale=r.market==='props'?Math.max(1,r.projection*.25):r.period==='ft'?12:7;
@@ -216,7 +257,8 @@ export function buildNbaDecisionBoard({
  }
  const ranked=rankNbaPreferredSides(rows,asOf);
  const counts=Object.fromEntries(Object.entries(rows).map(([k,v])=>[k,v.length]));
- return {version:BOARD_VERSION,asOf,day,summary:{
+ return {version:BOARD_VERSION,asOf,day,historyEvidence,summary:{
+  qualityCounts:all.reduce((counts,r)=>{const k=r.dataQuality.status;counts[k]=(counts[k]??0)+1;return counts;},{}),
   games:games.length,historyGames:history.length,markets:counts,preferredMarkets:ranked.summary.preferredByMarket,
   rawSideCount:ranked.summary.evaluatedSides,withoutPreferredContract:ranked.summary.withNoPreferredContract,
   watchCandidates:ranked.top25.length,

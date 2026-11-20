@@ -1,0 +1,23 @@
+{
+  "forecast_id": "687c202e313d6ca8f9beffe660d1d645f16df1af53e910c08501441d1fe78c79",
+  "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+  "decision_at": "2026-11-20 15:35:09.314+00",
+  "game_id": 21718150,
+  "game_start_at": "2026-11-21 00:30:00+00",
+  "game_date_local": "2026-11-20",
+  "market": "props",
+  "period": "ft",
+  "side": "over",
+  "statistic": "assists",
+  "player_id": 1028038426,
+  "line": "4.500",
+  "american_odds": -160,
+  "quote_id": "422b8758dbfc9a8e3d041df0ddd068d408697aa56ddcf8d420173d78ca2696ee",
+  "quote_source": "GOAT",
+  "quote_captured_at": "2026-11-20 15:30:33.992+00",
+  "projection": "8.210",
+  "l5": "8.800",
+  "l10": "7.100",
+  "historical_n": 10,
+  "row_fingerprint": "55eb0c114238577d4e8023f29b3968af"
+}

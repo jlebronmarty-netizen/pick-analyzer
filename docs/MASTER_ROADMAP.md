@@ -1,3 +1,7 @@
+## 2026-11-20 · Verificación de datos antes de clasificar oportunidades
+
+NBA tiene un adaptador implementado en rama de revisión. Las siguientes dependencias son la revisión de cobertura de originales y del contrato OT, reconciliación propuesta de dos partidos, y adaptadores de calendario y disponibilidad por deporte. Cualquier backfill o despliegue requiere aprobación separada. [Informe y evidencia](audits/2026-11-20/README.md)
+
 ## NBA: only one preferred side (2026-11-19)
 - Present up to 25 distinct SHADOW study opportunities sorted by explicit favorable conditions; each market tab only shows one eligible side per contract, otherwise PASAR.
 - Keep all original quote sides in the research archive, freeze/settlement input unchanged; never equate a ranking position with calibrated probability or positive expected value.

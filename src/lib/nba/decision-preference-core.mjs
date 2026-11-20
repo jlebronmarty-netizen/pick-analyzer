@@ -1,3 +1,4 @@
+import {hasValidatedInputs} from '../data-quality/window.mjs';
 // NBA Preferred Side V1: purely presentational, never changes the frozen forecast input.
 // A lead is a research WATCH signal, never a calibrated probability, EV, official bet or guaranteed event.
 export const NBA_PREFERRED_SIDE_VERSION='NBA_PREFERRED_SIDE_RESEARCH_VIEW_V1';
@@ -41,7 +42,7 @@ function lineAligned(row,value){
 }
 function preferenceCandidate(r,asOf){
  const now=Date.parse(asOf);
- if(!Number.isFinite(now)||!r||!Number.isFinite(Date.parse(r.startsAt??''))||
+ if(!Number.isFinite(now)||!hasValidatedInputs(r)||!Number.isFinite(Date.parse(r.startsAt??''))||
     now>=Date.parse(r.startsAt)-10*60000)return null;
  if(r.quoteFreshness!=='RECENT'||!finite(r.odds)||Math.abs(r.odds)<100||
     !finite(r.projection)||!Number.isInteger(r.sample)||r.sample<5||

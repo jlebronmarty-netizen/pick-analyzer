@@ -1,7 +1,7 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
-import {planNbaShadowFreeze,settleNbaShadowForecast} from '@/lib/nba/decision-learning-core.mjs';
+import {planNbaShadowFreeze,settleNbaShadowForecast,concordantPlayerFinal} from '@/lib/nba/decision-learning-core.mjs';
 import {verifiedArchivedPlayerFinal} from '@/lib/nba/decision-archived-final-core.mjs';
 
 function rows(res:any,label:string){if(res.error)throw new Error(label);return res.data??[];}
@@ -55,7 +55,6 @@ export async function settleNbaDecisionShadow(now=new Date()){
   if(seen.has(f.forecast_id))return false;seen.add(f.forecast_id);return true;
  });
  if(!pending.length)return {status:'NO_UNSETTLED_SHADOW_FORECASTS',provider_calls:0,writes:0};
- if(!pending.length)return {status:'ALL_FROZEN_RESULTS_ALREADY_SETTLED',provider_calls:0,writes:0};
  const gameMap=new Map<string,any>();
  for(const f of pending){
   const key=f.game_date_local+'|'+f.game_id;
@@ -75,12 +74,17 @@ export async function settleNbaDecisionShadow(now=new Date()){
  // the separate GOAT compact research materialization.
  // Never use a partial/identity-conflicted game or zero-minute player.
  const archivedFinals=new Map<string,any>();
- if(games.length>0&&games.length<=16){
+ for(let i=0;i<games.length;i+=16){
+  const batch=games.slice(i,i+16);
   const r=await db.from('nba_game_context_v2')
    .select('provider_game_id,player_stats,player_stats_captured_at')
-   .in('provider_game_id',games).not('player_stats','is',null)
-   .limit(16).abortSignal(AbortSignal.timeout(10000));
-  for(const context of rows(r,'NBA_DECISION_CONTEXT_FINAL_UNAVAILABLE')){
+   .in('provider_game_id',batch).not('player_stats','is',null)
+   .lte('player_stats_captured_at',now.toISOString())
+   .limit(batch.length+1).abortSignal(AbortSignal.timeout(10000));
+  const contexts=rows(r,'NBA_DECISION_CONTEXT_FINAL_UNAVAILABLE');
+  if(contexts.length>batch.length)continue;
+  for(const context of contexts){
+   if(contexts.filter((x:any)=>x.provider_game_id===context.provider_game_id).length!==1)continue;
    const gameId=Number(context.provider_game_id);
    const gameRecord=[...gameMap.entries()].find(([k,v])=>v&&k.endsWith('|'+gameId))?.[1];
    if(!gameRecord)continue;
@@ -93,21 +97,23 @@ export async function settleNbaDecisionShadow(now=new Date()){
   }
  }
  const results=[];
+ let awaitingVerifiedProps=0;
  for(const f of pending){
   const final=gameMap.get(f.game_date_local+'|'+f.game_id);
   if(!final)continue;
   const compact=f.market==='props'?playerRows.find(x=>Number(x.player_id)===Number(f.player_id)&&Number(x.provider_game_id)===Number(f.game_id)):null;
-  const stat=compact??(f.market==='props'?archivedFinals.get(f.game_id+'|'+f.player_id):null);
+  const stat=f.market==='props'?concordantPlayerFinal(f.statistic,compact,archivedFinals.get(f.game_id+'|'+f.player_id)):null;
+  if(f.market==='props'&&!stat){awaitingVerifiedProps++;continue;}
   const out=settleNbaShadowForecast(f,{game:final.game,sourceReceivedAt:final.receivedAt,
     playerStat:stat??null,playerStatReceivedAt:stat?.source_captured_at??null});
   if(out)results.push({...out,evidence:{...out.evidence,source_snapshot_id:final.snapshotId,
-    ...(f.market==='props'?{player_stat_table:compact?'nba_goat_player_game_research_v1':'nba_game_context_v2'}:{})}});
+    ...(f.market==='props'?{player_stat_table:'nba_game_context_v2',compact_corroborated:Boolean(compact)}:{})}});
  }
- if(!results.length)return {status:'RESULTS_NOT_ARCHIVED_YET',pending:pending.length,provider_calls:0,writes:0};
+ if(!results.length)return {status:'RESULTS_NOT_ARCHIVED_YET',pending:pending.length,awaiting_verified_props:awaitingVerifiedProps,provider_calls:0,writes:0};
  const attempts=await writeIgnoreDuplicates('nba_decision_shadow_outcomes_v1',results,'forecast_id');
  return {status:'STATISTICAL_OUTCOMES_PERSISTED',pending_seen:pending.length,
    attempted_idempotent_rows:attempts,awaiting_final_or_player_stats:pending.length-results.length,
-   queue_pending_checked:pending.length,
+   awaiting_verified_props:awaitingVerifiedProps,queue_pending_checked:pending.length,
    provider_calls:0,official_model_writes:0};
 }
 export async function readNbaDecisionLearningStatus(){

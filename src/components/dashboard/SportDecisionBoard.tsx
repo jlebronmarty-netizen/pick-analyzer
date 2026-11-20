@@ -1,6 +1,8 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 
+import {hasValidatedInputs} from '@/lib/data-quality/window.mjs';
+
 export type SportDecisionMarket='ml'|'oneXTwo'|'spread'|'total'|'special'|'props'|'periods';
 export type SportDecisionRow={
  id:string;market:SportDecisionMarket;matchup:string;selection:string;
@@ -8,14 +10,16 @@ export type SportDecisionRow={
  startsAt?:string|null;capturedAt?:string|null;
  line?:number|null;odds?:number|null;projection?:string|null;
  probability?:number|null;gap?:number|null;gapUnit?:string|null;
+ dataQuality?:{status:string;issues:{reason:string}[]};
  evidence?:string|null;note?:string|null;eligible:boolean;
 };
 const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['oneXTwo','1X2'],['spread','Spread'],['total','Total'],['special','Par/Impar sets'],['props','Player props'],['periods','Cuartos / Mitades']];
 const isNumber=(n:number|null|undefined):n is number=>typeof n==='number'&&Number.isFinite(n);
 const date=(iso?:string|null)=>iso?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(iso)):'Sin fecha';
-export default function SportDecisionBoard({sport,rows,description,marketNotes={}}:{
+export default function SportDecisionBoard({sport,rows:sourceRows,description,marketNotes={}}:{
  sport:string;rows:SportDecisionRow[];description?:string;marketNotes?:Partial<Record<SportDecisionMarket,string>>;
 }){
+ const rows=useMemo(()=>sourceRows.map(r=>({...r,eligible:r.eligible&&hasValidatedInputs(r)})),[sourceRows]);
  const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':['ml','oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
  const [expanded,setExpanded]=useState(false);
  // Async sport ledgers can arrive after initial render. Select their first populated market
@@ -74,7 +78,7 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
      <div><dt className="text-xs text-slate-400">Probabilidad del modelo</dt><dd className="font-semibold">{isNumber(r.probability)?(r.probability*100).toFixed(1)+'%':'Sin calibrar'}</dd></div>
     </dl>
     <p className="mt-3 text-xs text-slate-400">Inicio {date(r.startsAt)} · Captura {date(r.capturedAt)}</p>
-    <p className="mt-2 text-xs text-amber-200">{r.evidence??'Evidencia de modelo sin certificación de valor.'}</p>
+    <p className="mt-2 text-xs text-amber-200">{r.evidence??'Evidencia de modelo sin certificación de valor.'} · Calidad: {r.dataQuality?.status??'Pendiente de verificar historial y contrato'}</p>
     {r.note&&<details className="mt-2 text-xs text-slate-300"><summary className="cursor-pointer text-teal-300">Ver contexto</summary><p className="mt-2 leading-5">{r.note}</p></details>}
    </article>)}
   </div>:<p role="status" className="rounded-xl border border-slate-700 p-5 text-sm text-slate-300">{tab==='top'?'No hay oportunidades elegibles y verificadas en este deporte. No se fuerza una selección.':marketNotes[tab as SportDecisionMarket]?'Sin selecciones publicables en este mercado. Consulta el estado de investigación indicado arriba.':'Este mercado no tiene contratos o proyecciones verificadas para mostrar aquí.'}</p>}

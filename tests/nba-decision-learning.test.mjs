@@ -6,7 +6,7 @@ import {checkNbaDecisionCronRequest} from '../src/lib/nba/decision-cron-auth.mjs
 
 const captureTime='2026-11-19T19:15:00Z',asOf='2026-11-19T19:25:00Z';
 const tip='2026-11-20T01:00:00Z',date='2026-11-19';
-const main={gameId:21718143,matchup:'Golden State Warriors @ Memphis Grizzlies',market:'total',period:'ft',
+const main={dataQuality:{status:'VALIDATED',issues:[]},gameId:21718143,matchup:'Golden State Warriors @ Memphis Grizzlies',market:'total',period:'ft',
  selection:'Over',line:220.5,odds:-110,projection:225.6,advantage:5.1,
  quoteId:'valid-quote-total-0001',capturedAt:captureTime,quoteFreshness:'RECENT',
  source:'GOAT',sample:8,l5:226,l10:221};

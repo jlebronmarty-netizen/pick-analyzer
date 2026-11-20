@@ -4,7 +4,7 @@ import {visibleNbaPreferredRows} from '../src/lib/nba/decision-visible-core.mjs'
 
 const preference={evidenceScope:'DESCRIPTIVE_SHADOW_NOT_PROBABILITY',numericGap:2.5,sortIndex:310,favorableCount:3};
 const make=(id,changes={})=>({
- id,gameId:'game1',market:'spread',period:'q2',selection:id,line:.5,
+ id,dataQuality:{status:'VALIDATED',issues:[]},gameId:'game1',market:'spread',period:'q2',selection:id,line:.5,
  classification:'VIGILAR',preference:{...preference},...changes
 });
 test('all six board tabs accept only validated favorable SHADOW preferences, not PASAR or raw rows',()=>{

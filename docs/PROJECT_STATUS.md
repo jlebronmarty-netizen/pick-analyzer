@@ -1,3 +1,7 @@
+## 2026-11-20 · Integridad de historiales y contratos NBA
+
+Rama de revisión con el incidente de Jamal Shead reproducido en dos cortes, bloqueo del Top/SHADOW ante partidos faltantes y cotejo de originales. El informe documenta el alcance, las regresiones y los riesgos pendientes por deporte. [Informe y evidencia](audits/2026-11-20/README.md)
+
 ## NBA Decision Board: preferred side per contract (2026-11-19)
 - New research-only preferredRows selects ONE side per game/market/period/contract using historical evidence gates, L5/L10 agreement where meaningful, captured FanDuel odds, and stable minute evidence for props.
 - Rank by count of favorable conditions, not win probabilities; omit unqualified contracts as PASAR. No fake EV, sportsbook availability, model promotion or changes to underlying frozen forecasts/settlement.

@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {buildNbaDecisionBoard,buildPlayerProjection,matchHoopsCapture,projectedPeriod} from '../src/lib/nba/decision-board-core.mjs';
 
 const TODAY='2026-11-19',START='2026-11-20T01:00:00Z',ASOF='2026-11-19T19:00:00Z';
-const g={id:123,date:TODAY,datetime:START,status_state:'scheduled',
+const g={season:2026,postseason:false,id:123,date:TODAY,datetime:START,status_state:'scheduled',
  home_team:{id:10,full_name:'Memphis Grizzlies'},visitor_team:{id:2,full_name:'Golden State Warriors'}};
 function history(){
- const arr=[];for(let n=1;n<=8;n++){const d='2026-11-'+String(n).padStart(2,'0');
-  arr.push({game:{id:1000+n,date:d,datetime:d+'T21:00:00Z',status_state:'final',
+ const arr=[];for(let n=1;n<=10;n++){const d='2026-11-'+String(n).padStart(2,'0');
+  arr.push({game:{season:2026,postseason:false,id:1000+n,date:d,datetime:d+'T21:00:00Z',status_state:'final',
    home_team:{id:10},visitor_team:{id:2},home_q1:30,home_q2:26,home_q3:29,home_q4:25,
    visitor_q1:26,visitor_q2:25,visitor_q3:23,visitor_q4:27,
    home_team_score:110,visitor_team_score:101}});
@@ -25,7 +25,7 @@ const hoop={normalized:{captured_at:ASOF,games:[{provider_game_id:'hoop001',home
  quotes:[{provider_game_id:'hoop001',quote_id:'h1total',market:'total',period:'h1',side:'over',line:106.5,american_odds_approx:-110,source_received_at:ASOF},
  {provider_game_id:'hoop001',quote_id:'q1home',market:'spread',period:'q1',side:'home',line:-2.5,american_odds_approx:-110,source_received_at:ASOF}]}};
 test('all six tabs have rows, prices and never claim calibration',()=>{
- const report=buildNbaDecisionBoard({scheduleGames:[g],historyFinals:history(),goatMainQuotes:prices,
+ const report=buildNbaDecisionBoard({scheduleGames:[g],calendar:{games:history().map(x=>({...x,capturedAt:ASOF})),issues:[]},historyFinals:history(),goatMainQuotes:prices,
   goatPropQuotes:[q],playerHistory:playerRows(),playerNames:{40:'Verified Player'},hoopsCapture:hoop,asOf:ASOF});
  assert.equal(report.summary.games,1);
  assert.equal(report.summary.matchedHoopsGames,1);
@@ -35,7 +35,7 @@ test('all six tabs have rows, prices and never claim calibration',()=>{
  assert.equal(report.rows.props.length,1);
  assert.equal(report.rows.periods.length,2);
  const prop=report.rows.props[0];
- assert.equal(prop.playerName,'Verified Player');assert.equal(prop.l5,9);assert.equal(prop.hit10,8);
+ assert.equal(prop.playerName,'Verified Player');assert.equal(prop.l5,null);assert.equal(prop.dataQuality.status,'INCOMPLETE_HISTORY');
  for(const a of Object.values(report.rows))for(const row of a){
   assert.equal(row.probability,null);assert.equal(row.expectedValue,null);
   assert.notEqual(row.classification,'PICK');assert.equal(row.regionVerified,false);
@@ -45,11 +45,11 @@ test('all six tabs have rows, prices and never claim calibration',()=>{
 });
 test('past scores only: change or add future finals and current projections remain identical',()=>{
  const h=history();
- const before=buildNbaDecisionBoard({scheduleGames:[g],historyFinals:h,goatMainQuotes:prices,asOf:ASOF})
+ const before=buildNbaDecisionBoard({scheduleGames:[g],calendar:{games:h.map(x=>({...x,capturedAt:ASOF})),issues:[]},historyFinals:h,goatMainQuotes:prices,asOf:ASOF})
    .rows.total[0].projection;
  const future={...h[0].game,id:9000,date:'2026-11-21',datetime:'2026-11-22T01:00:00Z',
   home_q1:40,home_team_score:120};
- const after=buildNbaDecisionBoard({scheduleGames:[g],historyFinals:[...h,{game:future}],
+ const after=buildNbaDecisionBoard({scheduleGames:[g],calendar:{games:[...h,{game:future}].map(x=>({...x,capturedAt:ASOF})),issues:[]},historyFinals:[...h,{game:future}],
   goatMainQuotes:prices,asOf:ASOF}).rows.total[0].projection;
  assert.equal(before,after);
  assert.notEqual(before,null);

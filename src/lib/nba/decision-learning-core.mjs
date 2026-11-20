@@ -1,3 +1,5 @@
+import {localDay} from '../nba-archive-core.mjs';
+import {hasValidatedInputs} from '../data-quality/window.mjs';
 import {createHash} from 'node:crypto';
 export const NBA_DECISION_LEARNING_VERSION='NBA_DECISION_STATISTICAL_SHADOW_V1';
 const okTime=v=>typeof v==='string'&&Number.isFinite(Date.parse(v));
@@ -73,6 +75,7 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
   const game=board.games.find(g=>String(g.id)===String(row.gameId));
   let reason=null;
   if(!game||!okTime(game.startsAt)||time>=Date.parse(game.startsAt)-10*60000)reason='NOT_PREGAME';
+  else if(!hasValidatedInputs(row))reason='DATA_QUALITY_UNVERIFIED';
   else if(!allowedMarkets.has(row.market)||!allowedPeriods.has(row.period))reason='UNSUPPORTED_MARKET_PERIOD';
   else if(row.projection===null||!Number.isFinite(row.projection)||row.sample<5)reason='NO_PROJECTION_HISTORY';
   else if(row.quoteFreshness!=='RECENT'||!okTime(row.capturedAt)||Date.parse(row.capturedAt)>time+120000||
@@ -103,6 +106,7 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
    quote_id:String(row.quoteId),quote_source:row.source,quote_captured_at:row.capturedAt,
    projection:round(row.projection),l5:row.l5??null,l10:row.l10??null,
    historical_n:Number(row.sample),evidence:{
+    quality:row.dataQuality,history:board.historyEvidence?.[row.historyKey]??null,
     origin:NBA_DECISION_LEARNING_VERSION,board_as_of:board.asOf,
     data_priority:'RESEARCH_ONLY_NOT_OFFICIAL',regional_price_verified:false,
     source_contract:'STATISTICAL_ONLY',quote_freshness:row.quoteFreshness,
@@ -122,7 +126,7 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
 function validatedFinal(raw,forecast){
  const g=raw?.game??raw;
  if(!g||g.status_state!=='final'||Number(g.id)!==forecast.game_id ||
-    g.date!==forecast.game_date_local||!okTime(g.datetime)||
+    !okTime(g.datetime)||localDay(new Date(g.datetime))!==forecast.game_date_local||
     Math.abs(Date.parse(g.datetime)-Date.parse(forecast.game_start_at))>3600000)return null;
  const home=[g.home_q1,g.home_q2,g.home_q3,g.home_q4].map(number);
  const away=[g.visitor_q1,g.visitor_q2,g.visitor_q3,g.visitor_q4].map(number);
@@ -144,6 +148,16 @@ function periodScore(final,side,period){
 const statsMap={points:['pts'],rebounds:['reb'],assists:['ast'],threes:['fg3m'],
   points_rebounds:['pts','reb'],points_assists:['pts','ast'],rebounds_assists:['reb','ast'],
   points_rebounds_assists:['pts','reb','ast']};
+// Grading a pending prop requires a reconciled final box. An older compact
+// observation may corroborate it, but a disputed component must remain pending.
+export function concordantPlayerFinal(statistic, compact, original) {
+ const fields=statsMap[statistic];
+ if(!fields||!original)return null;
+ if(compact && (Number(compact.player_id)!==original.player_id ||
+    Number(compact.provider_game_id)!==original.provider_game_id ||
+    !(compact.minutes_played>0) || fields.some(k=>number(compact[k])!==original[k])))return null;
+ return original;
+}
 /** @param {any} forecast @param {any} sources */
 export function settleNbaShadowForecast(forecast,{game,sourceReceivedAt,playerStat=null,playerStatReceivedAt=null}={}){
  if(!forecast||!okTime(sourceReceivedAt)||!okTime(forecast.game_start_at)||
