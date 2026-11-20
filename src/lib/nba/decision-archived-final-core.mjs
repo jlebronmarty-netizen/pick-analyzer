@@ -1,9 +1,9 @@
 // A zero-provider-call, fail-closed verifier for already archived NBA final player stats.
 // Never use postgame stats as pregame features or bookmaker-settlement evidence.
 const integer = x => typeof x==='number'&&Number.isSafeInteger(x)?x:
-  typeof x==='string'&&/^(0|[1-9]\\d*)$/.test(x)&&Number.isSafeInteger(Number(x))?Number(x):null;
+  typeof x==='string'&&/^(0|[1-9]\d*)$/.test(x)&&Number.isSafeInteger(Number(x))?Number(x):null;
 const date = x => typeof x==='string'&&Number.isFinite(Date.parse(x))?Date.parse(x):null;
-const minutes = x => x==='0'||x===0?0:typeof x==='string'&&/^\\d{1,3}:([0-5]\\d)$/.test(x)?
+const minutes = x => x==='0'||x===0?0:typeof x==='string'&&/^\d{1,3}:([0-5]\d)$/.test(x)?
   Number(x.split(':')[0])*60+Number(x.split(':')[1]):null;
 const FIELDS=['pts','reb','ast','fg3m'];
 const sameGame=(a,b)=>integer(a?.id)===integer(b?.id)&&
