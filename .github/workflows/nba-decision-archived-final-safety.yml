@@ -1,0 +1,25 @@
+name: NBA archived player final fallback safety
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nba/decision-archived-final-core.mjs'
+      - 'src/services/nba-decision-learning.service.ts'
+      - 'tests/nba-decision-archived-final.test.mjs'
+      - '.github/workflows/nba-decision-archived-final-safety.yml'
+permissions:
+  contents: read
+jobs:
+  archive-props-fallback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Archived final and pregame freeze guards
+        run: node --test tests/nba-decision-archived-final.test.mjs tests/nba-decision-learning.test.mjs
+      - name: TypeScript validation
+        run: npm ci --no-audit --no-fund && npx tsc --noEmit --pretty false

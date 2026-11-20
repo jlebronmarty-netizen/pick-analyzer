@@ -2,6 +2,7 @@ import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
 import {planNbaShadowFreeze,settleNbaShadowForecast} from '@/lib/nba/decision-learning-core.mjs';
+import {verifiedArchivedPlayerFinal} from '@/lib/nba/decision-archived-final-core.mjs';
 
 function rows(res:any,label:string){if(res.error)throw new Error(label);return res.data??[];}
 function dayPR(date:Date){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);}
@@ -70,11 +71,33 @@ export async function settleNbaDecisionShadow(now=new Date()){
     .limit(1000).abortSignal(AbortSignal.timeout(10000));
   playerRows.push(...rows(t,'NBA_DECISION_PLAYER_RESULT_UNAVAILABLE'));
  }
+ // Zero-provider-call fallback: archived operational boxscores may predate
+ // the separate GOAT compact research materialization.
+ // Never use a partial/identity-conflicted game or zero-minute player.
+ const archivedFinals=new Map<string,any>();
+ if(games.length>0&&games.length<=16){
+  const r=await db.from('nba_game_context_v2')
+   .select('provider_game_id,player_stats,player_stats_captured_at')
+   .in('provider_game_id',games).not('player_stats','is',null)
+   .limit(16).abortSignal(AbortSignal.timeout(10000));
+  for(const context of rows(r,'NBA_DECISION_CONTEXT_FINAL_UNAVAILABLE')){
+   const gameId=Number(context.provider_game_id);
+   const gameRecord=[...gameMap.entries()].find(([k,v])=>v&&k.endsWith('|'+gameId))?.[1];
+   if(!gameRecord)continue;
+   const verified=verifiedArchivedPlayerFinal({
+    context,final:gameRecord.game,providerGameId:gameId
+   });
+   if(!verified)continue;
+   for(const [playerId,stat] of verified.rows)
+    archivedFinals.set(gameId+'|'+playerId,{...stat,source_captured_at:verified.capturedAt});
+  }
+ }
  const results=[];
  for(const f of pending){
   const final=gameMap.get(f.game_date_local+'|'+f.game_id);
   if(!final)continue;
-  const stat=f.market==='props'?playerRows.find(x=>Number(x.player_id)===Number(f.player_id)&&Number(x.provider_game_id)===Number(f.game_id)):null;
+  const compact=f.market==='props'?playerRows.find(x=>Number(x.player_id)===Number(f.player_id)&&Number(x.provider_game_id)===Number(f.game_id)):null;
+  const stat=compact??(f.market==='props'?archivedFinals.get(f.game_id+'|'+f.player_id):null);
   const out=settleNbaShadowForecast(f,{game:final.game,sourceReceivedAt:final.receivedAt,
     playerStat:stat??null,playerStatReceivedAt:stat?.source_captured_at??null});
   if(out)results.push({...out,evidence:{...out.evidence,source_snapshot_id:final.snapshotId}});
