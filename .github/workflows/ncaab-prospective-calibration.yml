@@ -32,6 +32,8 @@ jobs:
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
       - name: Strict NCAAB as-of calibration, original lifecycle and dashboard
-        run: node --test tests/ncaab-prospective-calibration.test.mjs tests/ncaab-source-lifecycle.test.mjs tests/college-score-accuracy.test.mjs tests/dashboard-multisport/ncaab-daily.test.mjs
+        run: node --test tests/ncaab-prospective-calibration.test.mjs tests/ncaab-source-lifecycle.test.mjs tests/college-score-accuracy.test.mjs
+      - name: Dashboard multisport regression using configured TS loader
+        run: npm run test:dashboard-multisport
       - name: TypeScript verification
         run: npx tsc --noEmit --pretty false
