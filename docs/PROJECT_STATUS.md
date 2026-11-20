@@ -3606,3 +3606,11 @@ team/player box scores. No paid plan, models, forecasts or changes to other spor
 - La cohorte de 259 resultados W/L de SETS_ODD_EVEN tuvo 173 W/86 L para el modelo (66.8 %). Desglose de selección: 235 ODD con 165 W/70 L, 24 EVEN con 8 W/16 L. La paridad real fue ODD en 181 de los 259 juegos; referencia elegir ODD siempre: 181/259 (69.9 %), superior al modelo por 8 aciertos, aproximadamente 3.09 puntos porcentuales.
 - Por tanto el score del modelo NO demuestra capacidad adicional contra una referencia estructural simple ni EV. No promocionar a Top oportunidades. La prevalencia ODD puede reflejar el formato de sets (best-of-5), que debe confirmarse por competición antes de suponer neutralidad 50/50.
 - Se añadió comparador auditable en Edge Lab TT, basado en el mismo conjunto de finales liquidados y un único registro por partido; sin modificar resultados ni pronósticos. Nuevo test unitario incluido en CI TT.
+
+## Revisión de fuentes del control de release — 2026-11-19
+
+- El despliegue de `0eabc5a5c9f634cb399534429a8240303321d629` está READY en producción; `/api/system/version` devuelve ese mismo commit. Soccer 1X2 y TT Par/Impar se comprobaron en la interfaz publicada.
+- El control `MLB release readiness` fallaba por cinco archivos compartidos que cambiaron desde su certificado de octubre. Se revisaron sus versiones certificadas y actuales, incluyendo la separación de rutas de solo lectura del proveedor legado.
+- Se prepara un manifiesto versionado con 110 fuentes: conserva las 107 anteriores y añade las dos dependencias de navegación y el manifiesto previo. Los certificados y las evidencias anteriores se conservan; no se omiten controles ni se actualizan hashes sin revisión.
+- Validación local: 37 fuentes R3 y 110 operativas verificadas; 31 pruebas de guardas/paginación y 98 pruebas dashboard aprobadas. Compilación y Preview se registran en el PR antes de publicación. Véase `docs/product/MLB_SOURCE_REVIEW_20261119.md`.
+- La respuesta de producción de 2026-11-19 19:26 PR mantiene MLB en `OFFSEASON_PAUSED`. La actualización del certificado elimina el bloqueo por deriva de fuentes, pero no ejecuta ni autoriza un tick operativo. No se cambian calendarios, activación, entorno, modelos o proveedores. Rama preparada; no integrada en main en este registro.

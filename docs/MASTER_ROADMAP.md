@@ -4426,3 +4426,9 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 - La cohorte de 259 resultados W/L de SETS_ODD_EVEN tuvo 173 W/86 L para el modelo (66.8 %). Desglose de selección: 235 ODD con 165 W/70 L, 24 EVEN con 8 W/16 L. La paridad real fue ODD en 181 de los 259 juegos; referencia elegir ODD siempre: 181/259 (69.9 %), superior al modelo por 8 aciertos, aproximadamente 3.09 puntos porcentuales.
 - Por tanto el score del modelo NO demuestra capacidad adicional contra una referencia estructural simple ni EV. No promocionar a Top oportunidades. La prevalencia ODD puede reflejar el formato de sets (best-of-5), que debe confirmarse por competición antes de suponer neutralidad 50/50.
 - Se añadió comparador auditable en Edge Lab TT, basado en el mismo conjunto de finales liquidados y un único registro por partido; sin modificar resultados ni pronósticos. Nuevo test unitario incluido en CI TT.
+
+## Control de release: revisión versionada de fuentes — 2026-11-19
+
+- Preparada la corrección del certificado operativo desactualizado tras revisar cinco cambios de interfaz y separación de rutas de lectura; se conservan las 107 fuentes protegidas anteriores y se amplía la cobertura a 110.
+- Permanecen los certificados históricos, R3, los controles de activación y las verificaciones que rechazan modificaciones o eliminaciones no revisadas. Pruebas locales: 31 de guardas/paginación y 98 dashboard aprobadas.
+- Cierre requerido: compilación, Preview y checks del commit exacto; integración/publicación conforme a la autorización del usuario. No reactivar MLB ni ejecutar su pipeline para probar este cambio. Producción observada en `OFFSEASON_PAUSED` a las 19:26 PR.
