@@ -52,7 +52,7 @@ export async function captureNbaResearchData(options:Options={}){
    const schedules=rows(await db.from('nba_market_schedules_v1').select('snapshot_id,source_received_at,payload').eq('date_local',day).order('source_received_at',{ascending:false}).limit(3));
    const games=[...mergeNbaScheduleGames(schedules).values()].filter((x:any)=>Number.isFinite(Date.parse(x.game?.datetime??''))&&Date.parse(x.game.datetime)>Date.now()&&x.game?.status_state==='scheduled'&&Date.now()-Date.parse(x.sourceReceivedAt)<=3600000).map((x:any)=>x.game);
    if(games.length>16)throw Error('NBA_RESEARCH_SLATE_BOUND');
-   if(!games.length)summary.errors.push('NO_FRESH_UPCOMING_SCHEDULE');
+   if(!games.length){summary.noop_reason='NO_FRESH_UPCOMING_SCHEDULE';summary.eligible_games=0;}
    for(const game of games){
     const url=new URL('https://api.balldontlie.io/nba/v2/odds/player_props');url.searchParams.set('game_id',String(game.id));url.searchParams.append('vendors[]','fanduel');
     const payload=await fetchJson(url),receivedAt=new Date().toISOString();
