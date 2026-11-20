@@ -17,7 +17,10 @@ export async function getNhlLateV6Readiness(){
  if(frozen.error)throw Error('NHL_LATE_V6_READ_NOT_VERIFIED');
  const rows=frozen.data??[];
  const finals=await readNhlV6CohortFinals(db,rows.map(row=>row.event_id));
- const truth=new Map(finals.map(row=>[row.event_id,row]));
+ const truth=new Map<string,any>();
+ for(const receipt of finals){
+  truth.set(receipt.event_id,truth.has(receipt.event_id)?null:receipt);
+ }
  const pairedValidation=evaluateNhlV6Paired({frozenRows:rows,finalRows:finals});
  let scored=0,unscored=0,invalid=0,nP=0,nC=0,nD=0,nM=0;
  let sumP=0,sumC=0,sumD=0,sumM=0,lossP=0,lossC=0,lossD=0,lossM=0;
@@ -40,6 +43,7 @@ export async function getNhlLateV6Readiness(){
   if(row.special_teams_evidence?.status==='ASOF_SPECIAL_TEAMS_EVIDENCE')withPP++;
   if(row.calibration?.status==='PROSPECTIVE_TEST_ONLY')eligible++;
   const o=truth.get(row.event_id) as any;
+  if(o===null){invalid++;continue;}
   if(!o){unscored++;continue;}
   const b=o.body??{},h=b.homeScore,a=b.awayScore;
   if(stamp(b.scheduledAt)!==scheduled||Number(b.homeId)!==Number(row.home_team_id)||
