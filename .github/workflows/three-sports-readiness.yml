@@ -25,7 +25,9 @@ jobs:
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
       - name: Three sports readiness and original UFC ATP Soccer safety
-        run: node --test tests/three-sports-readiness.test.mjs tests/tennis-free/contract.test.mjs tests/ufc/identity-v2.test.mjs
+        run: node --test tests/three-sports-readiness.test.mjs tests/tennis-free/contract.test.mjs
+      - name: Existing UFC V2 identity contract under TS module loader
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/ufc/identity-v2.test.mjs
       - name: Dashboard multisport regression
         run: npm run test:dashboard-multisport
       - name: TypeScript verification
