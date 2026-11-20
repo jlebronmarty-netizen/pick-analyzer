@@ -2,6 +2,31 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {evaluateNhlV6Paired} from '../src/lib/nhl-v6-prospective-validation.mjs';
+import {readNhlV6CohortFinals} from '../src/lib/nhl-v6-cohort-finals.mjs';
+
+test('cohort lookup finds late finals beyond 250 unrelated records and preserves missing finals',async()=>{
+ const archive=Array.from({length:370},(_,i)=>({event_id:'nhl:'+i}));
+ const ids=archive.slice(251).map(row=>row.event_id).concat('pending');
+ const batches=[];
+ const db={from(table){
+  assert.equal(table,'nhl_free_outcomes_v1');
+  return {select(){return {in(key,group){
+   assert.equal(key,'event_id');
+   batches.push(group.length);
+   const data=archive.filter(row=>group.includes(row.event_id));
+   return {data,count:data.length,error:null};
+  }}}};
+ }};
+ assert.deepEqual(await readNhlV6CohortFinals(db,[]),[]);
+ assert.deepEqual(await readNhlV6CohortFinals(db,ids),archive.slice(251));
+ assert.deepEqual(batches,[50,50,20]);
+ let calls=0;
+ const failing={from:()=>({select:()=>({in:()=>++calls===2?{error:{}}:{data:[archive[0]],count:1}})})};
+ await assert.rejects(readNhlV6CohortFinals(failing,ids),/READ_NOT_VERIFIED/);
+ assert.equal(calls,2);
+ const capped={from:()=>({select:()=>({in:()=>({data:[archive[0]],count:2})})})};
+ await assert.rejects(readNhlV6CohortFinals(capped,ids),/READ_NOT_VERIFIED/);
+});
 
 const id='nhl:2026020999',scheduled_at='2026-11-20T00:00:00Z';
 const base={

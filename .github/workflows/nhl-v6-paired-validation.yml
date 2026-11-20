@@ -3,6 +3,7 @@ name: NHL V6 paired validation and quote archive safety
 on:
   pull_request:
     paths:
+      - 'src/lib/nhl-v6-cohort-finals.mjs'
       - 'src/lib/nhl-v6-prospective-validation.mjs'
       - 'src/services/nhl-late-v6-readiness.service.ts'
       - 'src/services/nhl-late-v6-freeze-writer.service.ts'

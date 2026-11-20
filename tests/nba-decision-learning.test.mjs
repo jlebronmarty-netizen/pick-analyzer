@@ -64,14 +64,25 @@ test('player stats must be exact id + game and captured after start',()=>{
  const p=planNbaShadowFreeze(board,asOf).rows.find(x=>x.market==='props');
  assert.equal(settleNbaShadowForecast(p,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z'}),null);
  assert.equal(settleNbaShadowForecast(p,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z',
-  playerStat:{player_id:99,provider_game_id:21718143,reb:8},
+  playerStat:{player_id:99,provider_game_id:21718143,minutes_played:1,reb:8},
   playerStatReceivedAt:'2026-11-20T06:00:00Z'}).statistical_result,'win');
  assert.equal(settleNbaShadowForecast(p,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z',
-  playerStat:{player_id:200,provider_game_id:21718143,reb:8},
+  playerStat:{player_id:200,provider_game_id:21718143,minutes_played:1,reb:8},
   playerStatReceivedAt:'2026-11-20T06:00:00Z'}),null);
  assert.equal(settleNbaShadowForecast(p,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z',
-  playerStat:{player_id:99,provider_game_id:21718143,reb:8},
+  playerStat:{player_id:99,provider_game_id:21718143,minutes_played:1,reb:8},
   playerStatReceivedAt:'2026-11-19T18:00:00Z'}),null);
+});
+test('compact zero boxscores require positive playing time for either side',()=>{
+ const prop=planNbaShadowFreeze(board,asOf).rows.find(row=>row.market==='props');
+ for(const side of ['under','over']){
+  const settle=minutes=>settleNbaShadowForecast({...prop,side},{
+   game:final,sourceReceivedAt:'2026-11-20T05:00:00Z',
+   playerStat:{player_id:99,provider_game_id:21718143,minutes_played:minutes,reb:0},
+   playerStatReceivedAt:'2026-11-20T06:00:00Z'});
+  for(const minutes of [0,null,undefined,-1,false,'0',NaN,Infinity])assert.equal(settle(minutes),null);
+  assert.equal(settle(0.017).statistical_result,side==='under'?'win':'loss');
+ }
 });
 test('accuracy summaries expose independent game count, no auto promotion and sample guard',()=>{
  const frozen=planNbaShadowFreeze(board,asOf).rows;

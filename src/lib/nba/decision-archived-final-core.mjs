@@ -50,7 +50,7 @@ export function verifiedArchivedPlayerFinal({context,final,providerGameId}={}){
     if(time===0)continue; // DNP/zero minutes: never grade a contract.
     const stats={};
     for(const k of FIELDS){const n=integer(p[k]);if(n===null||n<0)return null;stats[k]=n;}
-    playerRows.set(playerId,{provider_game_id:id,player_id:playerId,...stats});
+    playerRows.set(playerId,{provider_game_id:id,player_id:playerId,minutes_played:time/60,...stats});
   }
   if(count.get(homeId)<5||count.get(awayId)<5||
      sum.get(homeId)!==integer(game.home_team_score)||
