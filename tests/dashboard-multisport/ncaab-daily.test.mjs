@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {predictNcaab,reconcileNcaab,ncaabMetrics} from '../../src/lib/ncaab-live.ts';
 import {normalizeNcaab} from '../../src/services/ncaab-daily.service.ts';
+import {collegeScoreAccuracy} from '../../src/lib/college-score-accuracy.mjs';
 const original=JSON.parse(fs.readFileSync('src/data/ncaab-original-73.json','utf8'));
 const profile=JSON.parse(fs.readFileSync('src/data/ncaab-profile-2027.json','utf8'));
 const schedule=f=>({event_id:f.event_id,home_id:f.home_id,away_id:f.away_id,home_name:f.home_name,away_name:f.away_name,scheduled_at:f.scheduled_at,season_ending_year:2027,phase:'REGULAR',status:'SCHEDULED',time_verified:true,neutral_site:false,captured_at:f.created_at});
@@ -30,6 +31,39 @@ test('duplicate finals do not duplicate denominator; exact event identity tolera
   const reviewed=reconcileNcaab(f,[final,{...final,...change}]);assert.equal(reviewed.review_required,true);assert.equal(ncaabMetrics([reviewed]).winnerDenominator,0);
  }
  assert.equal(reconcileNcaab(f,[]).settlement,null);
+});
+test('an earlier corrected tip cannot admit a forecast issued after that game started',()=>{
+ const forecast={...f,created_at:'2026-11-18T19:30:00Z',scheduled_at:'2026-11-18T20:00:00Z'};
+ const corrected={...final,scheduled_at:'2026-11-18T19:00:00Z',captured_at:'2026-11-18T22:00:00Z'};
+ const reviewed=reconcileNcaab(forecast,[corrected]);
+ assert.equal(reviewed.review_required,true);assert.equal(reviewed.review_reason,'INVALID_PREGAME_TIMING');
+ assert.equal(reviewed.settlement,null);assert.equal(ncaabMetrics([reviewed]).winnerDenominator,0);
+ assert.equal(collegeScoreAccuracy([reviewed]).games,0);
+ const stillPregame=reconcileNcaab(forecast,[{...corrected,scheduled_at:'2026-11-18T19:45:00Z'}]);
+ assert.equal(stillPregame.review_required,false);assert.ok(stillPregame.settlement);
+});
+test('wrong event IDs, invalid receipts and invalid pregame timing stay out of prospective metrics',()=>{
+ const forecast={...f,created_at:'2026-11-18T18:00:00Z',scheduled_at:'2026-11-18T20:00:00Z'};
+ const result={...final,scheduled_at:forecast.scheduled_at,captured_at:'2026-11-18T22:00:00Z'};
+ for(const change of [{event_id:'espn:unrelated'},{captured_at:'not-a-time'},
+  {captured_at:forecast.scheduled_at},{home_score:Infinity}]){
+  const reviewed=reconcileNcaab(forecast,[{...result,...change}]);
+  assert.equal(reviewed.review_required,true);assert.equal(reviewed.settlement,null);
+  assert.equal(ncaabMetrics([reviewed]).winnerDenominator,0);
+ }
+ for(const created_at of [null,'invalid',forecast.scheduled_at,'2026-11-18T20:01:00Z']){
+  assert.equal(reconcileNcaab({...forecast,created_at},[result]).review_required,true);
+ }
+});
+test('equivalent repeated finals use the earliest valid receipt without mutating stored inputs',()=>{
+ const forecast={...f,created_at:'2026-11-18T18:00:00Z',scheduled_at:'2026-11-18T20:00:00Z'};
+ const result={...final,scheduled_at:forecast.scheduled_at,captured_at:'2026-11-18T22:00:00Z'};
+ const results=[{...result,captured_at:'2026-11-18T23:00:00Z'},result];
+ const before=JSON.stringify({forecast,results});
+ const a=reconcileNcaab(forecast,results),b=reconcileNcaab(forecast,[...results].reverse());
+ assert.deepEqual(a,b);assert.equal(a.settlement.observed_at,result.captured_at);
+ assert.equal(ncaabMetrics([a]).winnerDenominator,1);assert.equal(collegeScoreAccuracy([a]).games,1);
+ assert.equal(JSON.stringify({forecast,results}),before);
 });
 test('normalizer never infers verified tip or venue and accepts finals only with both scores',()=>{
  const e={id:'1234',date:'2026-11-04T00:00:00Z',season:{year:2027,type:2},status:{type:{state:'pre',name:'STATUS_SCHEDULED',completed:false}},competitions:[{date:'2026-11-04T00:00:00Z',competitors:[{id:'1',homeAway:'home',team:{displayName:'H'}},{id:'2',homeAway:'away',team:{displayName:'A'}}]}]};

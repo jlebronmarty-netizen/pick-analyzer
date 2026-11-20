@@ -35,18 +35,25 @@ export function predictNcaab(s:Schedule,now:string):LiveObservation{
 }
 export function reconcileNcaab(f:LiveObservation,finals:Final[]):LiveObservation{
  if(!finals.length)return f;
+ // Reporting only: keep the stored forecast and final observations immutable.
+ // A corrected earlier tip must not turn an in-game emission into a
+ // prospective observation, even when the correction is within two hours.
+ const emitted=Date.parse(f.created_at??''),scheduled=Date.parse(f.scheduled_at);
+ if(![emitted,scheduled].every(Number.isFinite)||emitted>=scheduled)return {...f,review_required:true,review_reason:'INVALID_PREGAME_TIMING',settlement:null};
  const normalized=finals.map(x=>{
   const same=x.home_id===f.home_id&&x.away_id===f.away_id,swapped=x.home_id===f.away_id&&x.away_id===f.home_id;
-  const drift=Math.abs(Date.parse(x.scheduled_at)-Date.parse(f.scheduled_at));
-  if((!same&&!swapped)||!Number.isFinite(drift)||drift>2*3600000||x.status!=='FINAL')return null;
+  const drift=Math.abs(Date.parse(x.scheduled_at)-scheduled);
+  if(x.event_id!==f.event_id||(!same&&!swapped)||!Number.isFinite(drift)||drift>2*3600000||x.status!=='FINAL')return null;
   return {x,home_score:swapped?x.away_score:x.home_score,away_score:swapped?x.home_score:x.away_score};
  });
  if(normalized.some(x=>x===null))return {...f,review_required:true,review_reason:'CORRECTION_OR_IDENTITY_REVIEW',settlement:null};
  const valid=normalized as {x:Final;home_score:number;away_score:number}[];
+ if(valid.some(({x})=>emitted>=Date.parse(x.scheduled_at)))return {...f,review_required:true,review_reason:'INVALID_PREGAME_TIMING',settlement:null};
+ if(valid.some(({x,home_score,away_score})=>!Number.isSafeInteger(home_score)||!Number.isSafeInteger(away_score)||Math.min(home_score,away_score)<0||home_score===away_score||!Number.isFinite(Date.parse(x.captured_at))||Date.parse(x.captured_at)<=Date.parse(x.scheduled_at)))return {...f,review_required:true,review_reason:'INVALID_FINAL',settlement:null};
  const signatures=new Set(valid.map(({home_score,away_score})=>JSON.stringify([home_score,away_score])));
  if(signatures.size>1)return {...f,review_required:true,review_reason:'CORRECTION_OR_IDENTITY_REVIEW',settlement:null};
- const {x,home_score,away_score}=valid[0];
- if(!Number.isInteger(home_score)||!Number.isInteger(away_score)||Math.min(home_score,away_score)<0||home_score===away_score||Date.parse(x.captured_at)<Date.parse(x.scheduled_at))return {...f,review_required:true,review_reason:'INVALID_FINAL',settlement:null};
+ // Identical repeated finals count once, using their earliest valid receipt.
+ const {x,home_score,away_score}=valid.reduce((first,row)=>Date.parse(row.x.captured_at)<Date.parse(first.x.captured_at)?row:first);
  const winner=home_score>away_score?f.home_id:f.away_id;
  return {...f,review_required:false,review_reason:null,settlement:{home_score,away_score,outcome:f.predicted_winner===null?null:f.predicted_winner===winner?'WIN':'LOSS',observed_at:x.captured_at}};
 }

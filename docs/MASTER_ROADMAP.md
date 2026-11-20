@@ -4432,3 +4432,10 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 - Preparada la corrección del certificado operativo desactualizado tras revisar cinco cambios de interfaz y separación de rutas de lectura; se conservan las 107 fuentes protegidas anteriores y se amplía la cobertura a 110.
 - Permanecen los certificados históricos, R3, los controles de activación y las verificaciones que rechazan modificaciones o eliminaciones no revisadas. Pruebas locales: 31 de guardas/paginación y 98 dashboard aprobadas.
 - Cierre requerido: compilación, Preview y checks del commit exacto; integración/publicación conforme a la autorización del usuario. No reactivar MLB ni ejecutar su pipeline para probar este cambio. Producción observada en `OFFSEASON_PAUSED` a las 19:26 PR.
+
+## Validación universitaria: cohorte y error verificables — 2026-11-19
+
+- Preparada corrección de MAE NCAAF: estado NUMERIC, error real y denominador explícito; excluye disputas con valores nulos. Auditoría sobre datos guardados confirmó el defecto; no se cambian las predicciones.
+- NCAAB incorpora control prepartido frente al horario corregido, identidad exacta, duplicados deterministas y sesgo visible con desglose de exclusiones. Se conserva la equivalencia de los 73 pronósticos originales.
+- 17 pruebas numéricas/lifecycle y 101 dashboard aprobadas. Cierre de esta fase: build, checks y Preview del commit propuesto, con aprobación antes de integrar/publicar según el flujo del usuario.
+- Siguiente validación de precios requiere líneas, cuotas, reglas y timestamps realmente archivados. Las proyecciones siguen descriptivas mientras no exista ese contrato; no se activa un proveedor o suscripción nuevo.
