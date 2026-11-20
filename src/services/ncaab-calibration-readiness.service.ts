@@ -21,6 +21,6 @@ export async function getNcaabCalibrationReadiness(){
   .select('id,event_id,body,observed_at').in('event_id',eventIds).limit(500);
  if(o.error||(o.data??[]).length>=500)throw Error('NCAAB_SHADOW_OUTCOME_SCAN_UNAVAILABLE');
  const result=evaluateNcaabFrozenCalibration({frozenRows:rows,finalRows:o.data??[]});
- return {status:result.status,version:NCAAB_CALIBRATION_VERSION,
-  readOnly:true,providerCalls:0,databaseWrites:0,...result};
+ return {...result,version:NCAAB_CALIBRATION_VERSION,
+  readOnly:true,providerCalls:0,databaseWrites:0};
 }
