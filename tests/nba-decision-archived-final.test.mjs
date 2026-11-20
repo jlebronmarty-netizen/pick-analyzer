@@ -32,6 +32,14 @@ test('verifies exact game/team/score reconciled data and excludes DNP',()=>{
  assert.equal(settleNbaShadowForecast({...f,player_id:100},{game,sourceReceivedAt:capture,
    playerStat:r.rows.get(100),playerStatReceivedAt:r.capturedAt}),null);
 });
+test('accepts nested archive schedule team IDs but refuses conflicting nested identity',()=>{
+ const schedule={...game,home_team_id:undefined,visitor_team_id:undefined,
+  home_team:{id:5},visitor_team:{id:7}};
+ const match=verifiedArchivedPlayerFinal({context:ctx(),final:schedule,providerGameId:42});
+ assert.equal(match?.rows.size,11);
+ assert.equal(verifiedArchivedPlayerFinal({context:ctx(),final:{...schedule,home_team:{id:7}},providerGameId:42}),null);
+ assert.equal(verifiedArchivedPlayerFinal({context:ctx(),final:{...game,home_team:{id:7}},providerGameId:42}),null);
+});
 test('rejects future/pregame capture, mismatched game and unknown player identity',()=>{
  assert.equal(verifiedArchivedPlayerFinal({context:ctx(rows(),tip),final:game,providerGameId:42}),null);
  assert.equal(verifiedArchivedPlayerFinal({context:ctx(),final:game,providerGameId:43}),null);
