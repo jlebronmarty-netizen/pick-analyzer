@@ -6,6 +6,7 @@ import SportRecommendationCard from '@/components/dashboard/SportRecommendationC
 import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
 import SportDecisionBoard from '@/components/dashboard/SportDecisionBoard';
 import {ttOddEvenBaseline} from '@/lib/edge-lab/tt-odd-even-baseline.mjs';
+import {ttOddEvenTemporalAudit} from '@/lib/edge-lab/tt-odd-even-temporal-audit.mjs';
 const box={border:'1px solid #334155',borderRadius:12,padding:18,marginTop:16};const pct=v=>typeof v==='number'?(v*100).toFixed(1)+'%':'N/A';const num=v=>typeof v==='number'?v.toFixed(2):'N/A';const date=v=>v?new Date(v).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'}):'Sin ejecución';
 const names={SOCCER:'Soccer · LaLiga',TT:'Tenis de mesa · TT Elite',MLB:'MLB · motores Edge',NCAAF:'NCAAF'};
 const marketName={MONEYLINE:'Ganador',TOTAL_POINTS:'Total de puntos',SETS_ODD_EVEN:'Sets par/impar',HOME_TEAM_RUNS:'Carreras local',AWAY_TEAM_RUNS:'Carreras visitante','1X2':'Local / empate / visitante',TOTAL_2_5:'Total de goles 2.5'};
@@ -19,6 +20,7 @@ export default function Board({initialSport='SOCCER'}){
  const isSoccer=sport==='SOCCER',data=isSoccer?soccer:multi,rows=isSoccer?soccer?.rows??[]:(multi?.rows??[]).filter(r=>r.sport===sport),metrics=isSoccer?soccer?.metrics??[]:(multi?.metrics??[]).filter(m=>m.sport===sport),runs=isSoccer?soccer?.runs??[]:(multi?.runs??[]).filter(r=>r.sport===sport),last=runs[0];
  const ledgerView=useLedgerView(rows);
  const parityBenchmark=sport==='TT'?ttOddEvenBaseline(rows):null;
+ const temporalAudit=sport==='TT'?ttOddEvenTemporalAudit(rows):null;
  const decisionRows=ledgerView.rows.filter(r=>r.status==='FORECAST'||r.status==='PROJECTION').flatMap(r=>{
   const market=r.market==='1X2'?'oneXTwo':r.market==='MONEYLINE'?'ml':
    r.market==='SETS_ODD_EVEN'?'special':
@@ -57,6 +59,15 @@ export default function Board({initialSport='SOCCER'}){
    <div className="col-span-2 rounded-lg bg-slate-950 p-3 sm:col-span-1"><p className="text-xs text-slate-400">Mejora frente a Impar</p><p className="mt-1 text-xl font-semibold">{parityBenchmark.games?(100*parityBenchmark.edgeOverBaseline).toFixed(1)+' pp':'—'}</p><p className="text-xs text-slate-400">Solo accuracy, no EV ni ROI</p></div>
   </div>
   <p className="mt-3 text-xs text-amber-200">{parityBenchmark.games&&parityBenchmark.edgeOverBaseline<=0?'El modelo NO supera la referencia siempre Impar en esta cohorte. No promocionar apuestas.':'La muestra todavía no demuestra una ventaja validada contra el baseline.'} Se eligió Impar {parityBenchmark.oddSelected} veces y Par {parityBenchmark.evenSelected} veces.</p>
+ </section>}
+ {sport==='TT'&&temporalAudit&&<section aria-label="Auditoría temporal de Par/Impar" className="rounded-xl border border-slate-700 bg-slate-900/70 p-4">
+  <h2 className="font-semibold">Auditoría temporal de Par/Impar</h2>
+  <p className="mt-2 text-xs text-slate-400">Solo pronósticos congelados antes del partido y finales W/L. El corte del 12 de noviembre de 2026 es retrospectivo y NO constituye holdout independiente.</p>
+  <div className="mt-3 overflow-x-auto"><table className="min-w-full text-left text-sm"><thead><tr className="border-b border-slate-700"><th className="p-2">Muestra</th><th className="p-2">Modelo</th><th className="p-2">Siempre Impar</th><th className="p-2">Diferencia</th></tr></thead>
+   <tbody>{[['Anterior',temporalAudit.early],['Posterior',temporalAudit.later],['Total',temporalAudit.all]].map(([label,r])=><tr key={label} className="border-b border-slate-800">
+    <td className="p-2">{label} ({r.games})</td><td className="p-2">{r.games?(100*r.modelAccuracy).toFixed(1)+'%':'—'}</td><td className="p-2">{r.games?(100*r.alwaysOddAccuracy).toFixed(1)+'%':'—'}</td><td className="p-2">{r.games?r.modelMinusOddPp.toFixed(1)+' pp':'—'}</td>
+   </tr>)}</tbody></table></div>
+  <p className="mt-2 text-xs text-amber-200">Solo investigación; no se calcula EV ni se promociona al Top. Ignorados: {temporalAudit.ignored}; duplicados idénticos: {temporalAudit.duplicates}; conflictos descartados: {temporalAudit.conflicts}.</p>
  </section>}
  <div role="tablist" aria-label="Deporte de Edge Lab" style={{display:'flex',gap:8,flexWrap:'wrap'}}>{Object.entries(names).map(([id,label])=><button key={id} role="tab" aria-selected={sport===id} onClick={()=>{setSport(id);window.history.replaceState(null,'','/edge-lab?sport='+id);}} style={{padding:12,border:'1px solid '+(sport===id?'#67e8f9':'#475569'),borderRadius:8,background:sport===id?'#164e63':'transparent'}}>{label}</button>)}</div>
  <p><button onClick={refresh} disabled={busy} style={{padding:10,border:'1px solid #64748b',borderRadius:8}}>{busy?'Consultando…':'Actualizar estado'}</button> La actualización de pantalla consulta el archivo; no consume consultas del proveedor de tenis de mesa.</p>
