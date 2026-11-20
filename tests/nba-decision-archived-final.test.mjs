@@ -5,7 +5,9 @@ import {verifiedArchivedPlayerFinal} from '../src/lib/nba/decision-archived-fina
 import {settleNbaShadowForecast} from '../src/lib/nba/decision-learning-core.mjs';
 const tip='2026-11-20T01:00:00Z',capture='2026-11-20T04:30:00Z';
 const game={id:42,date:'2026-11-19',datetime:tip,status_state:'final',
-  home_team_id:5,visitor_team_id:7,home_team_score:50,visitor_team_score:60};
+  home_team_id:5,visitor_team_id:7,home_team_score:50,visitor_team_score:60,
+  home_q1:12,home_q2:12,home_q3:13,home_q4:13,
+  visitor_q1:15,visitor_q2:15,visitor_q3:15,visitor_q4:15};
 function rows(){
   const result=[];
   for(let i=0;i<12;i++){
