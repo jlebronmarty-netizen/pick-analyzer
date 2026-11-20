@@ -13,7 +13,7 @@ export function ttOddEvenTemporalAudit(rows,{cutoff=CUTOFF}={}){
    typeof row.event_id!=='string'||!row.event_id||!isDate(row.emitted_at)||!isDate(row.scheduled_at)||
    Date.parse(row.emitted_at)>=Date.parse(row.scheduled_at)){ignored++;continue;}
   const key=row.event_id, existing=map.get(key);
-  if(!existing){map.set(key,row);continue;}
+  if(!map.has(key)){map.set(key,row);continue;}\n  if(existing===null){conflicts++;continue;}
   if(existing.selection===row.selection&&existing.outcome.status===row.outcome.status){duplicates++;continue;}
   map.set(key,null);conflicts++;
  }
