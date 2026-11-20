@@ -76,6 +76,7 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
   let reason=null;
   if(!game||!okTime(game.startsAt)||time>=Date.parse(game.startsAt)-10*60000)reason='NOT_PREGAME';
   else if(!hasValidatedInputs(row))reason='DATA_QUALITY_UNVERIFIED';
+  else if(row.dataQuality.expiresAt!=null && !(Date.parse(row.dataQuality.expiresAt)>time))reason='QUALITY_RECEIPT_EXPIRED';
   else if(!allowedMarkets.has(row.market)||!allowedPeriods.has(row.period))reason='UNSUPPORTED_MARKET_PERIOD';
   else if(row.projection===null||!Number.isFinite(row.projection)||row.sample<5)reason='NO_PROJECTION_HISTORY';
   else if(row.quoteFreshness!=='RECENT'||!okTime(row.capturedAt)||Date.parse(row.capturedAt)>time+120000||

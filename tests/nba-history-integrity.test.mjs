@@ -84,3 +84,38 @@ test('PR calendar day may differ from both UTC date and provider date; an absent
   assert.ok(archivedCalendar(cap,[],at).issues.length);
   assert.equal(buildNbaDecisionBoard({...inputs(),scheduleGames:[game],asOf:at}).summary.games,1);
 });
+
+test('a fully evidenced synthetic contract recovers automatically, then expires without regrading the frozen case',()=>{
+  // Hypothetical corroborating receipts. These are never asserted to be actual FanDuel terms or lineups.
+  const x=inputs();
+  x.goatPropQuotes=[{...q,period:'FULL_GAME_INCLUDING_OT',
+    payload:{...q.payload,period:'FULL_GAME_INCLUDING_OT',overtime_rule:'INCLUDES_OVERTIME'}}];
+  x.pregame={captured_at:after,game_ids:[target.id],coverage:{injuriesComplete:true,projectedLineupsComplete:true},
+    injuries:{data:[]},projected_lineups:{data:[{game_id:target.id,team_id:28,status:'confirmed',
+      updated_at:after,lineup:[{player:{id}}]}]}};
+  for(const {game,capturedAt} of x.calendar.games){
+    const row=x.playerHistory.find(r=>r.provider_game_id===game.id);
+    game.home_team_score=100;game.visitor_team_score=95;
+    const seconds=Math.round(row.minutes_played*60);
+    const min=Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');
+    const data=[game.home_team.id,game.visitor_team.id].flatMap((team,side)=>
+      Array.from({length:5},(_,i)=>{
+        const player=team===28&&i===0?id:team*100+i;
+        return {player:{id:player,team_id:team},team:{id:team},game,min:player===id?min:'30:00',
+          pts:side===0?20:19,reb:2,ast:player===id?row.ast:3,fg3m:1};
+      }));
+    x.contexts.push({provider_game_id:game.id,player_stats_captured_at:capturedAt,player_stats:{data}});
+  }
+  const missing=buildNbaDecisionBoard({...x,playerHistory:x.playerHistory.slice(1)});
+  assert.equal(missing.rows.props[0].dataQuality.status,'INCOMPLETE_HISTORY');
+  assert.equal(planNbaShadowFreeze(missing,after).rows.length,0);
+  const recovered=buildNbaDecisionBoard(x),row=recovered.rows.props[0];
+  assert.deepEqual(row.dataQuality.issues,[]);
+  assert.equal(row.dataQuality.status,'VALIDATED');
+  assert.equal(row.projection,6.03);
+  const plan=planNbaShadowFreeze(recovered,after);
+  assert.equal(plan.rows.length,1);
+  assert.equal(plan.rows[0].evidence.history.player.included.length,10);
+  const cached={...recovered,rows:{props:[{...row,dataQuality:{...row.dataQuality,expiresAt:after}}]}};
+  assert.equal(planNbaShadowFreeze(cached,after).excluded.QUALITY_RECEIPT_EXPIRED,1);
+});

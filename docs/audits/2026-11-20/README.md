@@ -67,6 +67,27 @@ Horas PR del último proceso observado el 20 de noviembre, salvo fecha indicada.
 
 Muestras externas: [NHL](https://www.nhl.com/news/dallas-stars-vegas-golden-knights-game-recap-november-19-2026), [Rice](https://riceowls.com/sports/football/stats/2026/temple/boxscore/28823), [LaLiga](https://www.laliga.com/en-CA/clubs/athletic-club/results), [NFL](https://www.houstontexans.com/team/players-roster/c-j-stroud/logs/2026/reg/), [UFC](https://www.ufc.com/news/polymarket-ufc-334-gane-vs-hokit-results), [Reuters NCAAB](https://www.reuters.com/sports/basketball/virginia-tech-takes-down-northwestern-with-3-point-accuracy--flm-2026-11-20/).
 
+## Contrastes adicionales de fuentes y métricas prospectivas
+
+Se enlazó cada predicción con su recibo de entrada en NHL (125), NCAAF (594), NFL (42), Table Tennis (4,368) y UFC (47 actuales + sus 47 recibos de historial). Todos los enlaces existían. Ningún recibo de esas poblaciones fue posterior a la emisión ni al inicio del evento. Para las liquidaciones, las 111 NHL, 763 NCAAB, 10 UFC y 15 NFL conectaban con fuentes registradas antes o en el momento de observar el resultado.
+
+En NCAAB, 73 de 863 recibos locales de origen se crearon después de los juegos. Se investigó la excepción directamente. Los 73 pronósticos originales están en un commit del 15 de octubre a las 12:58 PR, anterior a sus partidos; Supabase los importó el 3 de noviembre. Comparados todos los campos de cada objeto JSON (orden de claves normalizado), **73/73 coincidieron** con el archivo Git y los IDs eran únicos. La fecha de importación y la de publicación original son datos distintos. [Checkpoint anterior a los partidos](https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json)
+
+En Soccer, se recalcularon los 20 recibos (10 por mercado) desde goles, IDs y estado del partido. Los 42 pronósticos tenían historial de fechas anteriores a la jornada del encuentro. En NCAAF, las 324 liquidaciones sin disputa coincidieron al recalcular ganador, margen, total y error absoluto desde el marcador (108 juegos). Las 18 disputas estaban identificadas como cambio del contrato del evento. En Table Tennis, los puntos y sets de 265 partidos reprodujeron las cifras y el moneyline con identidades conciliadas. Otros 18 tenían reconciliación pública manual con totales, sets y enlace de origen. Sus tres mercados concordaron con el resumen archivado. Falta el desglose punto por punto o por set para auditar esos 18 al mismo nivel.
+
+### Desempeño observado
+
+Primera emisión evaluable por modelo y evento, resultado recibido antes de las 19:15 PR. Se excluyen empates sin lado seleccionado, participantes desconocidos y tiempos incompatibles según las condiciones de la consulta. Estas cohortes documentan desempeño prospectivo observado; quedan pendientes una validación formal del modelo, el impacto de disponibilidad y las condiciones de ejecución del operador. La frecuencia de un lado y la media de la probabilidad declarada se refieren al local en baloncesto universitario/NHL y al participante A en NFL/UFC.
+
+| Modelo | Aciertos / juegos evaluados | Brier | Probabilidad media del lado | Frecuencia observada del lado |
+|---|---:|---:|---:|---:|
+| NCAAB preseason | 587/757 | 0.1940 | 58.43% | 74.11% |
+| NHL DRatings | 63/111 | 0.2421 | 53.64% | 43.24% |
+| NFL free | 11/15 | 0.2133 | 47.61% | 33.33% |
+| UFC Elo, primera emisión | 6/9 | 0.2580 | 50.43% | 33.33% |
+
+Por tramos, en NCAAB el lado local promedió 65.8% de probabilidad en 318 juegos del tramo 60–80%, y ganó en 91.2% de ese grupo. La selección de calendarios, rivales y sedes puede influir; este hallazgo por sí solo no especifica una recalibración. MAE de NCAAF (108 juegos por mercado): 13.654 puntos de margen y 13.188 del total. MAE de Table Tennis (283 juegos): 14.334 puntos en el total. El archivo de resultados contiene el desglose por tramos y los conteos para cada operación. [Consultas de contraste entre deportes](cross-sport.sql) · [Resultados](observations.json)
+
 ## Hallazgos, corrección y riesgo residual
 
 | Severidad y fuente | Evidencia y efecto | Corrección, verificación y riesgo residual |
@@ -99,8 +120,8 @@ El umbral de diez minutos preserva el criterio estadístico previo. Un DNP o men
 
 ## Verificación y condiciones de cierre
 
-- Unidades e integración del motor cubren datos faltantes, recuperación, DNP, límite de minutos, cero real, traspasos, duplicados, fechas PR/UTC, reprogramados, materialización futura, valores corregidos, mercado/OT, precios vencidos, congelados y verificación de gzip/SHA. Datos reales del incidente y escenarios sintéticos adicionales se identifican en los tests.
-- Regresión por deportes: 621 pruebas pasaron. Familias adicionales con sus respectivos loaders: 124 pruebas de dashboard/deportes y 9 de runtime de tenis. Dos expectativas antiguas basadas en texto del código ya fallaban en la base, se reprodujeron en un checkout separado y se actualizaron a los contratos vigentes.
+- Unidades e integración del motor cubren datos faltantes, recuperación, DNP, límite de minutos, cero real, traspasos, duplicados, fechas PR/UTC, reprogramados, materialización futura, valores corregidos, mercado/OT, precios vencidos, congelados y verificación de gzip/SHA. Una prueba de recuperación aporta un contrato y alineación sintéticos verificados, confirma que el motor admite exactamente un nuevo freeze y luego lo bloquea al vencer el recibo. Datos reales del incidente y escenarios sintéticos adicionales se identifican en los tests.
+- Regresión por deportes: 622 pruebas pasaron. Familias adicionales con sus respectivos loaders: 124 pruebas de dashboard/deportes y 9 de runtime de tenis. Dos expectativas antiguas basadas en texto del código ya fallaban en la base, se reprodujeron en un checkout separado y se actualizaron a los contratos vigentes.
 - La prueba de navegador usa respuestas generadas por el motor del PR y un fallo 503 controlado. Recorre las seis pestañas, inspecciona el partido faltante, actualiza la proyección y verifica que se retire el valor anterior en escritorio y móvil. Resultado en Chromium real: 2/2 pruebas de navegador aprobadas, a 1440×900 y 390×844. El build local completó compilación, verificación de tipos y prerender de 400/400 páginas. Estos ensayos no acreditan latencia/transferencia ni comportamiento con toda la carga real de una jornada.
 - Quedan abiertos el cotejo byte a byte de los 225 objetos privados (se verificaron sus metadatos, conteos y hashes registrados), una medición de lectura a escala de jornada antes de activar cualquier descarga, validación independiente por deporte de L3/L20, titular/suplente, ritmo, descanso, viajes, rivales y probabilidades, y calibración con juegos futuros independientes. Los lectores de estas features están enumerados en el inventario. Para reactivar oportunidades de otro deporte hay que implementar su evidencia de origen antes de marcar filas validadas.
 - Cualquier backfill debe ser aditivo y preservar hash, fecha efectiva, fecha de observación y procedencia de ambas versiones. Evaluar primero NBA 21718140 y 21718112 en una propuesta independiente. Costos, cambios de esquema, crons, promoción de modelos y puesta en producción requieren la decisión del propietario.

@@ -1664,5 +1664,581 @@
         "alert": "QUOTE_VOLUME_REVIEW"
       }
     ]
-  ]
+  ],
+  "sourceChain": [
+    {
+      "lane": "NCAAB",
+      "records": 863,
+      "events": 863,
+      "missing_source": 0,
+      "later_receipt": 73,
+      "non_pregame": 0,
+      "non_pregame_source": 73,
+      "max_receipt_minus_issue_seconds": "1665178.652578"
+    },
+    {
+      "lane": "NCAAF",
+      "records": 594,
+      "events": 198,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "0.000000"
+    },
+    {
+      "lane": "NFL",
+      "records": 42,
+      "events": 42,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-0.144000"
+    },
+    {
+      "lane": "NHL",
+      "records": 125,
+      "events": 125,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-1.165000"
+    },
+    {
+      "lane": "TT",
+      "records": 4368,
+      "events": 1456,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "0.000000"
+    },
+    {
+      "lane": "UFC current",
+      "records": 47,
+      "events": 26,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-1.375000"
+    },
+    {
+      "lane": "UFC history",
+      "records": 47,
+      "events": 26,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-1.656000"
+    }
+  ],
+  "outcomeProvenance": [
+    {
+      "lane": "UFC",
+      "records": 10,
+      "missing_source": 0,
+      "later_receipt": 0
+    },
+    {
+      "lane": "NHL",
+      "records": 111,
+      "missing_source": 0,
+      "later_receipt": 0
+    },
+    {
+      "lane": "NCAAB",
+      "records": 763,
+      "missing_source": 0,
+      "later_receipt": 0
+    },
+    {
+      "lane": "NFL",
+      "records": 15,
+      "missing_source": 0,
+      "later_receipt": 0
+    }
+  ],
+  "ncaabImport": [
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "mode"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "model"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "sport"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "metrics"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "version"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "attempts"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "forecasts"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "abstentions"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "HOSTED_READY"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "generated_at"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "model_status"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "odds_ROI_CLV"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "forecast_count"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "profile_anchor"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "profile_sha256"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "schema_version"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "MODEL_VALIDATED"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "roster_continuity"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "storage_integrity"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "prospective_started"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "scheduled_observations"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "uncertainty_calibrated"
+    }
+  ],
+  "soccerRecheck": [
+    {
+      "market": "1X2",
+      "observed": 21,
+      "missing_last_history": 0,
+      "nonprior_history": 0,
+      "settled": 10,
+      "identity_disagreements": 0,
+      "early_results": 0
+    },
+    {
+      "market": "TOTAL_2_5",
+      "observed": 21,
+      "missing_last_history": 0,
+      "nonprior_history": 0,
+      "settled": 10,
+      "identity_disagreements": 0,
+      "early_results": 0
+    }
+  ],
+  "ncaafDisputeCause": [
+    {
+      "sport": "NCAAF",
+      "status": "DISPUTE",
+      "reason": "EVENT_CONTRACT_CHANGED",
+      "outcome_rows": 18,
+      "events": 6
+    }
+  ],
+  "soccerGrading": [
+    {
+      "market": "1X2",
+      "receipts": 10,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "TOTAL_2_5",
+      "receipts": 10,
+      "grade_disagreements": 0
+    }
+  ],
+  "collegeGrading": [
+    {
+      "market": "MONEYLINE",
+      "receipts": 108,
+      "games": 108,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "POINT_MARGIN",
+      "receipts": 108,
+      "games": 108,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "TOTAL_POINTS",
+      "receipts": 108,
+      "games": 108,
+      "grade_disagreements": 0
+    }
+  ],
+  "ttShape": [
+    {
+      "source": "public_web_manual_reconciliation",
+      "sets_type": null,
+      "n": 18,
+      "example": "netbet:1-31467652",
+      "min_sets": null,
+      "max_sets": null,
+      "keys": "{capturedAt,scheduledAt,setsA,setsB,source,sourceUrl,totalPoints}"
+    },
+    {
+      "source": "pulsescore:tipsport",
+      "sets_type": "array",
+      "n": 265,
+      "example": "netbet:1-31457155",
+      "min_sets": 3,
+      "max_sets": 5,
+      "keys": "{capturedAt,contentDigest,playerA,playerB,scheduledAt,setPoints,setsA,setsB,source,sourceMatchId,totalPoints}"
+    }
+  ],
+  "ttDetailedRegrade": [
+    {
+      "market": "MONEYLINE",
+      "receipts": 283,
+      "games": 283,
+      "no_set_breakdown": 18,
+      "box_disagreements": 0,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "SETS_ODD_EVEN",
+      "receipts": 283,
+      "games": 283,
+      "no_set_breakdown": 18,
+      "box_disagreements": 0,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "TOTAL_POINTS",
+      "receipts": 283,
+      "games": 283,
+      "no_set_breakdown": 18,
+      "box_disagreements": 0,
+      "grade_disagreements": 0
+    }
+  ],
+  "ttManual": [
+    {
+      "market": "MONEYLINE",
+      "receipts": 18,
+      "summary_disagreements": 0
+    },
+    {
+      "market": "SETS_ODD_EVEN",
+      "receipts": 18,
+      "summary_disagreements": 0
+    },
+    {
+      "market": "TOTAL_POINTS",
+      "receipts": 18,
+      "summary_disagreements": 0
+    }
+  ],
+  "prospectiveMetrics": [
+    {
+      "model": "NCAAB preseason",
+      "independent_events": 757,
+      "correct": 587,
+      "hit_rate": "0.7754",
+      "brier": "0.1940",
+      "mean_side_probability": "0.5843",
+      "observed_side_frequency": "0.7411"
+    },
+    {
+      "model": "NFL free",
+      "independent_events": 15,
+      "correct": 11,
+      "hit_rate": "0.7333",
+      "brier": "0.2133",
+      "mean_side_probability": "0.4761",
+      "observed_side_frequency": "0.3333"
+    },
+    {
+      "model": "NHL DRatings",
+      "independent_events": 111,
+      "correct": 63,
+      "hit_rate": "0.5676",
+      "brier": "0.2421",
+      "mean_side_probability": "0.5364",
+      "observed_side_frequency": "0.4324"
+    },
+    {
+      "model": "UFC Elo earliest",
+      "independent_events": 9,
+      "correct": 6,
+      "hit_rate": "0.6667",
+      "brier": "0.2580",
+      "mean_side_probability": "0.5043",
+      "observed_side_frequency": "0.3333"
+    }
+  ],
+  "reliabilityBins": [
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 1,
+      "independent_events": 8,
+      "mean_probability": "0.366",
+      "observed_frequency": "0.250"
+    },
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 2,
+      "independent_events": 427,
+      "mean_probability": "0.532",
+      "observed_frequency": "0.621"
+    },
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 3,
+      "independent_events": 318,
+      "mean_probability": "0.658",
+      "observed_frequency": "0.912"
+    },
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 4,
+      "independent_events": 4,
+      "mean_probability": "0.811",
+      "observed_frequency": "1.000"
+    },
+    {
+      "model": "NFL free",
+      "bin_0_to_4": 1,
+      "independent_events": 4,
+      "mean_probability": "0.343",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "NFL free",
+      "bin_0_to_4": 2,
+      "independent_events": 9,
+      "mean_probability": "0.505",
+      "observed_frequency": "0.556"
+    },
+    {
+      "model": "NFL free",
+      "bin_0_to_4": 3,
+      "independent_events": 2,
+      "mean_probability": "0.615",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 1,
+      "independent_events": 13,
+      "mean_probability": "0.357",
+      "observed_frequency": "0.308"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 2,
+      "independent_events": 70,
+      "mean_probability": "0.512",
+      "observed_frequency": "0.400"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 3,
+      "independent_events": 26,
+      "mean_probability": "0.671",
+      "observed_frequency": "0.577"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 4,
+      "independent_events": 2,
+      "mean_probability": "0.809",
+      "observed_frequency": "0.500"
+    },
+    {
+      "model": "UFC Elo earliest",
+      "bin_0_to_4": 1,
+      "independent_events": 1,
+      "mean_probability": "0.383",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "UFC Elo earliest",
+      "bin_0_to_4": 2,
+      "independent_events": 7,
+      "mean_probability": "0.498",
+      "observed_frequency": "0.429"
+    },
+    {
+      "model": "UFC Elo earliest",
+      "bin_0_to_4": 3,
+      "independent_events": 1,
+      "mean_probability": "0.671",
+      "observed_frequency": "0.000"
+    }
+  ],
+  "marketMae": [
+    {
+      "sport": "NCAAF",
+      "market": "POINT_MARGIN",
+      "events": 108,
+      "observations": 108,
+      "mae": "13.654"
+    },
+    {
+      "sport": "NCAAF",
+      "market": "TOTAL_POINTS",
+      "events": 108,
+      "observations": 108,
+      "mae": "13.188"
+    },
+    {
+      "sport": "TT",
+      "market": "TOTAL_POINTS",
+      "events": 283,
+      "observations": 283,
+      "mae": "14.334"
+    }
+  ],
+  "verifiedNcaabOriginal": {
+    "sourceCommit": "c451d9fc9767bbeff751e26e631fe0b48579fe75",
+    "committed": "2026-10-15T16:58:38Z",
+    "blob": "a0876f7ecafc879a64d158e18b8aa8138b7b25ea",
+    "records": 73,
+    "unique": 73,
+    "mismatched": [],
+    "sourceForecasts": 73
+  },
+  "ttMlOrientation": {
+    "checked": 265,
+    "mismatch": 0,
+    "reverse": 0,
+    "bad": 0
+  }
 }
