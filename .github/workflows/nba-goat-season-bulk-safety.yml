@@ -20,6 +20,9 @@ on:
       - 'src/app/api/nba/goat/materialize-props-research/route.ts'
       - 'src/services/nba-goat-props-shadow-readiness.service.ts'
       - 'src/lib/nba/goat-research-compact-core.mjs'
+      - 'src/lib/nba/goat-cached-archive.mjs'
+      - 'src/lib/nba/decision-archived-final-core.mjs'
+      - 'tests/nba-goat-cached-archive.test.mjs'
       - 'tests/nba-goat-research-compact-core.test.mjs'
       - 'supabase/migrations/20261115211500_nba_goat_player_game_research_v1.sql'
       - 'supabase/migrations/20261114160000_nba_goat_season_archive_v1.sql'
@@ -47,7 +50,7 @@ jobs:
       - name: Verify schedules have research-only auth, bounded provider calls and preserved production cron
         run: node --test tests/nba-goat-daily-schedules-20261118.test.mjs
       - name: Compact GOAT research fact unit tests
-        run: node --test tests/nba-goat-research-compact-core.test.mjs
+        run: node --test tests/nba-goat-research-compact-core.test.mjs tests/nba-goat-cached-archive.test.mjs
       - name: NBA formula search engine unit tests
         run: node --test tests/nba-goat-formula-lab.test.mjs
       - name: NBA V2 formula lab unit tests

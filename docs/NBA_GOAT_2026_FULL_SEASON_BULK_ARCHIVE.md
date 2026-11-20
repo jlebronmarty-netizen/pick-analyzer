@@ -42,3 +42,7 @@ User upgraded Pick Analyzer to Supabase Small. Project API reported ACTIVE_HEALT
 - Existing Production credentials should stay scoped to Production; do not add them to generic Preview. The single custom environment is the isolated route.
 - Backups of PostgreSQL do not include bucket objects; Storage must be backed up separately before treating the archive as durable.
 - If the lock exists after partial failure, stop and review manually. Never auto-remove lock or rerun a failed batch blindly.
+
+## Stored-only player boxscore batches (November 20)
+
+On the existing private research form, enter up to ten distinct game IDs under **Archivar boxscores guardados**. The server reads the existing operational context and a separate final schedule receipt. The final must reconcile dates, identities, player rows and both point totals. Late events may be filed under the next UTC day. Unverified games stay out of the archive. The private gzip is read back and verified by SHA-256 before the append-only player manifest is acknowledged. Reruns skip indexed games. Use the existing compact materializer after verifying the manifest. This mode makes zero sports-provider calls and runs manually. Advanced datasets retain their separate workflow.
