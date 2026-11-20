@@ -8,7 +8,8 @@ export function ttOddEvenTemporalAudit(rows,{cutoff=CUTOFF}={}){
  if(!isDate(cutoff))throw Error('INVALID_CUTOFF');
  const map=new Map();let ignored=0,duplicates=0,conflicts=0;
  for(const row of Array.isArray(rows)?rows:[]){
-  if(row?.sport!=='TT'||row.market!=='SETS_ODD_EVEN'||row.status!=='FORECAST'||
+  if(row?.sport!=='TT'||row.market!=='SETS_ODD_EVEN')continue;
+  if(row.status!=='FORECAST'||
    !['ODD','EVEN'].includes(row.selection)||!['W','L'].includes(row.outcome?.status)||
    typeof row.event_id!=='string'||!row.event_id||!isDate(row.emitted_at)||!isDate(row.scheduled_at)||
    Date.parse(row.emitted_at)>=Date.parse(row.scheduled_at)){ignored++;continue;}
