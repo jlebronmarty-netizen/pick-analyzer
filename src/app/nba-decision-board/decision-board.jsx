@@ -1,6 +1,7 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 import SportDecisionNavigation from '@/components/dashboard/SportDecisionNavigation';
+import {shortlistNbaPreferred} from '@/lib/nba/decision-preference-core.mjs';
 import {visibleNbaPreferredRows} from '@/lib/nba/decision-visible-core.mjs';
 
 const NAV=[
@@ -24,7 +25,9 @@ function humanReason(row){
  if(row.reason==='UNVALIDATED_NUMERIC_GAP')return 'Brecha y contexto histórico favorables, sin validación de EV';
  return row.reason??'Sin evidencia suficiente';
 }
+function displayedGap(row){return num(row.advantage)??num(row.preference?.numericGap);}
 function Row({row,rank,history,version}){
+ const gap=displayedGap(row);
  const [expanded,setExpanded]=useState(false);
  return <article className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -33,12 +36,12 @@ function Row({row,rank,history,version}){
     <p className="mt-1 font-semibold text-slate-100">{rank!=null&&<span className="mr-2 rounded bg-sky-950 px-2 py-0.5 text-sm text-sky-300">#{rank}</span>}{row.label}</p>
     <p className="mt-1 text-xs text-slate-400">Precio capturado {date(row.capturedAt)} · {row.source} · {row.quoteFreshness==='RECENT'?'Reciente':'Desactualizado'}</p>
    </div>
-   <span className="rounded-full bg-amber-950 px-2 py-1 text-xs font-medium text-amber-200">{row.dataQuality?.status==='VALIDATED'?'PREFERENCIA SHADOW':'PASAR · '+(row.dataQuality?.status??'SIN DATOS')}</span>
+   <span className="rounded-full bg-amber-950 px-2 py-1 text-xs font-medium text-amber-200">{row.dataQuality?.status==='VALIDATED'?'PREFERENCIA SHADOW':(row.classification??'SIN DATOS')+' · '+(row.dataQuality?.status??'SOURCE_UNAVAILABLE')}</span>
   </div>
   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
    <div><p className="text-xs text-slate-400">{row.dataQuality?.book??'Operador pendiente'} / Línea</p><p className="font-semibold tabular-nums">{row.line===null?'ML':decimal(row.line)} <span className="text-sky-200">{odds(row.odds)}</span></p></div>
    <div><p className="text-xs text-slate-400">{row.market==='moneyline'?'Margen estimado':'Proyección'}</p><p className="font-semibold tabular-nums">{decimal(row.projection,2)}</p></div>
-   <div><p className="text-xs text-slate-400">Brecha favorable</p><p className="font-semibold tabular-nums">{row.advantage===null?'—':(row.advantage>0?'+':'')+decimal(row.advantage,2)}</p></div>
+   <div><p className="text-xs text-slate-400">Brecha favorable</p><p className="font-semibold tabular-nums">{gap===null?'—':(gap>0?'+':'')+decimal(gap,2)}</p></div>
    <div><p className="text-xs text-slate-400">{row.market==='props'?'L5 / L10':'Puntos anotados L5 / L10 (ambos equipos)'}</p><p className="font-semibold tabular-nums">{decimal(row.l5)}/{decimal(row.l10)}</p></div>
    <div><p className="text-xs text-slate-400">Historial / aciertos</p><p className="font-semibold tabular-nums">{row.hit10!=null?row.hit10+'/'+row.sample:row.sample!=null?row.sample+' partidos':'—'}</p></div>
    <div><p className="text-xs text-slate-400">Condiciones a favor</p><p className="font-semibold text-sky-200">{row.preference?.favorableCount??0}/{row.preference?.conditionCount??0}</p><p className="text-xs text-amber-200">Probabilidad sin calibrar</p></div>
@@ -56,6 +59,8 @@ function Row({row,rank,history,version}){
     {[...h.issues,...h.excluded].map((v,i)=><p key={i}>{v.id??'Calendario'} · {v.reason}</p>)}</div>)}
    <p><strong>Modelo {version}</strong> {row.method??'Sin modelo aplicable a este contrato.'}</p>
    <p><strong>Condiciones favorables ({row.preference?.favorableCount}/{row.preference?.conditionCount}):</strong> {row.preference?.favorableReasons?.join(' · ')??'No evaluadas'}</p>
+   {row.dataQuality?.warnings?.includes('AVAILABLE_STARTING_ROLE_UNCONFIRMED')&&<p>Jugador disponible según el recibo archivado. Titularidad por confirmar.</p>}
+   {row.dataQuality?.warnings?.includes('TEAM_AVAILABILITY_UNCONFIRMED')&&<p>Disponibilidad de equipos pendiente. El modelo de equipo sólo utiliza marcadores históricos.</p>}
    {row.preference?.cautions?.length>0&&<p><strong>Condiciones no confirmadas:</strong> {row.preference.cautions.join(' · ')}</p>}
    {row.playerId!=null&&<p><strong>Jugador:</strong> {row.playerName} (ID GOAT {row.playerId}). Minutos L5/L10: {decimal(row.minutesL5)}/{decimal(row.minutesL10)}.</p>}
    {row.hit5!=null&&<p><strong>Frecuencia histórica al umbral de hoy:</strong> {row.hit5}/5 y {row.hit10}/{row.sample}; no es probabilidad futura.</p>}
@@ -90,16 +95,15 @@ export default function DecisionBoard(){
  },[data,clock]);
  const entries=useMemo(()=>{
   if(!data)return [];
-  const input=tab==='top'?data.top25:data.preferredRows?.[tab]??[];
-  const preferred=visibleNbaPreferredRows(input);
-  const visible=preferred.filter(x=>Date.parse(x.dataQuality?.expiresAt)>clock&&(gameId==='all'||String(x.gameId)===gameId)&&
+  const input=tab==='top'?Object.values(data.preferredRows??{}).flat():data.preferredRows?.[tab]??[];
+  const active=visibleNbaPreferredRows(input).filter(r=>Date.parse(r.dataQuality?.expiresAt)>clock);
+  const preferred=tab==='top'?shortlistNbaPreferred(active):active;
+  const visible=preferred.filter(x=>(gameId==='all'||String(x.gameId)===gameId)&&
    (tab!=='periods'||period==='all'||x.period===period)&&
    (!search||(x.label+' '+x.matchup+' '+x.market).toLowerCase().includes(search.toLowerCase())));
   // Sort only the presentation copy: original predictions, frozen records and server ranking remain untouched.
-  const gap=r=>typeof r.advantage==='number'&&Number.isFinite(r.advantage)?r.advantage:
-   typeof r.preference?.numericGap==='number'&&Number.isFinite(r.preference.numericGap)?r.preference.numericGap:null;
   const compareGap=(a,b,descending)=>{
-   const aa=gap(a),bb=gap(b);
+   const aa=displayedGap(a),bb=displayedGap(b);
    if(aa===null)return bb===null?0:1;
    if(bb===null)return -1;
    return descending?bb-aa:aa-bb;
@@ -154,7 +158,7 @@ export default function DecisionBoard(){
     <p className="font-semibold text-sky-200">Aprendizaje prospectivo SHADOW</p>
     <p className="mt-1 text-slate-300">Predicciones congeladas: {learning.frozenRowsSeen}. Resultados evaluados: {learning.outcomesSeen}. Ajustes automáticos a modelos oficiales: 0.</p>
     {learning.metrics?.length>0&&<div className="mt-2 flex flex-wrap gap-2">
-     {learning.metrics.slice(0,8).map((r,i)=><span key={i} className="rounded-lg bg-slate-950 px-2 py-1 text-xs text-slate-300">{r.market} {periodLabels[r.period]??r.period}: MAE {decimal(r.mae,2)} · {r.uniqueGames} juegos</span>)}
+     {learning.metrics.slice(0,8).map((r,i)=><span key={i} className="rounded-lg bg-slate-950 px-2 py-1 text-xs text-slate-300">{r.market} {periodLabels[r.period]??r.period}: MAE {decimal(r.mae,2)} · {r.uniqueGames} juegos con igual peso</span>)}
     </div>}
     <div className="mt-3 rounded-lg border border-slate-700 bg-slate-950/60 p-3">
      <p className="font-semibold text-slate-100">Comparación de fórmulas candidatas · investigación prospectiva</p>
@@ -208,6 +212,10 @@ export default function DecisionBoard(){
    {error&&<p role="alert" className="rounded-xl border border-rose-700 bg-rose-950 p-4 text-sm">No pude cargar el panel: {error}</p>}
    {!loading&&!error&&entries.length===0&&<p role="status" className="rounded-xl border border-slate-700 p-6 text-slate-300">No hay lados con señales suficientemente favorables en este filtro. Se mantiene PASAR; no se fuerza una recomendación.</p>}
    {entries.slice(0,limit).map((r,i)=><Row key={r.id} row={r} rank={i+1} history={data.historyEvidence?.[r.historyKey]} version={data.version}/>)}
+   {data?.evidence?.readIssues?.length>0&&<p role="status">Fuentes parciales · {data.evidence.readIssues.join(' · ')}</p>}
+   {data?.evidence?.marketCaptureIssues?.length>0&&<details className="rounded-xl border border-slate-700 p-3"><summary>Mercados sin captura verificable</summary>
+    {data.evidence.marketCaptureIssues.map(i=><p key={i.game+'-'+i.lane} className="text-xs">Partido {i.game} · {i.lane==='props'?'Player props':'Mercados principales'} · SIN DATOS · {i.reason}</p>)}
+   </details>}
    {data&&<details className="rounded-xl border border-slate-700 p-3"><summary>Datos pendientes de validación</summary>
     <p className="my-2 text-xs">{Object.entries(data.summary.qualityCounts??{}).map(([k,n])=>k+' '+n).join(' · ')} · Conteo de lados de mercado.</p>
     {(tab==='top'?Object.values(data.rows).flat():data.rows[tab]??[]).filter(r=>r.dataQuality?.status!=='VALIDATED'&&

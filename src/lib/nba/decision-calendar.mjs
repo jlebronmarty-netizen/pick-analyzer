@@ -15,11 +15,16 @@ export function tailDays(capture, today) {
 export function archivedCalendar(capture, snapshots, asOf) {
   const now = Date.parse(asOf), today = localDay(new Date(now));
   const tail = tailDays(capture,today), games = new Map();
-  const issues = [];
+  const issues = [], scoped={};
+  const issueFor=(reason,...affected)=>{
+    const key=reason+'_'+affected[0].id;
+    issues.push(key);
+    scoped[key]=[...new Set([...(scoped[key]??[]),...affected.flatMap(g=>[g.home_team?.id,g.visitor_team?.id])])];
+  };
   const put = (game, capturedAt) => {
     const prior = games.get(game.id);
     if (prior && (prior.game.season !== game.season || prior.game.home_team?.id !== game.home_team?.id ||
-        prior.game.visitor_team?.id !== game.visitor_team?.id)) issues.push('IDENTITY_MISMATCH');
+        prior.game.visitor_team?.id !== game.visitor_team?.id)) issueFor('IDENTITY_MISMATCH',game,prior.game);
     if (!prior || Date.parse(prior.capturedAt) <= Date.parse(capturedAt)) games.set(game.id,{game,capturedAt});
   };
   const pages = capture?.raw_provider_responses;
@@ -28,7 +33,7 @@ export function archivedCalendar(capture, snapshots, asOf) {
   if (usableBase) {
     const seen = new Set();
     for (const page of pages) for (const game of page.data) {
-      if (seen.has(game.id)) issues.push('DUPLICATE_DATA');
+      if (seen.has(game.id)) issueFor('DUPLICATE_DATA',game);
       seen.add(game.id);
       // Only the portion continuously connected to the tail is usable.
       if (game.date < capture.provider_date_range.startDate || game.date > capture.provider_date_range.endDate ||
@@ -53,9 +58,9 @@ export function archivedCalendar(capture, snapshots, asOf) {
     const dayIds = new Set(dayGames.map(g => g.id));
     for (const {game} of games.values()) {
       if (localDay(new Date(game.datetime)) === date && !dayIds.has(game.id) && !game.postponed)
-        issues.push('CALENDAR_DISAGREEMENT_' + game.id);
+        issueFor('CALENDAR_DISAGREEMENT',game);
     }
     for (const game of dayGames) put(game,s.source_received_at);
   }
-  return {games:[...games.values()], issues:[...new Set(issues)], cutoff:asOf};
+  return {games:[...games.values()], issues:[...new Set(issues)], scoped, cutoff:asOf};
 }

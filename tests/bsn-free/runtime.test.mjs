@@ -21,7 +21,8 @@ globalThis.fetch=async(url,options)=>{
 };
 const opts={clock:new Date('2026-11-11T02:00:00Z'),pause:async()=>{}};
 test('missing key has no claims or calls',async()=>{reset();delete process.env.BSN_APISPORTS_KEY;assert.equal((await runBsnArchive(opts)).status,'MISSING');assert.equal(store.rows.length,0);});
-test('resumable catalogue/season captures retain replayable bodies and no secrets in health',async()=>{
+test('resumable catalogue/season captures retain replayable bodies and no secrets in health',async(t)=>{
+ t.mock.timers.enable({apis:['Date'],now:opts.clock.getTime()});
  reset();const r=await runBsnArchive(opts);assert.equal(r.providerCalls,4);assert.equal(store.calls,4);
  assert.equal((await runBsnArchive(opts)).providerCalls,0);
  const row=store.rows.find(x=>x.source===BASE+'/leagues?id=76');

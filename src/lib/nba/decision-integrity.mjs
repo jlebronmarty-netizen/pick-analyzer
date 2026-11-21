@@ -1,3 +1,4 @@
+import {localDay} from '../nba-archive-core.mjs';
 import {auditWindow} from '../data-quality/window.mjs';
 import {verifiedArchivedPlayerFinal} from './decision-archived-final-core.mjs';
 
@@ -25,10 +26,10 @@ export function indexEvidence({calendar, playerHistory, manifests, contexts, pre
     if (!(stamp(context.player_stats_captured_at) <= stamp(asOf))) continue;
     const id = Number(context.provider_game_id), final = games.find(x => x.game.id === id)?.game;
     if (!final) continue;
-    const verified = verifiedArchivedPlayerFinal({context, final, providerGameId:id});
+    const verified = verifiedArchivedPlayerFinal({context, final, providerGameId:id, allowPartialComponents:true});
     boxes.set(id, verified && !boxes.has(id) ? index(context.player_stats.data, x => x.player.id) : null);
   }
-  return {games, calendarIssues:calendar?.issues ?? ['CALENDAR_UNAVAILABLE'], boxes, pregame, asOf,
+  return {games,calendarScope:calendar?.scoped??{}, calendarIssues:calendar?.issues ?? ['CALENDAR_UNAVAILABLE'], boxes, pregame, asOf,
     compact:index(playerHistory, r => Number(r.player_id)),
     manifests:index(manifests ?? [], r => Number(r.provider_game_id))};
 }
@@ -47,27 +48,41 @@ function inspectFinal(game) {
   if (game.status_state !== 'final' || !(stamp(game.receiptAt)>stamp(game.datetime))) return issue('INCOMPLETE_HISTORY','FINAL_NOT_ARCHIVED');
   return null;
 }
+function calendarCheck(e,team,a){
+  const oldest=a.included.length===a.required?localDay(new Date(a.included.at(-1).date)):null;
+  const issues=e.calendarIssues.filter(key=>{
+    const affected=e.calendarScope?.[key];
+    if(affected?.length && affected.every(Number.isSafeInteger) && !affected.includes(team))return false;
+    const day=key.match(/^(?:MISSING_OR_STALE_CALENDAR_|INVALID_CALENDAR_)(\d{4}-\d{2}-\d{2})$/)?.[1];
+    return !(day&&oldest&&day<oldest);
+  });
+  return issues.length?unavailable(e,'SOURCE_UNAVAILABLE',issues.join(',')):a;
+}
 export function teamWindow(e,target,team,observedIds) {
-  if (e.calendarIssues.length) return unavailable(e,'SOURCE_UNAVAILABLE',e.calendarIssues.join(','));
-  return auditWindow(expected(e,target,team), game => inspectFinal(game) ??
+  const audit=auditWindow(expected(e,target,team), game => inspectFinal(game) ??
     (observedIds.has(game.id) ? {include:{}} : issue('PARTIAL','INVALID_PERIOD_SCORE_OR_FINAL')),e.asOf);
+  return calendarCheck(e,team,audit);
 }
 
 export function playerWindow(e,target,playerId,parts) {
-  if (e.calendarIssues.length) return unavailable(e,'SOURCE_UNAVAILABLE',e.calendarIssues.join(','));
   const records = (e.compact.get(playerId) ?? []).filter(r => r.season === target.season &&
       stamp(r.game_datetime) < Math.min(stamp(target.datetime),stamp(e.asOf)) &&
       stamp(r.materialized_at) <= stamp(e.asOf) && stamp(r.source_captured_at) <= stamp(e.asOf));
   const byGame = index(records,r => Number(r.provider_game_id));
   const latest = records.slice().sort((a,b)=>stamp(b.game_datetime)-stamp(a.game_datetime))[0];
-  if (!latest) return unavailable(e,'INCOMPLETE_HISTORY','NO_MATERIALIZED_PLAYER_HISTORY');
+  if (!latest) return calendarCheck(e,null,unavailable(e,'INCOMPLETE_HISTORY','NO_MATERIALIZED_PLAYER_HISTORY'));
   const team = Number(latest.team_id);
   if (!teams(target).includes(team)) return unavailable(e,'IDENTITY_MISMATCH','TEAM_OUTSIDE_TARGET_GAME');
   const audit = auditWindow(expected(e,target,team), game => {
     const final = inspectFinal(game);
     if (final) return final;
     const matches = byGame.get(game.id) ?? [];
-    if (!matches.length) return issue('INCOMPLETE_HISTORY','PLAYER_ROW_MISSING_AT_CUTOFF');
+    if (!matches.length) {
+      const appearance=e.boxes.get(game.id)?.get(playerId)?.[0];
+      if(appearance?.team?.id===team && (appearance.min==='0'||appearance.min===0||appearance.min==='0:00'))
+        return {exclude:'DNP'};
+      return issue('INCOMPLETE_HISTORY','PLAYER_ROW_MISSING_AT_CUTOFF');
+    }
     if (matches.length !== 1) return issue('DUPLICATE_DATA','PLAYER_GAME_NOT_UNIQUE');
     const r = matches[0], m = e.manifests.get(game.id) ?? [];
     if (m.length !== 1) return issue(m.length ? 'DUPLICATE_DATA' : 'SOURCE_UNAVAILABLE','ARCHIVE_MANIFEST_NOT_UNIQUE');
@@ -104,7 +119,7 @@ export function playerWindow(e,target,playerId,parts) {
   // Documentary gaps may coexist with an actual missing game. Report the latter first.
   audit.status = audit.issues.find(i=>i.status==='INCOMPLETE_HISTORY')?.status ??
     audit.issues.find(i=>i.reason!=='ORIGINAL_BOX_NOT_CROSS_CHECKED')?.status ?? audit.status;
-  return audit;
+  return calendarCheck(e,team,audit);
 }
 
 export function readableWindow(a) {
@@ -112,6 +127,7 @@ export function readableWindow(a) {
 }
 
 export function marketQuality(q, game, evidence, histories) {
+  const warnings = [];
   const issues = histories.flatMap(h => h.status === 'VALIDATED' ? [] :
     [{status:h.status,reason:h.issues.find(i=>i.status===h.status)?.reason ?? h.status}]);
   const cutoff = stamp(evidence.asOf), captured = stamp(q.source_received_at), updated = stamp(q.provider_updated_at);
@@ -123,6 +139,11 @@ export function marketQuality(q, game, evidence, histories) {
     issues.push({status:'CONTRACT_UNVERIFIED',reason:'BOOK_OR_PRICE_UNVERIFIED'});
   if (q.phase && q.phase !== 'PREGAME' || game.status_state !== 'scheduled' || stamp(game.datetime)<=cutoff)
     issues.push({status:'STALE',reason:'NOT_PREGAME'});
+  const teamSide=q.market==='moneyline'||q.market==='spread';
+  if(!(teamSide?['home','away']:['over','under']).includes(q.side) ||
+      q.provider!=='hoopsapi' && !['FULL_GAME_INCLUDING_OT','FULL_GAME_LABEL_OT_UNVERIFIED'].includes(q.period) ||
+      q.provider==='hoopsapi' && (!finite(q.decimal_odds)||Number(q.decimal_odds)<=1))
+    issues.push({status:'CONTRACT_UNVERIFIED',reason:'MARKET_SIDE_PERIOD_OR_PRICE_MISMATCH'});
   const mainContract = {moneyline:'WINNER',spread:'SIGNED_HANDICAP',total:q.side==='over'?'STRICT_GREATER_THAN':'STRICT_LESS_THAN'};
   if (q.provider!=='hoopsapi' && (q.phase!=='PREGAME' ||
       (q.market==='props' ? q.contract !== (q.side==='over'?'STRICT_GREATER_THAN':'STRICT_LESS_THAN') :
@@ -134,7 +155,7 @@ export function marketQuality(q, game, evidence, histories) {
     const same=raw && raw.sportsbook===book && raw.game_id===q.provider_game_id && raw.quote_id===q.quote_id &&
       raw.market===q.market && raw.period===q.period && raw.side===q.side && sameLine(raw.line,q.line) &&
       raw.american_odds===q.american_odds && raw.contract===q.contract &&
-      stamp(raw.provider_updated_at)===updated && stamp(raw.source_received_at)===captured &&
+      stamp(raw.provider_updated_at)===updated && stamp(raw.source_received_at??q.envelopeReceivedAt)===captured &&
       (q.market!=='props' || raw.player_id===q.player_id && raw.statistic===q.statistic);
     if(!same)issues.push({status:'CONTRACT_UNVERIFIED',reason:'QUOTE_RECEIPT_MISMATCH'});
     if(raw?.freshness==='STALE')issues.push({status:'STALE',reason:'STALE_AT_CAPTURE'});
@@ -142,24 +163,33 @@ export function marketQuality(q, game, evidence, histories) {
   const rule = q.provider==='hoopsapi' ? q.overtime_rule : q.payload?.overtime_rule;
   if (!['q1','q2','q3','q4','h1'].includes(q.period) && (rule!=='INCLUDES_OVERTIME' || q.period==='FULL_GAME_LABEL_OT_UNVERIFIED'))
     issues.push({status:'CONTRACT_UNVERIFIED',reason:'OVERTIME_RULE_UNVERIFIED'});
-  const p = evidence.pregame;
+  const p = Array.isArray(evidence.pregame)?evidence.pregame.find(r=>r.game_ids?.includes(game.id)):
+    evidence.pregame;
   const coverage = p?.coverage?.injuriesComplete && p.coverage.projectedLineupsComplete &&
     Array.isArray(p.injuries?.data) && Array.isArray(p.projected_lineups?.data) && p.game_ids?.includes(game.id) &&
     stamp(p.captured_at)<=cutoff && cutoff-stamp(p.captured_at)<=3*3600000;
-  if (!coverage) issues.push({status:'PARTIAL',reason:'PREGAME_CONTEXT_UNVERIFIED'});
+  if (!coverage && q.market!=='props') warnings.push('TEAM_AVAILABILITY_UNCONFIRMED');
   if (q.market === 'props') {
     const lineups = p?.projected_lineups?.data ?? [];
     const matching = lineups.filter(v=>v.game_id===game.id && teams(game).includes(v.team_id) &&
       stamp(v.updated_at)<=cutoff && v.lineup?.some(entry=>entry.player?.id===q.player_id));
-    if (!p?.coverage?.injuriesComplete || !p.coverage.projectedLineupsComplete ||
+    const injuries=(p?.injuries?.data??[]).filter(v=>v.player?.id===q.player_id);
+    const reported=injuries.filter(v=>String(v.status).toLowerCase()==='available');
+    const unsafe=injuries.some(v=>String(v.status).toLowerCase()!=='available');
+    const team=histories[0]?.included[0]?.teamId;
+    const teamGames=evidence.games.filter(({game:g})=>p?.game_ids?.includes(g.id)&&teams(g).includes(team));
+    const available=reported.length===1 && reported[0].player.team_id===team &&
+      (reported[0].game_id===game.id || reported[0].game_id==null && teamGames.length===1 && teamGames[0].game.id===game.id);
+    const confirmed=p?.coverage?.projectedLineupsComplete && matching.length===1 && matching[0].status==='confirmed';
+    if (!p?.coverage?.injuriesComplete || !Array.isArray(p.injuries?.data) || unsafe ||
         !(stamp(p.captured_at)<=cutoff && cutoff-stamp(p.captured_at)<=3*3600000) ||
-        !p.game_ids?.includes(game.id) || matching.length!==1 || matching[0].status!=='confirmed' ||
-        p.injuries?.data?.some(v=>v.player?.id===q.player_id))
+        !p.game_ids?.includes(game.id) || (!confirmed&&!available))
       issues.push({status:'PARTIAL',reason:'PLAYER_AVAILABILITY_UNCONFIRMED'});
-    else if (matching[0].team_id !== histories[0]?.included[0]?.teamId)
+    else if (matching.length>1 || matching.some(line=>line.team_id!==team) || reported.some(v=>v.player.team_id!==team))
       issues.push({status:'IDENTITY_MISMATCH',reason:'CURRENT_TEAM_DIFFERS_FROM_HISTORY'});
+    else if(!confirmed) warnings.push('AVAILABLE_STARTING_ROLE_UNCONFIRMED');
   }
   const validUntil=Math.min(stamp(game.datetime)-10*60000,updated+(q.provider==='hoopsapi'?360:180)*60000,
-    stamp(p?.captured_at)+3*3600000);
-  return {status:issues[0]?.status ?? 'VALIDATED',issues,expiresAt:Number.isFinite(validUntil)?new Date(validUntil).toISOString():null,book:book ?? null,providerUpdatedAt:q.provider_updated_at ?? null};
+    q.market==='props'?stamp(p?.captured_at)+3*3600000:Infinity);
+  return {status:issues[0]?.status ?? 'VALIDATED',issues,warnings,overtimeRule:rule??'NOT_VERIFIED',regionalExecutionVerified:false,expiresAt:Number.isFinite(validUntil)?new Date(validUntil).toISOString():null,book:book ?? null,providerUpdatedAt:q.provider_updated_at ?? null};
 }

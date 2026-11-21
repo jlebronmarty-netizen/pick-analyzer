@@ -14,7 +14,7 @@ function rows(){
    const home=i<6,player=i+100,team=home?5:7,minute=i===0?'0':'24:24';
    const pts=i===0?0:home?10:10;
    result.push({player:{id:player,team_id:team},team:{id:team},game:{...game},
-     min:minute,pts,reb:4,ast:2,fg3m:1});
+     min:minute,pts,reb:i===0?0:4,ast:i===0?0:2,fg3m:i===0?0:1});
   }
   return result;
 }
@@ -78,4 +78,9 @@ test('a corrected rebound blocks pending rebounds and PRA until the two receipts
  assert.equal(concordantPlayerFinal('points',older,original),original);
  assert.equal(concordantPlayerFinal('rebounds',original,original),original);
  assert.equal(concordantPlayerFinal('rebounds',older,null),null);
+});
+
+test('zero minutes and a nonzero box stat require reconciliation',()=>{
+ const disputed=rows();disputed[0].reb=1;
+ assert.equal(verifiedArchivedPlayerFinal({context:ctx(disputed),final:game,providerGameId:42}),null);
 });

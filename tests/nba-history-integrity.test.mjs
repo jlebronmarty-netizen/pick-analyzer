@@ -46,7 +46,7 @@ test('duplicates, null vs zero, transfer, bad digest, late receipt, wrong season
     [x=>{x.calendar.issues=['MISSING_CALENDAR']},'SOURCE_UNAVAILABLE'],
   ]){
     const x=inputs();change(x);const r=buildNbaDecisionBoard(x).rows.props[0];
-    assert.equal(r.dataQuality.status,expected);assert.equal(r.projection,null);assert.equal(r.classification,'PASAR');
+    assert.equal(r.dataQuality.status,expected);assert.equal(r.projection,null);assert.equal(r.classification,expected==='SOURCE_UNAVAILABLE'?'SIN DATOS':'PASAR');
   }
   const x=inputs(),e=indexEvidence(x);
   // Adapter scenarios use explicit in-memory original rows; the date/ID/AST fixture above is observed data.

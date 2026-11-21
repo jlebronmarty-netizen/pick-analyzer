@@ -1,3 +1,7 @@
+## 2026-11-20 · Integración controlada del PR 391
+
+Siguientes hitos con autorización independiente: integrar la rama, comprobar los ciclos existentes de congelación y liquidación, y evaluar la corrección aditiva de Warriors–Dallas. Los adaptadores fuera de NBA siguen en el inventario de cobertura. [Procedimiento y criterios](audits/2026-11-20/production-review.md)
+
 ## 2026-11-20 · Verificación de datos antes de clasificar oportunidades
 
 NBA tiene un adaptador implementado en rama de revisión. Las siguientes dependencias son la revisión de cobertura de originales y del contrato OT, reconciliación propuesta de dos partidos, y adaptadores de calendario y disponibilidad por deporte. Cualquier backfill o despliegue requiere aprobación separada. [Informe y evidencia](audits/2026-11-20/README.md)

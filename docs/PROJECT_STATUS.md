@@ -1,3 +1,7 @@
+## 2026-11-20 · Cierre técnico del PR 391
+
+La reproducción de nueve partidos obtuvo 143 preferencias descriptivas de período y 25 en el Top. El nuevo lector usa el último menú archivado por partido. La rama tiene un procedimiento de integración y reversión pendiente de autorización. [Evidencia de preparación](audits/2026-11-20/production-review.md)
+
 ## 2026-11-20 · Integridad de historiales y contratos NBA
 
 Rama de revisión con el incidente de Jamal Shead reproducido en dos cortes, bloqueo del Top/SHADOW ante partidos faltantes y cotejo de originales. El informe documenta el alcance, las regresiones y los riesgos pendientes por deporte. [Informe y evidencia](audits/2026-11-20/README.md)

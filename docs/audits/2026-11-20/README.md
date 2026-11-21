@@ -1,5 +1,7 @@
 # Pick Analyzer · Auditoría de datos del 20 de noviembre de 2026
 
+[Revisión final del PR 391, prueba de jornada completa, SQL de reparación y procedimiento de producción](production-review.md)
+
 ## Dictamen
 
 El Decision Board NBA de producción permitió congelar un prop de Jamal Shead con diez observaciones que omitían tres partidos más recientes. La cuota y la línea tenían recibo. La tabla compacta aún no había materializado los tres originales. La rama reproduce el incidente, bloquea esa selección, muestra los encuentros responsables y conserva el pronóstico histórico. Encontramos además un partido completo ausente, dos rebotes contradictorios y contratos cuyo alcance de prórroga sigue sin verificarse.

@@ -54,9 +54,10 @@ test('verified final scores settle full-game totals, spread, ML and Q1, H2+OT de
  assert.equal(settleNbaShadowForecast(mlrow,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z'}).statistical_result,'win');
  const q1={...total,period:'q1',line:50,projection:56,side:'over'};
  assert.equal(settleNbaShadowForecast(q1,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z'}).actual,51);
- const extra={...final,home_ot1:8,visitor_ot1:6,home_team_score:126,visitor_team_score:107};
- const h2={...total,period:'h2',line:103.5,projection:110,side:'over'};
- assert.equal(settleNbaShadowForecast(h2,{game:extra,sourceReceivedAt:'2026-11-20T05:00:00Z'}).actual,120);
+ const extra={...final,period:5,visitor_q4:43,home_ot1:8,visitor_ot1:6,home_team_score:126,visitor_team_score:124};
+ const h2={...total,evidence:{quality:{overtimeRule:'INCLUDES_OVERTIME'}},period:'h2',line:103.5,projection:110,side:'over'};
+ assert.equal(settleNbaShadowForecast(h2,{game:extra,sourceReceivedAt:'2026-11-20T05:00:00Z'}).actual,137);
+ assert.equal(settleNbaShadowForecast({...h2,evidence:{}},{game:extra,sourceReceivedAt:'2026-11-20T05:00:00Z'}),null);
  const spread={...total,market:'spread',side:'home',line:-16.5,projection:17};
  assert.equal(settleNbaShadowForecast(spread,{game:final,sourceReceivedAt:'2026-11-20T05:00:00Z'}).statistical_result,'win');
 });

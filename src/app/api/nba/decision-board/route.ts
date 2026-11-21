@@ -1,3 +1,4 @@
+import {boardResponse} from '@/lib/nba/decision-board-response.mjs';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
 export const dynamic='force-dynamic';
 export const runtime='nodejs';
@@ -12,7 +13,7 @@ export async function GET(request:Request){
     return response({status:'PRIVATE_DEPLOYMENT_HOST_REQUIRED'},404);
   if(!request.headers.get('x-vercel-oidc-token'))return response({status:'PRIVATE_VERCEL_AUTH_REQUIRED'},401);
   if(new URL(request.url).search)return response({status:'NO_QUERY_PARAMETERS_ALLOWED'},400);
-  try{return response(await readNbaDecisionBoard());}
+  try{return boardResponse(await readNbaDecisionBoard(),request.headers.get('accept-encoding')??'');}
   catch(e){console.warn('NBA_DECISION_BOARD_READ_ERROR',e instanceof Error?e.message:'UNKNOWN');
     return response({status:'NBA_DECISION_BOARD_READ_UNAVAILABLE',provider_calls:0,model_writes:0},503);}
 }

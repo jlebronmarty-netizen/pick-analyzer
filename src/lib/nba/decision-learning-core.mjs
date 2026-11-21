@@ -1,4 +1,5 @@
-import {localDay} from '../nba-archive-core.mjs';
+import {reconciledPeriods} from './decision-archived-final-core.mjs';
+import {localDay,validateArchive} from '../nba-archive-core.mjs';
 import {hasValidatedInputs} from '../data-quality/window.mjs';
 import {createHash} from 'node:crypto';
 export const NBA_DECISION_LEARNING_VERSION='NBA_DECISION_STATISTICAL_SHADOW_V1';
@@ -124,19 +125,25 @@ export function planNbaShadowFreeze(board,asOf=new Date().toISOString()){
   excluded:{...excluded,FAIR_SAMPLING_CAP:selected.length-balanced.length},
   provider_calls:0,official_model_writes:0};
 }
+// Rows are ordered newest first. A revised or withdrawn final supersedes its older receipt.
+export function latestArchivedFinal(rows,gameId,day,asOf){
+ const [r,prior]=rows;
+ if(!r||prior && Date.parse(r.source_received_at)===Date.parse(prior.source_received_at))return null;
+ const meta=r.payload?.meta;
+ if(meta?.snapshot_id!==r.snapshot_id||meta?.date_local!==day||meta.status!=='SCHEDULE_RETRIEVED'||
+    meta.warnings?.length || Date.parse(meta.source_received_at)!==Date.parse(r.source_received_at)||
+    !(Date.parse(r.source_received_at)<=Date.parse(asOf)))return null;
+ try{validateArchive(r.payload,new Date(asOf));}catch{return null;}
+ const game=r.payload.data.games?.find(g=>g.id===gameId);
+ if(game?.status_state!=='final'||game.postponed||!(Date.parse(r.source_received_at)>Date.parse(game.datetime)))return null;
+ return {game,receivedAt:r.source_received_at,snapshotId:r.snapshot_id};
+}
 function validatedFinal(raw,forecast){
  const g=raw?.game??raw;
  if(!g||g.status_state!=='final'||Number(g.id)!==forecast.game_id ||
     !okTime(g.datetime)||localDay(new Date(g.datetime))!==forecast.game_date_local||
-    Math.abs(Date.parse(g.datetime)-Date.parse(forecast.game_start_at))>3600000)return null;
- const home=[g.home_q1,g.home_q2,g.home_q3,g.home_q4].map(number);
- const away=[g.visitor_q1,g.visitor_q2,g.visitor_q3,g.visitor_q4].map(number);
- if([...home,...away].some(v=>v===null||!Number.isSafeInteger(v)||v<0))return null;
- const ho=['home_ot1','home_ot2','home_ot3'].reduce((s,k)=>s+(number(g[k])??0),0);
- const ao=['visitor_ot1','visitor_ot2','visitor_ot3'].reduce((s,k)=>s+(number(g[k])??0),0);
- const h=home.reduce((a,b)=>a+b,0)+ho,a=away.reduce((x,y)=>x+y,0)+ao;
- if(h!==number(g.home_team_score)||a!==number(g.visitor_team_score))return null;
- return {h,a,home,away,ho,ao};
+    g.postponed===true||Date.parse(g.datetime)!==Date.parse(forecast.game_start_at))return null;
+ return reconciledPeriods(g);
 }
 function periodScore(final,side,period){
  const a=side==='home'?final.home:final.away,ot=side==='home'?final.ho:final.ao;
@@ -153,18 +160,28 @@ const statsMap={points:['pts'],rebounds:['reb'],assists:['ast'],threes:['fg3m'],
 // observation may corroborate it, but a disputed component must remain pending.
 export function concordantPlayerFinal(statistic, compact, original) {
  const fields=statsMap[statistic];
- if(!fields||!original)return null;
+ if(!fields||!original||fields.some(k=>!Number.isSafeInteger(original[k])||original[k]<0))return null;
  if(compact && (Number(compact.player_id)!==original.player_id ||
     Number(compact.provider_game_id)!==original.provider_game_id ||
     !(compact.minutes_played>0) || fields.some(k=>number(compact[k])!==original[k])))return null;
  return original;
 }
+export function pendingOvertimeDispute(f,game){
+ if(!['ft','h2'].includes(f.period))return false;
+ const played=Number(game?.period)>4 || ['home','visitor'].some(side=>
+   ['ot1','ot2','ot3'].some(period=>Number(game?.[side+'_'+period])>0));
+ return played && f.evidence?.quality?.overtimeRule!=='INCLUDES_OVERTIME';
+}
 /** @param {any} forecast @param {any} sources */
 export function settleNbaShadowForecast(forecast,{game,sourceReceivedAt,playerStat=null,playerStatReceivedAt=null}={}){
- if(!forecast||!okTime(sourceReceivedAt)||!okTime(forecast.game_start_at)||
+ if(!forecast||!allowedMarkets.has(forecast.market)||!allowedPeriods.has(forecast.period)||
+    number(forecast.projection)===null||!okTime(sourceReceivedAt)||!okTime(forecast.game_start_at)||
     Date.parse(sourceReceivedAt)<=Date.parse(forecast.game_start_at))return null;
  const final=validatedFinal(game,forecast);
- if(!final)return null;
+ if(!final||pendingOvertimeDispute(forecast,game?.game??game))return null;
+ const teamMarket=forecast.market==='moneyline'||forecast.market==='spread';
+ if(!(teamMarket?['home','away']:['over','under']).includes(forecast.side) ||
+    forecast.market!=='moneyline' && number(forecast.line)===null)return null;
  let actual=null,source='BALLDONTLIE_FINAL_ARCHIVE';
  if(forecast.market==='props'){
   const cols=statsMap[forecast.statistic]??null;
