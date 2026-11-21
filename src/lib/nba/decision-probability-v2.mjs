@@ -3,18 +3,19 @@
 // Candidate probabilities must be frozen before tipoff and have an independent ledger.
 export const NBA_DECISION_V2_VERSION = 'NBA_DECISION_PROBABILITY_RESEARCH_V2';
 const valid = n => typeof n === 'number' && Number.isFinite(n);
-const time = s => typeof s === 'string' ? Date.parse(s) : NaN;
+const time = s => typeof s === 'string' && /T.*(?:Z|[+-]\d{2}:\d{2})$/i.test(s) ? Date.parse(s) : NaN;
 const round = n => Math.round(n * 1000000) / 1000000;
 const groups = rows => [...new Set(rows.map(r => String(r.gameId)))].length;
 export function impliedProbability(americanOdds) {
   if (!Number.isInteger(americanOdds) || (americanOdds > -100 && americanOdds < 100)) return null;
   return americanOdds < 0 ? -americanOdds / (-americanOdds + 100) : 100 / (americanOdds + 100);
 }
-export function expectedValue(probability, americanOdds) {
+export function expectedValue(probability, americanOdds, pushProbability=0) {
   const implied = impliedProbability(americanOdds);
-  if (!valid(probability) || probability < 0 || probability > 1 || implied === null) return null;
+  if (!valid(probability) || probability < 0 || probability > 1 || implied === null ||
+      !valid(pushProbability) || pushProbability < 0 || pushProbability > 1) return null;
   const profit = americanOdds < 0 ? 100 / -americanOdds : americanOdds / 100;
-  return round(probability * profit - (1 - probability));
+  return round((1-pushProbability) * (probability * profit - (1-probability)));
 }
 function eligible(r) {
   // Explicitly exclude pushes, ambiguous identities, unfrozen or post-game inputs.
@@ -23,6 +24,8 @@ function eligible(r) {
     typeof r.forecastId === 'string' && r.forecastId.length > 0 &&
     valid(r.probability) && r.probability > 0 && r.probability < 1 &&
     ['win', 'loss'].includes(r.result) &&
+    (r.market !== 'props' || Boolean(r.statistic?.trim())) &&
+    ['trainedThrough','featuresAsOf','quoteAt','frozenAt'].every(k => r[k]===undefined || time(r[k])<=time(r.decisionAt)) &&
     Number.isFinite(time(r.decisionAt)) && Number.isFinite(time(r.gameStartAt)) &&
     Number.isFinite(time(r.outcomeAt)) && time(r.decisionAt) < time(r.gameStartAt) &&
     time(r.outcomeAt) > time(r.gameStartAt) && r.qualityStatus === 'VALIDATED' &&
@@ -45,22 +48,31 @@ export function evaluateProbabilityCohort(rows, {trainBefore, holdoutFrom, minim
       time(trainBefore) >= time(holdoutFrom) || !Number.isSafeInteger(minimumTrainGames) ||
       !Number.isSafeInteger(minimumHoldoutGames) || minimumTrainGames < 100 || minimumHoldoutGames < 100)
     throw new Error('INVALID_PROSPECTIVE_EVALUATION_PLAN');
-  const accepted = rows.filter(eligible);
+  const byId=new Map(), conflicts=new Set(), starts=new Map(), disputedGames=new Set();
+  for (const row of rows.filter(Boolean)) {
+    const id=row.forecastId, start=time(row.gameStartAt);
+    if (starts.has(row.gameId) && starts.get(row.gameId)!==start) disputedGames.add(row.gameId);
+    starts.set(row.gameId,start);
+    const prior=byId.get(id);
+    if (prior && Object.keys({...prior,...row}).some(k=>prior[k]!==row[k])) conflicts.add(id);
+    else byId.set(id,row);
+  }
+  const accepted = [...byId.values()].filter(r=>eligible(r) && !conflicts.has(r.forecastId) && !disputedGames.has(r.gameId));
   const invalid = rows.length - accepted.length;
   const cohorts = new Map();
   for (const row of accepted) {
-    const key=[row.modelVersion,row.market,row.period].join('|');
+    const key=JSON.stringify([row.modelVersion,row.market,row.period,row.statistic??null]);
     if (!cohorts.has(key)) cohorts.set(key,[]);
     cohorts.get(key).push(row);
   }
   const output=[];
   for (const [key, records] of cohorts) {
-    const [modelVersion,market,period]=key.split('|');
+    const [modelVersion,market,period,statistic]=JSON.parse(key);
     // A game's temporal cohort is determined by its start, never settlement or ingestion time.
-    const train=records.filter(r=>time(r.gameStartAt)<time(trainBefore));
-    const holdout=records.filter(r=>time(r.gameStartAt)>=time(holdoutFrom));
+    const train=records.filter(r=>time(r.outcomeAt)<time(trainBefore));
+    const holdout=records.filter(r=>time(r.decisionAt)>=time(holdoutFrom));
     const trainGames=groups(train),holdoutGames=groups(holdout);
-    output.push({modelVersion,market,period,trainGames,holdoutGames,
+    output.push({modelVersion,market,period,statistic,trainGames,holdoutGames,
       trainContracts:train.length,holdoutContracts:holdout.length,
       trainBrier:score(train),holdoutBrier:score(holdout),
       excludedGapContracts:records.length-train.length-holdout.length,
@@ -72,19 +84,49 @@ export function evaluateProbabilityCohort(rows, {trainBefore, holdoutFrom, minim
     acceptedContracts:accepted.length,rejectedContracts:invalid,models:output,
     approvedForBetting:false,officialModelWrites:0,providerCalls:0};
 }
-export function researchDecision(candidate, validation) {
-  // This is intentionally a fail-closed gate. Validation reviews are not an automatic promotion.
+export function researchDecision(candidate, validation, asOf) {
   const basis={classification:'VIGILAR',researchOnly:true,modelProbability:null,expectedValue:null};
-  if (!candidate || candidate.dataQuality !== 'VALIDATED') return {...basis,classification:'PASAR',reason:'DATA_QUALITY_UNVERIFIED'};
-  if (!valid(candidate.probability) || candidate.probability<=0 || candidate.probability>=1 ||
-      candidate.probabilityOrigin!=='FROZEN_PROSPECTIVE_MODEL')
+  if (!candidate) return {...basis,classification:'SIN DATOS',reason:'CANDIDATE_UNAVAILABLE'};
+  if (candidate.dataQuality!=='VALIDATED') {
+    const classification=['SOURCE_UNAVAILABLE','INSUFFICIENT_SAMPLE'].includes(candidate.dataQuality)?'SIN DATOS':'PASAR';
+    return {...basis,classification,reason:candidate.dataQuality??'DATA_QUALITY_UNVERIFIED'};
+  }
+  const p=candidate.probability;
+  if (!valid(p)||p<=0||p>=1||candidate.probabilityOrigin!=='FROZEN_PROSPECTIVE_MODEL')
     return {...basis,reason:'CALIBRATED_PROBABILITY_UNAVAILABLE'};
-  const ev=expectedValue(candidate.probability,candidate.americanOdds);
-  if(ev===null)return {...basis,reason:'PRICE_UNVERIFIED'};
-  const enough=validation?.validationStatus==='VALIDATED_INDEPENDENT_HOLDOUT' &&
-    validation?.humanReviewed===true && validation?.calibrationPassed===true &&
-    validation?.contractVerified===true && validation?.regionalExecutionVerified===true;
-  // Until explicit independent evidence and review exists, NEVER output JUGADA.
-  return {...basis,reason:enough?'RESEARCH_READY_FOR_SEPARATE_RELEASE_REVIEW':'PROBABILITY_NOT_VALIDATED',
-    modelProbability:candidate.probability,expectedValue:ev};
+  if (Number.isInteger(candidate.line) && candidate.market!=='moneyline' && !valid(candidate.pushProbability))
+    return {...basis,reason:'PUSH_MODEL_UNAVAILABLE'};
+  const ev=expectedValue(p,candidate.americanOdds,candidate.pushProbability??0);
+  if (ev===null) return {...basis,reason:'PRICE_UNVERIFIED'};
+  const evaluated={...basis,modelProbability:p,expectedValue:ev};
+  if (ev<=0) return {...evaluated,classification:'PASAR',reason:'NONPOSITIVE_EV'};
+  const now=time(asOf);
+  const qualified=Boolean(candidate.quoteId && candidate.book && candidate.modelVersion && candidate.scope &&
+    candidate.contextVerified===true && candidate.contractVerified===true && candidate.regionalExecutionVerified===true &&
+    time(candidate.quoteAt)<=time(candidate.frozenAt) && time(candidate.frozenAt)<=now &&
+    now<Math.min(time(candidate.expiresAt),time(candidate.gameStartAt)) &&
+    validation?.validationStatus==='VALIDATED_INDEPENDENT_HOLDOUT' &&
+    validation.modelVersion===candidate.modelVersion && validation.scope===candidate.scope &&
+    validation.trainGames>=100 && validation.holdoutGames>=100 && validation.separateProspective===true &&
+    validation.humanReviewed===true && validation.calibrationPassed===true &&
+    valid(candidate.evLower95) && candidate.evLower95>0 && candidate.evLower95<=ev);
+  return {...evaluated,reason:qualified?'RESEARCH_READY_FOR_SEPARATE_RELEASE_REVIEW':'PROBABILITY_NOT_VALIDATED'};
+}
+
+export function challengeStage(candidates, asOf, {allowExceptional=false}={}) {
+  const pool=[];
+  for (const {candidate,validation} of candidates) {
+    if (!candidate?.forecastId) continue;
+    const odds=candidate.americanOdds;
+    const decision=researchDecision(candidate,validation,asOf);
+    if (odds<=-110 && odds>=(allowExceptional?-300:-200) &&
+        decision.reason==='RESEARCH_READY_FOR_SEPARATE_RELEASE_REVIEW') {
+      pool.push({forecastId:candidate.forecastId,probability:decision.modelProbability,ev:decision.expectedValue});
+    }
+  }
+  const first=(a,b)=>String(a.forecastId).localeCompare(String(b.forecastId));
+  return {initialCapital:100,objective:1000,maximumPicksPerStage:1,
+    highestProbability:pool.toSorted((a,b)=>b.probability-a.probability||b.ev-a.ev||first(a,b))[0]??null,
+    highestEv:pool.toSorted((a,b)=>b.ev-a.ev||b.probability-a.probability||first(a,b))[0]??null,
+    selection:null,classification:'SIN APUESTA',automaticPromotion:false};
 }
