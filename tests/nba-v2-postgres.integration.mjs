@@ -96,6 +96,20 @@ try{
   assert.equal(await scalar(a,'select count(*)::int from nba_v2_shadow.reports'),2);
   const late={...dry.batch,at:morning};
   await assert.rejects(p.commit('freeze','2026-11-23T15:35:00Z',late),/INVALID_V2_BATCH_OR_CLOCK/);
-  console.log(JSON.stringify({version,seedForecasts:40,seedResults:15,concurrentConnections:2,
+  await a.query('reset role');
+  await a.query(readFileSync('scripts/research/nba-v2/daily/observe-only.sql','utf8'));
+  const sha='a'.repeat(40),host='pick-analyzer-test.vercel.app';
+  await a.query("insert into nba_v2_shadow.observation_window(deployment_sha,hostname,expires_at) values($1,$2,now()+interval '5 min')",[sha,host]);
+  await a.query('set role service_role');
+  assert.equal(await scalar(a,'select public.nba_v2_shadow_observe_allowed($1,$2)',[sha,host]),true);
+  assert.equal(await scalar(a,'select public.nba_v2_shadow_observe_allowed($1,$2)',[sha,'other.vercel.app']),false);
+  await assert.rejects(a.query('update nba_v2_shadow.observation_window set closed_at=now()'),e=>e.code==='42501');
+  await assert.rejects(a.query("select public.nba_v2_shadow_commit(null,null,null)"),e=>e.code==='42501');
+  await assert.rejects(a.query("select public.nba_v2_shadow_report(null,null)"),e=>e.code==='42501');
+  await assert.rejects(a.query("insert into nba_v2_shadow.judgments default values"),e=>e.code==='42501');
+  await a.query('reset role');
+  await a.query('update nba_v2_shadow.observation_window set closed_at=now() where deployment_sha=$1',[sha]);
+  assert.equal(await scalar(a,'select public.nba_v2_shadow_observe_allowed($1,$2)',[sha,host]),false);
+  console.log(JSON.stringify({observationClosed:true,automaticWritesDenied:true,version,seedForecasts:40,seedResults:15,concurrentConnections:2,
     firstFreezePreserved:true,rollback:true,reportRetry:true,publicRolesDenied:true,rpcsTested:[...new Set(events)]}));
 }finally{await Promise.all([a.end(),b.end()]);}

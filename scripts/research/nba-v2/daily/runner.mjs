@@ -14,7 +14,7 @@ export function cycleSlot(kind,at){
   if(slot===undefined)throw Error('OUTSIDE_EXISTING_NBA_SLOT');
   return new Date(slot).toISOString();
 }
-// No scheduler or production entry point imports this module. Inject the already-read V1 board.
+// Automatic runs always validate the existing PR slot before planning or persisting.
 export async function runDaily({kind,model,board,port,clock=()=>new Date().toISOString(),write=false}){
   const at=clock(),slot=cycleSlot(kind,at),modelHash=hash(model);
   if(write){
@@ -24,6 +24,17 @@ export async function runDaily({kind,model,board,port,clock=()=>new Date().toISO
       return {cycleId:existing.id,diagnostics:existing.diagnostics,reused:true};
     }
   }
+  const batch=await planReadOnlyBatch({kind,model,board,port,at});
+  if(!write)return {slot,batch,write:false};
+  const cycleId=await port.commit(kind,slot,batch);
+  if(kind==='freeze')return {cycleId,diagnostics:batch.diagnostics};
+  return {cycleId,diagnostics:batch.diagnostics,report:await refreshReport(port,model,cycleId)};
+}
+
+// The operator rehearsal uses the actual clock. This planner has no write path or synthetic slot.
+export async function planReadOnlyBatch({kind,model,board,port,at}){
+  if(!['freeze','settle'].includes(kind))throw Error('INVALID_V2_OPERATION');
+  const modelHash=hash(model);
   if(kind==='freeze'){
     const frozen=planProbabilityFreeze(board,model,at);
     const boardRows=new Map(Object.values(board.rows).flat().map(row=>[row.id,row]));
@@ -36,8 +47,7 @@ export async function runDaily({kind,model,board,port,clock=()=>new Date().toISO
     });
     const diagnostics={excluded:frozen.ignored,discarded:frozen.discarded??[],considered:Object.values(board.rows).flat().length,
       eligible:records.length,withoutPairedPrice:records.filter(f=>!f.benchmark).length,boardAsOf:board.asOf};
-    const batch={modelHash,at,records,diagnostics};
-    return write?{cycleId:await port.commit(kind,slot,batch),diagnostics}:{slot,batch,write:false};
+    return {modelHash,at,records,diagnostics};
   }
   const games=await port.due(modelHash,at),days=new Map(),records=[];
   for(const {gameId,forecasts} of games){
@@ -50,10 +60,7 @@ export async function runDaily({kind,model,board,port,clock=()=>new Date().toISO
     for(const f of forecasts)records.push(grade(f,receipts,at));
   }
   const diagnostics={games:games.length,settled:records.filter(r=>r.result).length,pending:records.filter(r=>r.reason).length};
-  const batch={modelHash,at,records,diagnostics};
-  if(!write)return {slot,batch,write:false};
-  const cycleId=await port.commit(kind,slot,batch);
-  return {cycleId,diagnostics,report:await refreshReport(port,model,cycleId)};
+  return {modelHash,at,records,diagnostics};
 }
 
 export async function refreshReport(port,model,cycleId){

@@ -1,6 +1,6 @@
 import 'server-only';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
-import {supabaseAdmin as db} from '@/lib/supabase-admin';
+import {supabaseAdmin} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
 import {readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
 import {readMarketBatches} from '@/lib/nba/decision-market-snapshot.mjs';
@@ -29,7 +29,7 @@ function accuracy(rows:any[],asOf:string){
  result.periods={...result.props};
  return result;
 }
-async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:string){
+async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:string,db:typeof supabaseAdmin){
  const query=(fields:string)=>{
    const q=db.from('nba_market_snapshots_v1').select(fields).eq('provider_game_id',game.id)
      .gte('source_received_at',since).lte('source_received_at',asOf).lte('recorded_at',asOf);
@@ -50,7 +50,7 @@ async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:stri
  const result=await query(fields).eq('source_received_at',at).order('snapshot_id').limit(33).abortSignal(AbortSignal.timeout(10000));
  return {id:game.id,lane,...readMarketBatches(check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED'),game,lane,asOf)};
 }
-export async function readNbaDecisionBoard({now=new Date()}={}){
+export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
  const [slate,archived,hoops,settlementRows,contextResult,pregameResult]=await Promise.all([
   db.from('nba_market_schedules_v1').select('source_received_at,payload,date_local').eq('date_local',day).lte('recorded_at',asOf).lte('source_received_at',asOf)
@@ -90,7 +90,7 @@ export async function readNbaDecisionBoard({now=new Date()}={}){
  }));
  const calendar=archivedCalendar(historicalCapture,snapshots,asOf);
  const captures=await Promise.all(games.flatMap((game:any)=>(['main','props'] as const).map(async lane=>{
-   try{return await marketReceipt(game,lane,asOf,threeHours);}
+   try{return await marketReceipt(game,lane,asOf,threeHours,db);}
    catch{return {id:game.id,lane,quotes:[],reason:'SOURCE_UNAVAILABLE'};}
  })));
  const recentMain=captures.filter(c=>c.lane==='main').flatMap(c=>c.quotes);

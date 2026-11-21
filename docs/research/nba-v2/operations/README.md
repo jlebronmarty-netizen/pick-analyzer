@@ -37,7 +37,9 @@ La ruta `/nba-decision-v2` muestra el archivo de la rama en el entorno preview. 
 
 El saldo declarado consta en centavos. $177.92 provienen de las jugadas de Atlanta y $10.02 del cash out de Oklahoma City. La clasificación ejecutable del Challenge sigue vacía. Los pronósticos futuros y estas simulaciones no cambian el saldo. [Saldo informado](challenge-balance.json)
 
-## Activación propuesta, pendiente de aprobación
+## Procedimiento original de activación
+
+El 21 de noviembre se autorizó la integración escalonada hasta una observación manual en producción. [Procedimiento aprobado para esta etapa](observe-release.md)
 
 1. **Integrar en la rama** el parche `scripts/research/nba-v2/daily/activate-after-approval.patch`, revisar el diff y aprobar el release. Reutiliza el tablero que ya cargó la congelación V1. El modo predeterminado es desactivado. El PR actual deja el parche separado y conserva intactos `vercel.json`, los handlers de cron y el servicio V1.
 2. **Provisionar solo el almacenamiento V2** con `storage-proposal.sql` en una transacción aprobada. El esquema privado guarda ejecuciones, forecast original, precio contrario, observaciones de liquidación y reportes. Los RPC públicos son de tipo invoker y están revocados para público, anon y authenticated. El cliente existente de servidor usa el rol de servicio. Revisar los privilegios y el acceso PostgREST en el entorno de destino.

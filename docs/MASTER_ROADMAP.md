@@ -1,3 +1,7 @@
+## 2026-11-21 · NBA V2 · Integración escalonada
+
+Autorizados el despliegue del adaptador apagado, la importación de 40 pronósticos y 15 resultados y una observación de solo lectura. La activación automática requiere una segunda aprobación. El operador debe verificar los hashes de importación, los permisos y las cohortes V1 antes y después de observar. [Procedimiento y límites de la autorización](research/nba-v2/operations/observe-release.md)
+
 ## 2026-11-21 · NBA V2 · Activación diaria pendiente
 
 Primer lote conciliado y segundo lote congelado. La siguiente decisión es autorizar el esquema privado y el uso de los tres ciclos existentes, comenzar en observación y habilitar solo SHADOW tras comprobar tiempo y presupuesto. Siguen pendientes 100 juegos prospectivos liquidados por versión y mercado. [Informe y procedimiento](research/nba-v2/operations/README.md)

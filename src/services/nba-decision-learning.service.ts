@@ -1,3 +1,4 @@
+import {runOptionalNbaV2} from './nba-decision-v2-hook.mjs';
 import 'server-only';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
@@ -19,6 +20,11 @@ async function writeIgnoreDuplicates(table:string,values:any[],id:string){
 }
 export async function freezeNbaDecisionShadow(now=new Date()){
  const board=await readNbaDecisionBoard({now});
+ const original=await persistV1Freeze(board,now);
+ await runOptionalNbaV2('freeze',db,board);
+ return original;
+}
+async function persistV1Freeze(board:Awaited<ReturnType<typeof readNbaDecisionBoard>>,now:Date){
  const plan=planNbaShadowFreeze(board,now.toISOString());
  if(plan.status!=='SHADOW_PREVIEW_FREEZE_PLAN')return {status:plan.status,provider_calls:0,writes:0};
  if(plan.rows.length>1500) return {status:'NBA_DECISION_FREEZE_REVIEW_BOUND',candidates:plan.rows.length,provider_calls:0,writes:0};
@@ -36,6 +42,11 @@ async function loadFinal(gameId:number,day:string,asOf:string){
  return latestArchivedFinal(evidence,gameId,day,asOf);
 }
 export async function settleNbaDecisionShadow(now=new Date()){
+ const original=await persistV1Settlement(now);
+ await runOptionalNbaV2('settle',db,undefined);
+ return original;
+}
+async function persistV1Settlement(now:Date){
  const before=new Date(now.getTime()-3*60*60000).toISOString();
  const after=new Date(now.getTime()-21*24*3600000).toISOString();
  // Two bounded, fair lanes: prevent stale player stats from blocking newly settled games.

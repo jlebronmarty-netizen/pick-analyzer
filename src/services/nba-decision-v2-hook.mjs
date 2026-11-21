@@ -2,9 +2,9 @@ import model from '../../docs/research/nba-v2/model.json' with {type:'json'};
 import {runDaily} from '../../scripts/research/nba-v2/daily/runner.mjs';
 import {supabasePort} from '../../scripts/research/nba-v2/daily/supabase-port.mjs';
 
-// The existing V1 service may call this hook only after the integration is approved.
+// The existing V1 service calls this hook after its own operation completes.
 // Use the existing server-only database client and already-loaded board. No network call in off mode.
-export async function runOptionalNbaV2(kind,db,board,{mode=process.env.NBA_DECISION_V2_MODE,clock}={}) {
+export async function runOptionalNbaV2(kind,db,board,{mode=process.env.NBA_DECISION_V2_MODE??'off',clock}={}) {
   if(!['observe','shadow'].includes(mode))return {status:'DISABLED'};
   try{
     const result=await runDaily({kind,model,board,port:supabasePort(db),clock,write:mode==='shadow'});
