@@ -17,6 +17,12 @@ test('six NBA views, Shead evidence across refresh, and read failure clears stal
     await expect(page.locator('h2').filter({hasText:name})).toBeVisible();
   }
   await tabs.getByRole('button',{name:/^Player props/}).click();
+  const empty=page.getByRole('status').filter({hasText:'Sin preferencias vigentes'});
+  await expect(empty).toContainText('Falta un juego en el historial del jugador');
+  await page.getByLabel('Buscar jugador, mercado o equipo').fill('jugador-inexistente');
+  await expect(empty).toContainText('Ningún lado capturado coincide');
+  await expect(empty).not.toContainText('Falta un juego');
+  await page.getByLabel('Buscar jugador, mercado o equipo').fill('');
   await page.getByText('Datos pendientes de validación',{exact:true}).click();
   const row=page.locator('article').filter({hasText:'Jamal Shead'});
   await expect(row).toContainText('INCOMPLETE_HISTORY');
