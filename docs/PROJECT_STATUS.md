@@ -1,3 +1,7 @@
+## 2026-11-21 · Mercados NBA sin preferencias
+
+El tablero NBA cuenta los lados capturados y detalla los motivos de exclusión al quedar vacía una pestaña. El conteo y los registros pendientes siguen los filtros de partido, período y búsqueda.
+
 ## 2026-11-20 · Cierre técnico del PR 391
 
 La reproducción de nueve partidos obtuvo 143 preferencias descriptivas de período y 25 en el Top. El nuevo lector usa el último menú archivado por partido. La rama tiene un procedimiento de integración y reversión pendiente de autorización. [Evidencia de preparación](audits/2026-11-20/production-review.md)

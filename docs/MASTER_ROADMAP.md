@@ -1,3 +1,7 @@
+## 2026-11-21 · Mercados NBA sin preferencias
+
+Para habilitar preferencias de partido completo hace falta evidencia de la regla de prórroga aplicable a cada contrato. Para props también se requieren el historial cotejado y la disponibilidad del jugador antes del partido.
+
 ## 2026-11-20 · Integración controlada del PR 391
 
 Siguientes hitos con autorización independiente: integrar la rama, comprobar los ciclos existentes de congelación y liquidación, y evaluar la corrección aditiva de Warriors–Dallas. Los adaptadores fuera de NBA siguen en el inventario de cobertura. [Procedimiento y criterios](audits/2026-11-20/production-review.md)
