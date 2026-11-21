@@ -1,3 +1,7 @@
+## 2026-11-20 · Validación prospectiva NBA V2
+
+Primer lote experimental congelado en GitHub. Para revisar cada versión y mercado faltan 100 juegos prospectivos independientes con resultados conciliados, comparación contra el precio sin margen, evidencia de ejecución regional y aprobación. El enlace a persistencia diaria mediante los ciclos existentes queda pendiente de autorización. [Informe del PR #393](research/nba-v2/README.md)
+
 ## 2026-11-20 · Integración controlada del PR 391
 
 Siguientes hitos con autorización independiente: integrar la rama, comprobar los ciclos existentes de congelación y liquidación, y evaluar la corrección aditiva de Warriors–Dallas. Los adaptadores fuera de NBA siguen en el inventario de cobertura. [Procedimiento y criterios](audits/2026-11-20/production-review.md)

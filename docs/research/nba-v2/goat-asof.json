@@ -1,0 +1,9 @@
+[
+  {
+    "played_player_rows": 112,
+    "played_games": 96,
+    "rows_with_ten_in_latest_materialization": 32,
+    "rows_with_ten_in_time": 1,
+    "games_with_ten_in_time": 1
+  }
+]

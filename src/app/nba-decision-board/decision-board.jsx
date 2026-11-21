@@ -26,6 +26,19 @@ function humanReason(row){
  return row.reason??'Sin evidencia suficiente';
 }
 function displayedGap(row){return num(row.advantage)??num(row.preference?.numericGap);}
+function ShadowProbability({row}){
+ const f=row.shadowProbability;
+ if(!f || f.classification!=='VIGILAR' || row.dataQuality?.status!=='VALIDATED' ||
+    f.quoteId!==row.quoteId || f.americanOdds!==row.odds || f.line!==row.line || f.projection!==row.projection)return null;
+ const pct=v=>num(v)===null?'—':(100*v).toFixed(1)+'%';
+ return <section aria-label="Probabilidad experimental" className="mt-3 rounded-lg border border-sky-900 p-3">
+  <h3 className="font-semibold">Probabilidad experimental · SHADOW</h3>
+  <p>Acierto si se liquida sin empate {pct(f.probability)} · Implícita de la cuota {pct(f.impliedProbability)}</p>
+  <p>Probabilidad de devolución {pct(f.pushProbability)} · EV estimado por unidad {pct(f.expectedValue)}</p>
+  <p>Intervalo central histórico del resultado (80%) {f.projectionInterval80?.map(x=>decimal(x)).join(' a ')??'—'}</p>
+  <p>{f.modelVersion} · Congelado {date(f.frozenAt)} · Validación prospectiva pendiente</p>
+ </section>;
+}
 function Row({row,rank,history,version}){
  const gap=displayedGap(row);
  const [expanded,setExpanded]=useState(false);
@@ -51,6 +64,7 @@ function Row({row,rank,history,version}){
    <button type="button" onClick={()=>setExpanded(!expanded)} aria-expanded={expanded} className="shrink-0 rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-100">{expanded?'Ocultar':'Ver contexto'}</button>
   </div>
   {expanded&&<div className="mt-3 rounded-lg bg-slate-950 p-3 text-sm leading-6 text-slate-200">
+   <ShadowProbability row={row}/>
    <p><strong>Calidad de los datos</strong> {row.dataQuality?.status} · {row.dataQuality?.issues?.map(i=>i.reason).join(' · ')}</p>
    <p><strong>Hora del precio del operador</strong> {date(row.dataQuality?.providerUpdatedAt)}</p>
    {Object.entries(history??{}).map(([scope,h])=><div key={scope}><strong>{({player:'Jugador',home:'Local',away:'Visitante'})[scope]}</strong>

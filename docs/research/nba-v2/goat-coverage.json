@@ -1,0 +1,65 @@
+[
+  {
+    "market": "props",
+    "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+    "contract": "PROVIDER_MILESTONE_UNVERIFIED",
+    "quotes": 322347,
+    "games": 25,
+    "first_receipt": "2026-11-18 17:27:42.319+00",
+    "last_receipt": "2026-11-21 01:30:37.846+00"
+  },
+  {
+    "market": "props",
+    "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+    "contract": "STRICT_GREATER_THAN",
+    "quotes": 74123,
+    "games": 130,
+    "first_receipt": "2026-11-03 01:30:30.333+00",
+    "last_receipt": "2026-11-21 01:30:37.846+00"
+  },
+  {
+    "market": "props",
+    "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+    "contract": "STRICT_LESS_THAN",
+    "quotes": 74123,
+    "games": 130,
+    "first_receipt": "2026-11-03 01:30:30.333+00",
+    "last_receipt": "2026-11-21 01:30:37.846+00"
+  },
+  {
+    "market": "props",
+    "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+    "contract": "MILESTONE_AS_PUBLISHED",
+    "quotes": 68242,
+    "games": 106,
+    "first_receipt": "2026-11-03 01:30:30.333+00",
+    "last_receipt": "2026-11-18 07:00:29.18+00"
+  },
+  {
+    "market": "props",
+    "period": "Q1",
+    "contract": "PROVIDER_MILESTONE_UNVERIFIED",
+    "quotes": 36045,
+    "games": 25,
+    "first_receipt": "2026-11-18 17:27:42.319+00",
+    "last_receipt": "2026-11-21 01:30:37.846+00"
+  },
+  {
+    "market": "props",
+    "period": "Q1",
+    "contract": "STRICT_GREATER_THAN",
+    "quotes": 6102,
+    "games": 25,
+    "first_receipt": "2026-11-18 17:27:42.319+00",
+    "last_receipt": "2026-11-21 01:30:37.846+00"
+  },
+  {
+    "market": "props",
+    "period": "Q1",
+    "contract": "STRICT_LESS_THAN",
+    "quotes": 6102,
+    "games": 25,
+    "first_receipt": "2026-11-18 17:27:42.319+00",
+    "last_receipt": "2026-11-21 01:30:37.846+00"
+  }
+]

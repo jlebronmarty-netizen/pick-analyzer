@@ -70,11 +70,15 @@ export function settleProbabilityFreeze(f,receipts) {
   const raw={forecast_id:f.forecastId,game_id:f.gameId,game_start_at:f.gameStartAt,game_date_local:f.gameDay,
     market:f.market,period:f.period,side:f.side,line:f.line,model_version:f.modelVersion,projection:f.projection,
     player_id:f.playerId,statistic:f.statistic,evidence:{quality:f.quality}};
+  if(f.market==='props' && (!receipts.compact || !receipts.original ||
+      !(time(receipts.compact.materialized_at)>=time(receipts.compact.source_captured_at) &&
+        time(receipts.compact.source_captured_at)>time(f.gameStartAt))))return null;
   const playerStat=f.market==='props'?concordantPlayerFinal(f.statistic,receipts.compact,receipts.original):null;
   const result=settleNbaShadowForecast(raw,{...receipts,playerStat});
   if(!result)return null;
   return {forecastId:f.forecastId,result:result.statistical_result,actual:result.actual,
-    outcomeAt:result.source_received_at,scope:'STATISTICAL_SETTLEMENT',source:result.result_source};
+    outcomeAt:new Date(Math.max(time(result.source_received_at),time(receipts.sourceReceivedAt),
+      f.market==='props' ? time(receipts.compact.materialized_at) : 0)).toISOString(),scope:'STATISTICAL_SETTLEMENT',source:result.result_source};
 }
 // Enrich an archived board for branch-only display. The ranking and official classifications are inherited.
 export function previewProbabilityBoard(board,ledger) {

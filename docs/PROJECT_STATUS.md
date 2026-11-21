@@ -1,3 +1,7 @@
+## 2026-11-20 · NBA Decision Engine V2 en investigación
+
+El PR #393 probó tres mercados con precio en 891 juegos por mercado, ocho estadísticas de jugadores y seis períodos. Publicó 15 probabilidades antes del inicio en tres partidos. El ROI simulado del Challenge incluye pérdidas dentro del IC del 95%. JUGADA sigue desactivada. [Resultados y evidencia](research/nba-v2/README.md)
+
 ## 2026-11-20 · Cierre técnico del PR 391
 
 La reproducción de nueve partidos obtuvo 143 preferencias descriptivas de período y 25 en el Top. El nuevo lector usa el último menú archivado por partido. La rama tiene un procedimiento de integración y reversión pendiente de autorización. [Evidencia de preparación](audits/2026-11-20/production-review.md)

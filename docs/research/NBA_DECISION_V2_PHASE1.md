@@ -2,6 +2,8 @@
 
 Estado: **solo investigación**. No existe ruta a producción, endpoint, cron, migración, proveedor ni mutación de predicciones oficiales en este cambio.
 
+El avance experimental, los resultados fuera de muestra y el primer lote congelado están en el [informe V2](nba-v2/README.md). Las etapas de este documento describen el punto de partida.
+
 ## Diagnóstico real al 20 de noviembre de 2026
 
 - El Decision Board V1 conserva proyecciones descriptivas, no probabilidades calibradas.

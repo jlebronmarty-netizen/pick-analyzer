@@ -9,6 +9,7 @@ function byGame(rows, value) {
   }
   return [...game.values()].map(mean);
 }
+export function gameMean(rows,fn){return mean(byGame(rows,fn));}
 function interval(sample) {
   if (sample.length<2) return null;
   let seed=391393;

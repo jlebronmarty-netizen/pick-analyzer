@@ -1,0 +1,32 @@
+import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+import {planProbabilityFreeze,previewProbabilityBoard} from '../../src/lib/nba/decision-shadow-v2.mjs';
+test('archived SHADOW probabilities expand with the exact quote and disappear on refresh',async({page})=>{
+ const path=process.env.NBA_ARCHIVED_SLATE_FILE;
+ test.skip(!path,'Requires stored nine-game response.');
+ const b=JSON.parse(readFileSync(path!,'utf8'));
+ const model=JSON.parse(readFileSync('docs/research/nba-v2/model.json','utf8'));
+ // Simulated clock only for browser replay. Never written to the forward ledger.
+ const preview=previewProbabilityBoard(b,planProbabilityFreeze(b,model,b.asOf));
+ const chosen=preview.preferredRows.periods.find((r:any)=>r.shadowProbability);
+ expect(chosen).toBeDefined();
+ await page.clock.setFixedTime(new Date(b.asOf));
+ let available=true;
+ await page.route('**/api/nba/decision-board',route=>route.fulfill({json:available?preview:b}));
+ await page.route('**/api/nba/decision-learning',route=>route.fulfill({json:{}}));
+ await page.goto('/nba-decision-board');
+ await page.getByRole('button',{name:/^Cuartos \/ Mitades/}).click();
+ await page.getByRole('textbox',{name:'Buscar jugador, mercado o equipo'}).fill(chosen.matchup);
+ const card=page.locator('article:visible').filter({hasText:chosen.label}).filter({hasText:chosen.matchup}).filter({hasText:chosen.period==='h1'?'1H':chosen.period.slice(1)+'Q'}).first();
+ await card.getByRole('button',{name:'Ver contexto'}).click();
+ const detail=card.getByRole('region',{name:'Probabilidad experimental'});
+ await expect(detail).toContainText(chosen.shadowProbability.modelVersion);
+ await expect(detail).toContainText((chosen.shadowProbability.probability*100).toFixed(1)+'%');
+ await expect(detail).toContainText('EV estimado');
+ await expect(detail).toContainText('80%');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ available=false;
+ await page.getByRole('button',{name:'Actualizar sin consumir API'}).click();
+ await expect(page.getByRole('button',{name:'Actualizar sin consumir API'})).toBeEnabled();
+ await expect(page.getByRole('region',{name:'Probabilidad experimental'})).toHaveCount(0);
+});

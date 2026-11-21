@@ -40,13 +40,14 @@ export function verifiedPrices(prices,pairs,byGame) {
     const delta=(y-threshold)*(sel===labels[0]?1:-1);
     if ((delta===0?'push':delta>0?'win':'loss')!==settled){skip('SETTLEMENT_DISPUTE');continue;}
     const p=impliedProbability(a[2]),q=impliedProbability(b[2]);
-    usable.set(key(game,market),{line:threshold,odds:a[2],book:p/(p+q),exactTip:list[0][3]===g[2],side:sides[market][0]});
+    usable.set(key(game,market),{line:threshold,odds:a[2],otherOdds:b[2],at,book:p/(p+q),exactTip:list[0][3]===g[2],side:sides[market][0]});
   }
   return {usable,reasons};
 }
-export function buildSamples(games,players,prices,pairs) {
+export function buildSamples(games,players,prices,pairs,{statistic='assists',threshold=4.5,weight=.65,playersOnly=false}={}) {
   const byGame=new Map(games.map(g=>[g[0],g]));
-  if(byGame.size!==games.length)throw Error('DUPLICATE_GAME');
+  const teamsAtTip=new Set(games.flatMap(g=>[key(g[2],g[3]),key(g[2],g[4])]));
+  if(byGame.size!==games.length || teamsAtTip.size!==2*games.length)throw Error('DUPLICATE_GAME_OR_TEAM_AT_TIP');
   const books=verifiedPrices(prices,pairs,byGame);
   const playerRows=index(players,p=>p[0]);
   const teamNames=[...new Set(games.flatMap(g=>g.slice(3,5)))];
@@ -64,11 +65,11 @@ export function buildSamples(games,players,prices,pairs) {
     const hId=teamNames.indexOf(home),aId=teamNames.indexOf(away);
     const target={datetime:new Date(tip*1000).toISOString(),home_team:{id:hId},visitor_team:{id:aId}};
     const windows=[prior(teams,home),prior(teams,away)];
-    if(ok && windows.every(w=>w.length===10 && w.every(x=>x.ok && x.t/1000+28800<=cutoff))) {
+    if(!playersOnly && ok && windows.every(w=>w.length===10 && w.every(x=>x.ok && x.t/1000+28800<=cutoff))) {
       const history=[...new Map(windows.flat().map(r=>[r.id,r])).values()];
       for(const period of periods) {
         const proj=projectedPeriod(target,history,period);
-        const emit=(scope,mu,y,line,market)=>samples.push({game,season,tip,scope,mu,y,line,
+        const emit=(scope,mu,y,line,market)=>samples.push({game,season,tip,scope,mu,y,line,featuresReadyAt:Math.max(...history.map(h=>h.t/1000))+28800,
           price:books.usable.get(key(game,market))??null});
         if(period==='ft'){
           emit('moneyline',proj.margin,h-a,0,'moneyline');
@@ -80,7 +81,7 @@ export function buildSamples(games,players,prices,pairs) {
           emit('total_'+period,proj.total,y,period.startsWith('h')?109.5:54.5,null);
         }
       }
-    }else count('teamGameWithoutUsableWindowOrResult');
+    }else if(!playersOnly) count('teamGameWithoutUsableWindowOrResult');
     const original={id:game,t:tip*1000,ok,home:hId,away:aId,qh,qa,ho:ok?h-sum(qh):null,ao:ok?a-sum(qa):null};
     append(teams,home,original);append(teams,away,original);
     for(const entries of index(playerRows.get(game)??[],r=>r[1]).values()) {
@@ -90,8 +91,8 @@ export function buildSamples(games,players,prices,pairs) {
       const good=entries.length===1 && [home,away].includes(team) && Number.isFinite(mins)&&mins>0&&validStat(ast);
       if(good && w.length===10 && w.at(-1).team===team && w.every(x=>x.good && x.tip+28800<=cutoff)) {
         const values=w.map(x=>x.ast);
-        samples.push({game,season,tip,scope:'props_assists',mu:Number((.65*mean(values.slice(-5))+.35*mean(values)).toFixed(2)),
-          y:ast,line:4.5,price:null});
+        samples.push({game,season,tip,scope:'props_'+statistic,entity:id,mu:Number((weight*mean(values.slice(-5))+Number((1-weight).toFixed(2))*mean(values)).toFixed(2)),
+          y:ast,line:threshold,price:null});
       }
       // Ten-minute rule applies to prior features. A short appearance today still settles the forecast.
       if(!good || mins>=10)append(playerPast,id,{good,tip,team,ast});
