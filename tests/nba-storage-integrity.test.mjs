@@ -22,3 +22,23 @@ test('private archive reads are disabled by default, bounded, hash checked, and 
   assert.deepEqual(await readOriginalContexts([manifest],[{provider_game_id:11}],ids,fetchObject,bytes.length),[]);
   assert.equal(calls,1);
 });
+
+test('reads the season writer array after verifying the original bytes and still rejects incomplete evidence',()=>{
+  const rows=[{player:{id:41},pts:12}];
+  const encode=payload=>{
+    const json=Buffer.from(JSON.stringify(payload));
+    const bytes=gzipSync(json);
+    return {bytes,manifest:{provider_game_id:22,source_captured_at:'2026-11-20T03:30:00Z',
+      data_count:1,response_sha256:createHash('sha256').update(json).digest('hex'),
+      json_bytes:json.length,compressed_bytes:bytes.length}};
+  };
+  const {bytes,manifest}=encode(rows);
+  assert.deepEqual(originalContext(bytes,manifest),{
+    provider_game_id:22,player_stats_captured_at:manifest.source_captured_at,player_stats:{data:rows}
+  });
+  assert.equal(originalContext(bytes,{...manifest,data_count:2}),null);
+  const changed=encode([{player:{id:41},pts:13}]);
+  assert.equal(originalContext(changed.bytes,{...changed.manifest,response_sha256:manifest.response_sha256}),null);
+  const partial=encode({data:rows,meta:{next_cursor:4}});
+  assert.equal(originalContext(partial.bytes,partial.manifest),null);
+});

@@ -9,7 +9,9 @@ export function originalContext(bytes, manifest) {
   try {
     const json = gunzipSync(bytes,{maxOutputLength:512000});
     if (json.length !== manifest.json_bytes || createHash('sha256').update(json).digest('hex') !== hash) return null;
-    const payload = JSON.parse(json.toString('utf8'));
+    const stored = JSON.parse(json.toString('utf8'));
+    // Season archives store the aggregated row array. Operational archives use a page envelope.
+    const payload = Array.isArray(stored) ? {data: stored} : stored;
     if (!Array.isArray(payload.data) || payload.data.length !== manifest.data_count || payload.meta?.next_cursor != null)
       return null;
     return {provider_game_id:manifest.provider_game_id,player_stats_captured_at:manifest.source_captured_at,player_stats:payload};
