@@ -1,0 +1,290 @@
+{
+  "asOf": "2026-11-21T20:00:30Z",
+  "modelHash": "1ec8aff30c264bec1f87917f326db5affb85f508457dc5031b16f80016101329",
+  "games": {
+    "21718153": {
+      "home": "Utah Jazz",
+      "away": "Phoenix Suns",
+      "tip": "2026-11-21T02:30:00.000Z",
+      "periods": {
+        "home": [
+          23,
+          26,
+          27,
+          25
+        ],
+        "away": [
+          26,
+          35,
+          28,
+          22
+        ],
+        "ho": 0,
+        "ao": 0,
+        "h": 101,
+        "a": 111
+      },
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779",
+      "sourceReceivedAt": "2026-11-21 20:00:18.471+00",
+      "boxReceivedAt": "2026-11-21 05:30:30.741+00",
+      "finalSnapshots": 30,
+      "firstArchivedFinal": "2026-11-21 05:30:17.092+00",
+      "distinctScoreVersions": 1
+    },
+    "21718154": {
+      "home": "Denver Nuggets",
+      "away": "Houston Rockets",
+      "tip": "2026-11-21T03:00:00.000Z",
+      "periods": {
+        "home": [
+          31,
+          31,
+          37,
+          34
+        ],
+        "away": [
+          33,
+          27,
+          42,
+          22
+        ],
+        "ho": 0,
+        "ao": 0,
+        "h": 133,
+        "a": 124
+      },
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779",
+      "sourceReceivedAt": "2026-11-21 20:00:18.471+00",
+      "boxReceivedAt": "2026-11-21 06:00:30.62+00",
+      "finalSnapshots": 29,
+      "firstArchivedFinal": "2026-11-21 06:00:16.579+00",
+      "distinctScoreVersions": 1
+    },
+    "21718155": {
+      "home": "Los Angeles Lakers",
+      "away": "Sacramento Kings",
+      "tip": "2026-11-21T03:00:00.000Z",
+      "periods": {
+        "home": [
+          28,
+          26,
+          28,
+          24
+        ],
+        "away": [
+          28,
+          34,
+          22,
+          20
+        ],
+        "ho": 0,
+        "ao": 0,
+        "h": 106,
+        "a": 104
+      },
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779",
+      "sourceReceivedAt": "2026-11-21 20:00:18.471+00",
+      "boxReceivedAt": "2026-11-21 05:30:30.741+00",
+      "finalSnapshots": 30,
+      "firstArchivedFinal": "2026-11-21 05:30:17.092+00",
+      "distinctScoreVersions": 1
+    }
+  },
+  "benchmarks": [
+    {
+      "forecastId": "050e50aacc6aaa903f78fe8e61c458b197dd34403cf8ecc59d2a8bfcf8936fc9",
+      "quoteId": "b235ce43c27385ad643fb11e757cdbd29fc44c0801806a69d0e75d6025a67a95",
+      "oppositeQuoteId": "c25e83ac0e63eec9c7e369e749cc3a035fb4cfe6929e6fe2955e0ea7c169dd7b",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.901,
+      "oppositeDecimal": 1.87,
+      "probability": 0.49588968443383724,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "0c4c939435ebe0fabe018bc03e1e5ef41760d86f6cab8ed5cbd9b05dd083076a",
+      "quoteId": "08d6a43d193fb2ba9d565d52cd375073fb9fb8b5ba8d04a1fa1a71089ecdd204",
+      "oppositeQuoteId": "33589ce4cf1d62721a01eedc2a7d339d37cd45ffdfce33dae7568fa9111ef9bb",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.98,
+      "oppositeDecimal": 1.8,
+      "probability": 0.4761904761904762,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "14afe0fa6f91526a71feda14fe6b5dd02a102dbdd2941d07934f8bf52af3da4c",
+      "quoteId": "4d8f5fc3e540e915ac7145781606374ac98d923a8ce06b8e98b811a1ad5accc1",
+      "oppositeQuoteId": "91427aa254250f3da31e942f33910e6d7251787676f35e2eb9900cf3e98f4dd4",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.87,
+      "oppositeDecimal": 1.901,
+      "probability": 0.5041103155661628,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "225ec799880be82a8dd51d5634b8443296ea40f03fbe335c06b10f1419ed24e4",
+      "quoteId": "d8ddc35cc9d7b8174bc8fa255bfe4cdf95a2b0f1a31ad97441652c9f2ca058ad",
+      "oppositeQuoteId": "bfd9b3fb26d63575c289e83288d6885d9ad5d172b65ee06d68f844f354b08743",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.926,
+      "oppositeDecimal": 1.847,
+      "probability": 0.4895308772859793,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "37b120aa7f99f9955af55a704ec776ca85dabea8fe64f6df9b9b8dc3735cbeb1",
+      "quoteId": "e9340906161705983ac15fc65745daccd97331c6b608593190d474a7aa58a6b4",
+      "oppositeQuoteId": "c81fcb62add87c519713819578d6cbfc89b9779d930b965f13685ad9dbda936d",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.909,
+      "oppositeDecimal": 1.909,
+      "probability": 0.5,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "4b9def4a590a97bcf7eceef5c0d0bcd4dbdb541e614db43a7140ef39f61def21",
+      "quoteId": "b5b4dc147f427cdc7ff3acc75f880e5f3958f509f566c84cf9226f7464a823b5",
+      "oppositeQuoteId": "36faafe587d3526667ca0fd6ef019cdeb2abf53f85bb52a452d05ecf49c95ea4",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:15:05Z",
+      "decimal": 1.82,
+      "oppositeDecimal": 1.962,
+      "probability": 0.5187731359069275,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "4f0b88ba9cf5684264f4f3d38a9c26327637f3567545d45ae6d5534c91629b35",
+      "quoteId": "b120e83feb3f480e35277cb021f040b6c8448f868c805d0525c2420c5abfec79",
+      "oppositeQuoteId": "3620788b95c12a3a59d730aec855c5d36fa758e1052decd6c906be1ff19ae090",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.847,
+      "oppositeDecimal": 1.962,
+      "probability": 0.5150958256760305,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "4f9b3dba7a0894c9f8efb4a01b806de51f3b85f9079c9d3a2ba2589bf35b72b4",
+      "quoteId": "adcf9acd0538aa74a70f814381e94627b07d4467f3fdfbe5432cc03b7a0cb9d9",
+      "oppositeQuoteId": "57a2ff30244ab682b9c91ed5db8a58fc93ade6e8f42d0eee2c038436fb89249c",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.962,
+      "oppositeDecimal": 1.82,
+      "probability": 0.48122686409307247,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "634f93b9961cc81ae6d505c745b0b93d1bd9f876cce60c65a5993b7bd71f2751",
+      "quoteId": "9b5caac9e798ff72cbef6a62d23013f6dabc87c8533ca12aeaf72c4f58c8dad7",
+      "oppositeQuoteId": "a34d80ce8c16962a6808299de95bcfa64d3b3306cabd03a47a9eb3a60d213ed3",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:15:05Z",
+      "decimal": 1.82,
+      "oppositeDecimal": 1.962,
+      "probability": 0.5187731359069275,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "784d820aa7411e1362cb531fb6bf5e773a2522f18e319360bc5405c0e42e327f",
+      "quoteId": "df05774deabf7b20461f49d51ece2b756ef086000eec4dbaa92be7192f41efa4",
+      "oppositeQuoteId": "f0150901b6c0199d1c410aecdc6cdd432e3458ef6114e06d91857c4717509b27",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.8,
+      "oppositeDecimal": 1.98,
+      "probability": 0.5238095238095238,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "85c122ff138b5af9d996a82a65df4c8cdc8c63a4b1c29805376fcc094b42e291",
+      "quoteId": "f019344644c5ea34a714cdee7793ac079bec163c50cbcf7d3ac3c1de8bd735fc",
+      "oppositeQuoteId": "5365b8abefea5a83156283e97b0491fc87c85ed5bfa5081dea94db9662f8f2c5",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.833,
+      "oppositeDecimal": 1.943,
+      "probability": 0.5145656779661016,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "8d0122db3d5decd02dc611c8fcba8f00ffc1958a7d331547b1380838d9c6b019",
+      "quoteId": "48384720c7ef19d498da1c8d4b25dd52800c224a7d21c8a1036d27dffdc12bae",
+      "oppositeQuoteId": "08137266f0d0133bdd7a0bf610a30056ecd60b5931edf3d005659a02aba8f179",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:14:05Z",
+      "decimal": 1.901,
+      "oppositeDecimal": 1.87,
+      "probability": 0.49588968443383724,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "9120c3aef375dbe8d61816cec430c265784e652319f16e798792b3cdf1925bd5",
+      "quoteId": "21c7c0ae61fb6d2beb360afbd300127dc958d154bbc17f6311350636af8e3763",
+      "oppositeQuoteId": "6c92f1ea5777aeda9a496a0759831e698d2af2da5a6b91cbf8b8a8664b8611f3",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:15:05Z",
+      "decimal": 1.952,
+      "oppositeDecimal": 1.87,
+      "probability": 0.48927263212977506,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "ccaab3e444e0112eb25550a6c1053a20f28f519b9eb6403f2b56b0b3a93b03e9",
+      "quoteId": "fe2235a8f939cf091f74278aa5a94c95bdc980cbac46cb3bd29dd6c8b5b56ac9",
+      "oppositeQuoteId": "51942fef6c5bb687ad4575daa4cf6119845c25fb1726f15fec8f3c52580b20b2",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:15:05Z",
+      "decimal": 1.926,
+      "oppositeDecimal": 1.847,
+      "probability": 0.4895308772859793,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    },
+    {
+      "forecastId": "edeee65ef160e4fa80db5982e1aaf81f278b5f37538fff082a08c919bba8378b",
+      "quoteId": "aa04dddea96c4bf3f4a9d639540093c3d4e6ad0d95e0791159b0278934536e5a",
+      "oppositeQuoteId": "61d21fe3e7f27e80317dd18e971d6b7e83a9a21b910b342bde52516c90b83e1d",
+      "captureId": "94997ae2-c844-4c16-9e0e-6984d1b91880",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-20T23:15:46.538Z",
+      "quoteAt": "2026-11-20T23:15:05Z",
+      "decimal": 1.901,
+      "oppositeDecimal": 1.87,
+      "probability": 0.49588968443383724,
+      "basis": "ARCHIVED_DECIMAL_PAIR"
+    }
+  ]
+}

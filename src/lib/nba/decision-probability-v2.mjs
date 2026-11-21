@@ -121,7 +121,7 @@ export function researchDecision(candidate, validation, asOf) {
   return {...evaluated,reason:qualified?'RESEARCH_READY_FOR_SEPARATE_RELEASE_REVIEW':'PROBABILITY_NOT_VALIDATED'};
 }
 
-export function challengeStage(candidates, asOf, {allowExceptional=false}={}) {
+export function challengeStage(candidates, asOf, {allowExceptional=false,currentCapitalCents=null}={}) {
   const pool=[];
   for (const {candidate,validation} of candidates) {
     if (!candidate?.forecastId) continue;
@@ -135,7 +135,8 @@ export function challengeStage(candidates, asOf, {allowExceptional=false}={}) {
   const preferred=pool.filter(r=>r.odds>=-200);
   const ranked=preferred.length?preferred:pool;
   const first=(a,b)=>String(a.forecastId).localeCompare(String(b.forecastId));
-  return {initialCapital:100,objective:1000,maximumPicksPerStage:1,
+  return {initialCapital:100,currentCapitalCents:Number.isSafeInteger(currentCapitalCents)&&currentCapitalCents>=0?currentCapitalCents:null,
+    objective:1000,maximumPicksPerStage:1,
     highestProbability:ranked.toSorted((a,b)=>b.probability-a.probability||b.ev-a.ev||first(a,b))[0]??null,
     highestEv:ranked.toSorted((a,b)=>b.ev-a.ev||b.probability-a.probability||first(a,b))[0]??null,
     selection:null,classification:'SIN APUESTA',automaticPromotion:false};

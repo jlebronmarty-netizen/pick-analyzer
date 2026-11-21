@@ -11,9 +11,13 @@ export function planProbabilityFreeze(board, model, frozenAt) {
   const now=time(frozenAt),asOf=time(board?.asOf);
   if(!(asOf<=now && now-asOf<=10*60000 && time(model?.selectionEnd)<asOf) || model.version!==MODELV)
     throw Error('INVALID_FREEZE_CLOCK_OR_MODEL');
-  const rows=[],ignored={},groups=new Map(),modelHash=hash(model);
-  const skip=reason=>{ignored[reason]=(ignored[reason]??0)+1;};
+  const rows=[],ignored={},discarded=[],groups=new Map(),modelHash=hash(model);
+  const reject=(row,reason)=>{
+    ignored[reason]=(ignored[reason]??0)+1;
+    discarded.push({gameId:row.gameId,quoteId:row.quoteId??null,market:row.market,period:row.period,reason});
+  };
   for(const row of Object.values(board.rows).flat()) {
+    const skip=reason=>reject(row,reason);
     const game=board.games.find(g=>g.id===row.gameId);
     const q=row.dataQuality;
     if(!hasValidatedInputs(row)){skip(q?.status??'SOURCE_UNAVAILABLE');continue;}
@@ -60,10 +64,10 @@ export function planProbabilityFreeze(board, model, frozenAt) {
   }
   for(const entries of groups.values()){
     // More than one executable-looking line or source needs an explicit line-selection policy.
-    if(entries.length!==1){skip('AMBIGUOUS_CONTRACT');continue;}
+    if(entries.length!==1){for(const entry of entries)reject(entry,'AMBIGUOUS_CONTRACT');continue;}
     rows.push(entries[0]);
   }
-  return {version:model.version,frozenAt,modelHash,mode:'PROSPECTIVE_SHADOW',rows:rows.sort((a,b)=>a.forecastId.localeCompare(b.forecastId)),ignored};
+  return {version:model.version,frozenAt,modelHash,mode:'PROSPECTIVE_SHADOW',rows:rows.sort((a,b)=>a.forecastId.localeCompare(b.forecastId)),ignored,discarded};
 }
 export function settleProbabilityFreeze(f,receipts) {
   if(!f || !(time(f.frozenAt)<time(f.gameStartAt)) || f.probabilityOrigin!=='FROZEN_PROSPECTIVE_MODEL')return null;
@@ -81,7 +85,7 @@ export function settleProbabilityFreeze(f,receipts) {
       f.market==='props' ? time(receipts.compact.materialized_at) : 0)).toISOString(),scope:'STATISTICAL_SETTLEMENT',source:result.result_source};
 }
 // Enrich an archived board for branch-only display. The ranking and official classifications are inherited.
-export function previewProbabilityBoard(board,ledger,{asOf=ledger.frozenAt,reviews={},execution={}}={}) {
+export function previewProbabilityBoard(board,ledger,{asOf=ledger.frozenAt,reviews={},execution={},currentCapitalCents=null}={}) {
   const assessed=new Map();
   const byId=new Map(ledger.rows.map(f=>[f.rowId,f]));
   const attach=r=>{
@@ -102,5 +106,5 @@ export function previewProbabilityBoard(board,ledger,{asOf=ledger.frozenAt,revie
   };
   const sections=obj=>Object.fromEntries(Object.entries(obj??{}).map(([k,v])=>[k,v.map(attach)]));
   const preview={...board,rows:sections(board.rows),preferredRows:sections(board.preferredRows),top25:(board.top25??[]).map(attach)};
-  return {...preview,shadowChallenge:challengeStage([...assessed.values()],asOf)};
+  return {...preview,shadowChallenge:challengeStage([...assessed.values()],asOf,{currentCapitalCents})};
 }

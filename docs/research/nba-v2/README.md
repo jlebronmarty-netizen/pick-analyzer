@@ -2,6 +2,8 @@
 
 **Decisión de la rama. Mantener SHADOW. El Challenge queda sin apuesta.** Los resultados históricos con precios favorecen al operador frente al modelo basado en errores de proyección. La primera muestra V2 prospectiva comprende tres partidos. El PR no habilita recomendaciones oficiales.
 
+**Actualización del 21 de noviembre.** Los 15 contratos del primer lote están liquidados. El segundo lote añade cinco juegos prospectivos. [Resultados y preparación diaria](operations/README.md)
+
 ## Datos efectivamente utilizados
 
 | Fuente archivada | Uso y cobertura |
