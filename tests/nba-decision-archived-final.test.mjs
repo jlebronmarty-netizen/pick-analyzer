@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {verifiedArchivedPlayerFinal} from '../src/lib/nba/decision-archived-final-core.mjs';
-import {settleNbaShadowForecast} from '../src/lib/nba/decision-learning-core.mjs';
+import {concordantPlayerFinal,settleNbaShadowForecast} from '../src/lib/nba/decision-learning-core.mjs';
 const tip='2026-11-20T01:00:00Z',capture='2026-11-20T04:30:00Z';
 const game={id:42,date:'2026-11-19',datetime:tip,status_state:'final',
   home_team_id:5,visitor_team_id:7,home_team_score:50,visitor_team_score:60,
@@ -14,7 +14,7 @@ function rows(){
    const home=i<6,player=i+100,team=home?5:7,minute=i===0?'0':'24:24';
    const pts=i===0?0:home?10:10;
    result.push({player:{id:player,team_id:team},team:{id:team},game:{...game},
-     min:minute,pts,reb:4,ast:2,fg3m:1});
+     min:minute,pts,reb:i===0?0:4,ast:i===0?0:2,fg3m:i===0?0:1});
   }
   return result;
 }
@@ -63,9 +63,24 @@ test('zero-network, read-only staged fallback retains core idempotent settlement
  const service=readFileSync('src/services/nba-decision-learning.service.ts','utf8');
  assert.match(service,/verifiedArchivedPlayerFinal/);
  assert.match(service,/\.from\('nba_game_context_v2'\)/);
- assert.match(service,/\.limit\(16\)/);
- assert.match(service,/compact\?\?/);
+ assert.match(service,/\.limit\(batch.length\+1\)/);
+ assert.match(service,/concordantPlayerFinal/);
  assert.match(service,/onConflict:id,ignoreDuplicates:true/);
  assert.match(service,/settleNbaShadowForecast/);
  assert.doesNotMatch(service,/fetch\(/);
+});
+
+test('a corrected rebound blocks pending rebounds and PRA until the two receipts agree',()=>{
+ const original={provider_game_id:21718112,player_id:77,minutes_played:28,pts:12,ast:3,reb:6};
+ const older={...original,reb:5};
+ assert.equal(concordantPlayerFinal('rebounds',older,original),null);
+ assert.equal(concordantPlayerFinal('points_rebounds_assists',older,original),null);
+ assert.equal(concordantPlayerFinal('points',older,original),original);
+ assert.equal(concordantPlayerFinal('rebounds',original,original),original);
+ assert.equal(concordantPlayerFinal('rebounds',older,null),null);
+});
+
+test('zero minutes and a nonzero box stat require reconciliation',()=>{
+ const disputed=rows();disputed[0].reb=1;
+ assert.equal(verifiedArchivedPlayerFinal({context:ctx(disputed),final:game,providerGameId:42}),null);
 });

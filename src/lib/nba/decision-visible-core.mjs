@@ -1,3 +1,4 @@
+import {hasValidatedInputs} from '../data-quality/window.mjs';
 // Presentation-only guard: never derive picks from archived raw quote rows.
 const finite=v=>typeof v==='number'&&Number.isFinite(v);
 function contractKey(r){
@@ -11,7 +12,7 @@ export function visibleNbaPreferredRows(rows){
  if(!Array.isArray(rows))return [];
  const seen=new Map();
  for(const r of rows){
-  if(!r||r.classification!=='VIGILAR'||r.preference?.evidenceScope!=='DESCRIPTIVE_SHADOW_NOT_PROBABILITY'||
+  if(!hasValidatedInputs(r)||r.classification!=='VIGILAR'||r.preference?.evidenceScope!=='DESCRIPTIVE_SHADOW_NOT_PROBABILITY'||
      !finite(r.preference.numericGap)||r.preference.numericGap<=0||
      !finite(r.preference.sortIndex)||!Number.isInteger(r.preference.favorableCount)||r.preference.favorableCount<1)continue;
   const key=contractKey(r),previous=seen.get(key);

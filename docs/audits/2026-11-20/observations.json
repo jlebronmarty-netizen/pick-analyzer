@@ -1,0 +1,2288 @@
+{
+  "caseStats": [
+    {
+      "player_id": 132,
+      "cutoff": "2026-11-20 23:00:00+00",
+      "l5": "4.80",
+      "l10": "5.80"
+    },
+    {
+      "player_id": 132,
+      "cutoff": "2026-11-20 23:15:00+00",
+      "l5": "4.00",
+      "l10": "5.10"
+    },
+    {
+      "player_id": 17895858,
+      "cutoff": "2026-11-20 23:00:00+00",
+      "l5": "14.20",
+      "l10": "13.20"
+    },
+    {
+      "player_id": 17895858,
+      "cutoff": "2026-11-20 23:15:00+00",
+      "l5": "27.00",
+      "l10": "20.80"
+    },
+    {
+      "player_id": 1028038426,
+      "cutoff": "2026-11-20 23:00:00+00",
+      "l5": "8.80",
+      "l10": "7.10"
+    },
+    {
+      "player_id": 1028038426,
+      "cutoff": "2026-11-20 23:15:00+00",
+      "l5": "5.40",
+      "l10": "7.20"
+    }
+  ],
+  "rawDisagree": [
+    {
+      "raw_rows": 2362,
+      "raw_missing_compact": 29,
+      "eligible_join": 1337,
+      "disagreement": 2
+    }
+  ],
+  "rawDetails": [
+    {
+      "provider_game_id": 21718112,
+      "game_id": "bdl_nba_21718112",
+      "event_date": "2026-11-15",
+      "game_status": "final",
+      "given": "Devin",
+      "family": "Vassell",
+      "original_at": "2026-11-17 00:00:32.134+00",
+      "compact_source_at": "2026-11-16 00:36:09.675+00",
+      "original": [
+        "6",
+        "6",
+        "1",
+        "0"
+      ],
+      "compact": [
+        6,
+        5,
+        1,
+        0
+      ]
+    },
+    {
+      "provider_game_id": 21718112,
+      "game_id": "bdl_nba_21718112",
+      "event_date": "2026-11-15",
+      "game_status": "final",
+      "given": "Victor",
+      "family": "Wembanyama",
+      "original_at": "2026-11-17 00:00:32.134+00",
+      "compact_source_at": "2026-11-16 00:36:09.675+00",
+      "original": [
+        "26",
+        "10",
+        "6",
+        "4"
+      ],
+      "compact": [
+        26,
+        11,
+        6,
+        4
+      ]
+    }
+  ],
+  "rawMissing": [
+    {
+      "provider_game_id": 21718140,
+      "event_date": "2026-11-18",
+      "game_status": "final",
+      "home": null,
+      "away": null,
+      "original_rows": 29
+    }
+  ],
+  "rawCalDetails": [
+    {
+      "date_local": "2026-11-18",
+      "provider_id": "21718140",
+      "provider_date": "2026-11-18",
+      "utc_tip": "2026-11-19T01:00:00.000Z",
+      "home": "Dallas Mavericks",
+      "away": "Golden State Warriors"
+    }
+  ],
+  "allCalendar": [
+    {
+      "finals": 109,
+      "distinct_finals": 109
+    }
+  ],
+  "archCon": [
+    {
+      "archives": 225,
+      "missing_object": 0,
+      "row_count_mismatch": 0,
+      "bytes": "668520"
+    }
+  ],
+  "qualityNBA": [
+    {
+      "rows": 6463,
+      "no_manifest": 0,
+      "hash_disagrees": 0,
+      "pretip_source": 0,
+      "partial_stats": 0
+    }
+  ],
+  "material": [
+    {
+      "rows": 6463,
+      "known_keys": 6463,
+      "games": 225,
+      "oldest": "2026-10-20 19:00:00+00",
+      "newest": "2026-11-20 01:00:00+00",
+      "materialized": "2026-11-20 23:03:12.999306+00",
+      "source": "2026-11-20 12:00:39.999+00"
+    }
+  ],
+  "advanced": [
+    {
+      "research_rows": 6463,
+      "source_lag_24h": 4682,
+      "materialize_lag_24h": 6225
+    }
+  ],
+  "marketMeta": [
+    {
+      "market": "moneyline",
+      "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+      "contract": "WINNER",
+      "phase": "PREGAME",
+      "book": "FanDuel",
+      "overtime": "NOT_VERIFIED",
+      "provider_updated_at": "2026-11-20 23:00:20.537+00"
+    },
+    {
+      "market": "props",
+      "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+      "contract": "PROVIDER_MILESTONE_UNVERIFIED",
+      "phase": "PREGAME",
+      "book": "FanDuel",
+      "overtime": "NOT_VERIFIED",
+      "provider_updated_at": "2026-11-20 23:00:24.823+00"
+    },
+    {
+      "market": "spread",
+      "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+      "contract": "SIGNED_HANDICAP",
+      "phase": "PREGAME",
+      "book": "FanDuel",
+      "overtime": "NOT_VERIFIED",
+      "provider_updated_at": "2026-11-20 23:00:20.537+00"
+    },
+    {
+      "market": "total",
+      "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+      "contract": "STRICT_LESS_THAN",
+      "phase": "PREGAME",
+      "book": "FanDuel",
+      "overtime": "NOT_VERIFIED",
+      "provider_updated_at": "2026-11-20 23:00:20.537+00"
+    }
+  ],
+  "availability": [
+    {
+      "captures": 92,
+      "latest": "2026-11-20 23:00:29.982+00",
+      "with_injury_coverage": 88,
+      "with_lineup_coverage": 72
+    }
+  ],
+  "nbaquoteTime": [
+    {
+      "total": 242539,
+      "missing_update": 0,
+      "future_update": 0,
+      "provider_lag_3h": 0
+    }
+  ],
+  "quoteParity": [
+    {
+      "provider_game_id": 21718147,
+      "quote_count": 721,
+      "raw_total": 721,
+      "raw_sides": 190,
+      "derived_sides": 190
+    },
+    {
+      "provider_game_id": 21718148,
+      "quote_count": 796,
+      "raw_total": 796,
+      "raw_sides": 206,
+      "derived_sides": 206
+    },
+    {
+      "provider_game_id": 21718149,
+      "quote_count": 587,
+      "raw_total": 587,
+      "raw_sides": 152,
+      "derived_sides": 152
+    },
+    {
+      "provider_game_id": 21718150,
+      "quote_count": 729,
+      "raw_total": 729,
+      "raw_sides": 192,
+      "derived_sides": 192
+    },
+    {
+      "provider_game_id": 21718151,
+      "quote_count": 801,
+      "raw_total": 801,
+      "raw_sides": 210,
+      "derived_sides": 210
+    },
+    {
+      "provider_game_id": 21718152,
+      "quote_count": 691,
+      "raw_total": 691,
+      "raw_sides": 182,
+      "derived_sides": 182
+    },
+    {
+      "provider_game_id": 21718153,
+      "quote_count": 699,
+      "raw_total": 699,
+      "raw_sides": 188,
+      "derived_sides": 188
+    },
+    {
+      "provider_game_id": 21718154,
+      "quote_count": 702,
+      "raw_total": 702,
+      "raw_sides": 184,
+      "derived_sides": 184
+    },
+    {
+      "provider_game_id": 21718155,
+      "quote_count": 645,
+      "raw_total": 645,
+      "raw_sides": 174,
+      "derived_sides": 174
+    }
+  ],
+  "freeze": [
+    {
+      "market": "moneyline",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "forecasts": 75,
+      "games": 13,
+      "receipts": 28,
+      "invalid_time": 0
+    },
+    {
+      "market": "props",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "forecasts": 169,
+      "games": 11,
+      "receipts": 0,
+      "invalid_time": 0
+    },
+    {
+      "market": "spread",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "forecasts": 70,
+      "games": 13,
+      "receipts": 26,
+      "invalid_time": 0
+    },
+    {
+      "market": "team_total_away",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "forecasts": 49,
+      "games": 12,
+      "receipts": 18,
+      "invalid_time": 0
+    },
+    {
+      "market": "team_total_home",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "forecasts": 47,
+      "games": 11,
+      "receipts": 20,
+      "invalid_time": 0
+    },
+    {
+      "market": "total",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "forecasts": 64,
+      "games": 13,
+      "receipts": 27,
+      "invalid_time": 0
+    }
+  ],
+  "freezeProof": [
+    {
+      "forecast_id": "687c202e313d6ca8f9beffe660d1d645f16df1af53e910c08501441d1fe78c79",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "decision_at": "2026-11-20 15:35:09.314+00",
+      "game_id": 21718150,
+      "game_start_at": "2026-11-21 00:30:00+00",
+      "game_date_local": "2026-11-20",
+      "market": "props",
+      "period": "ft",
+      "side": "over",
+      "statistic": "assists",
+      "player_id": 1028038426,
+      "line": "4.500",
+      "american_odds": -160,
+      "quote_id": "422b8758dbfc9a8e3d041df0ddd068d408697aa56ddcf8d420173d78ca2696ee",
+      "quote_source": "GOAT",
+      "quote_captured_at": "2026-11-20 15:30:33.992+00",
+      "projection": "8.210",
+      "l5": "8.800",
+      "l10": "7.100",
+      "historical_n": 10,
+      "row_fingerprint": "55eb0c114238577d4e8023f29b3968af"
+    }
+  ],
+  "freezeTriggers": [
+    {
+      "tgname": "nba_decision_forecast_append_only_v1",
+      "tgenabled": "O",
+      "relname": "nba_decision_shadow_forecasts_v1"
+    },
+    {
+      "tgname": "nba_decision_outcome_append_only_v1",
+      "tgenabled": "O",
+      "relname": "nba_decision_shadow_outcomes_v1"
+    }
+  ],
+  "settleCohort": [
+    {
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "market": "moneyline",
+      "contracts": 28,
+      "unique_games": 4,
+      "contract_mae": "6.068"
+    },
+    {
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "market": "spread",
+      "contracts": 26,
+      "unique_games": 4,
+      "contract_mae": "5.643"
+    },
+    {
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "market": "team_total_away",
+      "contracts": 18,
+      "unique_games": 4,
+      "contract_mae": "5.109"
+    },
+    {
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "market": "team_total_home",
+      "contracts": 20,
+      "unique_games": 4,
+      "contract_mae": "4.112"
+    },
+    {
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "market": "total",
+      "contracts": 27,
+      "unique_games": 4,
+      "contract_mae": "8.387"
+    }
+  ],
+  "ledgers": [
+    {
+      "sport": "NHL",
+      "forecasts": 125,
+      "games": 125,
+      "oldest": "2026-11-05 00:30:00+00",
+      "latest": "2026-11-20 04:07:23.602+00",
+      "forecasts_with_event_receipt": 111
+    },
+    {
+      "sport": "NCAAB",
+      "forecasts": 863,
+      "games": 863,
+      "oldest": "2026-11-02 08:00:00+00",
+      "latest": "2026-11-20 10:00:15.546+00",
+      "forecasts_with_event_receipt": 763
+    },
+    {
+      "sport": "UFC",
+      "forecasts": 47,
+      "games": 26,
+      "oldest": "2026-11-14 22:00:00+00",
+      "latest": "2026-11-14 01:49:30.557+00",
+      "forecasts_with_event_receipt": 20
+    }
+  ],
+  "edge": [
+    {
+      "sport": "NCAAF",
+      "cohort": "NCAAF_PPG_PICK_20261105",
+      "model_version": "NCAAF_PPG_V1_PICK_PORT_1",
+      "rows": 594,
+      "games": 198,
+      "oldest": "2026-11-06 00:30:00+00",
+      "latest": "2026-11-20 04:33:40.238+00",
+      "joined_outcomes": 342,
+      "matched_events": 114
+    },
+    {
+      "sport": "TT",
+      "cohort": "EDGE_LAB_LIVE_20261104",
+      "model_version": "TT_ML_V1_PICK_PORT_1",
+      "rows": 1456,
+      "games": 1456,
+      "oldest": "2026-11-04 23:35:00+00",
+      "latest": "2026-11-20 17:00:55.236+00",
+      "joined_outcomes": 283,
+      "matched_events": 283
+    },
+    {
+      "sport": "TT",
+      "cohort": "EDGE_LAB_LIVE_20261104",
+      "model_version": "TT_SETS_OE_V1_PICK_PORT_1",
+      "rows": 1456,
+      "games": 1456,
+      "oldest": "2026-11-04 23:35:00+00",
+      "latest": "2026-11-20 17:00:55.236+00",
+      "joined_outcomes": 283,
+      "matched_events": 283
+    },
+    {
+      "sport": "TT",
+      "cohort": "EDGE_LAB_LIVE_20261104",
+      "model_version": "TT_TOTAL_V1_PICK_PORT_1",
+      "rows": 1456,
+      "games": 1456,
+      "oldest": "2026-11-04 23:35:00+00",
+      "latest": "2026-11-20 17:00:55.236+00",
+      "joined_outcomes": 283,
+      "matched_events": 283
+    }
+  ],
+  "soccer": [
+    {
+      "cohort": "EDGE_LAB_RESTART_20261104",
+      "model_version": "SOCCER_V0_PICK_PORT_1",
+      "forecasts": 42,
+      "games": 21,
+      "oldest": "2026-11-06 20:00:00+00",
+      "latest": "2026-11-20 04:15:23.866+00",
+      "receipts": 20
+    }
+  ],
+  "leagues": [
+    {
+      "league": "NFL",
+      "forecasts": 42,
+      "events": 42,
+      "first": "2026-11-13 01:15:00+00",
+      "latest": "2026-11-20 01:39:27.356+00",
+      "with_receipt": 15
+    }
+  ],
+  "agedPlayable": [
+    {
+      "sport": "TT",
+      "status": "FORECAST",
+      "market": "MONEYLINE",
+      "forecast_rows": 110,
+      "unique_events": 110
+    },
+    {
+      "sport": "TT",
+      "status": "FORECAST",
+      "market": "SETS_ODD_EVEN",
+      "forecast_rows": 110,
+      "unique_events": 110
+    },
+    {
+      "sport": "TT",
+      "status": "PROJECTION",
+      "market": "TOTAL_POINTS",
+      "forecast_rows": 110,
+      "unique_events": 110
+    }
+  ],
+  "ttsett": [
+    {
+      "sport": "NCAAF",
+      "status": "DISPUTE",
+      "forecast_rows": 18,
+      "games": 6
+    },
+    {
+      "sport": "NCAAF",
+      "status": "L",
+      "forecast_rows": 40,
+      "games": 40
+    },
+    {
+      "sport": "NCAAF",
+      "status": "NUMERIC",
+      "forecast_rows": 216,
+      "games": 108
+    },
+    {
+      "sport": "NCAAF",
+      "status": "W",
+      "forecast_rows": 68,
+      "games": 68
+    },
+    {
+      "sport": "NCAAF",
+      "status": null,
+      "forecast_rows": 252,
+      "games": 84
+    },
+    {
+      "sport": "TT",
+      "status": "L",
+      "forecast_rows": 231,
+      "games": 176
+    },
+    {
+      "sport": "TT",
+      "status": "NUMERIC",
+      "forecast_rows": 283,
+      "games": 283
+    },
+    {
+      "sport": "TT",
+      "status": "W",
+      "forecast_rows": 335,
+      "games": 228
+    },
+    {
+      "sport": "TT",
+      "status": null,
+      "forecast_rows": 3519,
+      "games": 1173
+    }
+  ],
+  "nhlShadow": [
+    {
+      "model_version": "NHL_SCORES_POISSON_SHADOW_V1",
+      "status": "FROZEN_RESEARCH",
+      "rows": 45,
+      "events": 45,
+      "temporal_errors": 0,
+      "first": "2026-11-15 11:07:23.564+00",
+      "last": "2026-11-20 22:07:26.798+00"
+    },
+    {
+      "model_version": "NHL_LATE_PROBABLE_CALIBRATION_SHADOW_V6",
+      "status": "FROZEN_RESEARCH",
+      "rows": 11,
+      "events": 11,
+      "temporal_errors": 0,
+      "first": "2026-11-19 22:07:29.865+00",
+      "last": "2026-11-19 22:07:29.865+00"
+    }
+  ],
+  "ncaaModel": [
+    {
+      "model_version": "NCAAB_SIDE_PRESERVING_SHADOW_V1",
+      "status": "FROZEN_RESEARCH",
+      "rows": 52,
+      "events": 52,
+      "temporal_errors": 0,
+      "first": "2026-11-20 04:00:31.452+00",
+      "last": "2026-11-20 10:00:29.34+00"
+    }
+  ],
+  "mlbLedger": [
+    {
+      "rows": 919,
+      "unique_games": 201,
+      "first": "2026-09-15",
+      "latest": "2026-10-28",
+      "received": 917
+    }
+  ],
+  "elapsed": [
+    {
+      "sport": "NHL",
+      "late": 0,
+      "aged": 0
+    },
+    {
+      "sport": "NCAAB",
+      "late": 0,
+      "aged": 4
+    },
+    {
+      "sport": "UFC",
+      "late": 0,
+      "aged": 0
+    }
+  ],
+  "soccerTime": [
+    {
+      "rows": 42,
+      "post_start_issue": 0,
+      "invalid_probability": 0
+    }
+  ],
+  "freeTime": [
+    {
+      "league": "NFL",
+      "forecasts": 42,
+      "post_start_issue": 0
+    }
+  ],
+  "providerMap": [
+    {
+      "sport": "NCAAB",
+      "host": "site.api.espn.com",
+      "items": 242,
+      "latest": "2026-11-20 22:00:24.121+00"
+    },
+    {
+      "sport": "NCAAB",
+      "host": "github.com",
+      "items": 1,
+      "latest": "2026-11-03 23:15:53.458125+00"
+    },
+    {
+      "sport": "NHL",
+      "host": "api-web.nhle.com",
+      "items": 1212,
+      "latest": "2026-11-20 23:07:18.93+00"
+    },
+    {
+      "sport": "NHL",
+      "host": "api.nhle.com",
+      "items": 168,
+      "latest": "2026-11-20 01:37:17.254+00"
+    },
+    {
+      "sport": "NHL",
+      "host": "www.dratings.com",
+      "items": 5084,
+      "latest": "2026-11-20 23:07:31.989+00"
+    },
+    {
+      "sport": "UFC",
+      "host": "www.espn.com",
+      "items": 1,
+      "latest": "2026-11-08 21:15:33.024+00"
+    },
+    {
+      "sport": "UFC",
+      "host": "sports.core.api.espn.com",
+      "items": 452,
+      "latest": "2026-11-20 21:49:30.896+00"
+    },
+    {
+      "sport": "UFC",
+      "host": "site.api.espn.com",
+      "items": 153,
+      "latest": "2026-11-20 21:49:29.194+00"
+    },
+    {
+      "sport": "Soccer",
+      "host": "football-data.co.uk",
+      "items": 2,
+      "latest": "2026-11-09 10:15:23.379+00"
+    }
+  ],
+  "runErrors": [
+    {
+      "lane": "history",
+      "status": "completed",
+      "started_at": "2026-11-18 17:27:34.519+00",
+      "completed_at": "2026-11-18 17:27:35.734+00"
+    },
+    {
+      "lane": "props",
+      "status": "completed",
+      "started_at": "2026-11-20 23:00:32.541+00",
+      "completed_at": "2026-11-20 23:00:48.668+00"
+    },
+    {
+      "lane": "stats",
+      "status": "completed",
+      "started_at": "2026-11-18 17:27:36.675+00",
+      "completed_at": "2026-11-18 17:27:37.383+00"
+    }
+  ],
+  "feeds": [
+    {
+      "sport": "NHL",
+      "status": "PASS",
+      "latest": "2026-11-20 23:07:33.281+00",
+      "runs": 735
+    },
+    {
+      "sport": "NHL",
+      "status": "PARTIAL",
+      "latest": "2026-11-18 16:07:35.816+00",
+      "runs": 47
+    },
+    {
+      "sport": "NCAAB",
+      "status": "PASS",
+      "latest": "2026-11-20 22:00:26.386+00",
+      "runs": 70
+    },
+    {
+      "sport": "UFC",
+      "status": "PASS",
+      "latest": "2026-11-08 22:00:58.412+00",
+      "runs": 1
+    },
+    {
+      "sport": "UFC",
+      "status": "PARTIAL",
+      "latest": "2026-11-20 21:49:30.988+00",
+      "runs": 76
+    },
+    {
+      "sport": "SOCCER",
+      "status": "SUCCESS",
+      "latest": "2026-11-20 22:45:23.88+00",
+      "runs": 764
+    },
+    {
+      "sport": "SOCCER",
+      "status": "PARTIAL",
+      "latest": "2026-11-14 07:15:33.962+00",
+      "runs": 4
+    },
+    {
+      "sport": "NCAAF",
+      "status": "SUCCESS",
+      "latest": "2026-11-14 15:13:42.807+00",
+      "runs": 19
+    },
+    {
+      "sport": "TT",
+      "status": "BLOCKED",
+      "latest": "2026-11-05 21:30:45.835+00",
+      "runs": 1
+    },
+    {
+      "sport": "MLB",
+      "status": "SUCCESS",
+      "latest": "2026-11-04 23:10:45.814+00",
+      "runs": 1
+    },
+    {
+      "sport": "NCAAF",
+      "status": "PARTIAL",
+      "latest": "2026-11-20 16:33:41.207+00",
+      "runs": 12
+    },
+    {
+      "sport": "TT",
+      "status": "PARTIAL",
+      "latest": "2026-11-20 17:00:56.115+00",
+      "runs": 23
+    },
+    {
+      "sport": "TT",
+      "status": "FAILED",
+      "latest": "2026-11-18 16:40:52.344+00",
+      "runs": 25
+    },
+    {
+      "sport": "BSN",
+      "status": "ERROR",
+      "latest": "2026-11-11 08:05:28.205+00",
+      "runs": 4
+    },
+    {
+      "sport": "BSN",
+      "status": "OK",
+      "latest": "2026-11-11 08:05:21.119+00",
+      "runs": 4
+    },
+    {
+      "sport": "ATP",
+      "status": "ERROR",
+      "latest": null,
+      "runs": 2
+    },
+    {
+      "sport": "ATP",
+      "status": "OK",
+      "latest": "2026-11-20 00:13:09.65+00",
+      "runs": 9
+    },
+    {
+      "sport": "NFL",
+      "status": "OK",
+      "latest": "2026-11-20 21:39:27.023+00",
+      "runs": 61
+    }
+  ],
+  "ncaabId": [
+    {
+      "receipts": 763,
+      "side_identity_disagreements": 12,
+      "impossible_receipt": 1
+    }
+  ],
+  "ncaabExceptions": [
+    {
+      "event_id": "espn:401920912",
+      "scheduled_at": "2026-11-02 08:00:00+00",
+      "created_at": "2026-10-15 16:42:54.805547+00",
+      "prediction_state": "FORECAST",
+      "home": "Northern Illinois Huskies",
+      "away": "Grambling Tigers",
+      "predicted_home": "2459",
+      "predicted_away": "2755",
+      "result_home": "2755",
+      "result_away": "2459",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-03 23:03:59.736611+00"
+    },
+    {
+      "event_id": "espn:401921422",
+      "scheduled_at": "2026-11-02 11:00:00+00",
+      "created_at": "2026-10-15 16:42:54.805547+00",
+      "prediction_state": "FORECAST",
+      "home": "Merrimack Warriors",
+      "away": "App State Mountaineers",
+      "predicted_home": "2771",
+      "predicted_away": "2026",
+      "result_home": "2026",
+      "result_away": "2771",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-03 23:03:59.736611+00"
+    },
+    {
+      "event_id": "espn:401921704",
+      "scheduled_at": "2026-11-03 00:30:00+00",
+      "created_at": "2026-10-15 16:42:54.805547+00",
+      "prediction_state": "FORECAST",
+      "home": "Purdue Boilermakers",
+      "away": "Gonzaga Bulldogs",
+      "predicted_home": "2509",
+      "predicted_away": "2250",
+      "result_home": "2250",
+      "result_away": "2509",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-03 23:03:59.736611+00"
+    },
+    {
+      "event_id": "espn:401909694",
+      "scheduled_at": "2026-11-03 01:30:00+00",
+      "created_at": "2026-10-15 16:42:54.805547+00",
+      "prediction_state": "FORECAST",
+      "home": "Florida State Seminoles",
+      "away": "Florida A&M Rattlers",
+      "predicted_home": "52",
+      "predicted_away": "50",
+      "result_home": "50",
+      "result_away": "52",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-03 23:03:59.736611+00"
+    },
+    {
+      "event_id": "espn:401918053",
+      "scheduled_at": "2026-11-09 01:30:00+00",
+      "created_at": "2026-11-07 04:00:20.925+00",
+      "prediction_state": "FORECAST",
+      "home": "California Golden Bears",
+      "away": "Houston Cougars",
+      "predicted_home": "25",
+      "predicted_away": "248",
+      "result_home": "248",
+      "result_away": "25",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-09 04:00:11.386+00"
+    },
+    {
+      "event_id": "espn:401919029",
+      "scheduled_at": "2026-11-09 04:00:00+00",
+      "created_at": "2026-11-07 04:00:20.996+00",
+      "prediction_state": "FORECAST",
+      "home": "Wichita State Shockers",
+      "away": "USC Trojans",
+      "predicted_home": "2724",
+      "predicted_away": "30",
+      "result_home": "30",
+      "result_away": "2724",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-09 10:00:11.277+00"
+    },
+    {
+      "event_id": "espn:401918992",
+      "scheduled_at": "2026-11-11 20:00:00+00",
+      "created_at": "2026-11-10 04:00:18.658+00",
+      "prediction_state": "FORECAST",
+      "home": "South Florida Bulls",
+      "away": "Saint Joseph's Hawks",
+      "predicted_home": "58",
+      "predicted_away": "2603",
+      "result_home": "2603",
+      "result_away": "58",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-12 04:00:11.616+00"
+    },
+    {
+      "event_id": "espn:401920074",
+      "scheduled_at": "2026-11-14 18:00:00+00",
+      "created_at": "2026-11-13 04:00:17.231+00",
+      "prediction_state": "FORECAST",
+      "home": "George Mason Patriots",
+      "away": "Bradley Braves",
+      "predicted_home": "2244",
+      "predicted_away": "71",
+      "result_home": "71",
+      "result_away": "2244",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-14 22:00:18.687+00"
+    },
+    {
+      "event_id": "espn:401920567",
+      "scheduled_at": "2026-11-14 18:00:00+00",
+      "created_at": "2026-11-13 04:00:17.153+00",
+      "prediction_state": "FORECAST",
+      "home": "Morgan State Bears",
+      "away": "Towson Tigers",
+      "predicted_home": "2415",
+      "predicted_away": "119",
+      "result_home": "2352",
+      "result_away": "2415",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-15 04:00:12.719+00"
+    },
+    {
+      "event_id": "espn:401920750",
+      "scheduled_at": "2026-11-14 23:00:00+00",
+      "created_at": "2026-11-13 04:00:19.111+00",
+      "prediction_state": "FORECAST",
+      "home": "Youngstown State Penguins",
+      "away": "Marshall Thundering Herd",
+      "predicted_home": "2754",
+      "predicted_away": "276",
+      "result_home": "2754",
+      "result_away": "276",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-14 22:00:18.687+00"
+    },
+    {
+      "event_id": "espn:401909525",
+      "scheduled_at": "2026-11-15 19:30:00+00",
+      "created_at": "2026-11-14 04:00:20.549+00",
+      "prediction_state": "FORECAST",
+      "home": "Marquette Golden Eagles",
+      "away": "Missouri Tigers",
+      "predicted_home": "269",
+      "predicted_away": "142",
+      "result_home": "142",
+      "result_away": "269",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-15 22:00:17.009+00"
+    },
+    {
+      "event_id": "espn:401918959",
+      "scheduled_at": "2026-11-19 23:00:00+00",
+      "created_at": "2026-11-18 04:00:18.367+00",
+      "prediction_state": "FORECAST",
+      "home": "Murray State Racers",
+      "away": "NC State Wolfpack",
+      "predicted_home": "93",
+      "predicted_away": "152",
+      "result_home": "152",
+      "result_away": "93",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-20 04:00:11.756+00"
+    },
+    {
+      "event_id": "espn:401919019",
+      "scheduled_at": "2026-11-20 19:00:00+00",
+      "created_at": "2026-11-19 04:00:17.988+00",
+      "prediction_state": "FORECAST",
+      "home": "UAB Blazers",
+      "away": "George Washington Revolutionaries",
+      "predicted_home": "5",
+      "predicted_away": "45",
+      "result_home": "45",
+      "result_away": "5",
+      "result_status": "FINAL",
+      "observed_at": "2026-11-20 22:00:15.937+00"
+    }
+  ],
+  "nhlId": [
+    {
+      "receipts": 111,
+      "side_identity_disagreements": 0,
+      "impossible_receipt": 0
+    }
+  ],
+  "ufcId": [
+    {
+      "joined_rows": 20,
+      "bouts": 10,
+      "alien_winner": 0,
+      "impossible_receipt": 0
+    }
+  ],
+  "candidate": [
+    {
+      "sport": "MLB",
+      "model_version": "EQUILIZER_ML_V2_E2_STABLE6",
+      "state": "CHALLENGER_TEST",
+      "candidates": 1
+    },
+    {
+      "sport": "NBA",
+      "model_version": "nba_prediction_engine_v1",
+      "state": "PATTERN",
+      "candidates": 1
+    },
+    {
+      "sport": "NCAAB",
+      "model_version": "NCAAB_PRESEASON_V1",
+      "state": "CHALLENGER_TEST",
+      "candidates": 1
+    },
+    {
+      "sport": "NCAAF",
+      "model_version": "NCAAF PPG V1",
+      "state": "CHALLENGER_TEST",
+      "candidates": 1
+    },
+    {
+      "sport": "NHL",
+      "model_version": "NHL MODEL_ONLY",
+      "state": "CHALLENGER_TEST",
+      "candidates": 1
+    }
+  ],
+  "allPred": [
+    {
+      "sport_key": "americanfootball_ncaaf",
+      "model_role": "champion",
+      "model_version": null,
+      "prediction_origin": null,
+      "forecasts": 122,
+      "games": 61
+    },
+    {
+      "sport_key": "americanfootball_nfl",
+      "model_role": "champion",
+      "model_version": null,
+      "prediction_origin": null,
+      "forecasts": 190,
+      "games": 95
+    },
+    {
+      "sport_key": "americanfootball_nfl",
+      "model_role": "shadow",
+      "model_version": "americanfootball_nfl_preview_lifecycle_v1",
+      "prediction_origin": null,
+      "forecasts": 776,
+      "games": 12
+    },
+    {
+      "sport_key": "americanfootball_nfl",
+      "model_role": "shadow",
+      "model_version": "nfl_ml_score_baseline_v1",
+      "prediction_origin": "CURRENT_ERA_SHADOW",
+      "forecasts": 6,
+      "games": 5
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "challenger",
+      "model_version": "baseball_mlb_prospective_v6",
+      "prediction_origin": null,
+      "forecasts": 15,
+      "games": 5
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "challenger",
+      "model_version": "baseball_mlb_prospective_v7",
+      "prediction_origin": null,
+      "forecasts": 48,
+      "games": 16
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "champion",
+      "model_version": "baseball_mlb_line_versioned_reprediction_v1",
+      "prediction_origin": null,
+      "forecasts": 11,
+      "games": 9
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "champion",
+      "model_version": "baseball_mlb_model_v1",
+      "prediction_origin": null,
+      "forecasts": 45,
+      "games": 15
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "champion",
+      "model_version": "baseball_mlb_prospective_preview_v1",
+      "prediction_origin": null,
+      "forecasts": 3051,
+      "games": 755
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "champion",
+      "model_version": null,
+      "prediction_origin": null,
+      "forecasts": 564,
+      "games": 280
+    },
+    {
+      "sport_key": "baseball_mlb",
+      "model_role": "shadow",
+      "model_version": "MLB_CALIBRATED_SHADOW_V1",
+      "prediction_origin": "CURRENT_ERA_SHADOW",
+      "forecasts": 4,
+      "games": 2
+    },
+    {
+      "sport_key": "basketball_bsn",
+      "model_role": "champion",
+      "model_version": null,
+      "prediction_origin": null,
+      "forecasts": 8,
+      "games": 4
+    },
+    {
+      "sport_key": "basketball_nba",
+      "model_role": "champion",
+      "model_version": "basketball_nba_model_v1",
+      "prediction_origin": null,
+      "forecasts": 27,
+      "games": 9
+    },
+    {
+      "sport_key": "basketball_nba",
+      "model_role": "shadow",
+      "model_version": "nba_prediction_engine_v1",
+      "prediction_origin": "CURRENT_ERA_SHADOW",
+      "forecasts": 139,
+      "games": 56
+    },
+    {
+      "sport_key": "basketball_nba",
+      "model_role": "shadow",
+      "model_version": "nba_prediction_engine_v1",
+      "prediction_origin": "HISTORICAL_REPLAY_SHADOW",
+      "forecasts": 14840,
+      "games": 3710
+    },
+    {
+      "sport_key": "icehockey_nhl",
+      "model_role": "shadow",
+      "model_version": "icehockey_nhl_preview_lifecycle_v1",
+      "prediction_origin": null,
+      "forecasts": 258,
+      "games": 12
+    },
+    {
+      "sport_key": "soccer_epl",
+      "model_role": "champion",
+      "model_version": null,
+      "prediction_origin": null,
+      "forecasts": 20,
+      "games": 10
+    }
+  ],
+  "sheadOrigQ": [
+    {
+      "quote_id": "809e3cc3358a7972c79a38d867d8af997a32fe6dea42b20c2cab1f3a1a7ac4fa",
+      "game_id": 21718150,
+      "player_id": 1028038426,
+      "statistic": "assists",
+      "market": "props",
+      "period": "FULL_GAME_LABEL_OT_UNVERIFIED",
+      "side": "over",
+      "line": 4.5,
+      "american_odds": -158,
+      "contract": "STRICT_GREATER_THAN",
+      "provider_updated_at": "2026-11-20T22:30:24.292Z",
+      "source_received_at": "2026-11-20T22:30:33.520Z",
+      "sportsbook": "FanDuel",
+      "overtime_rule": "NOT_VERIFIED",
+      "freshness": "RECENT"
+    }
+  ],
+  "freezeTimeline": [
+    {
+      "decision_at": "2026-11-20 15:35:09.314+00",
+      "model_version": "NBA_DECISION_BOARD_SHADOW_V1",
+      "period": "ft",
+      "line": "4.500",
+      "american_odds": -160,
+      "projection": "8.210",
+      "l5": "8.800",
+      "l10": "7.100",
+      "historical_n": 10
+    }
+  ],
+  "freezeAtCutoff": [
+    {
+      "frozen": 474,
+      "independent_games": 13,
+      "prop_rows": 169,
+      "prop_games": 11,
+      "temporal_violations": 0
+    }
+  ],
+  "postAuditFrozenFingerprint": "55eb0c114238577d4e8023f29b3968af",
+  "realReplay": [
+    {
+      "asOf": "2026-11-20T23:00:00Z",
+      "version": "NBA_DECISION_BOARD_SHADOW_V2_INTEGRITY",
+      "l5": null,
+      "l10": null,
+      "projection": null,
+      "quality": {
+        "status": "INCOMPLETE_HISTORY",
+        "issues": [
+          {
+            "status": "INCOMPLETE_HISTORY",
+            "reason": "PLAYER_ROW_MISSING_AT_CUTOFF"
+          },
+          {
+            "status": "CONTRACT_UNVERIFIED",
+            "reason": "OVERTIME_RULE_UNVERIFIED"
+          },
+          {
+            "status": "PARTIAL",
+            "reason": "PREGAME_CONTEXT_UNVERIFIED"
+          },
+          {
+            "status": "PARTIAL",
+            "reason": "PLAYER_AVAILABILITY_UNCONFIRMED"
+          }
+        ],
+        "expiresAt": null,
+        "book": "FanDuel",
+        "providerUpdatedAt": "2026-11-20T22:30:24.292Z"
+      },
+      "ids": [
+        21718091,
+        21718083,
+        21718069,
+        21718048,
+        21718036,
+        21718025,
+        21718011
+      ],
+      "gaps": [
+        {
+          "id": 21718136,
+          "status": "INCOMPLETE_HISTORY",
+          "reason": "PLAYER_ROW_MISSING_AT_CUTOFF"
+        },
+        {
+          "id": 21718126,
+          "status": "INCOMPLETE_HISTORY",
+          "reason": "PLAYER_ROW_MISSING_AT_CUTOFF"
+        },
+        {
+          "id": 21718114,
+          "status": "INCOMPLETE_HISTORY",
+          "reason": "PLAYER_ROW_MISSING_AT_CUTOFF"
+        },
+        {
+          "id": 21718083,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718069,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718048,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718036,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718025,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718011,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        }
+      ],
+      "decision": "PASAR",
+      "top": 0
+    },
+    {
+      "asOf": "2026-11-20T23:15:00Z",
+      "version": "NBA_DECISION_BOARD_SHADOW_V2_INTEGRITY",
+      "l5": 5.4,
+      "l10": 7.2,
+      "projection": 6.03,
+      "quality": {
+        "status": "PARTIAL",
+        "issues": [
+          {
+            "status": "PARTIAL",
+            "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+          },
+          {
+            "status": "CONTRACT_UNVERIFIED",
+            "reason": "OVERTIME_RULE_UNVERIFIED"
+          },
+          {
+            "status": "PARTIAL",
+            "reason": "PREGAME_CONTEXT_UNVERIFIED"
+          },
+          {
+            "status": "PARTIAL",
+            "reason": "PLAYER_AVAILABILITY_UNCONFIRMED"
+          }
+        ],
+        "expiresAt": null,
+        "book": "FanDuel",
+        "providerUpdatedAt": "2026-11-20T22:30:24.292Z"
+      },
+      "ids": [
+        21718136,
+        21718126,
+        21718114,
+        21718091,
+        21718083,
+        21718069,
+        21718048,
+        21718036,
+        21718025,
+        21718011
+      ],
+      "gaps": [
+        {
+          "id": 21718083,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718069,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718048,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718036,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718025,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        },
+        {
+          "id": 21718011,
+          "status": "PARTIAL",
+          "reason": "ORIGINAL_BOX_NOT_CROSS_CHECKED"
+        }
+      ],
+      "decision": "PASAR",
+      "top": 0
+    }
+  ],
+  "healthChecks": [
+    [
+      {
+        "date_local": "2026-11-18",
+        "id": 21718140,
+        "season": 2026,
+        "source_rows": null,
+        "compact_rows": null,
+        "unique_players": null,
+        "alert": "SOURCE_UNAVAILABLE"
+      }
+    ],
+    [
+      {
+        "provider_game_id": 21718112,
+        "player_id": 3547246,
+        "player_stats_captured_at": "2026-11-17 00:00:32.134+00",
+        "source_captured_at": "2026-11-16 00:36:09.675+00",
+        "field": "reb",
+        "raw_value": "6",
+        "compact_value": "5"
+      },
+      {
+        "provider_game_id": 21718112,
+        "player_id": 56677822,
+        "player_stats_captured_at": "2026-11-17 00:00:32.134+00",
+        "source_captured_at": "2026-11-16 00:36:09.675+00",
+        "field": "reb",
+        "raw_value": "10",
+        "compact_value": "11"
+      }
+    ],
+    [
+      {
+        "lane": "ATP",
+        "status": "OK",
+        "finished": "2026-11-20 00:13:09.65+00",
+        "age": "23:28:43.983562"
+      },
+      {
+        "lane": "BSN",
+        "status": "ERROR",
+        "finished": "2026-11-11 08:05:28.205+00",
+        "age": "9 days 15:36:25.428562"
+      },
+      {
+        "lane": "MLB",
+        "status": "SUCCESS",
+        "finished": "2026-11-04 23:10:45.814+00",
+        "age": "16 days 00:31:07.819562"
+      },
+      {
+        "lane": "NBA history",
+        "status": "completed",
+        "finished": "2026-11-18 17:27:35.734+00",
+        "age": "2 days 06:14:17.899562"
+      },
+      {
+        "lane": "NBA props",
+        "status": "completed",
+        "finished": "2026-11-20 23:30:44.552+00",
+        "age": "00:11:09.081562"
+      },
+      {
+        "lane": "NBA stats",
+        "status": "completed",
+        "finished": "2026-11-18 17:27:37.383+00",
+        "age": "2 days 06:14:16.250562"
+      },
+      {
+        "lane": "NCAAB",
+        "status": "PASS",
+        "finished": "2026-11-20 22:00:26.386+00",
+        "age": "01:41:27.247562"
+      },
+      {
+        "lane": "NCAAF",
+        "status": "PARTIAL",
+        "finished": "2026-11-20 16:33:41.207+00",
+        "age": "07:08:12.426562"
+      },
+      {
+        "lane": "NFL",
+        "status": "OK",
+        "finished": "2026-11-20 21:39:27.023+00",
+        "age": "02:02:26.610562"
+      },
+      {
+        "lane": "NHL",
+        "status": "PASS",
+        "finished": "2026-11-20 23:37:23.758+00",
+        "age": "00:04:29.875562"
+      },
+      {
+        "lane": "Soccer",
+        "status": "SUCCESS",
+        "finished": "2026-11-20 23:15:23.741+00",
+        "age": "00:26:29.892562"
+      },
+      {
+        "lane": "TT",
+        "status": "PARTIAL",
+        "finished": "2026-11-20 17:00:56.115+00",
+        "age": "06:40:57.518562"
+      },
+      {
+        "lane": "UFC",
+        "status": "PARTIAL",
+        "finished": "2026-11-20 21:49:30.988+00",
+        "age": "01:52:22.645562"
+      }
+    ],
+    [
+      {
+        "date_local": "2026-11-13",
+        "games": 9,
+        "snapshots": 524,
+        "quote_rows": 9950,
+        "quotes_per_game": "1105.6"
+      },
+      {
+        "date_local": "2026-11-14",
+        "games": 5,
+        "snapshots": 297,
+        "quote_rows": 5639,
+        "quotes_per_game": "1127.8"
+      },
+      {
+        "date_local": "2026-11-15",
+        "games": 9,
+        "snapshots": 546,
+        "quote_rows": 11886,
+        "quotes_per_game": "1320.7"
+      },
+      {
+        "date_local": "2026-11-16",
+        "games": 8,
+        "snapshots": 467,
+        "quote_rows": 8040,
+        "quotes_per_game": "1005.0"
+      },
+      {
+        "date_local": "2026-11-17",
+        "games": 4,
+        "snapshots": 276,
+        "quote_rows": 7003,
+        "quotes_per_game": "1750.8"
+      },
+      {
+        "date_local": "2026-11-18",
+        "games": 13,
+        "snapshots": 804,
+        "quote_rows": 137138,
+        "quotes_per_game": "10549.1"
+      },
+      {
+        "date_local": "2026-11-19",
+        "games": 4,
+        "snapshots": 361,
+        "quote_rows": 97058,
+        "quotes_per_game": "24264.5"
+      },
+      {
+        "date_local": "2026-11-20",
+        "games": 9,
+        "snapshots": 725,
+        "quote_rows": 249002,
+        "quotes_per_game": "27666.9"
+      }
+    ],
+    [
+      {
+        "sport": "TT",
+        "status": "FORECAST",
+        "market": "MONEYLINE",
+        "forecast_rows": 110,
+        "unique_events": 110
+      },
+      {
+        "sport": "TT",
+        "status": "FORECAST",
+        "market": "SETS_ODD_EVEN",
+        "forecast_rows": 110,
+        "unique_events": 110
+      },
+      {
+        "sport": "TT",
+        "status": "PROJECTION",
+        "market": "TOTAL_POINTS",
+        "forecast_rows": 110,
+        "unique_events": 110
+      }
+    ],
+    [
+      {
+        "market": "moneyline",
+        "frozen": 123,
+        "independent_games": 13,
+        "invalid_time": 0,
+        "aged_unsettled": 0
+      },
+      {
+        "market": "props",
+        "frozen": 214,
+        "independent_games": 11,
+        "invalid_time": 0,
+        "aged_unsettled": 0
+      },
+      {
+        "market": "spread",
+        "frozen": 113,
+        "independent_games": 13,
+        "invalid_time": 0,
+        "aged_unsettled": 0
+      },
+      {
+        "market": "team_total_away",
+        "frozen": 82,
+        "independent_games": 12,
+        "invalid_time": 0,
+        "aged_unsettled": 0
+      },
+      {
+        "market": "team_total_home",
+        "frozen": 74,
+        "independent_games": 11,
+        "invalid_time": 0,
+        "aged_unsettled": 0
+      },
+      {
+        "market": "total",
+        "frozen": 102,
+        "independent_games": 13,
+        "invalid_time": 0,
+        "aged_unsettled": 0
+      }
+    ],
+    [],
+    [
+      {
+        "date_local": "2026-11-18",
+        "per_game": "10549.0769230769230769",
+        "typical": 1127.8,
+        "days": 7,
+        "alert": "QUOTE_VOLUME_REVIEW"
+      },
+      {
+        "date_local": "2026-11-19",
+        "per_game": "24264.500000000000",
+        "typical": 1320.66666666667,
+        "days": 7,
+        "alert": "QUOTE_VOLUME_REVIEW"
+      }
+    ]
+  ],
+  "sourceChain": [
+    {
+      "lane": "NCAAB",
+      "records": 863,
+      "events": 863,
+      "missing_source": 0,
+      "later_receipt": 73,
+      "non_pregame": 0,
+      "non_pregame_source": 73,
+      "max_receipt_minus_issue_seconds": "1665178.652578"
+    },
+    {
+      "lane": "NCAAF",
+      "records": 594,
+      "events": 198,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "0.000000"
+    },
+    {
+      "lane": "NFL",
+      "records": 42,
+      "events": 42,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-0.144000"
+    },
+    {
+      "lane": "NHL",
+      "records": 125,
+      "events": 125,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-1.165000"
+    },
+    {
+      "lane": "TT",
+      "records": 4368,
+      "events": 1456,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "0.000000"
+    },
+    {
+      "lane": "UFC current",
+      "records": 47,
+      "events": 26,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-1.375000"
+    },
+    {
+      "lane": "UFC history",
+      "records": 47,
+      "events": 26,
+      "missing_source": 0,
+      "later_receipt": 0,
+      "non_pregame": 0,
+      "non_pregame_source": 0,
+      "max_receipt_minus_issue_seconds": "-1.656000"
+    }
+  ],
+  "outcomeProvenance": [
+    {
+      "lane": "UFC",
+      "records": 10,
+      "missing_source": 0,
+      "later_receipt": 0
+    },
+    {
+      "lane": "NHL",
+      "records": 111,
+      "missing_source": 0,
+      "later_receipt": 0
+    },
+    {
+      "lane": "NCAAB",
+      "records": 763,
+      "missing_source": 0,
+      "later_receipt": 0
+    },
+    {
+      "lane": "NFL",
+      "records": 15,
+      "missing_source": 0,
+      "later_receipt": 0
+    }
+  ],
+  "ncaabImport": [
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "mode"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "model"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "sport"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "metrics"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "version"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "attempts"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "forecasts"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "abstentions"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "HOSTED_READY"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "generated_at"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "model_status"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "odds_ROI_CLV"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "forecast_count"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "profile_anchor"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "profile_sha256"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "schema_version"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "MODEL_VALIDATED"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "roster_continuity"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "storage_integrity"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "prospective_started"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "scheduled_observations"
+    },
+    {
+      "source_url": "https://github.com/jlebronmarty-netizen/sports-edge-hub/blob/c451d9fc9767bbeff751e26e631fe0b48579fe75/research/ncaab-preseason-v1/results/authentic-preseason-initial-status.json",
+      "captured_at": "2026-11-03 23:15:53.458125+00",
+      "first_issued": "2026-10-15 16:42:54.805547+00",
+      "last_issued": "2026-10-15 16:42:54.805547+00",
+      "rows": 73,
+      "evidence_key": "uncertainty_calibrated"
+    }
+  ],
+  "soccerRecheck": [
+    {
+      "market": "1X2",
+      "observed": 21,
+      "missing_last_history": 0,
+      "nonprior_history": 0,
+      "settled": 10,
+      "identity_disagreements": 0,
+      "early_results": 0
+    },
+    {
+      "market": "TOTAL_2_5",
+      "observed": 21,
+      "missing_last_history": 0,
+      "nonprior_history": 0,
+      "settled": 10,
+      "identity_disagreements": 0,
+      "early_results": 0
+    }
+  ],
+  "ncaafDisputeCause": [
+    {
+      "sport": "NCAAF",
+      "status": "DISPUTE",
+      "reason": "EVENT_CONTRACT_CHANGED",
+      "outcome_rows": 18,
+      "events": 6
+    }
+  ],
+  "soccerGrading": [
+    {
+      "market": "1X2",
+      "receipts": 10,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "TOTAL_2_5",
+      "receipts": 10,
+      "grade_disagreements": 0
+    }
+  ],
+  "collegeGrading": [
+    {
+      "market": "MONEYLINE",
+      "receipts": 108,
+      "games": 108,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "POINT_MARGIN",
+      "receipts": 108,
+      "games": 108,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "TOTAL_POINTS",
+      "receipts": 108,
+      "games": 108,
+      "grade_disagreements": 0
+    }
+  ],
+  "ttShape": [
+    {
+      "source": "public_web_manual_reconciliation",
+      "sets_type": null,
+      "n": 18,
+      "example": "netbet:1-31467652",
+      "min_sets": null,
+      "max_sets": null,
+      "keys": "{capturedAt,scheduledAt,setsA,setsB,source,sourceUrl,totalPoints}"
+    },
+    {
+      "source": "pulsescore:tipsport",
+      "sets_type": "array",
+      "n": 265,
+      "example": "netbet:1-31457155",
+      "min_sets": 3,
+      "max_sets": 5,
+      "keys": "{capturedAt,contentDigest,playerA,playerB,scheduledAt,setPoints,setsA,setsB,source,sourceMatchId,totalPoints}"
+    }
+  ],
+  "ttDetailedRegrade": [
+    {
+      "market": "MONEYLINE",
+      "receipts": 283,
+      "games": 283,
+      "no_set_breakdown": 18,
+      "box_disagreements": 0,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "SETS_ODD_EVEN",
+      "receipts": 283,
+      "games": 283,
+      "no_set_breakdown": 18,
+      "box_disagreements": 0,
+      "grade_disagreements": 0
+    },
+    {
+      "market": "TOTAL_POINTS",
+      "receipts": 283,
+      "games": 283,
+      "no_set_breakdown": 18,
+      "box_disagreements": 0,
+      "grade_disagreements": 0
+    }
+  ],
+  "ttManual": [
+    {
+      "market": "MONEYLINE",
+      "receipts": 18,
+      "summary_disagreements": 0
+    },
+    {
+      "market": "SETS_ODD_EVEN",
+      "receipts": 18,
+      "summary_disagreements": 0
+    },
+    {
+      "market": "TOTAL_POINTS",
+      "receipts": 18,
+      "summary_disagreements": 0
+    }
+  ],
+  "prospectiveMetrics": [
+    {
+      "model": "NCAAB preseason",
+      "independent_events": 757,
+      "correct": 587,
+      "hit_rate": "0.7754",
+      "brier": "0.1940",
+      "mean_side_probability": "0.5843",
+      "observed_side_frequency": "0.7411"
+    },
+    {
+      "model": "NFL free",
+      "independent_events": 15,
+      "correct": 11,
+      "hit_rate": "0.7333",
+      "brier": "0.2133",
+      "mean_side_probability": "0.4761",
+      "observed_side_frequency": "0.3333"
+    },
+    {
+      "model": "NHL DRatings",
+      "independent_events": 111,
+      "correct": 63,
+      "hit_rate": "0.5676",
+      "brier": "0.2421",
+      "mean_side_probability": "0.5364",
+      "observed_side_frequency": "0.4324"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V1",
+      "independent_events": 9,
+      "correct": 6,
+      "hit_rate": "0.6667",
+      "brier": "0.2580",
+      "mean_side_probability": "0.5043",
+      "observed_side_frequency": "0.3333"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "independent_events": 9,
+      "correct": 6,
+      "hit_rate": "0.6667",
+      "brier": "0.2580",
+      "mean_side_probability": "0.5043",
+      "observed_side_frequency": "0.3333"
+    }
+  ],
+  "reliabilityBins": [
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 1,
+      "independent_events": 8,
+      "mean_probability": "0.366",
+      "observed_frequency": "0.250"
+    },
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 2,
+      "independent_events": 427,
+      "mean_probability": "0.532",
+      "observed_frequency": "0.621"
+    },
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 3,
+      "independent_events": 318,
+      "mean_probability": "0.658",
+      "observed_frequency": "0.912"
+    },
+    {
+      "model": "NCAAB preseason",
+      "bin_0_to_4": 4,
+      "independent_events": 4,
+      "mean_probability": "0.811",
+      "observed_frequency": "1.000"
+    },
+    {
+      "model": "NFL free",
+      "bin_0_to_4": 1,
+      "independent_events": 4,
+      "mean_probability": "0.343",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "NFL free",
+      "bin_0_to_4": 2,
+      "independent_events": 9,
+      "mean_probability": "0.505",
+      "observed_frequency": "0.556"
+    },
+    {
+      "model": "NFL free",
+      "bin_0_to_4": 3,
+      "independent_events": 2,
+      "mean_probability": "0.615",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 1,
+      "independent_events": 13,
+      "mean_probability": "0.357",
+      "observed_frequency": "0.308"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 2,
+      "independent_events": 70,
+      "mean_probability": "0.512",
+      "observed_frequency": "0.400"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 3,
+      "independent_events": 26,
+      "mean_probability": "0.671",
+      "observed_frequency": "0.577"
+    },
+    {
+      "model": "NHL DRatings",
+      "bin_0_to_4": 4,
+      "independent_events": 2,
+      "mean_probability": "0.809",
+      "observed_frequency": "0.500"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V1",
+      "bin_0_to_4": 1,
+      "independent_events": 1,
+      "mean_probability": "0.383",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V1",
+      "bin_0_to_4": 2,
+      "independent_events": 7,
+      "mean_probability": "0.498",
+      "observed_frequency": "0.429"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V1",
+      "bin_0_to_4": 3,
+      "independent_events": 1,
+      "mean_probability": "0.671",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "bin_0_to_4": 1,
+      "independent_events": 1,
+      "mean_probability": "0.383",
+      "observed_frequency": "0.000"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "bin_0_to_4": 2,
+      "independent_events": 7,
+      "mean_probability": "0.498",
+      "observed_frequency": "0.429"
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "bin_0_to_4": 3,
+      "independent_events": 1,
+      "mean_probability": "0.671",
+      "observed_frequency": "0.000"
+    }
+  ],
+  "marketMae": [
+    {
+      "sport": "NCAAF",
+      "market": "POINT_MARGIN",
+      "events": 108,
+      "observations": 108,
+      "mae": "13.654"
+    },
+    {
+      "sport": "NCAAF",
+      "market": "TOTAL_POINTS",
+      "events": 108,
+      "observations": 108,
+      "mae": "13.188"
+    },
+    {
+      "sport": "TT",
+      "market": "TOTAL_POINTS",
+      "events": 283,
+      "observations": 283,
+      "mae": "14.334"
+    }
+  ],
+  "verifiedNcaabOriginal": {
+    "sourceCommit": "c451d9fc9767bbeff751e26e631fe0b48579fe75",
+    "committed": "2026-10-15T16:58:38Z",
+    "blob": "a0876f7ecafc879a64d158e18b8aa8138b7b25ea",
+    "records": 73,
+    "unique": 73,
+    "mismatched": [],
+    "sourceForecasts": 73
+  },
+  "ttMlOrientation": {
+    "checked": 265,
+    "mismatch": 0,
+    "reverse": 0,
+    "bad": 0
+  },
+  "ufcModelAudit": [
+    {
+      "model": "UFC_ELO_K32_FREE_V1",
+      "forecasts": 21,
+      "bouts": 21,
+      "final_rows": 10
+    },
+    {
+      "model": "UFC_ELO_K32_FREE_V2_IDENTITY",
+      "forecasts": 26,
+      "bouts": 26,
+      "final_rows": 10
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 'use client';
 import {useEffect,useMemo,useState} from 'react';
 
+import {hasValidatedInputs} from '@/lib/data-quality/window.mjs';
+
 export type SportDecisionMarket='ml'|'oneXTwo'|'spread'|'total'|'special'|'props'|'periods';
 export type SportDecisionRow={
  id:string;market:SportDecisionMarket;matchup:string;selection:string;
@@ -8,14 +10,16 @@ export type SportDecisionRow={
  startsAt?:string|null;capturedAt?:string|null;
  line?:number|null;odds?:number|null;projection?:string|null;
  probability?:number|null;gap?:number|null;gapUnit?:string|null;
+ dataQuality?:{status:string;issues:{reason:string}[]};
  evidence?:string|null;note?:string|null;eligible:boolean;
 };
 const tabs:[string,string][]=[['top','Top oportunidades'],['ml','Moneyline'],['oneXTwo','1X2'],['spread','Spread'],['total','Total'],['special','Par/Impar sets'],['props','Player props'],['periods','Cuartos / Mitades']];
 const isNumber=(n:number|null|undefined):n is number=>typeof n==='number'&&Number.isFinite(n);
-const date=(iso?:string|null)=>iso?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(iso)):'Sin fecha';
-export default function SportDecisionBoard({sport,rows,description,marketNotes={}}:{
+const date=(iso?:string|null)=>iso&&Number.isFinite(Date.parse(iso))?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(iso)):'Sin fecha';
+export default function SportDecisionBoard({sport,rows:sourceRows,description,marketNotes={}}:{
  sport:string;rows:SportDecisionRow[];description?:string;marketNotes?:Partial<Record<SportDecisionMarket,string>>;
 }){
+ const rows=useMemo(()=>sourceRows.map(r=>({...r,eligible:r.eligible&&hasValidatedInputs(r),awaitingEvidence:r.eligible&&!hasValidatedInputs(r)})),[sourceRows]);
  const [tab,setTab]=useState(()=>rows.some(r=>r.eligible)?'top':['ml','oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??'ml'),[sort,setSort]=useState('gap'),[query,setQuery]=useState('');
  const [expanded,setExpanded]=useState(false);
  // Async sport ledgers can arrive after initial render. Select their first populated market
@@ -26,6 +30,8 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
    ?(rows.some(r=>r.eligible)?'top':['oneXTwo','special','total','spread','props','periods'].find(m=>rows.some(r=>r.market===m))??current)
    :current);
  },[rows]);
+ const [limit,setLimit]=useState(100);
+ useEffect(()=>setLimit(100),[tab,query,sort]);
  const counts=useMemo(()=>Object.fromEntries(tabs.slice(1).map(([id])=>[id,rows.filter(x=>x.market===id).length])),[rows]);
  const visible=useMemo(()=>{
   const input=(tab==='top'?rows.filter(r=>r.eligible):rows.filter(r=>r.market===tab))
@@ -34,7 +40,7 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
    if(sort==='date')return (Date.parse(a.startsAt??'')||0)-(Date.parse(b.startsAt??'')||0)||a.id.localeCompare(b.id);
    if(sort==='probability')return (isNumber(b.probability)?b.probability:-1)-(isNumber(a.probability)?a.probability:-1)||a.id.localeCompare(b.id);
    return (isNumber(b.gap)?b.gap:-Infinity)-(isNumber(a.gap)?a.gap:-Infinity)||a.id.localeCompare(b.id);
-  }).slice(0,tab==='top'?25:100);
+  });
  },[rows,tab,sort,query]);
  return <section aria-label={sport+' Decision Board'} className="space-y-4 rounded-2xl border border-slate-700 bg-slate-950/60 p-4 sm:p-5">
   <div className="flex flex-wrap justify-between gap-3">
@@ -63,7 +69,7 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
   {tab!=='top'&&marketNotes[tab as SportDecisionMarket]&&<p role="note" className="rounded-lg border border-amber-400/20 bg-slate-900/60 p-3 text-xs leading-5 text-amber-200">{marketNotes[tab as SportDecisionMarket]}</p>}
   {sort==='gap'&&visible.length>0&&!visible.some(r=>isNumber(r.gap))&&<p className="text-xs text-slate-400">Las selecciones visibles no tienen una brecha de mercado validada. Este orden se mantiene estable por identificador; selecciona probabilidad del modelo u hora para comparar.</p>}
   {visible.length?<div className="grid gap-3 lg:grid-cols-2">
-   {visible.map(r=><article key={r.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4">
+   {visible.slice(0,tab==='top'?25:limit).map(r=><article key={r.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4">
     <div className="flex flex-wrap justify-between gap-2"><div className="min-w-0">
      <p className="text-xs text-slate-400">{r.matchup}</p><h3 className="mt-1 font-semibold text-slate-100">{r.selection}</h3>
     </div><span className="self-start rounded-full border border-slate-600 px-2 py-1 text-[10px] font-bold text-amber-200">{r.eligible?'SEÑAL FAVORABLE · ':''}{r.status}</span></div>
@@ -74,10 +80,17 @@ export default function SportDecisionBoard({sport,rows,description,marketNotes={
      <div><dt className="text-xs text-slate-400">Probabilidad del modelo</dt><dd className="font-semibold">{isNumber(r.probability)?(r.probability*100).toFixed(1)+'%':'Sin calibrar'}</dd></div>
     </dl>
     <p className="mt-3 text-xs text-slate-400">Inicio {date(r.startsAt)} · Captura {date(r.capturedAt)}</p>
-    <p className="mt-2 text-xs text-amber-200">{r.evidence??'Evidencia de modelo sin certificación de valor.'}</p>
+    <p className="mt-2 text-xs text-amber-200">{r.evidence??'Evidencia de modelo sin certificación de valor.'} · Calidad: {r.dataQuality?.status??'Pendiente de verificar historial y contrato'}</p>
     {r.note&&<details className="mt-2 text-xs text-slate-300"><summary className="cursor-pointer text-teal-300">Ver contexto</summary><p className="mt-2 leading-5">{r.note}</p></details>}
    </article>)}
   </div>:<p role="status" className="rounded-xl border border-slate-700 p-5 text-sm text-slate-300">{tab==='top'?'No hay oportunidades elegibles y verificadas en este deporte. No se fuerza una selección.':marketNotes[tab as SportDecisionMarket]?'Sin selecciones publicables en este mercado. Consulta el estado de investigación indicado arriba.':'Este mercado no tiene contratos o proyecciones verificadas para mostrar aquí.'}</p>}
+  {tab==='top'&&rows.some(r=>r.awaitingEvidence)&&<details className="rounded-xl border border-slate-700 p-3">
+   <summary className="text-sm text-amber-200">Señales del modelo pendientes de cotejo</summary>
+   <p className="my-2 text-xs text-slate-400">El modelo encontró una diferencia de precio. Falta verificar el historial o el contrato de estas observaciones.</p>
+   {rows.filter(r=>r.awaitingEvidence&&(!query||(r.matchup+' '+r.selection).toLowerCase().includes(query.toLowerCase()))).map(r=>
+    <button key={r.id} type="button" className="block text-left text-sm text-teal-300" onClick={()=>{setTab(r.market);setQuery(r.matchup);}}>{r.matchup} · {r.selection}</button>)}
+  </details>}
+  {tab!=='top'&&visible.length>limit&&<button type="button" className="text-sm text-teal-300" onClick={()=>setLimit(n=>n+100)}>Ver más resultados</button>}
   <button type="button" onClick={()=>setExpanded(!expanded)} className="text-xs font-semibold text-teal-300">{expanded?'Ocultar condiciones':'Cómo interpretar estos resultados'}</button>
   {expanded&&<p className="text-xs leading-5 text-slate-400">Top oportunidades solo incluye filas marcadas favorables por evidencia del deporte. Las otras pestañas pueden mostrar pronósticos de investigación que NO son recomendaciones. Probabilidad del modelo no implica probabilidad calibrada. Sin línea original no se declara edge ni ROI. Las métricas de precisión y liquidaciones continúan en el registro del deporte.</p>}
  </section>;

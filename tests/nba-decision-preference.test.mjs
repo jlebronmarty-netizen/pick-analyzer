@@ -4,7 +4,7 @@ import {rankNbaPreferredSides,NBA_PREFERRED_SIDE_VERSION} from '../src/lib/nba/d
 
 const now='2026-11-19T19:00:00Z',future='2026-11-20T01:00:00Z';
 function row(overrides={}){
- return {id:'base',gameId:21718143,matchup:'Golden State Warriors @ Memphis Grizzlies',
+ return {dataQuality:{status:'VALIDATED',issues:[]},id:'base',gameId:21718143,matchup:'Golden State Warriors @ Memphis Grizzlies',
   startsAt:future,period:'h1',market:'total',label:'Over',selection:'Over',
   quoteId:'quote-present-123456',quoteFreshness:'RECENT',source:'HoopsAPI',
   capturedAt:'2026-11-19T18:30:00Z',odds:-110,line:109.5,projection:112.69,

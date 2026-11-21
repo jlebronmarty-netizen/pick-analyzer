@@ -1,3 +1,4 @@
+import {hasValidatedInputs} from '../data-quality/window.mjs';
 // NBA Preferred Side V1: purely presentational, never changes the frozen forecast input.
 // A lead is a research WATCH signal, never a calibrated probability, EV, official bet or guaranteed event.
 export const NBA_PREFERRED_SIDE_VERSION='NBA_PREFERRED_SIDE_RESEARCH_VIEW_V1';
@@ -41,7 +42,7 @@ function lineAligned(row,value){
 }
 function preferenceCandidate(r,asOf){
  const now=Date.parse(asOf);
- if(!Number.isFinite(now)||!r||!Number.isFinite(Date.parse(r.startsAt??''))||
+ if(!Number.isFinite(now)||!hasValidatedInputs(r)||!Number.isFinite(Date.parse(r.startsAt??''))||
     now>=Date.parse(r.startsAt)-10*60000)return null;
  if(r.quoteFreshness!=='RECENT'||!finite(r.odds)||Math.abs(r.odds)<100||
     !finite(r.projection)||!Number.isInteger(r.sample)||r.sample<5||
@@ -128,18 +129,24 @@ export function rankNbaPreferredSides(rows,asOf){
  }
  summary.discardedSides=summary.evaluatedSides-Object.values(preferred).reduce((n,a)=>n+a.length,0);
  // The Top 25 is a diverse shortlist, not an automatic claim of the 25 likeliest winning outcomes.
- const candidates=Object.values(preferred).flat().sort(sortPreferred);
+ const top25=shortlistNbaPreferred(Object.values(preferred).flat());
+ return {version:NBA_PREFERRED_SIDE_VERSION,rows:preferred,top25,summary:{
+  ...summary,shortlistSize:top25.length,notCalibrated:true,topIsNotWinProbabilityRanking:true}};
+}
+
+export function shortlistNbaPreferred(rows){
+ const candidates=rows.slice().sort(sortPreferred);
+ const gameCount=new Set(candidates.map(c=>String(c.gameId))).size;
+ const allowedGame=Math.max(5,Math.ceil(25/Math.max(1,gameCount))+1);
  const top25=[];const byGame=new Map(),byTab=new Map();
  for(const row of candidates){
   if(top25.length>=25)break;
   const game=String(row.gameId),market=row.market==='props'?'props':row.period==='ft'?row.market:'periods';
-  const allowedGame=Math.max(5,Math.ceil(25/Math.max(1,new Set(candidates.map(c=>String(c.gameId))).size))+1);
   if((byGame.get(game)??0)>=allowedGame)continue;
   if(market==='props'&&(byTab.get(market)??0)>=13)continue;
   top25.push(row);
   byGame.set(game,(byGame.get(game)??0)+1);
   byTab.set(market,(byTab.get(market)??0)+1);
  }
- return {version:NBA_PREFERRED_SIDE_VERSION,rows:preferred,top25,summary:{
-  ...summary,shortlistSize:top25.length,notCalibrated:true,topIsNotWinProbabilityRanking:true}};
+ return top25;
 }

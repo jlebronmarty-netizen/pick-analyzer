@@ -28,7 +28,7 @@ test('NBA causal V3 is bounded, cooldown-protected and postgame only',()=>{
 test('NBA causal diagnostics keep V3 evidence hypothesis-only',()=>{
   const s=fs.readFileSync('src/services/nba-causal-learning.service.ts','utf8');
   assert.match(s,/getNbaCausalV3Evidence/);
-  assert.match(s,/matchupTracking:v3/);
+  assert.match(s,/matchupTracking:teamMarket\?v3:null/);
   assert.match(s,/missingConfirmedMatchup/);
   assert.match(s,/HYPOTHESIS_ONLY/);
 });
