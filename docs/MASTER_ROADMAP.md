@@ -1,3 +1,15 @@
+## 2026-11-21 · NBA V2 · Integración escalonada
+
+Autorizados el despliegue del adaptador apagado, la importación de 40 pronósticos y 15 resultados y una observación de solo lectura. La activación automática requiere una segunda aprobación. El operador debe verificar los hashes de importación, los permisos y las cohortes V1 antes y después de observar. [Procedimiento y límites de la autorización](research/nba-v2/operations/observe-release.md)
+
+## 2026-11-21 · NBA V2 · Activación diaria pendiente
+
+Primer lote conciliado y segundo lote congelado. La siguiente decisión es autorizar el esquema privado y el uso de los tres ciclos existentes, comenzar en observación y habilitar solo SHADOW tras comprobar tiempo y presupuesto. Siguen pendientes 100 juegos prospectivos liquidados por versión y mercado. [Informe y procedimiento](research/nba-v2/operations/README.md)
+
+## 2026-11-20 · Validación prospectiva NBA V2
+
+Primer lote experimental congelado en GitHub. Para revisar cada versión y mercado faltan 100 juegos prospectivos independientes con resultados conciliados, comparación contra el precio sin margen, evidencia de ejecución regional y aprobación. El enlace a persistencia diaria mediante los ciclos existentes queda pendiente de autorización. [Informe del PR #393](research/nba-v2/README.md)
+
 ## 2026-11-20 · Integración controlada del PR 391
 
 Siguientes hitos con autorización independiente: integrar la rama, comprobar los ciclos existentes de congelación y liquidación, y evaluar la corrección aditiva de Warriors–Dallas. Los adaptadores fuera de NBA siguen en el inventario de cobertura. [Procedimiento y criterios](audits/2026-11-20/production-review.md)
