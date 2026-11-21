@@ -1,0 +1,142 @@
+{
+  "checkedAt": "2026-11-21T20:00:59.060Z",
+  "modelHash": "1ec8aff30c264bec1f87917f326db5affb85f508457dc5031b16f80016101329",
+  "outcomes": [
+    {
+      "forecastId": "050e50aacc6aaa903f78fe8e61c458b197dd34403cf8ecc59d2a8bfcf8936fc9",
+      "result": "win",
+      "actual": 61,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "0c4c939435ebe0fabe018bc03e1e5ef41760d86f6cab8ed5cbd9b05dd083076a",
+      "result": "win",
+      "actual": 58,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "14afe0fa6f91526a71feda14fe6b5dd02a102dbdd2941d07934f8bf52af3da4c",
+      "result": "win",
+      "actual": 64,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "225ec799880be82a8dd51d5634b8443296ea40f03fbe335c06b10f1419ed24e4",
+      "result": "loss",
+      "actual": 55,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "37b120aa7f99f9955af55a704ec776ca85dabea8fe64f6df9b9b8dc3735cbeb1",
+      "result": "loss",
+      "actual": 110,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "4b9def4a590a97bcf7eceef5c0d0bcd4dbdb541e614db43a7140ef39f61def21",
+      "result": "loss",
+      "actual": 56,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "4f0b88ba9cf5684264f4f3d38a9c26327637f3567545d45ae6d5534c91629b35",
+      "result": "win",
+      "actual": 122,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "4f9b3dba7a0894c9f8efb4a01b806de51f3b85f9079c9d3a2ba2589bf35b72b4",
+      "result": "win",
+      "actual": 79,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "634f93b9961cc81ae6d505c745b0b93d1bd9f876cce60c65a5993b7bd71f2751",
+      "result": "win",
+      "actual": 60,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "784d820aa7411e1362cb531fb6bf5e773a2522f18e319360bc5405c0e42e327f",
+      "result": "loss",
+      "actual": 49,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "85c122ff138b5af9d996a82a65df4c8cdc8c63a4b1c29805376fcc094b42e291",
+      "result": "loss",
+      "actual": 56,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "8d0122db3d5decd02dc611c8fcba8f00ffc1958a7d331547b1380838d9c6b019",
+      "result": "loss",
+      "actual": 47,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "9120c3aef375dbe8d61816cec430c265784e652319f16e798792b3cdf1925bd5",
+      "result": "loss",
+      "actual": 116,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "ccaab3e444e0112eb25550a6c1053a20f28f519b9eb6403f2b56b0b3a93b03e9",
+      "result": "loss",
+      "actual": 44,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    },
+    {
+      "forecastId": "edeee65ef160e4fa80db5982e1aaf81f278b5f37538fff082a08c919bba8378b",
+      "result": "loss",
+      "actual": 50,
+      "outcomeAt": "2026-11-21T20:00:18.471Z",
+      "scope": "STATISTICAL_SETTLEMENT",
+      "source": "BALLDONTLIE_FINAL_ARCHIVE",
+      "snapshotId": "60c6bd7905499ae5a50c8169025be19a70328824f1feda32cdaa58b9a7c7f779"
+    }
+  ],
+  "pending": []
+}
