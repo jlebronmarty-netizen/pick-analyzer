@@ -1,0 +1,30 @@
+name: MultiSport archive research safety
+on:
+  pull_request:
+    paths:
+      - 'scripts/research/multisport-daily-archive-health.mjs'
+      - 'docs/MULTISPORT_DAILY_ARCHIVE_AND_LEARNING_PLAN.md'
+      - '.github/workflows/multisport-archive-health-safety.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-no-call-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate syntax
+        run: node --check scripts/research/multisport-daily-archive-health.mjs
+      - name: Check safe zero-network dry run
+        run: |
+          node scripts/research/multisport-daily-archive-health.mjs > /tmp/multisport-health.json
+          node -e "const r=require('/tmp/multisport-health.json');if(r.status!=='DRY_RUN'||r.providerCalls!==0||r.databaseWrites!==0||r.officialModelWrites!==0)process.exit(1)"
+      - name: Verify no production scheduler modifications
+        run: |
+          git diff --exit-code origin/main...HEAD -- vercel.json
