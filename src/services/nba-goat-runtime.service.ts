@@ -4,7 +4,9 @@ import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {NBA_GOAT_PROVIDER,NBA_GOAT_POLICY,nbaGoatQuoteChecks,nbaGoatGate,isExactGoatModelMatch,nbaGoatDerivedContext} from '@/lib/nba/goat-provider-policy.mjs';
 import {teamStatsFresh} from '@/lib/nba/goat-team-stats-core.mjs';
 import {mergeNbaScheduleGames} from '@/lib/nba/goat-schedule-core.mjs';
+import {NBA_INPUTS_SHADOW_MODEL_VERSION} from '@/lib/nba/prediction-inputs-shadow';
 const SPORT='basketball_nba',ORIGIN='CURRENT_ERA_SHADOW';
+function exactShadowMatch(p:any,e:any,q:any){return p?.modelVersion===NBA_INPUTS_SHADOW_MODEL_VERSION&&p?.featureSnapshot?.selectedQuote?.id===q.id&&p?.featureSnapshot?.selectedQuote?.metadata?.snapshot_id===q.metadata?.snapshot_id&&isExactGoatModelMatch(p,e,q);}
 function rows(r:any){if(r.error)throw Error('NBA_GOAT_READ_FAILED');return r.data??[];}
 function yearAndSeason(now=new Date()){const year=now.getUTCMonth()>=9?now.getUTCFullYear():now.getUTCFullYear()-1;return {year,season:String(year)+'-'+String(year+1).slice(-2)};}
 function providerGameId(id:string){const m=/^bdl_nba_(\d+)$/.exec(id);return m?Number(m[1]):null;}
@@ -47,7 +49,7 @@ export async function previewNbaGoatShadowMatches(){
  const {generateNbaPredictions}=await import('./nba-prediction-engine.service');
  const result=await generateNbaPredictions({persist:false,limit:25});
  const eligible=loaded.candidates.filter((c:any)=>c.check.writeEligible);
- const matches=eligible.filter((c:any)=>result.predictions.some((p:any)=>isExactGoatModelMatch(p,c.event,c.quote)));
+ const matches=eligible.filter((c:any)=>result.predictions.some((p:any)=>exactShadowMatch(p,c.event,c.quote)));
  return {status:'PREVIEW_ONLY',provider:NBA_GOAT_PROVIDER,checked_at:new Date().toISOString(),events:loaded.status.events,write_eligible_quotes:eligible.length,model_outputs:result.predictions.length,exact_matches:matches.length,recommended_by_engine:result.predictions.filter((p:any)=>p.recommendedPick).length,provider_calls:0,database_writes:0,legacy_pending:loaded.status.legacy_shadow_pending,goat_pending:loaded.status.goat_shadow_pending,warning:'Preview does not emit picks, alter accuracy, or bypass shadow gates.'};
 }
 
@@ -71,8 +73,8 @@ export async function runNbaGoatShadowScheduler(){
    if(inserted>=status.gate.perRunWriteCap)break;if(!c.check.writeEligible)continue;
    const e=c.event,q=c.quote,key=e.id+'|'+q.market;
    if((eventCounts.get(e.id)??0)>=6||(marketCounts.get(key)??0)>=3)continue;
-   if(history.some((p:any)=>p.game_id===e.id&&p.market===q.market&&p.team===q.outcome&&(p.line??null)===(q.line??null)&&p.sportsbook===q.sportsbook))continue;
-   const model=result.predictions.find((p:any)=>isExactGoatModelMatch(p,e,q));if(!model){reasons.EXACT_MODEL_OUTPUT_UNAVAILABLE=(reasons.EXACT_MODEL_OUTPUT_UNAVAILABLE??0)+1;continue;}
+   if(history.some((p:any)=>p.model_version===NBA_INPUTS_SHADOW_MODEL_VERSION&&p.game_id===e.id&&p.market===q.market&&p.team===q.outcome&&(p.line??null)===(q.line??null)&&p.sportsbook===q.sportsbook))continue;
+   const model=result.predictions.find((p:any)=>exactShadowMatch(p,e,q));if(!model){reasons.EXACT_MODEL_OUTPUT_UNAVAILABLE=(reasons.EXACT_MODEL_OUTPUT_UNAVAILABLE??0)+1;continue;}
    const refreshed=nbaGoatQuoteChecks(e,q,new Date().toISOString(),c.context);if(!refreshed.writeEligible)continue;
    const row:any=buildNbaCurrentEraShadowPredictionRow({event:e,odds:q,generatedAt:new Date().toISOString(),modelPrediction:model});
    const pgGames=Array.isArray(pregameContext?.game_ids)?pregameContext.game_ids.map((x:any)=>Number(x)):[];const pgCaptured=Date.parse(pregameContext?.captured_at??'');const generated=Date.parse(row.generated_at??new Date().toISOString());const eventProviderId=providerGameId(e.id);const pgEligible=eventProviderId!==null&&pgGames.includes(eventProviderId)&&Number.isFinite(pgCaptured)&&Number.isFinite(generated)&&pgCaptured<=generated;
@@ -81,7 +83,7 @@ export async function runNbaGoatShadowScheduler(){
    const saved=await savePredictionHistory([row]);inserted+=saved.saved??0;
    if(saved.saved){eventCounts.set(e.id,(eventCounts.get(e.id)??0)+1);marketCounts.set(key,(marketCounts.get(key)??0)+1);}
   }
-  const summary={policy:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,providerCalls:0,insertedCount:inserted,reasons,runPurpose:status.gate.continuous?'CONTINUOUS_SHADOW_EVIDENCE_RUN':status.gate.repair?'REPAIRED_RUNTIME_VERIFICATION_RUN':'GOAT_CANARY',officialPickDelta:0,modelFormulaChanged:false,legacyPendingExcluded:true};
+  const summary={policy:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,providerCalls:0,insertedCount:inserted,reasons,runPurpose:status.gate.continuous?'CONTINUOUS_SHADOW_EVIDENCE_RUN':status.gate.repair?'REPAIRED_RUNTIME_VERIFICATION_RUN':'GOAT_CANARY',officialPickDelta:0,modelVersion:NBA_INPUTS_SHADOW_MODEL_VERSION,inputAdapterCorrected:true,probabilityStatus:'EXPLORATORY_UNVALIDATED',sharedModelFormulaChanged:false,legacyPendingExcluded:true};
   const saved=await db.from('sports_sync_jobs').update({status:'completed',completed_at:new Date().toISOString(),records_inserted:inserted,metadata:summary}).eq('id',runId);if(saved.error)throw Error('NBA_GOAT_AUDIT_FAILED');
   return {success:true,finalClassification:inserted?'NBA_GOAT_SHADOW_SUCCESS':'NO_EXACT_MODEL_MATCH',...summary};
  }catch{

@@ -1,5 +1,6 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
+import {nbaIndependentGroups,NBA_GOAT_INDEPENDENT_ROW_POLICY,type NbaVersionRow} from '@/lib/nba/model-version-evidence';
 
 type LearningState='COLLECTING'|'MONITORING'|'PATTERN_DETECTED'|'VALIDATED_CANDIDATE';
 type SportLearning={
@@ -18,6 +19,12 @@ type SportLearning={
   summary:string;
   evidence:string[];
   candidate:null|{title:string;reason:string;validation:string;requiresApproval:true};
+  modelVersion?:string;
+  market?:string;
+  independentGames?:number;
+  sourceRows?:number;
+  duplicateRowsExcluded?:number;
+  invalidRowsExcluded?:number;
 };
 
 const pct=(w:number,l:number)=>w+l?w/(w+l):null;
@@ -33,12 +40,25 @@ function stateFor(s:SportLearning):SportLearning{
   return {...s,state:'MONITORING',summary:'Hay evidencia suficiente para monitoreo, pero no existe una corrección validada que justifique cambiar el modelo.'};
 }
 
-async function nba():Promise<SportLearning>{
- const q=await db.from('prediction_history').select('result,settled_at,market,model_version,feature_snapshot').eq('sport_key','basketball_nba').eq('prediction_origin','CURRENT_ERA_SHADOW').eq('feature_snapshot->>goatProviderPolicy','NBA_GOAT_ARCHIVE_SHADOW_V1').not('settled_at','is',null).order('settled_at',{ascending:false}).limit(500);
+export function nbaVersionLearningOverview(rows:NbaVersionRow[]):SportLearning[]{
+ return nbaIndependentGroups(rows).map(group=>{
+  const settled=group.rows.filter(row=>['win','loss','push'].includes(row.result??'')).sort((a,b)=>Date.parse(b.settled_at!)-Date.parse(a.settled_at!));
+  const wins=settled.filter(row=>row.result==='win').length,losses=settled.filter(row=>row.result==='loss').length,pushes=settled.filter(row=>row.result==='push').length;
+  const recent=settled.slice(0,25),rw=recent.filter(row=>row.result==='win').length,rl=recent.filter(row=>row.result==='loss').length;
+  return stateFor({sport:'NBA',model:group.modelVersion+' · '+group.market,modelVersion:group.modelVersion,market:group.market,
+   settled:settled.length,independentGames:settled.length,sourceRows:group.sourceRows,duplicateRowsExcluded:group.duplicateRowsExcluded,invalidRowsExcluded:group.invalidRowsExcluded,
+   wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',
+   evidence:[`Modelo ${group.modelVersion}; mercado ${group.market}. No se agregan versiones ni mercados.`,
+    `${settled.length} juegos únicos liquidados; ${group.duplicateRowsExcluded} contratos repetidos y ${group.invalidRowsExcluded} registros sin evidencia temporal excluidos.`,
+    `Selección fija: ${NBA_GOAT_INDEPENDENT_ROW_POLICY}. Los juegos compartidos con otros grupos no son muestras adicionales.`,
+    'Probabilidades exploratorias. Ninguna revisión retrospectiva valida una ventaja sin un holdout prospectivo separado.'],candidate:null});
+ });
+}
+async function nba():Promise<SportLearning[]>{
+ const q=await db.from('prediction_history').select('id,game_id,result,settled_at,commence_time,generated_at,created_at,market,model_version,model_probability,recommended_pick,production_eligible,feature_snapshot').eq('sport_key','basketball_nba').eq('prediction_origin','CURRENT_ERA_SHADOW').eq('feature_snapshot->>goatProviderPolicy','NBA_GOAT_ARCHIVE_SHADOW_V1').order('settled_at',{ascending:false}).limit(500);
  if(q.error)throw Error('NBA_LEARNING_READ_FAILED');
- const rows=q.data??[], wl=rows.map(r=>resultWL(r.result)).filter(Boolean), wins=wl.filter(x=>x==='W').length,losses=wl.filter(x=>x==='L').length,pushes=wl.filter(x=>x==='PUSH').length;
- const recent=wl.slice(0,25),rw=recent.filter(x=>x==='W').length,rl=recent.filter(x=>x==='L').length;
- return stateFor({sport:'NBA',model:'NBA GOAT',settled:wins+losses+pushes,wins,losses,pushes,accuracy:pct(wins,losses),numericEvaluations:0,mae:null,recentSettled:recent.length,recentAccuracy:pct(rw,rl),state:'COLLECTING',summary:'',evidence:['Pregame freeze + settlement archivado','NBA Causal Learning V3 combina Q1-Q4, PBP, lineup esperado/real y player stats','Matchups jugador-vs-defensor y tracking se incorporan solo cuando BALLDONTLIE los confirma'],candidate:null});
+ if((q.data?.length??0)>=500)throw Error('NBA_LEARNING_SCAN_LIMIT');
+ return nbaVersionLearningOverview((q.data??[]) as NbaVersionRow[]);
 }
 
 async function nhl():Promise<SportLearning>{
@@ -129,7 +149,10 @@ export async function getMultisportLearningOverview(){
   if(r.status==='fulfilled'){if(Array.isArray(r.value))sports.push(...r.value);else sports.push(r.value);}
   else errors.push(r.reason instanceof Error?r.reason.message:'LEARNING_READ_FAILED');
  }
- const candidates=candidatesR.error?[]:(candidatesR.data??[]);
+ // This registry's older NBA entries do not prove independent prospective holdout.
+ // Keep their stored status inspectable while withholding the validation claim.
+ const candidates=candidatesR.error?[]:(candidatesR.data??[]).map((candidate:any)=>candidate.sport==='NBA'&&candidate.state==='VALIDATED_CANDIDATE'
+  ?{...candidate,stored_state:candidate.state,state:'CHALLENGER_TEST',validationScope:'UNVERIFIED_PROSPECTIVE_HOLDOUT',reason:candidate.reason+' NBA requiere al menos 100 juegos independientes y un holdout prospectivo separado; este registro no los acredita.'}:candidate);
  const validated=candidates.filter((x:any)=>x.state==='VALIDATED_CANDIDATE'&&Number(x.validation_sample)>=20&&Number(x.holdout_sample)>=20);
  const alerts=validated.map((x:any)=>({
   sport:x.sport,
@@ -137,6 +160,7 @@ export async function getMultisportLearningOverview(){
   candidate:{title:x.title,reason:x.reason,validation:`validation n=${x.validation_sample} · holdout n=${x.holdout_sample}`,requiresApproval:true as const},
  }));
  for(const s of sports){
+  if(s.sport==='NBA')continue;
   const x=validated.find((c:any)=>c.sport===s.sport||c.model_version===s.model);
   if(x){s.state='VALIDATED_CANDIDATE';s.candidate={title:x.title,reason:x.reason,validation:`validation n=${x.validation_sample} · holdout n=${x.holdout_sample}`,requiresApproval:true};s.summary='Existe una mejora candidata validada. Requiere evaluación humana antes de cualquier implementación.';}
  }

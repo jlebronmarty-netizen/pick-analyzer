@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-11-21T23:57:56.808234+00:00",
+  "verifiedAtPuertoRico": "2026-11-21T19:57:56.808234-04:00",
+  "baseCommit": "c374aa7e45728f1019d7fc4edf5439b0cfe98519",
+  "scope": "ISOLATED_REVIEW_BRANCH_NOT_DEPLOYED",
+  "providerCalls": 0,
+  "productionDatabaseWrites": 0,
+  "newCrons": 0,
+  "modelPromotion": false,
+  "unitAndIntegrationTests": [
+    {
+      "suite": "dashboard",
+      "tests": 122,
+      "pass": 122,
+      "fail": 0,
+      "logSha256": "d65cb3b25482499f4d53778127068a1ef88eafeb37afd2f5cb149c356560a41b"
+    },
+    {
+      "suite": "nba-decision",
+      "tests": 32,
+      "pass": 32,
+      "fail": 0,
+      "logSha256": "49f5b8895c34ec41c4432c7af66260c12dca70b7d314fb46fbfd61fa8f02e78e"
+    },
+    {
+      "suite": "nba-goat",
+      "tests": 93,
+      "pass": 93,
+      "fail": 0,
+      "logSha256": "5f8f9f19e608d05600a93f4e8dbf06cf71306b3afab2738d8be63a209d54f4bb"
+    },
+    {
+      "suite": "nba-inputs",
+      "tests": 61,
+      "pass": 61,
+      "fail": 0,
+      "logSha256": "b0dd341c6d276dc969767ea3ef7218470225fe1cdf45271ec46046519091e0bf"
+    },
+    {
+      "suite": "nba-version",
+      "tests": 15,
+      "pass": 15,
+      "fail": 0,
+      "logSha256": "d6daa097e2e6b340441c7533114f9feae6c8df2583067798a696c0bcfcb8c2f6"
+    },
+    {
+      "suite": "ncaab",
+      "tests": 31,
+      "pass": 31,
+      "fail": 0,
+      "logSha256": "6001af8e5acf084c7deb6afdab24796cf11c2f9432811c6e11cd115497960543"
+    }
+  ],
+  "totalPassed": 354,
+  "build": {
+    "status": "PASS",
+    "pagesGenerated": 400,
+    "typescript": "PASS",
+    "configuration": "CI_PLACEHOLDERS_NO_PRODUCTION_CREDENTIALS",
+    "logSha256": "128781d2604aec7d6cf77f0cf08f25f9465d78b3774a32004a8cd581d6c02e3d"
+  },
+  "browser": {
+    "localStatus": "ENVIRONMENT_BLOCKED_BEFORE_TEST_EXECUTION",
+    "reason": "Chromium socket creation was denied by the execution environment.",
+    "cases": 2,
+    "scope": "Offline SSR production components and compiled CSS; native disclosure and responsive overflow; no authenticated production or hydrated-filter claim.",
+    "ciWorkflow": ".github/workflows/ncaab-prospective-calibration.yml",
+    "ciStatus": "CONSULT_GITHUB_ACTIONS_FOR_THIS_COMMIT"
+  },
+  "ncaabReplay": {
+    "asOf": "2026-11-21T23:00:00Z",
+    "originalCode": {
+      "predictions": 902,
+      "outcomes": 830,
+      "verified_exact_history": 790,
+      "rejected_history": 40,
+      "frozen": 91,
+      "matched": 91,
+      "digest_matches": 91,
+      "source_hash_matches": 91
+    },
+    "correctedCode": {
+      "predictions": 902,
+      "outcomes": 830,
+      "verified_exact_history": 790,
+      "rejected_history": 40,
+      "frozen": 91,
+      "matched": 91,
+      "digest_matches": 91,
+      "source_hash_matches": 91
+    },
+    "sourceFileHashes": {
+      "core": "43d26cc6548b638f9205c30d4e327a853f65bc921c8a37bec139e7f40398115b",
+      "predictions": "9f548d9b6bc41dd1f1644ef4014addfeffb6e901ec6aae99c4811aa97441cb7d",
+      "outcomes": "c74d90525318a1b3cd7712c7a949720a65a83263c762f652e800d0949fdb16fa"
+    },
+    "differences": 0
+  },
+  "ncaabEvaluation": {
+    "asOf": "2026-11-21T23:00:00.000Z",
+    "frozen": 91,
+    "uniqueFrozenGames": 91,
+    "validFrozen": 91,
+    "settled": 22,
+    "uniquePairedGames": 22,
+    "localDays": 2,
+    "uniqueTeams": 44,
+    "pending": 68,
+    "invalid": 1,
+    "invalidReasons": {
+      "FINAL_IDENTITY_OR_TIME": 1
+    },
+    "evaluationType": "PROSPECTIVE_SEQUENTIAL",
+    "minimumIndependentGames": 100,
+    "separateHoldoutVerified": false,
+    "metrics": {
+      "baseline": {
+        "n": 22,
+        "hits": 15,
+        "accuracy": 0.68182,
+        "brier": 0.22543,
+        "logLoss": 0.64037,
+        "mae": null,
+        "bias": null
+      },
+      "unrestricted": {
+        "n": 22,
+        "hits": 13,
+        "accuracy": 0.59091,
+        "brier": 0.23212,
+        "logLoss": 0.64861,
+        "mae": null,
+        "bias": null
+      },
+      "sidePreserving": {
+        "n": 22,
+        "hits": 15,
+        "accuracy": 0.68182,
+        "brier": 0.21385,
+        "logLoss": 0.61106,
+        "mae": null,
+        "bias": null
+      },
+      "baselineMargin": {
+        "n": 22,
+        "hits": null,
+        "accuracy": null,
+        "brier": null,
+        "logLoss": null,
+        "mae": 15.04,
+        "bias": -2.547
+      },
+      "correctedMargin": {
+        "n": 22,
+        "hits": null,
+        "accuracy": null,
+        "brier": null,
+        "logLoss": null,
+        "mae": 15.889,
+        "bias": 2.953
+      },
+      "totalUnchanged": {
+        "n": 22,
+        "hits": null,
+        "accuracy": null,
+        "brier": null,
+        "logLoss": null,
+        "mae": 17.533,
+        "bias": -1.655
+      }
+    },
+    "candidateMinusOriginal": {
+      "brier": -0.01158,
+      "logLoss": -0.02931,
+      "marginMae": 0.849
+    },
+    "pairedUncertainty": {
+      "status": "DESCRIPTIVE_ONLY",
+      "method": "PAIRED_PERCENTILE_BOOTSTRAP",
+      "iterations": 2000,
+      "confidenceLevel": 0.95,
+      "uniqueGames": 22,
+      "localDays": 2,
+      "deltaConvention": "candidate_minus_original",
+      "deltas": {
+        "brier": -0.011579,
+        "logLoss": -0.029314,
+        "marginMae": 0.849137
+      },
+      "intervals": {
+        "byGame": {
+          "groups": 22,
+          "interval95": {
+            "brier": [
+              -0.051665,
+              0.034371
+            ],
+            "logLoss": [
+              -0.121019,
+              0.078561
+            ],
+            "marginMae": [
+              -1.396,
+              3.00282
+            ]
+          }
+        },
+        "byPuertoRicoDay": {
+          "groups": 2,
+          "interval95": {
+            "brier": [
+              -0.017257,
+              0.045204
+            ],
+            "logLoss": [
+              -0.042438,
+              0.101916
+            ],
+            "marginMae": [
+              3.2e-05,
+              0.934048
+            ]
+          }
+        }
+      },
+      "smallSample": true,
+      "validationEvidence": false,
+      "warning": "Descriptive paired uncertainty. Repeated teams, few dates and retrospective selection can invalidate nominal coverage. These intervals never authorize promotion."
+    },
+    "days": [
+      {
+        "date": "2026-11-20",
+        "games": 2,
+        "modelBrier": 0.31661,
+        "sidePreservingBrier": 0.36181
+      },
+      {
+        "date": "2026-11-21",
+        "games": 20,
+        "modelBrier": 0.21631,
+        "sidePreservingBrier": 0.19905
+      }
+    ],
+    "independentValidationPassed": false,
+    "modelPromotionAllowed": false
+  },
+  "changedSourceSha256": {
+    "src/app/api/ncaab/overview/route.ts": "25587c69242ea673dd4b2f335320d99a7f2c39e31127f340455c3d7516fb1bad",
+    "src/app/nba-market-data/model-report.jsx": "a489001416f6313fbcad0fd59d81a1cfba3f2ca11b84c1cdd68c501a4ea83af5",
+    "src/app/ncaab/page.tsx": "645a2254418205395ea389960c63e6779bcf23f4691adf37ac70f2d1b24f8701",
+    "src/components/dashboard/MultisportDayView.tsx": "711b05699727b5fdd7db25ab281fc0c93a0aa644aef76f4c0d06b9f400a7ce8c",
+    "src/components/dashboard/NbaPredictionEnginePanel.tsx": "d81ec3995548bce2d682b2a47c25757f2487a01af0da9f853ce02d812c5a53ce",
+    "src/components/dashboard/NcaabArchivedEvidence.tsx": "1f620f8ba1554d32bbef004f7d85a49af31b41383765933497513ba24c647646",
+    "src/components/dashboard/NcaabDashboard.tsx": "9e1e5ccb48f2b13fdbd01c8f26e96a90139bd1bece25da0eb5ef1ec9baa4d7f2",
+    "src/components/dashboard/SportModelOverview.tsx": "07da7a4939a7b71f32a6fdb655123657d844264e492395a655fb039909792fd0",
+    "src/components/model-learning/MultisportLearningCenter.tsx": "bfee1677a5b3392e42de60c36b3e4b74d4a6f1db55f2656a0fb9545255c8b58d",
+    "src/lib/nba/model-version-evidence.ts": "34f111c09d88ab4e947daca4cc4862d370fba941ca6f912a574ca9244cf8e0af",
+    "src/lib/nba/prediction-inputs-shadow.ts": "0e3a83bf3cd9ab1ad454ba81235cabf482c996367ff6e2b25d9379542d7c42cc",
+    "src/lib/ncaab-archived-evidence.ts": "c371fea046cd2fee1fcdcf4a300d7fdfe066d02d2c804c4ab16c0bae1b096bfd",
+    "src/lib/ncaab-bounded-archive-reader.mjs": "334cd3659e2cbc296228c01694148a0f7a6fee29fef5d8af55f548ff853e69d0",
+    "src/lib/ncaab-calibration-evidence.mjs": "2c4df985f8346ddcbe6efafabf13ca21d4223c9d530e6df08462d619d2496f2a",
+    "src/lib/ncaab-checkpoint.ts": "955e832709b5c223ff6d1d43994b22815448a968e8da7d5dc69fd04c83605422",
+    "src/lib/ncaab-paired-uncertainty.mjs": "06b4d63b752b257dcde5f6b2d894cebc2087e38894645d46589aac9db26a70f1",
+    "src/lib/ncaab-prospective-calibration-core.mjs": "43d26cc6548b638f9205c30d4e327a853f65bc921c8a37bec139e7f40398115b",
+    "src/lib/ncaab-prospective-calibration-evaluation.mjs": "6cbb6dda5eda8444cbb8ca662d48ef50bcc92aaf615c68365f6370da7c30c45a",
+    "src/lib/sport-model-overview.ts": "cf5719e76c67baa0028cf3899f034462a9d27eeb66fea101da7c9e6b0a8a041d",
+    "src/services/multisport-learning-evaluator.service.ts": "f30c041ef2ff75020589adfd80c05987c70e5406c51c2dec428965fee33f194d",
+    "src/services/multisport-learning-overview.service.ts": "84a8ab6e5f8bf25dd20db3bbb194be55f225b5b581c7604b511564d1550f37ea",
+    "src/services/nba-current-era-shadow-canary.service.ts": "7e385d52b5b4d28727773b1f7698aafd230fb6a0216aeaccec43c2091246d031",
+    "src/services/nba-goat-audit.service.ts": "1413cb3c99ff2f61730840896063b20ca9bef78cdb5edc07482a609aae52c28a",
+    "src/services/nba-goat-model-read.service.ts": "bd5d49ca325394b37c70a8cf380a2fc9970f3f3e495c7dd36020eacaf6f13bc6",
+    "src/services/nba-goat-runtime.service.ts": "fbcf77aca1436507dfd92cebb63231a6ca523c023dbd61c800086646706a10fc",
+    "src/services/nba-prediction-engine.service.ts": "79b2ba857a70950ababbdc3ae700583a38f8ab1dc1611b9a6d83c2bc5b4df2e1",
+    "src/services/nba-prediction-settlement.service.ts": "8054eaa9523ff219e035666a0dd3312a4c67f41e874deb0030b2f7e4d1b2baee",
+    "src/services/nba-prediction-validation.service.ts": "beaaa76074e77935695264225846b8faa969bc00604ebf0831c51dcbefe94785",
+    "src/services/ncaab-archived-evidence.service.ts": "b6ebb415c144ea20943e0a7ef994c22971749918f396a0776b223b7f0bb91b25",
+    "src/services/ncaab-calibration-readiness.service.ts": "5d2f2bedcfeac7d190cb6c45a090907dc22e939dced068251436716dd9f158d7",
+    "src/services/ncaab-calibration-shadow-writer.service.ts": "980399e042dbb75de7146707518d83b8eaf5afccb89355eb9e5baa50a8cf5df5",
+    "src/services/ncaab-daily.service.ts": "4287901e2123d836182dfb60211e29879f0cfca8fa78125676aa25bb23e5b7c1",
+    "src/services/prediction-history.service.ts": "079263f08aa24e591b1e1a05259809e762dd40b798199ce1c6235b3da0ff9712",
+    "tests/dashboard-multisport/ncaab-archived-evidence.test.mjs": "2525aae857bbaeabc649e516ac59aff070c0d5966574a42a20a3d9de318608af",
+    "tests/fixtures/ncaab-archived-evidence.mjs": "db178f7c4aacc3883fdb61642c24ce8a9a823534deda26c598caa49df6215a95",
+    "tests/nba-goat-operational.test.mjs": "206a65c86b2140462f41b2491175e3e5e6d23a89fcc4ea926f9ac9e23e81d667",
+    "tests/nba-goat-provider.test.mjs": "dedac496493bb023450fabd13199089f71dc6fd0109177476f827596600b564f",
+    "tests/nba-goat-visibility.test.mjs": "f836fee4f4ed409205a48661c2397c8743577e0f02b6111c6b0f1c293f831715",
+    "tests/nba-inputs-shadow.test.mjs": "759fbcf3c26310a18f5409083976848b26706ae75209b60c2df046bedeaf1e51",
+    "tests/nba-model-version-evidence.test.mjs": "0a75906b6a95eba71ae9a0226a032d56c73d929a42ab92e9486332f8a8bd298e",
+    "tests/ncaab-prospective-calibration.test.mjs": "d430689d13d9d43791ffbf973216b5ec6c29803b7145a1a94529d90f688c8ee1",
+    "tests/product-experience/ncaab-archive.spec.ts": "1d98308816824ebfb726fdd72085f17e31e98dbf540169db894d54991662f108"
+  }
+}

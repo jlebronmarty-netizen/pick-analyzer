@@ -3,8 +3,8 @@ import type { NhlReport } from './nhl-external-report';
 import { engineTotals } from './mlb-engine-hub';
 
 export const OFFICIAL_MLB_MODEL = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1';
-export type ModelCohort = { key:string; label:string; available:boolean; wins:number|null; losses:number|null; pending:number|null; pushes:number|null; voids:number|null; models:number|null; accuracy:number|null; note:string };
-export type SportModelCard = { key:string; label:string; href:string; classification:string; cohorts:ModelCohort[]; metricLabel?:string; detailLines?:string[]; checkedAt?:string; linkLabel?:string };
+export type ModelCohort = { key:string; label:string; available:boolean; wins:number|null; losses:number|null; pending:number|null; pushes:number|null; voids:number|null; models:number|null; accuracy:number|null; note:string; modelVersion?:string; aggregationGroup?:string; market?:string; uniqueGames?:number; settledUniqueGames?:number };
+export type SportModelCard = { key:string; label:string; href:string; classification:string; cohorts:ModelCohort[]; metricLabel?:string; detailLines?:string[]; checkedAt?:string; linkLabel?:string; models?:number };
 type Official = { status:string; summary:{wins:number;losses:number;pushes:number;voids:number;modelVersions:string[];dateFrom:string|null;dateTo:string|null};ledger:{pendingUniqueSelections:number} } | null;
 const empty=(key:string,label:string,note:string):ModelCohort=>({key,label,available:false,wins:null,losses:null,pending:null,pushes:null,voids:null,models:null,accuracy:null,note});
 export function mlbModelCohorts(research:QualifiedReport, official:Official):ModelCohort[]{
@@ -38,7 +38,10 @@ export function nhlModelCohort(r:NhlReport):ModelCohort{
     note:r.source==='PICK_ANALYZER'?'Nueva cohorte prospectiva gratuita. Historial anterior del Hub pendiente de recuperación; no incluido.':'Registro completo de origen; conserva modelos de identidad no registrada. No se le asigna una fase MLB.'};
 }
 export function displayedModelTotal(cohorts:ModelCohort[]){
-  if(!cohorts.length||cohorts.some(c=>!c.available))return {accuracy:null,wins:null,losses:null,pending:null,available:false};
+  const versionGroups=new Map<string,Set<string>>();
+  for(const c of cohorts)if(c.aggregationGroup&&c.modelVersion){const versions=versionGroups.get(c.aggregationGroup)??new Set<string>();versions.add(c.modelVersion);versionGroups.set(c.aggregationGroup,versions);}
+  if([...versionGroups.values()].some(versions=>versions.size>1))return {accuracy:null,wins:null,losses:null,pending:null,available:false,reason:'MODEL_VERSIONS_NOT_POOLED'};
+  if(!cohorts.length||cohorts.some(c=>!c.available))return {accuracy:null,wins:null,losses:null,pending:null,available:false,reason:'INCOMPLETE_COHORTS'};
   const wins=cohorts.reduce((n,c)=>n+c.wins!,0),losses=cohorts.reduce((n,c)=>n+c.losses!,0),pending=cohorts.reduce((n,c)=>n+c.pending!,0);
-  return {accuracy:wins+losses?wins/(wins+losses):null,wins,losses,pending,available:true};
+  return {accuracy:wins+losses?wins/(wins+losses):null,wins,losses,pending,available:true,reason:null};
 }

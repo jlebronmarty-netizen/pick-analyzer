@@ -5,6 +5,21 @@ on:
       - 'src/lib/nba/goat-*.mjs'
       - 'src/services/nba-goat-*.ts'
       - 'src/services/nba-current-era-shadow-canary.service.ts'
+      - 'src/lib/nba/prediction-inputs-shadow.ts'
+      - 'src/lib/nba/model-version-evidence.ts'
+      - 'src/services/nba-prediction-engine.service.ts'
+      - 'src/services/nba-prediction-validation.service.ts'
+      - 'src/services/nba-prediction-settlement.service.ts'
+      - 'src/services/prediction-history.service.ts'
+      - 'src/services/multisport-learning-overview.service.ts'
+      - 'src/services/multisport-learning-evaluator.service.ts'
+      - 'src/app/nba-market-data/model-report.jsx'
+      - 'src/lib/sport-model-overview.ts'
+      - 'src/components/dashboard/SportModelOverview.tsx'
+      - 'src/components/dashboard/NbaPredictionEnginePanel.tsx'
+      - 'src/components/model-learning/MultisportLearningCenter.tsx'
+      - 'tests/nba-inputs-shadow.test.mjs'
+      - 'tests/nba-model-version-evidence.test.mjs'
       - 'tests/nba-goat-*.test.mjs'
       - '.github/workflows/nba-goat-readiness-check.yml'
   workflow_dispatch:
@@ -21,5 +36,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: npm
+      - name: Install pinned test dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: NBA GOAT evidence/contract/statistical-only regression
         run: node --test tests/nba-goat-*.test.mjs tests/nba-production-audit-20261113.test.mjs
+      - name: Versioned NBA inputs and cohort regression (no provider calls)
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/nba-inputs-shadow.test.mjs tests/nba-model-version-evidence.test.mjs

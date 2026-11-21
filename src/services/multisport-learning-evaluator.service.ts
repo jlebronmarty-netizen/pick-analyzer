@@ -1,8 +1,9 @@
 import 'server-only';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
+import {nbaCalibrationGroups,type NbaVersionRow} from '@/lib/nba/model-version-evidence';
 
 type Rec={at:string;p:number;y:0|1};
-type Eval={sport:string;model:string;records:number;state:'INSUFFICIENT_SAMPLE'|'NO_IMPROVEMENT'|'CHALLENGER_TEST'|'VALIDATED_CANDIDATE';alpha:number|null;baseline:any;challenger:any;reason:string};
+type Eval={sport:string;model:string;records:number;state:'INSUFFICIENT_SAMPLE'|'NO_IMPROVEMENT'|'CHALLENGER_TEST'|'VALIDATED_CANDIDATE';alpha:number|null;baseline:any;challenger:any;reason:string;modelVersion?:string;market?:string;independentGames?:number;sourceRows?:number;duplicateRowsExcluded?:number;invalidRowsExcluded?:number;invalidProbabilitiesExcluded?:number;sourceProbabilityUnit?:string;evaluationProbabilityUnit?:string;selectionPolicy?:string;validationScope?:string;prospectiveHoldoutVerified?:boolean};
 
 const finite=(v:any)=>Number.isFinite(Number(v));
 const clamp=(p:number)=>Math.max(1e-6,Math.min(1-1e-6,p));
@@ -38,10 +39,25 @@ async function mlb():Promise<Rec[]>{
  if(q.error)throw Error('MLB_CALIBRATION_READ_FAILED');
  return (q.data??[]).filter(r=>valid(r.model_probability)&&(win(r.result)||loss(r.result))).map(r=>({at:String(r.target_date)+'T12:00:00Z',p:Number(r.model_probability),y:(win(r.result)?1:0) as 0|1}));
 }
-async function nba():Promise<Rec[]>{
- const q=await db.from('prediction_history').select('commence_time,model_probability,result,feature_snapshot').eq('sport_key','basketball_nba').eq('prediction_origin','CURRENT_ERA_SHADOW').eq('feature_snapshot->>goatProviderPolicy','NBA_GOAT_ARCHIVE_SHADOW_V1').order('commence_time',{ascending:true}).limit(2000);
+export function evaluateNbaVersionGroups(rows:NbaVersionRow[]):Eval[]{
+ return nbaCalibrationGroups(rows).map(group=>{
+  const evaluation=evaluate('NBA',group.modelVersion+' · '+group.market,group.records);
+  // A chronological split performed now is exploratory; it is not a separately
+  // frozen, prospective challenger holdout and cannot validate a new NBA model.
+  return {...evaluation,state:evaluation.state==='VALIDATED_CANDIDATE'?'CHALLENGER_TEST':evaluation.state,
+   modelVersion:group.modelVersion,market:group.market,independentGames:group.independentGames,
+   sourceRows:group.sourceRows,duplicateRowsExcluded:group.duplicateRowsExcluded,invalidRowsExcluded:group.invalidRowsExcluded,
+   invalidProbabilitiesExcluded:group.invalidProbabilitiesExcluded,sourceProbabilityUnit:group.sourceProbabilityUnit,
+   evaluationProbabilityUnit:group.evaluationProbabilityUnit,selectionPolicy:group.selectionPolicy,
+   validationScope:group.validationScope,prospectiveHoldoutVerified:false,
+   reason:`${group.independentGames} juegos únicos de esta versión y mercado. Revisión retrospectiva exploratoria; falta un holdout prospectivo separado. ${evaluation.reason}`};
+ });
+}
+async function nba():Promise<Eval[]>{
+ const q=await db.from('prediction_history').select('id,game_id,model_version,market,commence_time,generated_at,created_at,settled_at,model_probability,result,recommended_pick,production_eligible,feature_snapshot').eq('sport_key','basketball_nba').eq('prediction_origin','CURRENT_ERA_SHADOW').eq('feature_snapshot->>goatProviderPolicy','NBA_GOAT_ARCHIVE_SHADOW_V1').order('commence_time',{ascending:true}).limit(500);
  if(q.error)throw Error('NBA_CALIBRATION_READ_FAILED');
- return (q.data??[]).filter(r=>valid(r.model_probability)&&(win(r.result)||loss(r.result))).map(r=>({at:r.commence_time,p:Number(r.model_probability),y:(win(r.result)?1:0) as 0|1}));
+ if((q.data?.length??0)>=500)throw Error('NBA_CALIBRATION_SCAN_LIMIT');
+ return evaluateNbaVersionGroups((q.data??[]) as NbaVersionRow[]);
 }
 async function nhl():Promise<Rec[]>{
  const [p,o]=await Promise.all([
@@ -78,14 +94,15 @@ async function edgeMulti(sport:string):Promise<Rec[]>{
 
 async function persist(e:Eval){
  if(!['CHALLENGER_TEST','VALIDATED_CANDIDATE'].includes(e.state))return;
- const key='probability_calibration_alpha_v1';
- const old=await db.from('model_learning_candidates_v1').select('id,state').eq('sport',e.sport).eq('model_version',e.model).eq('hypothesis_key',key).maybeSingle();
+ const key=e.sport==='NBA'?'probability_calibration_alpha_v1:'+e.market:'probability_calibration_alpha_v1';
+ const modelVersion=e.modelVersion??e.model;
+ const old=await db.from('model_learning_candidates_v1').select('id,state').eq('sport',e.sport).eq('model_version',modelVersion).eq('hypothesis_key',key).maybeSingle();
  if(old.error)throw Error('CANDIDATE_READ_FAILED');if(['APPROVED','REJECTED'].includes(old.data?.state??''))return;
  const payload={
-  sport:e.sport,model_version:e.model,hypothesis_key:key,title:'Recalibración de confianza probabilística',
+  sport:e.sport,model_version:modelVersion,hypothesis_key:key,title:'Recalibración de confianza probabilística',
   state:e.state,baseline_sample:e.records,validation_sample:e.baseline.validation.n,holdout_sample:e.baseline.holdout.n,
   baseline_metric:e.baseline,challenger_metric:e.challenger,
-  validation_evidence:{method:'chronological_60_20_20',alpha:e.alpha,selection_changed:false,gate:{min_total:100,min_validation:20,min_holdout:20,min_brier_improvement_each:.003,log_loss_must_improve_each:true,boundary_optimum_cannot_validate:true}},
+  validation_evidence:{method:'chronological_60_20_20',alpha:e.alpha,selection_changed:false,gate:{min_total:100,min_validation:20,min_holdout:20,min_brier_improvement_each:.003,log_loss_must_improve_each:true,boundary_optimum_cannot_validate:true},...(e.sport==='NBA'?{modelVersion,market:e.market,independentGames:e.independentGames,sourceRows:e.sourceRows,duplicateRowsExcluded:e.duplicateRowsExcluded,invalidRowsExcluded:e.invalidRowsExcluded,invalidProbabilitiesExcluded:e.invalidProbabilitiesExcluded,sourceProbabilityUnit:e.sourceProbabilityUnit,evaluationProbabilityUnit:e.evaluationProbabilityUnit,selectionPolicy:e.selectionPolicy,validationScope:e.validationScope,prospectiveHoldoutVerified:false,canValidate:false}:{})},
   reason:e.reason,updated_at:new Date().toISOString(),
  };
  const q=old.data?.id?await db.from('model_learning_candidates_v1').update(payload).eq('id',old.data.id):await db.from('model_learning_candidates_v1').insert(payload);
@@ -95,7 +112,7 @@ async function persist(e:Eval){
 export async function runMultisportLearningEvaluation(){
  const inputs=await Promise.allSettled([
   mlb().then(r=>evaluate('MLB','EQUILIZER_ML_V2_E2_STABLE6',r)),
-  nba().then(r=>evaluate('NBA','NBA GOAT',r)),
+  nba(),
   nhl().then(r=>evaluate('NHL','NHL MODEL_ONLY',r)),
   ncaab().then(r=>evaluate('NCAAB','NCAAB_PRESEASON_V1',r)),
   edgeSingle().then(r=>evaluate('Fútbol','SOCCER_V0_PICK_PORT_1',r)),
@@ -103,7 +120,7 @@ export async function runMultisportLearningEvaluation(){
   edgeMulti('NCAAF').then(r=>evaluate('NCAAF','NCAAF PPG V1',r)),
  ]);
  const evaluations:Eval[]=[],errors:string[]=[];
- for(const x of inputs){if(x.status==='fulfilled'){evaluations.push(x.value);await persist(x.value);}else errors.push(x.reason instanceof Error?x.reason.message:'LEARNING_EVAL_FAILED');}
+ for(const x of inputs){if(x.status==='fulfilled'){for(const evaluation of Array.isArray(x.value)?x.value:[x.value]){evaluations.push(evaluation);await persist(evaluation);}}else errors.push(x.reason instanceof Error?x.reason.message:'LEARNING_EVAL_FAILED');}
  evaluations.push({sport:'UFC',model:'UFC Elo experimental',records:0,state:'INSUFFICIENT_SAMPLE',alpha:null,baseline:null,challenger:null,reason:'Sin resultados liquidados suficientes para calibración.'});
  return {status:errors.length?'PARTIAL':'SUCCESS',evaluatedAt:new Date().toISOString(),policy:{storedDataOnly:true,providerCalls:0,modelWrites:0,autoApply:false,autoPromotion:false},evaluations,errors};
 }

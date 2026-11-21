@@ -40,6 +40,7 @@ export type NcaabData=Omit<NcaabCheckpoint,'models'|'observations'|'connection'|
  connection:'PUBLISHED_CHECKPOINT'|'DAILY_FREE_PIPELINE';continuousSync:boolean;hostedPipelineReady:boolean;
  models:{id:'NCAAB_PRESEASON_V1'|'NCAAB_FREE_SCORE_V1_1';forecasts:number;abstentions:number;settled:number;wins:number;losses?:number;winnerDenominator:number;accuracy:number|null;review?:number}[];
  observations:import('./ncaab-live').LiveObservation[];lastRun?:{status:string;completedAt:string|null;providerCalls:number};warning?:string;
+ archivedEvidence?:import('./ncaab-archived-evidence').NcaabArchivedEvidence;
 };
 export type NcaabReport={status:'AVAILABLE';data:NcaabData}|{status:'UNAVAILABLE';warning:string};
 export function ncaabModelCohort(report:NcaabReport):ModelCohort{

@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getNbaInjuryLineupConfidenceStatus } from '@/services/nba-injury-lineup-confidence.service'
 import { NBA_PREDICTION_MODEL_VERSION, NBA_SPORT_KEY } from '@/services/nba-prediction-validation.service'
+import { NBA_INPUTS_SHADOW_MODEL_VERSION } from '@/lib/nba/prediction-inputs-shadow'
 
 type SettlementOutcome = 'win' | 'loss' | 'push' | 'void' | 'pending'
 type NbaMarket = 'moneyline' | 'spread' | 'total' | 'first_half' | 'first_half_spread' | 'first_half_total'
@@ -293,7 +294,9 @@ async function loadPendingPredictions(eventId?: string) {
 
   const { data, error } = await query
   if (error) throw new Error(`Failed to load NBA predictions: ${error.message}`)
-  return (data ?? []) as PredictionRow[]
+  // Corrected SHADOW contracts use the GOAT reconciler and its archived contract
+  // evidence. Generic sport_events settlement must never liquidate that cohort.
+  return ((data ?? []) as PredictionRow[]).filter(row => row.model_version !== NBA_INPUTS_SHADOW_MODEL_VERSION)
 }
 
 async function loadPendingPredictionsByIds(predictionIds: string[]) {
@@ -309,7 +312,7 @@ async function loadPendingPredictionsByIds(predictionIds: string[]) {
   if (error) throw new Error(`Failed to load bounded NBA predictions: ${error.message}`)
 
   return ((data ?? []) as PredictionRow[]).filter(
-    (row) => !isFinalResult(row.result) && row.lifecycle_status !== 'skipped'
+    (row) => row.model_version !== NBA_INPUTS_SHADOW_MODEL_VERSION && !isFinalResult(row.result) && row.lifecycle_status !== 'skipped'
   )
 }
 
@@ -636,6 +639,7 @@ export async function getNbaPredictionPerformance() {
     .from('prediction_history')
     .select('*')
     .eq('sport_key', NBA_SPORT_KEY)
+    .eq('model_version', NBA_PREDICTION_MODEL_VERSION)
     .order('created_at', { ascending: false })
     .limit(5000)
 
@@ -647,6 +651,11 @@ export async function getNbaPredictionPerformance() {
   return {
     success: true,
     mode: 'nba_prediction_performance_v1',
+    modelVersion: NBA_PREDICTION_MODEL_VERSION,
+    scope: 'LEGACY_MODEL_VERSION_ONLY',
+    sampleUnit: 'STORED_CONTRACT',
+    uniqueGames: new Set(rows.map(row => row.game_id)).size,
+    scopeNote: 'Historical V1 contracts only. Corrected SHADOW versions are reported separately in the NBA GOAT board; these metrics do not validate them.',
     generatedAt: new Date().toISOString(),
     overall,
     brierScore: brierScore(rows),
@@ -670,20 +679,23 @@ export async function getNbaPredictionPerformance() {
   }
 }
 
-async function loadHealthRows() {
-  const { data, error } = await supabaseAdmin
+async function loadHealthRows(modelVersion?: string) {
+  let query = supabaseAdmin
     .from('prediction_history')
     .select('*')
     .eq('sport_key', NBA_SPORT_KEY)
     .order('created_at', { ascending: false })
     .limit(5000)
 
+  if (modelVersion) query = query.eq('model_version', modelVersion)
+  const { data, error } = await query
+
   if (error) throw new Error(`Failed to load NBA model health rows: ${error.message}`)
   return (data ?? []) as PredictionRow[]
 }
 
-export async function getNbaSettlementBacklog() {
-  const rows = await loadHealthRows()
+export async function getNbaSettlementBacklog(modelVersion?: string) {
+  const rows = await loadHealthRows(modelVersion)
   const pendingRows = rows.filter((row) => !isFinalResult(row.result) && row.lifecycle_status !== 'skipped')
   const eventIds = Array.from(new Set(pendingRows.map((row) => row.game_id)))
 
@@ -706,6 +718,7 @@ export async function getNbaSettlementBacklog() {
       selection: row.team,
       sportsbook: row.sportsbook,
       line: row.line,
+      modelVersion: row.model_version,
       eventStatus: event?.status ?? 'missing',
       commenceTime: row.commence_time,
       reason: event?.status === 'cancelled' ? 'ready_to_void' : 'ready_to_settle',
@@ -715,6 +728,8 @@ export async function getNbaSettlementBacklog() {
   return {
     success: true,
     mode: 'nba_prediction_settlement_backlog_v1',
+    modelVersion: modelVersion ?? null,
+    scope: modelVersion ? 'SINGLE_MODEL_VERSION' : 'ALL_STORED_NBA_VERSIONS',
     generatedAt: new Date().toISOString(),
     count: backlog.length,
     backlog,
@@ -728,15 +743,15 @@ export async function getNbaSettlementBacklog() {
 
 export async function getNbaModelHealthV2() {
   const [rows, backlog, injuryLineup] = await Promise.all([
-    loadHealthRows(),
-    getNbaSettlementBacklog(),
+    loadHealthRows(NBA_PREDICTION_MODEL_VERSION),
+    getNbaSettlementBacklog(NBA_PREDICTION_MODEL_VERSION),
     getNbaInjuryLineupConfidenceStatus(),
   ])
   const issues: string[] = []
   const warnings: string[] = []
 
   const duplicateGroups = groupRows(rows, (row) =>
-    [row.game_id, row.team, row.market, row.sportsbook].join('|')
+    [row.game_id, row.team, row.market, row.line ?? 'null', row.sportsbook, row.model_version, row.prediction_origin].join('|')
   ).filter((group) => group.rows.length > 1)
 
   const missingModelVersion = rows.filter((row) => !row.model_version).length
@@ -803,6 +818,8 @@ export async function getNbaModelHealthV2() {
     generatedAt: new Date().toISOString(),
     status: issues.length ? 'degraded' : warnings.length ? 'watch' : 'healthy',
     modelVersion: NBA_PREDICTION_MODEL_VERSION,
+    scope: 'LEGACY_MODEL_VERSION_ONLY',
+    scopeNote: 'Health and backlog are restricted to historical V1. Multiple lines or model versions are distinct contracts. Archive injury coverage is contextual, not calibration evidence.',
     issues,
     warnings,
     checks: {

@@ -1,14 +1,13 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {execFileSync} from 'node:child_process';
 test('NBA homepage uses GOAT model card instead of placeholder sports-center card',()=>{const s=fs.readFileSync('src/services/multisport-model-read.service.ts','utf8');assert.match(s,/getNbaGoatModelCard/);assert.match(s,/nbaCard/);assert.match(s,/mma_ufc','nba/);});
 test('NBA model report is private and read-only',()=>{const s=fs.readFileSync('src/app/api/market-data/nba/model-report/route.ts','utf8');assert.match(s,/privateHost/);assert.match(s,/getNbaGoatModelReport/);assert.ok(!/insert\(|update\(|upsert\(/.test(s));});
-test('NBA model report excludes legacy by GOAT policy and Official Picks flags',()=>{const s=fs.readFileSync('src/services/nba-goat-model-read.service.ts','utf8');assert.match(s,/goatProviderPolicy/);assert.match(s,/NBA_GOAT_ARCHIVE_SHADOW_V1/);assert.match(s,/recommended_pick!==false/);assert.match(s,/production_eligible!==false/);});
+test('NBA model report excludes legacy by GOAT policy and Official Picks flags',()=>{const s=fs.readFileSync('src/services/nba-goat-model-read.service.ts','utf8');assert.match(s,/goatProviderPolicy/);assert.match(s,/NBA_GOAT_ARCHIVE_SHADOW_V1/);assert.match(s,/buildNbaVersionReport/);const core=fs.readFileSync('src/lib/nba/model-version-evidence.ts','utf8');assert.match(core,/recommended_pick !== false/);assert.match(core,/production_eligible !== false/);});
 test('NBA headline uses Moneyline only; spread and total remain details',()=>{const s=fs.readFileSync('src/services/nba-goat-model-read.service.ts','utf8');assert.match(s,/market==='moneyline'/);assert.match(s,/metricLabel:'Moneyline'/);assert.match(s,/Spread/);assert.match(s,/Total/);});
 test('NBA detailed table labels SHADOW and does not claim Official Picks',()=>{const s=fs.readFileSync('src/app/nba-market-data/model-report.jsx','utf8');assert.match(s,/selecciones GOAT SHADOW/);assert.match(s,/No son Official Picks/);assert.match(s,/Accuracy = W\/\(W\+L\)/);});
-test('NBA GOAT preserves model formulas and cron config while allowing the exact read-only weight call',()=>{
- const d=execFileSync('git',['diff','--name-only','origin/main','HEAD','--','vercel.json','src/utils/prediction-engine-v4.ts'],{encoding:'utf8'});assert.equal(d,'');
- const path='src/services/nba-prediction-engine.service.ts';
- const baseline=execFileSync('git',['show','origin/main:'+path],{encoding:'utf8'}),current=fs.readFileSync(path,'utf8');
- const normalizeWeightRead=s=>s.replace('getModelWeights(NBA_SPORT_KEY, {initialize: false})','getModelWeights(NBA_SPORT_KEY)');
- assert.equal(normalizeWeightRead(current),normalizeWeightRead(baseline),'Any engine change beyond the reviewed read-only weight invocation needs separate review');
- const runtime=fs.readFileSync('src/services/nba-goat-runtime.service.ts','utf8');assert.match(runtime,/mergeNbaScheduleGames/);
+test('NBA GOAT corrections are explicitly versioned and never become official recommendations',()=>{
+ const d=execFileSync('git',['diff','--name-only','origin/main','--','vercel.json','src/utils/prediction-engine-v4.ts'],{encoding:'utf8'});assert.equal(d,'');
+ const engine=fs.readFileSync('src/services/nba-prediction-engine.service.ts','utf8'),core=fs.readFileSync('src/lib/nba/prediction-inputs-shadow.ts','utf8');
+ assert.match(engine,/getModelWeights\(NBA_SPORT_KEY, \{initialize: false\}\)/);assert.match(engine,/NBA_EXPLORATORY_REQUIRES_SHADOW_WRITER/);
+ assert.match(core,/recommendedPick: false/);assert.match(core,/recommendedStake: 0/);assert.match(core,/nba_prediction_engine_v1_1_inputs_shadow/);
+ const runtime=fs.readFileSync('src/services/nba-goat-runtime.service.ts','utf8');assert.match(runtime,/mergeNbaScheduleGames/);assert.match(runtime,/p\.model_version===NBA_INPUTS_SHADOW_MODEL_VERSION/);
 });
