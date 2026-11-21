@@ -1,0 +1,452 @@
+{
+  "asOf": "2026-11-21T20:02:02.502Z",
+  "modelHash": "1ec8aff30c264bec1f87917f326db5affb85f508457dc5031b16f80016101329",
+  "games": {
+    "21718156": {
+      "id": 21718156,
+      "away": "Milwaukee Bucks",
+      "home": "Philadelphia 76ers",
+      "startsAt": "2026-11-21T18:00:00.000Z",
+      "status": "in_progress"
+    },
+    "21718157": {
+      "id": 21718157,
+      "away": "Portland Trail Blazers",
+      "home": "New York Knicks",
+      "startsAt": "2026-11-22T00:30:00.000Z",
+      "status": "scheduled"
+    },
+    "21718158": {
+      "id": 21718158,
+      "away": "LA Clippers",
+      "home": "Dallas Mavericks",
+      "startsAt": "2026-11-22T01:00:00.000Z",
+      "status": "scheduled"
+    },
+    "21718159": {
+      "id": 21718159,
+      "away": "Memphis Grizzlies",
+      "home": "Minnesota Timberwolves",
+      "startsAt": "2026-11-22T01:00:00.000Z",
+      "status": "scheduled"
+    },
+    "21718160": {
+      "id": 21718160,
+      "away": "New Orleans Pelicans",
+      "home": "San Antonio Spurs",
+      "startsAt": "2026-11-22T01:00:00.000Z",
+      "status": "scheduled"
+    },
+    "21718161": {
+      "id": 21718161,
+      "away": "Boston Celtics",
+      "home": "Sacramento Kings",
+      "startsAt": "2026-11-22T03:00:00.000Z",
+      "status": "scheduled"
+    }
+  },
+  "benchmarks": [
+    {
+      "forecastId": "006fcb28d860118885321ca47cb8866b29d391301e42a697ba45bc9cdb751168",
+      "quoteId": "e0f7c43e7c4da20e2c836bc6a784d9a6b29b7e454e508bbb8d405810e1f2958c",
+      "oppositeQuoteId": "952d78ee815e3101a45d2f2dcb84b5887cc167c84f9d43fe1d39bdaa94bb70b9",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -114,
+      "probability": 0.49133599029630914,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "0374fd47f4f9c6cfe42b1bc5e91aeefb12ec13b5846cec1ea23d1e8cdcbb12d8",
+      "quoteId": "a7712df7ed53d13639fd143c31873a197b195358bd6db175d004199a427956d1",
+      "oppositeQuoteId": "bb2f1d7510506b19e9cd9de75e3457b1dedd93f3cbfc9861f381e707e4e9ebed",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -108,
+      "probability": 0.5043297540699688,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "17815817f71c980ddfb2c4e2716bee58c8e437f994949a339deaa0c5ddb7b9ea",
+      "quoteId": "cf4ff014600c19f5bbe4ebdfb8a79e3ebc873a900faa532ce0aeda2a7fd903e9",
+      "oppositeQuoteId": "f4ee5d4cde6ab49261b018dbfc50d7c0f75923403821a33c8933a8bba5f19c9d",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -116,
+      "probability": 0.4893144127201231,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "1cfb3aef99ee358616e7d0425fbb8aa5c8bd4e316e94b58498c146046681d661",
+      "quoteId": "99154f5c1d268b406450e316904d3ab3c75f7b9f306f3c318fcaad9daa81482f",
+      "oppositeQuoteId": "baaba8f0574d658a5f367fa5fa7a3d6ecf9a18dc5efab378b4167cd71df865ec",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -104,
+      "probability": 0.5149751839808318,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "231301fcb74771d17079e63d6a544f6a1f586ec9b027001410439a13548f3f5e",
+      "quoteId": "21462bacec0be34dce5f2e65f1a0e114500f8fcdc84bbb3b960ac5fba8d3c911",
+      "oppositeQuoteId": "263e8013c16624ce6e02f5ffff366d9928e6105dbc72fe2148b90b499146f648",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -118,
+      "probability": 0.4896023956080519,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "3b8774345b8673f7efaea4f1ff2cb05c65ae1b61597ecd81eb8a1dc1d894a759",
+      "quoteId": "f885ce9167b25a88b0bc40d3beb892ef23c945479780e86eda738eaa3d2b0c08",
+      "oppositeQuoteId": "cdd480463d061423de55c399056e7c9f9789ab0d58fa714dc872118f6012a145",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -114,
+      "probability": 0.4935930292157868,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "3c59b37040dc58a383c9d62dc71179ac54a147f7f7e5e807e543ba110ed94c4a",
+      "quoteId": "da5521a5fd5b69b3f5709fad258a3fec9a655d473a3e68fe3f222d16716f7c4c",
+      "oppositeQuoteId": "1af17afac63ae793f620cf5370da4fb27d85961a88cc2d077082f3146dc47461",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -118,
+      "probability": 0.4850248160191682,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "6094e7a21c9f6661d810a6850496f723936d32d9fdd79a82b230ed230ba4792b",
+      "quoteId": "2b7985f55c5736f8268246cc6d802af461d706744e25715cc597c05a30eebda9",
+      "oppositeQuoteId": "3f3ad81e1447ff2d77fa6641b982dffac4d54bc716be1561c3abfbd2f40b97de",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -113,
+      "probability": 0.5,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "70bbbbc06bbcb84bb6879729cb88f4ca7803317305e476a82f53184d6d2f4ee5",
+      "quoteId": "afb1dc527de0ce412874c80b020724f2ac8c4920feef61ce5b4cbddbcce14364",
+      "oppositeQuoteId": "81b4c2a67a88c048011ad3ca6a155a682b3055a6ad747d5b4cb7f12f838c7dee",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -116,
+      "probability": 0.4893144127201231,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "8212819d0d0442a415694378f5aa0fae9e1011ccf87733cab620806517e6f259",
+      "quoteId": "53c0c1fce5c98513bd5db2011f415dc403a0723efdb85b2f9124e1e32055adc9",
+      "oppositeQuoteId": "66d4e8cab9651a6327a836bcd1b9792225e0a71ddd810e91dba848a28e334edb",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -116,
+      "probability": 0.4893144127201231,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "88df1c83739f49ef5054e9ea79f11c489b1070b76b7899bb41c2ea649ca1da8f",
+      "quoteId": "cdb8b2e0d01f5a278bd066028dc6488cb15e1d6de1e80fe84256ccf8cf35dc3a",
+      "oppositeQuoteId": "f9e17f646b7f1f64fd7c0dbd3ac95118e2d2184398627af92d39116a8fe3e1c8",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -102,
+      "probability": 0.5238589211618258,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "8ebf700551cc8f24c3964c7a337ea24a160062a1b688bdadc44edafd7f8ebcd3",
+      "quoteId": "8a1bc6d79f52a1ff24f0e7372886a83ea7e73ec556e6789b9c193f15233245c7",
+      "oppositeQuoteId": "f5ca5eb896668afe233fa915c16d9d13c8bd91920af8489dfadb93893153d66e",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -106,
+      "probability": 0.510685587279877,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "95108bfa910b2173b489d11a5ca579b8ab5b7bffe8daccca069af847b7195009",
+      "quoteId": "00a034d8534ceefef383bd15324920be11f09bd62832a406f83fa48a497ece34",
+      "oppositeQuoteId": "028bb6a43400a632f33c9b1257f42f41fe437c5b708051079e38a303315e8341",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -106,
+      "probability": 0.5086640097036909,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "95beaa278223f5e27240563bed1c843d13261f0b3bab4696dc8f5e9a65a85dfb",
+      "quoteId": "427619ae9d45fc86d4b7a925b46f81b487bfa2b577a8e6cb571e0e793891852a",
+      "oppositeQuoteId": "f3e06df2339f69a58f6474d833a110e7410b15a71ce705966396c856010f1059",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -104,
+      "probability": 0.5149751839808318,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "982d11d0c0f5a341529d9de399777b2095aa76ce74c1baec22072eaf7dd781fd",
+      "quoteId": "e172f67c2515b607d9bb3c1026ee2b7757567a4c62e7d0cb7cea41538fb5b814",
+      "oppositeQuoteId": "65033bb56f2b255dc9f28a9fa0f4f3b90cd2d527e44835785b6fc9b8bb83626d",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -118,
+      "probability": 0.4896023956080519,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "aaea2361bb3c3192be6e0811235734c0c470f65c75779bb35b8fe73f97e279ad",
+      "quoteId": "6f325844cad0f19bc58a862f8cb1a7c352ba39d1f5cd1f6db520a486f19e85fb",
+      "oppositeQuoteId": "21135a3f49becf2b423bf8c85ec2cbaf7cdb5b71f2dfcdaf683a96432ddebd65",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -110,
+      "probability": 0.5,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "b294fe5f239b3fd90542d0ffc9cc8cf1e5ba17df19de1c806d1d9fdf09af971a",
+      "quoteId": "54ccfde97c94dfe3c9de1a921e2973af5e18aa4ea0f929ff5759db560a6fda21",
+      "oppositeQuoteId": "4e8403722a933d6634c9dee29381dbb24f088acf1f922bfa38b11a02cad2e5f7",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -108,
+      "probability": 0.5074246924056003,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "bece38972969abf1afa2f1eb394eef7f3afbc5ef9aeddceeab0ebb56c2016adc",
+      "quoteId": "f2542093feacbc7cfb7693ddcf7522bc40afaca15480bafadf811a47715c24cd",
+      "oppositeQuoteId": "ab8576447a32d878803720dc20293b2ade188fcba551ac5f9dd22c2410feb14f",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -108,
+      "probability": 0.5064069707842132,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "c23b628173627870a0bae255a4c7b7198c8f8bdd496c8e77763b866f48b3f21a",
+      "quoteId": "cc494145743cce122095e5370253973e12c6e9a6be0bc9b669426f474c9edf69",
+      "oppositeQuoteId": "3b4be552de9d9169521262c601f68f0d03cf04b23bfaf01643ee21fbbb825b4a",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -122,
+      "probability": 0.48124062031015497,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "d90a13ceae17c2807be96da31eb270b5178f1d3fbeb52783057acc6a4a6505b1",
+      "quoteId": "0646791fb27b0ab823ca1939cd316b4e855f5ad38aebf3800ec7be1baffb86cb",
+      "oppositeQuoteId": "385b5baa4a0dc00483f9916177ec48bf46ecd22394cbbd087f555eab727c8667",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -108,
+      "probability": 0.5064069707842132,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "e8a6dc45f63231f610293ee9101d662c9678d01f3a15e77740cfb8b29e621d1a",
+      "quoteId": "1c9fce532069fec0cbcd4ee4c55562d1013b504f13e93a5803c87fd61349ab07",
+      "oppositeQuoteId": "f99f673520bb2c0e613c06709a7a533b318587a0b17d972223a69504ab0c1d1e",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -106,
+      "probability": 0.510685587279877,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "ed7a4a2f1591edc30f50f84ced3c30e4431c960513d7191cd60772367249ae31",
+      "quoteId": "acf8191564c9459bca131fd02c6118bb15bc6338a98b5195da0993259d0ae36a",
+      "oppositeQuoteId": "daa11bf17e27b7258cbbc27468b19da40c73b8b55283e4103d14f7415b024520",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -104,
+      "probability": 0.5149751839808318,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "ee746bf367da5e2e72c24d6e13b96bb6d1c8755f1bea25f5f4527b633c8c5ad6",
+      "quoteId": "50a0eb386e19fea2d7de6efc07c200877eaba41beb03d3db90050fb6d26d9f7e",
+      "oppositeQuoteId": "575b3ce7ca3cd38971e7bcb8051d16d586042b633ec3a8438569b354c1add10c",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -104,
+      "probability": 0.5187593796898449,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "f20513047f06843bbbc3870ce73d588c051dce0e23991968b34171183384d36b",
+      "quoteId": "0584c624309605dae77ffac52f8dbea6833d61fc6ccf030afeafe4d887efb644",
+      "oppositeQuoteId": "6127396b2e05e0c236723d8b2bc22771134ce22f55f0cda3df9e487182ec695e",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:13:05Z",
+      "oppositeAmericanOdds": -102,
+      "probability": 0.519280205655527,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    },
+    {
+      "forecastId": "f7cc146614f63cae429b30a3ab6a14f27f1d4e5edd7a069da360971d92914618",
+      "quoteId": "503cea247249add7e88ed6f041a3211a2aaf236b6dd61db13c042d59ff254b5d",
+      "oppositeQuoteId": "a4796048bf7ea9a2f2f140867720c51acb0470e39aaad28a4a43eaa16c26f3f0",
+      "book": "FanDuel",
+      "capturedAt": "2026-11-21T15:15:46.722Z",
+      "quoteAt": "2026-11-21T15:12:05Z",
+      "oppositeAmericanOdds": -104,
+      "probability": 0.5149751839808318,
+      "basis": "ARCHIVED_AMERICAN_PAIR"
+    }
+  ],
+  "context": [
+    {
+      "forecastId": "006fcb28d860118885321ca47cb8866b29d391301e42a697ba45bc9cdb751168",
+      "l5": 106.2,
+      "l10": 111.2
+    },
+    {
+      "forecastId": "0374fd47f4f9c6cfe42b1bc5e91aeefb12ec13b5846cec1ea23d1e8cdcbb12d8",
+      "l5": 116.4,
+      "l10": 117.1
+    },
+    {
+      "forecastId": "17815817f71c980ddfb2c4e2716bee58c8e437f994949a339deaa0c5ddb7b9ea",
+      "l5": 52,
+      "l10": 52.099999999999994
+    },
+    {
+      "forecastId": "1cfb3aef99ee358616e7d0425fbb8aa5c8bd4e316e94b58498c146046681d661",
+      "l5": 57.8,
+      "l10": 62.1
+    },
+    {
+      "forecastId": "231301fcb74771d17079e63d6a544f6a1f586ec9b027001410439a13548f3f5e",
+      "l5": 59,
+      "l10": 58.099999999999994
+    },
+    {
+      "forecastId": "3b8774345b8673f7efaea4f1ff2cb05c65ae1b61597ecd81eb8a1dc1d894a759",
+      "l5": 51.599999999999994,
+      "l10": 54.3
+    },
+    {
+      "forecastId": "3c59b37040dc58a383c9d62dc71179ac54a147f7f7e5e807e543ba110ed94c4a",
+      "l5": 55.8,
+      "l10": 57.900000000000006
+    },
+    {
+      "forecastId": "6094e7a21c9f6661d810a6850496f723936d32d9fdd79a82b230ed230ba4792b",
+      "l5": 59.400000000000006,
+      "l10": 57.400000000000006
+    },
+    {
+      "forecastId": "70bbbbc06bbcb84bb6879729cb88f4ca7803317305e476a82f53184d6d2f4ee5",
+      "l5": 54.8,
+      "l10": 58.6
+    },
+    {
+      "forecastId": "8212819d0d0442a415694378f5aa0fae9e1011ccf87733cab620806517e6f259",
+      "l5": 55.8,
+      "l10": 58.4
+    },
+    {
+      "forecastId": "88df1c83739f49ef5054e9ea79f11c489b1070b76b7899bb41c2ea649ca1da8f",
+      "l5": 61.6,
+      "l10": 58.5
+    },
+    {
+      "forecastId": "8ebf700551cc8f24c3964c7a337ea24a160062a1b688bdadc44edafd7f8ebcd3",
+      "l5": 56.6,
+      "l10": 55.599999999999994
+    },
+    {
+      "forecastId": "95108bfa910b2173b489d11a5ca579b8ab5b7bffe8daccca069af847b7195009",
+      "l5": 119.2,
+      "l10": 115
+    },
+    {
+      "forecastId": "95beaa278223f5e27240563bed1c843d13261f0b3bab4696dc8f5e9a65a85dfb",
+      "l5": 112.4,
+      "l10": 113.5
+    },
+    {
+      "forecastId": "982d11d0c0f5a341529d9de399777b2095aa76ce74c1baec22072eaf7dd781fd",
+      "l5": 50,
+      "l10": 51.6
+    },
+    {
+      "forecastId": "aaea2361bb3c3192be6e0811235734c0c470f65c75779bb35b8fe73f97e279ad",
+      "l5": 109.4,
+      "l10": 114.5
+    },
+    {
+      "forecastId": "b294fe5f239b3fd90542d0ffc9cc8cf1e5ba17df19de1c806d1d9fdf09af971a",
+      "l5": 55.8,
+      "l10": 56
+    },
+    {
+      "forecastId": "bece38972969abf1afa2f1eb394eef7f3afbc5ef9aeddceeab0ebb56c2016adc",
+      "l5": 51.6,
+      "l10": 52.4
+    },
+    {
+      "forecastId": "c23b628173627870a0bae255a4c7b7198c8f8bdd496c8e77763b866f48b3f21a",
+      "l5": 59.8,
+      "l10": 57.599999999999994
+    },
+    {
+      "forecastId": "d90a13ceae17c2807be96da31eb270b5178f1d3fbeb52783057acc6a4a6505b1",
+      "l5": 66.4,
+      "l10": 62.699999999999996
+    },
+    {
+      "forecastId": "e8a6dc45f63231f610293ee9101d662c9678d01f3a15e77740cfb8b29e621d1a",
+      "l5": 58.8,
+      "l10": 57.8
+    },
+    {
+      "forecastId": "ed7a4a2f1591edc30f50f84ced3c30e4431c960513d7191cd60772367249ae31",
+      "l5": 50.400000000000006,
+      "l10": 52.8
+    },
+    {
+      "forecastId": "ee746bf367da5e2e72c24d6e13b96bb6d1c8755f1bea25f5f4527b633c8c5ad6",
+      "l5": 55.8,
+      "l10": 54.7
+    },
+    {
+      "forecastId": "f20513047f06843bbbc3870ce73d588c051dce0e23991968b34171183384d36b",
+      "l5": 53.4,
+      "l10": 51.400000000000006
+    },
+    {
+      "forecastId": "f7cc146614f63cae429b30a3ab6a14f27f1d4e5edd7a069da360971d92914618",
+      "l5": 55.2,
+      "l10": 55.7
+    }
+  ]
+}

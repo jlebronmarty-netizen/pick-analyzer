@@ -1,3 +1,11 @@
+## 2026-11-21 · NBA V2 · Primera liquidación prospectiva
+
+Los 15 contratos quedaron liquidados en tres partidos independientes. Seis Over ganaron, nueve perdieron y el ROI simulado fue −24.14%. Se congelaron otros 25 contratos en cinco juegos. El almacenamiento separado y el adaptador diario están preparados en el PR #393. Challenge SIN APUESTA con $187.94. [Informe y procedimiento](research/nba-v2/operations/README.md)
+
+## 2026-11-20 · NBA Decision Engine V2 en investigación
+
+El PR #393 probó tres mercados con precio en 891 juegos por mercado, ocho estadísticas de jugadores y seis períodos. Publicó 15 probabilidades antes del inicio en tres partidos. El ROI simulado del Challenge incluye pérdidas dentro del IC del 95%. JUGADA sigue desactivada. [Resultados y evidencia](research/nba-v2/README.md)
+
 ## 2026-11-20 · Cierre técnico del PR 391
 
 La reproducción de nueve partidos obtuvo 143 preferencias descriptivas de período y 25 en el Top. El nuevo lector usa el último menú archivado por partido. La rama tiene un procedimiento de integración y reversión pendiente de autorización. [Evidencia de preparación](audits/2026-11-20/production-review.md)
