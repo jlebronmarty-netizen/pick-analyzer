@@ -23,6 +23,7 @@ test('archived SHADOW probabilities expand with the exact quote and disappear on
  await expect(detail).toContainText(chosen.shadowProbability.modelVersion);
  await expect(detail).toContainText((chosen.shadowProbability.probability*100).toFixed(1)+'%');
  await expect(detail).toContainText('EV estimado');
+ await expect(detail).toContainText('Evaluación V2 '+chosen.shadowDecision.classification);
  await expect(detail).toContainText('80%');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  available=false;

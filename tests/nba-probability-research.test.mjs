@@ -105,7 +105,11 @@ test('shadow freezes a complete receipt and suppresses stale, ambiguous, incompl
  const b=input(), row=b.rows.periods[0];
  const snapshot=JSON.stringify(b);
  const plan=planProbabilityFreeze(b,model,when);assert.equal(plan.rows.length,1);
- assert.equal(previewProbabilityBoard(b,plan).top25[0].shadowProbability.forecastId,plan.rows[0].forecastId);
+ const preview=previewProbabilityBoard(b,plan);
+ assert.equal(preview.top25[0].shadowProbability.forecastId,plan.rows[0].forecastId);
+ assert.ok(['VIGILAR','PASAR'].includes(preview.top25[0].shadowDecision.classification));
+ assert.equal(preview.shadowChallenge.selection,null);
+ assert.equal(preview.shadowChallenge.highestEv,null);
  assert.equal(JSON.stringify(b),snapshot);
  assert.equal(previewProbabilityBoard({...b,asOf:when},plan).top25[0].shadowProbability,undefined);
  assert.throws(()=>planProbabilityFreeze(b,model,f.gameStartAt),/INVALID_FREEZE/);

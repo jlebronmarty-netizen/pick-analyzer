@@ -36,6 +36,7 @@ function ShadowProbability({row}){
   <p>Acierto si se liquida sin empate {pct(f.probability)} · Implícita de la cuota {pct(f.impliedProbability)}</p>
   <p>Probabilidad de devolución {pct(f.pushProbability)} · EV estimado por unidad {pct(f.expectedValue)}</p>
   <p>Intervalo central histórico del resultado (80%) {f.projectionInterval80?.map(x=>decimal(x)).join(' a ')??'—'}</p>
+  {row.shadowDecision&&<p>Evaluación V2 {row.shadowDecision.classification} · {row.shadowDecision.reason==='NONPOSITIVE_EV'?'EV estimado igual o menor que cero':row.shadowDecision.reason==='PROBABILITY_NOT_VALIDATED'?'Falta validación prospectiva o de ejecución':row.shadowDecision.reason}</p>}
   <p>{f.modelVersion} · Congelado {date(f.frozenAt)} · Validación prospectiva pendiente</p>
  </section>;
 }

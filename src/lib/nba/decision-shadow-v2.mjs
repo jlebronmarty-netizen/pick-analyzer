@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import {hasValidatedInputs} from '../data-quality/window.mjs';
 import {MODELV,residualForecast} from './decision-residual-v2.mjs';
-import {expectedValue,impliedProbability} from './decision-probability-v2.mjs';
+import {challengeStage,expectedValue,impliedProbability,researchDecision} from './decision-probability-v2.mjs';
 import {concordantPlayerFinal,settleNbaShadowForecast} from './decision-learning-core.mjs';
 
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -81,14 +81,26 @@ export function settleProbabilityFreeze(f,receipts) {
       f.market==='props' ? time(receipts.compact.materialized_at) : 0)).toISOString(),scope:'STATISTICAL_SETTLEMENT',source:result.result_source};
 }
 // Enrich an archived board for branch-only display. The ranking and official classifications are inherited.
-export function previewProbabilityBoard(board,ledger) {
+export function previewProbabilityBoard(board,ledger,{asOf=ledger.frozenAt,reviews={},execution={}}={}) {
+  const assessed=new Map();
   const byId=new Map(ledger.rows.map(f=>[f.rowId,f]));
   const attach=r=>{
     const f=byId.get(r.id);
-    return f && hasValidatedInputs(r) && f.quoteId===r.quoteId && f.americanOdds===r.odds &&
-      f.line===r.line && f.projection===r.projection && f.featuresAsOf===board.asOf &&
-      f.historyReceiptHash===hash(board.historyEvidence?.[r.historyKey]??null)?{...r,shadowProbability:f}:r;
+    if(!f || !hasValidatedInputs(r) || f.quoteId!==r.quoteId || f.americanOdds!==r.odds ||
+      f.line!==r.line || f.projection!==r.projection || f.featuresAsOf!==board.asOf ||
+      f.historyReceiptHash!==hash(board.historyEvidence?.[r.historyKey]??null))return r;
+    const e=execution[f.forecastId],v=reviews[f.scope];
+    const current=e?.quoteId===r.quoteId && e?.book===f.book && e?.americanOdds===r.odds &&
+      e?.line===r.line && time(f.frozenAt)<=time(e?.checkedAt) && time(e?.checkedAt)<=time(asOf) &&
+      time(asOf)<time(e?.expiresAt) && e.region==='PR';
+    const candidate={...f,dataQuality:r.dataQuality.status,advantage:r.advantage,
+      regionalExecutionVerified:current && e.available===true,
+      contextVerified:current && e.contextVerified===true,evLower95:current?e.evLower95:null};
+    const decision=researchDecision(candidate,v,asOf);
+    assessed.set(f.forecastId,{candidate,validation:v});
+    return {...r,shadowProbability:f,shadowDecision:decision};
   };
   const sections=obj=>Object.fromEntries(Object.entries(obj??{}).map(([k,v])=>[k,v.map(attach)]));
-  return {...board,rows:sections(board.rows),preferredRows:sections(board.preferredRows),top25:(board.top25??[]).map(attach)};
+  const preview={...board,rows:sections(board.rows),preferredRows:sections(board.preferredRows),top25:(board.top25??[]).map(attach)};
+  return {...preview,shadowChallenge:challengeStage([...assessed.values()],asOf)};
 }
