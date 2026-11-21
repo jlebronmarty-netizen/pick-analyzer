@@ -1,5 +1,7 @@
 # Pick Analyzer · Auditoría de datos del 20 de noviembre de 2026
 
+**Producción, 20 de noviembre a las 9:25 p. m. PR.** La versión de integridad está desplegada y el tablero se comprobó con datos reales. [Resultados de las seis vistas y ciclos SHADOW pendientes](production-verification.md)
+
 [Revisión final del PR 391, prueba de jornada completa, SQL de reparación y procedimiento de producción](production-review.md)
 
 ## Dictamen
