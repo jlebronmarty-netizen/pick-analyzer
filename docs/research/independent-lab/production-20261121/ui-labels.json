@@ -1,0 +1,30 @@
+{
+  "http": 200,
+  "labels": [
+    {
+      "label": "Top 25",
+      "found": true
+    },
+    {
+      "label": "Moneyline",
+      "found": true
+    },
+    {
+      "label": "Spread",
+      "found": true
+    },
+    {
+      "label": "Total",
+      "found": true
+    },
+    {
+      "label": "Player props",
+      "found": true
+    },
+    {
+      "label": "Cuartos / Mitades",
+      "found": true
+    }
+  ],
+  "scope": "SSR navigation labels and authenticated read APIs; not a claim of production hydrated click-flow testing"
+}

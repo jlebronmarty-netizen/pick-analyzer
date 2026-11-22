@@ -1,0 +1,127 @@
+{
+  "path": "/api/nba/decision-board",
+  "http": 200,
+  "asOf": "2026-11-22T00:41:36.012Z",
+  "day": "2026-11-21",
+  "summary": {
+    "qualityCounts": {
+      "CONTRACT_UNVERIFIED": 50,
+      "STALE": 62,
+      "PARTIAL": 482,
+      "INCOMPLETE_HISTORY": 360,
+      "VALIDATED": 200
+    },
+    "games": 5,
+    "historyGames": 236,
+    "markets": {
+      "ml": 10,
+      "spread": 10,
+      "total": 12,
+      "props": 842,
+      "periods": 280
+    },
+    "preferredMarkets": {
+      "ml": 0,
+      "spread": 0,
+      "total": 0,
+      "props": 0,
+      "periods": 61
+    },
+    "rawSideCount": 1154,
+    "withoutPreferredContract": 516,
+    "watchCandidates": 25,
+    "calibratedPicks": 0,
+    "matchedHoopsGames": 5,
+    "unmatchedHoopsGameIds": [],
+    "latestHoopsCapture": "2026-11-21T23:15:46.582Z",
+    "providerCalls": 0,
+    "dbWrites": 0,
+    "sourcePolicy": "ARCHIVED_ONLY",
+    "noAutomaticPromotion": true
+  },
+  "evidence": {
+    "scheduleCapturedAt": "2026-11-22T00:30:16.987+00:00",
+    "historyCaptureAt": "2026-11-18T17:27:34.519+00:00",
+    "historyRunId": "569d3e7c-8378-448b-9679-a4ffbcf86fe7",
+    "hoopsCapturedAt": "2026-11-21T23:15:46.582+00:00",
+    "hoopsCaptureId": "6eb6d376-f9d7-4b69-8925-7b9a535a7df4",
+    "readIssues": [],
+    "marketCaptureIssues": [
+      {
+        "game": 21718156,
+        "lane": "main",
+        "reason": "GAME_OR_PHASE_MISMATCH"
+      },
+      {
+        "game": 21718156,
+        "lane": "props",
+        "reason": "SOURCE_UNAVAILABLE"
+      },
+      {
+        "game": 21718157,
+        "lane": "main",
+        "reason": "GAME_OR_PHASE_MISMATCH"
+      }
+    ],
+    "quarantinedPropGameIds": [
+      21718156
+    ],
+    "propsGameSnapshots": 5,
+    "playerHistoryRows": 954,
+    "playerNameCoverage": 521,
+    "mainQuotesRead": 24,
+    "reportVersion": "NBA_DECISION_BOARD_SHADOW_V2_INTEGRITY",
+    "noProviderCalls": true,
+    "noWrites": true
+  },
+  "warnings": [
+    "Solo se muestra un lado preferido por contrato con una señal estadística favorable; los contratos sin señal se omiten y cuentan como PASAR.",
+    "Orden de revisión SHADOW basado en condiciones verificables, no en probabilidades calibradas.",
+    "No son picks oficiales; sin demostración de valor esperado ni disponibilidad en FanDuel Puerto Rico.",
+    "Cuotas y lesiones pueden cambiar; las capturas se muestran con su hora.",
+    "Player props Q1 y mercados especiales sin historial equivalente quedan sin predicción."
+  ],
+  "rows": {
+    "ml": {
+      "count": 10,
+      "classifications": {
+        "PASAR": 10
+      }
+    },
+    "spread": {
+      "count": 10,
+      "classifications": {
+        "PASAR": 10
+      }
+    },
+    "total": {
+      "count": 12,
+      "classifications": {
+        "PASAR": 12
+      }
+    },
+    "props": {
+      "count": 842,
+      "classifications": {
+        "PASAR": 842
+      }
+    },
+    "periods": {
+      "count": 280,
+      "classifications": {
+        "PASAR": 243,
+        "VIGILAR": 37
+      }
+    }
+  },
+  "preferred": {
+    "ml": 0,
+    "spread": 0,
+    "total": 0,
+    "props": 0,
+    "periods": 61
+  },
+  "top25": {
+    "count": 25
+  }
+}

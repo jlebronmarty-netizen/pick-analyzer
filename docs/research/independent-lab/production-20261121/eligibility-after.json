@@ -1,0 +1,24 @@
+{
+  "captured_at": "2026-11-22 00:39:28.421916+00",
+  "flags": {
+    "ncaab_flags": {
+      "rows": 91,
+      "official": 0,
+      "production_eligible": 0
+    },
+    "goat_by_version": [
+      {
+        "n": 93,
+        "recommended": 0,
+        "model_version": "nba_prediction_engine_v1",
+        "nonzero_stake": 0,
+        "production_eligible": 0
+      }
+    ],
+    "v2_classifications": {
+      "VIGILAR": 40
+    },
+    "v2_natural_forecasts": 0,
+    "v2_unique_pending_games": 5
+  }
+}

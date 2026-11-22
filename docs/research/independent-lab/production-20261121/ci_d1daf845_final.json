@@ -1,0 +1,77 @@
+{
+  "commit": "d1daf845e8aa5a9bdbfbba6b0b89c2c5ea131554",
+  "tree": "510af8b9c7cc55e31e264d0b8b3ac5db485b450a",
+  "ncaabRunId": 44967176439,
+  "ncaabJobId": 137038724379,
+  "excerpts": [
+    "2026-11-22T00:33:34.0533770Z ℹ tests 31",
+    "2026-11-22T00:33:34.0534275Z ℹ pass 31",
+    "2026-11-22T00:33:34.0534584Z ℹ fail 0",
+    "2026-11-22T00:33:38.5948434Z ℹ tests 122",
+    "2026-11-22T00:33:38.5949145Z ℹ pass 122",
+    "2026-11-22T00:33:38.5949371Z ℹ fail 0",
+    "2026-11-22T00:35:15.0238386Z ✓ Generating static pages using 4 workers (400/400) in 796ms",
+    "2026-11-22T00:35:53.1612277Z Running 2 tests using 1 worker",
+    "2026-11-22T00:35:56.6811064Z   ✓  1 [chromium] › tests/product-experience/ncaab-archive.spec.ts:19:7 › archived NCAAB price evidence is readable and explicit on desktop (371ms)",
+    "2026-11-22T00:35:56.9665543Z   ✓  2 [chromium] › tests/product-experience/ncaab-archive.spec.ts:19:7 › archived NCAAB price evidence is readable and explicit on mobile (279ms)",
+    "2026-11-22T00:35:56.9962796Z   2 passed (4.2s)"
+  ],
+  "runs": [
+    {
+      "id": 44967176452,
+      "name": "MLB approved prop roster identity",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176478,
+      "name": "MLB Official Pick write boundary",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176389,
+      "name": "MLB target-local history block",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176377,
+      "name": "MLB Odds API Credential Contract Audit",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176423,
+      "name": "MLB approved prop recovery idempotency",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176475,
+      "name": "College archived evaluation safety",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176367,
+      "name": "NBA GOAT Safe Regression",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176491,
+      "name": "MLB release readiness",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44967176439,
+      "name": "NCAAB prospective calibration shadow safety",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "vercelStatus": "success",
+  "vercelDeployment": "5HgNeBZ2GT3kbZh3zagXzgbTCohd"
+}

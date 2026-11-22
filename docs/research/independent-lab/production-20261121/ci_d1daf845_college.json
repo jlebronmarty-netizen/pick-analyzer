@@ -1,0 +1,16 @@
+{
+  "commit": "d1daf845e8aa5a9bdbfbba6b0b89c2c5ea131554",
+  "runId": 44967176475,
+  "jobId": 137038724534,
+  "conclusion": "success",
+  "excerpts": [
+    "2026-11-22T00:33:30.3644418Z ℹ tests 17",
+    "2026-11-22T00:33:30.3645483Z ℹ pass 17",
+    "2026-11-22T00:33:30.3646053Z ℹ fail 0",
+    "2026-11-22T00:33:37.4377531Z ℹ tests 122",
+    "2026-11-22T00:33:37.4378188Z ℹ pass 122",
+    "2026-11-22T00:33:37.4378398Z ℹ fail 0",
+    "2026-11-22T00:33:37.4590711Z ##[group]Run npx tsc --noEmit --pretty false",
+    "2026-11-22T00:33:37.4591062Z \u001b[36;1mnpx tsc --noEmit --pretty false\u001b[0m"
+  ]
+}
