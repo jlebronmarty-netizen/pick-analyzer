@@ -15,6 +15,7 @@ on:
       - 'src/components/dashboard/NcaabDashboard.tsx'
       - 'tests/dashboard-multisport/ncaab-archived-evidence.test.mjs'
       - 'tests/fixtures/ncaab-archived-evidence.mjs'
+      - 'tests/fixtures/render-ncaab-archived-evidence.mjs'
       - 'tests/product-experience/ncaab-archive.spec.ts'
       - 'src/services/ncaab-calibration-shadow-writer.service.ts'
       - 'src/services/ncaab-calibration-readiness.service.ts'

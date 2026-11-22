@@ -69,7 +69,7 @@
     "scope": "Offline SSR production components and compiled CSS; native disclosure and responsive overflow; no authenticated production or hydrated-filter claim.",
     "ciWorkflow": ".github/workflows/ncaab-prospective-calibration.yml",
     "ciStatus": "CONSULT_GITHUB_ACTIONS_FOR_THIS_COMMIT",
-    "compatibilityNote": "Fixture uses readdirSync instead of globSync to match the pinned Node 20 type declarations; no dependency upgrade or disabled typecheck."
+    "compatibilityNote": "Fixture renders real production React components with the existing Node JSX loader in a child process, outside Playwright's component transform. Compiled production CSS and browser assertions remain unchanged; readdirSync matches pinned Node 20 declarations."
   },
   "ncaabReplay": {
     "asOf": "2026-11-21T23:00:00Z",
@@ -290,6 +290,7 @@
     "tests/nba-inputs-shadow.test.mjs": "759fbcf3c26310a18f5409083976848b26706ae75209b60c2df046bedeaf1e51",
     "tests/nba-model-version-evidence.test.mjs": "0a75906b6a95eba71ae9a0226a032d56c73d929a42ab92e9486332f8a8bd298e",
     "tests/ncaab-prospective-calibration.test.mjs": "d430689d13d9d43791ffbf973216b5ec6c29803b7145a1a94529d90f688c8ee1",
-    "tests/product-experience/ncaab-archive.spec.ts": "127fbdeb8219d3d6e0d29429cc701c1e29faca59ff348f7e68ffafc5c2d9e0ca"
+    "tests/product-experience/ncaab-archive.spec.ts": "d876cfa26301b083de47bfee280766f45648f3f6e4da18b01f4be6183b9426b0",
+    "tests/fixtures/render-ncaab-archived-evidence.mjs": "8703d2283e1c09493360c5e428f7f4d927ddd1f069c1e2f1002accd2546c6818"
   }
 }
