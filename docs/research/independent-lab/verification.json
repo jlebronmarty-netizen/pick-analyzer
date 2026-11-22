@@ -58,7 +58,9 @@
     "pagesGenerated": 400,
     "typescript": "PASS",
     "configuration": "CI_PLACEHOLDERS_NO_PRODUCTION_CREDENTIALS",
-    "logSha256": "128781d2604aec7d6cf77f0cf08f25f9465d78b3774a32004a8cd581d6c02e3d"
+    "logSha256": "128781d2604aec7d6cf77f0cf08f25f9465d78b3774a32004a8cd581d6c02e3d",
+    "productionSourceChangedSinceLocalBuild": false,
+    "finalCommitVerification": "Existing GitHub workflow repeats typecheck and build for the exact PR head."
   },
   "browser": {
     "localStatus": "ENVIRONMENT_BLOCKED_BEFORE_TEST_EXECUTION",
@@ -66,7 +68,8 @@
     "cases": 2,
     "scope": "Offline SSR production components and compiled CSS; native disclosure and responsive overflow; no authenticated production or hydrated-filter claim.",
     "ciWorkflow": ".github/workflows/ncaab-prospective-calibration.yml",
-    "ciStatus": "CONSULT_GITHUB_ACTIONS_FOR_THIS_COMMIT"
+    "ciStatus": "CONSULT_GITHUB_ACTIONS_FOR_THIS_COMMIT",
+    "compatibilityNote": "Fixture uses readdirSync instead of globSync to match the pinned Node 20 type declarations; no dependency upgrade or disabled typecheck."
   },
   "ncaabReplay": {
     "asOf": "2026-11-21T23:00:00Z",
@@ -287,6 +290,6 @@
     "tests/nba-inputs-shadow.test.mjs": "759fbcf3c26310a18f5409083976848b26706ae75209b60c2df046bedeaf1e51",
     "tests/nba-model-version-evidence.test.mjs": "0a75906b6a95eba71ae9a0226a032d56c73d929a42ab92e9486332f8a8bd298e",
     "tests/ncaab-prospective-calibration.test.mjs": "d430689d13d9d43791ffbf973216b5ec6c29803b7145a1a94529d90f688c8ee1",
-    "tests/product-experience/ncaab-archive.spec.ts": "1d98308816824ebfb726fdd72085f17e31e98dbf540169db894d54991662f108"
+    "tests/product-experience/ncaab-archive.spec.ts": "127fbdeb8219d3d6e0d29429cc701c1e29faca59ff348f7e68ffafc5c2d9e0ca"
   }
 }

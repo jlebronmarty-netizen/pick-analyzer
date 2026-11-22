@@ -1,11 +1,19 @@
 import {test, expect} from '@playwright/test';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {globSync, readFileSync} from 'node:fs';
+import {readdirSync, readFileSync} from 'node:fs';
+import {join} from 'node:path';
 import NcaabDashboard from '../../src/components/dashboard/NcaabDashboard';
 import {buildNcaabArchivedEvidence} from '../../src/lib/ncaab-archived-evidence';
 import type {NcaabReport} from '../../src/lib/ncaab-checkpoint';
 import {archiveForecast, archiveReceipt, archiveAsOf, archiveDate} from '../fixtures/ncaab-archived-evidence.mjs';
+
+function compiledStyles(directory: string): string[] {
+  return readdirSync(directory, {withFileTypes: true}).flatMap(entry => {
+    const file = join(directory, entry.name);
+    return entry.isDirectory() ? compiledStyles(file) : entry.name.endsWith('.css') ? [file] : [];
+  });
+}
 
 // Offline SSR integration fixture using the production components and compiled
 // CSS. It exercises native disclosure/keyboard behavior, not client filter hydration.
@@ -21,7 +29,7 @@ for (const viewport of [{name:'desktop',width:1280,height:900},{name:'mobile',wi
       abstentions:0,settled:0,wins:0,losses:0,winnerDenominator:0,accuracy:null}));
     data.archivedEvidence=buildNcaabArchivedEvidence({forecasts:[forecast],receipts:[receipt],asOf:archiveAsOf,dates:[archiveDate]});
     const report={status:'AVAILABLE',data} as NcaabReport;
-    const styles=globSync('.next/static/**/*.css').map(file=>readFileSync(file,'utf8')).join('\n');
+    const styles=compiledStyles('.next/static').map(file=>readFileSync(file,'utf8')).join('\n');
     expect(styles.length,'Run npm run build before this browser fixture').toBeGreaterThan(100);
     const html=renderToStaticMarkup(React.createElement(NcaabDashboard,{report}));
     await page.setContent(`<html lang="es"><head><style>${styles}</style></head><body class="bg-slate-950 text-white"><main>${html}</main></body></html>`);
