@@ -1,3 +1,7 @@
+## 2026-11-21 · Mercados NBA sin preferencias
+
+Para habilitar preferencias de partido completo hace falta evidencia de la regla de prórroga aplicable a cada contrato. Para props también se requieren el historial cotejado y la disponibilidad del jugador antes del partido.
+
 ## 2026-11-21 · NBA V2 · Integración escalonada
 
 Autorizados el despliegue del adaptador apagado, la importación de 40 pronósticos y 15 resultados y una observación de solo lectura. La activación automática requiere una segunda aprobación. El operador debe verificar los hashes de importación, los permisos y las cohortes V1 antes y después de observar. [Procedimiento y límites de la autorización](research/nba-v2/operations/observe-release.md)

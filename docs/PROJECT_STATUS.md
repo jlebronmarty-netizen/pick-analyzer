@@ -1,3 +1,7 @@
+## 2026-11-21 · Mercados NBA sin preferencias
+
+El tablero NBA cuenta los lados capturados y detalla los motivos de exclusión al quedar vacía una pestaña. El conteo y los registros pendientes siguen los filtros de partido, período y búsqueda.
+
 ## 2026-11-21 · NBA V2 · Integración escalonada
 
 Autorizados el despliegue del adaptador apagado, la importación de 40 pronósticos y 15 resultados y una observación de solo lectura. La activación automática requiere una segunda aprobación. El operador debe verificar los hashes de importación, los permisos y las cohortes V1 antes y después de observar. [Procedimiento y límites de la autorización](research/nba-v2/operations/observe-release.md)
