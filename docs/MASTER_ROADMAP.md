@@ -1,3 +1,7 @@
+## 2026-11-21 · Mercados NBA sin preferencias
+
+Para habilitar preferencias de partido completo hace falta evidencia de la regla de prórroga aplicable a cada contrato. Para props también se requieren el historial cotejado y la disponibilidad del jugador antes del partido.
+
 ## 2026-11-21 · NBA V2 · Integración escalonada
 
 Autorizados el despliegue del adaptador apagado, la importación de 40 pronósticos y 15 resultados y una observación de solo lectura. La activación automática requiere una segunda aprobación. El operador debe verificar los hashes de importación, los permisos y las cohortes V1 antes y después de observar. [Procedimiento y límites de la autorización](research/nba-v2/operations/observe-release.md)
@@ -4474,3 +4478,5 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 ## 2026-11-21 · Lectura de originales GOAT para props NBA
 
 Medir en una prueba privada y acotada cuántos historiales de props se pueden cotejar con los box scores archivados. Verificar por separado la disponibilidad previa del jugador y la regla de prórroga de cada contrato.
+
+Prueba de vista previa completada el 21 de noviembre a las 8:34 p. m. de Puerto Rico. Se validó el historial de 334 de 842 lados de props. Antes de activar lecturas periódicas en producción, revisar el límite de lectura y los 140 lados con discrepancias de original o identidad. Siguen pendientes los historiales incompletos, la disponibilidad de los jugadores y la regla regional de prórroga.

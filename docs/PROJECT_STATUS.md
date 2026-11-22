@@ -1,3 +1,7 @@
+## 2026-11-21 · Mercados NBA sin preferencias
+
+El tablero NBA cuenta los lados capturados y detalla los motivos de exclusión al quedar vacía una pestaña. El conteo y los registros pendientes siguen los filtros de partido, período y búsqueda.
+
 ## 2026-11-21 · NBA V2 · Integración escalonada
 
 Autorizados el despliegue del adaptador apagado, la importación de 40 pronósticos y 15 resultados y una observación de solo lectura. La activación automática requiere una segunda aprobación. El operador debe verificar los hashes de importación, los permisos y las cohortes V1 antes y después de observar. [Procedimiento y límites de la autorización](research/nba-v2/operations/observe-release.md)
@@ -3658,3 +3662,5 @@ NHL V6 now reads finals by the event IDs of its latest 250 freezes in batches of
 ## 2026-11-21 · Lectura de originales GOAT para props NBA
 
 El lector de box scores acepta las listas que guarda el archivo estacional y el formato anterior con el campo `data`. Se reprodujeron los juegos 21718144, 21718145 y 21718146 con 104 filas en total. En cada caso coincidieron el tamaño original, el tamaño comprimido y el SHA-256 del manifiesto.
+
+El 21 de noviembre a las 8:34 p. m. de Puerto Rico se compararon dos vistas previas del mismo commit con 842 lados de props. Coincidieron los identificadores de cuota, los precios, las líneas, las capturas y las claves de historial. Con un límite de 256 KiB por lectura, 334 lados correspondientes a 24 jugadores pasaron de historial parcial a validado y 140 mostraron discrepancias con el original o su identidad. Otros 360 siguieron con historial incompleto y ocho conservaron diferencias estadísticas. De los 334 con historial validado, 188 seguían antes del inicio y requerían verificar tanto la disponibilidad como la prórroga. El tablero devolvió cero props preferidas, cero llamadas al proveedor y cero escrituras en ambas lecturas. El límite de la rama de prueba volvió a cero después de la comparación.

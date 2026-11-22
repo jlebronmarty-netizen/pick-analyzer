@@ -25,6 +25,32 @@ function humanReason(row){
  if(row.reason==='UNVALIDATED_NUMERIC_GAP')return 'Brecha y contexto histórico favorables, sin validación de EV';
  return row.reason??'Sin evidencia suficiente';
 }
+const issueLabels={
+ OVERTIME_RULE_UNVERIFIED:'Regla de prórroga sin verificar',
+ ORIGINAL_BOX_NOT_CROSS_CHECKED:'Falta cotejar la estadística con el box score original',
+ ORIGINAL_BOX_DISAGREES:'La estadística difiere del box score original',
+ MINUTE_EXCLUSION_UNVERIFIED:'Minutos del jugador por confirmar',
+ PLAYER_AVAILABILITY_UNCONFIRMED:'Disponibilidad del jugador por confirmar',
+ PLAYER_ROW_MISSING_AT_CUTOFF:'Falta un juego en el historial del jugador',
+ NOT_PREGAME:'Partido fuera de la ventana previa al inicio',
+ PRICE_TIME_UNVERIFIED_OR_STALE:'Hora o vigencia de la cuota sin verificar'
+};
+function EmptyMarket({rows,pending,filtered,top}){
+ const reasons=new Map();
+ for(const row of pending){
+  const labels=new Set((row.dataQuality?.issues??[]).map(issue=>issueLabels[issue.reason]));
+  for(const label of labels)if(label)reasons.set(label,(reasons.get(label)??0)+1);
+ }
+ const ordered=[...reasons].sort((a,b)=>b[1]-a[1]);
+ return <div role="status" className="space-y-2 rounded-xl border border-slate-700 p-5 text-slate-300">
+  <p className="font-semibold">{top?'Top 25 sin coincidencias':'Sin preferencias vigentes'}{filtered?' con estos filtros':''}</p>
+  {rows.length===0?<p>{filtered?'Ningún lado capturado coincide con la búsqueda.':'Sin lados de mercado capturados en esta vista.'}</p>:
+   <p>Lados capturados: {rows.length}. Pendientes de validación: {pending.length}.</p>}
+  {ordered.length>0&&<><p className="text-sm">Motivos por lado. Un lado puede tener varios.</p>
+   <ul className="list-disc space-y-1 pl-5 text-sm">{ordered.map(([label,n])=><li key={label}>{label} ({n})</li>)}</ul></>}
+  {rows.length>pending.length&&<p className="text-sm">Con datos validados en la captura: {rows.length-pending.length}. {top?'Ninguna selección del ranking vigente coincide con esta vista.':'Ninguno tiene una preferencia favorable vigente en esta vista.'}</p>}
+ </div>;
+}
 function displayedGap(row){return num(row.advantage)??num(row.preference?.numericGap);}
 function ShadowProbability({row}){
  const f=row.shadowProbability;
@@ -108,14 +134,22 @@ export default function DecisionBoard(){
     .filter(t=>t>clock).sort((a,b)=>a-b)[0];
   if(expires){const timer=setTimeout(()=>setClock(Date.now()),Math.max(1,expires-Date.now()+1));return ()=>clearTimeout(timer);}
  },[data,clock]);
+ const matchesFilters=useMemo(()=>row=>
+  (gameId==='all'||String(row.gameId)===gameId)&&
+  (tab!=='periods'||period==='all'||row.period===period)&&
+  (!search||(row.label+' '+row.matchup+' '+row.market).toLowerCase().includes(search.toLowerCase())),
+ [gameId,tab,period,search]);
+ const captured=useMemo(()=>{
+  const groups=data?.rows??{};
+  return (tab==='top'?Object.values(groups).flat():groups[tab]??[]).filter(matchesFilters);
+ },[data,tab,matchesFilters]);
+ const pending=captured.filter(row=>row.dataQuality?.status!=='VALIDATED');
  const entries=useMemo(()=>{
   if(!data)return [];
   const input=tab==='top'?Object.values(data.preferredRows??{}).flat():data.preferredRows?.[tab]??[];
   const active=visibleNbaPreferredRows(input).filter(r=>Date.parse(r.dataQuality?.expiresAt)>clock);
   const preferred=tab==='top'?shortlistNbaPreferred(active):active;
-  const visible=preferred.filter(x=>(gameId==='all'||String(x.gameId)===gameId)&&
-   (tab!=='periods'||period==='all'||x.period===period)&&
-   (!search||(x.label+' '+x.matchup+' '+x.market).toLowerCase().includes(search.toLowerCase())));
+  const visible=preferred.filter(matchesFilters);
   // Sort only the presentation copy: original predictions, frozen records and server ranking remain untouched.
   const compareGap=(a,b,descending)=>{
    const aa=displayedGap(a),bb=displayedGap(b);
@@ -132,7 +166,7 @@ export default function DecisionBoard(){
    else difference=(b.preference?.sortIndex??0)-(a.preference?.sortIndex??0);
    return difference||((b.preference?.sortIndex??0)-(a.preference?.sortIndex??0))||String(a.id).localeCompare(String(b.id));
   });
- },[data,tab,search,gameId,period,sortBy,clock]);
+ },[data,tab,matchesFilters,sortBy,clock]);
  function activate(next){setTab(next);setGameId('all');setPeriod('all');setSearch('');setLimit(30);}
  return <main className="mx-auto max-w-7xl space-y-5 px-3 py-6 text-slate-100">
   <header className="rounded-2xl border border-slate-700 bg-slate-950 p-5">
@@ -225,19 +259,17 @@ export default function DecisionBoard(){
    <p className="text-xs text-amber-200">La brecha se compara en unidades propias de cada mercado (ML: margen estimado; spread/total/props: puntos o estadística). Orden descriptivo, no probabilidad de ganar.</p>
    {!error&&!loading&&<p className="text-xs text-slate-400">Únicamente un lado por contrato; las alternativas y los mercados sin señal se excluyen de esta lista y se consideran PASAR. El registro original permanece intacto para backtesting.</p>}
    {error&&<p role="alert" className="rounded-xl border border-rose-700 bg-rose-950 p-4 text-sm">No pude cargar el panel: {error}</p>}
-   {!loading&&!error&&entries.length===0&&<p role="status" className="rounded-xl border border-slate-700 p-6 text-slate-300">No hay lados con señales suficientemente favorables en este filtro. Se mantiene PASAR; no se fuerza una recomendación.</p>}
+   {!loading&&!error&&entries.length===0&&<EmptyMarket rows={captured} pending={pending} top={tab==='top'} filtered={gameId!=='all'||period!=='all'||Boolean(search)}/>}
    {entries.slice(0,limit).map((r,i)=><Row key={r.id} row={r} rank={i+1} history={data.historyEvidence?.[r.historyKey]} version={data.version}/>)}
    {data?.evidence?.readIssues?.length>0&&<p role="status">Fuentes parciales · {data.evidence.readIssues.join(' · ')}</p>}
    {data?.evidence?.marketCaptureIssues?.length>0&&<details className="rounded-xl border border-slate-700 p-3"><summary>Mercados sin captura verificable</summary>
     {data.evidence.marketCaptureIssues.map(i=><p key={i.game+'-'+i.lane} className="text-xs">Partido {i.game} · {i.lane==='props'?'Player props':'Mercados principales'} · SIN DATOS · {i.reason}</p>)}
    </details>}
    {data&&<details className="rounded-xl border border-slate-700 p-3"><summary>Datos pendientes de validación</summary>
-    <p className="my-2 text-xs">{Object.entries(data.summary.qualityCounts??{}).map(([k,n])=>k+' '+n).join(' · ')} · Conteo de lados de mercado.</p>
-    {(tab==='top'?Object.values(data.rows).flat():data.rows[tab]??[]).filter(r=>r.dataQuality?.status!=='VALIDATED'&&
-      (gameId==='all'||String(r.gameId)===gameId)&&(period==='all'||r.period===period)&&
-      (!search||(r.label+' '+r.matchup).toLowerCase().includes(search.toLowerCase()))).slice(0,limit).map(r=>
+    <p className="my-2 text-xs">Lados pendientes en esta vista: {pending.length}.</p>
+    {pending.slice(0,limit).map(r=>
        <Row key={r.id} row={r} history={data.historyEvidence?.[r.historyKey]} version={data.version}/>)}
-    <button type="button" onClick={()=>setLimit(v=>v+30)}>Ver más registros</button>
+    {pending.length>limit&&<button type="button" onClick={()=>setLimit(v=>v+30)}>Ver más registros</button>}
    </details>}
    {entries.length>limit&&<button type="button" onClick={()=>setLimit(x=>x+30)} className="rounded-xl border border-sky-500 px-4 py-2 text-sm text-sky-200">Ver 30 selecciones más</button>}
   </section>
