@@ -5,6 +5,18 @@ on:
     paths:
       - 'src/lib/ncaab-prospective-calibration-core.mjs'
       - 'src/lib/ncaab-prospective-calibration-evaluation.mjs'
+      - 'src/lib/ncaab-calibration-evidence.mjs'
+      - 'src/lib/ncaab-paired-uncertainty.mjs'
+      - 'src/lib/ncaab-bounded-archive-reader.mjs'
+      - 'src/lib/ncaab-archived-evidence.ts'
+      - 'src/services/ncaab-archived-evidence.service.ts'
+      - 'src/services/ncaab-daily.service.ts'
+      - 'src/components/dashboard/NcaabArchivedEvidence.tsx'
+      - 'src/components/dashboard/NcaabDashboard.tsx'
+      - 'tests/dashboard-multisport/ncaab-archived-evidence.test.mjs'
+      - 'tests/fixtures/ncaab-archived-evidence.mjs'
+      - 'tests/fixtures/render-ncaab-archived-evidence.mjs'
+      - 'tests/product-experience/ncaab-archive.spec.ts'
       - 'src/services/ncaab-calibration-shadow-writer.service.ts'
       - 'src/services/ncaab-calibration-readiness.service.ts'
       - 'src/app/api/ncaab/calibration-shadow/route.ts'
@@ -20,7 +32,12 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -37,3 +54,18 @@ jobs:
         run: npm run test:dashboard-multisport
       - name: TypeScript verification
         run: npx tsc --noEmit --pretty false
+      - name: Production build with isolated placeholder configuration
+        run: npm run build
+      - name: Install browser for offline evidence fixtures
+        run: npx playwright install --with-deps chromium
+      - name: Archived NCAAB reference presentation on desktop and mobile
+        env:
+          PLAYWRIGHT_EXTERNAL_SERVER: 'true'
+        run: npx playwright test tests/product-experience/ncaab-archive.spec.ts
+      - name: Upload offline browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ncaab-archived-evidence-browser
+          path: test-results/product-experience/
+          retention-days: 7

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { generateNbaPredictions } from '@/services/nba-prediction-engine.service'
+import { NBA_INPUTS_SHADOW_MODEL_VERSION, NBA_INPUTS_SHADOW_FEATURE_VERSION, assertNbaInputsShadowPrediction } from '@/lib/nba/prediction-inputs-shadow'
 import {
   buildPredictionHistoryDeterministicId,
   buildPredictionHistoryLogicalIdentity,
@@ -8,7 +9,6 @@ import {
 } from '@/services/prediction-history.service'
 import {
   NBA_LEAGUE_KEY,
-  NBA_PREDICTION_MODEL_VERSION,
   NBA_SPORT_KEY,
 } from '@/services/nba-prediction-validation.service'
 
@@ -150,6 +150,7 @@ export function buildNbaCurrentEraShadowCandidateKey({
   line,
   sportsbook,
   oddsId,
+  modelVersion = NBA_INPUTS_SHADOW_MODEL_VERSION,
 }: {
   eventId: string
   market: string | null
@@ -157,6 +158,7 @@ export function buildNbaCurrentEraShadowCandidateKey({
   line: number | null
   sportsbook: string | null
   oddsId?: string | null
+  modelVersion?: string
 }) {
   return [
     NBA_SPORT_KEY,
@@ -166,6 +168,7 @@ export function buildNbaCurrentEraShadowCandidateKey({
     line ?? 'null',
     sportsbook ?? 'missing_sportsbook',
     oddsId ?? 'missing_odds',
+    modelVersion,
   ].map(keyPart).join('|')
 }
 
@@ -174,11 +177,13 @@ export function buildNbaCurrentEraShadowModelMatchKey({
   market,
   selection,
   line,
+  modelVersion = NBA_INPUTS_SHADOW_MODEL_VERSION,
 }: {
   eventId: string
   market: string | null
   selection: string | null
   line: number | null
+  modelVersion?: string
 }) {
   return [
     NBA_SPORT_KEY,
@@ -186,7 +191,7 @@ export function buildNbaCurrentEraShadowModelMatchKey({
     market ?? 'missing_market',
     selection ?? 'missing_selection',
     line ?? 'null',
-    NBA_PREDICTION_MODEL_VERSION,
+    modelVersion,
   ].map(keyPart).join('|')
 }
 
@@ -203,11 +208,11 @@ function isHistoricalTrialEvidence(event: CurrentEraEventRow, odds: CurrentEraOd
   )
 }
 
-function currentEraFeatureSnapshot(event: CurrentEraEventRow, odds: CurrentEraOddsRow, generatedAt: string) {
+function currentEraFeatureSnapshot(event: CurrentEraEventRow, odds: CurrentEraOddsRow, generatedAt: string, modelVersion: string) {
   return {
     canaryVersion: NBA_CURRENT_ERA_SHADOW_CANARY_VERSION,
-    featureSetVersion: NBA_CURRENT_ERA_SHADOW_FEATURE_VERSION,
-    modelVersion: NBA_PREDICTION_MODEL_VERSION,
+    featureSetVersion: NBA_INPUTS_SHADOW_FEATURE_VERSION,
+    modelVersion,
     eventId: event.id,
     market: odds.market,
     selection: odds.outcome,
@@ -229,11 +234,14 @@ export function findNbaCurrentEraShadowModelPrediction({
   candidate,
   modelPredictions,
 }: {
-  candidate: Pick<NbaCurrentEraShadowCandidate, 'eventId' | 'market' | 'selection' | 'line'>
+  candidate: Pick<NbaCurrentEraShadowCandidate, 'eventId' | 'market' | 'selection' | 'line'> & Partial<Pick<NbaCurrentEraShadowCandidate, 'price' | 'sportsbook' | 'oddsTimestamp'>>
   modelPredictions: NbaEnginePrediction[]
 }) {
   return modelPredictions.find((prediction) =>
+    prediction.modelVersion === NBA_INPUTS_SHADOW_MODEL_VERSION &&
     prediction.gameId === candidate.eventId &&
+    prediction.odds === candidate.price && prediction.sportsbook === candidate.sportsbook &&
+    prediction.oddsTimestamp === candidate.oddsTimestamp &&
     prediction.market === candidate.market &&
     prediction.team === candidate.selection &&
     (prediction.line ?? null) === (candidate.line ?? null)
@@ -397,12 +405,13 @@ export function evaluateNbaCurrentEraShadowCandidate({
           market: odds.market,
           selection: odds.outcome,
           line: odds.line,
+          price: odds.price, sportsbook: odds.sportsbook, oddsTimestamp,
         },
         modelPredictions,
       })
     : null
   const logicalKey = odds
-    ? [NBA_SPORT_KEY, event.id, odds.market, odds.outcome, odds.line ?? 'null', odds.sportsbook, 'CURRENT_ERA_SHADOW', NBA_PREDICTION_MODEL_VERSION].join('|')
+    ? [NBA_SPORT_KEY, event.id, odds.market, odds.outcome, odds.line ?? 'null', odds.sportsbook, 'CURRENT_ERA_SHADOW', NBA_INPUTS_SHADOW_MODEL_VERSION].join('|')
     : null
   const skipReasons: NbaCurrentEraShadowSkipReason[] = []
 
@@ -445,8 +454,8 @@ export function evaluateNbaCurrentEraShadowCandidate({
     sportsbook: odds?.sportsbook ?? null,
     oddsTimestamp,
     priceAgeMinutes,
-    modelVersion: NBA_PREDICTION_MODEL_VERSION,
-    featureVersion: NBA_CURRENT_ERA_SHADOW_FEATURE_VERSION,
+    modelVersion: modelPrediction?.modelVersion ?? NBA_INPUTS_SHADOW_MODEL_VERSION,
+    featureVersion: NBA_INPUTS_SHADOW_FEATURE_VERSION,
     cutoffAt,
     priceEligible,
     modelMatched,
@@ -503,6 +512,8 @@ export function buildNbaCurrentEraShadowPredictionRow({
   generatedAt: string
   modelPrediction: NbaEnginePrediction
 }): PredictionHistoryInput {
+  assertNbaInputsShadowPrediction(modelPrediction, event, odds, generatedAt)
+  const modelVersion = modelPrediction.modelVersion
   const implied = Number(odds.price) > 0
     ? (100 / (Number(odds.price) + 100)) * 100
     : (Math.abs(Number(odds.price)) / (Math.abs(Number(odds.price)) + 100)) * 100
@@ -520,7 +531,7 @@ export function buildNbaCurrentEraShadowPredictionRow({
     line: odds.line,
     sportsbook: odds.sportsbook,
     prediction_origin: 'CURRENT_ERA_SHADOW',
-    model_version: NBA_PREDICTION_MODEL_VERSION,
+    model_version: modelVersion,
   } as const
   const logicalIdentity = buildPredictionHistoryLogicalIdentity(identityBase)
   const predictionId = buildPredictionHistoryDeterministicId(identityBase)
@@ -548,10 +559,11 @@ export function buildNbaCurrentEraShadowPredictionRow({
     odds_timestamp: odds.provider_timestamp ?? odds.snapshot_time,
     generated_at: generatedAt,
     cutoff_at: cutoffFor(event),
-    model_version: NBA_PREDICTION_MODEL_VERSION,
-    feature_set_version: NBA_CURRENT_ERA_SHADOW_FEATURE_VERSION,
+    model_version: modelVersion,
+    feature_set_version: NBA_INPUTS_SHADOW_FEATURE_VERSION,
     feature_snapshot: {
-      ...currentEraFeatureSnapshot(event, odds, generatedAt),
+      ...currentEraFeatureSnapshot(event, odds, generatedAt, modelVersion),
+      ...modelPrediction.featureSnapshot,
       featureQualityScore: modelPrediction.featureQualityScore,
       dataSufficiencyScore: modelPrediction.dataSufficiencyScore,
       pregameFeatureScoresCaptured: true,
@@ -564,6 +576,7 @@ export function buildNbaCurrentEraShadowPredictionRow({
         market: odds.market,
         selection: odds.outcome,
         line: odds.line,
+        modelVersion,
       }),
     },
     production_eligible: false,
@@ -593,11 +606,16 @@ export function buildNbaCurrentEraShadowPredictionRow({
       selection: odds.outcome,
       line: odds.line,
       sportsbook: odds.sportsbook,
-      modelVersion: NBA_PREDICTION_MODEL_VERSION,
+      modelVersion,
+      inputHash: modelPrediction.inputHash,
+      trainingWeightsHash: modelPrediction.trainingWeightsHash,
     },
     certification_metadata: {
       canaryVersion: NBA_CURRENT_ERA_SHADOW_CANARY_VERSION,
       currentEra: true,
+      probabilityStatus: 'EXPLORATORY_UNVALIDATED',
+      inputHash: modelPrediction.inputHash,
+      trainingWeightsHash: modelPrediction.trainingWeightsHash,
       officialPickEligible: false,
       productionCalibrationEligible: false,
       productionLearningEligible: false,

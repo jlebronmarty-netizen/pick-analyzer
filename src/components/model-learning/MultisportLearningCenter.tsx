@@ -35,7 +35,7 @@ export default async function MultisportLearningCenter(){
     <section className="grid gap-4 md:grid-cols-3">
       <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Deportes monitoreados</p>
-        <p className="mt-2 text-3xl font-black text-white">{data.sports.length}</p>
+        <p className="mt-2 text-3xl font-black text-white">{new Set(data.sports.map(s=>s.sport)).size}</p>
       </div>
       <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Patrones para investigar</p>
@@ -60,13 +60,13 @@ export default async function MultisportLearningCenter(){
     </section>}
 
     <section className="grid gap-4 xl:grid-cols-2">
-      {data.sports.map(s=><article key={s.sport} className="rounded-lg border border-slate-800 bg-slate-900/70 p-6">
+      {data.sports.map(s=><article key={[s.sport,s.modelVersion??s.model,s.market??'primary'].join(':')} className="rounded-lg border border-slate-800 bg-slate-900/70 p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div><h2 className="text-2xl font-black text-white">{s.sport}</h2><p className="mt-1 text-sm text-slate-400">{s.model}</p></div>
           <span className={'rounded-full border px-3 py-1 text-xs font-bold '+stateClass[s.state]}>{stateLabel[s.state]}</span>
         </div>
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <div><p className="text-xs text-slate-500">Liquidados</p><p className="mt-1 text-xl font-black text-white">{s.settled}</p></div>
+          <div><p className="text-xs text-slate-500">{s.sport==='NBA'?'Juegos únicos liquidados':'Liquidados'}</p><p className="mt-1 text-xl font-black text-white">{s.settled}</p></div>
           <div><p className="text-xs text-slate-500">W-L</p><p className="mt-1 text-xl font-black text-white">{s.wins}-{s.losses}</p></div>
           <div><p className="text-xs text-slate-500">Accuracy</p><p className="mt-1 text-xl font-black text-white">{pct(s.accuracy)}</p></div>
           <div><p className="text-xs text-slate-500">MAE numérico</p><p className="mt-1 text-xl font-black text-white">{mae(s.mae)}</p></div>

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import type { PredictionHistoryInput } from '@/services/prediction-history.service'
+import { NBA_INPUTS_SHADOW_MODEL_VERSION } from '@/lib/nba/prediction-inputs-shadow'
 
 export const NBA_SPORT_KEY = 'basketball_nba'
 export const NBA_LEAGUE_KEY = 'nba'
@@ -102,14 +103,22 @@ function isTotalMarket(market: NbaMarketType) {
   return market === 'total' || market === 'first_half' || market === 'first_half_total'
 }
 
-function candidateKey(candidate: NbaPredictionCandidate) {
-  return [
+function candidateKey(candidate: {
+  sport_key: string; game_id: string; team: string; market: string | null; sportsbook: string | null
+  model_version?: string | null; line?: number | null
+}) {
+  const identity = [
     candidate.sport_key,
     candidate.game_id,
     candidate.team,
     candidate.market,
     candidate.sportsbook,
-  ].join('|')
+  ]
+  // Preserve the old duplicate contract for every historical model. Only the
+  // corrected cohort distinguishes model version and signed/exact line.
+  return (candidate.model_version === NBA_INPUTS_SHADOW_MODEL_VERSION
+    ? [...identity, candidate.line ?? 'null', candidate.model_version]
+    : identity).join('|')
 }
 
 function getSnapshotScore(
@@ -231,7 +240,7 @@ async function loadDuplicateKeys(candidates: NbaPredictionCandidate[]) {
 
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('sport_key, game_id, team, market, sportsbook, lifecycle_status, result')
+    .select('sport_key, game_id, team, market, sportsbook, lifecycle_status, result, model_version, line')
     .eq('sport_key', NBA_SPORT_KEY)
     .in('game_id', gameIds)
 
@@ -248,15 +257,7 @@ async function loadDuplicateKeys(candidates: NbaPredictionCandidate[]) {
       result === 'pending' ||
       result === ''
     ) {
-      duplicateKeys.add(
-        [
-          row.sport_key,
-          row.game_id,
-          row.team,
-          row.market,
-          row.sportsbook,
-        ].join('|')
-      )
+      duplicateKeys.add(candidateKey(row))
     }
   }
 

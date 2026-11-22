@@ -17,6 +17,8 @@ type NbaPrediction = {
   ev: number
   confidence: number
   recommendedPick: boolean
+  modelVersion?: string
+  probabilityStatus?: string
   adaptiveScore: number
   riskGrade: string
   explanation: {
@@ -28,6 +30,8 @@ type NbaPrediction = {
 
 type NbaPredictionResponse = {
   success: boolean
+  modelVersion?: string
+  probabilityStatus?: string
   validation: {
     checked: number
     valid: number
@@ -101,6 +105,9 @@ type PerformanceSummary = {
 
 type PerformanceResponse = {
   success: boolean
+  modelVersion?: string
+  scope?: string
+  scopeNote?: string
   overall: PerformanceSummary
   brierScore: number | null
   calibration: {
@@ -115,6 +122,8 @@ type PerformanceResponse = {
 
 type ModelHealthV2Response = {
   success: boolean
+  modelVersion?: string
+  scope?: string
   status: string
   issues: string[]
   warnings: string[]
@@ -254,6 +263,7 @@ export default function NbaPredictionEnginePanel() {
   }
 
   const best = data?.summary.bestPrediction
+  const exploratory = data?.probabilityStatus === 'EXPLORATORY_UNVALIDATED'
   const warnings = [
     ...(modelHealthV2?.issues ?? []),
     ...(modelHealthV2?.warnings ?? []),
@@ -265,19 +275,19 @@ export default function NbaPredictionEnginePanel() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-violet-300">
-            NBA Prediction Engine V1
+            {data?.modelVersion ?? 'NBA Prediction Engine'}
           </p>
           <h2 className="mt-2 text-3xl font-black text-white">
             NBA Market Predictions
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-            Generates moneyline, spread, total and first-half predictions using synced NBA data and existing Pick Analyzer intelligence.
+            {exploratory ? 'Vista SHADOW de Moneyline, Spread y Total con archivos disponibles. Probabilidades, edge y EV exploratorios; no acreditan una ventaja validada ni una oferta actual. No habilita JUGADA.' : 'Generates NBA market predictions using archived data and existing Pick Analyzer intelligence.'}
           </p>
         </div>
 
         <div className="flex flex-col items-start gap-3 lg:items-end">
           <p className={`text-sm font-black uppercase ${statusClass(modelHealthV2?.status ?? health?.status ?? 'unavailable')}`}>
-            {modelHealthV2?.status ?? health?.status ?? 'unavailable'}
+            {modelHealthV2 ? 'Salud histórica V1: ' : ''}{modelHealthV2?.status ?? health?.status ?? 'unavailable'}
           </p>
           <button
             type="button"
@@ -299,19 +309,20 @@ export default function NbaPredictionEnginePanel() {
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label="Events" value={`${data?.summary.eventsScanned ?? 0}`} />
         <Stat label="Predictions" value={`${data?.summary.predictionsGenerated ?? 0}`} />
-        <Stat label="Recommended" value={`${data?.summary.recommended ?? 0}`} />
+        <Stat label={exploratory ? 'JUGADA' : 'Recommended'} value={exploratory ? 'BLOQUEADA' : `${data?.summary.recommended ?? 0}`} />
         <Stat label="Feature Quality" value={`${data?.summary.averageFeatureQuality ?? 0}`} />
         <Stat label="Sufficiency" value={`${data?.summary.averageDataSufficiency ?? 0}`} />
       </div>
 
+      {performance?.modelVersion ? <p className="mt-6 text-sm text-slate-400">Historial: {performance.modelVersion}. {performance.scopeNote}</p> : null}
       <div className="mt-6 grid gap-3 md:grid-cols-4">
         <Stat label="Settled" value={`${performance?.overall.settled ?? 0}`} />
         <Stat
           label="Record"
           value={`${performance?.overall.wins ?? 0}-${performance?.overall.losses ?? 0}-${performance?.overall.pushes ?? 0}`}
         />
-        <Stat label="ROI" value={pct(performance?.overall.roi)} />
-        <Stat label="Backlog" value={`${backlog?.count ?? 0}`} />
+        <Stat label="ROI histórico V1" value={pct(performance?.overall.roi)} />
+        <Stat label="Backlog de todas las versiones" value={`${backlog?.count ?? 0}`} />
       </div>
 
       <div className="mt-6 grid gap-3 md:grid-cols-4">
@@ -334,7 +345,7 @@ export default function NbaPredictionEnginePanel() {
       </div>
 
       <div className="mt-6 grid gap-4 xl:grid-cols-4">
-        <Panel title="Validation">
+        <Panel title={exploratory ? 'Comprobación de datos' : 'Validation'}>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <Mini label="Checked" value={`${data?.validation?.checked ?? 0}`} />
             <Mini label="Valid" value={`${data?.validation?.valid ?? 0}`} />
@@ -347,7 +358,7 @@ export default function NbaPredictionEnginePanel() {
           </div>
         </Panel>
 
-        <Panel title="Model Health V2">
+        <Panel title="Salud del modelo histórico V1">
           <p className={`text-xl font-black uppercase ${statusClass(modelHealthV2?.status ?? 'unavailable')}`}>
             {modelHealthV2?.status ?? 'unavailable'}
           </p>
@@ -396,7 +407,7 @@ export default function NbaPredictionEnginePanel() {
 
       {best ? (
         <div className="mt-6 rounded-3xl border border-violet-500/20 bg-violet-950/10 p-6">
-          <p className="text-sm font-bold text-violet-300">Best NBA Prediction</p>
+          <p className="text-sm font-bold text-violet-300">{exploratory || best.probabilityStatus === 'EXPLORATORY_UNVALIDATED' ? 'Candidato exploratorio NBA · sin recomendación certificada' : 'Best NBA Prediction'}</p>
           <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h3 className="text-2xl font-black text-white">
@@ -440,7 +451,7 @@ export default function NbaPredictionEnginePanel() {
       ) : null}
 
       <div className="mt-6 grid gap-4 xl:grid-cols-2">
-        <Panel title="Market Performance">
+        <Panel title="Rendimiento histórico V1 por mercado">
           <div className="space-y-2">
             {(performance?.byMarket ?? []).slice(0, 6).map((row) => (
               <div key={row.market} className="flex items-center justify-between gap-3 text-sm">
@@ -453,7 +464,7 @@ export default function NbaPredictionEnginePanel() {
           </div>
         </Panel>
 
-        <Panel title="Moneyline Calibration">
+        <Panel title="Calibración histórica V1 de Moneyline">
           <div className="space-y-2">
             {(performance?.calibration ?? []).slice(0, 6).map((row) => (
               <div key={row.bucket} className="flex items-center justify-between gap-3 text-sm">
@@ -487,7 +498,7 @@ export default function NbaPredictionEnginePanel() {
 
       <div className="mt-6 grid gap-3 xl:grid-cols-2">
         {(data?.predictions ?? []).slice(0, 8).map((prediction) => (
-          <PredictionCard key={prediction.id} prediction={prediction} />
+          <PredictionCard key={prediction.id} prediction={prediction} exploratory={exploratory} />
         ))}
       </div>
     </section>
@@ -512,7 +523,8 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-function PredictionCard({ prediction }: { prediction: NbaPrediction }) {
+export function PredictionCard({ prediction, exploratory = false }: { prediction: NbaPrediction; exploratory?: boolean }) {
+  const unvalidated = exploratory || prediction.probabilityStatus === 'EXPLORATORY_UNVALIDATED'
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -531,10 +543,11 @@ function PredictionCard({ prediction }: { prediction: NbaPrediction }) {
           <p className="text-xs text-slate-500">{prediction.riskGrade}</p>
         </div>
       </div>
+      {unvalidated ? <p className="mt-3 text-xs text-amber-200">SHADOW exploratorio · precio archivado · probabilidad y EV sin validar · JUGADA bloqueada</p> : null}
       <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
-        <Mini label="Prob" value={pct(prediction.modelProbability)} />
-        <Mini label="EV" value={pct(prediction.ev)} />
-        <Mini label="Edge" value={pct(prediction.edge)} />
+        <Mini label={unvalidated ? 'Prob. exploratoria' : 'Prob'} value={pct(prediction.modelProbability)} />
+        <Mini label={unvalidated ? 'EV exploratorio' : 'EV'} value={pct(prediction.ev)} />
+        <Mini label={unvalidated ? 'Edge exploratorio' : 'Edge'} value={`${Number(prediction.edge).toFixed(2)} pp`} />
         <Mini label="Conf" value={pct(prediction.confidence)} />
       </div>
     </article>

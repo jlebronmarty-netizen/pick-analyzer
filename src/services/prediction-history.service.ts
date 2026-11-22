@@ -8,6 +8,8 @@ import { evaluateRecommendationEligibility } from '@/services/recommendation-eli
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 import { classifyPredictionCutoff, type CutoffEventLike } from '@/services/prediction-cutoff-enforcement.service'
+import { NBA_INPUTS_SHADOW_MODEL_VERSION, NBA_INPUTS_SHADOW_FEATURE_VERSION, assertNbaInputsShadowPrediction, nbaEvidenceTimestamp,
+  type NbaInputEvent, type NbaInputQuote, type NbaInputsShadowPrediction } from '@/lib/nba/prediction-inputs-shadow'
 
 export type PredictionHistoryInput = {
   id?: string
@@ -383,6 +385,51 @@ function segmentReplay(rows: HistoricalReplayRow[], keyFn: (row: HistoricalRepla
   })
 }
 
+/** The corrected NBA cohort cannot escape into generic/champion persistence. */
+export function assertNbaInputsShadowHistoryRow(row: PredictionHistoryInput, now = new Date().toISOString()) {
+  const snapshot = row.feature_snapshot, certification = row.certification_metadata
+  const tagged = row.model_version === NBA_INPUTS_SHADOW_MODEL_VERSION || snapshot?.modelVersion === NBA_INPUTS_SHADOW_MODEL_VERSION ||
+    row.feature_set_version === NBA_INPUTS_SHADOW_FEATURE_VERSION || snapshot?.featureSetVersion === NBA_INPUTS_SHADOW_FEATURE_VERSION ||
+    row.version_lineage?.modelVersion === NBA_INPUTS_SHADOW_MODEL_VERSION
+  if (!tagged) return
+  if (row.model_version !== NBA_INPUTS_SHADOW_MODEL_VERSION || row.sport_key !== 'basketball_nba' || row.prediction_origin !== 'CURRENT_ERA_SHADOW' || row.model_role !== 'shadow' ||
+    row.is_current !== false || row.production_eligible !== false || row.recommended_pick !== false || row.stake !== 0 ||
+    row.result !== 'pending' || row.status !== 'pending' || row.profit !== null || row.lifecycle_status !== 'active' ||
+    row.validation_status !== 'valid' || row.trial !== false || row.scrambled !== false ||
+    row.certification_status !== 'SHADOW_PENDING' || row.feature_set_version !== NBA_INPUTS_SHADOW_FEATURE_VERSION ||
+    certification?.officialPickEligible !== false || certification?.productionCalibrationEligible !== false || certification?.productionLearningEligible !== false ||
+    certification?.productSurfaceVisible !== false || certification?.alertEligible !== false || certification?.fallbackOddsAllowed !== false ||
+    !snapshot || snapshot.probabilityStatus !== 'EXPLORATORY_UNVALIDATED' || !/^[a-f0-9]{64}$/.test(String(snapshot.inputHash)) ||
+    !/^[a-f0-9]{64}$/.test(String(snapshot.trainingWeightsHash)) || certification?.inputHash !== snapshot.inputHash ||
+    certification?.trainingWeightsHash !== snapshot.trainingWeightsHash || row.version_lineage?.inputHash !== snapshot.inputHash ||
+    row.version_lineage?.trainingWeightsHash !== snapshot.trainingWeightsHash || row.version_lineage?.modelVersion !== row.model_version ||
+    row.id !== buildPredictionHistoryDeterministicId(row) || row.idempotency_key !== buildPredictionHistoryLogicalIdentity(row) ||
+    row.prediction_group_key !== buildPredictionHistoryLogicalIdentity(row) || row.prediction_version !== 1 ||
+    !Number.isFinite(nbaEvidenceTimestamp(row.generated_at)) || !Number.isFinite(nbaEvidenceTimestamp(now)) || nbaEvidenceTimestamp(row.generated_at) > nbaEvidenceTimestamp(now)) {
+    throw new Error('NBA_INPUTS_SHADOW_HISTORY_GUARD_REJECTED')
+  }
+  const event = snapshot.event as NbaInputEvent, quote = snapshot.selectedQuote as NbaInputQuote
+  if (!event || !quote || row.game_id !== event.id || row.home_team !== event.home_team || row.away_team !== event.away_team ||
+    row.commence_time !== event.start_time || row.sportsbook !== quote.sportsbook || row.selection !== quote.outcome ||
+    !Number.isFinite(nbaEvidenceTimestamp(event.start_time)) ||
+    row.cutoff_at !== new Date(nbaEvidenceTimestamp(event.start_time) - 10 * 60_000).toISOString() || nbaEvidenceTimestamp(row.generated_at) < nbaEvidenceTimestamp(snapshot.asOf)) {
+    throw new Error('NBA_INPUTS_SHADOW_HISTORY_IDENTITY_MISMATCH')
+  }
+  const enginePrediction = {
+    id: [event.id, row.market, row.team, row.line ?? 'null', quote.id, NBA_INPUTS_SHADOW_MODEL_VERSION].join(':'),
+    gameId: row.game_id, market: row.market, team: row.team,
+    opponent: row.market === 'total' ? `${event.away_team} @ ${event.home_team}` : row.team === event.home_team ? event.away_team : event.home_team,
+    sportsbook: row.sportsbook, odds: row.odds, line: row.line, projectedLine: row.projected_line,
+    impliedProbability: row.implied_probability, modelProbability: row.model_probability, edge: row.edge, ev: row.ev,
+    confidence: row.confidence, recommendedPick: false, oddsTimestamp: row.odds_timestamp,
+    featureQualityScore: snapshot.featureQualityScore, dataSufficiencyScore: snapshot.dataSufficiencyScore,
+    cutoffAt: snapshot.asOf, modelVersion: row.model_version, kellyPercent: 0, recommendedStake: 0,
+    probabilityStatus: 'EXPLORATORY_UNVALIDATED', featureSnapshot: snapshot,
+    inputHash: snapshot.inputHash, trainingWeightsHash: snapshot.trainingWeightsHash,
+  } as NbaInputsShadowPrediction
+  assertNbaInputsShadowPrediction(enginePrediction, event, quote, now)
+}
+
 export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
   if (!rows.length) {
     return {
@@ -390,6 +437,9 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
       saved: 0,
     }
   }
+
+  // Validate the whole batch before any database call. Legacy cohorts retain their existing path.
+  for (const row of rows) assertNbaInputsShadowHistoryRow(row)
 
   const requestedProductionEventIds = Array.from(
     new Set(rows.filter((row) => row.production_eligible === true).map((row) => row.game_id).filter(Boolean))
@@ -452,7 +502,15 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
     }
   }).filter(Boolean) as PredictionHistoryInput[]
 
-  const deterministicCurrentEraRows = gatedRows.filter((row) => row.prediction_origin === 'CURRENT_ERA_SHADOW' && Boolean(row.id))
+  const inputShadowRows = gatedRows.filter(row => row.model_version === NBA_INPUTS_SHADOW_MODEL_VERSION)
+  let inputShadowSaved = 0
+  if (inputShadowRows.length) {
+    const { data, error } = await supabaseAdmin.from('prediction_history')
+      .upsert(inputShadowRows, { onConflict: 'id', ignoreDuplicates: true }).select('id')
+    if (error) throw new Error(error.message)
+    inputShadowSaved = data?.length ?? 0
+  }
+  const deterministicCurrentEraRows = gatedRows.filter((row) => row.model_version !== NBA_INPUTS_SHADOW_MODEL_VERSION && row.prediction_origin === 'CURRENT_ERA_SHADOW' && Boolean(row.id))
   const legacyRows = gatedRows.filter((row) => !(row.prediction_origin === 'CURRENT_ERA_SHADOW' && Boolean(row.id)))
 
   if (deterministicCurrentEraRows.length > 0) {
@@ -481,7 +539,7 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
 
   return {
     success: true,
-    saved: gatedRows.length,
+    saved: gatedRows.length - inputShadowRows.length + inputShadowSaved,
     rejectedByCutoff,
   }
 }

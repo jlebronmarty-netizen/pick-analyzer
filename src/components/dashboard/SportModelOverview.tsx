@@ -35,7 +35,7 @@ export default function SportModelOverview({cards}:{cards:SportModelCard[]}){
   return <section aria-label="Accuracy de modelos por deporte" className="space-y-4">
     <header className="flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-teal-400/25 bg-slate-900 p-5">
       <div><p className="text-xs font-bold uppercase tracking-widest text-teal-300">Todos los modelos conectados · resultados registrados</p><h2 className="mt-2 text-2xl font-bold">Accuracy combinada de registros</h2><p className="mt-2 text-sm text-slate-400">Subtotal descriptivo de las cohortes principales mostradas.</p></div>
-      <div className="text-right"><p className="text-4xl font-bold">{pct(total.accuracy)}</p><p className="mt-2 text-sm">{total.available?`${total.wins} W / ${total.losses} L · ${total.pending} pendientes`:'Conjunto completo no disponible'}</p></div>
+      <div className="text-right"><p className="text-4xl font-bold">{pct(total.accuracy)}</p><p className="mt-2 text-sm">{total.available?`${total.wins} W / ${total.losses} L · ${total.pending} pendientes`:total.reason==='MODEL_VERSIONS_NOT_POOLED'?'Versiones separadas; no se suman':'Conjunto completo no disponible'}</p></div>
     </header>
     <p className="text-xs leading-6 text-slate-400">Se suman WIN y LOSS; no se promedian porcentajes. Cada registro cuenta una vez; distintos modelos pueden seleccionar el mismo partido. Fórmulas y pestañas son vistas del mismo ledger. No es accuracy de juegos únicos, probabilidad calibrada, ROI ni certificación conjunta. OPEN, PUSH y VOID quedan fuera. Fútbol, tenis de mesa, NCAAF y NBA aportan solo su mercado principal de ganador/Moneyline; los mercados secundarios no se suman a este subtotal.</p>
     <div role="group" aria-label="Fase MLB de las tarjetas" className="flex flex-wrap items-center gap-2"><span className="text-sm text-slate-400">MLB:</span>{[['REGULAR_SEASON','Temporada regular'],['POSTSEASON','Playoffs']].map(([key,name])=><button type="button" key={key} onClick={()=>setPhase(key)} aria-pressed={phase===key} className={`rounded-lg border px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-teal-300 ${phase===key?'border-teal-400 bg-teal-500/10':'border-slate-600'}`}>{name}</button>)}</div>
@@ -44,10 +44,12 @@ export default function SportModelOverview({cards}:{cards:SportModelCard[]}){
       {metricLabel(card)&&<p className="mt-3 text-xs text-slate-300">Accuracy · {metricLabel(card)}</p>}
       <p className="mt-4 text-3xl font-bold">{pct(c?.accuracy??null)}</p><p className="mt-2 text-sm">{c?.available?`${c.wins} W / ${c.losses} L · ${c.pending} pendientes`:'Resultados no conectados o no disponibles'}</p>
       {c&&<><p className="mt-3 text-xs text-teal-300">{c.label}</p><p className="mt-2 text-xs leading-5 text-slate-400">{c.note}</p></>}
+      {c?.modelVersion&&<p className="mt-2 text-xs text-slate-300">{c.settledUniqueGames??0} juegos únicos liquidados · {card.models??1} versiones separadas</p>}
+      {card.cohorts.filter(other=>other.modelVersion&&other.key!==c?.key).map(other=><div key={other.key} className="mt-3 border-t border-slate-700 pt-3 text-xs leading-5"><p className="text-teal-300">{other.label}</p><p>{pct(other.accuracy)} · {other.wins} W / {other.losses} L · {other.pending} pendientes</p><p className="text-slate-400">{other.settledUniqueGames??0} juegos únicos liquidados · historial separado</p></div>)}
       <div className="mt-3 space-y-2 text-xs leading-5 text-slate-300">{card.detailLines?.map(line=><p key={line}>{line}</p>)}</div>
       {card.checkedAt&&<p className="mt-3 text-xs text-slate-400">Lectura: {checkedAtLabel(card.checkedAt)} PR</p>}
       <p className="mt-4 text-sm font-semibold text-teal-300">Ver análisis completo →</p>
     </Link>;})}</div>
-    <p className="text-xs text-slate-400">Regular y playoffs de MLB se mantienen separados. NHL conserva su propio historial MODEL_ONLY. Solo deportes con fuentes conectadas aportan resultados; una caída de lectura no se sustituye por cero.</p>
+    <p className="text-xs text-slate-400">Regular y playoffs de MLB se mantienen separados. NHL conserva su propio historial MODEL_ONLY. NBA muestra cada versión por separado; el subtotal utiliza solamente la versión identificada en su tarjeta principal, elegida por su última captura. Esta presentación no certifica ni promociona modelos. Solo deportes con fuentes conectadas aportan resultados; una caída de lectura no se sustituye por cero.</p>
   </section>;
 }

@@ -5,12 +5,13 @@ import {getNcaabCheckpoint} from './ncaab-checkpoint-read.service';
 import type {NcaabReport} from '@/lib/ncaab-checkpoint';
 import profile from '@/data/ncaab-profile-2027.json' with {type:'json'};
 import {ncaabSourceLifecycle} from '@/lib/ncaab-source-lifecycle.mjs';
+import {readNcaabArchivedEvidence} from './ncaab-archived-evidence.service';
 const BASE='https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard';
 const hash=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 async function db(){return (await import('@/lib/supabase-admin')).supabaseAdmin;}
 async function readAll(table:string){const client=await db();const rows:Record<string,unknown>[]=[];let after='';for(;;){let q=client.from(table).select('*').order('id').limit(500).abortSignal(AbortSignal.timeout(20000));if(after)q=q.gt('id',after);const {data,error}=await q;if(error||!data)throw Error('NCAAB_DATABASE_READ_FAILED');rows.push(...data);if(data.length<500)break;after=String(data.at(-1)!.id);}return rows;}
 // Existing immutable checkpoint remains independently available; live failure is explicit.
-export async function getNcaabDailyReport():Promise<NcaabReport>{
+export async function getNcaabDailyReport(options:{includeArchivedEvidence?:boolean}={}):Promise<NcaabReport>{
  try{
   const client=await db();const [ps,os,latest,lifecycleHistory]=await Promise.all([readAll('ncaab_daily_predictions_v1'),readAll('ncaab_daily_outcomes_v1'),client.from('ncaab_daily_runs_v1').select('status,completed_at,provider_calls,detail').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(1),client.from('ncaab_daily_runs_v1').select('lifecycle_updates:detail->lifecycle_updates').neq('id','SEED_ORIGINAL_73').order('started_at',{ascending:false}).limit(80)]);
   if(latest.error)throw Error('NCAAB_RUN_READ_FAILED');
@@ -32,7 +33,8 @@ export async function getNcaabDailyReport():Promise<NcaabReport>{
   const last=latest.data?.[0];const detail=last?.detail as {abstentions?:LiveObservation[]}|undefined;
   const seen=new Set(rows.map(x=>x.event_id));const abstentions=(detail?.abstentions??[]).filter(x=>!seen.has(x.event_id));
   const lastCompleted=last?.completed_at as string|null;const stale=!lastCompleted||Date.now()-Date.parse(lastCompleted)>26*3600000;
-  return {status:'AVAILABLE',data:{...checkpoint.data,connection:'DAILY_FREE_PIPELINE',continuousSync:true,hostedPipelineReady:true,generatedAt:lastCompleted??checkpoint.data.generatedAt,observations:[...displayRows,...abstentions].sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)||a.event_id.localeCompare(b.event_id)),models:[{...metrics,abstentions:abstentions.length},{id:'NCAAB_FREE_SCORE_V1_1',forecasts:0,abstentions:0,settled:0,wins:0,losses:0,winnerDenominator:0,accuracy:null}],lastRun:{status:last?.status??'NOT_RUN',completedAt:lastCompleted??null,providerCalls:Number(last?.provider_calls??0)},warning:stale?'Proceso diario sin ejecución completada reciente; revisar estado.':last?.status!=='PASS'?'Última ejecución incompleta; historial preservado.':undefined}};
+  const archivedEvidence=options.includeArchivedEvidence?await readNcaabArchivedEvidence(displayRows,new Date().toISOString(),client):undefined;
+  return {status:'AVAILABLE',data:{...checkpoint.data,connection:'DAILY_FREE_PIPELINE',continuousSync:true,hostedPipelineReady:true,generatedAt:lastCompleted??checkpoint.data.generatedAt,observations:[...displayRows,...abstentions].sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at)||a.event_id.localeCompare(b.event_id)),models:[{...metrics,abstentions:abstentions.length},{id:'NCAAB_FREE_SCORE_V1_1',forecasts:0,abstentions:0,settled:0,wins:0,losses:0,winnerDenominator:0,accuracy:null}],lastRun:{status:last?.status??'NOT_RUN',completedAt:lastCompleted??null,providerCalls:Number(last?.provider_calls??0)},archivedEvidence,warning:stale?'Proceso diario sin ejecución completada reciente; revisar estado.':last?.status!=='PASS'?'Última ejecución incompleta; historial preservado.':undefined}};
  }catch{return {status:'UNAVAILABLE',warning:'NCAAB: no se pudo leer el historial diario. No se sustituyen métricas por ceros.'};}
 }
 type EspnTeam={id:string;homeAway:string;score?:string;team:{displayName?:string}};
