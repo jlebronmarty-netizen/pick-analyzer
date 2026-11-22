@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {gzipSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
-import {originalContext,readOriginalContexts} from '../src/lib/nba/decision-storage-original.mjs';
+import {archiveReadOptions,originalContext,readOriginalContexts} from '../src/lib/nba/decision-storage-original.mjs';
 test('private archive reads are disabled by default, bounded, hash checked, and reused only for identical objects',async()=>{
   const json=Buffer.from(JSON.stringify({data:[{pts:0}],meta:{next_cursor:null}}));
   const bytes=gzipSync(json), hash=createHash('sha256').update(json).digest('hex');
@@ -21,6 +21,29 @@ test('private archive reads are disabled by default, bounded, hash checked, and 
   assert.equal((await readOriginalContexts([manifest],[],ids,fetchObject,bytes.length)).length,1);
   assert.deepEqual(await readOriginalContexts([manifest],[{provider_game_id:11}],ids,fetchObject,bytes.length),[]);
   assert.equal(calls,1);
+});
+
+test('the display override and its warmed archive never supply a scheduled read',async()=>{
+  const env={NBA_DECISION_DISPLAY_ARCHIVE_READ_BYTES:'262144'};
+  const screen=archiveReadOptions(true,env), scheduled=archiveReadOptions(false,env);
+  assert.equal(screen.limit,262144);
+  assert.equal(scheduled.limit,0);
+  assert.notEqual(screen.cache,scheduled.cache);
+  assert.equal(archiveReadOptions(true,{}).cache,scheduled.cache);
+  assert.equal(archiveReadOptions(false,{...env,NBA_DECISION_ARCHIVE_READ_BYTES:'4096'}).limit,4096);
+  const json=Buffer.from(JSON.stringify([{pts:8}]));
+  const bytes=gzipSync(json), hash=createHash('sha256').update(json).digest('hex');
+  const manifest={season:2026,provider_game_id:37,source_captured_at:'2026-11-18T10:00:00Z',
+    storage_bucket:'nba-goat-2026-private',storage_object_path:'2026/37/player_stats/'+hash+'.json.gz',
+    response_sha256:hash,compressed_bytes:bytes.length,json_bytes:json.length,data_count:1};
+  const ids=new Set([37]);let downloads=0;
+  const read=({limit,cache})=>readOriginalContexts([manifest],[],ids,async()=>{downloads++;return bytes;},limit,cache);
+  assert.equal((await read(screen)).length,1);
+  assert.equal((await read(screen)).length,1);
+  assert.deepEqual(await read(scheduled),[]);
+  assert.deepEqual(await read({...scheduled,limit:1}),[]);
+  assert.deepEqual(await read({...screen,limit:0}),[]);
+  assert.equal(downloads,1);
 });
 
 test('reads the season writer array after verifying the original bytes and still rejects incomplete evidence',()=>{
