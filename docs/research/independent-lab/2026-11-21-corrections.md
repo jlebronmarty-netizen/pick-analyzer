@@ -106,6 +106,8 @@ La pantalla explica que el modelo de pretemporada usa historial congelado y no i
 
 Las pruebas incluyen escenarios adversariales de identidad, tiempo, precio, duplicados, reintentos y aislamiento de modelos; se conservan regresiones NBA Decision V1/V2 y de otros deportes. Los detalles del árbol final y comandos quedan en `verification.json`. Los tests de navegador NCAAB usan componentes de producción renderizados con una fixture sintética y el CSS compilado; comprueban lectura, accesibilidad del disclosure y ausencia de desbordamiento en escritorio y móvil. No equivalen a un acceso autenticado contra producción ni a una prueba de los filtros hidratados del panel.
 
+La comprobación autenticada de la previsualización detectó además un fallo real en el transporte de datos de Next: la API respondía 200, pero `/ncaab` devolvía 500 porque el mapa de evidencia usaba un prototipo nulo. Se corrigió a un objeto plano, conservando la validación estricta de las claves `espn:<dígitos>`. La regresión comprueba el prototipo de las props antes de serializarlas, la conservación exacta del DTO y el rechazo de claves especiales. El control de entrega incluye volver a consultar la página real; una prueba SSR aislada no cubre esa frontera servidor/cliente.
+
 Las consultas y replays de producción fueron de solo lectura. Los datos privados completos no se publican en Git; `verification.json` incluye conteos y huellas de los archivos de análisis. Para repetirlos deben conservarse los timestamps ISO de `to_jsonb`, tal como los devuelve PostgREST: cambiar su representación textual puede dar un desacuerdo de hash falso.
 
 Pendientes que requieren evidencia futura o una decisión separada:

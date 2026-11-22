@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "verifiedAtUtc": "2026-11-21T23:57:56.808234+00:00",
-  "verifiedAtPuertoRico": "2026-11-21T19:57:56.808234-04:00",
+  "verifiedAtUtc": "2026-11-22T00:13:13.203291+00:00",
+  "verifiedAtPuertoRico": "2026-11-21T20:13:13.203291-04:00",
   "baseCommit": "c374aa7e45728f1019d7fc4edf5439b0cfe98519",
-  "scope": "ISOLATED_REVIEW_BRANCH_NOT_DEPLOYED",
+  "scope": "ISOLATED_REVIEW_BRANCH_NOT_DEPLOYED_TO_PRODUCTION",
   "providerCalls": 0,
   "productionDatabaseWrites": 0,
   "newCrons": 0,
@@ -14,7 +14,7 @@
       "tests": 122,
       "pass": 122,
       "fail": 0,
-      "logSha256": "d65cb3b25482499f4d53778127068a1ef88eafeb37afd2f5cb149c356560a41b"
+      "logSha256": "20a9fb0b51798b0967968bfca8bd89d01ac7259ae1b4f0c4c2f4f2c3705f196c"
     },
     {
       "suite": "nba-decision",
@@ -58,7 +58,7 @@
     "pagesGenerated": 400,
     "typescript": "PASS",
     "configuration": "CI_PLACEHOLDERS_NO_PRODUCTION_CREDENTIALS",
-    "logSha256": "128781d2604aec7d6cf77f0cf08f25f9465d78b3774a32004a8cd581d6c02e3d",
+    "logSha256": "468294c7c7ed90b3c165c0393e803aff37ef936b1c2dd92491a55527a5321499",
     "productionSourceChangedSinceLocalBuild": false,
     "finalCommitVerification": "Existing GitHub workflow repeats typecheck and build for the exact PR head."
   },
@@ -260,7 +260,7 @@
     "src/components/model-learning/MultisportLearningCenter.tsx": "bfee1677a5b3392e42de60c36b3e4b74d4a6f1db55f2656a0fb9545255c8b58d",
     "src/lib/nba/model-version-evidence.ts": "34f111c09d88ab4e947daca4cc4862d370fba941ca6f912a574ca9244cf8e0af",
     "src/lib/nba/prediction-inputs-shadow.ts": "0e3a83bf3cd9ab1ad454ba81235cabf482c996367ff6e2b25d9379542d7c42cc",
-    "src/lib/ncaab-archived-evidence.ts": "c371fea046cd2fee1fcdcf4a300d7fdfe066d02d2c804c4ab16c0bae1b096bfd",
+    "src/lib/ncaab-archived-evidence.ts": "44340b4ca07a90a24a745ccb93284ab5b312ccf7e5ee4c29e52d2f368b174f98",
     "src/lib/ncaab-bounded-archive-reader.mjs": "334cd3659e2cbc296228c01694148a0f7a6fee29fef5d8af55f548ff853e69d0",
     "src/lib/ncaab-calibration-evidence.mjs": "2c4df985f8346ddcbe6efafabf13ca21d4223c9d530e6df08462d619d2496f2a",
     "src/lib/ncaab-checkpoint.ts": "955e832709b5c223ff6d1d43994b22815448a968e8da7d5dc69fd04c83605422",
@@ -282,7 +282,7 @@
     "src/services/ncaab-calibration-shadow-writer.service.ts": "980399e042dbb75de7146707518d83b8eaf5afccb89355eb9e5baa50a8cf5df5",
     "src/services/ncaab-daily.service.ts": "4287901e2123d836182dfb60211e29879f0cfca8fa78125676aa25bb23e5b7c1",
     "src/services/prediction-history.service.ts": "079263f08aa24e591b1e1a05259809e762dd40b798199ce1c6235b3da0ff9712",
-    "tests/dashboard-multisport/ncaab-archived-evidence.test.mjs": "2525aae857bbaeabc649e516ac59aff070c0d5966574a42a20a3d9de318608af",
+    "tests/dashboard-multisport/ncaab-archived-evidence.test.mjs": "8f2ac7b767f2d09064c1ad613dc85a1ff741c16625b183d7584bcb27aef90d91",
     "tests/fixtures/ncaab-archived-evidence.mjs": "db178f7c4aacc3883fdb61642c24ce8a9a823534deda26c598caa49df6215a95",
     "tests/nba-goat-operational.test.mjs": "206a65c86b2140462f41b2491175e3e5e6d23a89fcc4ea926f9ac9e23e81d667",
     "tests/nba-goat-provider.test.mjs": "dedac496493bb023450fabd13199089f71dc6fd0109177476f827596600b564f",
@@ -292,5 +292,13 @@
     "tests/ncaab-prospective-calibration.test.mjs": "d430689d13d9d43791ffbf973216b5ec6c29803b7145a1a94529d90f688c8ee1",
     "tests/product-experience/ncaab-archive.spec.ts": "d876cfa26301b083de47bfee280766f45648f3f6e4da18b01f4be6183b9426b0",
     "tests/fixtures/render-ncaab-archived-evidence.mjs": "8703d2283e1c09493360c5e428f7f4d927ddd1f069c1e2f1002accd2546c6818"
+  },
+  "previewRegression": {
+    "foundOnCommit": "19952a083132247297330091f68f2968a1bf50b8",
+    "apiStatus": 200,
+    "pageStatus": 500,
+    "cause": "Next RSC rejects null-prototype events map passed to the client component",
+    "fix": "Plain DTO with strict espn:<digits> keys; raw prototype and exact JSON roundtrip regression",
+    "requiredFinalVerification": "Authenticated GET /ncaab and /api/ncaab/overview on the final preview; evidence in PR #396"
   }
 }

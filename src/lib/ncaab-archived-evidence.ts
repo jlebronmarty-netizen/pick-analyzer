@@ -136,7 +136,9 @@ export function buildNcaabArchivedEvidence(input: {
     const latest = matches.filter(r => timestamp(r.captured_at) === timestamp(matches[0].captured_at));
     sources.set(date, latest);
   }
-  const events: Record<string, NcaabEventArchiveEvidence> = Object.create(null);
+  // This DTO crosses Next's Server/Client Component boundary. A null prototype
+  // is rejected there; keys are restricted to espn:<digits> before assignment.
+  const events: Record<string, NcaabEventArchiveEvidence> = {};
   const matchedEvents = new Set<string>();
   const counts = new Map<string, number>();
   for (const f of input.forecasts) counts.set(f.event_id, (counts.get(f.event_id) ?? 0) + 1);

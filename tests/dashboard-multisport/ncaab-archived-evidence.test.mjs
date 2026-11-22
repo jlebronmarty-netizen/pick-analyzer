@@ -115,6 +115,11 @@ test('spread sides must sum to zero and total sides must use the same positive l
 test('duplicate forecasts and review-required identity cannot create historical price claims',()=>{
   const f=archiveForecast();assert.equal(event(parse([archiveReceipt()],[f,f])).status,'BLOCKED');
   assert.equal(event(parse([archiveReceipt()],[{...f,review_required:true}])).status,'BLOCKED');
+  for(const event_id of ['__proto__','constructor','prototype']){
+    const result=parse([archiveReceipt()],[{...f,event_id}]);
+    assert.deepEqual(Object.keys(result.events),[]);
+    assert.equal(Object.getPrototypeOf(result.events),Object.prototype);
+  }
 });
 test('PR date window is explicit, missing neutral venue remains unknown and history is not broadly declared absent',()=>{
   assert.deepEqual(ncaabArchiveDates('2026-11-22T02:00:00Z'),['2026-11-20','2026-11-21','2026-11-22']);
@@ -148,6 +153,10 @@ test('presentation explains receipt time, actual sportsbook, neutral site and ab
 test('existing NCAAB dashboard integrates references without altering forecasts or claiming daily injury inputs',()=>{
   const report=structuredClone(getNcaabCheckpoint());assert.equal(report.status,'AVAILABLE');
   report.data.observations=[archiveForecast()];report.data.archivedEvidence=parse();
+  // Regression for the real /ncaab RSC boundary: JSON could serialize a
+  // null-prototype map, but Next rejects it when passing props to this client.
+  assert.equal(Object.getPrototypeOf(report.data.archivedEvidence.events),Object.prototype);
+  assert.deepEqual(JSON.parse(JSON.stringify(report)),report,'Dashboard props must remain plain transport DTOs');
   const before=JSON.stringify(report.data.observations);
   const html=renderToStaticMarkup(React.createElement(NcaabDashboard,{report}));
   for(const text of ['Cuotas y contexto archivados','DraftKings','no incorpora lesiones, quintetos ni forma reciente']){
