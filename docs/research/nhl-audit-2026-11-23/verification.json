@@ -49,7 +49,8 @@
         "digest": "6c61565fb77cb80b9219c7d7b3ea2b7c"
       }
     ],
-    "unchanged": true
+    "unchanged": true,
+    "postPreviewUnchanged": true
   },
   "production": {
     "deployment": "dpl_GYajmAvr5sZtFpVXUftPHZBRhUtB",
@@ -66,7 +67,8 @@
       "state": "READY",
       "externalPR": 395,
       "preservedByRebase": true
-    }
+    },
+    "postPreviewDeployment": "dpl_AJCLW29TdCUGWEbM6vQN3dztgbvq"
   },
   "tests": {
     "nhl": 162,
@@ -79,16 +81,85 @@
     "providerCredentialsUsed": false
   },
   "visual": {
-    "status": "LOCAL_CHROMIUM_SOCKET_RESTRICTED",
+    "status": "DESKTOP_BROWSER_PASS",
     "actualReportServerRender": "PASS",
-    "desktopScreenshot": false,
-    "mobileScreenshot": false
+    "reportFileSha256": "0bcd8b916346924ee7c14e0e09e5d0cd6dab6007f54e3ad6f4a33bddae104200",
+    "desktopScreenshotInspected": true,
+    "mobileScreenshot": false,
+    "mobileStatus": "NOT_PERFORMED",
+    "viewport": {
+      "width": 1348,
+      "height": 936
+    },
+    "horizontalOverflow": false,
+    "applicationErrorsObserved": 0,
+    "browserExtensionErrorsExcluded": true,
+    "verifiedFlows": [
+      "initial panel collapsed",
+      "button-triggered archive fetch",
+      "inventory matches live API",
+      "24-game four-way metrics",
+      "paired uncertainty",
+      "empty calibration bins",
+      "exclusions pagination 1 to 2 of 11"
+    ],
+    "localChromium": "SOCKET_RESTRICTED; desktop verified in connected cloud browser"
   },
   "preview": {
-    "status": "PENDING_PR_BUILD"
+    "status": "READY",
+    "deployment": "dpl_CR6Gf4Z8XohwdM58brjk7ksF1dbz",
+    "url": "https://pick-analyzer-pxt7u7i38-pick-analyzer.vercel.app/nhl",
+    "environment": "PREVIEW",
+    "vercelTarget": "staging",
+    "codeCommit": "1a6c7aa18421a3e421cbfc7f47f492124591444d",
+    "manualPreview": true,
+    "automaticResearchDeploymentsRemainDisabled": true,
+    "api": {
+      "path": "/api/nhl/research-audit",
+      "http": 200,
+      "cutoff": "2026-11-23T16:24:57.884Z",
+      "readComplete": true,
+      "fourWayGames": 24,
+      "moneylineCaptures": 3922,
+      "spreadCaptures": 1908,
+      "totalCaptures": 1908,
+      "runs": 912,
+      "selectedScheduleReceipts": 50,
+      "historicalMetricsMatch": true,
+      "providerCalls": 0,
+      "databaseWrites": 0
+    },
+    "runtimeErrorWarningQuery": {
+      "window": "15m",
+      "returnedRecords": 0
+    }
   },
   "providerCalls": 0,
   "databaseWrites": 0,
   "officialPromotion": false,
-  "initialBaseCommit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be"
+  "initialBaseCommit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+  "codeCommit": "1a6c7aa18421a3e421cbfc7f47f492124591444d",
+  "pullRequest": {
+    "number": 399,
+    "url": "https://github.com/jlebronmarty-netizen/pick-analyzer/pull/399",
+    "state": "OPEN",
+    "merged": false
+  },
+  "ci": {
+    "status": "PASS",
+    "codeCommit": "1a6c7aa18421a3e421cbfc7f47f492124591444d",
+    "workflowRun": 45215547281,
+    "fullBuild": "PASS",
+    "reportedWorkflows": 10,
+    "successfulWorkflows": 10
+  },
+  "reproductionArchive": {
+    "filename": "nhl-audit-inputs-2026-11-23.zip",
+    "bytes": 5247318,
+    "sha256": "b84b9122e1812e65f1c47a1e347fc2eb14784de971140338a85e9c3d7302dc66",
+    "inputFiles": 13,
+    "zipEntries": 15,
+    "allManifestHashesVerified": true,
+    "storedWithDelivery": true
+  }
 }

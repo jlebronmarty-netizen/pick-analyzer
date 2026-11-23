@@ -7,7 +7,7 @@
 ## Estado y alcance
 
 - Repositorio: `jlebronmarty-netizen/pick-analyzer`; base inicial verificada `a3d2a1a15ba4afa8594c933efe2a1c3de01458be`; rama actualizada sobre `ca2d8450dd0f00569614844197b383bb830e6711` tras la integración paralela del PR #395 de NBA.
-- Rama: `research/nhl-data-evaluation-20261123`. Este trabajo se entrega como PR revisable. No fusiona ni despliega en producción.
+- Rama: `research/nhl-data-evaluation-20261123`. [PR #399 abierto y revisable](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/399), sin fusionar. Código validado: `1a6c7aa18421a3e421cbfc7f47f492124591444d`; las actualizaciones posteriores de esta entrega solo documentan la verificación. [Vista previa NHL](https://pick-analyzer-pxt7u7i38-pick-analyzer.vercel.app/nhl), `READY`. No se despliega este trabajo en producción.
 - Supabase `ynuocvexviorgdjrfthw`: `ACTIVE_HEALTHY` durante la revisión. Se usaron exclusivamente consultas de lectura.
 - Vercel producción: `dpl_GYajmAvr5sZtFpVXUftPHZBRhUtB`, `READY`, commit inicial. Durante esta auditoría otro chat integró #395 y producción pasó a `dpl_AJCLW29TdCUGWEbM6vQN3dztgbvq`, `READY`, commit `ca2d8450dd0f00569614844197b383bb830e6711`; se preservó ese avance. `/nhl`, `/api/nhl/late-v6-readiness` y `/api/nhl/exact-circa-market-research` respondieron HTTP 200 antes de los cambios.
 - Se revisaron las ramas y PR NHL. El PR #372, sobre reconstrucción reglamentaria/OT/SO V8, sigue abierto y en draft; sus resultados anteriores no se presentan como código desplegado. Los PR #397 y #398 de continuidad/NBA/navegación tampoco se incorporan implícitamente.
@@ -149,9 +149,19 @@ No escribir credenciales en comandos compartidos ni documentos. La consulta SQL 
 
 Verificación local: **162 pruebas NHL y 26 de interfaz/integración aprobadas**, además de TypeScript y compilación completa. El primer intento de build carecía del placeholder `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` que exige el proyecto; se corrigió usando la configuración de CI existente. El render del reporte real confirmó 142/5,112/24 y las métricas comunes sin `NaN` ni valores indefinidos. La revisión visual mediante Chromium local quedó bloqueada por la restricción de sockets del entorno; el estado de Preview y revisión visual final se registra en `verification.json`.
 
+### Comprobación publicada
+
+- El [workflow NHL de este PR](https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/45215547281) completó las pruebas y el build. Los diez workflows devueltos para el commit de código finalizaron en `SUCCESS`, incluidos los otros tres controles NHL y seis controles existentes de MLB.
+- Vercel `dpl_CR6Gf4Z8XohwdM58brjk7ksF1dbz`: Preview `READY`, commit de código `1a6c7aa…`. Se solicitó una vista previa puntual porque `vercel.json` ya desactiva los despliegues automáticos de `research/*`; esa configuración no se cambió. La API de Vercel denomina `staging` a este destino de Preview.
+- `GET /api/nhl/research-audit` devolvió HTTP 200, lectura completa de las 13 fuentes y cero llamadas/escrituras. Su corte en vivo fue `2026-11-23T16:24:57.884Z` (12:24:57 p. m. PR): 3,922 capturas ML, 1,908 puck line y 1,908 total; 912 ejecuciones. Los ciclos existentes añadieron siete capturas por mercado después del informe histórico. La cohorte común, sus métricas y las pruebas de variables coinciden con el corte conservado.
+- Navegador de escritorio, 1,348 × 936: apertura del panel, consulta bajo demanda, inventario, cuatro referencias, intervalos, bandas vacías de calibración y paginación de exclusiones de 1 a 2/11 verificados. Sin desbordamiento horizontal ni errores de aplicación observados. Se inspeccionaron capturas; no se publicaron archivos de navegador. La revisión visual móvil no se realizó.
+- Tras la comprobación, producción seguía en `dpl_AJCLW29TdCUGWEbM6vQN3dztgbvq` / `ca2d8450`, y las cuatro huellas históricas permanecían idénticas. La consulta de logs de errores/advertencias del Preview no devolvió registros.
+
+La evidencia SSR del archivo comprometido corresponde al SHA256 `0bcd8b916346924ee7c14e0e09e5d0cd6dab6007f54e3ad6f4a33bddae104200`. El paquete separado `nhl-audit-inputs-2026-11-23.zip` entregado con este trabajo conserva los 13 JSON originales y el manifiesto para reproducir offline el corte histórico; el código y los resultados permanecen versionados en este PR.
+
 ## 7. Pendientes y continuidad
 
-1. Revisar el PR y su Preview antes de integrar la interfaz y las correcciones de calidad. No activar nuevos candidatos ni fusionar PR #372 implícitamente.
+1. Revisar el PR #399 y su Preview, y completar la comprobación visual móvil antes de integrar la interfaz y las correcciones de calidad. No activar nuevos candidatos ni fusionar PR #372 implícitamente.
 2. Al alcanzar 30 V6 independientes, ejecutar la misma comparación y examinar intervalos, fechas y calibración. Es una revisión inicial; ni 30 ni 100 partidos garantizan mejora.
 3. Mantener las fechas, las cinco variantes y el corte de esta investigación. Si se autoriza una etapa posterior, congelar antes del juego probabilidades de candidatos con versiones y features; evaluar luego el periodo futuro reservado sin ajustar parámetros sobre sus resultados.
 4. Revisar las tres discrepancias estadísticas frente a otra evidencia original guardada o una captura futura autorizada, conservando procedencia. Nunca alterar retrospectivamente congelaciones.

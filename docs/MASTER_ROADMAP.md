@@ -2,7 +2,7 @@
 
 Implementada en rama de revisión la auditoría A–E de datos NHL y su panel: cobertura por fecha/equipo, cuatro referencias Moneyline comparables con tiempos e incertidumbre, pruebas cronológicas separadas, líneas exactas y motivos de exclusión. Evidencia: [NHL 2026-11-23](research/nhl-audit-2026-11-23/README.md), reporte JSON y base equipo-partido. Se recuperan contratos excluidos por acentos y se bloquean estadísticas incompatibles en futura evidencia V7. Se preservan PR de otros chats y el V8 abierto #372.
 
-Pendientes: revisión/Preview/integración del PR; revisión inicial V6 al alcanzar 30 partidos (actual: 24; ningún umbral garantiza mejora); futuro periodo independiente para variantes fijas; confirmación/identidad previa de porteros; reglas exactas de Circa y hora publicada; mercado y liquidación de props de tiros/atajadas. Las cuatro pruebas evaluables de 19 partidos son inconclusas, porteros no tiene muestra cronológica suficiente. No promover modelos, certificar ROI/CLV/FanDuel ni declarar player props completo.
+PR #399 abierto, CI y Preview aprobados; flujo de escritorio y API con datos reales verificados. Pendientes: revisión del PR, comprobación visual móvil e integración; revisión inicial V6 al alcanzar 30 partidos (actual: 24; ningún umbral garantiza mejora); futuro periodo independiente para variantes fijas; confirmación/identidad previa de porteros; reglas exactas de Circa y hora publicada; mercado y liquidación de props de tiros/atajadas. Las cuatro pruebas evaluables de 19 partidos son inconclusas, porteros no tiene muestra cronológica suficiente. No promover modelos, certificar ROI/CLV/FanDuel ni declarar player props completo.
 
 ## 2026-11-21 · Laboratorio independiente · Correcciones de entradas y evidencia
 
