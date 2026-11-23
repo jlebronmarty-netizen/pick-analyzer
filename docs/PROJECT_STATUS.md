@@ -16,6 +16,10 @@ Se prepara la corrección autorizada de navegación: portada con deportes y accu
 
 Rama de revisión desde `c374aa7e`: nueva cohorte NBA `nba_prediction_engine_v1_1_inputs_shadow` con precios pareados reales, entradas reproducibles y persistencia que conserva la primera captura. Se corrigen el efecto direccional de la penalización global y los defaults de mercado; resultados y aprendizaje se separan por versión, mercado y juego. NCAAB reproduce 91/91 congelaciones y añade evidencia completa, lectura paginada, incertidumbre pareada y clasificación secuencial sin afirmar holdout validado. El panel distingue cuotas archivadas de ejecución, operador y temporalidad. Sin backfills, proveedores, crons nuevos ni promoción. Integración y comprobación en producción pendientes. [Alcance, pruebas y límites](research/independent-lab/2026-11-21-corrections.md).
 
+## 2026-11-23 · NBA · Mercados con cuotas y cero preferencias
+
+Al corte de las 5:30 p. m. PR, los mercados de partido completo tenían 62 lados con contrato pendiente y los props 1,548 con historial incompleto. La propuesta muestra cuota y causa al entrar a una pestaña sin preferencias. [Evidencia y cruce de archivos](audits/2026-11-23-nba-market-tabs.md).
+
 ## 2026-11-21 · Mercados NBA sin preferencias
 
 El tablero NBA cuenta los lados capturados y detalla los motivos de exclusión al quedar vacía una pestaña. El conteo y los registros pendientes siguen los filtros de partido, período y búsqueda.
