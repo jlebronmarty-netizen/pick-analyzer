@@ -1,0 +1,64 @@
+{
+  "cutoff": "2026-11-23T15:52:27.459Z",
+  "complete": true,
+  "files": {
+    "contexts": {
+      "rows": 142,
+      "sha256": "bc702376a0b55fafed788a13ba494fee87dc4757535607c894a23e62b7c4ec72"
+    },
+    "predictions": {
+      "rows": 137,
+      "sha256": "3580de49bf101c250232e77f58a45ca9da83131e85be5b88af9aea5c4ec4c7fa"
+    },
+    "outcomes": {
+      "rows": 130,
+      "sha256": "958271ab326466d20bbeec2f05af4359ba23c523d8a0e68212c5e75af2552118"
+    },
+    "early": {
+      "rows": 56,
+      "sha256": "7cc750d51814bc33c22898f4bea43511dd46bcf109852f239279077f3bde362f"
+    },
+    "late": {
+      "rows": 24,
+      "sha256": "6fdad9ca59ed6e5800fbd8b76f82d42e2043333417def40e82e828823e42732b"
+    },
+    "goalies": {
+      "rows": 6,
+      "sha256": "65804e64ff6cd05af678d727b484fa486bfe91f8d653d8384ef30a173bc8928f"
+    },
+    "specialTeams": {
+      "rows": 8,
+      "sha256": "ff31aadc58868665d5802881912f2537cb18b54b7cad4b0fc5a63fec05367a77"
+    },
+    "quotes": {
+      "rows": 3915,
+      "sha256": "d7e04edeb61d17f4a7e3d2d5034a4c13d0f0bac580230707101c50b6ae6573e6"
+    },
+    "runs": {
+      "rows": 911,
+      "sha256": "204f2438fbc5e4f70e2e1780e982c65abba4a3c00ce798b08407a13fa5ca5325"
+    },
+    "matchups": {
+      "rows": 3324,
+      "sha256": "1667cc4f7c4b2a49d1a2d3910853a15ff9eead55d97e6de3705a97bfa0c71373"
+    },
+    "sources": {
+      "rows": 910,
+      "sha256": "ac9c31e6deb38289dc24cf5d357668b82ac0f3f27e6b249497c93de22062b68b"
+    },
+    "sourceMetadata": {
+      "rows": 1362,
+      "sha256": "5a9d953e04e6f876ed316d961044c2d938491117131c8604499d9709fd438b98"
+    },
+    "diagnostics": {
+      "rows": 130,
+      "sha256": "4ef51dd27833a657d5e000956c740d24483aac4b96122572f8c23a7f436f31ec"
+    }
+  },
+  "readEvidence": {
+    "method": "Read-only Supabase SQL exports ordered and paginated at <=500 rows; source receipts deduplicated by URL + original SHA256 keeping earliest capture.",
+    "project": "ynuocvexviorgdjrfthw",
+    "databaseWrites": 0,
+    "providerCalls": 0
+  }
+}
