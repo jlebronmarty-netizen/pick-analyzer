@@ -1,0 +1,47 @@
+{
+  "artifact":"MLB_DAILY_MARKET_COVERAGE_BOARD_20260925",
+  "research_only":true,
+  "date":"2026-09-25",
+  "scope":"persisted approved-prop sportsbook snapshots only; exact market+line+side matching",
+  "summary":{
+    "total_unique_market_player_book_rows":11550,
+    "exact_contract_rows":1007,
+    "pct_rows_covered":8.72,
+    "total_distinct_surfaces":99,
+    "covered_distinct_surfaces":9,
+    "games_with_quotes":8,
+    "games_with_any_exact_contract":8
+  },
+  "covered_contracts":[
+    {"label":"Batter Walks U0.5","games":8,"players":132,"books":3,"rows":368},
+    {"label":"RBI U0.5","games":8,"players":153,"books":3,"rows":292},
+    {"label":"Batter Doubles U0.5","games":8,"players":152,"books":2,"rows":283},
+    {"label":"Pitcher ER O1.5","games":7,"players":8,"books":3,"rows":20},
+    {"label":"Pitcher Outs O14.5","games":5,"players":5,"books":4,"rows":18},
+    {"label":"Batter Hits U1.5","games":7,"players":8,"books":2,"rows":10},
+    {"label":"Pitcher K O3.5","games":3,"players":3,"books":4,"rows":9},
+    {"label":"Pitcher K U6.5","games":3,"players":3,"books":3,"rows":5},
+    {"label":"Pitcher Walks U2.5","games":2,"players":2,"books":1,"rows":2}
+  ],
+  "interpretation":{
+    "surface_coverage_pct":9.09,
+    "row_coverage_pct":8.72,
+    "game_reach_pct":100.0,
+    "note":"Coverage measures exact contract compatibility, not model qualification. A covered quote row can still be NO_PLAY or fail identity/pregame/price gates."
+  },
+  "next_research_focus":[
+    "high-frequency YES ladders are currently not covered by UNDER/OVER contracts",
+    "batter hits 0.5 is high-frequency but failed >=75% signal research",
+    "total bases 1.5/3.5 are high-frequency but failed external/signal gates",
+    "pitcher walks 1.5 is common but both directions failed development",
+    "prioritize entirely new high-frequency market families or genuinely different features rather than threshold rescue"
+  ],
+  "boundaries":{
+    "no_line_extrapolation":true,
+    "no_side_aliasing_yes_to_over":true,
+    "no_threshold_rescue":true,
+    "no_official_picks":true,
+    "apostar_disabled":true,
+    "no_historical_odds_api_spend":true
+  }
+}
