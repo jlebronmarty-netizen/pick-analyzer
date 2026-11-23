@@ -1,0 +1,555 @@
+{
+  "deploymentCommit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+  "checks": [
+    {
+      "path": "/nba-decision-board",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:40:52 GMT",
+      "htmlBytes": 34324,
+      "flightErrors": 0,
+      "navigationEvidence": "ui-labels.json"
+    },
+    {
+      "path": "/api/nba/decision-board",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:40:55 GMT",
+      "arrays": {
+        "summary.unmatchedHoopsGameIds": {
+          "length": 0,
+          "jugada": 0
+        },
+        "games": {
+          "length": 5,
+          "jugada": 0
+        },
+        "rows.ml": {
+          "length": 10,
+          "jugada": 0
+        },
+        "rows.spread": {
+          "length": 10,
+          "jugada": 0
+        },
+        "rows.total": {
+          "length": 12,
+          "jugada": 0
+        },
+        "rows.props": {
+          "length": 842,
+          "jugada": 0
+        },
+        "rows.periods": {
+          "length": 280,
+          "jugada": 0
+        },
+        "preferredRows.ml": {
+          "length": 0,
+          "jugada": 0
+        },
+        "preferredRows.spread": {
+          "length": 0,
+          "jugada": 0
+        },
+        "preferredRows.total": {
+          "length": 0,
+          "jugada": 0
+        },
+        "preferredRows.props": {
+          "length": 0,
+          "jugada": 0
+        },
+        "preferredRows.periods": {
+          "length": 61,
+          "jugada": 0
+        },
+        "top25": {
+          "length": 25,
+          "jugada": 0
+        },
+        "warnings": {
+          "length": 5,
+          "jugada": 0
+        },
+        "evidence.readIssues": {
+          "length": 0,
+          "jugada": 0
+        },
+        "evidence.marketCaptureIssues": {
+          "length": 3,
+          "jugada": 0
+        },
+        "evidence.quarantinedPropGameIds": {
+          "length": 1,
+          "jugada": 0
+        }
+      }
+    },
+    {
+      "path": "/api/nba/decision-learning",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:40:50 GMT",
+      "status": "EXPLORATORY_PROSPECTIVE_SHADOW"
+    },
+    {
+      "path": "/api/market-data/nba/model-report",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:40:45 GMT",
+      "status": "AVAILABLE",
+      "selectedModelVersion": "nba_prediction_engine_v1",
+      "models": 1,
+      "versions": [
+        {
+          "modelVersion": "nba_prediction_engine_v1",
+          "rows": 93,
+          "metrics": [
+            {
+              "market": "moneyline",
+              "rows": 49,
+              "uniqueGames": 49,
+              "settledUniqueGames": 45,
+              "pending": 4,
+              "wins": 29,
+              "losses": 16,
+              "pushes": 0,
+              "accuracy": 0.6444444444444445
+            },
+            {
+              "market": "spread",
+              "rows": 27,
+              "uniqueGames": 26,
+              "settledUniqueGames": 25,
+              "pending": 1,
+              "wins": 12,
+              "losses": 14,
+              "pushes": 0,
+              "accuracy": 0.46153846153846156
+            },
+            {
+              "market": "total",
+              "rows": 17,
+              "uniqueGames": 16,
+              "settledUniqueGames": 15,
+              "pending": 1,
+              "wins": 8,
+              "losses": 8,
+              "pushes": 0,
+              "accuracy": 0.5
+            }
+          ]
+        }
+      ],
+      "readOnly": true
+    },
+    {
+      "path": "/api/nba/goat/audit",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:40:48 GMT",
+      "status": "ATTENTION",
+      "policy": {
+        "autoApply": false,
+        "autoPromotion": false,
+        "officialPicksModified": false,
+        "productionModelFormulaChanged": false
+      },
+      "runtime": {
+        "module": "NBA_GOAT_ARCHIVE_SHADOW_V1",
+        "provider": "balldontlie",
+        "checked_at": "2026-11-22T00:40:46.975Z",
+        "season": "2026-27",
+        "read_only": true,
+        "provider_calls": 0,
+        "database_writes": 0,
+        "legacy_provider_fallback": false,
+        "scheduler_enabled": true,
+        "continuous_enabled": true,
+        "events": 4,
+        "quotes_examined": 24,
+        "fresh_pregame_quotes": 24,
+        "verified_contract_quotes": 24,
+        "team_stats_rows": 30,
+        "team_stats_fresh": true,
+        "missing_current_team_stats": [],
+        "goat_shadow_pending": 6,
+        "legacy_shadow_pending": 61,
+        "pending_original_shadow": 67,
+        "rows_emitted_today": 6,
+        "last_archive": {
+          "status": "completed",
+          "completed_at": "2026-11-22T00:30:26.99+00:00",
+          "summary": {
+            "errors": [],
+            "module": "NBA_SHARED_ARCHIVE_V1",
+            "quotes": 30,
+            "planned": 5,
+            "eligible": 5,
+            "completed": 5,
+            "snapshots": 5,
+            "legacy_rows": 30,
+            "schedule_days": [
+              "2026-11-20",
+              "2026-11-21"
+            ],
+            "models_written": false,
+            "gateway_requests": 7,
+            "settlement_performed": false
+          }
+        },
+        "last_schedule_received_at": "2026-11-22T00:30:16.987+00:00",
+        "pregame_context": {
+          "snapshot_id": "4450a8821e27fb1fb37d7da401608cbc13407c061dbd8e04509622fb78aaf72a",
+          "captured_at": "2026-11-21T23:00:28.512+00:00",
+          "coverage": {
+            "teams": 10,
+            "failures": [],
+            "injuryRows": 57,
+            "requestCap": 8,
+            "injuryPages": 1,
+            "providerCalls": 2,
+            "upcomingGames": 5,
+            "injuriesComplete": true,
+            "usedAsScoringInput": false,
+            "projectedLineupRows": 10,
+            "projectedLineupPages": 1,
+            "projectedLineupsComplete": true,
+            "sourceScheduleSnapshotIds": [
+              "18d329525dad9b800d2958b4f22fd20d6e61848e60cc24d9ddda89f44d8b3dd7"
+            ]
+          }
+        },
+        "gate": {
+          "allowed": true,
+          "blockers": [],
+          "continuous": true,
+          "repair": false,
+          "perRunWriteCap": 3,
+          "directProviderCalls": 0
+        },
+        "classification": "NBA_GOAT_SHADOW_PREREQUISITES_READY",
+        "issues": {},
+        "note": "GOAT prices are not predictions. Legacy shadow rows remain separate and do not block the GOAT cohort. New contracts are statistical shadow evidence, not a claim of user sportsbook settlement."
+      },
+      "cohort": {
+        "policy": "NBA_GOAT_ARCHIVE_SHADOW_V1",
+        "modelVersion": "nba_prediction_engine_v1",
+        "modelVersions": [
+          "nba_prediction_engine_v1"
+        ],
+        "models": 1,
+        "aggregationScope": "SELECTED_MODEL_VERSION",
+        "totalMarkets": 93,
+        "settledMarkets": 87,
+        "pendingMarkets": 6,
+        "uniqueGames": 55,
+        "settledUniqueGames": 51,
+        "byMarket": [
+          {
+            "market": "moneyline",
+            "rows": 49,
+            "uniqueGames": 49,
+            "settledUniqueGames": 45,
+            "pending": 4,
+            "wins": 29,
+            "losses": 16,
+            "pushes": 0,
+            "accuracy": 0.6444444444444445,
+            "modelVersion": "nba_prediction_engine_v1",
+            "settled": 45,
+            "averageModelProbability": 88,
+            "probabilityUnit": "PERCENT_0_100",
+            "independentGames": 45,
+            "independentWins": 29,
+            "independentLosses": 16,
+            "independentAccuracy": 0.6444444444444445,
+            "wilson95": {
+              "lower": 0.4984,
+              "upper": 0.7678,
+              "confidence": 0.95,
+              "sample": 45
+            },
+            "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+            "duplicateRowsExcluded": 0,
+            "invalidRowsExcluded": 0
+          },
+          {
+            "market": "spread",
+            "rows": 27,
+            "uniqueGames": 26,
+            "settledUniqueGames": 25,
+            "pending": 1,
+            "wins": 12,
+            "losses": 14,
+            "pushes": 0,
+            "accuracy": 0.46153846153846156,
+            "modelVersion": "nba_prediction_engine_v1",
+            "settled": 26,
+            "averageModelProbability": 46.193200000000004,
+            "probabilityUnit": "PERCENT_0_100",
+            "independentGames": 25,
+            "independentWins": 11,
+            "independentLosses": 14,
+            "independentAccuracy": 0.44,
+            "wilson95": {
+              "lower": 0.2667,
+              "upper": 0.6293,
+              "confidence": 0.95,
+              "sample": 25
+            },
+            "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+            "duplicateRowsExcluded": 1,
+            "invalidRowsExcluded": 0
+          },
+          {
+            "market": "total",
+            "rows": 17,
+            "uniqueGames": 16,
+            "settledUniqueGames": 15,
+            "pending": 1,
+            "wins": 8,
+            "losses": 8,
+            "pushes": 0,
+            "accuracy": 0.5,
+            "modelVersion": "nba_prediction_engine_v1",
+            "settled": 16,
+            "averageModelProbability": 64.43466666666667,
+            "probabilityUnit": "PERCENT_0_100",
+            "independentGames": 15,
+            "independentWins": 7,
+            "independentLosses": 8,
+            "independentAccuracy": 0.4666666666666667,
+            "wilson95": {
+              "lower": 0.2481,
+              "upper": 0.6988,
+              "confidence": 0.95,
+              "sample": 15
+            },
+            "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+            "duplicateRowsExcluded": 1,
+            "invalidRowsExcluded": 0
+          }
+        ],
+        "byVersion": [
+          {
+            "modelVersion": "nba_prediction_engine_v1",
+            "total": {
+              "rows": 93,
+              "uniqueGames": 55,
+              "settledUniqueGames": 51,
+              "pending": 6,
+              "wins": 49,
+              "losses": 38,
+              "pushes": 0
+            },
+            "byMarket": [
+              {
+                "market": "moneyline",
+                "rows": 49,
+                "uniqueGames": 49,
+                "settledUniqueGames": 45,
+                "pending": 4,
+                "wins": 29,
+                "losses": 16,
+                "pushes": 0,
+                "accuracy": 0.6444444444444445,
+                "modelVersion": "nba_prediction_engine_v1",
+                "settled": 45,
+                "averageModelProbability": 88,
+                "probabilityUnit": "PERCENT_0_100",
+                "independentGames": 45,
+                "independentWins": 29,
+                "independentLosses": 16,
+                "independentAccuracy": 0.6444444444444445,
+                "wilson95": {
+                  "lower": 0.4984,
+                  "upper": 0.7678,
+                  "confidence": 0.95,
+                  "sample": 45
+                },
+                "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+                "duplicateRowsExcluded": 0,
+                "invalidRowsExcluded": 0
+              },
+              {
+                "market": "spread",
+                "rows": 27,
+                "uniqueGames": 26,
+                "settledUniqueGames": 25,
+                "pending": 1,
+                "wins": 12,
+                "losses": 14,
+                "pushes": 0,
+                "accuracy": 0.46153846153846156,
+                "modelVersion": "nba_prediction_engine_v1",
+                "settled": 26,
+                "averageModelProbability": 46.193200000000004,
+                "probabilityUnit": "PERCENT_0_100",
+                "independentGames": 25,
+                "independentWins": 11,
+                "independentLosses": 14,
+                "independentAccuracy": 0.44,
+                "wilson95": {
+                  "lower": 0.2667,
+                  "upper": 0.6293,
+                  "confidence": 0.95,
+                  "sample": 25
+                },
+                "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+                "duplicateRowsExcluded": 1,
+                "invalidRowsExcluded": 0
+              },
+              {
+                "market": "total",
+                "rows": 17,
+                "uniqueGames": 16,
+                "settledUniqueGames": 15,
+                "pending": 1,
+                "wins": 8,
+                "losses": 8,
+                "pushes": 0,
+                "accuracy": 0.5,
+                "modelVersion": "nba_prediction_engine_v1",
+                "settled": 16,
+                "averageModelProbability": 64.43466666666667,
+                "probabilityUnit": "PERCENT_0_100",
+                "independentGames": 15,
+                "independentWins": 7,
+                "independentLosses": 8,
+                "independentAccuracy": 0.4666666666666667,
+                "wilson95": {
+                  "lower": 0.2481,
+                  "upper": 0.6988,
+                  "confidence": 0.95,
+                  "sample": 15
+                },
+                "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+                "duplicateRowsExcluded": 1,
+                "invalidRowsExcluded": 0
+              }
+            ],
+            "sample": {
+              "modelVersion": "nba_prediction_engine_v1",
+              "market": "moneyline",
+              "sampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+              "settled": 45,
+              "uniqueGames": 45,
+              "wins": 29,
+              "losses": 16,
+              "accuracy": 0.6444444444444445,
+              "brier": 0.2846222222222223,
+              "markets": [
+                {
+                  "market": "moneyline",
+                  "rows": 49,
+                  "uniqueGames": 49,
+                  "settledUniqueGames": 45,
+                  "pending": 4,
+                  "wins": 29,
+                  "losses": 16,
+                  "pushes": 0,
+                  "accuracy": 0.6444444444444445,
+                  "modelVersion": "nba_prediction_engine_v1",
+                  "settled": 45,
+                  "averageModelProbability": 88,
+                  "probabilityUnit": "PERCENT_0_100",
+                  "independentGames": 45,
+                  "independentWins": 29,
+                  "independentLosses": 16,
+                  "independentAccuracy": 0.6444444444444445,
+                  "wilson95": {
+                    "lower": 0.4984,
+                    "upper": 0.7678,
+                    "confidence": 0.95,
+                    "sample": 45
+                  },
+                  "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+                  "duplicateRowsExcluded": 0,
+                  "invalidRowsExcluded": 0
+                },
+                {
+                  "market": "spread",
+                  "rows": 27,
+                  "uniqueGames": 26,
+                  "settledUniqueGames": 25,
+                  "pending": 1,
+                  "wins": 12,
+                  "losses": 14,
+                  "pushes": 0,
+                  "accuracy": 0.46153846153846156,
+                  "modelVersion": "nba_prediction_engine_v1",
+                  "settled": 26,
+                  "averageModelProbability": 46.193200000000004,
+                  "probabilityUnit": "PERCENT_0_100",
+                  "independentGames": 25,
+                  "independentWins": 11,
+                  "independentLosses": 14,
+                  "independentAccuracy": 0.44,
+                  "wilson95": {
+                    "lower": 0.2667,
+                    "upper": 0.6293,
+                    "confidence": 0.95,
+                    "sample": 25
+                  },
+                  "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+                  "duplicateRowsExcluded": 1,
+                  "invalidRowsExcluded": 0
+                },
+                {
+                  "market": "total",
+                  "rows": 17,
+                  "uniqueGames": 16,
+                  "settledUniqueGames": 15,
+                  "pending": 1,
+                  "wins": 8,
+                  "losses": 8,
+                  "pushes": 0,
+                  "accuracy": 0.5,
+                  "modelVersion": "nba_prediction_engine_v1",
+                  "settled": 16,
+                  "averageModelProbability": 64.43466666666667,
+                  "probabilityUnit": "PERCENT_0_100",
+                  "independentGames": 15,
+                  "independentWins": 7,
+                  "independentLosses": 8,
+                  "independentAccuracy": 0.4666666666666667,
+                  "wilson95": {
+                    "lower": 0.2481,
+                    "upper": 0.6988,
+                    "confidence": 0.95,
+                    "sample": 15
+                  },
+                  "wilsonSampleUnit": "FIRST_FROZEN_ROW_PER_VERSION_MARKET_GAME",
+                  "duplicateRowsExcluded": 1,
+                  "invalidRowsExcluded": 0
+                }
+              ]
+            },
+            "calibrationAudit": {
+              "modelVersion": "nba_prediction_engine_v1",
+              "market": "moneyline",
+              "moneylineSettled": 45,
+              "moneylineContractRows": 45,
+              "distinctMoneylineProbabilities": [
+                88
+              ],
+              "sourceProbabilityUnit": "PERCENT_0_100",
+              "accuracyUnit": "FRACTION_0_1",
+              "observedMoneylineAccuracy": 0.6444444444444445,
+              "moneylineWilson95": {
+                "lower": 0.4984,
+                "upper": 0.7678,
+                "confidence": 0.95,
+                "sample": 45
+              },
+              "prospectiveHoldoutVerified": false,
+              "productionFormulaChanged": false
+            }
+          }
+        ],
+        "allVersionsTotal": {
+          "rows": 93,
+          "uniqueGames": 55,
+          "models": 1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "deploymentId": "dpl_GYajmAvr5sZtFpVXUftPHZBRhUtB",
+  "projectId": "prj_hmkAkzUTe3b7M7yedvshGl5L9rP7",
+  "environment": "production",
+  "since": "2026-11-22T00:38:52Z",
+  "returnedUntil": "2026-11-22T00:42:04.286Z",
+  "level": [
+    "error",
+    "warning",
+    "fatal"
+  ],
+  "limit": 30,
+  "result": "No logs found for the specified criteria."
+}

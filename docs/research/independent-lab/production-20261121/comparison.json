@@ -1,0 +1,59 @@
+{
+  "baseline_at": "2026-11-22 00:30:52.466181+00",
+  "checked_at": "2026-11-22 00:39:10.711864+00",
+  "production_commit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+  "deployment": "dpl_GYajmAvr5sZtFpVXUftPHZBRhUtB",
+  "checks": [
+    {
+      "scope": "nba_goat_frozen_fields",
+      "before_rows": 93,
+      "after_rows": 93,
+      "sha256_before": "98e09921f760cfa22654cf64536408ceff197a7225c966e365bae8977d2f9667",
+      "sha256_after": "98e09921f760cfa22654cf64536408ceff197a7225c966e365bae8977d2f9667",
+      "unchanged": true
+    },
+    {
+      "scope": "nba_v1_forecasts",
+      "before_rows": 963,
+      "after_rows": 963,
+      "sha256_before": "717ce3d74839ef3329c3e85eddd441ef0c5bbd8536494f8e1549fb1053095375",
+      "sha256_after": "717ce3d74839ef3329c3e85eddd441ef0c5bbd8536494f8e1549fb1053095375",
+      "unchanged": true
+    },
+    {
+      "scope": "nba_v1_outcomes",
+      "before_rows": 693,
+      "after_rows": 693,
+      "sha256_before": "ecf3ad05ea72e8405ab946f813f93663e1ede3e5de38be4defedfe78a413a874",
+      "sha256_after": "ecf3ad05ea72e8405ab946f813f93663e1ede3e5de38be4defedfe78a413a874",
+      "unchanged": true
+    },
+    {
+      "scope": "nba_v2_forecasts",
+      "before_rows": 40,
+      "after_rows": 40,
+      "sha256_before": "0c2d0afcdd122c9cbe1ee32d09f5f2c58302e60450190f987d87f6ca5af079d7",
+      "sha256_after": "0c2d0afcdd122c9cbe1ee32d09f5f2c58302e60450190f987d87f6ca5af079d7",
+      "unchanged": true
+    },
+    {
+      "scope": "nba_v2_judgments",
+      "before_rows": 15,
+      "after_rows": 15,
+      "sha256_before": "09785d81120846d0767855838595fd1c827df03e407544e5f63847d08e53287d",
+      "sha256_after": "09785d81120846d0767855838595fd1c827df03e407544e5f63847d08e53287d",
+      "unchanged": true
+    },
+    {
+      "scope": "ncaab_calibration",
+      "before_rows": 91,
+      "after_rows": 91,
+      "sha256_before": "2c03e01fcc2dac21be81ba2ad7ea54fda4a0a185a165c1a1e8386cf8cd6dd0f2",
+      "sha256_after": "2c03e01fcc2dac21be81ba2ad7ea54fda4a0a185a165c1a1e8386cf8cd6dd0f2",
+      "unchanged": true
+    }
+  ],
+  "all_unchanged": true,
+  "provider_calls": 0,
+  "production_writes": 0
+}

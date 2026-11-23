@@ -1,0 +1,35 @@
+{
+  "captured_at": "2026-11-22 00:39:28.761234+00",
+  "evidence": [
+    {
+      "rows": 93,
+      "scope": "nba_goat_frozen_fields",
+      "sha256": "98e09921f760cfa22654cf64536408ceff197a7225c966e365bae8977d2f9667"
+    },
+    {
+      "rows": 963,
+      "scope": "nba_v1_forecasts",
+      "sha256": "717ce3d74839ef3329c3e85eddd441ef0c5bbd8536494f8e1549fb1053095375"
+    },
+    {
+      "rows": 693,
+      "scope": "nba_v1_outcomes",
+      "sha256": "ecf3ad05ea72e8405ab946f813f93663e1ede3e5de38be4defedfe78a413a874"
+    },
+    {
+      "rows": 40,
+      "scope": "nba_v2_forecasts",
+      "sha256": "0c2d0afcdd122c9cbe1ee32d09f5f2c58302e60450190f987d87f6ca5af079d7"
+    },
+    {
+      "rows": 15,
+      "scope": "nba_v2_judgments",
+      "sha256": "09785d81120846d0767855838595fd1c827df03e407544e5f63847d08e53287d"
+    },
+    {
+      "rows": 91,
+      "scope": "ncaab_calibration",
+      "sha256": "2c03e01fcc2dac21be81ba2ad7ea54fda4a0a185a165c1a1e8386cf8cd6dd0f2"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "deploymentCommit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+  "checks": [
+    {
+      "key": "primary-version",
+      "url": "https://pick-analyzer.vercel.app/api/system/version",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:39:50 GMT",
+      "environment": "production",
+      "commit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+      "providerCalls": 0
+    },
+    {
+      "key": "deployment-version",
+      "url": "https://pick-analyzer-4rl2ihk2z-pick-analyzer.vercel.app/api/system/version",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:39:57 GMT",
+      "environment": "production",
+      "commit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+      "providerCalls": 0
+    },
+    {
+      "key": "ncaab-page",
+      "url": "https://pick-analyzer.vercel.app/ncaab",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:39:53 GMT",
+      "htmlBytes": 1279357,
+      "archivedEvidence": true,
+      "draftKings": true,
+      "noEvWarning": true,
+      "modelLimitWarning": true,
+      "flightErrors": 0
+    },
+    {
+      "key": "ncaab-overview",
+      "url": "https://pick-analyzer-4rl2ihk2z-pick-analyzer.vercel.app/api/ncaab/overview",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:39:44 GMT",
+      "status": "AVAILABLE",
+      "observations": 940,
+      "generatedAt": "2026-11-21T22:00:26.825+00:00",
+      "archiveStatus": "PARTIAL",
+      "dates": [
+        "2026-11-20",
+        "2026-11-21",
+        "2026-11-22"
+      ],
+      "matchedEvents": 131,
+      "quotedEvents": 21,
+      "sourceErrors": [],
+      "providerCalls": 0,
+      "databaseWrites": 0
+    },
+    {
+      "key": "ncaab-calibration",
+      "url": "https://pick-analyzer-4rl2ihk2z-pick-analyzer.vercel.app/api/ncaab/calibration-shadow",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:39:56 GMT",
+      "status": "REVIEW_INVALID_EVIDENCE",
+      "frozen": 91,
+      "settled": 22,
+      "pending": 68,
+      "invalid": 1,
+      "promotion": false,
+      "holdout": false,
+      "providerCalls": 0,
+      "databaseWrites": 0
+    },
+    {
+      "key": "model-learning",
+      "url": "https://pick-analyzer-4rl2ihk2z-pick-analyzer.vercel.app/api/model-learning/overview",
+      "http": 200,
+      "checkedAt": "Sun, 22 Nov 2026 00:39:48 GMT",
+      "status": "AVAILABLE",
+      "errors": [],
+      "autoPromotion": false,
+      "nba": [
+        {
+          "modelVersion": "nba_prediction_engine_v1",
+          "market": "moneyline",
+          "state": "PATTERN_DETECTED",
+          "settled": 45,
+          "independentGames": 45,
+          "candidate": null
+        },
+        {
+          "modelVersion": "nba_prediction_engine_v1",
+          "market": "spread",
+          "state": "MONITORING",
+          "settled": 25,
+          "independentGames": 25,
+          "candidate": null
+        },
+        {
+          "modelVersion": "nba_prediction_engine_v1",
+          "market": "total",
+          "state": "COLLECTING",
+          "settled": 15,
+          "independentGames": 15,
+          "candidate": null
+        }
+      ]
+    }
+  ]
+}

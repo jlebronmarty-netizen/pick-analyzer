@@ -1,0 +1,7 @@
+{
+  "change": "Existing daily prompt now distinguishes Decision V1 statistical ledger, private operational V2 and GOAT V1.1; requires post-release natural-cycle checks and preserves all read-only/no-provider/no-promotion constraints.",
+  "newTasks": 0,
+  "scheduleBefore": "BEGIN:VEVENT\nDTSTART;TZID=America/Puerto_Rico:20261120T180000\nRRULE:FREQ=DAILY\nEND:VEVENT",
+  "scheduleAfter": "BEGIN:VEVENT\nDTSTART;TZID=America/Puerto_Rico:20261120T180000\nRRULE:FREQ=DAILY\nEND:VEVENT",
+  "nextRun": "2026-11-22T18:00:00-04:00"
+}
