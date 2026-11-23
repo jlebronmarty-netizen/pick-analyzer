@@ -4,7 +4,7 @@ export function manualFeature({eventId='nhl:2026020350',generated='2026-11-23T15
     season:{record:'10-8-2',gp:20,points:22,gf_pg:2.75,ga_pg:3.1,through_date:'2026-11-22'},
     last10:{record:'5-4-1',gp:10,complete:true,sequence_verified:true,gf_pg:2.5,ga_pg:3,shots_for_pg:29,shots_against_pg:31,periods:[{period:1,gp:10,gf_pg:.8,ga_pg:1,shots_for_pg:9,shots_against_pg:10,goals_coverage:10,shots_coverage:10}]},
     recent_event_ids:['nhl:2026020342'],
-    special_teams:{pp_pct:20,pk_pct:80,is_current_gp_match:false,captured_at:'2026-11-22T12:00:00.000Z'},
+    special_teams:{pp_pct:.2,pk_pct:.8,is_current_gp_match:false,captured_at:'2026-11-22T12:00:00.000Z'},
     rest:{days_off:1,back_to_back:false,verified:true},
     reported_goalie:{name:'Portero de prueba',status:'PROBABLE',checked_at:generated},
   });

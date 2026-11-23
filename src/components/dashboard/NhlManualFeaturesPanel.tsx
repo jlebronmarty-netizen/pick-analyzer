@@ -4,7 +4,7 @@ import {useEffect,useRef,useState} from 'react';
 import type {NhlManualFeaturesReport,NhlManualFeatureTeam} from '@/types/nhl-manual-features';
 
 const number=(v:number|null,decimals=2)=>v===null?'Sin dato':v.toLocaleString('es-PR',{maximumFractionDigits:decimals});
-const percent=(v:number|null)=>v===null?'Sin dato':`${number(v)}%`;
+const percent=(v:number|null)=>v===null?'Sin dato':`${number(v*100)}%`;
 const goalieLabels:Record<string,string>={NO_CONFIRMADO:'Sin confirmar',PROBABLE:'Probable',CONFIRMADO:'Confirmado'};
 const goalieStatus=(status:string)=>goalieLabels[status]??'Estado sin verificar';
 const stamp=(v:string|null)=>v&&Number.isFinite(Date.parse(v))?new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',dateStyle:'short',timeStyle:'short'}).format(new Date(v))+' PR':'Sin hora verificada';
