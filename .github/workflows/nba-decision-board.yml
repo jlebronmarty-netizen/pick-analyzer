@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'src/lib/nba/decision-board-core.mjs'
+      - 'src/lib/nba/decision-storage-original.mjs'
+      - 'tests/nba-storage-integrity.test.mjs'
       - 'src/lib/nba/decision-preference-core.mjs'
       - 'src/lib/nba/decision-visible-core.mjs'
       - 'tests/nba-decision-visible.test.mjs'
@@ -42,7 +44,7 @@ jobs:
         with:
           node-version: '24'
       - name: Test archived-only contracts, missing-data blocking and cross-provider IDs
-        run: node --test tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs
+        run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs
       - name: Ensure no unapproved provider call or official pick mutation
         run: |
           if grep -R -n -E 'prediction_history.*(insert|upsert|update)|recommendedPick: true' src/lib/nba/decision-board-core.mjs src/lib/nba/decision-learning-core.mjs src/services/nba-decision-board.service.ts src/services/nba-decision-learning.service.ts src/app/api/nba/decision-board; then

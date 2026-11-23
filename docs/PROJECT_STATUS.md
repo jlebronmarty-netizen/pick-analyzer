@@ -3662,3 +3662,9 @@ team/player box scores. No paid plan, models, forecasts or changes to other spor
 The NBA compact player archive contains 1,007 zero-minute lines with zero points across 192 games. Require positive playing time before grading a SHADOW prop from either archived source. Newly recorded prop evidence names the player-stat table. At the audit cutoff all 119 outcomes were team contracts. The compact archive matches all 192 indexed player boxscores by row count. An additional 34 stored game contexts need independent final and provenance checks before archival.
 
 NHL V6 now reads finals by the event IDs of its latest 250 freezes in batches of 50. Production baseline on 11 pairs had candidate Brier 0.23062 and log loss 0.65173.
+
+## 2026-11-21 · Lectura de originales GOAT para props NBA
+
+El lector de box scores acepta las listas que guarda el archivo estacional y el formato anterior con el campo `data`. Se reprodujeron los juegos 21718144, 21718145 y 21718146 con 104 filas en total. En cada caso coincidieron el tamaño original, el tamaño comprimido y el SHA-256 del manifiesto.
+
+El 21 de noviembre a las 8:34 p. m. de Puerto Rico se compararon dos vistas previas del mismo commit con 842 lados de props. Coincidieron los identificadores de cuota, los precios, las líneas, las capturas y las claves de historial. Con un límite de 256 KiB por lectura, 334 lados correspondientes a 24 jugadores pasaron de historial parcial a validado y 140 mostraron discrepancias con el original o su identidad. Otros 360 siguieron con historial incompleto y ocho conservaron diferencias estadísticas. De los 334 con historial validado, 188 seguían antes del inicio y requerían verificar tanto la disponibilidad como la prórroga. El tablero devolvió cero props preferidas, cero llamadas al proveedor y cero escrituras en ambas lecturas. El límite de la rama de prueba volvió a cero después de la comparación.

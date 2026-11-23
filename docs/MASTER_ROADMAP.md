@@ -4478,3 +4478,9 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 
 - NBA: compare the Nov 19 frozen props with new statistical outcomes after the Nov 21 scheduled settlement. Verify the DNP stays pending. Reconcile stored player contexts with independent finals before adding any private GOAT raw receipts.
 - NHL: compare exact-event V6 finals at 30 paired games, then validate on a larger prospective holdout. The report covers up to 250 recent freezes.
+
+## 2026-11-21 · Lectura de originales GOAT para props NBA
+
+Medir en una prueba privada y acotada cuántos historiales de props se pueden cotejar con los box scores archivados. Verificar por separado la disponibilidad previa del jugador y la regla de prórroga de cada contrato.
+
+Prueba de vista previa completada el 21 de noviembre a las 8:34 p. m. de Puerto Rico. Se validó el historial de 334 de 842 lados de props. Antes de activar lecturas periódicas en producción, revisar el límite de lectura y los 140 lados con discrepancias de original o identidad. Siguen pendientes los historiales incompletos, la disponibilidad de los jugadores y la regla regional de prórroga.

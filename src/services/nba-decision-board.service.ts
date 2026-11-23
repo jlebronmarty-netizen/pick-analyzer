@@ -2,7 +2,7 @@ import 'server-only';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
-import {readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
+import {archiveReadOptions,readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
 import {readMarketBatches} from '@/lib/nba/decision-market-snapshot.mjs';
 import {archivedCalendar,tailDays} from '@/lib/nba/decision-calendar.mjs';
 const stamp=(v:unknown)=>Date.parse(String(v??''));
@@ -50,7 +50,7 @@ async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:stri
  const result=await query(fields).eq('source_received_at',at).order('snapshot_id').limit(33).abortSignal(AbortSignal.timeout(10000));
  return {id:game.id,lane,...readMarketBatches(check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED'),game,lane,asOf)};
 }
-export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin}={}){
+export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
  const [slate,archived,hoops,settlementRows,contextResult,pregameResult]=await Promise.all([
   db.from('nba_market_schedules_v1').select('source_received_at,payload,date_local').eq('date_local',day).lte('recorded_at',asOf).lte('source_received_at',asOf)
@@ -161,10 +161,11 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin}={})
    contexts.push(...boxes);
  }
  if(incompleteIndex)contexts.push(...[...needed].map(id=>({provider_game_id:id,player_stats_captured_at:asOf,player_stats:null})));
+ const archiveRead=archiveReadOptions(forDisplay);
  const storageOriginals=await readOriginalContexts(manifests,contexts,needed,async (m:any)=>{
    const r=await db.storage.from(m.storage_bucket).download(m.storage_object_path);
    return r.error||!r.data?null:Buffer.from(await r.data.arrayBuffer());
- },Number(process.env.NBA_DECISION_ARCHIVE_READ_BYTES??0));
+ },archiveRead.limit,archiveRead.cache);
  contexts.push(...storageOriginals);
  const available=optional(pregameResult,'NBA_DECISION_AVAILABILITY_FAILED');
  for(const p of available)for(const lineup of p.projected_lineups?.data??[]){
