@@ -746,7 +746,7 @@
       "src/components/dashboard/NbaBoardAccess.tsx"
     ],
     "evidenceHashes": {
-      "docs/audits/2026-11-22-nba-flow/source-review.md": "1bdd8b60827469638ad1e329be3abe28bac23e4fde7b5929e45022e7a95c935a",
+      "docs/audits/2026-11-22-nba-flow/source-review.md": "46b2dd05784cb13e0a674f6e30d19c80d657a884c6a232d5178f9e7463e4d935",
       "tests/mlb-production-readiness/source-review.test.mjs": "79cf42edac3915742882d09e08216f4bf0e1f2f1a5dddd08b1f83572968a088f",
       "docs/audits/2026-11-22-nba-flow/source-review-validation.json": "e926994c0a915ced7c59c77a7b35037b6bcd747d2228865db955ce3d8723317a"
     },
