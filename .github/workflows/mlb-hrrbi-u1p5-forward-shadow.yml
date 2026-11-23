@@ -1,0 +1,42 @@
+name: MLB HRRBI U1.5 forward shadow
+
+on:
+  push:
+    branches:
+      - research/hrrbi-u1p5-forward-shadow-v1-20260925
+    paths:
+      - artifacts/research/mlb_hrrbi_u1p5_forward_targets_20260925.json
+      - scripts/research/mlb_hrrbi_u1p5_forward_shadow_v1.mjs
+      - scripts/research/verify_mlb_hrrbi_u1p5_forward_shadow_v1.test.mjs
+      - docs/research/MLB_HRRBI_U1P5_FORWARD_SHADOW_V1.md
+      - .github/workflows/mlb-hrrbi-u1p5-forward-shadow.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - artifacts/research/mlb_hrrbi_u1p5_forward_targets_20260925.json
+      - scripts/research/mlb_hrrbi_u1p5_forward_shadow_v1.mjs
+      - scripts/research/verify_mlb_hrrbi_u1p5_forward_shadow_v1.test.mjs
+      - docs/research/MLB_HRRBI_U1P5_FORWARD_SHADOW_V1.md
+      - .github/workflows/mlb-hrrbi-u1p5-forward-shadow.yml
+
+permissions:
+  contents: read
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test scripts/research/verify_mlb_hrrbi_u1p5_forward_shadow_v1.test.mjs
+      - run: node scripts/research/mlb_hrrbi_u1p5_forward_shadow_v1.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mlb-hrrbi-u1p5-forward-20260925
+          path: /tmp/mlb_hrrbi_u1p5_forward_20260925.json
+          if-no-files-found: error
+          retention-days: 7
