@@ -6,14 +6,24 @@ on:
       - 'src/lib/nhl-research-*.mjs'
       - 'src/lib/nhl-exact-circa-market-research.mjs'
       - 'src/lib/nhl-goalie-prior-form-asof-v7.mjs'
+      - 'src/lib/nhl-manual-features.mjs'
       - 'src/services/nhl-research-audit.service.ts'
+      - 'src/services/nhl-manual-features.service.ts'
       - 'src/app/api/nhl/research-audit/**'
+      - 'src/app/api/nhl/manual-features/**'
       - 'src/components/dashboard/NhlResearchAuditPanel.tsx'
+      - 'src/components/dashboard/NhlManualFeaturesPanel.tsx'
+      - 'src/types/nhl-manual-features.ts'
       - 'src/components/dashboard/NhlDashboard.tsx'
       - 'tests/nhl-*.test.mjs'
       - 'tests/fixtures/nhl-*.json'
+      - 'tests/fixtures/nhl-manual-features.mjs'
       - 'tests/dashboard-multisport/nhl-research-audit-ui.test.mjs'
+      - 'tests/dashboard-multisport/nhl-manual-features-ui.test.mjs'
+      - 'tests/*manual*feature*.py'
       - 'scripts/nhl-research-audit.mjs'
+      - 'scripts/nhl-manual-feature*'
+      - 'supabase/migrations/*_nhl_manual_feature_snapshots_v1.sql'
       - '.github/workflows/nhl-research-audit.yml'
   workflow_dispatch:
 
@@ -43,5 +53,7 @@ jobs:
         run: node --test tests/nhl-*.test.mjs
       - name: NHL dashboard and empty-state checks
         run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/dashboard-multisport/nhl*.test.mjs
+      - name: Shared feature SQL renderer contract and injection checks
+        run: python3 -m unittest discover -s tests -p 'test_nhl_manual_feature_sql.py' -v
       - name: Full application build
         run: npm run build

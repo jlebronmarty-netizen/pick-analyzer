@@ -1,3 +1,9 @@
+## 2026-11-23 · NHL · Inputs diarios compartidos
+
+Primera fase aditiva para guardar el contrato canónico del panel en `nhl_manual_feature_snapshots_v1` y consultarlo bajo demanda en NHL mediante `/api/nhl/manual-features`. Disponibilidad fijada por servidor, fuente original preservada, tabla privada append-only, idempotencia por run/evento y rechazo de retries divergentes. Los partidos ya iniciados no se guardan. La tabla ausente tiene estado explícito; el lector exige paginación completa. Sin ajuste de probabilidades, promoción, proveedor o cron nuevo. Migración aplicada y privilegios/RLS verificados; primera escritura y QA móvil de este módulo pendientes al preparar el PR. [Contrato y operación](nhl-manual-features-v1.md).
+
+Corrección de unidades detectada en QA: PP/PK se conserva como razón 0–1 en fuente, snapshots y API; la interfaz multiplica por 100 una sola vez al mostrar porcentajes. Regresión con 0.204081/0.724138 → 20.41%/72.41%, límites 0/1 y datos ausentes. No se reescriben capturas ni tiempos.
+
 ## 2026-11-23 · NHL · Corrección de tiros ofensivos de portero
 
 La exclusión de tiros de `nhl:2026020342` era un falso positivo: VGK 27 = 26 de patinadores + 1 de Adin Hill. Corregida con la observación tirador–portero del snapshot original; se conservan 13 archivos y hashes, el corte, las cohortes, las fórmulas y las congelaciones. Moneyline y mercados exactos no cambian; tiros sigue sin mejora suficiente para promoverse. 166 pruebas NHL, 26 de dashboard, TypeScript y build completo aprobados; nueva QA móvil pendiente en esta revisión. [Evidencia](research/nhl-audit-2026-11-23/goalie-shot-correction.json). El panel diario con capturas compartidas y complemento histórico se prepara por separado; no es parte de esta corrección.
