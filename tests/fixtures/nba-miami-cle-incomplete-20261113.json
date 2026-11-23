@@ -1,0 +1,434 @@
+{
+  "source": "Archived nba_game_context_v2 receipt, reduced to verifier-consumed fields; no stats repaired",
+  "provider_game_id": 21718097,
+  "captured_at": "2026-11-14 04:00:33.433+00",
+  "game": {
+    "id": 21718097,
+    "date": "2026-11-13",
+    "time": "Final",
+    "period": 4,
+    "season": 2026,
+    "status": "Final",
+    "home_q1": 29,
+    "home_q2": 25,
+    "home_q3": 38,
+    "home_q4": 41,
+    "datetime": "2026-11-14T01:00:00.000Z",
+    "home_ot1": null,
+    "home_ot2": null,
+    "home_ot3": null,
+    "ist_stage": "East Group B",
+    "postponed": false,
+    "postseason": false,
+    "visitor_q1": 27,
+    "visitor_q2": 30,
+    "visitor_q3": 34,
+    "visitor_q4": 30,
+    "visitor_ot1": null,
+    "visitor_ot2": null,
+    "visitor_ot3": null,
+    "home_team_id": 16,
+    "status_state": "final",
+    "home_in_bonus": true,
+    "home_team_score": 133,
+    "visitor_team_id": 6,
+    "visitor_in_bonus": true,
+    "visitor_team_score": 121,
+    "home_timeouts_remaining": 0,
+    "visitor_timeouts_remaining": 1
+  },
+  "rows": [
+    {
+      "player": {
+        "id": 1057846109,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "19:19",
+      "pts": 0,
+      "reb": 4,
+      "ast": 2,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 15,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "31:00",
+      "pts": 37,
+      "reb": 9,
+      "ast": 2,
+      "fg3m": 1
+    },
+    {
+      "player": {
+        "id": 4,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "38:05",
+      "pts": 37,
+      "reb": 14,
+      "ast": 3,
+      "fg3m": 2
+    },
+    {
+      "player": {
+        "id": 191,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "20:09",
+      "pts": 4,
+      "reb": 3,
+      "ast": 2,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 17553994,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "38:56",
+      "pts": 22,
+      "reb": 5,
+      "ast": 17,
+      "fg3m": 3
+    },
+    {
+      "player": {
+        "id": 1091463429,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "32:45",
+      "pts": 20,
+      "reb": 5,
+      "ast": 2,
+      "fg3m": 4
+    },
+    {
+      "player": {
+        "id": 1091904403,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 38017739,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "7:26",
+      "pts": 0,
+      "reb": 0,
+      "ast": 2,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 1028125584,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 38017696,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 377,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "15:03",
+      "pts": 5,
+      "reb": 3,
+      "ast": 2,
+      "fg3m": 1
+    },
+    {
+      "player": {
+        "id": 3547282,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 19465585,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "5:44",
+      "pts": 0,
+      "reb": 0,
+      "ast": 1,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 443,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 475,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "31:33",
+      "pts": 8,
+      "reb": 3,
+      "ast": 4,
+      "fg3m": 1
+    },
+    {
+      "player": {
+        "id": 1057846206,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 1028036986,
+        "team_id": 16
+      },
+      "team": {
+        "id": 16
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 1028028993,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "29:52",
+      "pts": 16,
+      "reb": 3,
+      "ast": 1,
+      "fg3m": 4
+    },
+    {
+      "player": {
+        "id": 38017721,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "30:25",
+      "pts": 4,
+      "reb": 4,
+      "ast": 2,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 9,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "31:40",
+      "pts": 9,
+      "reb": 8,
+      "ast": 1,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 192,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "34:49",
+      "pts": 20,
+      "reb": 6,
+      "ast": 8,
+      "fg3m": 2
+    },
+    {
+      "player": {
+        "id": 322,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "32:51",
+      "pts": 25,
+      "reb": 4,
+      "ast": 7,
+      "fg3m": 5
+    },
+    {
+      "player": {
+        "id": 74,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "16:20",
+      "pts": 9,
+      "reb": 1,
+      "ast": 1,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 208,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "9:21",
+      "pts": 4,
+      "reb": 4,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 1028245994,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 1057848025,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "0",
+      "pts": 0,
+      "reb": 0,
+      "ast": 0,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 56677872,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "9:28",
+      "pts": 0,
+      "reb": 2,
+      "ast": 2,
+      "fg3m": 0
+    },
+    {
+      "player": {
+        "id": 1057395754,
+        "team_id": 6
+      },
+      "team": {
+        "id": 6
+      },
+      "min": "27:20",
+      "pts": 22,
+      "reb": 4,
+      "ast": 3,
+      "fg3m": 5
+    }
+  ]
+}

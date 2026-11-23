@@ -1,4 +1,5 @@
 import {NextRequest} from 'next/server';
+import {materializeNbaArchivedPlayerHistory} from '@/services/nba-archived-player-materialization.service';
 import {apiError,apiOk,requestId} from '@/lib/api-contract';
 import {getNbaGoatRuntimeStatus,runNbaGoatShadowScheduler} from '@/services/nba-goat-runtime.service';
 import {syncNbaGoatTeamStatsIfStale} from '@/services/nba-goat-team-stats.service';
@@ -14,7 +15,7 @@ export const dynamic='force-dynamic';export const revalidate=0;export const maxD
 function authorized(r:NextRequest){const s=process.env.CRON_SECRET;return Boolean(s)&&(r.headers.get('authorization')==='Bearer '+s||r.nextUrl.searchParams.get('secret')===s);}
 const safe=async<T>(fn:()=>Promise<T>,failure:string)=>{try{return await fn();}catch{return {status:'FAILED',error:failure} as const;}};
 async function handle(r:NextRequest){
- const id=requestId(r);if(!authorized(r))return apiError({id,code:'UNAUTHORIZED',message:'Unauthorized',status:401});
+ const startedAt=Date.now(),id=requestId(r);if(!authorized(r))return apiError({id,code:'UNAUTHORIZED',message:'Unauthorized',status:401});
  try{
   if(r.nextUrl.searchParams.get('mode')==='status'||r.nextUrl.searchParams.get('status')==='precheck')return apiOk(await getNbaGoatRuntimeStatus(),id);
   const marketDataArchive=await runSharedNbaArchive(r.headers.get('x-vercel-oidc-token')??'','cron',undefined,{captureProps:false});
@@ -35,8 +36,9 @@ async function handle(r:NextRequest){
   const expandedProps=await safe(()=>captureNbaResearchData({mode:'props'}),'NBA_GOAT_RESEARCH_PROPS_FAILED');
   // Opt-in-only research backfill; the existing NBA pipeline and models run first.
   const propsHistory=await safe(()=>syncNbaPropsPlayerHistory(),'NBA_PROPS_HISTORY_FAILED');
-  console.log('NBA_GOAT_PIPELINE',JSON.stringify({marketStatus:(marketDataArchive as any).status,pregameContextStatus:(pregameContext as any).status,pregameContextCalls:(pregameContext as any).provider_calls??0,teamStatsStatus:(teamStats as any).status,resultStatus:(results as any).status,pbpStatus:(pbp as any).status,pbpCalls:(pbp as any).provider_calls??0,v2ContextStatus:(v2Context as any).status,v2ContextCalls:(v2Context as any).provider_calls??0,v3MatchupStatus:(v3Matchups as any).status,v3MatchupCalls:(v3Matchups as any).provider_calls??0,causalStatus:(causal as any).status,shadowStatus:(shadow as any).finalClassification??(shadow as any).status,propsHistoryStatus:(propsHistory as any).status,propsHistoryCalls:(propsHistory as any).providerCalls??0,legacyOddsApiCalls:0}));
-  return apiOk({marketDataArchive,pregameContext,teamStats,results,pbp,v2Context,v3Matchups,causal,shadow,expandedProps,propsHistory,legacyOddsApiCalls:0},id);
+  const playerMaterialization=await safe(()=>materializeNbaArchivedPlayerHistory({budgetMs:Math.max(0,280000-(Date.now()-startedAt))}),'NBA_ARCHIVED_PLAYER_MATERIALIZATION_FAILED');
+  console.log('NBA_GOAT_PIPELINE',JSON.stringify({marketStatus:(marketDataArchive as any).status,pregameContextStatus:(pregameContext as any).status,pregameContextCalls:(pregameContext as any).provider_calls??0,teamStatsStatus:(teamStats as any).status,resultStatus:(results as any).status,pbpStatus:(pbp as any).status,pbpCalls:(pbp as any).provider_calls??0,v2ContextStatus:(v2Context as any).status,v2ContextCalls:(v2Context as any).provider_calls??0,v3MatchupStatus:(v3Matchups as any).status,v3MatchupCalls:(v3Matchups as any).provider_calls??0,causalStatus:(causal as any).status,shadowStatus:(shadow as any).finalClassification??(shadow as any).status,propsHistoryStatus:(propsHistory as any).status,propsHistoryCalls:(propsHistory as any).providerCalls??0,playerMaterializationStatus:(playerMaterialization as any).status,playerMaterializationRows:(playerMaterialization as any).insertedRows??0,legacyOddsApiCalls:0}));
+  return apiOk({marketDataArchive,pregameContext,teamStats,results,pbp,v2Context,v3Matchups,causal,shadow,expandedProps,propsHistory,playerMaterialization,legacyOddsApiCalls:0},id);
  }catch{return apiError({id,code:'INTERNAL_ERROR',message:'NBA GOAT market archive failed; downstream model stages were not assumed complete',status:500});}
 }
 export async function GET(r:NextRequest){return handle(r);}export async function POST(r:NextRequest){return handle(r);}

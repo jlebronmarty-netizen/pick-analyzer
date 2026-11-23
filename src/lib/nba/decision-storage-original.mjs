@@ -9,7 +9,9 @@ export function originalContext(bytes, manifest) {
   try {
     const json = gunzipSync(bytes,{maxOutputLength:512000});
     if (json.length !== manifest.json_bytes || createHash('sha256').update(json).digest('hex') !== hash) return null;
-    const payload = JSON.parse(json.toString('utf8'));
+    const stored = JSON.parse(json.toString('utf8'));
+    // Season archives store the aggregated row array. Operational archives use a page envelope.
+    const payload = Array.isArray(stored) ? {data: stored} : stored;
     if (!Array.isArray(payload.data) || payload.data.length !== manifest.data_count || payload.meta?.next_cursor != null)
       return null;
     return {provider_game_id:manifest.provider_game_id,player_stats_captured_at:manifest.source_captured_at,player_stats:payload};
@@ -17,9 +19,21 @@ export function originalContext(bytes, manifest) {
 }
 
 // No recurring downloads by default. The limit is an explicit per-read ceiling
-// for a reviewed deployment. Each compressed object is read at most once per warm process.
-const verified = new Map();
-export async function readOriginalContexts(manifests, operational, needed, fetchObject, limit = 0) {
+// for a reviewed deployment. Verified objects are reused while cached.
+// Concurrent reads may still download the same uncached object.
+const sharedCache = new Map();
+const displayCache = new Map();
+
+export function archiveReadOptions(forDisplay, env = process.env) {
+  const displayLimit = forDisplay ? env.NBA_DECISION_DISPLAY_ARCHIVE_READ_BYTES : undefined;
+  return {
+    limit: Number(displayLimit ?? env.NBA_DECISION_ARCHIVE_READ_BYTES ?? 0),
+    cache: displayLimit === undefined ? sharedCache : displayCache
+  };
+}
+
+export async function readOriginalContexts(manifests, operational, needed, fetchObject, limit = 0, verified = sharedCache) {
+  if (!Number.isSafeInteger(limit) || limit <= 0) return [];
   const result = [], pending = [], have = new Set(operational.map(c => c.provider_game_id));
   let reserved = 0;
   for (const m of manifests) {
@@ -30,7 +44,7 @@ export async function readOriginalContexts(manifests, operational, needed, fetch
         m.storage_object_path !== [m.season,id,'player_stats',m.response_sha256+'.json.gz'].join('/')) continue;
     const key=m.storage_object_path;
     if (verified.has(key)) { result.push(verified.get(key)); continue; }
-    if (!Number.isSafeInteger(limit) || limit<=0 || pending.length>=128 || !(m.compressed_bytes>0) ||
+    if (pending.length>=128 || !(m.compressed_bytes>0) ||
         m.compressed_bytes>32768 || reserved+m.compressed_bytes>Math.min(limit,512000)) continue;
     pending.push(m);
     reserved+=m.compressed_bytes;

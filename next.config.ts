@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import fs from 'node:fs';
 
-const mlbCertificates=['docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_REVALIDATION_20261014.json','docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261119.json'];
+const mlbCertificates=['docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_REVALIDATION_20261014.json','docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261122.json'];
 const mlbRuntimeFiles=[...new Set([...mlbCertificates,...mlbCertificates.flatMap(file=>Object.keys(JSON.parse(fs.readFileSync(file,'utf8')).sourceHashes??{})),'docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json'])].map(file=>`./${file}`);
 
 const nextConfig: NextConfig = {

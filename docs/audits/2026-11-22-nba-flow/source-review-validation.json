@@ -1,0 +1,35 @@
+{
+  "scope": "OFFLINE_SHARED_PRESENTATION_SOURCE_REVIEW",
+  "sourceBaseCommit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be",
+  "commands": [
+    {
+      "command": "node scripts/verify-mlb-release-readiness.mjs",
+      "exitCode": 0,
+      "status": "OFFLINE_RELEASE_GUARDS_PASS",
+      "r3": {
+        "status": "R3_CERTIFIED",
+        "sourceFiles": 37
+      },
+      "pinnedRuntimeFiles": 118,
+      "reviewedManifestChain": [
+        "2026-10-14",
+        "2026-11-19",
+        "2026-11-22"
+      ]
+    },
+    {
+      "command": "node --test tests/mlb-production-readiness/*.test.mjs",
+      "exitCode": 0,
+      "tests": 42,
+      "pass": 42,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  ],
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "operationalTickExecuted": false,
+  "deploymentPerformed": false,
+  "finalBuild": "PENDING_ENCLOSING_RELEASE"
+}

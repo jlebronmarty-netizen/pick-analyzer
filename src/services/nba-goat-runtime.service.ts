@@ -1,7 +1,7 @@
 import 'server-only';
 import {createHash} from 'node:crypto';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
-import {NBA_GOAT_PROVIDER,NBA_GOAT_POLICY,nbaGoatQuoteChecks,nbaGoatGate,isExactGoatModelMatch,nbaGoatDerivedContext} from '@/lib/nba/goat-provider-policy.mjs';
+import {NBA_GOAT_PROVIDER,NBA_GOAT_POLICY,NBA_GOAT_CONTINUOUS_DAILY_ROW_CAP,nbaGoatQuoteChecks,nbaGoatGate,isExactGoatModelMatch,nbaGoatDerivedContext,nbaGoatDailyUsage} from '@/lib/nba/goat-provider-policy.mjs';
 import {teamStatsFresh} from '@/lib/nba/goat-team-stats-core.mjs';
 import {mergeNbaScheduleGames} from '@/lib/nba/goat-schedule-core.mjs';
 import {NBA_INPUTS_SHADOW_MODEL_VERSION} from '@/lib/nba/prediction-inputs-shadow';
@@ -34,13 +34,13 @@ async function load(){
   candidates.push({event:e,quote:q,context,check:nbaGoatQuoteChecks(e,q,checkedAt,context)});
  }
  const pendingRows=history.filter((p:any)=>!p.result||p.result==='pending'),goatPendingRows=pendingRows.filter((p:any)=>p.feature_snapshot?.goatProviderPolicy===NBA_GOAT_POLICY),legacyPendingRows=pendingRows.filter((p:any)=>p.feature_snapshot?.goatProviderPolicy!==NBA_GOAT_POLICY);
- const today=checkedAt.slice(0,10),goatHistory=history.filter((p:any)=>p.feature_snapshot?.goatProviderPolicy===NBA_GOAT_POLICY),rowsToday=goatHistory.filter((p:any)=>String(p.created_at).slice(0,10)===today).length;
+ const goatHistory=history.filter((p:any)=>p.feature_snapshot?.goatProviderPolicy===NBA_GOAT_POLICY),dailyUsage=nbaGoatDailyUsage(goatHistory,now),rowsToday=dailyUsage.rows;
  const completed=runs.filter((r:any)=>r.status==='completed'),repaired=completed.filter((r:any)=>r.metadata?.runPurpose==='REPAIRED_RUNTIME_VERIFICATION_RUN').length,canaryRows=completed.reduce((n:number,r:any)=>n+Number(r.records_inserted??r.metadata?.insertedCount??0),0);
  const currentStats=teamStatsFresh(stats,now),statNames=new Set(stats.map((s:any)=>s.team_name)),missingTeams=[...new Set(events.flatMap((e:any)=>[e.home_team,e.away_team]).filter((name:string)=>!statNames.has(name)))];
  const enabled=process.env.NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED==='true',continuousEnabled=process.env.NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED==='true',repairEnabled=process.env.NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED==='true';
  const priceCount=candidates.filter(c=>c.check.priceEligible).length,contractCount=candidates.filter(c=>c.check.writeEligible).length;
  const gate=nbaGoatGate({enabled,continuousEnabled,repairEnabled,pending:goatPendingRows.length,rowsToday,statsCurrent:currentStats&&events.length>0&&missingTeams.length===0,priceCount,contractCount,completedRuns:completed.length,repairedRuns:repaired,canaryRows});
- const status={module:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,checked_at:checkedAt,season,read_only:true,provider_calls:0,database_writes:0,legacy_provider_fallback:false,scheduler_enabled:enabled,continuous_enabled:continuousEnabled,events:events.length,quotes_examined:candidates.length,fresh_pregame_quotes:priceCount,verified_contract_quotes:contractCount,team_stats_rows:stats.length,team_stats_fresh:currentStats,missing_current_team_stats:missingTeams,goat_shadow_pending:goatPendingRows.length,legacy_shadow_pending:legacyPendingRows.length,pending_original_shadow:pendingRows.length,rows_emitted_today:rowsToday,last_archive:lastArchive,last_schedule_received_at:lastSchedule?.source_received_at??null,pregame_context:lastPregameContext?{snapshot_id:lastPregameContext.snapshot_id,captured_at:lastPregameContext.captured_at,coverage:lastPregameContext.coverage}:null,gate,classification:gate.allowed?'NBA_GOAT_SHADOW_PREREQUISITES_READY':'NBA_GOAT_ODDS_CONNECTED_MODEL_BLOCKED',issues:candidates.reduce((a:Record<string,number>,c:any)=>{for(const k of [...c.check.issues,...c.check.writeIssues])a[k]=(a[k]??0)+1;return a;},{}),note:'GOAT prices are not predictions. Legacy shadow rows remain separate and do not block the GOAT cohort. New contracts are statistical shadow evidence, not a claim of user sportsbook settlement.'};
+ const status={module:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,checked_at:checkedAt,season,read_only:true,provider_calls:0,database_writes:0,legacy_provider_fallback:false,scheduler_enabled:enabled,continuous_enabled:continuousEnabled,events:events.length,quotes_examined:candidates.length,fresh_pregame_quotes:priceCount,verified_contract_quotes:contractCount,team_stats_rows:stats.length,team_stats_fresh:currentStats,missing_current_team_stats:missingTeams,goat_shadow_pending:goatPendingRows.length,legacy_shadow_pending:legacyPendingRows.length,pending_original_shadow:pendingRows.length,rows_emitted_today:rowsToday,rows_emitted_date_local:dailyUsage.dateLocal,rows_emitted_time_zone:dailyUsage.timeZone,daily_row_cap:NBA_GOAT_CONTINUOUS_DAILY_ROW_CAP,rows_remaining_today:Math.max(0,NBA_GOAT_CONTINUOUS_DAILY_ROW_CAP-rowsToday),next_daily_reset_at:dailyUsage.nextResetAt,last_prediction_created_at:dailyUsage.lastCreatedAt,history_rows_scanned:history.length,history_scan_limit:1000,last_archive:lastArchive,last_schedule_received_at:lastSchedule?.source_received_at??null,pregame_context:lastPregameContext?{snapshot_id:lastPregameContext.snapshot_id,captured_at:lastPregameContext.captured_at,coverage:lastPregameContext.coverage}:null,gate,classification:gate.allowed?'NBA_GOAT_SHADOW_PREREQUISITES_READY':'NBA_GOAT_ODDS_CONNECTED_MODEL_BLOCKED',issues:candidates.reduce((a:Record<string,number>,c:any)=>{for(const k of [...c.check.issues,...c.check.writeIssues])a[k]=(a[k]??0)+1;return a;},{}),note:'GOAT prices are not predictions. Legacy shadow rows remain separate and do not block the GOAT cohort. New contracts are statistical shadow evidence, not a claim of user sportsbook settlement.'};
  return {status,candidates,history:goatHistory,pregameContext:lastPregameContext};
 }
 export async function getNbaGoatRuntimeStatus(){return (await load()).status;}
@@ -55,7 +55,10 @@ export async function previewNbaGoatShadowMatches(){
 
 export async function runNbaGoatShadowScheduler(){
  const loaded=await load(),status=loaded.status,candidates=loaded.candidates,history=loaded.history,pregameContext=loaded.pregameContext;
- if(!status.gate.allowed)return {...status,read_only:false,predictions_inserted:0,provider_calls:0,finalClassification:status.classification};
+ if(!status.gate.allowed){
+  console.info('NBA_GOAT_SHADOW_BLOCKED',JSON.stringify({checked_at:status.checked_at,date_local:status.rows_emitted_date_local,time_zone:status.rows_emitted_time_zone,rows_emitted_today:status.rows_emitted_today,daily_row_cap:status.daily_row_cap,next_daily_reset_at:status.next_daily_reset_at,blockers:status.gate.blockers,provider_calls:0,database_writes:0,predictions_inserted:0}));
+  return {...status,read_only:false,predictions_inserted:0,provider_calls:0,finalClassification:status.classification};
+ }
  const slot=Math.floor(Date.now()/1800000),h=createHash('sha256').update(NBA_GOAT_POLICY+':'+String(slot)).digest('hex'),runId=h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20,32);
  const claim=await db.from('sports_sync_jobs').insert({id:runId,job_type:'nba_goat_shadow_v1',sport_key:SPORT,league_key:'nba',provider:NBA_GOAT_PROVIDER,status:'running',metadata:{policy:NBA_GOAT_POLICY,slot}});
  if(claim.error){if(claim.error.code==='23505')return {...status,finalClassification:'ALREADY_CLAIMED',predictions_inserted:0};throw Error('NBA_GOAT_CLAIM_FAILED');}
@@ -83,7 +86,7 @@ export async function runNbaGoatShadowScheduler(){
    const saved=await savePredictionHistory([row]);inserted+=saved.saved??0;
    if(saved.saved){eventCounts.set(e.id,(eventCounts.get(e.id)??0)+1);marketCounts.set(key,(marketCounts.get(key)??0)+1);}
   }
-  const summary={policy:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,providerCalls:0,insertedCount:inserted,reasons,runPurpose:status.gate.continuous?'CONTINUOUS_SHADOW_EVIDENCE_RUN':status.gate.repair?'REPAIRED_RUNTIME_VERIFICATION_RUN':'GOAT_CANARY',officialPickDelta:0,modelVersion:NBA_INPUTS_SHADOW_MODEL_VERSION,inputAdapterCorrected:true,probabilityStatus:'EXPLORATORY_UNVALIDATED',sharedModelFormulaChanged:false,legacyPendingExcluded:true};
+  const summary={policy:NBA_GOAT_POLICY,provider:NBA_GOAT_PROVIDER,providerCalls:0,insertedCount:inserted,reasons,dateLocal:status.rows_emitted_date_local,timeZone:status.rows_emitted_time_zone,rowsBeforeRun:status.rows_emitted_today,dailyRowCap:status.daily_row_cap,nextDailyResetAt:status.next_daily_reset_at,runPurpose:status.gate.continuous?'CONTINUOUS_SHADOW_EVIDENCE_RUN':status.gate.repair?'REPAIRED_RUNTIME_VERIFICATION_RUN':'GOAT_CANARY',officialPickDelta:0,modelVersion:NBA_INPUTS_SHADOW_MODEL_VERSION,inputAdapterCorrected:true,probabilityStatus:'EXPLORATORY_UNVALIDATED',sharedModelFormulaChanged:false,legacyPendingExcluded:true};
   const saved=await db.from('sports_sync_jobs').update({status:'completed',completed_at:new Date().toISOString(),records_inserted:inserted,metadata:summary}).eq('id',runId);if(saved.error)throw Error('NBA_GOAT_AUDIT_FAILED');
   return {success:true,finalClassification:inserted?'NBA_GOAT_SHADOW_SUCCESS':'NO_EXACT_MODEL_MATCH',...summary};
  }catch{

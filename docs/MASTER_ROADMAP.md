@@ -1,3 +1,7 @@
+## 2026-11-22 · Flujo por deporte y reparación operativa NBA
+
+Objetivo autorizado: Deportes y accuracy → tablero del deporte → mercados y detalle. La rama corrige acceso NBA, separación de versiones, lectura fallida y límite diario en America/Puerto_Rico. Mantener JUGADA bloqueada y conservar los pronósticos originales durante publicación y verificación. La rama añade un materializador de originales archivados íntegros al cron NBA existente, con límite por ejecución, transacción idempotente y procedencia explícita. Su activación y primer ciclo real quedan pendientes; un box score incompleto permanece excluido. [Alcance y evidencia](audits/2026-11-22-nba-flow/README.md).
+
 ## 2026-11-21 · Laboratorio independiente · Correcciones de entradas y evidencia
 
 Rama de revisión desde `c374aa7e`: nueva cohorte NBA `nba_prediction_engine_v1_1_inputs_shadow` con precios pareados reales, entradas reproducibles y persistencia que conserva la primera captura. Se corrigen el efecto direccional de la penalización global y los defaults de mercado; resultados y aprendizaje se separan por versión, mercado y juego. NCAAB reproduce 91/91 congelaciones y añade evidencia completa, lectura paginada, incertidumbre pareada y clasificación secuencial sin afirmar holdout validado. El panel distingue cuotas archivadas de ejecución, operador y temporalidad. Sin backfills, proveedores, crons nuevos ni promoción. Integración y comprobación en producción pendientes. [Alcance, pruebas y límites](research/independent-lab/2026-11-21-corrections.md).

@@ -1,0 +1,68 @@
+[
+  {
+    "game": 21718140,
+    "status": "REJECTED",
+    "reason": "ARCHIVED_PLAYER_FINAL_TRUTH_UNVERIFIED"
+  },
+  {
+    "game": 21718148,
+    "rows": 35,
+    "json_bytes": 43303,
+    "compressed_bytes": 3458,
+    "status": "VALID"
+  },
+  {
+    "game": 21718149,
+    "rows": 34,
+    "json_bytes": 42255,
+    "compressed_bytes": 3484,
+    "status": "VALID"
+  },
+  {
+    "game": 21718151,
+    "rows": 36,
+    "json_bytes": 44569,
+    "compressed_bytes": 3559,
+    "status": "VALID"
+  },
+  {
+    "game": 21718152,
+    "rows": 36,
+    "json_bytes": 45191,
+    "compressed_bytes": 3593,
+    "status": "VALID"
+  },
+  {
+    "game": 21718153,
+    "rows": 35,
+    "json_bytes": 43170,
+    "compressed_bytes": 3396,
+    "status": "VALID"
+  },
+  {
+    "game": 21718154,
+    "rows": 34,
+    "json_bytes": 42202,
+    "compressed_bytes": 3402,
+    "status": "VALID"
+  },
+  {
+    "game": 21718157,
+    "rows": 34,
+    "json_bytes": 42100,
+    "compressed_bytes": 3454,
+    "status": "VALID"
+  },
+  {
+    "game": 21718158,
+    "status": "REJECTED",
+    "reason": "ARCHIVED_PLAYER_FINAL_TRUTH_UNVERIFIED"
+  },
+  {
+    "game": 21718161,
+    "rows": 34,
+    "json_bytes": 41750,
+    "compressed_bytes": 3505,
+    "status": "VALID"
+  }
+]
