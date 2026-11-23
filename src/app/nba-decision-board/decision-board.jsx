@@ -28,6 +28,7 @@ function humanReason(row){
 const issueLabels={
  OVERTIME_RULE_UNVERIFIED:'Regla de prórroga sin verificar',
  ORIGINAL_BOX_NOT_CROSS_CHECKED:'Falta cotejar la estadística con el box score original',
+ ORIGINAL_BOX_NOT_VERIFIED:'El box score original no supera la verificación de integridad',
  ORIGINAL_BOX_DISAGREES:'La estadística difiere del box score original',
  MINUTE_EXCLUSION_UNVERIFIED:'Minutos del jugador por confirmar',
  PLAYER_AVAILABILITY_UNCONFIRMED:'Disponibilidad del jugador por confirmar',

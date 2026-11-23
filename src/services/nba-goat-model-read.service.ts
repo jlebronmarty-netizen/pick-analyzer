@@ -19,10 +19,10 @@ export async function getNbaGoatModelCard():Promise<SportModelCard>{
  try{
   const r=await getNbaGoatModelReport();
   const details=r.versions.flatMap(version=>version.metrics.filter(x=>x.market!=='moneyline').map(x=>`${version.modelVersion} · ${x.market==='spread'?'Spread':'Total'}: ${x.wins} W / ${x.losses} L · ${x.pending} pendientes · accuracy ${x.accuracy===null?'N/A':(100*x.accuracy).toFixed(2)+'%'} · ${x.settledUniqueGames} juegos liquidados`));
-  return {key:'nba',label:'NBA',href:'/nba-market-data',classification:'SHADOW / MODEL_ONLY · GOAT',metricLabel:'Moneyline',linkLabel:'Ver selecciones, cuotas y resultados →',checkedAt:r.checked_at,detailLines:details,models:r.models,
+  return {key:'nba',label:'NBA',href:'/nba-decision-board',classification:'SHADOW / MODEL_ONLY · GOAT',metricLabel:'Moneyline',linkLabel:'Abrir Decision Board NBA →',checkedAt:r.checked_at,detailLines:details,models:r.models,
    cohorts:r.versions.map(version=>{
     const m=version.metrics.find(x=>x.market==='moneyline')!;
     return {key:'NBA_GOAT:'+version.modelVersion,label:'NBA GOAT · '+version.modelVersion,modelVersion:version.modelVersion,aggregationGroup:'NBA_GOAT',market:'moneyline',available:true,wins:m.wins,losses:m.losses,pending:m.pending,pushes:m.pushes,voids:0,models:1,accuracy:m.accuracy,uniqueGames:m.uniqueGames,settledUniqueGames:m.settledUniqueGames,note:'Registros de esta versión, sin combinar cohortes. Accuracy descriptiva por contrato; los juegos se cuentan aparte. Probabilidades exploratorias sin validación. No incluye legacy ni Official Picks.'};
    })};
- }catch{return {key:'nba',label:'NBA',href:'/nba-market-data',classification:'SHADOW / MODEL_ONLY · GOAT',metricLabel:'Moneyline',cohorts:[{key:'NBA_GOAT',label:'NBA GOAT · cohort prospectivo',available:false,wins:null,losses:null,pending:null,pushes:null,voids:null,models:null,accuracy:null,note:'Reporte GOAT no verificado; no se sustituye por cero.'}]};}
+ }catch{return {key:'nba',label:'NBA',href:'/nba-decision-board',classification:'SHADOW / MODEL_ONLY · GOAT',metricLabel:'Moneyline',cohorts:[{key:'NBA_GOAT',label:'NBA GOAT · cohort prospectivo',available:false,wins:null,losses:null,pending:null,pushes:null,voids:null,models:null,accuracy:null,note:'Reporte GOAT no verificado; no se sustituye por cero.'}]};}
 }

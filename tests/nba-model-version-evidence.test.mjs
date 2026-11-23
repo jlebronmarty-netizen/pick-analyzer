@@ -128,7 +128,9 @@ test('read service exposes both versions, card counts two, and neither is pooled
   assert.equal(card.cohorts[0].modelVersion,corrected);assert.ok(card.cohorts.every(cohort=>cohort.models===1));
   assert.equal(displayedModelTotal(card.cohorts).reason,'MODEL_VERSIONS_NOT_POOLED');
   const html=renderToStaticMarkup(React.createElement(SportModelOverview,{cards:[card]}));
-  for(const text of [historical,corrected,'2 versiones separadas','historial separado','0.00%','100.00%'])assert.ok(html.includes(text),text);
+  for(const text of [historical,corrected,'2 versiones · resultados separados en el historial','historial separado','0.00%','100.00%'])assert.ok(html.includes(text),text);
+  assert.equal(card.href,'/nba-decision-board');
+  assert.ok(!html.includes('Accuracy combinada'));
   assert.ok(mock.reads.every(table=>table==='prediction_history'));
  }finally{mock.restore();}
 });

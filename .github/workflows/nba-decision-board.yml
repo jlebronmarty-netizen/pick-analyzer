@@ -3,8 +3,15 @@ on:
   pull_request:
     paths:
       - 'src/lib/nba/decision-board-core.mjs'
+      - 'src/lib/nba/decision-integrity.mjs'
       - 'src/lib/nba/decision-storage-original.mjs'
       - 'tests/nba-storage-integrity.test.mjs'
+      - 'src/lib/nba/archived-player-materializer-core.mjs'
+      - 'src/services/nba-archived-player-materialization.service.ts'
+      - 'src/app/api/cron/nba-current-era-shadow/**'
+      - 'supabase/migrations/*nba_archived_player_materializer*.sql'
+      - 'tests/nba-archived-player-materializer*'
+      - 'tests/nba-invalid-original-classification.test.mjs'
       - 'src/lib/nba/decision-preference-core.mjs'
       - 'src/lib/nba/decision-visible-core.mjs'
       - 'tests/nba-decision-visible.test.mjs'
@@ -30,6 +37,26 @@ on:
       - 'vercel.json'
       - 'docs/edge-lab/nba-decision-shadow-learning-20261119.md'
       - 'docs/edge-lab/nba-decision-board-v1-20261119.md'
+      - 'src/components/dashboard/Sport*Navigation.tsx'
+      - 'src/components/dashboard/SportModelOverview.tsx'
+      - 'src/components/dashboard/NbaBoardAccess.tsx'
+      - 'src/components/dashboard/DashboardShell*.tsx'
+      - 'src/components/pick2/MlbToday*.tsx'
+      - 'src/app/page.tsx'
+      - 'src/app/today/page.tsx'
+      - 'src/app/layout.tsx'
+      - 'src/app/nba-market-data/**'
+      - 'src/app/api/market-data/nba/model-report/**'
+      - 'src/app/api/market-data/nba/model-status/**'
+      - 'src/services/nba-goat-model-read.service.ts'
+      - 'src/services/nba-goat-runtime.service.ts'
+      - 'src/lib/nba/goat-provider-policy.mjs'
+      - 'src/lib/nba/model-version-evidence.ts'
+      - 'tests/dashboard-multisport/navigation-overview.test.mjs'
+      - 'tests/product-experience/nba-navigation-history.spec.ts'
+      - 'playwright.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/nba-decision-board.yml'
   workflow_dispatch:
 permissions:
@@ -50,3 +77,76 @@ jobs:
           if grep -R -n -E 'prediction_history.*(insert|upsert|update)|recommendedPick: true' src/lib/nba/decision-board-core.mjs src/lib/nba/decision-learning-core.mjs src/services/nba-decision-board.service.ts src/services/nba-decision-learning.service.ts src/app/api/nba/decision-board; then
             echo 'Unexpected official model mutation'; exit 1;
           fi
+
+  responsive-navigation-fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+      # Local fixture configuration only. No real deployment or protection changes.
+      VERCEL: '1'
+      VERCEL_ENV: preview
+      VERCEL_GIT_COMMIT_REF: research/nba-functional-20261102
+      NBA_SHARED_FEED_ENABLED: 'true'
+      NBA_DECISION_BOARD_ENABLED: 'true'
+      PLAYWRIGHT_EXTERNAL_SERVER: 'true'
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3107
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify sport cohort presentation without combining versions
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/dashboard-multisport/navigation-overview.test.mjs tests/dashboard-multisport/combined-models.test.mjs
+      - name: Verify archived-only materialization and incomplete-original exclusion
+        run: node --test tests/nba-archived-player-materializer.test.mjs tests/nba-archived-player-materializer.service.test.mjs tests/nba-invalid-original-classification.test.mjs tests/nba-storage-integrity.test.mjs
+      - name: Build application with isolated loopback data configuration
+        run: npm run build
+      - name: Install Chromium for local fixtures
+        run: npx playwright install --with-deps chromium
+      - name: Verify desktop and mobile journeys against the real application
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test-results/nba-navigation-server
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3107 > test-results/nba-navigation-server/server.log 2>&1 &
+          nba_ui_pid=$!
+          cleanup_nba_ui() {
+            kill "$nba_ui_pid" 2>/dev/null || true
+            wait "$nba_ui_pid" 2>/dev/null || true
+          }
+          trap cleanup_nba_ui EXIT
+          nba_ui_deadline=$((SECONDS + 60))
+          until curl --fail --silent --max-time 2 http://127.0.0.1:3107/api/system/version > /dev/null; do
+            if ! kill -0 "$nba_ui_pid" 2>/dev/null; then
+              cat test-results/nba-navigation-server/server.log
+              exit 1
+            fi
+            if (( SECONDS >= nba_ui_deadline )); then
+              echo 'NBA UI fixture server did not become ready within 60 seconds'
+              cat test-results/nba-navigation-server/server.log
+              exit 1
+            fi
+            sleep 1
+          done
+          npx playwright test tests/product-experience/nba-navigation-history.spec.ts --config=playwright.config.ts --workers=1
+      - name: Preserve responsive screenshots, traces and fixture server logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nba-navigation-ui-${{ github.run_id }}
+          path: |
+            test-results/product-experience/
+            test-results/nba-navigation-server/
+          if-no-files-found: warn
+          retention-days: 7

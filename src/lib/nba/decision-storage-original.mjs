@@ -19,7 +19,8 @@ export function originalContext(bytes, manifest) {
 }
 
 // No recurring downloads by default. The limit is an explicit per-read ceiling
-// for a reviewed deployment. Each compressed object is read at most once per warm process.
+// for a reviewed deployment. Verified objects are reused while cached.
+// Concurrent reads may still download the same uncached object.
 const sharedCache = new Map();
 const displayCache = new Map();
 

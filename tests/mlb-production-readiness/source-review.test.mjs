@@ -8,8 +8,10 @@ import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
-const currentPath = 'docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261119.json'
-const previousPath = 'docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json'
+const currentPath = 'docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261122.json'
+const previousPath = 'docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261119.json'
+const octoberPath = 'docs/CERTIFICATION/MLB_OPERATIONAL_READINESS_REVALIDATION_20261014.json'
+const historicalTestPath = 'docs/audits/2026-11-22-nba-flow/historical/source-review-20261119.test.mjs.txt'
 const r3Path = 'docs/CERTIFICATION/MLB_DATA_02R_R2T_R3_REVALIDATION_20261014.json'
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'))
 const digest = file => createHash('sha256').update(fs.readFileSync(file, 'utf8').replaceAll('\r\n', '\n')).digest('hex')
@@ -20,14 +22,17 @@ function runGuard(t, mutate = () => {}) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mlb-source-review-'))
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   const files = new Set()
-  for (const certificatePath of [r3Path, previousPath, currentPath]) {
+  for (const certificatePath of [r3Path, octoberPath, previousPath, currentPath]) {
     files.add(certificatePath)
     const certificate = readJson(path.join(root, certificatePath))
     for (const file of Object.keys(certificate.sourceHashes)) files.add(file)
     const oldReview = certificate.revalidation20261014
     files.add(oldReview.priorCertificate)
     for (const file of Object.keys(oldReview.evidenceHashes)) files.add(file)
-    for (const file of Object.keys(certificate.revalidation20261119?.evidenceHashes ?? {})) files.add(file)
+    for (const key of ['revalidation20261119', 'revalidation20261122']) {
+      for (const file of Object.keys(certificate[key]?.evidenceHashes ?? {})) files.add(file)
+      for (const entry of Object.values(certificate[key]?.supersededEvidence ?? {})) files.add(entry.preservedPath)
+    }
   }
   for (const file of files) {
     const destination = path.join(directory, file)
@@ -60,7 +65,8 @@ test('reviewed manifest preserves all runtime and historical source guards', t =
   const receipt = JSON.parse(result.stdout)
   assert.equal(receipt.status, 'OFFLINE_RELEASE_GUARDS_PASS')
   assert.equal(receipt.r3.sourceFiles, 37)
-  assert.equal(receipt.pinnedRuntimeFiles, 110)
+  assert.equal(receipt.pinnedRuntimeFiles, 118)
+  assert.deepEqual(receipt.reviewedManifestChain, ['2026-10-14', '2026-11-19', '2026-11-22'])
   assert.equal(receipt.providerCalls, 0)
   assert.equal(receipt.databaseWrites, 0)
 })
@@ -83,7 +89,7 @@ test('refreshing a source hash without its bounded review is rejected', t => {
     fs.appendFileSync(file, '\n/* unreviewed change */\n')
     changeManifest(directory, manifest => { manifest.sourceHashes['src/app/globals.css'] = digest(file) })
   })
-  assertBlocked(result, 'SOURCE_REVIEW_DRIFT:src/app/globals.css')
+  assertBlocked(result, 'UNREVIEWED_SOURCE_CHANGE')
 })
 
 test('historical operational manifest remains immutable', t => {
@@ -107,7 +113,69 @@ test('new read-only dependency cannot be removed together with its review entry'
   const file = 'src/lib/read-only-sport-route.mjs'
   const result = runGuard(t, directory => changeManifest(directory, manifest => {
     delete manifest.sourceHashes[file]
-    delete manifest.revalidation20261119.addedSources[file]
+    delete manifest.revalidation20261122.addedSources[file]
   }))
   assertBlocked(result, 'SOURCE_REMOVED:' + file)
+})
+
+test('the October predecessor remains pinned through both later reviews', t => {
+  const result = runGuard(t, directory => fs.appendFileSync(path.join(directory, octoberPath), '\n'))
+  assertBlocked(result, 'SOURCE_DRIFT:' + octoberPath)
+})
+
+test('the November 19 regression evidence remains exact in its archived copy', t => {
+  const result = runGuard(t, directory => fs.appendFileSync(path.join(directory, historicalTestPath), '\n// changed historical evidence\n'))
+  assertBlocked(result, 'HISTORICAL_EVIDENCE_CHANGED')
+})
+
+test('a source review cannot silently discard the historical evidence receipt', t => {
+  const result = runGuard(t, directory => changeManifest(directory, manifest => {
+    manifest.revalidation20261122.supersededEvidence = {}
+  }))
+  assertBlocked(result, 'UNREVIEWED_HISTORICAL_EVIDENCE_CHANGE')
+})
+
+test('current source review evidence stays independently pinned', t => {
+  const file = 'docs/audits/2026-11-22-nba-flow/source-review.md'
+  const result = runGuard(t, directory => fs.appendFileSync(path.join(directory, file), '\nChanged review.\n'))
+  assertBlocked(result, 'SOURCE_REVIEW_EVIDENCE_DRIFT:' + file)
+})
+
+test('the updated regression test itself remains pinned as new evidence', t => {
+  const file = 'tests/mlb-production-readiness/source-review.test.mjs'
+  const result = runGuard(t, directory => fs.appendFileSync(path.join(directory, file), '\n// changed current evidence\n'))
+  assertBlocked(result, 'SOURCE_REVIEW_EVIDENCE_DRIFT:' + file)
+})
+
+test('revising navigation cannot rewrite inherited official runtime claims', t => {
+  const result = runGuard(t, directory => changeManifest(directory, manifest => {
+    manifest.automation.activation = 'ENABLED'
+  }))
+  assertBlocked(result, 'HISTORICAL_READINESS_CLAIMS_CHANGED')
+})
+
+for (const file of ['vercel.json', 'src/services/edge-lab-multi.service.mjs',
+  'docs/CERTIFICATION/MLB_OPERATIONAL_AUTOMATION_ACTIVATION.json']) {
+  test('the MLB pause/activation source cannot drift: ' + file, t => {
+    const result = runGuard(t, directory => fs.appendFileSync(path.join(directory, file), '\n'))
+    assertBlocked(result, 'SOURCE_DRIFT:' + file)
+  })
+}
+
+test('new navigation dependencies cannot be removed with their review entries', t => {
+  const file = 'src/components/dashboard/SportDecisionNavigation.tsx'
+  const result = runGuard(t, directory => changeManifest(directory, manifest => {
+    delete manifest.sourceHashes[file]
+    delete manifest.revalidation20261122.addedSources[file]
+  }))
+  assertBlocked(result, 'SOURCE_REMOVED:' + file)
+})
+
+test('a reviewed presentation digest cannot silently move to another value', t => {
+  const file = 'src/components/dashboard/DashboardShell.tsx'
+  const result = runGuard(t, directory => {
+    fs.appendFileSync(path.join(directory, file), '\n// unreviewed navigation change\n')
+    changeManifest(directory, manifest => { manifest.sourceHashes[file] = digest(path.join(directory, file)) })
+  })
+  assertBlocked(result, 'SOURCE_REVIEW_DRIFT:' + file)
 })

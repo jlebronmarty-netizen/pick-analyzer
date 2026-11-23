@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { SportProvider } from '@/context/SportContext'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
+import { PICK_SPORTS } from '@/components/dashboard/SportDecisionNavigation'
 
 export type DashboardNavItem = {
   href: string
@@ -25,6 +26,18 @@ export default function DashboardShellClient({
 }) {
   const pathname = usePathname()
   const activeTitle = titleByPath[pathname ?? ''] ?? 'Pick Analyzer 2.0'
+  const currentBoard = PICK_SPORTS.find(sport =>
+    pathname === sport.href || pathname?.startsWith(sport.href + '/') ||
+    pathname === sport.href + '-learning' ||
+    (sport.id === 'NBA' && /^\/nba(?:-|\/|$)/.test(pathname ?? ''))
+  )
+  const primaryItems: DashboardNavItem[] = [
+    productNavItems[0],
+    ...(currentBoard ? [{ href: currentBoard.href, label: 'Board ' + currentBoard.label, icon: 'B' }] : []),
+    productNavItems[1],
+  ].filter(Boolean)
+  const secondaryItems = productNavItems.slice(2)
+  const navigationItems = [...primaryItems, ...secondaryItems]
 
   return (
     <SportProvider>
@@ -44,19 +57,19 @@ export default function DashboardShellClient({
               </p>
             </div>
 
-            <nav className="mt-8 space-y-2 pb-24">
+            <nav aria-label="Navegación principal" className="mt-8 space-y-2 pb-24">
               <div className="pt-2">
                 <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
                   PRINCIPAL
                 </p>
 
                 <div className="mt-2 space-y-1">
-                  {productNavItems.map((item, index) => {
+                  {navigationItems.map((item, index) => {
                     const active = pathname === item.href || (pathname === '/' && item.href === '/today')
                     return (
                       <div key={item.href}>
-                      {index === 2 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">INVESTIGACIÓN</p>}
-                      {index === 5 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">RESULTADOS</p>}
+                      {index === primaryItems.length && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">INVESTIGACIÓN</p>}
+                      {index === primaryItems.length + 3 && <p className="pb-2 pt-5 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">RESULTADOS</p>}
                       <a
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
@@ -66,7 +79,7 @@ export default function DashboardShellClient({
                             : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                         }`}
                       >
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
+                        <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
                           {item.icon}
                         </span>
 
@@ -121,7 +134,7 @@ export default function DashboardShellClient({
               </div>
             </header>
 
-            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Investigación y resultados</summary><nav aria-label="Investigación y navegación secundaria" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{productNavItems.slice(2).map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
+            <details className="border-b border-slate-800 px-4 py-2 text-sm text-slate-300 xl:hidden"><summary className="w-fit cursor-pointer rounded py-2 focus-visible:outline-2 focus-visible:outline-teal-300">Investigación y resultados</summary><nav aria-label="Investigación y navegación secundaria" className="flex flex-wrap gap-x-4 gap-y-1 pb-2">{secondaryItems.map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="rounded px-1 py-3 hover:text-white focus-visible:outline-2 focus-visible:outline-teal-300">{item.label}</Link>)}</nav></details>
             <div className="mx-auto max-w-[1800px] space-y-10 p-4 md:p-8">
               {children}
             </div>
@@ -135,8 +148,8 @@ export default function DashboardShellClient({
           data-b5-1-mobile-bottom-nav="true"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
         >
-          <div className="mx-auto grid max-w-2xl grid-cols-2 gap-1">
-            {productNavItems.slice(0, 2).map((item) => {
+          <div className={`mx-auto grid max-w-2xl gap-1 ${primaryItems.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            {primaryItems.map((item) => {
               const active = pathname === item.href || (pathname === '/' && item.href === '/today')
               const baseClasses = 'flex min-h-14 min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-sky-300'
               const stateClasses = active
@@ -150,7 +163,7 @@ export default function DashboardShellClient({
                   className={`${baseClasses} ${stateClasses}`}
                   aria-current={active ? 'page' : undefined}
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
+                  <span aria-hidden="true" className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
                     {item.icon}
                   </span>
                   <span className="w-full truncate">{item.label}</span>

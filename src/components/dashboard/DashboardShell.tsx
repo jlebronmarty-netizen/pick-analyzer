@@ -7,7 +7,7 @@ import {
 } from '@/config/pick2-value-board-navigation'
 
 const baseProductNavItems: DashboardNavItem[] = [
-  { href: '/today', label: 'Hoy', icon: 'H' },
+  { href: '/today', label: 'Deportes', icon: 'D' },
   { href: '/mlb', label: 'Laboratorio MLB', icon: 'B' },
   { href: '/qualified-plays', label: 'Jugadas calificadas', icon: 'Q' },
   { href: '/model-lab', label: 'Laboratorio de modelos', icon: 'M' },
@@ -16,15 +16,17 @@ const baseProductNavItems: DashboardNavItem[] = [
 ]
 
 const titleByPath: DashboardTitleByPath = {
-  '/': 'Hoy',
-  '/today': 'Hoy',
+  '/': 'Deportes',
+  '/today': 'Deportes',
   '/mlb': 'Laboratorio MLB',
   [PICK2_MLB_VALUE_BOARD_ROUTE]: 'Valor / Edge',
   '/qualified-plays': 'Jugadas calificadas',
   '/performance': 'Rendimiento',
   '/model-lab': 'Laboratorio de modelos',
   '/data-health': 'Estado de datos',
-  '/nba-market-data': 'NBA',
+  '/nba': 'NBA · Decision Board',
+  '/nba-decision-board': 'NBA · Decision Board',
+  '/nba-market-data': 'NBA · Archivo GOAT',
   '/edge-lab': 'Edge Lab',
   '/nhl': 'NHL',
   '/ncaab': 'NCAAB',

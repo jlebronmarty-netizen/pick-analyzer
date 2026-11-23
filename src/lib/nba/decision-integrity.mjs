@@ -96,6 +96,9 @@ export function playerWindow(e,target,playerId,parts) {
     const min = Number(r.minutes_played);
     if (!finite(r.minutes_played) || min < 0) return issue('PARTIAL','MISSING_OR_INVALID_MINUTES');
     const hasBox = e.boxes.has(game.id), raw = e.boxes.get(game.id)?.get(playerId)?.[0];
+    // A quarantined whole box is unverified evidence, not proof that this player belongs to another team.
+    // It still consumes an unresolved history slot and cannot supply a projection or SHADOW freeze.
+    if (hasBox && e.boxes.get(game.id) === null) return issue('PARTIAL','ORIGINAL_BOX_NOT_VERIFIED');
     if (hasBox && (!raw || raw.team.id !== team)) return issue('IDENTITY_MISMATCH','ORIGINAL_BOX_OR_IDENTITY_DISAGREES');
     if (raw) {
       const [whole,seconds = 0] = String(raw.min).split(':').map(Number);

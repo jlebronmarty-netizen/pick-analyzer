@@ -23,10 +23,13 @@ test('blocked, started, stale and future-date rows cannot become highest-edge op
  assert.equal(operationalDailyPicks(view([row('a')],{games:[{gamePk:1,gameStatus:'STARTED'}]})).edge.data.length,0)
  assert.equal(operationalDailyPicks(view([],{games:[]})).official.status,'UNAVAILABLE')
 })
-test('homepage retains model overview above a combined connected-sports calendar',()=>{
+test('sports entry keeps model accuracy first and retains the combined calendar in secondary activity',()=>{
  const v=view([row('v')]);const day=combinedDay(v,{status:'UNAVAILABLE',warning:'NHL: fuente no disponible'}, {status:'EMPTY',groups:[],entries:[]});
  const html=renderToStaticMarkup(React.createElement(TodayContent,{view:v,performance:React.createElement('div',null,'Model overview'),calendar:React.createElement(MultisportDayView,{day,mlb:v})}))
- for(const text of ['Picks y rendimiento de hoy.','Model overview','Mayor edge del día','62.00%','7.00 pp','href="/mlb-value-board"','Partidos combinados de hoy','NHL: fuente no disponible'])assert.ok(html.includes(text),text)
+ for(const text of ['Actividad de hoy · todos los deportes','Model overview','Mayor edge del día','62.00%','7.00 pp','href="/mlb-value-board"','Partidos combinados de hoy','NHL: fuente no disponible'])assert.ok(html.includes(text),text)
+ assert.match(html,/<h1[^>]*>Deportes<\/h1>/)
+ assert.ok(html.includes('id="deportes"'))
+ assert.match(html,/<details[^>]*><summary[^>]*>Actividad de hoy · todos los deportes<\/summary>/)
  assert.ok(html.indexOf('Model overview')<html.indexOf('Calendario de todos los deportes'))
 })
 

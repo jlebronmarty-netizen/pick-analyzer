@@ -1,0 +1,32 @@
+{
+  "cutoff_at": "2026-11-23 00:42:14.777036+00",
+  "datasets": [
+    {
+      "name": "DECISION_V1_FORECASTS",
+      "rows": 1246,
+      "fingerprint": "ce9a108767d3758d64790331698ae70b"
+    },
+    {
+      "name": "DECISION_V1_OUTCOMES",
+      "rows": 962,
+      "fingerprint": "7205993234f84e662bcad62077aa99c7"
+    },
+    {
+      "name": "DECISION_V2_FORECASTS",
+      "rows": 75,
+      "fingerprint": "e2952808cd6ab99b93fe0f98b1835162"
+    },
+    {
+      "name": "DECISION_V2_JUDGMENTS",
+      "rows": 55,
+      "fingerprint": "4ee518598998fff450815b874c4f1706"
+    },
+    {
+      "name": "NBA_PREDICTION_INPUTS",
+      "rows": 15030,
+      "fingerprint": "fe791f61292b20b47c63da64e21ad821"
+    }
+  ],
+  "scope": "NBA prediction inputs across all NBA versions; Decision V1/V2 frozen records and outcomes at the fixed cutoff. New rows after cutoff are excluded. V2 judgments are append-only revisions, not unique games.",
+  "digest": "MD5 of ordered canonical JSON, for before/after equality"
+}

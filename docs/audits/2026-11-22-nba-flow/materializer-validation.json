@@ -1,0 +1,29 @@
+{
+  "files": [
+    "src/app/api/cron/nba-current-era-shadow/route.ts",
+    "src/lib/nba/archived-player-materializer-core.mjs",
+    "src/services/nba-archived-player-materialization.service.ts",
+    "supabase/migrations/20261123004359_nba_archived_player_materializer_v1.sql",
+    "tests/fixtures/nba-archived-player-materializer.mjs",
+    "tests/nba-archived-player-materializer.postgres.integration.mjs",
+    "tests/nba-archived-player-materializer.service.test.mjs",
+    "tests/nba-archived-player-materializer.test.mjs",
+    "docs/research/nba-archived-player-materializer.md"
+  ],
+  "unit_tests": 35,
+  "postgres_checks": 26,
+  "postgres_version": "17.12",
+  "real_archived_contexts": 10,
+  "valid_games": 8,
+  "valid_rows": 278,
+  "rejected_games": [
+    21718140,
+    21718158
+  ],
+  "targeted_typecheck": "passed",
+  "root_full_build": "pending integration",
+  "production_writes": 0,
+  "provider_calls": 0,
+  "default_enabled": false,
+  "activation_flag": "NBA_ARCHIVED_PLAYER_MATERIALIZATION_ENABLED=true"
+}

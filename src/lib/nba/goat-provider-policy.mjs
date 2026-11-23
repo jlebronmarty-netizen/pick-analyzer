@@ -1,3 +1,4 @@
+import {localDay} from '../nba-archive-core.mjs';
 export const NBA_GOAT_PROVIDER='balldontlie';
 export const NBA_GOAT_POLICY='NBA_GOAT_ARCHIVE_SHADOW_V1';
 export const NBA_GOAT_STATS_VERSION='NBA_GOAT_TEAM_STATS_V1';
@@ -12,6 +13,21 @@ export const FANDUEL_NBA_FULL_GAME_RULE={
  sportsbookSettlementClaimed:false,
 };
 const time=x=>typeof x==='string'&&Number.isFinite(Date.parse(x))?Date.parse(x):null;
+export function nbaGoatDailyUsage(history,now=new Date()){
+ const dateLocal=localDay(now);
+ // Puerto Rico is UTC-04:00 throughout the year. Count emissions, across all
+ // GOAT versions, within the existing local day; deployment never resets usage.
+ const start=Date.parse(dateLocal+'T00:00:00-04:00'),end=start+86400000;
+ let rows=0,lastCreatedAt=null;
+ for(const p of history){
+  if(p.feature_snapshot?.goatProviderPolicy!==NBA_GOAT_POLICY)continue;
+  const createdAt=time(p.created_at);
+  if(createdAt===null||!/(?:Z|[+-]\d\d:\d\d)$/.test(p.created_at))throw Error('NBA_GOAT_HISTORY_TIMESTAMP_INVALID');
+  if(createdAt>=start&&createdAt<end)rows++;
+  if(lastCreatedAt===null||createdAt>lastCreatedAt)lastCreatedAt=createdAt;
+ }
+ return {dateLocal,timeZone:'America/Puerto_Rico',rows,nextResetAt:new Date(end).toISOString(),lastCreatedAt:lastCreatedAt===null?null:new Date(lastCreatedAt).toISOString()};
+}
 const marketContract={moneyline:new Set(['WINNER']),spread:new Set(['SIGNED_HANDICAP']),total:new Set(['STRICT_GREATER_THAN','STRICT_LESS_THAN'])};
 function providerId(event){const m=/^bdl_nba_(\d+)$/.exec(String(event?.id??''));return m?Number(m[1]):null;}
 export function nbaGoatDerivedContext(event,quote,scheduleGame,scheduleReceivedAt,now=new Date().toISOString()){
