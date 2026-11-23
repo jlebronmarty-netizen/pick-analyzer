@@ -79,7 +79,7 @@ export default function DashboardShellClient({
                             : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                         }`}
                       >
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
+                        <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
                           {item.icon}
                         </span>
 
@@ -163,7 +163,7 @@ export default function DashboardShellClient({
                   className={`${baseClasses} ${stateClasses}`}
                   aria-current={active ? 'page' : undefined}
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
+                  <span aria-hidden="true" className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
                     {item.icon}
                   </span>
                   <span className="w-full truncate">{item.label}</span>

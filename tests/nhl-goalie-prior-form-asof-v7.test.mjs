@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {nhlGoalieSameAbbreviatedIdentity,nhlGoalieAsOfSide,nhlPairedGoalieAsOfEvidence}
+import {nhlGoalieSameAbbreviatedIdentity,nhlGoalieAsOfSide,nhlPairedGoalieAsOfEvidence,nhlGoalieShotAccounting}
  from '../src/lib/nhl-goalie-prior-form-asof-v7.mjs';
 const now='2026-11-19T22:08:00Z';
 const game={eventId:'nhl:2026020355',scheduledAt:'2026-11-20T01:00:00Z',
@@ -85,6 +85,53 @@ test('duplicate official game archived snapshots are discarded, no doubled goali
   decisionAt:now,gameEventId:game.eventId,boxscoreRows:[...prior,prior[0]]});
  assert.equal(dup.priorShots,30);
  assert.equal(dup.status,'INSUFFICIENT_PRIOR_SHOTS');
+});
+test('recorded zero saves and zero-shot backups are valid counts, not missing values',()=>{
+ assert.equal(nhlGoalieShotAccounting({shotsAgainst:0,goalsAgainst:0,saves:0,saveShotsAgainst:'0/0'}).status,'VALID_PRIOR_SHOT_COUNTS');
+ const allAllowed=nhlGoalieShotAccounting({shotsAgainst:5,goalsAgainst:5,saves:0,saveShotsAgainst:'0/5'});
+ assert.equal(allAllowed.status,'VALID_PRIOR_SHOT_COUNTS');assert.equal(allAllowed.recordedSaves,0);
+ const backup=box('nhl:2026020319','2026-11-13T00:00:00Z','2026-11-13T04:10:00Z',20,30,
+  [{...goalie(8480022,'M. DiPietro',0,0),toi:'00:00',saves:0,saveShotsAgainst:'0/0'}],[]);
+ const form=nhlGoalieAsOfSide({teamId:20,fullName:'Michael DiPietro',decisionAt:now,gameEventId:game.eventId,boxscoreRows:[backup]});
+ assert.equal(form.priorShots,0);assert.equal(form.recentGameCount,0);assert.equal(form.priorSavePct,null);
+ assert.equal(form.status,'INSUFFICIENT_PRIOR_SHOTS');
+});
+test('optional redundant goalie fields cannot contradict recorded shots and goals',()=>{
+ for(const row of [
+  {shotsAgainst:19,goalsAgainst:4,saves:16,saveShotsAgainst:'16/19'}, // Real Vladar discrepancy.
+  {shotsAgainst:19,goalsAgainst:3,saves:17,saveShotsAgainst:'17/19'}, // Real Levi discrepancy.
+  {shotsAgainst:30,goalsAgainst:2,saves:28,saveShotsAgainst:'28/31'},
+  {shotsAgainst:30,goalsAgainst:2,saves:28,saveShotsAgainst:'29/30'},
+  {shotsAgainst:30,goalsAgainst:2,saveShotsAgainst:'29/30'},
+  {shotsAgainst:30,goalsAgainst:2,saves:null},
+  {shotsAgainst:30,goalsAgainst:2,saves:'28'},
+  {shotsAgainst:30,goalsAgainst:2,saveShotsAgainst:null},
+  {shotsAgainst:30,goalsAgainst:2,saveShotsAgainst:'unavailable'},
+ ])assert.equal(nhlGoalieShotAccounting(row).status,'NOT_READY',JSON.stringify(row));
+ assert.equal(nhlGoalieShotAccounting({shotsAgainst:30,goalsAgainst:2,saves:28,saveShotsAgainst:'28/30'}).status,'VALID_PRIOR_SHOT_COUNTS');
+});
+test('minimum shots and goals must be recorded; absent redundant fields remain absent',()=>{
+ for(const row of [{shotsAgainst:null,goalsAgainst:2},{goalsAgainst:2},{shotsAgainst:30},{shotsAgainst:30,goalsAgainst:null},
+  {shotsAgainst:30,goalsAgainst:-1},{shotsAgainst:2,goalsAgainst:3}])assert.equal(nhlGoalieShotAccounting(row).status,'NOT_READY');
+ const counts=nhlGoalieShotAccounting({shotsAgainst:30,goalsAgainst:2});
+ assert.equal(counts.status,'VALID_PRIOR_SHOT_COUNTS');assert.equal(counts.recordedSaves,null);
+ assert.equal(counts.recordedSavesAvailable,false);assert.equal(counts.saveShotsFractionVerified,false);
+});
+test('disputed historical statistics are excluded from new form with event-specific reasons; originals stay intact',()=>{
+ const source=structuredClone(prior),p=source[0].boxscore.playerByGameStats.homeTeam.goalies[0];
+ p.saves=31;p.saveShotsAgainst='31/32';const before=JSON.stringify(source);
+ const form=nhlGoalieAsOfSide({teamId:20,fullName:'Michael DiPietro',decisionAt:now,gameEventId:game.eventId,boxscoreRows:source});
+ assert.equal(form.priorShots,30);assert.equal(form.priorGoalsAgainst,1);assert.equal(form.status,'INSUFFICIENT_PRIOR_SHOTS');
+ assert.deepEqual(form.statQuality.excludedPriorRows,[{eventId:'nhl:2026020321',playerId:8480022,reason:'INCONSISTENT_RECORDED_SAVES'}]);
+ assert.equal(JSON.stringify(source),before);assert.equal(form.goalieAdjustmentApplied,false);
+ const onlyBad=nhlGoalieAsOfSide({teamId:20,fullName:'Michael DiPietro',decisionAt:now,gameEventId:game.eventId,boxscoreRows:[source[0]]});
+ assert.equal(onlyBad.reason,'NO_CONSISTENT_PRIOR_GOALIE_STATISTICS');
+});
+test('bad shot accounting cannot resolve an otherwise ambiguous goalie-name identity',()=>{
+ const bad=box('nhl:2026020319','2026-11-13T00:00:00Z','2026-11-13T04:10:00Z',20,30,
+  [{...goalie(8000001,'M. DiPietro',30,2),saves:29}],[]);
+ const form=nhlGoalieAsOfSide({teamId:20,fullName:'Michael DiPietro',decisionAt:now,gameEventId:game.eventId,boxscoreRows:[...prior,bad]});
+ assert.equal(form.reason,'MULTIPLE_GOALIE_IDS_FOR_SAME_TEAM_NAME');assert.equal(form.candidateIds,2);
 });
 test('V6 writer reads existing NHL boxscores without new vendor calls and no goalie score weights',()=>{
  const writer=fs.readFileSync('src/services/nhl-late-v6-freeze-writer.service.ts','utf8');

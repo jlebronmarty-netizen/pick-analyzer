@@ -45,4 +45,3 @@ La reproducción de archivos almacenados identificó ocho juegos admisibles y 27
 ## Reversión
 
 Revertir el commit de aplicación restaura la presentación y el contador previos, sin borrar registros ni alterar predicciones. La fecha UTC anterior vuelve a ser incorrecta para Puerto Rico; por eso la reversión del contador solo debe hacerse ante una regresión demostrada y acompañada de seguimiento del límite local.
-

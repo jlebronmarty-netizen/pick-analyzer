@@ -1,3 +1,13 @@
+## 2026-11-23 · NHL · Corrección de tiros ofensivos de portero
+
+La exclusión de tiros de `nhl:2026020342` era un falso positivo: VGK 27 = 26 de patinadores + 1 de Adin Hill. Corregida con la observación tirador–portero del snapshot original; se conservan 13 archivos y hashes, el corte, las cohortes, las fórmulas y las congelaciones. Moneyline y mercados exactos no cambian; tiros sigue sin mejora suficiente para promoverse. 166 pruebas NHL, 26 de dashboard, TypeScript y build completo aprobados; nueva QA móvil pendiente en esta revisión. [Evidencia](research/nhl-audit-2026-11-23/goalie-shot-correction.json). El panel diario con capturas compartidas y complemento histórico se prepara por separado; no es parte de esta corrección.
+
+## 2026-11-23 · NHL · Auditoría terminada, validación de modelos pendiente
+
+Implementada en rama de revisión la auditoría A–E de datos NHL y su panel: cobertura por fecha/equipo, cuatro referencias Moneyline comparables con tiempos e incertidumbre, pruebas cronológicas separadas, líneas exactas y motivos de exclusión. Evidencia: [NHL 2026-11-23](research/nhl-audit-2026-11-23/README.md), reporte JSON y base equipo-partido. Se recuperan contratos excluidos por acentos y se bloquean estadísticas incompatibles en futura evidencia V7. Se preservan PR de otros chats y el V8 abierto #372.
+
+PR #399 abierto, CI y Preview aprobados; flujo de escritorio y API con datos reales verificados. Pendientes: revisión del PR, comprobación visual móvil e integración; revisión inicial V6 al alcanzar 30 partidos (actual: 24; ningún umbral garantiza mejora); futuro periodo independiente para variantes fijas; confirmación/identidad previa de porteros; reglas exactas de Circa y hora publicada; mercado y liquidación de props de tiros/atajadas. Las cuatro pruebas evaluables de 19 partidos son inconclusas, porteros no tiene muestra cronológica suficiente. No promover modelos, certificar ROI/CLV/FanDuel ni declarar player props completo.
+
 ## 2026-11-22 · Flujo por deporte y reparación operativa NBA
 
 Objetivo autorizado: Deportes y accuracy → tablero del deporte → mercados y detalle. La rama corrige acceso NBA, separación de versiones, lectura fallida y límite diario en America/Puerto_Rico. Mantener JUGADA bloqueada y conservar los pronósticos originales durante publicación y verificación. La rama añade un materializador de originales archivados íntegros al cron NBA existente, con límite por ejecución, transacción idempotente y procedencia explícita. Su activación y primer ciclo real quedan pendientes; un box score incompleto permanece excluido. [Alcance y evidencia](audits/2026-11-22-nba-flow/README.md).
@@ -4482,3 +4492,9 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 
 - NBA: compare the Nov 19 frozen props with new statistical outcomes after the Nov 21 scheduled settlement. Verify the DNP stays pending. Reconcile stored player contexts with independent finals before adding any private GOAT raw receipts.
 - NHL: compare exact-event V6 finals at 30 paired games, then validate on a larger prospective holdout. The report covers up to 250 recent freezes.
+
+## 2026-11-21 · Lectura de originales GOAT para props NBA
+
+Medir en una prueba privada y acotada cuántos historiales de props se pueden cotejar con los box scores archivados. Verificar por separado la disponibilidad previa del jugador y la regla de prórroga de cada contrato.
+
+Prueba de vista previa completada el 21 de noviembre a las 8:34 p. m. de Puerto Rico. Se validó el historial de 334 de 842 lados de props. Antes de activar lecturas periódicas en producción, revisar el límite de lectura y los 140 lados con discrepancias de original o identidad. Siguen pendientes los historiales incompletos, la disponibilidad de los jugadores y la regla regional de prórroga.

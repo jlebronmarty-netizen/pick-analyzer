@@ -389,7 +389,7 @@
     "src/app/today/loading.tsx": "4310507b5544df37226da71eaa5bad195abcb67de9fdf21633cea40cb243e0eb",
     "src/app/today/page.tsx": "211d45e7a6afd244db71c31c5c064daf8b2fc6d321a394739a8b387d74958ef6",
     "src/components/dashboard/DashboardShell.tsx": "80f0c36f0f89ef4233d2d0e287d5c2b3b6325e9300733e82bd3a1f4c34381411",
-    "src/components/dashboard/DashboardShellClient.tsx": "748e80c1014811093945878e4306eaad0103561ed6a3198123db241aafdd4802",
+    "src/components/dashboard/DashboardShellClient.tsx": "505ea3b833276856d4cffbe99684c714c81bf957d6d55fb02115c6dd2b6c258c",
     "src/components/dashboard/NbaBoardAccess.tsx": "04e89410ee4e444268e31c5515e8ea0285657e1b9412622f1eb1371b37fcc0f8",
     "src/components/dashboard/SportDecisionNavigation.tsx": "f39c8cd5c32942d9bf7927fce27df77f45bc9212eb38887c44207d735b9216a7",
     "src/components/dashboard/SportModelOverview.tsx": "f8b74629e8d65e9fdfcb3189be561aae2511a9abd1efc286ea705a14a342c17a",
@@ -717,7 +717,7 @@
       },
       "src/components/dashboard/DashboardShellClient.tsx": {
         "priorSha256": "62ce1ac6b990e90f359c9b147839205c94d2734ac9a4820b1d32de6db1f78b6d",
-        "reviewedSha256": "748e80c1014811093945878e4306eaad0103561ed6a3198123db241aafdd4802",
+        "reviewedSha256": "505ea3b833276856d4cffbe99684c714c81bf957d6d55fb02115c6dd2b6c258c",
         "scope": "REVIEWED_SHARED_PRESENTATION"
       },
       "src/components/dashboard/SportNavigation.tsx": {
