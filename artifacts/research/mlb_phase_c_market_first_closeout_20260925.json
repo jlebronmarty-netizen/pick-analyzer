@@ -1,0 +1,123 @@
+{
+  "artifact":"MLB_PHASE_C_MARKET_FIRST_CLOSEOUT_20260925",
+  "research_only":true,
+  "as_of_date":"2026-09-25",
+  "markets":["batter_walks","batter_strikeouts","pitcher_walks","batter_stolen_bases"],
+  "availability_summary":[
+    {"market":"batter_walks","line":0.5,"side":"UNDER","quote_rows":1962,"days_seen":6,"games_seen":27,"players_seen":187,"books_seen":4},
+    {"market":"batter_strikeouts","line":0.5,"side":"OVER","quote_rows":462,"days_seen":5,"games_seen":19,"players_seen":94,"books_seen":1},
+    {"market":"pitcher_walks","line":1.5,"side":"UNDER","quote_rows":77,"days_seen":6,"games_seen":24,"players_seen":32,"books_seen":2},
+    {"market":"pitcher_walks","line":1.5,"side":"OVER","quote_rows":77,"days_seen":6,"games_seen":24,"players_seen":32,"books_seen":2}
+  ],
+  "closeout":[
+    {
+      "market":"batter_walks",
+      "line":0.5,
+      "side":"UNDER",
+      "model":"batter_walks_under_0p5_proj_0p20_v1",
+      "accuracy_2026":0.8339,
+      "state":"EXISTING_STRONG_CONTRACT_FORWARD_MARKET_VALIDATION_PRIORITY",
+      "reason":"high real-board frequency and exact-line match"
+    },
+    {
+      "market":"batter_walks",
+      "line":0.5,
+      "side":"OVER",
+      "state":"NO_75_PLUS_STABLE_CANDIDATE",
+      "source":"PR #196"
+    },
+    {
+      "market":"batter_walks",
+      "line":1.5,
+      "side":"OVER",
+      "state":"NO_75_PLUS_STABLE_CANDIDATE",
+      "source":"PR #196"
+    },
+    {
+      "market":"batter_walks",
+      "line":1.5,
+      "side":"UNDER",
+      "state":"BASELINE_DOMINATED_NO_SIGNAL_CANDIDATE",
+      "source":"PR #196"
+    },
+    {
+      "market":"batter_strikeouts",
+      "line":0.5,
+      "side":"OVER",
+      "rule":"projection >=1.10",
+      "development_2025":{"n":1340,"wins":1036,"accuracy":0.7731,"lift_pp":18.47,"worst_month":0.7187},
+      "external_2026":{"n":3203,"wins":2382,"accuracy":0.7437},
+      "state":"EXTERNAL_BELOW_75_NO_RETUNE",
+      "source":"PR #193"
+    },
+    {
+      "market":"batter_strikeouts",
+      "line":1.5,
+      "side":"UNDER",
+      "model":"batter_k_under_1p5_proj_0p5_v1",
+      "accuracy_2026":0.9311,
+      "state":"EXISTING_STRONG_CONTRACT_BUT_MARKET_SIDE_AVAILABILITY_LIMITED"
+    },
+    {
+      "market":"batter_strikeouts",
+      "line":2.5,
+      "side":"UNDER",
+      "state":"BASELINE_DOMINATED_NO_SIGNAL_CANDIDATE",
+      "source":"PR #193"
+    },
+    {
+      "market":"pitcher_walks",
+      "line":0.5,
+      "side":"OVER",
+      "rule":"expected_walks >=1.75",
+      "development_2025":{"n":1389,"wins":1207,"accuracy":0.869,"lift_pp":5.21},
+      "test_2025":{"n":253,"wins":230,"accuracy":0.9091},
+      "oos_2026":{"n":1436,"wins":1254,"accuracy":0.8733,"lift_pp":4.49,"worst_month":0.847},
+      "state":"CROSS_YEAR_STABLE_75_PLUS_OOS_LIFT_BELOW_5PP"
+    },
+    {
+      "market":"pitcher_walks",
+      "line":1.5,
+      "side":"OVER",
+      "state":"FAILED_DEVELOPMENT",
+      "source":"PR #191"
+    },
+    {
+      "market":"pitcher_walks",
+      "line":1.5,
+      "side":"UNDER",
+      "state":"FAILED_DEVELOPMENT",
+      "source":"PR #191"
+    },
+    {
+      "market":"pitcher_walks",
+      "line":2.5,
+      "side":"UNDER",
+      "rule":"expected_walks <=1.50",
+      "oos_2026":{"n":597,"wins":517,"accuracy":0.866,"lift_pp":12.11,"worst_month":0.8154},
+      "state":"CROSS_YEAR_STABLE_75_PLUS_LOW_CURRENT_AVAILABILITY"
+    },
+    {
+      "market":"pitcher_walks",
+      "line":3.5,
+      "side":"UNDER",
+      "rule":"expected_walks <=1.25",
+      "oos_2026":{"n":137,"wins":132,"accuracy":0.9635,"lift_pp":5.68,"worst_month":0.9},
+      "state":"CROSS_YEAR_STABLE_75_PLUS_LOW_COVERAGE_LOW_CURRENT_AVAILABILITY"
+    },
+    {
+      "market":"batter_stolen_bases",
+      "line":0.5,
+      "side":"UNDER",
+      "baseline_accuracy_2025":0.9527,
+      "state":"BASELINE_DOMINATED_NOT_PROMOTED",
+      "note":"simple filters reach ~97% but add <3pp over baseline"
+    }
+  ],
+  "phase_c_conclusion":{
+    "primary_forward_priority":"Batter Walks U0.5",
+    "secondary_watch":"Pitcher Walks O0.5 only when exact quote exists",
+    "do_not_reopen":["Batter Walks O0.5/O1.5","Batter K O0.5","Pitcher Walks 1.5 both sides","Stolen Bases U0.5 without materially higher-lift architecture"]
+  },
+  "boundaries":{"no_line_extrapolation":true,"no_threshold_rescue":true,"no_official_picks":true,"apostar_disabled":true,"no_historical_odds_api_spend":true}
+}
