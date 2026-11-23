@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "date": "2026-11-23",
+  "baseCommit": "1642fbdae0687ed6fdef6603094bf337765d10f8",
+  "baseTree": "a16f1153eeed59ad63babc3b262f28975fd5ec69",
+  "migration": "20261123210507_nhl_manual_feature_snapshots_v1.sql",
+  "schemaVersion": "NHL_MANUAL_FEATURES_V1",
+  "tests": {
+    "nhl": 171,
+    "nhlDashboard": 30,
+    "sqlRenderer": 10,
+    "postgres": {
+      "status": "PASS",
+      "engine": "PostgreSQL 17.12 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit",
+      "checks": [
+        "source preserved; availability and insertion assigned by database",
+        "identical retry stable; payload/hash divergence rejected",
+        "later run appends without replacing original",
+        "owner update/delete/truncate rejected",
+        "RLS enabled; anon/auth blocked; service SELECT only; writer inaccessible to application roles",
+        "started games omitted; direct post-start insert rejected; supplied backdated clocks ignored",
+        "future source captures, prediction flags, missing identity, duplicate and oversized batches rejected",
+        "invalid batch rolls back every new row",
+        "concurrent reverse-order retries append once per event without deadlock"
+      ],
+      "remoteDatabaseWrites": 0
+    }
+  },
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "includes": "Next.js compilation, TypeScript and full route generation"
+  },
+  "liveContract": {
+    "sourceGeneratedAt": "2026-11-23T21:07:51.184Z",
+    "featuresAccepted": 7,
+    "bothLast10Complete": 7,
+    "bothGoaliesConfirmed": 0,
+    "persistedByThisTest": false
+  },
+  "remoteMigration": {
+    "appliedByCoordinator": true,
+    "rlsVerified": true,
+    "serviceRoleSelectOnlyVerified": true,
+    "applicationRoleWriterExecutionDenied": true,
+    "firstBatchAtReview": "PENDING"
+  },
+  "predictionAdjustment": false,
+  "modelPromoted": false,
+  "providerCalls": 0,
+  "mobileQa": "PENDING_ON_NEW_PREVIEW",
+  "notes": [
+    "Server insertion clocks; original source clock retained in unchanged JSON.",
+    "Shared-data readout is on demand; no new scheduler or predictor.",
+    "SQL renderer has no network or database access."
+  ]
+}

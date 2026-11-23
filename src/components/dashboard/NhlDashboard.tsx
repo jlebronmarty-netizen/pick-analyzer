@@ -5,6 +5,7 @@ import SportDecisionBoard, {type SportDecisionRow} from '@/components/dashboard/
 import NhlMarketResearchCoverage from '@/components/dashboard/NhlMarketResearchCoverage';
 import NhlExactMarketValidation from '@/components/dashboard/NhlExactMarketValidation';
 import NhlResearchAuditPanel from '@/components/dashboard/NhlResearchAuditPanel';
+import NhlManualFeaturesPanel from '@/components/dashboard/NhlManualFeaturesPanel';
 import { useState } from "react";
 import type { NhlReport } from "@/lib/nhl-external-report";
 import { filterNhlHistory, nhlDate, nhlOpportunities } from "@/lib/nhl-view";
@@ -16,7 +17,7 @@ const button="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold
 const input="mt-1 block rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-slate-100";
 export default function NhlDashboard({report}:{report:NhlReport}){
   const [date,setDate]=useState("");const[outcome,setOutcome]=useState("ALL");const[page,setPage]=useState(0);
-  if(report.status==="UNAVAILABLE")return <section className="mlb-ui space-y-4"><h1 className="text-3xl font-bold">NHL</h1><p role="status" className="rounded-xl border border-amber-400/30 p-5 text-amber-200">{report.warning}</p><Link href="/today" className="text-teal-300">Volver a Today</Link><NhlResearchAuditPanel/></section>;
+  if(report.status==="UNAVAILABLE")return <section className="mlb-ui space-y-4"><h1 className="text-3xl font-bold">NHL</h1><p role="status" className="rounded-xl border border-amber-400/30 p-5 text-amber-200">{report.warning}</p><Link href="/today" className="text-teal-300">Volver a Today</Link><NhlManualFeaturesPanel/><NhlResearchAuditPanel/></section>;
   const r=report,s=r.summary,history=filterNhlHistory(r,date,outcome),pages=Math.max(1,Math.ceil(history.length/25)),current=Math.min(page,pages-1);
   const today=r.history.filter(p=>nhlDate(p.scheduledAt)===r.date).sort((a,b)=>a.scheduledAt.localeCompare(b.scheduledAt)||a.eventId.localeCompare(b.eventId)),opportunities=nhlOpportunities(r);
   const quoteCoverage='quoteCoverage' in r?r.quoteCoverage:undefined;
@@ -48,6 +49,7 @@ export default function NhlDashboard({report}:{report:NhlReport}){
     <SportDecisionBoard sport="NHL" rows={decisionRows} marketNotes={{spread:"Puck line: pares Circa archivados para investigación. Faltan certificación de reglas/contrato, probabilidades y validación prospectiva; no se publican selecciones.",total:"Total de goles: existen pares de investigación en el archivo. Sin certificación del mercado ni holdout no son recomendaciones.",props:"Shots on goal y goalie saves están en investigación; sin contratos de cuotas y proyecciones verificadas para publicación."}} description="El precio Circa y el pronóstico de DRatings se muestran en Moneyline. El Top requiere verificar la procedencia del historial y el contrato."/>
     <NhlMarketResearchCoverage/>
     <NhlExactMarketValidation/>
+    <NhlManualFeaturesPanel/>
     <NhlResearchAuditPanel/>
     <section aria-label="NHL source health" className="rounded-xl border border-slate-700 bg-slate-900 p-4 text-sm">
       <p>Operación: <strong>{r.health.status}</strong> · Último ciclo: {r.health.runStatus??"Sin dato"} · Cobertura futura: {r.health.coverage??"—"}/{r.health.eligible??"—"}</p>

@@ -1,3 +1,7 @@
+## 2026-11-23 · NHL · Compartir inputs antes de evaluar cambios de modelo
+
+Preparados almacenamiento privado append-only de `NHL_MANUAL_FEATURES_V1`, escritor restringido, lectura diaria completa y comparación bajo demanda en Pick. Los snapshots acreditan disponibilidad desde su inserción real; preservan generación, cortes y payload de la fuente. Migración instalada y permisos verificados; sigue la primera escritura con readback, conectar la actualización autorizada y completar QA móvil. La evaluación prospectiva y cualquier promoción de modelos siguen fuera de este módulo. [Detalle](nhl-manual-features-v1.md).
+
 ## 2026-11-23 · NHL · Corrección de tiros ofensivos de portero
 
 La exclusión de tiros de `nhl:2026020342` era un falso positivo: VGK 27 = 26 de patinadores + 1 de Adin Hill. Corregida con la observación tirador–portero del snapshot original; se conservan 13 archivos y hashes, el corte, las cohortes, las fórmulas y las congelaciones. Moneyline y mercados exactos no cambian; tiros sigue sin mejora suficiente para promoverse. 166 pruebas NHL, 26 de dashboard, TypeScript y build completo aprobados; nueva QA móvil pendiente en esta revisión. [Evidencia](research/nhl-audit-2026-11-23/goalie-shot-correction.json). El panel diario con capturas compartidas y complemento histórico se prepara por separado; no es parte de esta corrección.
