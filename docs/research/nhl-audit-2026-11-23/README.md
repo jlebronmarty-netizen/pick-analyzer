@@ -44,9 +44,11 @@ Hay 911 ejecuciones almacenadas al corte. El archivo de calendario incluye 1,362
 |---|---|---|
 | `nhl:2026020326` | D. Vladar, PHI: 19 tiros; 4 goles + 16 atajadas = 20 | Se excluye la estadística de forma previa; se conserva el original |
 | `nhl:2026020349` | D. Levi, EDM: 19 tiros; 3 goles + 17 atajadas = 20 | Mismo tratamiento |
-| `nhl:2026020342` | VGK: 27 tiros de equipo frente a 26 sumados entre jugadores | Se excluye el dato de tiros tanto como ataque propio como defensa del rival |
+| `nhl:2026020342` | VGK: 27 tiros de equipo = 26 de patinadores + 1 del portero Adin Hill | Falso positivo corregido con observación tirador–portero del mismo archivo; se recuperan tiros propios VGK y concedidos DAL |
 
-No se eliminan estos tres partidos del inventario ni se corrige silenciosamente la fuente. El nuevo control del helper V7 actúa solo al generar evidencia posterior. Si `saves` o `saveShotsAgainst` están registrados, deben cuadrar con tiros y goles; se distingue cero de dato ausente. Los conflictos de identidad permanecen bloqueados.
+No se elimina ningún partido del inventario ni se corrige silenciosamente la fuente. Permanecen dos partidos con estadísticas de portero en cuarentena. El nuevo control del helper V7 actúa solo al generar evidencia posterior. Si `saves` o `saveShotsAgainst` están registrados, deben cuadrar con tiros y goles; se distingue cero de dato ausente. Los conflictos de identidad permanecen bloqueados.
+
+**Corrección de tiros ofensivos del portero, 23 de noviembre:** el archivo original `matchups.json` ya contiene a Hill (`8478499`) como tirador frente a Oettinger (`8479979`), con un tiro y cero goles en `nhl:2026020342`, capturado a `2026-11-18T06:37:21.275Z`, igual que el PBP archivado. La guardia ahora suma tiros de patinadores y tiros ofensivos de porteros identificados, validando partido, fecha, rivales, minutos, conteos, duplicados y captura. `shots` del agregado ya incluye los goles; nunca se suma `shotsAgainst`. Los agregados sin período no recuperan tiros de partidos decididos por shootout. La hora de esta evidencia se conserva y se exige antes de cada decisión que la utiliza. La corrección usa los mismos 13 JSON, sus hashes y el corte original; no reemplaza resultados, pronósticos o congelaciones. [Evidencia y diferencias](goalie-shot-correction.json). Fuentes de corroboración: [Event Summary oficial](https://www.nhl.com/scores/htmlreports/20262027/ES020342.HTM) y [Play-by-play oficial](https://www.nhl.com/scores/htmlreports/20262027/PL020342.HTM), tiro de Hill al 01:39 del segundo período.
 
 Las tablas consultadas no presentan duplicados de eventos en pronósticos, resultados ni congelaciones. Los lectores rechazan solapamientos de páginas, claves ausentes, cambios de conteo y límites alcanzados. Un error o una lectura incompleta se presenta como no disponible, sin métricas parciales.
 
@@ -94,7 +96,7 @@ Las cuatro variantes evaluables comparten los mismos 19 partidos posteriores del
 
 | Grupo añadido | Entrenamiento / intermedia / posterior | MAE total: base → prueba | MAE margen: base → prueba | Brier ML: base → prueba |
 |---|---:|---:|---:|---:|
-| Volumen de tiros | 17 / 14 / 19 | 2.18147 → 2.15942 | 1.55874 → 1.74148 | 0.23571 → 0.26089 |
+| Volumen de tiros | 17 / 14 / 19 | 2.18147 → 2.15716 | 1.55874 → 1.73589 | 0.23571 → 0.25999 |
 | PP/PK | 15 / 11 / 19 | 2.18147 → 2.18116 | 1.55874 → 1.55976 | 0.23571 → 0.23604 |
 | Calidad observada del rival | 17 / 14 / 19 | 2.18147 → 2.18047 | 1.55874 → 1.55754 | 0.23571 → 0.23554 |
 | Descanso verificado | 17 / 14 / 19 | 2.18147 → 2.17316 | 1.55874 → 1.54997 | 0.23571 → 0.23933 |
@@ -157,15 +159,19 @@ Verificación local: **162 pruebas NHL y 26 de interfaz/integración aprobadas**
 - Navegador de escritorio, 1,348 × 936: apertura del panel, consulta bajo demanda, inventario, cuatro referencias, intervalos, bandas vacías de calibración y paginación de exclusiones de 1 a 2/11 verificados. Sin desbordamiento horizontal ni errores de aplicación observados. Se inspeccionaron capturas; no se publicaron archivos de navegador. La revisión visual móvil no se realizó.
 - Tras la comprobación, producción seguía en `dpl_AJCLW29TdCUGWEbM6vQN3dztgbvq` / `ca2d8450`, y las cuatro huellas históricas permanecían idénticas. La consulta de logs de errores/advertencias del Preview no devolvió registros.
 
-La evidencia SSR del archivo comprometido corresponde al SHA256 `0bcd8b916346924ee7c14e0e09e5d0cd6dab6007f54e3ad6f4a33bddae104200`. El paquete separado `nhl-audit-inputs-2026-11-23.zip` entregado con este trabajo conserva los 13 JSON originales y el manifiesto para reproducir offline el corte histórico; el código y los resultados permanecen versionados en este PR.
+La evidencia SSR de la entrega original corresponde al SHA256 `0bcd8b916346924ee7c14e0e09e5d0cd6dab6007f54e3ad6f4a33bddae104200`. La corrección de tiros de Hill regenera el informe desde las mismas entradas; sus hashes anterior y corregido se conservan en `goalie-shot-correction.json`. La verificación de navegador/Preview anterior no se presenta como prueba de esta revisión, cuya nueva comprobación móvil queda pendiente. El paquete separado `nhl-audit-inputs-2026-11-23.zip` entregado con este trabajo conserva los 13 JSON originales y el manifiesto para reproducir offline el corte histórico; el código y los resultados permanecen versionados en este PR.
+
+La corrección dirigida posterior a la entrega pasa **166 pruebas NHL, 26 de dashboard, TypeScript y build completo**, usando los mismos 13 archivos del corte original. La comparación Moneyline, mercados exactos, coeficiente de tiros y composición cronológica permanecen idénticos; solamente cambia el historial de tiros antes excluido por error y sus métricas derivadas. La nueva revisión móvil y la publicación quedan pendientes.
 
 ## 7. Pendientes y continuidad
 
 1. Revisar el PR #399 y su Preview, y completar la comprobación visual móvil antes de integrar la interfaz y las correcciones de calidad. No activar nuevos candidatos ni fusionar PR #372 implícitamente.
 2. Al alcanzar 30 V6 independientes, ejecutar la misma comparación y examinar intervalos, fechas y calibración. Es una revisión inicial; ni 30 ni 100 partidos garantizan mejora.
 3. Mantener las fechas, las cinco variantes y el corte de esta investigación. Si se autoriza una etapa posterior, congelar antes del juego probabilidades de candidatos con versiones y features; evaluar luego el periodo futuro reservado sin ajustar parámetros sobre sus resultados.
-4. Revisar las tres discrepancias estadísticas frente a otra evidencia original guardada o una captura futura autorizada, conservando procedencia. Nunca alterar retrospectivamente congelaciones.
+4. Revisar las dos discrepancias restantes de estadísticas de porteros frente a otra evidencia original guardada o una captura futura autorizada, conservando procedencia. La supuesta discrepancia de tiros VGK en `0342` quedó resuelta con el tiro ofensivo de Hill ya archivado. Nunca alterar retrospectivamente congelaciones.
 5. Conseguir identidad y estado previo del portero mejor verificados; el probable acertado después del partido no se vuelve una confirmación previa.
 6. Para props de tiros/atajadas faltan líneas, precios, periodos, reglas OT/DNP/titular, correspondencia de jugador y liquidación. La base individual prepara esa investigación; no acredita mercados completos.
 
 Continuidad: partir del código y de este informe, consultar el estado real de `main`, PR y Vercel, y volver a ejecutar la lectura para un nuevo corte. Conservar `report.json` de esta auditoría y no reemplazarlo silenciosamente con datos posteriores.
+
+La siguiente fase acordada es un panel diario que reutilice las capturas de Supabase y el complemento histórico de 172 partidos del análisis manual, con origen, corte y cobertura visibles. Esa integración y sus snapshots nuevos de variables previas se implementan por separado del PR #399. La corrección de este PR no incorpora código del Site, no transforma datos consultados posteriormente en entradas históricas previas y no promueve modelos.

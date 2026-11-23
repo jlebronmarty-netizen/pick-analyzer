@@ -161,5 +161,15 @@
     "zipEntries": 15,
     "allManifestHashesVerified": true,
     "storedWithDelivery": true
+  },
+  "goalieOffensiveShotCorrection": {
+    "evidence": "goalie-shot-correction.json",
+    "sameInputSnapshot": true,
+    "nhlTests": 166,
+    "dashboardTests": 26,
+    "fullBuild": "PASS",
+    "published": false,
+    "previewMobileStillRequired": true,
+    "typescript": "PASS"
   }
 }

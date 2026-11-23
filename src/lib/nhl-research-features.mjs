@@ -39,11 +39,41 @@ const stat=(rows,field)=>mean(rows.map(x=>x[field]).filter(x=>finite(x)!==null))
 const emptyMetrics=()=>({games:0,totalMAE:null,marginMAE:null,moneylineBrier:null});
 const exclusion=(eventId,scope,reason)=>({eventId:String(eventId??'UNKNOWN'),scope,reason});
 
+// The archived shooter-goalie table counts both goals and saved shots as SOG.
+// A goalie can be the SHOOTER; shotsAgainst is never offensive shot evidence.
+// These aggregates lack period labels, so they cannot certify extra SOG in SO games.
+function goalieOffensiveShots(context,side,matchups,playerCounts,cutoff){
+ const b=context.boxscore,other=side==='home'?'away':'home',now=ms(cutoff),
+  own=arr(b.playerByGameStats?.[side+'Team']?.goalies),
+  opposite=arr(b.playerByGameStats?.[other+'Team']?.goalies),
+  ownIds=new Set(own.filter(p=>integer(p.playerId)!==null).map(p=>p.playerId));
+ const rows=arr(matchups).filter(r=>r?.event_id===context.event_id&&ownIds.has(r.shooting_player_id)&&
+  (ms(r.captured_at)===null||ms(r.captured_at)<=now));
+ if(!rows.length)return {addedShots:0,capturedAt:null,observations:[],reason:null};
+ const blocked=reason=>({addedShots:null,capturedAt:null,observations:[],reason});
+ if((b.periodDescriptor?.periodType??b.gameOutcome?.lastPeriodType)==='SO')
+  return blocked('GOALIE_SHOT_PERIOD_UNVERIFIED');
+ const pbpAt=ms(context.pbp_captured_at),start=ms(b.startTimeUTC),seen=new Set(),evidence=[];
+ if(pbpAt===null||pbpAt<=start||pbpAt>now)return blocked('GOALIE_SHOT_CAPTURE_UNVERIFIED');
+ for(const r of rows){
+  const shooter=own.find(p=>p.playerId===r.shooting_player_id),receiver=opposite.find(p=>p.playerId===r.goalie_id),
+   pair=r.shooting_player_id+':'+r.goalie_id,at=ms(r.captured_at),shots=integer(r.shots),goals=integer(r.goals);
+  if(seen.has(pair)||r.provider_game_id!==b.id||r.game_date!==b.gameDate||at!==pbpAt||
+    shooter?.position!=='G'||receiver?.position!=='G'||(secs(shooter?.toi)??0)<=0||(secs(receiver?.toi)??0)<=0||
+    playerCounts.get(r.shooting_player_id)!==1||playerCounts.get(r.goalie_id)!==1||
+    shots===null||shots<1||goals===null||goals>shots)
+   return blocked('GOALIE_SHOT_IDENTITY_OR_COUNTS_UNVERIFIED');
+  seen.add(pair);evidence.push({shooterId:r.shooting_player_id,opposingGoalieId:r.goalie_id,
+   shots,goals,capturedAt:iso(r.captured_at)});
+ }
+ return {addedShots:evidence.reduce((n,r)=>n+r.shots,0),capturedAt:new Date(pbpAt).toISOString(),observations:evidence,reason:null};
+}
+
 /** Normalize actual performance separately from the official final scoreboard.
  * The SO deciding goal belongs to the final contract score, never to a player/goalie.
  * Missing numerics stay null; backup goalies with zero playing time remain identifiable.
  */
-export function normalizeNhlResearchContexts(contexts,cutoff){
+export function normalizeNhlResearchContexts(contexts,cutoff,matchups=[]){
  const now=ms(cutoff),counts=new Map(),exclusions=[],missing=new Map(),games=[],teamGames=[],skaterGames=[],goalieGames=[];
  const miss=field=>missing.set(field,(missing.get(field)??0)+1);
  for(const r of arr(contexts))counts.set(r?.event_id,(counts.get(r?.event_id)??0)+1);
@@ -105,10 +135,13 @@ export function normalizeNhlResearchContexts(contexts,cutoff){
    const shotsFor=integer(team.sog),shotsAgainst=integer(opponent.sog);
    if(shotsFor===null)miss('team.shotsFor');if(shotsAgainst===null)miss('team.shotsAgainst');
    const skaterGoals=sum(normalizedSkaters,'goals'),skaterShots=sum(normalizedSkaters,'shotsOnGoal');
+   const goalieShots=goalieOffensiveShots(r,side,matchups,playerCounts,cutoff),
+    playerShots=skaterShots!==null&&goalieShots.addedShots!==null?skaterShots+goalieShots.addedShots:null;
    if(skaterGoals!==ownGoals)miss('team.skaterGoalReconciliation');
-   if(skaterShots!==shotsFor){miss('team.skaterShotReconciliation');exclusions.push(exclusion(id,'teamShots','SKATER_TEAM_SHOT_MISMATCH:'+team.id));}
+   if(playerShots!==shotsFor){miss('team.skaterShotReconciliation');
+    exclusions.push(exclusion(id,'teamShots',(goalieShots.reason??'PLAYER_TEAM_SHOT_MISMATCH')+':'+team.id));}
    const goalsReliable=rawSkaters.length>=10&&normalizedSkaters.length===rawSkaters.length&&skaterGoals===ownGoals;
-   const shotsReliable=shotsFor!==null&&shotsAgainst!==null&&skaterShots===shotsFor;
+   const shotsReliable=shotsFor!==null&&shotsAgainst!==null&&playerShots===shotsFor;
    const finalGoalsFor=side==='home'?hg:ag,finalGoalsAgainst=side==='home'?ag:hg;
    teamGames.push({...common,team:text(team.abbrev)||text(team.commonName),endType,
     finalGoalsFor,finalGoalsAgainst,goalsFor:ownGoals,goalsAgainst:otherGoals,
@@ -116,11 +149,17 @@ export function normalizeNhlResearchContexts(contexts,cutoff){
     shotsFor,shotsAgainst,shootingPct:goalsReliable&&shotsReliable&&shotsFor>0?round(ownGoals/shotsFor):null,
     shootoutBonusFor:side==='home'?homeBonus:awayBonus,performanceGoalsVerified:goalsReliable,
     shotsVerified:shotsReliable,skaterRows:normalizedSkaters.length,goalieRows:rawGoalies.length,
+    shotEvidenceCapturedAt:new Date(Math.max(capture,ms(goalieShots.capturedAt)??capture)).toISOString(),
+    shotReconciliation:{skaterShots,goalieShotsAdded:goalieShots.addedShots,playerShots,
+     goalieEvidence:goalieShots.observations,goalieEvidenceReason:goalieShots.reason},
     powerPlayGoals:sum(normalizedSkaters,'powerPlayGoals')});
   }
   const pair=teamGames.slice(-2);
   // A disputed opponent SOG total also affects this team's shots conceded.
   if(pair.some(g=>!g.shotsVerified))for(const g of pair){g.shotsVerified=false;g.shootingPct=null;}
+  // Opposing SOG is also an input; both sides inherit the latest shot-evidence time.
+  const shotCapture=new Date(Math.max(...pair.map(g=>ms(g.shotEvidenceCapturedAt)))).toISOString();
+  for(const g of pair)g.shotEvidenceCapturedAt=shotCapture;
  }
  return {games,teamGames,skaterGames,goalieGames,exclusions,
   duplicates:[...counts.values()].filter(n=>n>1).reduce((s,n)=>s+n,0)+duplicatePlayerRows,
@@ -269,10 +308,10 @@ function evaluateAblation(variant,rows,exclusions){
 /** Public pure report builder. The canonical decision is late V6 if available,
  * otherwise early V1, chosen without outcomes or feature availability. Comparisons
  * always use the SAME frozen Poisson projection and same games for each ablation. */
-export function buildNhlFeatureResearch({contexts=[],sources=[],predictions=[],outcomes=[],early=[],late=[],goalies=[],specialTeams=[],cutoff}={}){
+export function buildNhlFeatureResearch({contexts=[],sources=[],predictions=[],outcomes=[],early=[],late=[],goalies=[],specialTeams=[],matchups=[],cutoff}={}){
  const now=ms(cutoff),featureCutoff=now===null?null:new Date(Math.min(now,ms(NHL_FEATURE_RESEARCH_REGISTERED_AT))).toISOString(),
-  featureAt=ms(featureCutoff),normalized=normalizeNhlResearchContexts(contexts,cutoff),
-  researchNormalized=normalizeNhlResearchContexts(arr(contexts).filter(c=>ms(c.boxscore_captured_at)!==null&&ms(c.boxscore_captured_at)<=featureAt),featureCutoff),
+  featureAt=ms(featureCutoff),normalized=normalizeNhlResearchContexts(contexts,cutoff,matchups),
+  researchNormalized=normalizeNhlResearchContexts(arr(contexts).filter(c=>ms(c.boxscore_captured_at)!==null&&ms(c.boxscore_captured_at)<=featureAt),featureCutoff,matchups),
   schedule=readNhlResearchSchedules(arr(sources).filter(s=>ms(s.captured_at)!==null&&ms(s.captured_at)<=featureAt),featureCutoff),
   exclusions=[...normalized.exclusions,...schedule.exclusions];
  const gameMap=new Map(researchNormalized.games.map(g=>[g.eventId,g])),teamMap=new Map();
@@ -334,7 +373,8 @@ export function buildNhlFeatureResearch({contexts=[],sources=[],predictions=[],o
   if(certified[5].every(x=>x.ok))windows.certified5++;
   if(certified[10].every(x=>x.ok))windows.certified10++;
   const features={},details={};
-  const observedH=h.filter(x=>x.shotsVerified&&x.performanceGoalsVerified),observedA=a.filter(x=>x.shotsVerified&&x.performanceGoalsVerified);
+  const observedH=h.filter(x=>x.shotsVerified&&x.performanceGoalsVerified&&ms(x.shotEvidenceCapturedAt)<freeze),
+   observedA=a.filter(x=>x.shotsVerified&&x.performanceGoalsVerified&&ms(x.shotEvidenceCapturedAt)<freeze);
   if(observedH.length>=3&&observedA.length>=3){
    features.shots=[(stat(observedH,'shotsFor')+stat(observedA,'shotsAgainst'))/2,(stat(observedA,'shotsFor')+stat(observedH,'shotsAgainst'))/2];
    details.shots={homeGames:observedH.map(g=>g.eventId),awayGames:observedA.map(g=>g.eventId),completeScheduleAssumed:false};

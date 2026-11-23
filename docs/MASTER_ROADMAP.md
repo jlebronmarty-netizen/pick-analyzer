@@ -1,3 +1,7 @@
+## 2026-11-23 · NHL · Corrección de tiros ofensivos de portero
+
+La exclusión de tiros de `nhl:2026020342` era un falso positivo: VGK 27 = 26 de patinadores + 1 de Adin Hill. Corregida con la observación tirador–portero del snapshot original; se conservan 13 archivos y hashes, el corte, las cohortes, las fórmulas y las congelaciones. Moneyline y mercados exactos no cambian; tiros sigue sin mejora suficiente para promoverse. 166 pruebas NHL, 26 de dashboard, TypeScript y build completo aprobados; nueva QA móvil pendiente en esta revisión. [Evidencia](research/nhl-audit-2026-11-23/goalie-shot-correction.json). El panel diario con capturas compartidas y complemento histórico se prepara por separado; no es parte de esta corrección.
+
 ## 2026-11-23 · NHL · Auditoría terminada, validación de modelos pendiente
 
 Implementada en rama de revisión la auditoría A–E de datos NHL y su panel: cobertura por fecha/equipo, cuatro referencias Moneyline comparables con tiempos e incertidumbre, pruebas cronológicas separadas, líneas exactas y motivos de exclusión. Evidencia: [NHL 2026-11-23](research/nhl-audit-2026-11-23/README.md), reporte JSON y base equipo-partido. Se recuperan contratos excluidos por acentos y se bloquean estadísticas incompatibles en futura evidencia V7. Se preservan PR de otros chats y el V8 abierto #372.

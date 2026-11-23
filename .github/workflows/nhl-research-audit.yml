@@ -11,6 +11,7 @@ on:
       - 'src/components/dashboard/NhlResearchAuditPanel.tsx'
       - 'src/components/dashboard/NhlDashboard.tsx'
       - 'tests/nhl-*.test.mjs'
+      - 'tests/fixtures/nhl-*.json'
       - 'tests/dashboard-multisport/nhl-research-audit-ui.test.mjs'
       - 'scripts/nhl-research-audit.mjs'
       - '.github/workflows/nhl-research-audit.yml'

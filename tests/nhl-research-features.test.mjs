@@ -2,10 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {gzipSync} from 'node:zlib';
+import {readFileSync} from 'node:fs';
 import {buildNhlFeatureResearch,normalizeNhlResearchContexts,readNhlResearchSchedules,
  NHL_FEATURE_RESEARCH_REGISTERED_AT,NHL_FEATURE_RESEARCH_SPLITS} from '../src/lib/nhl-research-features.mjs';
 
 const cutoff=NHL_FEATURE_RESEARCH_REGISTERED_AT,HOUR=3600000;
+const goalieShooterFixture=JSON.parse(readFileSync(new URL('./fixtures/nhl-2026020342-goalie-offensive-shot.json',import.meta.url),'utf8'));
 const timestamp=(date,hour)=>`${date}T${String(hour).padStart(2,'0')}:00:00.000Z`;
 const id=i=>'nhl:202602'+String(i).padStart(4,'0');
 function context(i,date,{homeId=1,awayId=2,homeGoals=3,awayGoals=2,homeShots=30,awayShots=28,type='REG'}={}){
@@ -64,6 +66,58 @@ test('normalization retains missing numerics as null and quarantines discrepant 
  assert.equal(r.skaterGames[0].shotsOnGoal,null);assert.equal(r.teamGames[0].shootingPct,null);
  assert.equal(r.teamGames[1].shotsVerified,false);assert.equal(r.goalieGames.find(p=>p.side==='away'&&p.played).accountingValid,false);
  assert.ok(r.exclusions.some(x=>x.scope==='goalieSource'));assert.equal(JSON.stringify(c),before);
+});
+
+test('archived VGK 27 SOG reconcile 26 skater shots plus Adin Hill one offensive shot, never shotsAgainst',()=>{
+ const {context:c,matchups}=structuredClone(goalieShooterFixture),before=JSON.stringify({c,matchups}),
+  without=normalizeNhlResearchContexts([c],cutoff),r=normalizeNhlResearchContexts([c],cutoff,matchups),
+  vgk=r.teamGames.find(x=>x.teamId===54),dal=r.teamGames.find(x=>x.teamId===25);
+ assert.equal(without.teamGames.every(x=>x.shotsVerified),false);
+ assert.equal(vgk.shotReconciliation.skaterShots,26);assert.equal(vgk.shotReconciliation.goalieShotsAdded,1);
+ assert.equal(vgk.shotsFor,27);assert.equal(vgk.shotsVerified,true);assert.equal(dal.shotsAgainst,27);assert.equal(dal.shotsVerified,true);
+ assert.deepEqual(vgk.shotReconciliation.goalieEvidence.map(x=>[x.shooterId,x.opposingGoalieId,x.shots]),[[8478499,8479979,1]]);
+ assert.equal(r.exclusions.some(x=>x.scope==='teamShots'),false);
+ assert.equal(JSON.stringify({c,matchups}),before);
+ // A scored goal is already included in matchup shots, so adding goals again is wrong.
+ const scored=normalizeNhlResearchContexts([c],cutoff,[{...matchups[0],goals:1}]);
+ assert.equal(scored.teamGames.find(x=>x.teamId===54).shotReconciliation.goalieShotsAdded,1);
+});
+
+test('goalie offensive shot recovery rejects duplicate pairs, bad identity, wrong captures and impossible counts',()=>{
+ const {context:c,matchups:[m]}=goalieShooterFixture;
+ for(const rows of [[m,m],[{...m,provider_game_id:2026020999}],[{...m,game_date:'2026-11-18'}],
+  [{...m,goalie_id:8479394}],[{...m,shooting_player_id:8479394}],
+  [{...m,captured_at:'2026-11-18T07:00:00Z'}],[{...m,captured_at:null}],
+  [{...m,shots:-1}],[{...m,goals:2}],[{...m,shots:null}]]){
+  const r=normalizeNhlResearchContexts([c],cutoff,rows);
+  assert.equal(r.teamGames.every(x=>x.shotsVerified),false,JSON.stringify(rows));
+  assert.ok(r.exclusions.some(x=>x.scope==='teamShots'));
+ }
+ const missing=structuredClone(c);delete missing.pbp_captured_at;
+ assert.equal(normalizeNhlResearchContexts([missing],cutoff,[m]).teamGames.every(x=>x.shotsVerified),false);
+});
+
+test('periodless shooter-goalie aggregates do not certify offensive SOG in shootouts',()=>{
+ const {context:c,matchups}=structuredClone(goalieShooterFixture);
+ c.boxscore.periodDescriptor.periodType='SO';c.boxscore.gameOutcome.lastPeriodType='SO';c.pbp_period.periodType='SO';
+ const r=normalizeNhlResearchContexts([c],cutoff,matchups);
+ assert.ok(r.exclusions.some(x=>x.reason==='GOALIE_SHOT_PERIOD_UNVERIFIED:54'));
+ assert.equal(r.teamGames.every(x=>x.shotsVerified),false);
+});
+
+test('offensive goalie evidence recorded after a decision never repairs that decision history',()=>{
+ const {context:c,matchups:[m]}=structuredClone(goalieShooterFixture),
+  prior=[14,15,16].map(day=>context(day,`2026-11-${day}`,{homeId:54,awayId:25})),
+  target=context(400,'2026-11-19',{homeId:54,awayId:25}),
+  input={contexts:[...prior,c,target],matchups:[m],early:[freeze(target)],outcomes:[outcome(target)],cutoff};
+ const available=buildNhlFeatureResearch(input).decisionFeatures[0];
+ assert.ok(available.details.shots.homeGames.includes(c.event_id));
+ c.pbp_captured_at='2026-11-19T19:00:00Z';m.captured_at=c.pbp_captured_at;
+ const later=buildNhlFeatureResearch(input).decisionFeatures[0];
+ assert.ok(!later.details.shots.homeGames.includes(c.event_id));
+ assert.ok(!later.details.shots.awayGames.includes(c.event_id));
+ const future={...m,captured_at:'2026-11-24T19:00:00Z'};
+ assert.equal(normalizeNhlResearchContexts([c],cutoff,[future]).teamGames.every(x=>x.shotsVerified),false);
 });
 
 test('duplicate games, same-game player identity collision and mismatched end-type evidence fail closed',()=>{

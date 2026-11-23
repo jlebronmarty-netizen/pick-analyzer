@@ -232,7 +232,7 @@
       {
         "key": "teamShots",
         "label": "Discrepancias entre tiros del equipo y jugadores",
-        "count": 1,
+        "count": 0,
         "unit": "registros de equipo",
         "note": "El volumen de tiros afectado no entra como ataque ni como tiros concedidos del rival."
       }
@@ -3022,15 +3022,11 @@
         {
           "field": "goalie.shotAccounting",
           "count": 2
-        },
-        {
-          "field": "team.skaterShotReconciliation",
-          "count": 1
         }
       ],
       "duplicates": 0,
       "excludedGames": 0,
-      "quarantinedStatisticGames": 3,
+      "quarantinedStatisticGames": 2,
       "researchSnapshotGames": 142,
       "scheduleReceipts": 910,
       "scheduleDays": 21
@@ -3040,20 +3036,20 @@
         {
           "side": "home",
           "games": 142,
-          "performanceGames": 141,
+          "performanceGames": 142,
           "finalGoalsPerGame": 3.17606,
-          "goalsPerGame": 3.14184,
-          "shotsPerGame": 28.1844,
+          "goalsPerGame": 3.14085,
+          "shotsPerGame": 28.17606,
           "shootingPct": 0.11147
         },
         {
           "side": "away",
           "games": 142,
-          "performanceGames": 141,
+          "performanceGames": 142,
           "finalGoalsPerGame": 3.29577,
-          "goalsPerGame": 3.23404,
-          "shotsPerGame": 27.08511,
-          "shootingPct": 0.1194
+          "goalsPerGame": 3.23944,
+          "shotsPerGame": 27.0493,
+          "shootingPct": 0.11976
         }
       ],
       "endTypes": [
@@ -3149,27 +3145,27 @@
         },
         "candidate": {
           "games": 19,
-          "totalMAE": 2.15942,
-          "marginMAE": 1.74148,
-          "moneylineBrier": 0.26089
+          "totalMAE": 2.15716,
+          "marginMAE": 1.73589,
+          "moneylineBrier": 0.25999
         },
         "difference": {
-          "totalMAE": -0.02205,
-          "marginMAE": 0.18274,
-          "moneylineBrier": 0.02518
+          "totalMAE": -0.02431,
+          "marginMAE": 0.17715,
+          "moneylineBrier": 0.02428
         },
         "interval95": {
           "totalMAE": {
-            "lower": -0.26928,
-            "upper": 0.22808,
+            "lower": -0.27246,
+            "upper": 0.22703,
             "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
             "confidence": 0.95,
             "independentGames": 19,
             "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
           },
           "marginMAE": {
-            "lower": -0.11977,
-            "upper": 0.52447,
+            "lower": -0.12491,
+            "upper": 0.5211,
             "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
             "confidence": 0.95,
             "independentGames": 19,
@@ -3269,9 +3265,9 @@
           },
           "candidate": {
             "games": 14,
-            "totalMAE": 1.63171,
-            "marginMAE": 2.31511,
-            "moneylineBrier": 0.30377
+            "totalMAE": 1.61384,
+            "marginMAE": 2.30628,
+            "moneylineBrier": 0.30272
           }
         },
         "reason": "Una diferencia negativa favorece al candidato solo en esta muestra posterior. El coeficiente usa únicamente entrenamiento; no se selecciona una combinación ni se promueve el modelo.",
@@ -3444,8 +3440,8 @@
               3.058
             ],
             "candidate": [
-              4.0541,
-              3.01546
+              4.10835,
+              3.08328
             ],
             "actual": [
               4,
@@ -3556,8 +3552,8 @@
               2.781
             ],
             "candidate": [
-              3.28108,
-              3.14538
+              3.36699,
+              3.1386
             ],
             "actual": [
               1,
@@ -5065,11 +5061,6 @@
         "eventId": "nhl:2026020326",
         "scope": "goalieSource",
         "reason": "INCONSISTENT_SHOTS_SAVES_GOALS:8478435"
-      },
-      {
-        "eventId": "nhl:2026020342",
-        "scope": "teamShots",
-        "reason": "SKATER_TEAM_SHOT_MISMATCH:54"
       },
       {
         "eventId": "nhl:2026020349",

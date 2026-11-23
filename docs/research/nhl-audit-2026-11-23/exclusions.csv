@@ -126,7 +126,6 @@ moneyline,nhl:2026020382,fourWay,NO_VALID_V6_FREEZE_AT_CUTOFF,Sin decisión V6 v
 moneyline,nhl:2026020383,fourWay,NO_VALID_V6_FREEZE_AT_CUTOFF,Sin decisión V6 válida congelada al corte
 moneyline,nhl:2026020384,fourWay,NO_VALID_V6_FREEZE_AT_CUTOFF,Sin decisión V6 válida congelada al corte
 features,nhl:2026020326,goalieSource,INCONSISTENT_SHOTS_SAVES_GOALS:8478435,
-features,nhl:2026020342,teamShots,SKATER_TEAM_SHOT_MISMATCH:54,
 features,nhl:2026020349,goalieSource,INCONSISTENT_SHOTS_SAVES_GOALS:8482221,
 features,nhl:2026020326,specialTeams,NO_FRESH_VERIFIED_PREGAME_PP_PK,
 features,nhl:2026020326,goalie,NO_VERIFIED_ASOF_PROBABLES,

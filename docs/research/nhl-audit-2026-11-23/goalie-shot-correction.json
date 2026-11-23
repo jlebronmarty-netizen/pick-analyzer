@@ -1,0 +1,91 @@
+{
+  "date": "2026-11-23",
+  "baseCommit": "8dcd304d41ad7924215070f50ebea2956ba9a35e",
+  "dataCutoff": "2026-11-23T15:52:27.459Z",
+  "scope": "False-positive team SOG exclusion; same immutable inputs and model formulas",
+  "eventId": "nhl:2026020342",
+  "teamId": 54,
+  "skaterShots": 26,
+  "goalieOffensiveShots": 1,
+  "teamShots": 27,
+  "evidence": {
+    "source": "nhl_matchup_observations_v3, original matchups.json",
+    "shooterId": 8478499,
+    "opposingGoalieId": 8479979,
+    "shots": 1,
+    "goals": 0,
+    "capturedAt": "2026-11-18T06:37:21.275Z",
+    "pbpEventId": 602,
+    "period": 2,
+    "timeInPeriod": "01:39",
+    "eventOwnerTeamId": 54
+  },
+  "inputManifest": "input-manifest.json",
+  "inputFiles": 13,
+  "allOriginalHashesVerified": true,
+  "previousReportSha256": "0bcd8b916346924ee7c14e0e09e5d0cd6dab6007f54e3ad6f4a33bddae104200",
+  "correctedReportSha256": "5dde4187b8aaf24be448e112525f29385510b1f8524e874af805667750abdbbc",
+  "removedExclusions": [
+    {
+      "analysis": "features",
+      "eventId": "nhl:2026020342",
+      "source": "teamShots",
+      "reason": "SKATER_TEAM_SHOT_MISMATCH:54",
+      "reasonLabel": ""
+    }
+  ],
+  "quarantinedStatisticGamesBefore": 3,
+  "quarantinedStatisticGamesAfter": 2,
+  "fourWayMoneylineUnchanged": true,
+  "exactMarketsUnchanged": true,
+  "shotCoefficientUnchanged": true,
+  "shotChronologicalCohortUnchanged": true,
+  "shotCandidateBefore": {
+    "games": 19,
+    "totalMAE": 2.15942,
+    "marginMAE": 1.74148,
+    "moneylineBrier": 0.26089
+  },
+  "shotCandidateAfter": {
+    "games": 19,
+    "totalMAE": 2.15716,
+    "marginMAE": 1.73589,
+    "moneylineBrier": 0.25999
+  },
+  "shotCandidateIntervals95": {
+    "totalMAE": {
+      "lower": -0.27246,
+      "upper": 0.22703,
+      "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+      "confidence": 0.95,
+      "independentGames": 19,
+      "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+    },
+    "marginMAE": {
+      "lower": -0.12491,
+      "upper": 0.5211,
+      "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+      "confidence": 0.95,
+      "independentGames": 19,
+      "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+    }
+  },
+  "otherAblationsUnchanged": true,
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "predictionsChanged": false,
+  "modelPromotion": false,
+  "verification": {
+    "nhlTestsPassed": 166,
+    "dashboardTestsPassed": 26,
+    "fullBuild": "PASS",
+    "mobileQA": "PENDING_ROOT",
+    "typescript": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "limits": [
+    "Periodless matchup aggregates cannot certify additional SOG in shootouts.",
+    "Data captured after a decision cannot repair that decision shot history.",
+    "Raw boxscores, matchups, outcomes and frozen forecasts are unchanged."
+  ]
+}
