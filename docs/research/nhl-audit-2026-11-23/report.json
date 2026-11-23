@@ -1,0 +1,5886 @@
+{
+  "version": "NHL_ARCHIVE_RESEARCH_AUDIT_V1",
+  "status": "READ_ONLY_NHL_RESEARCH_AUDIT",
+  "auditedAt": "2026-11-23T15:52:27.459Z",
+  "readOnly": true,
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "inventory": {
+    "entries": [
+      {
+        "key": "boxscores",
+        "label": "Partidos con boxscore",
+        "records": 142,
+        "distinctGames": 142,
+        "from": "2026-11-03",
+        "to": "2026-11-22",
+        "latestCapturedAt": "2026-11-23T04:07:24.587Z",
+        "note": "Un registro por partido; estadísticas originales NHL conservadas."
+      },
+      {
+        "key": "playByPlay",
+        "label": "Partidos con jugada por jugada",
+        "records": 142,
+        "distinctGames": 142,
+        "from": "2026-11-03",
+        "to": "2026-11-22",
+        "latestCapturedAt": "2026-11-23T04:07:24.587Z",
+        "note": "Se comprueba presencia; esta auditoría no descarga de nuevo las jugadas."
+      },
+      {
+        "key": "skaters",
+        "label": "Registros de jugadores de cancha",
+        "records": 5112,
+        "distinctGames": 142,
+        "from": "2026-11-03",
+        "to": "2026-11-22",
+        "latestCapturedAt": "2026-11-23T04:07:24.587Z",
+        "note": "700 jugadores únicos; las filas jugador-partido no son partidos independientes."
+      },
+      {
+        "key": "goalieBoxscores",
+        "label": "Registros de porteros en boxscore",
+        "records": 568,
+        "distinctGames": 142,
+        "from": "2026-11-05T00:30:00.000Z",
+        "to": "2026-11-23T01:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T04:07:24.587Z",
+        "note": "Incluye suplentes sin minutos; el análisis distingue apariciones jugadas y estadísticas inconsistentes."
+      },
+      {
+        "key": "predictions",
+        "label": "Pronósticos originales DRatings",
+        "records": 137,
+        "distinctGames": 137,
+        "from": "2026-11-05T00:30:00.000Z",
+        "to": "2026-11-24T03:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T01:37:22.380Z",
+        "note": "Probabilidad externa original e inmutable; no revela las variables internas de DRatings."
+      },
+      {
+        "key": "outcomes",
+        "label": "Resultados asociados",
+        "records": 130,
+        "distinctGames": 130,
+        "from": "2026-11-05T00:30:00.000Z",
+        "to": "2026-11-23T01:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T04:07:18.246Z",
+        "note": "Su disponibilidad como etiqueta no demuestra que era una entrada disponible antes del pronóstico."
+      },
+      {
+        "key": "moneyline",
+        "label": "Capturas Moneyline Circa",
+        "records": 3915,
+        "distinctGames": 118,
+        "from": "2026-11-07T22:00:00.000Z",
+        "to": "2026-11-24T03:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T15:37:21.499Z",
+        "note": "Circa publicada en DRatings; capturas repetidas del mismo partido."
+      },
+      {
+        "key": "spread",
+        "label": "Capturas de puck line Circa",
+        "records": 1901,
+        "distinctGames": 58,
+        "from": "2026-11-16T01:00:00.000Z",
+        "to": "2026-11-24T03:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T15:37:21.048Z",
+        "note": "Líneas y precios de dos lados guardados en el detalle de ejecuciones NHL; contrato y hora publicada sin certificar."
+      },
+      {
+        "key": "total",
+        "label": "Capturas de total Circa",
+        "records": 1901,
+        "distinctGames": 58,
+        "from": "2026-11-16T01:00:00.000Z",
+        "to": "2026-11-24T03:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T15:37:21.048Z",
+        "note": "Líneas y precios de dos lados guardados en el detalle de ejecuciones NHL; contrato y hora publicada sin certificar."
+      },
+      {
+        "key": "probableGoalies",
+        "label": "Partidos con ambos porteros probables",
+        "records": 41,
+        "distinctGames": 41,
+        "from": "2026-11-17T00:30:00.000Z",
+        "to": "2026-11-23T01:00:00.000Z",
+        "latestCapturedAt": "2026-11-22T22:07:23.126Z",
+        "note": "ESPN probable; no equivale a titular confirmado ni a una identidad NHL certificada."
+      },
+      {
+        "key": "specialTeams",
+        "label": "Capturas PP/PK",
+        "records": 8,
+        "distinctGames": 0,
+        "from": "2026-11-15",
+        "to": "2026-11-22",
+        "latestCapturedAt": "2026-11-22T18:07:25.119Z",
+        "note": "256 registros equipo-captura; no son partidos."
+      },
+      {
+        "key": "matchups",
+        "label": "Registros tirador–portero",
+        "records": 3324,
+        "distinctGames": 125,
+        "from": "2026-11-04",
+        "to": "2026-11-22",
+        "latestCapturedAt": "2026-11-23T04:07:24.587Z",
+        "note": "Observaciones descriptivas de jugadas; no demuestran causalidad."
+      },
+      {
+        "key": "early",
+        "label": "Pronósticos Poisson tempranos",
+        "records": 56,
+        "distinctGames": 56,
+        "from": "2026-11-16T00:30:00.000Z",
+        "to": "2026-11-24T02:40:00.000Z",
+        "latestCapturedAt": "2026-11-23T15:07:26.572Z",
+        "note": "Goles recientes y promedio previo según localía; probabilidad aproximada sin ajuste validado de portero."
+      },
+      {
+        "key": "late",
+        "label": "Decisiones V6 tardías",
+        "records": 24,
+        "distinctGames": 24,
+        "from": "2026-11-20T00:00:00.000Z",
+        "to": "2026-11-23T01:00:00.000Z",
+        "latestCapturedAt": "2026-11-22T22:07:23.962Z",
+        "note": "Circa sin margen más ajuste exploratorio de sesgo de localía; Poisson tardío se conserva como comparación."
+      },
+      {
+        "key": "diagnostics",
+        "label": "Diagnósticos posteriores al juego",
+        "records": 130,
+        "distinctGames": 130,
+        "from": "2026-11-05T00:30:00.000Z",
+        "to": "2026-11-23T01:00:00.000Z",
+        "latestCapturedAt": "2026-11-23T15:37:24.081Z",
+        "note": "Descripción de errores e hipótesis; no causalidad ni aprendizaje validado."
+      }
+    ],
+    "quality": [
+      {
+        "key": "teams",
+        "label": "Equipos con boxscore",
+        "count": 32,
+        "unit": "equipos",
+        "note": "Cobertura disponible, no historial completo de varias temporadas."
+      },
+      {
+        "key": "uniqueSkaters",
+        "label": "Jugadores de cancha únicos",
+        "count": 700,
+        "unit": "jugadores",
+        "note": "IDs NHL de los boxscores."
+      },
+      {
+        "key": "confirmedGoalies",
+        "label": "Partidos con ambos titulares confirmados",
+        "count": 0,
+        "unit": "partidos",
+        "note": "No se convierte un probable en confirmado por haber jugado después."
+      },
+      {
+        "key": "contextDuplicates",
+        "label": "Filas duplicadas por partido en contextos",
+        "count": 0,
+        "unit": "filas",
+        "note": "Los conflictos se excluyen de la normalización."
+      },
+      {
+        "key": "predictionDuplicates",
+        "label": "Pronósticos originales repetidos por partido",
+        "count": 0,
+        "unit": "filas",
+        "note": "Nunca aumentan el denominador de evaluación."
+      },
+      {
+        "key": "earlyDuplicates",
+        "label": "Congelaciones tempranas repetidas por partido",
+        "count": 0,
+        "unit": "filas",
+        "note": "Las duplicadas se rechazan para evaluar."
+      },
+      {
+        "key": "lateDuplicates",
+        "label": "Congelaciones V6 repetidas por partido",
+        "count": 0,
+        "unit": "filas",
+        "note": "Las duplicadas se rechazan para evaluar."
+      },
+      {
+        "key": "marketRulesVerified",
+        "label": "Capturas Spread/Total con contrato certificado",
+        "count": 0,
+        "unit": "capturas",
+        "note": "Las reglas generales de Circa no certifican cada contrato capturado."
+      },
+      {
+        "key": "quotePublishedAt",
+        "label": "Capturas Spread/Total con hora publicada de origen",
+        "count": 0,
+        "unit": "capturas",
+        "note": "capturedAt registra cuándo Pick observó el precio; no cuándo Circa lo publicó."
+      },
+      {
+        "key": "goalieAccounting",
+        "label": "Porteros con conteos incompatibles",
+        "count": 2,
+        "unit": "registros",
+        "note": "Las estadísticas afectadas se excluyen de la forma previa; se conservan los datos originales."
+      },
+      {
+        "key": "teamShots",
+        "label": "Discrepancias entre tiros del equipo y jugadores",
+        "count": 1,
+        "unit": "registros de equipo",
+        "note": "El volumen de tiros afectado no entra como ataque ni como tiros concedidos del rival."
+      }
+    ]
+  },
+  "moneyline": {
+    "schema": "NHL_MATCHED_MONEYLINE_RESEARCH_V1",
+    "status": "EXPLORATORY_MATCHED_COHORT",
+    "cutoff": "2026-11-23T15:52:27.459Z",
+    "timezone": "America/Puerto_Rico",
+    "researchOnly": true,
+    "modelPromotionAllowed": false,
+    "independentHoldoutPassed": false,
+    "sameInformationSet": false,
+    "quoteReceiptIndependentlyVerified": false,
+    "thresholdTieRule": "HOME_AT_0_5_FOR_COMPATIBILITY",
+    "coverage": {
+      "predictions": {
+        "rows": 137,
+        "distinctGames": 137,
+        "duplicateRows": 0,
+        "available": true
+      },
+      "outcomes": {
+        "rows": 130,
+        "distinctGames": 130,
+        "duplicateRows": 0,
+        "available": true
+      },
+      "early": {
+        "rows": 56,
+        "distinctGames": 56,
+        "duplicateRows": 0,
+        "available": true
+      },
+      "late": {
+        "rows": 24,
+        "distinctGames": 24,
+        "duplicateRows": 0,
+        "available": true
+      }
+    },
+    "comparisons": [
+      {
+        "model": "dratings",
+        "label": "DRatings original",
+        "games": 24,
+        "hits": 13,
+        "accuracy": 0.541667,
+        "accuracyInterval95": {
+          "low": 0.350749,
+          "high": 0.721087
+        },
+        "brier": 0.259496,
+        "logLoss": 0.716389,
+        "meanProbability": 0.520333,
+        "observedHomeWinRate": 0.458333,
+        "thresholdTies": 0
+      },
+      {
+        "model": "circaNoVig",
+        "label": "Circa sin margen",
+        "games": 24,
+        "hits": 15,
+        "accuracy": 0.625,
+        "accuracyInterval95": {
+          "low": 0.4271,
+          "high": 0.788406
+        },
+        "brier": 0.251252,
+        "logLoss": 0.698825,
+        "meanProbability": 0.523631,
+        "observedHomeWinRate": 0.458333,
+        "thresholdTies": 0
+      },
+      {
+        "model": "poisson",
+        "label": "Poisson tardío",
+        "games": 24,
+        "hits": 14,
+        "accuracy": 0.583333,
+        "accuracyInterval95": {
+          "low": 0.388347,
+          "high": 0.755324
+        },
+        "brier": 0.250802,
+        "logLoss": 0.696968,
+        "meanProbability": 0.497425,
+        "observedHomeWinRate": 0.458333,
+        "thresholdTies": 0
+      },
+      {
+        "model": "calibrated",
+        "label": "V6 experimental",
+        "games": 24,
+        "hits": 14,
+        "accuracy": 0.583333,
+        "accuracyInterval95": {
+          "low": 0.388347,
+          "high": 0.755324
+        },
+        "brier": 0.247957,
+        "logLoss": 0.69414,
+        "meanProbability": 0.445193,
+        "observedHomeWinRate": 0.458333,
+        "thresholdTies": 0
+      }
+    ],
+    "cohorts": {
+      "fourWay": {
+        "games": 24,
+        "eventIds": [
+          "nhl:2026020347",
+          "nhl:2026020348",
+          "nhl:2026020350",
+          "nhl:2026020351",
+          "nhl:2026020352",
+          "nhl:2026020354",
+          "nhl:2026020349",
+          "nhl:2026020353",
+          "nhl:2026020355",
+          "nhl:2026020356",
+          "nhl:2026020358",
+          "nhl:2026020363",
+          "nhl:2026020364",
+          "nhl:2026020365",
+          "nhl:2026020366",
+          "nhl:2026020367",
+          "nhl:2026020368",
+          "nhl:2026020369",
+          "nhl:2026020370",
+          "nhl:2026020371",
+          "nhl:2026020372",
+          "nhl:2026020375",
+          "nhl:2026020376",
+          "nhl:2026020377"
+        ],
+        "dateRange": {
+          "from": "2026-11-19",
+          "to": "2026-11-22"
+        },
+        "universeGames": 137,
+        "excludedGames": 113
+      },
+      "dratingsOriginal": {
+        "games": 130,
+        "eventIds": [
+          "nhl:2026020247",
+          "nhl:2026020248",
+          "nhl:2026020249",
+          "nhl:2026020250",
+          "nhl:2026020251",
+          "nhl:2026020252",
+          "nhl:2026020253",
+          "nhl:2026020254",
+          "nhl:2026020255",
+          "nhl:2026020256",
+          "nhl:2026020257",
+          "nhl:2026020258",
+          "nhl:2026020260",
+          "nhl:2026020261",
+          "nhl:2026020262",
+          "nhl:2026020263",
+          "nhl:2026020264",
+          "nhl:2026020265",
+          "nhl:2026020266",
+          "nhl:2026020267",
+          "nhl:2026020268",
+          "nhl:2026020269",
+          "nhl:2026020270",
+          "nhl:2026020271",
+          "nhl:2026020272",
+          "nhl:2026020273",
+          "nhl:2026020274",
+          "nhl:2026020275",
+          "nhl:2026020276",
+          "nhl:2026020277",
+          "nhl:2026020278",
+          "nhl:2026020280",
+          "nhl:2026020279",
+          "nhl:2026020281",
+          "nhl:2026020282",
+          "nhl:2026020283",
+          "nhl:2026020284",
+          "nhl:2026020285",
+          "nhl:2026020286",
+          "nhl:2026020287",
+          "nhl:2026020288",
+          "nhl:2026020291",
+          "nhl:2026020289",
+          "nhl:2026020290",
+          "nhl:2026020292",
+          "nhl:2026020293",
+          "nhl:2026020294",
+          "nhl:2026020295",
+          "nhl:2026020296",
+          "nhl:2026020297",
+          "nhl:2026020298",
+          "nhl:2026020309",
+          "nhl:2026020299",
+          "nhl:2026020300",
+          "nhl:2026020301",
+          "nhl:2026020303",
+          "nhl:2026020304",
+          "nhl:2026020302",
+          "nhl:2026020305",
+          "nhl:2026020306",
+          "nhl:2026020307",
+          "nhl:2026020308",
+          "nhl:2026020310",
+          "nhl:2026020311",
+          "nhl:2026020321",
+          "nhl:2026020312",
+          "nhl:2026020313",
+          "nhl:2026020314",
+          "nhl:2026020315",
+          "nhl:2026020316",
+          "nhl:2026020317",
+          "nhl:2026020318",
+          "nhl:2026020319",
+          "nhl:2026020320",
+          "nhl:2026020322",
+          "nhl:2026020323",
+          "nhl:2026020324",
+          "nhl:2026020325",
+          "nhl:2026020326",
+          "nhl:2026020327",
+          "nhl:2026020328",
+          "nhl:2026020329",
+          "nhl:2026020330",
+          "nhl:2026020331",
+          "nhl:2026020332",
+          "nhl:2026020333",
+          "nhl:2026020335",
+          "nhl:2026020336",
+          "nhl:2026020337",
+          "nhl:2026020341",
+          "nhl:2026020334",
+          "nhl:2026020338",
+          "nhl:2026020339",
+          "nhl:2026020340",
+          "nhl:2026020342",
+          "nhl:2026020343",
+          "nhl:2026020344",
+          "nhl:2026020345",
+          "nhl:2026020346",
+          "nhl:2026020347",
+          "nhl:2026020348",
+          "nhl:2026020350",
+          "nhl:2026020351",
+          "nhl:2026020352",
+          "nhl:2026020354",
+          "nhl:2026020349",
+          "nhl:2026020353",
+          "nhl:2026020355",
+          "nhl:2026020356",
+          "nhl:2026020357",
+          "nhl:2026020358",
+          "nhl:2026020359",
+          "nhl:2026020360",
+          "nhl:2026020361",
+          "nhl:2026020362",
+          "nhl:2026020363",
+          "nhl:2026020364",
+          "nhl:2026020365",
+          "nhl:2026020366",
+          "nhl:2026020367",
+          "nhl:2026020368",
+          "nhl:2026020369",
+          "nhl:2026020370",
+          "nhl:2026020371",
+          "nhl:2026020372",
+          "nhl:2026020373",
+          "nhl:2026020374",
+          "nhl:2026020375",
+          "nhl:2026020376",
+          "nhl:2026020377"
+        ],
+        "dateRange": {
+          "from": "2026-11-04",
+          "to": "2026-11-22"
+        },
+        "metrics": {
+          "model": "dratings",
+          "label": "DRatings original",
+          "games": 130,
+          "hits": 75,
+          "accuracy": 0.576923,
+          "accuracyInterval95": {
+            "low": 0.490987,
+            "high": 0.658444
+          },
+          "brier": 0.243955,
+          "logLoss": 0.682462,
+          "meanProbability": 0.535692,
+          "observedHomeWinRate": 0.453846,
+          "thresholdTies": 0
+        }
+      },
+      "earlyPoisson": {
+        "games": 50,
+        "eventIds": [
+          "nhl:2026020326",
+          "nhl:2026020327",
+          "nhl:2026020328",
+          "nhl:2026020329",
+          "nhl:2026020330",
+          "nhl:2026020331",
+          "nhl:2026020332",
+          "nhl:2026020335",
+          "nhl:2026020336",
+          "nhl:2026020337",
+          "nhl:2026020341",
+          "nhl:2026020334",
+          "nhl:2026020338",
+          "nhl:2026020339",
+          "nhl:2026020340",
+          "nhl:2026020342",
+          "nhl:2026020343",
+          "nhl:2026020344",
+          "nhl:2026020345",
+          "nhl:2026020346",
+          "nhl:2026020347",
+          "nhl:2026020348",
+          "nhl:2026020350",
+          "nhl:2026020351",
+          "nhl:2026020352",
+          "nhl:2026020354",
+          "nhl:2026020349",
+          "nhl:2026020353",
+          "nhl:2026020355",
+          "nhl:2026020356",
+          "nhl:2026020358",
+          "nhl:2026020359",
+          "nhl:2026020360",
+          "nhl:2026020361",
+          "nhl:2026020362",
+          "nhl:2026020363",
+          "nhl:2026020364",
+          "nhl:2026020365",
+          "nhl:2026020366",
+          "nhl:2026020367",
+          "nhl:2026020368",
+          "nhl:2026020369",
+          "nhl:2026020370",
+          "nhl:2026020371",
+          "nhl:2026020372",
+          "nhl:2026020373",
+          "nhl:2026020374",
+          "nhl:2026020375",
+          "nhl:2026020376",
+          "nhl:2026020377"
+        ],
+        "dateRange": {
+          "from": "2026-11-15",
+          "to": "2026-11-22"
+        },
+        "metrics": {
+          "model": "poissonEarly",
+          "label": "Poisson temprano",
+          "games": 50,
+          "hits": 29,
+          "accuracy": 0.58,
+          "accuracyInterval95": {
+            "low": 0.442334,
+            "high": 0.70625
+          },
+          "brier": 0.259711,
+          "logLoss": 0.715058,
+          "meanProbability": 0.509908,
+          "observedHomeWinRate": 0.5,
+          "thresholdTies": 0
+        }
+      }
+    },
+    "calibration": [
+      {
+        "model": "dratings",
+        "label": "DRatings original",
+        "probabilityTarget": "HOME_WIN",
+        "bins": [
+          {
+            "label": "0–40%",
+            "lower": 0,
+            "upper": 0.4,
+            "games": 3,
+            "meanProbability": 0.306333,
+            "observedHomeWinRate": 0.333333,
+            "interval95": {
+              "low": 0.061492,
+              "high": 0.79234
+            }
+          },
+          {
+            "label": "40–50%",
+            "lower": 0.4,
+            "upper": 0.5,
+            "games": 7,
+            "meanProbability": 0.473857,
+            "observedHomeWinRate": 0.428571,
+            "interval95": {
+              "low": 0.15822,
+              "high": 0.749542
+            }
+          },
+          {
+            "label": "50–60%",
+            "lower": 0.5,
+            "upper": 0.6,
+            "games": 9,
+            "meanProbability": 0.550778,
+            "observedHomeWinRate": 0.555556,
+            "interval95": {
+              "low": 0.266651,
+              "high": 0.811221
+            }
+          },
+          {
+            "label": "60–70%",
+            "lower": 0.6,
+            "upper": 0.7,
+            "games": 5,
+            "meanProbability": 0.659,
+            "observedHomeWinRate": 0.4,
+            "interval95": {
+              "low": 0.117621,
+              "high": 0.769276
+            }
+          },
+          {
+            "label": "70–100%",
+            "lower": 0.7,
+            "upper": 1,
+            "games": 0,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "interval95": null
+          }
+        ]
+      },
+      {
+        "model": "circaNoVig",
+        "label": "Circa sin margen",
+        "probabilityTarget": "HOME_WIN",
+        "bins": [
+          {
+            "label": "0–40%",
+            "lower": 0,
+            "upper": 0.4,
+            "games": 2,
+            "meanProbability": 0.295925,
+            "observedHomeWinRate": 0.5,
+            "interval95": {
+              "low": 0.094531,
+              "high": 0.905469
+            }
+          },
+          {
+            "label": "40–50%",
+            "lower": 0.4,
+            "upper": 0.5,
+            "games": 6,
+            "meanProbability": 0.458982,
+            "observedHomeWinRate": 0.166667,
+            "interval95": {
+              "low": 0.030053,
+              "high": 0.563503
+            }
+          },
+          {
+            "label": "50–60%",
+            "lower": 0.5,
+            "upper": 0.6,
+            "games": 12,
+            "meanProbability": 0.547696,
+            "observedHomeWinRate": 0.5,
+            "interval95": {
+              "low": 0.253782,
+              "high": 0.746218
+            }
+          },
+          {
+            "label": "60–70%",
+            "lower": 0.6,
+            "upper": 0.7,
+            "games": 3,
+            "meanProbability": 0.636787,
+            "observedHomeWinRate": 1,
+            "interval95": {
+              "low": 0.438503,
+              "high": 1
+            }
+          },
+          {
+            "label": "70–100%",
+            "lower": 0.7,
+            "upper": 1,
+            "games": 1,
+            "meanProbability": 0.73869,
+            "observedHomeWinRate": 0,
+            "interval95": {
+              "low": 0,
+              "high": 0.793451
+            }
+          }
+        ]
+      },
+      {
+        "model": "poisson",
+        "label": "Poisson tardío",
+        "probabilityTarget": "HOME_WIN",
+        "bins": [
+          {
+            "label": "0–40%",
+            "lower": 0,
+            "upper": 0.4,
+            "games": 3,
+            "meanProbability": 0.305467,
+            "observedHomeWinRate": 0.333333,
+            "interval95": {
+              "low": 0.061492,
+              "high": 0.79234
+            }
+          },
+          {
+            "label": "40–50%",
+            "lower": 0.4,
+            "upper": 0.5,
+            "games": 8,
+            "meanProbability": 0.454088,
+            "observedHomeWinRate": 0.375,
+            "interval95": {
+              "low": 0.136844,
+              "high": 0.694258
+            }
+          },
+          {
+            "label": "50–60%",
+            "lower": 0.5,
+            "upper": 0.6,
+            "games": 11,
+            "meanProbability": 0.554136,
+            "observedHomeWinRate": 0.636364,
+            "interval95": {
+              "low": 0.353801,
+              "high": 0.848335
+            }
+          },
+          {
+            "label": "60–70%",
+            "lower": 0.6,
+            "upper": 0.7,
+            "games": 2,
+            "meanProbability": 0.6468,
+            "observedHomeWinRate": 0,
+            "interval95": {
+              "low": 0,
+              "high": 0.65762
+            }
+          },
+          {
+            "label": "70–100%",
+            "lower": 0.7,
+            "upper": 1,
+            "games": 0,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "interval95": null
+          }
+        ]
+      },
+      {
+        "model": "calibrated",
+        "label": "V6 experimental",
+        "probabilityTarget": "HOME_WIN",
+        "bins": [
+          {
+            "label": "0–40%",
+            "lower": 0,
+            "upper": 0.4,
+            "games": 6,
+            "meanProbability": 0.312592,
+            "observedHomeWinRate": 0.333333,
+            "interval95": {
+              "low": 0.096771,
+              "high": 0.700007
+            }
+          },
+          {
+            "label": "40–50%",
+            "lower": 0.4,
+            "upper": 0.5,
+            "games": 11,
+            "meanProbability": 0.450318,
+            "observedHomeWinRate": 0.454545,
+            "interval95": {
+              "low": 0.212713,
+              "high": 0.719908
+            }
+          },
+          {
+            "label": "50–60%",
+            "lower": 0.5,
+            "upper": 0.6,
+            "games": 5,
+            "meanProbability": 0.51764,
+            "observedHomeWinRate": 0.6,
+            "interval95": {
+              "low": 0.230724,
+              "high": 0.882379
+            }
+          },
+          {
+            "label": "60–70%",
+            "lower": 0.6,
+            "upper": 0.7,
+            "games": 2,
+            "meanProbability": 0.633695,
+            "observedHomeWinRate": 0.5,
+            "interval95": {
+              "low": 0.094531,
+              "high": 0.905469
+            }
+          },
+          {
+            "label": "70–100%",
+            "lower": 0.7,
+            "upper": 1,
+            "games": 0,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "interval95": null
+          }
+        ]
+      }
+    ],
+    "timing": [
+      {
+        "model": "dratings",
+        "label": "DRatings original",
+        "games": 24,
+        "missing": 0,
+        "minMinutes": 1222.639933,
+        "medianMinutes": 1312.621433,
+        "maxMinutes": 2812.607267
+      },
+      {
+        "model": "circaNoVig",
+        "label": "Circa sin margen",
+        "games": 24,
+        "missing": 0,
+        "minMinutes": 112.566233,
+        "medianMinutes": 112.6833,
+        "maxMinutes": 322.506783
+      },
+      {
+        "model": "poisson",
+        "label": "Poisson tardío",
+        "games": 24,
+        "missing": 0,
+        "minMinutes": 112.50225,
+        "medianMinutes": 112.537067,
+        "maxMinutes": 292.537067
+      },
+      {
+        "model": "calibrated",
+        "label": "V6 experimental",
+        "games": 24,
+        "missing": 0,
+        "minMinutes": 112.50225,
+        "medianMinutes": 112.537067,
+        "maxMinutes": 292.537067
+      }
+    ],
+    "pairedDifferences": [
+      {
+        "candidate": "calibrated",
+        "baseline": "circaNoVig",
+        "games": 24,
+        "brier": {
+          "estimate": -0.003295,
+          "interval95": {
+            "low": -0.03425,
+            "high": 0.027877
+          }
+        },
+        "logLoss": {
+          "estimate": -0.004685,
+          "interval95": {
+            "low": -0.071037,
+            "high": 0.063833
+          }
+        },
+        "accuracy": {
+          "estimate": -0.041667,
+          "interval95": {
+            "low": -0.291667,
+            "high": 0.208333
+          }
+        },
+        "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP",
+        "iterations": 2000,
+        "seed": 20261123,
+        "dayBlockSensitivity": {
+          "method": "PAIRED_DATE_BLOCK_PERCENTILE_BOOTSTRAP",
+          "blocks": 3,
+          "brier": {
+            "estimate": -0.003295,
+            "interval95": {
+              "low": -0.033324,
+              "high": 0.022946
+            }
+          },
+          "logLoss": {
+            "estimate": -0.004685,
+            "interval95": {
+              "low": -0.073398,
+              "high": 0.057134
+            }
+          },
+          "accuracy": {
+            "estimate": -0.041667,
+            "interval95": {
+              "low": -0.333333,
+              "high": 0.090909
+            }
+          }
+        },
+        "validatedImprovement": false
+      },
+      {
+        "candidate": "calibrated",
+        "baseline": "dratings",
+        "games": 24,
+        "brier": {
+          "estimate": -0.011539,
+          "interval95": {
+            "low": -0.044991,
+            "high": 0.023413
+          }
+        },
+        "logLoss": {
+          "estimate": -0.02225,
+          "interval95": {
+            "low": -0.092124,
+            "high": 0.050135
+          }
+        },
+        "accuracy": {
+          "estimate": 0.041667,
+          "interval95": {
+            "low": -0.166667,
+            "high": 0.25
+          }
+        },
+        "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP",
+        "iterations": 2000,
+        "seed": 20261124,
+        "dayBlockSensitivity": {
+          "method": "PAIRED_DATE_BLOCK_PERCENTILE_BOOTSTRAP",
+          "blocks": 3,
+          "brier": {
+            "estimate": -0.011539,
+            "interval95": {
+              "low": -0.030326,
+              "high": 0.004645
+            }
+          },
+          "logLoss": {
+            "estimate": -0.02225,
+            "interval95": {
+              "low": -0.065011,
+              "high": 0.014634
+            }
+          },
+          "accuracy": {
+            "estimate": 0.041667,
+            "interval95": {
+              "low": -0.1,
+              "high": 0.181818
+            }
+          }
+        },
+        "validatedImprovement": false
+      },
+      {
+        "candidate": "calibrated",
+        "baseline": "poisson",
+        "games": 24,
+        "brier": {
+          "estimate": -0.002845,
+          "interval95": {
+            "low": -0.039774,
+            "high": 0.030615
+          }
+        },
+        "logLoss": {
+          "estimate": -0.002828,
+          "interval95": {
+            "low": -0.08067,
+            "high": 0.069529
+          }
+        },
+        "accuracy": {
+          "estimate": 0,
+          "interval95": {
+            "low": -0.25,
+            "high": 0.208333
+          }
+        },
+        "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP",
+        "iterations": 2000,
+        "seed": 20261125,
+        "dayBlockSensitivity": {
+          "method": "PAIRED_DATE_BLOCK_PERCENTILE_BOOTSTRAP",
+          "blocks": 3,
+          "brier": {
+            "estimate": -0.002845,
+            "interval95": {
+              "low": -0.030033,
+              "high": 0.020971
+            }
+          },
+          "logLoss": {
+            "estimate": -0.002828,
+            "interval95": {
+              "low": -0.063547,
+              "high": 0.052736
+            }
+          },
+          "accuracy": {
+            "estimate": 0,
+            "interval95": {
+              "low": -0.333333,
+              "high": 0.181818
+            }
+          }
+        },
+        "validatedImprovement": false
+      }
+    ],
+    "subgroups": [
+      {
+        "dimension": "CIRCA_FAVORITE_VENUE",
+        "group": "home",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 16,
+            "hits": 7,
+            "accuracy": 0.4375,
+            "accuracyInterval95": {
+              "low": 0.230987,
+              "high": 0.668214
+            },
+            "brier": 0.265109,
+            "logLoss": 0.725846,
+            "meanProbability": 0.57725,
+            "observedHomeWinRate": 0.5625,
+            "thresholdTies": 0
+          },
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 16,
+            "hits": 9,
+            "accuracy": 0.5625,
+            "accuracyInterval95": {
+              "low": 0.331786,
+              "high": 0.769013
+            },
+            "brier": 0.2527,
+            "logLoss": 0.70118,
+            "meanProbability": 0.576337,
+            "observedHomeWinRate": 0.5625,
+            "thresholdTies": 0
+          },
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 16,
+            "hits": 10,
+            "accuracy": 0.625,
+            "accuracyInterval95": {
+              "low": 0.38641,
+              "high": 0.815188
+            },
+            "brier": 0.242349,
+            "logLoss": 0.678612,
+            "meanProbability": 0.531538,
+            "observedHomeWinRate": 0.5625,
+            "thresholdTies": 0
+          },
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 16,
+            "hits": 8,
+            "accuracy": 0.5,
+            "accuracyInterval95": {
+              "low": 0.279996,
+              "high": 0.720004
+            },
+            "brier": 0.256715,
+            "logLoss": 0.707371,
+            "meanProbability": 0.498215,
+            "observedHomeWinRate": 0.5625,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "CIRCA_FAVORITE_VENUE",
+        "group": "away",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 8,
+            "hits": 6,
+            "accuracy": 0.75,
+            "accuracyInterval95": {
+              "low": 0.409275,
+              "high": 0.928521
+            },
+            "brier": 0.248271,
+            "logLoss": 0.697475,
+            "meanProbability": 0.4065,
+            "observedHomeWinRate": 0.25,
+            "thresholdTies": 0
+          },
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 8,
+            "hits": 6,
+            "accuracy": 0.75,
+            "accuracyInterval95": {
+              "low": 0.409275,
+              "high": 0.928521
+            },
+            "brier": 0.248358,
+            "logLoss": 0.694115,
+            "meanProbability": 0.418217,
+            "observedHomeWinRate": 0.25,
+            "thresholdTies": 0
+          },
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 8,
+            "hits": 4,
+            "accuracy": 0.5,
+            "accuracyInterval95": {
+              "low": 0.215216,
+              "high": 0.784784
+            },
+            "brier": 0.267708,
+            "logLoss": 0.733678,
+            "meanProbability": 0.4292,
+            "observedHomeWinRate": 0.25,
+            "thresholdTies": 0
+          },
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 8,
+            "hits": 6,
+            "accuracy": 0.75,
+            "accuracyInterval95": {
+              "low": 0.409275,
+              "high": 0.928521
+            },
+            "brier": 0.230442,
+            "logLoss": 0.667676,
+            "meanProbability": 0.33915,
+            "observedHomeWinRate": 0.25,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "CIRCA_FAVORITE_VENUE",
+        "group": "pickem",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          },
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          },
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          },
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "dratings",
+        "group": "home",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 14,
+            "hits": 7,
+            "accuracy": 0.5,
+            "accuracyInterval95": {
+              "low": 0.267992,
+              "high": 0.732008
+            },
+            "brier": 0.266111,
+            "logLoss": 0.728206,
+            "meanProbability": 0.589429,
+            "observedHomeWinRate": 0.5,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "dratings",
+        "group": "away",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 10,
+            "hits": 6,
+            "accuracy": 0.6,
+            "accuracyInterval95": {
+              "low": 0.312674,
+              "high": 0.83182
+            },
+            "brier": 0.250235,
+            "logLoss": 0.699846,
+            "meanProbability": 0.4236,
+            "observedHomeWinRate": 0.4,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "dratings",
+        "group": "favorite",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 22,
+            "hits": 13,
+            "accuracy": 0.590909,
+            "accuracyInterval95": {
+              "low": 0.387348,
+              "high": 0.767442
+            },
+            "brier": 0.259624,
+            "logLoss": 0.717031,
+            "meanProbability": 0.522909,
+            "observedHomeWinRate": 0.409091,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "dratings",
+        "group": "underdog",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 2,
+            "hits": 0,
+            "accuracy": 0,
+            "accuracyInterval95": {
+              "low": 0,
+              "high": 0.65762
+            },
+            "brier": 0.258089,
+            "logLoss": 0.709328,
+            "meanProbability": 0.492,
+            "observedHomeWinRate": 1,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "dratings",
+        "group": "pickem",
+        "comparisons": [
+          {
+            "model": "dratings",
+            "label": "DRatings original",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "circaNoVig",
+        "group": "home",
+        "comparisons": [
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 16,
+            "hits": 9,
+            "accuracy": 0.5625,
+            "accuracyInterval95": {
+              "low": 0.331786,
+              "high": 0.769013
+            },
+            "brier": 0.2527,
+            "logLoss": 0.70118,
+            "meanProbability": 0.576337,
+            "observedHomeWinRate": 0.5625,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "circaNoVig",
+        "group": "away",
+        "comparisons": [
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 8,
+            "hits": 6,
+            "accuracy": 0.75,
+            "accuracyInterval95": {
+              "low": 0.409275,
+              "high": 0.928521
+            },
+            "brier": 0.248358,
+            "logLoss": 0.694115,
+            "meanProbability": 0.418217,
+            "observedHomeWinRate": 0.25,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "circaNoVig",
+        "group": "favorite",
+        "comparisons": [
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 24,
+            "hits": 15,
+            "accuracy": 0.625,
+            "accuracyInterval95": {
+              "low": 0.4271,
+              "high": 0.788406
+            },
+            "brier": 0.251252,
+            "logLoss": 0.698825,
+            "meanProbability": 0.523631,
+            "observedHomeWinRate": 0.458333,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "circaNoVig",
+        "group": "underdog",
+        "comparisons": [
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "circaNoVig",
+        "group": "pickem",
+        "comparisons": [
+          {
+            "model": "circaNoVig",
+            "label": "Circa sin margen",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "poisson",
+        "group": "home",
+        "comparisons": [
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 13,
+            "hits": 7,
+            "accuracy": 0.538462,
+            "accuracyInterval95": {
+              "low": 0.291438,
+              "high": 0.767939
+            },
+            "brier": 0.261736,
+            "logLoss": 0.718239,
+            "meanProbability": 0.568392,
+            "observedHomeWinRate": 0.538462,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "poisson",
+        "group": "away",
+        "comparisons": [
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 11,
+            "hits": 7,
+            "accuracy": 0.636364,
+            "accuracyInterval95": {
+              "low": 0.353801,
+              "high": 0.848335
+            },
+            "brier": 0.23788,
+            "logLoss": 0.671829,
+            "meanProbability": 0.413555,
+            "observedHomeWinRate": 0.363636,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "poisson",
+        "group": "favorite",
+        "comparisons": [
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 17,
+            "hits": 11,
+            "accuracy": 0.647059,
+            "accuracyInterval95": {
+              "low": 0.413004,
+              "high": 0.826903
+            },
+            "brier": 0.243,
+            "logLoss": 0.681961,
+            "meanProbability": 0.496959,
+            "observedHomeWinRate": 0.529412,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "poisson",
+        "group": "underdog",
+        "comparisons": [
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 7,
+            "hits": 3,
+            "accuracy": 0.428571,
+            "accuracyInterval95": {
+              "low": 0.15822,
+              "high": 0.749542
+            },
+            "brier": 0.269751,
+            "logLoss": 0.733412,
+            "meanProbability": 0.498557,
+            "observedHomeWinRate": 0.285714,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "poisson",
+        "group": "pickem",
+        "comparisons": [
+          {
+            "model": "poisson",
+            "label": "Poisson tardío",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "calibrated",
+        "group": "home",
+        "comparisons": [
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 7,
+            "hits": 4,
+            "accuracy": 0.571429,
+            "accuracyInterval95": {
+              "low": 0.250458,
+              "high": 0.84178
+            },
+            "brier": 0.256972,
+            "logLoss": 0.708868,
+            "meanProbability": 0.550799,
+            "observedHomeWinRate": 0.571429,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTED_VENUE",
+        "model": "calibrated",
+        "group": "away",
+        "comparisons": [
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 17,
+            "hits": 10,
+            "accuracy": 0.588235,
+            "accuracyInterval95": {
+              "low": 0.360054,
+              "high": 0.783889
+            },
+            "brier": 0.244246,
+            "logLoss": 0.688075,
+            "meanProbability": 0.401709,
+            "observedHomeWinRate": 0.411765,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "calibrated",
+        "group": "favorite",
+        "comparisons": [
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 15,
+            "hits": 10,
+            "accuracy": 0.666667,
+            "accuracyInterval95": {
+              "low": 0.417135,
+              "high": 0.848237
+            },
+            "brier": 0.242822,
+            "logLoss": 0.686899,
+            "meanProbability": 0.437919,
+            "observedHomeWinRate": 0.4,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "calibrated",
+        "group": "underdog",
+        "comparisons": [
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 9,
+            "hits": 4,
+            "accuracy": 0.444444,
+            "accuracyInterval95": {
+              "low": 0.188779,
+              "high": 0.733349
+            },
+            "brier": 0.256516,
+            "logLoss": 0.706208,
+            "meanProbability": 0.457317,
+            "observedHomeWinRate": 0.555556,
+            "thresholdTies": 0
+          }
+        ]
+      },
+      {
+        "dimension": "MODEL_SELECTION_VS_CIRCA",
+        "model": "calibrated",
+        "group": "pickem",
+        "comparisons": [
+          {
+            "model": "calibrated",
+            "label": "V6 experimental",
+            "games": 0,
+            "hits": 0,
+            "accuracy": null,
+            "accuracyInterval95": null,
+            "brier": null,
+            "logLoss": null,
+            "meanProbability": null,
+            "observedHomeWinRate": null,
+            "thresholdTies": 0
+          }
+        ]
+      }
+    ],
+    "exclusions": [
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020378",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020379",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020380",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020381",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020382",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020383",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "dratingsOriginal",
+        "eventId": "nhl:2026020384",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "earlyPoisson",
+        "eventId": "nhl:2026020378",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "earlyPoisson",
+        "eventId": "nhl:2026020379",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "earlyPoisson",
+        "eventId": "nhl:2026020380",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "earlyPoisson",
+        "eventId": "nhl:2026020381",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "earlyPoisson",
+        "eventId": "nhl:2026020382",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "earlyPoisson",
+        "eventId": "nhl:2026020383",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020247",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020248",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020249",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020250",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020251",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020252",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020253",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020254",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020255",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020256",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020257",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020258",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020260",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020261",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020262",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020263",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020264",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020265",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020266",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020267",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020268",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020269",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020270",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020271",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020272",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020273",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020274",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020275",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020276",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020277",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020278",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020279",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020280",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020281",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020282",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020283",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020284",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020285",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020286",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020287",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020288",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020289",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020290",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020291",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020292",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020293",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020294",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020295",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020296",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020297",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020298",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020299",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020300",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020301",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020302",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020303",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020304",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020305",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020306",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020307",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020308",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020309",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020310",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020311",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020312",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020313",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020314",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020315",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020316",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020317",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020318",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020319",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020320",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020321",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020322",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020323",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020324",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020325",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020326",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020327",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020328",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020329",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020330",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020331",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020332",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020333",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020334",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020335",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020336",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020337",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020338",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020339",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020340",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020341",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020342",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020343",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020344",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020345",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020346",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020357",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020359",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020360",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020361",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020362",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020373",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020374",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020378",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020379",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020380",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020381",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020382",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020383",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      },
+      {
+        "source": "fourWay",
+        "eventId": "nhl:2026020384",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 1
+      }
+    ],
+    "exclusionSummary": [
+      {
+        "source": "dratingsOriginal",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 7,
+        "distinctGames": 7
+      },
+      {
+        "source": "earlyPoisson",
+        "reason": "FINAL_NOT_AVAILABLE_AT_CUTOFF",
+        "reasonLabel": "Sin resultado válido disponible al corte",
+        "rows": 6,
+        "distinctGames": 6
+      },
+      {
+        "source": "fourWay",
+        "reason": "NO_VALID_V6_FREEZE_AT_CUTOFF",
+        "reasonLabel": "Sin decisión V6 válida congelada al corte",
+        "rows": 113,
+        "distinctGames": 113
+      }
+    ],
+    "validation": {
+      "status": "PROSPECTIVE_SAMPLE_PENDING",
+      "rows": 24,
+      "settled": 24,
+      "pending": 0,
+      "invalid": 0,
+      "asOfGoalieCoverage": 24,
+      "candidatesFrozen": 24,
+      "uncalibrated": 0,
+      "uniquePairedGames": 24,
+      "minimumInitialHoldout": 30,
+      "morePairedGamesNeeded": 6,
+      "independentHoldoutPassed": false,
+      "modelPromotionAllowed": false,
+      "allAvailableMetrics": {
+        "dratings": {
+          "games": 24,
+          "accuracy": 0.54167,
+          "hits": 13,
+          "brier": 0.2595,
+          "logLoss": 0.71639,
+          "meanProbability": 0.52033,
+          "observedHomeWinRate": 0.45833
+        },
+        "circaNoVig": {
+          "games": 24,
+          "accuracy": 0.625,
+          "hits": 15,
+          "brier": 0.25125,
+          "logLoss": 0.69882,
+          "meanProbability": 0.52363,
+          "observedHomeWinRate": 0.45833
+        },
+        "poisson": {
+          "games": 24,
+          "accuracy": 0.58333,
+          "hits": 14,
+          "brier": 0.2508,
+          "logLoss": 0.69697,
+          "meanProbability": 0.49742,
+          "observedHomeWinRate": 0.45833
+        },
+        "calibrated": {
+          "games": 24,
+          "accuracy": 0.58333,
+          "hits": 14,
+          "brier": 0.24796,
+          "logLoss": 0.69414,
+          "meanProbability": 0.44519,
+          "observedHomeWinRate": 0.45833
+        }
+      },
+      "exactSameGamePairedMetrics": {
+        "dratings": {
+          "games": 24,
+          "accuracy": 0.54167,
+          "hits": 13,
+          "brier": 0.2595,
+          "logLoss": 0.71639,
+          "meanProbability": 0.52033,
+          "observedHomeWinRate": 0.45833
+        },
+        "circaNoVig": {
+          "games": 24,
+          "accuracy": 0.625,
+          "hits": 15,
+          "brier": 0.25125,
+          "logLoss": 0.69882,
+          "meanProbability": 0.52363,
+          "observedHomeWinRate": 0.45833
+        },
+        "poisson": {
+          "games": 24,
+          "accuracy": 0.58333,
+          "hits": 14,
+          "brier": 0.2508,
+          "logLoss": 0.69697,
+          "meanProbability": 0.49742,
+          "observedHomeWinRate": 0.45833
+        },
+        "calibrated": {
+          "games": 24,
+          "accuracy": 0.58333,
+          "hits": 14,
+          "brier": 0.24796,
+          "logLoss": 0.69414,
+          "meanProbability": 0.44519,
+          "observedHomeWinRate": 0.45833
+        }
+      },
+      "pairedCandidateMinusBaseline": {
+        "circaNoVig": {
+          "candidateMinusBaselineBrier": -0.00329,
+          "candidateMinusBaselineLogLoss": -0.00468
+        },
+        "dratings": {
+          "candidateMinusBaselineBrier": -0.01154,
+          "candidateMinusBaselineLogLoss": -0.02225
+        },
+        "poisson": {
+          "candidateMinusBaselineBrier": -0.00284,
+          "candidateMinusBaselineLogLoss": -0.00283
+        }
+      },
+      "weeklyDayCoverage": 3,
+      "perDayDescriptive": [
+        {
+          "date": "2026-11-20",
+          "games": 11,
+          "candidateBrier": 0.23062,
+          "circaBrier": 0.26394
+        },
+        {
+          "date": "2026-11-22",
+          "games": 10,
+          "candidateBrier": 0.27947,
+          "circaBrier": 0.25652
+        },
+        {
+          "date": "2026-11-23",
+          "games": 3,
+          "candidateBrier": 0.20652,
+          "circaBrier": 0.18718
+        }
+      ],
+      "invalidReasons": {},
+      "warning": "V6 strictly prospective. Only same-event 4-way pairs support model comparisons. Minimum 30 is an initial screen, not statistical proof, confirmed goalies, real-book ROI, or model promotion."
+    },
+    "validationScope": "ACCEPTED_FOUR_WAY_ROWS_ONLY",
+    "warnings": [
+      "Comparación sobre los mismos partidos, con información emitida en horarios distintos: DRatings original temprano, mercado y Poisson/V6 tardíos.",
+      "La evaluación es exploratoria. El periodo ya inspeccionado no es un holdout independiente para escoger fórmulas nuevas.",
+      "Los intervalos de bootstrap son aproximados; hay dependencia entre equipos y fechas. La sensibilidad por fecha puede tener muy pocos bloques.",
+      "Los subgrupos y los intervalos de calibración tienen muestras pequeñas; no establecen superioridad ni causalidad.",
+      "Circa publicada en DRatings. Horario de publicación original, reglas del contrato, ROI ejecutable y mercados FanDuel no verificados.",
+      "La integridad de paginación corresponde al lector. Las exclusiones pueden tener varios motivos por partido y no deben sumarse como partidos independientes.",
+      "Treinta partidos es una revisión inicial; cien tampoco garantiza mejora. No se activa ningún modelo ni recomendación oficial."
+    ]
+  },
+  "features": {
+    "version": "NHL_STORED_FEATURE_ABLATIONS_V1",
+    "status": "EXPLORATORY_RESEARCH",
+    "auditedAt": "2026-11-23T15:52:27.459Z",
+    "researchCutoff": "2026-11-23T15:52:27.459Z",
+    "coverage": {
+      "games": 142,
+      "teamGames": 284,
+      "skaterGames": 5112,
+      "uniqueSkaters": 700,
+      "goalieGames": 568,
+      "playedGoalieGames": 301,
+      "uniqueGoalies": 76,
+      "byDate": [
+        {
+          "date": "2026-11-03",
+          "games": 11
+        },
+        {
+          "date": "2026-11-04",
+          "games": 4
+        },
+        {
+          "date": "2026-11-05",
+          "games": 11
+        },
+        {
+          "date": "2026-11-06",
+          "games": 3
+        },
+        {
+          "date": "2026-11-07",
+          "games": 12
+        },
+        {
+          "date": "2026-11-08",
+          "games": 6
+        },
+        {
+          "date": "2026-11-09",
+          "games": 3
+        },
+        {
+          "date": "2026-11-10",
+          "games": 7
+        },
+        {
+          "date": "2026-11-11",
+          "games": 6
+        },
+        {
+          "date": "2026-11-12",
+          "games": 11
+        },
+        {
+          "date": "2026-11-13",
+          "games": 2
+        },
+        {
+          "date": "2026-11-14",
+          "games": 14
+        },
+        {
+          "date": "2026-11-15",
+          "games": 5
+        },
+        {
+          "date": "2026-11-16",
+          "games": 2
+        },
+        {
+          "date": "2026-11-17",
+          "games": 11
+        },
+        {
+          "date": "2026-11-18",
+          "games": 3
+        },
+        {
+          "date": "2026-11-19",
+          "games": 12
+        },
+        {
+          "date": "2026-11-21",
+          "games": 14
+        },
+        {
+          "date": "2026-11-22",
+          "games": 5
+        }
+      ],
+      "byTeam": [
+        {
+          "teamId": 1,
+          "team": "NJD",
+          "games": 9
+        },
+        {
+          "teamId": 2,
+          "team": "NYI",
+          "games": 8
+        },
+        {
+          "teamId": 3,
+          "team": "NYR",
+          "games": 8
+        },
+        {
+          "teamId": 4,
+          "team": "PHI",
+          "games": 10
+        },
+        {
+          "teamId": 5,
+          "team": "PIT",
+          "games": 9
+        },
+        {
+          "teamId": 6,
+          "team": "BOS",
+          "games": 7
+        },
+        {
+          "teamId": 7,
+          "team": "BUF",
+          "games": 10
+        },
+        {
+          "teamId": 8,
+          "team": "MTL",
+          "games": 10
+        },
+        {
+          "teamId": 9,
+          "team": "OTT",
+          "games": 8
+        },
+        {
+          "teamId": 10,
+          "team": "TOR",
+          "games": 9
+        },
+        {
+          "teamId": 12,
+          "team": "CAR",
+          "games": 8
+        },
+        {
+          "teamId": 13,
+          "team": "FLA",
+          "games": 9
+        },
+        {
+          "teamId": 14,
+          "team": "TBL",
+          "games": 10
+        },
+        {
+          "teamId": 15,
+          "team": "WSH",
+          "games": 8
+        },
+        {
+          "teamId": 16,
+          "team": "CHI",
+          "games": 9
+        },
+        {
+          "teamId": 17,
+          "team": "DET",
+          "games": 8
+        },
+        {
+          "teamId": 18,
+          "team": "NSH",
+          "games": 9
+        },
+        {
+          "teamId": 19,
+          "team": "STL",
+          "games": 10
+        },
+        {
+          "teamId": 20,
+          "team": "CGY",
+          "games": 9
+        },
+        {
+          "teamId": 21,
+          "team": "COL",
+          "games": 8
+        },
+        {
+          "teamId": 22,
+          "team": "EDM",
+          "games": 11
+        },
+        {
+          "teamId": 23,
+          "team": "VAN",
+          "games": 10
+        },
+        {
+          "teamId": 24,
+          "team": "ANA",
+          "games": 10
+        },
+        {
+          "teamId": 25,
+          "team": "DAL",
+          "games": 9
+        },
+        {
+          "teamId": 26,
+          "team": "LAK",
+          "games": 8
+        },
+        {
+          "teamId": 28,
+          "team": "SJS",
+          "games": 9
+        },
+        {
+          "teamId": 29,
+          "team": "CBJ",
+          "games": 9
+        },
+        {
+          "teamId": 30,
+          "team": "MIN",
+          "games": 9
+        },
+        {
+          "teamId": 52,
+          "team": "WPG",
+          "games": 9
+        },
+        {
+          "teamId": 54,
+          "team": "VGK",
+          "games": 9
+        },
+        {
+          "teamId": 55,
+          "team": "SEA",
+          "games": 6
+        },
+        {
+          "teamId": 68,
+          "team": "UTA",
+          "games": 9
+        }
+      ],
+      "missingFields": [
+        {
+          "field": "goalie.shotAccounting",
+          "count": 2
+        },
+        {
+          "field": "team.skaterShotReconciliation",
+          "count": 1
+        }
+      ],
+      "duplicates": 0,
+      "excludedGames": 0,
+      "quarantinedStatisticGames": 3,
+      "researchSnapshotGames": 142,
+      "scheduleReceipts": 910,
+      "scheduleDays": 21
+    },
+    "descriptive": {
+      "homeAway": [
+        {
+          "side": "home",
+          "games": 142,
+          "performanceGames": 141,
+          "finalGoalsPerGame": 3.17606,
+          "goalsPerGame": 3.14184,
+          "shotsPerGame": 28.1844,
+          "shootingPct": 0.11147
+        },
+        {
+          "side": "away",
+          "games": 142,
+          "performanceGames": 141,
+          "finalGoalsPerGame": 3.29577,
+          "goalsPerGame": 3.23404,
+          "shotsPerGame": 27.08511,
+          "shootingPct": 0.1194
+        }
+      ],
+      "endTypes": [
+        {
+          "type": "REG",
+          "games": 110
+        },
+        {
+          "type": "OT",
+          "games": 19
+        },
+        {
+          "type": "SO",
+          "games": 13
+        }
+      ]
+    },
+    "variables": [
+      {
+        "id": "shots",
+        "label": "Volumen de tiros",
+        "definition": "For each side: mean of its observed prior SOG-for average and the opponent observed SOG-against average; >=3 prior archived games on both sides.",
+        "availableGames": 50,
+        "usedByOriginal": false,
+        "limitation": "Observed archive form; no assumption that these are the actual last five scheduled games."
+      },
+      {
+        "id": "goalie",
+        "label": "Forma previa del portero probable",
+        "definition": "For each side: one minus opposing probable goalie shot-weighted prior save percentage, using the existing team-qualified unique-name V7 match, >=50 prior shots.",
+        "availableGames": 19,
+        "usedByOriginal": false,
+        "limitation": "Probable only; NHL/ESPN crosswalk is a research candidate and not independently certified."
+      },
+      {
+        "id": "specialTeams",
+        "label": "Power play frente a penalty kill",
+        "definition": "For each side: (own captured PP percentage + 1 - opponent captured PK percentage)/2 from the latest valid <=36h as-of snapshot.",
+        "availableGames": 45,
+        "usedByOriginal": false,
+        "limitation": "Season-to-date rates; power-play opportunity volume is not inferred from penalties."
+      },
+      {
+        "id": "opponent",
+        "label": "Calidad observada del rival",
+        "definition": "For each side: negative of the opponent prior physical goal differential per observed game, excluding the SO bonus; >=3 archived games per team.",
+        "availableGames": 50,
+        "usedByOriginal": false,
+        "limitation": "Strength in this observed archive; not full-season standings or a validated schedule adjustment."
+      },
+      {
+        "id": "rest",
+        "label": "Descanso con calendario verificado",
+        "definition": "For each side: min(7, hours between target start and actual previous scheduled start /24); all intervening daily slates must be saved before cutoff.",
+        "availableGames": 50,
+        "usedByOriginal": false,
+        "limitation": "Unknown if even one intervening official daily slate is missing; observed gaps alone are insufficient."
+      }
+    ],
+    "cohort": {
+      "decisions": 56,
+      "settled": 50,
+      "earlyDecisions": 26,
+      "lateDecisions": 24,
+      "training": null,
+      "selection": null,
+      "later": null,
+      "splitPolicy": "Fechas cronológicas fijadas por variable, agrupando jornadas completas y excluyendo etiquetas capturadas después de la decisión de evaluación. Se prefiere V6 tardío; en su ausencia V1 temprano, una vez por partido.",
+      "futureHoldoutAfter": "2026-11-23T15:52:27.459Z",
+      "futureHoldoutGames": 0,
+      "futureHoldoutScored": false,
+      "futureCandidateForecastsIssued": 0,
+      "independentHoldoutPassed": false
+    },
+    "ablations": [
+      {
+        "id": "shots",
+        "label": "Volumen de tiros",
+        "definition": "For each side: mean of its observed prior SOG-for average and the opponent observed SOG-against average; >=3 prior archived games on both sides.",
+        "limitation": "Observed archive form; no assumption that these are the actual last five scheduled games.",
+        "availableGames": 50,
+        "trainingGames": 17,
+        "selectionGames": 14,
+        "laterGames": 19,
+        "trainingUntil": "2026-11-18T03:00:00.000Z",
+        "selectionUntil": "2026-11-20T03:00:00.000Z",
+        "laterFrom": "2026-11-21T18:00:00.000Z",
+        "baseline": {
+          "games": 19,
+          "totalMAE": 2.18147,
+          "marginMAE": 1.55874,
+          "moneylineBrier": 0.23571
+        },
+        "candidate": {
+          "games": 19,
+          "totalMAE": 2.15942,
+          "marginMAE": 1.74148,
+          "moneylineBrier": 0.26089
+        },
+        "difference": {
+          "totalMAE": -0.02205,
+          "marginMAE": 0.18274,
+          "moneylineBrier": 0.02518
+        },
+        "interval95": {
+          "totalMAE": {
+            "lower": -0.26928,
+            "upper": 0.22808,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          },
+          "marginMAE": {
+            "lower": -0.11977,
+            "upper": 0.52447,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          }
+        },
+        "coefficient": -0.4704877,
+        "ridgePenalty": 10,
+        "interceptFitted": false,
+        "eventIds": {
+          "training": [
+            "nhl:2026020326",
+            "nhl:2026020327",
+            "nhl:2026020328",
+            "nhl:2026020329",
+            "nhl:2026020330",
+            "nhl:2026020331",
+            "nhl:2026020332",
+            "nhl:2026020335",
+            "nhl:2026020336",
+            "nhl:2026020337",
+            "nhl:2026020341",
+            "nhl:2026020334",
+            "nhl:2026020338",
+            "nhl:2026020339",
+            "nhl:2026020340",
+            "nhl:2026020342",
+            "nhl:2026020343"
+          ],
+          "selection": [
+            "nhl:2026020344",
+            "nhl:2026020345",
+            "nhl:2026020346",
+            "nhl:2026020347",
+            "nhl:2026020348",
+            "nhl:2026020350",
+            "nhl:2026020351",
+            "nhl:2026020352",
+            "nhl:2026020354",
+            "nhl:2026020349",
+            "nhl:2026020353",
+            "nhl:2026020355",
+            "nhl:2026020356",
+            "nhl:2026020358"
+          ],
+          "later": [
+            "nhl:2026020359",
+            "nhl:2026020360",
+            "nhl:2026020361",
+            "nhl:2026020362",
+            "nhl:2026020363",
+            "nhl:2026020364",
+            "nhl:2026020365",
+            "nhl:2026020366",
+            "nhl:2026020367",
+            "nhl:2026020368",
+            "nhl:2026020369",
+            "nhl:2026020370",
+            "nhl:2026020371",
+            "nhl:2026020372",
+            "nhl:2026020373",
+            "nhl:2026020374",
+            "nhl:2026020375",
+            "nhl:2026020376",
+            "nhl:2026020377"
+          ]
+        },
+        "purgedTrainingGames": 0,
+        "purgedTrainingEventIds": [],
+        "variantsTested": 1,
+        "parameterSearch": false,
+        "independentHoldoutPassed": false,
+        "officialPick": false,
+        "status": "EXPLORATORY_CHRONOLOGICAL_TEST",
+        "trainingCenter": 27.72485994,
+        "trainingScale": 1.85823084,
+        "training": {
+          "baseline": {
+            "games": 17,
+            "totalMAE": 2.08447,
+            "marginMAE": 2.55106,
+            "moneylineBrier": 0.27034
+          },
+          "candidate": {
+            "games": 17,
+            "totalMAE": 2.0529,
+            "marginMAE": 2.27563,
+            "moneylineBrier": 0.24039
+          }
+        },
+        "selection": {
+          "baseline": {
+            "games": 14,
+            "totalMAE": 1.6655,
+            "marginMAE": 2.20693,
+            "moneylineBrier": 0.27994
+          },
+          "candidate": {
+            "games": 14,
+            "totalMAE": 1.63171,
+            "marginMAE": 2.31511,
+            "moneylineBrier": 0.30377
+          }
+        },
+        "reason": "Una diferencia negativa favorece al candidato solo en esta muestra posterior. El coeficiente usa únicamente entrenamiento; no se selecciona una combinación ni se promueve el modelo.",
+        "observations": [
+          {
+            "eventId": "nhl:2026020359",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.241,
+              2.605
+            ],
+            "candidate": [
+              2.74935,
+              4.24438
+            ],
+            "actual": [
+              7,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020360",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.316,
+              3.355
+            ],
+            "candidate": [
+              3.22825,
+              3.83467
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020361",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.466,
+              2.83
+            ],
+            "candidate": [
+              3.14315,
+              3.17177
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020362",
+            "frozenAt": "2026-11-20T15:07:27.153Z",
+            "baseline": [
+              3.241,
+              2.905
+            ],
+            "candidate": [
+              3.10804,
+              2.66127
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020363",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.058
+            ],
+            "candidate": [
+              3.34076,
+              2.86777
+            ],
+            "actual": [
+              7,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020364",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.934,
+              3.208
+            ],
+            "candidate": [
+              2.67444,
+              2.88515
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020365",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.058
+            ],
+            "candidate": [
+              3.59105,
+              2.97427
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020366",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              2.683
+            ],
+            "candidate": [
+              3.35795,
+              3.30057
+            ],
+            "actual": [
+              4,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020367",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.583
+            ],
+            "candidate": [
+              1.88455,
+              3.24206
+            ],
+            "actual": [
+              2,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020368",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.358
+            ],
+            "candidate": [
+              2.87192,
+              2.27557
+            ],
+            "actual": [
+              9,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020369",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.909,
+              3.058
+            ],
+            "candidate": [
+              4.0541,
+              3.01546
+            ],
+            "actual": [
+              4,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020370",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.208
+            ],
+            "candidate": [
+              3.6894,
+              3.44252
+            ],
+            "actual": [
+              3,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020371",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.958
+            ],
+            "candidate": [
+              2.78654,
+              3.82504
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020372",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.159,
+              2.983
+            ],
+            "candidate": [
+              3.0387,
+              2.88802
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020373",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              2.749,
+              3.441
+            ],
+            "candidate": [
+              3.80061,
+              2.84687
+            ],
+            "actual": [
+              2,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020374",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              3.424,
+              2.541
+            ],
+            "candidate": [
+              3.39654,
+              3.21684
+            ],
+            "actual": [
+              2,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020375",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.63,
+              3.381
+            ],
+            "candidate": [
+              3.59691,
+              3.48294
+            ],
+            "actual": [
+              5,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020376",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.405,
+              2.781
+            ],
+            "candidate": [
+              3.28108,
+              3.14538
+            ],
+            "actual": [
+              1,
+              0
+            ]
+          },
+          {
+            "eventId": "nhl:2026020377",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.18,
+              3.606
+            ],
+            "candidate": [
+              3.14374,
+              3.72623
+            ],
+            "actual": [
+              3,
+              6
+            ]
+          }
+        ]
+      },
+      {
+        "id": "goalie",
+        "label": "Forma previa del portero probable",
+        "definition": "For each side: one minus opposing probable goalie shot-weighted prior save percentage, using the existing team-qualified unique-name V7 match, >=50 prior shots.",
+        "limitation": "Probable only; NHL/ESPN crosswalk is a research candidate and not independently certified.",
+        "availableGames": 19,
+        "trainingGames": 7,
+        "selectionGames": 10,
+        "laterGames": 2,
+        "trainingUntil": "2026-11-20T03:00:00.000Z",
+        "selectionUntil": "2026-11-22T03:00:00.000Z",
+        "laterFrom": "2026-11-23T00:00:00.000Z",
+        "baseline": {
+          "games": 0,
+          "totalMAE": null,
+          "marginMAE": null,
+          "moneylineBrier": null
+        },
+        "candidate": {
+          "games": 0,
+          "totalMAE": null,
+          "marginMAE": null,
+          "moneylineBrier": null
+        },
+        "difference": {
+          "totalMAE": null,
+          "marginMAE": null,
+          "moneylineBrier": null
+        },
+        "interval95": {
+          "totalMAE": null,
+          "marginMAE": null
+        },
+        "coefficient": null,
+        "ridgePenalty": 10,
+        "interceptFitted": false,
+        "eventIds": {
+          "training": [
+            "nhl:2026020347",
+            "nhl:2026020348",
+            "nhl:2026020350",
+            "nhl:2026020349",
+            "nhl:2026020353",
+            "nhl:2026020355",
+            "nhl:2026020358"
+          ],
+          "selection": [
+            "nhl:2026020363",
+            "nhl:2026020364",
+            "nhl:2026020365",
+            "nhl:2026020366",
+            "nhl:2026020367",
+            "nhl:2026020368",
+            "nhl:2026020369",
+            "nhl:2026020370",
+            "nhl:2026020371",
+            "nhl:2026020372"
+          ],
+          "later": [
+            "nhl:2026020375",
+            "nhl:2026020376"
+          ]
+        },
+        "purgedTrainingGames": 0,
+        "purgedTrainingEventIds": [],
+        "variantsTested": 1,
+        "parameterSearch": false,
+        "independentHoldoutPassed": false,
+        "officialPick": false,
+        "status": "INSUFFICIENT_CHRONOLOGICAL_SAMPLE",
+        "reason": "Se requieren al menos 10 partidos de entrenamiento, 3 intermedios y 5 posteriores; las fechas están fijadas y las etiquetas tardías se excluyen."
+      },
+      {
+        "id": "specialTeams",
+        "label": "Power play frente a penalty kill",
+        "definition": "For each side: (own captured PP percentage + 1 - opponent captured PK percentage)/2 from the latest valid <=36h as-of snapshot.",
+        "limitation": "Season-to-date rates; power-play opportunity volume is not inferred from penalties.",
+        "availableGames": 45,
+        "trainingGames": 15,
+        "selectionGames": 11,
+        "laterGames": 19,
+        "trainingUntil": "2026-11-19T03:00:00.000Z",
+        "selectionUntil": "2026-11-20T03:00:00.000Z",
+        "laterFrom": "2026-11-21T18:00:00.000Z",
+        "baseline": {
+          "games": 19,
+          "totalMAE": 2.18147,
+          "marginMAE": 1.55874,
+          "moneylineBrier": 0.23571
+        },
+        "candidate": {
+          "games": 19,
+          "totalMAE": 2.18116,
+          "marginMAE": 1.55976,
+          "moneylineBrier": 0.23604
+        },
+        "difference": {
+          "totalMAE": -0.00031,
+          "marginMAE": 0.00102,
+          "moneylineBrier": 0.00033
+        },
+        "interval95": {
+          "totalMAE": {
+            "lower": -0.01178,
+            "upper": 0.01012,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          },
+          "marginMAE": {
+            "lower": -0.0086,
+            "upper": 0.01041,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          }
+        },
+        "coefficient": -0.01631496,
+        "ridgePenalty": 10,
+        "interceptFitted": false,
+        "eventIds": {
+          "training": [
+            "nhl:2026020331",
+            "nhl:2026020332",
+            "nhl:2026020335",
+            "nhl:2026020336",
+            "nhl:2026020337",
+            "nhl:2026020341",
+            "nhl:2026020334",
+            "nhl:2026020338",
+            "nhl:2026020339",
+            "nhl:2026020340",
+            "nhl:2026020342",
+            "nhl:2026020343",
+            "nhl:2026020344",
+            "nhl:2026020345",
+            "nhl:2026020346"
+          ],
+          "selection": [
+            "nhl:2026020347",
+            "nhl:2026020348",
+            "nhl:2026020350",
+            "nhl:2026020351",
+            "nhl:2026020352",
+            "nhl:2026020354",
+            "nhl:2026020349",
+            "nhl:2026020353",
+            "nhl:2026020355",
+            "nhl:2026020356",
+            "nhl:2026020358"
+          ],
+          "later": [
+            "nhl:2026020359",
+            "nhl:2026020360",
+            "nhl:2026020361",
+            "nhl:2026020362",
+            "nhl:2026020363",
+            "nhl:2026020364",
+            "nhl:2026020365",
+            "nhl:2026020366",
+            "nhl:2026020367",
+            "nhl:2026020368",
+            "nhl:2026020369",
+            "nhl:2026020370",
+            "nhl:2026020371",
+            "nhl:2026020372",
+            "nhl:2026020373",
+            "nhl:2026020374",
+            "nhl:2026020375",
+            "nhl:2026020376",
+            "nhl:2026020377"
+          ]
+        },
+        "purgedTrainingGames": 0,
+        "purgedTrainingEventIds": [],
+        "variantsTested": 1,
+        "parameterSearch": false,
+        "independentHoldoutPassed": false,
+        "officialPick": false,
+        "status": "EXPLORATORY_CHRONOLOGICAL_TEST",
+        "trainingCenter": 0.22318282,
+        "trainingScale": 0.04311429,
+        "training": {
+          "baseline": {
+            "games": 15,
+            "totalMAE": 1.98147,
+            "marginMAE": 2.39307,
+            "moneylineBrier": 0.26595
+          },
+          "candidate": {
+            "games": 15,
+            "totalMAE": 1.97894,
+            "marginMAE": 2.39378,
+            "moneylineBrier": 0.26609
+          }
+        },
+        "selection": {
+          "baseline": {
+            "games": 11,
+            "totalMAE": 1.84591,
+            "marginMAE": 2.01864,
+            "moneylineBrier": 0.26063
+          },
+          "candidate": {
+            "games": 11,
+            "totalMAE": 1.83883,
+            "marginMAE": 2.00515,
+            "moneylineBrier": 0.25843
+          }
+        },
+        "reason": "Una diferencia negativa favorece al candidato solo en esta muestra posterior. El coeficiente usa únicamente entrenamiento; no se selecciona una combinación ni se promueve el modelo.",
+        "observations": [
+          {
+            "eventId": "nhl:2026020359",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.241,
+              2.605
+            ],
+            "candidate": [
+              3.24014,
+              2.5965
+            ],
+            "actual": [
+              7,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020360",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.316,
+              3.355
+            ],
+            "candidate": [
+              3.30898,
+              3.374
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020361",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.466,
+              2.83
+            ],
+            "candidate": [
+              3.45102,
+              2.85766
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020362",
+            "frozenAt": "2026-11-20T15:07:27.153Z",
+            "baseline": [
+              3.241,
+              2.905
+            ],
+            "candidate": [
+              3.23895,
+              2.93059
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020363",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.058
+            ],
+            "candidate": [
+              3.5328,
+              3.06739
+            ],
+            "actual": [
+              7,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020364",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.934,
+              3.208
+            ],
+            "candidate": [
+              2.91885,
+              3.22264
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020365",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.058
+            ],
+            "candidate": [
+              3.10254,
+              3.07044
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020366",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              2.683
+            ],
+            "candidate": [
+              3.08484,
+              2.67876
+            ],
+            "actual": [
+              4,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020367",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.583
+            ],
+            "candidate": [
+              2.35136,
+              3.57825
+            ],
+            "actual": [
+              2,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020368",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.358
+            ],
+            "candidate": [
+              3.06877,
+              3.37195
+            ],
+            "actual": [
+              9,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020369",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.909,
+              3.058
+            ],
+            "candidate": [
+              3.90584,
+              3.04117
+            ],
+            "actual": [
+              4,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020370",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.208
+            ],
+            "candidate": [
+              3.50775,
+              3.17188
+            ],
+            "actual": [
+              3,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020371",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.958
+            ],
+            "candidate": [
+              2.33878,
+              3.92253
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020372",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.159,
+              2.983
+            ],
+            "candidate": [
+              3.13463,
+              2.97563
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020373",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              2.749,
+              3.441
+            ],
+            "candidate": [
+              2.77004,
+              3.45995
+            ],
+            "actual": [
+              2,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020374",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              3.424,
+              2.541
+            ],
+            "candidate": [
+              3.41371,
+              2.54456
+            ],
+            "actual": [
+              2,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020375",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.63,
+              3.381
+            ],
+            "candidate": [
+              3.63027,
+              3.36678
+            ],
+            "actual": [
+              5,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020376",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.405,
+              2.781
+            ],
+            "candidate": [
+              3.41073,
+              2.807
+            ],
+            "actual": [
+              1,
+              0
+            ]
+          },
+          {
+            "eventId": "nhl:2026020377",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.18,
+              3.606
+            ],
+            "candidate": [
+              3.17876,
+              3.58545
+            ],
+            "actual": [
+              3,
+              6
+            ]
+          }
+        ]
+      },
+      {
+        "id": "opponent",
+        "label": "Calidad observada del rival",
+        "definition": "For each side: negative of the opponent prior physical goal differential per observed game, excluding the SO bonus; >=3 archived games per team.",
+        "limitation": "Strength in this observed archive; not full-season standings or a validated schedule adjustment.",
+        "availableGames": 50,
+        "trainingGames": 17,
+        "selectionGames": 14,
+        "laterGames": 19,
+        "trainingUntil": "2026-11-18T03:00:00.000Z",
+        "selectionUntil": "2026-11-20T03:00:00.000Z",
+        "laterFrom": "2026-11-21T18:00:00.000Z",
+        "baseline": {
+          "games": 19,
+          "totalMAE": 2.18147,
+          "marginMAE": 1.55874,
+          "moneylineBrier": 0.23571
+        },
+        "candidate": {
+          "games": 19,
+          "totalMAE": 2.18047,
+          "marginMAE": 1.55754,
+          "moneylineBrier": 0.23554
+        },
+        "difference": {
+          "totalMAE": -0.001,
+          "marginMAE": -0.0012,
+          "moneylineBrier": -0.00017
+        },
+        "interval95": {
+          "totalMAE": {
+            "lower": -0.00717,
+            "upper": 0.00493,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          },
+          "marginMAE": {
+            "lower": -0.00719,
+            "upper": 0.00395,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          }
+        },
+        "coefficient": -0.01033391,
+        "ridgePenalty": 10,
+        "interceptFitted": false,
+        "eventIds": {
+          "training": [
+            "nhl:2026020326",
+            "nhl:2026020327",
+            "nhl:2026020328",
+            "nhl:2026020329",
+            "nhl:2026020330",
+            "nhl:2026020331",
+            "nhl:2026020332",
+            "nhl:2026020335",
+            "nhl:2026020336",
+            "nhl:2026020337",
+            "nhl:2026020341",
+            "nhl:2026020334",
+            "nhl:2026020338",
+            "nhl:2026020339",
+            "nhl:2026020340",
+            "nhl:2026020342",
+            "nhl:2026020343"
+          ],
+          "selection": [
+            "nhl:2026020344",
+            "nhl:2026020345",
+            "nhl:2026020346",
+            "nhl:2026020347",
+            "nhl:2026020348",
+            "nhl:2026020350",
+            "nhl:2026020351",
+            "nhl:2026020352",
+            "nhl:2026020354",
+            "nhl:2026020349",
+            "nhl:2026020353",
+            "nhl:2026020355",
+            "nhl:2026020356",
+            "nhl:2026020358"
+          ],
+          "later": [
+            "nhl:2026020359",
+            "nhl:2026020360",
+            "nhl:2026020361",
+            "nhl:2026020362",
+            "nhl:2026020363",
+            "nhl:2026020364",
+            "nhl:2026020365",
+            "nhl:2026020366",
+            "nhl:2026020367",
+            "nhl:2026020368",
+            "nhl:2026020369",
+            "nhl:2026020370",
+            "nhl:2026020371",
+            "nhl:2026020372",
+            "nhl:2026020373",
+            "nhl:2026020374",
+            "nhl:2026020375",
+            "nhl:2026020376",
+            "nhl:2026020377"
+          ]
+        },
+        "purgedTrainingGames": 0,
+        "purgedTrainingEventIds": [],
+        "variantsTested": 1,
+        "parameterSearch": false,
+        "independentHoldoutPassed": false,
+        "officialPick": false,
+        "status": "EXPLORATORY_CHRONOLOGICAL_TEST",
+        "trainingCenter": 0.05182073,
+        "trainingScale": 1.33124975,
+        "training": {
+          "baseline": {
+            "games": 17,
+            "totalMAE": 2.08447,
+            "marginMAE": 2.55106,
+            "moneylineBrier": 0.27034
+          },
+          "candidate": {
+            "games": 17,
+            "totalMAE": 2.08653,
+            "marginMAE": 2.54936,
+            "moneylineBrier": 0.26974
+          }
+        },
+        "selection": {
+          "baseline": {
+            "games": 14,
+            "totalMAE": 1.6655,
+            "marginMAE": 2.20693,
+            "moneylineBrier": 0.27994
+          },
+          "candidate": {
+            "games": 14,
+            "totalMAE": 1.66993,
+            "marginMAE": 2.20647,
+            "moneylineBrier": 0.2796
+          }
+        },
+        "reason": "Una diferencia negativa favorece al candidato solo en esta muestra posterior. El coeficiente usa únicamente entrenamiento; no se selecciona una combinación ni se promueve el modelo.",
+        "observations": [
+          {
+            "eventId": "nhl:2026020359",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.241,
+              2.605
+            ],
+            "candidate": [
+              3.24916,
+              2.62093
+            ],
+            "actual": [
+              7,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020360",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.316,
+              3.355
+            ],
+            "candidate": [
+              3.30531,
+              3.34764
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020361",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.466,
+              2.83
+            ],
+            "candidate": [
+              3.45961,
+              2.83137
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020362",
+            "frozenAt": "2026-11-20T15:07:27.153Z",
+            "baseline": [
+              3.241,
+              2.905
+            ],
+            "candidate": [
+              3.2292,
+              2.91025
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020363",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.058
+            ],
+            "candidate": [
+              3.5222,
+              3.0584
+            ],
+            "actual": [
+              7,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020364",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.934,
+              3.208
+            ],
+            "candidate": [
+              2.92858,
+              3.19191
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020365",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.058
+            ],
+            "candidate": [
+              3.08181,
+              3.05926
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020366",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              2.683
+            ],
+            "candidate": [
+              3.08218,
+              2.69006
+            ],
+            "actual": [
+              4,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020367",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.583
+            ],
+            "candidate": [
+              2.34216,
+              3.57231
+            ],
+            "actual": [
+              2,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020368",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.358
+            ],
+            "candidate": [
+              3.09314,
+              3.35646
+            ],
+            "actual": [
+              9,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020369",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.909,
+              3.058
+            ],
+            "candidate": [
+              3.91231,
+              3.07102
+            ],
+            "actual": [
+              4,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020370",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.208
+            ],
+            "candidate": [
+              3.5344,
+              3.20646
+            ],
+            "actual": [
+              3,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020371",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.958
+            ],
+            "candidate": [
+              2.35284,
+              3.94579
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020372",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.159,
+              2.983
+            ],
+            "candidate": [
+              3.15474,
+              2.9737
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020373",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              2.749,
+              3.441
+            ],
+            "candidate": [
+              2.76604,
+              3.45249
+            ],
+            "actual": [
+              2,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020374",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              3.424,
+              2.541
+            ],
+            "candidate": [
+              3.4175,
+              2.55434
+            ],
+            "actual": [
+              2,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020375",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.63,
+              3.381
+            ],
+            "candidate": [
+              3.63506,
+              3.38226
+            ],
+            "actual": [
+              5,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020376",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.405,
+              2.781
+            ],
+            "candidate": [
+              3.39376,
+              2.78237
+            ],
+            "actual": [
+              1,
+              0
+            ]
+          },
+          {
+            "eventId": "nhl:2026020377",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.18,
+              3.606
+            ],
+            "candidate": [
+              3.17167,
+              3.59519
+            ],
+            "actual": [
+              3,
+              6
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rest",
+        "label": "Descanso con calendario verificado",
+        "definition": "For each side: min(7, hours between target start and actual previous scheduled start /24); all intervening daily slates must be saved before cutoff.",
+        "limitation": "Unknown if even one intervening official daily slate is missing; observed gaps alone are insufficient.",
+        "availableGames": 50,
+        "trainingGames": 17,
+        "selectionGames": 14,
+        "laterGames": 19,
+        "trainingUntil": "2026-11-18T03:00:00.000Z",
+        "selectionUntil": "2026-11-20T03:00:00.000Z",
+        "laterFrom": "2026-11-21T18:00:00.000Z",
+        "baseline": {
+          "games": 19,
+          "totalMAE": 2.18147,
+          "marginMAE": 1.55874,
+          "moneylineBrier": 0.23571
+        },
+        "candidate": {
+          "games": 19,
+          "totalMAE": 2.17316,
+          "marginMAE": 1.54997,
+          "moneylineBrier": 0.23933
+        },
+        "difference": {
+          "totalMAE": -0.00831,
+          "marginMAE": -0.00877,
+          "moneylineBrier": 0.00362
+        },
+        "interval95": {
+          "totalMAE": {
+            "lower": -0.14823,
+            "upper": 0.13865,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          },
+          "marginMAE": {
+            "lower": -0.15846,
+            "upper": 0.17751,
+            "method": "PAIRED_GAME_PERCENTILE_BOOTSTRAP_2000",
+            "confidence": 0.95,
+            "independentGames": 19,
+            "limitation": "Small-sample descriptive interval; recurring teams and dates may remain dependent."
+          }
+        },
+        "coefficient": 0.20605022,
+        "ridgePenalty": 10,
+        "interceptFitted": false,
+        "eventIds": {
+          "training": [
+            "nhl:2026020326",
+            "nhl:2026020327",
+            "nhl:2026020328",
+            "nhl:2026020329",
+            "nhl:2026020330",
+            "nhl:2026020331",
+            "nhl:2026020332",
+            "nhl:2026020335",
+            "nhl:2026020336",
+            "nhl:2026020337",
+            "nhl:2026020341",
+            "nhl:2026020334",
+            "nhl:2026020338",
+            "nhl:2026020339",
+            "nhl:2026020340",
+            "nhl:2026020342",
+            "nhl:2026020343"
+          ],
+          "selection": [
+            "nhl:2026020344",
+            "nhl:2026020345",
+            "nhl:2026020346",
+            "nhl:2026020347",
+            "nhl:2026020348",
+            "nhl:2026020350",
+            "nhl:2026020351",
+            "nhl:2026020352",
+            "nhl:2026020354",
+            "nhl:2026020349",
+            "nhl:2026020353",
+            "nhl:2026020355",
+            "nhl:2026020356",
+            "nhl:2026020358"
+          ],
+          "later": [
+            "nhl:2026020359",
+            "nhl:2026020360",
+            "nhl:2026020361",
+            "nhl:2026020362",
+            "nhl:2026020363",
+            "nhl:2026020364",
+            "nhl:2026020365",
+            "nhl:2026020366",
+            "nhl:2026020367",
+            "nhl:2026020368",
+            "nhl:2026020369",
+            "nhl:2026020370",
+            "nhl:2026020371",
+            "nhl:2026020372",
+            "nhl:2026020373",
+            "nhl:2026020374",
+            "nhl:2026020375",
+            "nhl:2026020376",
+            "nhl:2026020377"
+          ]
+        },
+        "purgedTrainingGames": 0,
+        "purgedTrainingEventIds": [],
+        "variantsTested": 1,
+        "parameterSearch": false,
+        "independentHoldoutPassed": false,
+        "officialPick": false,
+        "status": "EXPLORATORY_CHRONOLOGICAL_TEST",
+        "trainingCenter": 2.125,
+        "trainingScale": 0.77022034,
+        "training": {
+          "baseline": {
+            "games": 17,
+            "totalMAE": 2.08447,
+            "marginMAE": 2.55106,
+            "moneylineBrier": 0.27034
+          },
+          "candidate": {
+            "games": 17,
+            "totalMAE": 2.16078,
+            "marginMAE": 2.54975,
+            "moneylineBrier": 0.27146
+          }
+        },
+        "selection": {
+          "baseline": {
+            "games": 14,
+            "totalMAE": 1.6655,
+            "marginMAE": 2.20693,
+            "moneylineBrier": 0.27994
+          },
+          "candidate": {
+            "games": 14,
+            "totalMAE": 1.72322,
+            "marginMAE": 2.50112,
+            "moneylineBrier": 0.32945
+          }
+        },
+        "reason": "Una diferencia negativa favorece al candidato solo en esta muestra posterior. El coeficiente usa únicamente entrenamiento; no se selecciona una combinación ni se promueve el modelo.",
+        "observations": [
+          {
+            "eventId": "nhl:2026020359",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.241,
+              2.605
+            ],
+            "candidate": [
+              3.14068,
+              2.49911
+            ],
+            "actual": [
+              7,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020360",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.316,
+              3.355
+            ],
+            "candidate": [
+              3.2324,
+              3.2714
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020361",
+            "frozenAt": "2026-11-20T11:07:25.211Z",
+            "baseline": [
+              3.466,
+              2.83
+            ],
+            "candidate": [
+              3.95646,
+              2.78541
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020362",
+            "frozenAt": "2026-11-20T15:07:27.153Z",
+            "baseline": [
+              3.241,
+              2.905
+            ],
+            "candidate": [
+              3.72031,
+              2.86041
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020363",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.058
+            ],
+            "candidate": [
+              3.76251,
+              3.02456
+            ],
+            "actual": [
+              7,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020364",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.934,
+              3.208
+            ],
+            "candidate": [
+              2.90056,
+              3.16341
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020365",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.058
+            ],
+            "candidate": [
+              3.05056,
+              3.02456
+            ],
+            "actual": [
+              3,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020366",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              2.683
+            ],
+            "candidate": [
+              3.05056,
+              2.64956
+            ],
+            "actual": [
+              4,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020367",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.583
+            ],
+            "candidate": [
+              2.56251,
+              3.54956
+            ],
+            "actual": [
+              2,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020368",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.084,
+              3.358
+            ],
+            "candidate": [
+              3.05056,
+              3.58651
+            ],
+            "actual": [
+              9,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020369",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.909,
+              3.058
+            ],
+            "candidate": [
+              3.87556,
+              2.99112
+            ],
+            "actual": [
+              4,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020370",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.534,
+              3.208
+            ],
+            "candidate": [
+              3.75693,
+              3.17456
+            ],
+            "actual": [
+              3,
+              2
+            ]
+          },
+          {
+            "eventId": "nhl:2026020371",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              2.334,
+              3.958
+            ],
+            "candidate": [
+              2.30428,
+              3.94685
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020372",
+            "frozenAt": "2026-11-21T22:07:27.776Z",
+            "baseline": [
+              3.159,
+              2.983
+            ],
+            "candidate": [
+              3.6606,
+              2.95328
+            ],
+            "actual": [
+              4,
+              3
+            ]
+          },
+          {
+            "eventId": "nhl:2026020373",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              2.749,
+              3.441
+            ],
+            "candidate": [
+              3.70762,
+              3.13447
+            ],
+            "actual": [
+              2,
+              5
+            ]
+          },
+          {
+            "eventId": "nhl:2026020374",
+            "frozenAt": "2026-11-22T11:07:23.766Z",
+            "baseline": [
+              3.424,
+              2.541
+            ],
+            "candidate": [
+              3.63021,
+              2.22889
+            ],
+            "actual": [
+              2,
+              6
+            ]
+          },
+          {
+            "eventId": "nhl:2026020375",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.63,
+              3.381
+            ],
+            "candidate": [
+              3.32904,
+              3.14692
+            ],
+            "actual": [
+              5,
+              4
+            ]
+          },
+          {
+            "eventId": "nhl:2026020376",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.405,
+              2.781
+            ],
+            "candidate": [
+              3.60564,
+              2.49119
+            ],
+            "actual": [
+              1,
+              0
+            ]
+          },
+          {
+            "eventId": "nhl:2026020377",
+            "frozenAt": "2026-11-22T22:07:23.962Z",
+            "baseline": [
+              3.18,
+              3.606
+            ],
+            "candidate": [
+              2.85675,
+              3.3552
+            ],
+            "actual": [
+              3,
+              6
+            ]
+          }
+        ]
+      }
+    ],
+    "windowCoverage": {
+      "observed5": 48,
+      "observed10": 0,
+      "certified5": 48,
+      "certified10": 0,
+      "restCertified": 50
+    },
+    "variantRegistry": {
+      "registeredVersion": "NHL_STORED_FEATURE_ABLATIONS_V1",
+      "variants": [
+        "shots",
+        "goalie",
+        "specialTeams",
+        "opponent",
+        "rest"
+      ],
+      "ridgePenalty": 10,
+      "dataCutoff": "2026-11-23T15:52:27.459Z",
+      "protocolPreparedDuringAudit": true,
+      "prospectiveForecastsIssued": 0,
+      "lockedDateBoundaries": {
+        "shots": {
+          "trainingThrough": "2026-11-17",
+          "selectionThrough": "2026-11-19"
+        },
+        "goalie": {
+          "trainingThrough": "2026-11-19",
+          "selectionThrough": "2026-11-21"
+        },
+        "specialTeams": {
+          "trainingThrough": "2026-11-18",
+          "selectionThrough": "2026-11-19"
+        },
+        "opponent": {
+          "trainingThrough": "2026-11-17",
+          "selectionThrough": "2026-11-19"
+        },
+        "rest": {
+          "trainingThrough": "2026-11-17",
+          "selectionThrough": "2026-11-19"
+        }
+      },
+      "trainMinimum": 10,
+      "selectionMinimum": 3,
+      "laterMinimum": 5,
+      "featureCoefficientCount": 1,
+      "selectionOptimized": false,
+      "combinedCandidateTested": false,
+      "noInterceptCorrection": true,
+      "noProductionMutation": true
+    },
+    "exclusions": [
+      {
+        "eventId": "nhl:2026020326",
+        "scope": "goalieSource",
+        "reason": "INCONSISTENT_SHOTS_SAVES_GOALS:8478435"
+      },
+      {
+        "eventId": "nhl:2026020342",
+        "scope": "teamShots",
+        "reason": "SKATER_TEAM_SHOT_MISMATCH:54"
+      },
+      {
+        "eventId": "nhl:2026020349",
+        "scope": "goalieSource",
+        "reason": "INCONSISTENT_SHOTS_SAVES_GOALS:8482221"
+      },
+      {
+        "eventId": "nhl:2026020326",
+        "scope": "specialTeams",
+        "reason": "NO_FRESH_VERIFIED_PREGAME_PP_PK"
+      },
+      {
+        "eventId": "nhl:2026020326",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020327",
+        "scope": "specialTeams",
+        "reason": "NO_FRESH_VERIFIED_PREGAME_PP_PK"
+      },
+      {
+        "eventId": "nhl:2026020327",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020328",
+        "scope": "specialTeams",
+        "reason": "NO_FRESH_VERIFIED_PREGAME_PP_PK"
+      },
+      {
+        "eventId": "nhl:2026020328",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020329",
+        "scope": "specialTeams",
+        "reason": "NO_FRESH_VERIFIED_PREGAME_PP_PK"
+      },
+      {
+        "eventId": "nhl:2026020329",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020330",
+        "scope": "specialTeams",
+        "reason": "NO_FRESH_VERIFIED_PREGAME_PP_PK"
+      },
+      {
+        "eventId": "nhl:2026020330",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020331",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020332",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020335",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020336",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020337",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020341",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020334",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020338",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020339",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020340",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020342",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020343",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020344",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020345",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020346",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020351",
+        "scope": "goalie",
+        "reason": "INCOMPLETE_PRIOR_PROBABLE_GOALIE_FORM"
+      },
+      {
+        "eventId": "nhl:2026020352",
+        "scope": "goalie",
+        "reason": "INCOMPLETE_PRIOR_PROBABLE_GOALIE_FORM"
+      },
+      {
+        "eventId": "nhl:2026020354",
+        "scope": "goalie",
+        "reason": "INCOMPLETE_PRIOR_PROBABLE_GOALIE_FORM"
+      },
+      {
+        "eventId": "nhl:2026020356",
+        "scope": "goalie",
+        "reason": "INCOMPLETE_PRIOR_PROBABLE_GOALIE_FORM"
+      },
+      {
+        "eventId": "nhl:2026020359",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020360",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020361",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020362",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020373",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020374",
+        "scope": "goalie",
+        "reason": "NO_VERIFIED_ASOF_PROBABLES"
+      },
+      {
+        "eventId": "nhl:2026020377",
+        "scope": "goalie",
+        "reason": "INCOMPLETE_PRIOR_PROBABLE_GOALIE_FORM"
+      },
+      {
+        "eventId": "nhl:2026020378",
+        "scope": "featureEvaluation",
+        "reason": "NO_VALID_FINAL_BY_AUDIT"
+      },
+      {
+        "eventId": "nhl:2026020379",
+        "scope": "featureEvaluation",
+        "reason": "NO_VALID_FINAL_BY_AUDIT"
+      },
+      {
+        "eventId": "nhl:2026020380",
+        "scope": "featureEvaluation",
+        "reason": "NO_VALID_FINAL_BY_AUDIT"
+      },
+      {
+        "eventId": "nhl:2026020381",
+        "scope": "featureEvaluation",
+        "reason": "NO_VALID_FINAL_BY_AUDIT"
+      },
+      {
+        "eventId": "nhl:2026020382",
+        "scope": "featureEvaluation",
+        "reason": "NO_VALID_FINAL_BY_AUDIT"
+      },
+      {
+        "eventId": "nhl:2026020383",
+        "scope": "featureEvaluation",
+        "reason": "NO_VALID_FINAL_BY_AUDIT"
+      }
+    ],
+    "propsReadiness": {
+      "skaterStatRows": 5112,
+      "goalieStatRows": 568,
+      "status": "STATISTICS_ONLY",
+      "missing": [
+        "Líneas y precios pareados de props capturados antes del partido",
+        "Identidad jugador/equipo verificada al capturar la cuota",
+        "Período exacto y reglas de overtime/shootout",
+        "Reglas de participación, DNP y anulación por portero no titular",
+        "Pronósticos previos inmutables y liquidación separada",
+        "Validación cronológica independiente"
+      ]
+    },
+    "limitations": [
+      "Los resultados de noviembre son exploratorios. La muestra futura comienza después del corte registrado y no se utiliza para volver a ajustar estas pruebas.",
+      "La referencia es la proyección Poisson guardada en el corte de cada partido; las decisiones tempranas y tardías disponían de información diferente.",
+      "Cada prueba compara exactamente los mismos partidos. Las diferencias entre cohortes no establecen qué variable causa una mejora.",
+      "Los coeficientes usan resultados anteriores disponibles antes de las decisiones evaluadas, penalización ridge fija de 10 y ninguna búsqueda de parámetros.",
+      "Goles y tiros de desempeño incluyen overtime y excluyen el gol decisivo añadido en shootout; las etiquetas de evaluación usan el marcador final oficial.",
+      "El historial observado no equivale automáticamente a L5/L10. Descanso y ventanas completas requieren todas las capturas diarias intermedias antes del pronóstico.",
+      "La identidad del portero es una coincidencia histórica por nombre y equipo. Un probable nunca se convierte en confirmado a partir del boxscore posterior.",
+      "Estas pruebas no certifican contratos, ROI ejecutable, ventaja frente a Circa/FanDuel ni promociones de modelos."
+    ],
+    "providerCalls": 0,
+    "databaseWrites": 0,
+    "officialPicksChanged": false
+  },
+  "exactMarkets": {
+    "early": {
+      "status": "STATISTICAL_EXACT_LINE_RESEARCH_ONLY",
+      "version": "NHL_CIRCA_EXACT_LINE_RESEARCH_V1",
+      "frozenRows": 56,
+      "validFrozen": 56,
+      "skippedFrozen": 0,
+      "settledDistinctGames": 50,
+      "invalidResults": 0,
+      "pricedDistinctGames": 37,
+      "gradedDistinctGames": 31,
+      "exclusions": [
+        {
+          "eventId": "nhl:2026020326",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020326",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020327",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020327",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020328",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020328",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020329",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020329",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020330",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020330",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020353",
+          "market": "total",
+          "reason": "PUSH_EXCLUDED_FROM_WIN_LOSS",
+          "reasonLabel": "Push conservado por separado; fuera de aciertos y errores",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020359",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020359",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020360",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020360",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020361",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020361",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020362",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020362",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020363",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020363",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020364",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020364",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020365",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020365",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020366",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020366",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020367",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020367",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020368",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020368",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020369",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020369",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020370",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020370",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020371",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020371",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020372",
+          "market": "spread",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020372",
+          "market": "total",
+          "reason": "NO_VERIFIED_MATCHED_ASOF_QUOTE",
+          "reasonLabel": "Sin cuota exacta válida capturada antes de la congelación",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020378",
+          "market": null,
+          "reason": "FINAL_NOT_AVAILABLE",
+          "reasonLabel": "Sin resultado final disponible",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020379",
+          "market": null,
+          "reason": "FINAL_NOT_AVAILABLE",
+          "reasonLabel": "Sin resultado final disponible",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020380",
+          "market": null,
+          "reason": "FINAL_NOT_AVAILABLE",
+          "reasonLabel": "Sin resultado final disponible",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020381",
+          "market": null,
+          "reason": "FINAL_NOT_AVAILABLE",
+          "reasonLabel": "Sin resultado final disponible",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020382",
+          "market": null,
+          "reason": "FINAL_NOT_AVAILABLE",
+          "reasonLabel": "Sin resultado final disponible",
+          "rows": 1
+        },
+        {
+          "eventId": "nhl:2026020383",
+          "market": null,
+          "reason": "FINAL_NOT_AVAILABLE",
+          "reasonLabel": "Sin resultado final disponible",
+          "rows": 1
+        }
+      ],
+      "markets": {
+        "spread": {
+          "pricedEvents": 37,
+          "graded": 31,
+          "pushes": 0,
+          "modelBrier": 0.23443,
+          "circaNoVigBrier": 0.22999,
+          "modelLogLoss": 0.67066,
+          "circaNoVigLogLoss": 0.65122,
+          "modelHits": 20,
+          "circaHits": 18,
+          "observedLines": [
+            {
+              "line": -1.5,
+              "n": 29
+            },
+            {
+              "line": 1.5,
+              "n": 8
+            }
+          ]
+        },
+        "total": {
+          "pricedEvents": 37,
+          "graded": 30,
+          "pushes": 1,
+          "modelBrier": 0.24784,
+          "circaNoVigBrier": 0.2507,
+          "modelLogLoss": 0.68898,
+          "circaNoVigLogLoss": 0.69455,
+          "modelHits": 16,
+          "circaHits": 15,
+          "observedLines": [
+            {
+              "line": 5.5,
+              "n": 5
+            },
+            {
+              "line": 6,
+              "n": 19
+            },
+            {
+              "line": 6.5,
+              "n": 13
+            }
+          ]
+        }
+      },
+      "modelValidated": false,
+      "officialPicksChanged": false,
+      "marketRulesCertified": false,
+      "OTSOModelCertified": false,
+      "noBookmakerROIClaim": true,
+      "providerCalls": 0,
+      "databaseWrites": 0,
+      "warning": "Independent Poisson approximate score distribution; Circa source update timestamps and exact settlement eligibility unverified. Integer total pushes excluded from win/loss scoring. Do not promote from retrospective data."
+    },
+    "late": {
+      "status": "STATISTICAL_EXACT_LINE_RESEARCH_ONLY",
+      "version": "NHL_CIRCA_EXACT_LINE_RESEARCH_V1",
+      "frozenRows": 24,
+      "validFrozen": 24,
+      "skippedFrozen": 0,
+      "settledDistinctGames": 24,
+      "invalidResults": 0,
+      "pricedDistinctGames": 24,
+      "gradedDistinctGames": 24,
+      "exclusions": [
+        {
+          "eventId": "nhl:2026020353",
+          "market": "total",
+          "reason": "PUSH_EXCLUDED_FROM_WIN_LOSS",
+          "reasonLabel": "Push conservado por separado; fuera de aciertos y errores",
+          "rows": 1
+        }
+      ],
+      "markets": {
+        "spread": {
+          "pricedEvents": 24,
+          "graded": 24,
+          "pushes": 0,
+          "modelBrier": 0.21139,
+          "circaNoVigBrier": 0.21466,
+          "modelLogLoss": 0.61202,
+          "circaNoVigLogLoss": 0.6194,
+          "modelHits": 16,
+          "circaHits": 15,
+          "observedLines": [
+            {
+              "line": -1.5,
+              "n": 17
+            },
+            {
+              "line": 1.5,
+              "n": 7
+            }
+          ]
+        },
+        "total": {
+          "pricedEvents": 24,
+          "graded": 23,
+          "pushes": 1,
+          "modelBrier": 0.24098,
+          "circaNoVigBrier": 0.25126,
+          "modelLogLoss": 0.67469,
+          "circaNoVigLogLoss": 0.69572,
+          "modelHits": 11,
+          "circaHits": 13,
+          "observedLines": [
+            {
+              "line": 5.5,
+              "n": 2
+            },
+            {
+              "line": 6,
+              "n": 13
+            },
+            {
+              "line": 6.5,
+              "n": 9
+            }
+          ]
+        }
+      },
+      "modelValidated": false,
+      "officialPicksChanged": false,
+      "marketRulesCertified": false,
+      "OTSOModelCertified": false,
+      "noBookmakerROIClaim": true,
+      "providerCalls": 0,
+      "databaseWrites": 0,
+      "warning": "Independent Poisson approximate score distribution; Circa source update timestamps and exact settlement eligibility unverified. Integer total pushes excluded from win/loss scoring. Do not promote from retrospective data."
+    },
+    "gates": {
+      "fullGameOTSOContractCertified": false,
+      "CircaQuotePublishedAtVerified": false,
+      "FanDuelMarketsVerified": false,
+      "roiValidated": false,
+      "modelPromotionApproved": false
+    }
+  },
+  "readEvidence": {
+    "complete": true,
+    "mode": "OFFLINE_EXPORTED_ARCHIVE",
+    "cutoff": "2026-11-23T15:52:27.459Z",
+    "sha256": {
+      "contexts": "bc702376a0b55fafed788a13ba494fee87dc4757535607c894a23e62b7c4ec72",
+      "predictions": "3580de49bf101c250232e77f58a45ca9da83131e85be5b88af9aea5c4ec4c7fa",
+      "outcomes": "958271ab326466d20bbeec2f05af4359ba23c523d8a0e68212c5e75af2552118",
+      "early": "7cc750d51814bc33c22898f4bea43511dd46bcf109852f239279077f3bde362f",
+      "late": "6fdad9ca59ed6e5800fbd8b76f82d42e2043333417def40e82e828823e42732b",
+      "goalies": "65804e64ff6cd05af678d727b484fa486bfe91f8d653d8384ef30a173bc8928f",
+      "specialTeams": "ff31aadc58868665d5802881912f2537cb18b54b7cad4b0fc5a63fec05367a77",
+      "quotes": "d7e04edeb61d17f4a7e3d2d5034a4c13d0f0bac580230707101c50b6ae6573e6",
+      "runs": "204f2438fbc5e4f70e2e1780e982c65abba4a3c00ce798b08407a13fa5ca5325",
+      "matchups": "1667cc4f7c4b2a49d1a2d3910853a15ff9eead55d97e6de3705a97bfa0c71373",
+      "sources": "ac9c31e6deb38289dc24cf5d357668b82ac0f3f27e6b249497c93de22062b68b",
+      "sourceMetadata": "5a9d953e04e6f876ed316d961044c2d938491117131c8604499d9709fd438b98",
+      "diagnostics": "4ef51dd27833a657d5e000956c740d24483aac4b96122572f8c23a7f436f31ec"
+    },
+    "sourceReadEvidence": {
+      "method": "Read-only Supabase SQL exports ordered and paginated at <=500 rows; source receipts deduplicated by URL + original SHA256 keeping earliest capture.",
+      "project": "ynuocvexviorgdjrfthw",
+      "databaseWrites": 0,
+      "providerCalls": 0
+    }
+  },
+  "cutoffExclusions": [],
+  "modelInputs": [
+    {
+      "model": "DRatings original",
+      "used": [
+        "Probabilidad publicada de DRatings"
+      ],
+      "evidenceOnly": [
+        "La arquitectura interna del proveedor no está demostrada por estos archivos."
+      ]
+    },
+    {
+      "model": "Poisson propio",
+      "used": [
+        "Goles anotados/permitidos en cinco partidos previos observados",
+        "Promedio previo de liga según localía",
+        "Mezcla fija 75% forma / 25% promedio"
+      ],
+      "evidenceOnly": [
+        "Porteros probables",
+        "PP/PK",
+        "Estadísticas de jugadores"
+      ]
+    },
+    {
+      "model": "V6 calibrador",
+      "used": [
+        "Cuota Circa de ambos lados sin margen",
+        "Residuo previo de victoria local con contracción n/(n+50)"
+      ],
+      "evidenceOnly": [
+        "Poisson tardío como referencia separada",
+        "Porteros probables y forma histórica V7",
+        "PP/PK"
+      ]
+    }
+  ],
+  "props": {
+    "status": "RESEARCH_PREPARATION_ONLY",
+    "available": [
+      "Boxscores individuales y IDs NHL",
+      "Tiros a puerta de jugadores",
+      "Atajadas y carga de trabajo de porteros"
+    ],
+    "missing": [
+      "Líneas y precios por jugador antes del inicio",
+      "Contrato por periodo, overtime, DNP y portero titular",
+      "Ventanas completas del jugador y correspondencia del mercado",
+      "Liquidación y evaluación prospectiva con las mismas condiciones"
+    ],
+    "ready": false
+  },
+  "researchPlan": {
+    "dataCutoff": "2026-11-23T15:52:27.459Z",
+    "protocolPreparedDuringAudit": true,
+    "prospectiveCandidateForecastsIssued": 0,
+    "officialModelPromotion": false,
+    "futureHoldoutPassed": false,
+    "minimumInitialReviewGames": 30,
+    "minimumGamesNotProof": true
+  },
+  "warnings": [
+    "Investigación sobre el archivo disponible; no representa apuestas recomendadas, ROI ejecutable ni ventaja frente a FanDuel.",
+    "DRatings temprano y V6 tardío tienen tiempos de información distintos; la tabla común no aísla el efecto del algoritmo.",
+    "Los intervalos con pocos partidos y pocas fechas son exploratorios. Ninguna mejora se promueve automáticamente.",
+    "Boxscores recibidos tarde sirven para etiquetas o decisiones futuras, nunca como entradas retrospectivas de pronósticos anteriores."
+  ],
+  "nextSteps": [
+    "Revisar V6 al alcanzar 30 partidos independientes como diagnóstico inicial y seguir acumulando fechas; 100 partidos tampoco prueban por sí solos una mejora.",
+    "Mantener bloqueados los resultados futuros de las nuevas variantes para selección de fórmulas y registrar sus probabilidades antes de cada partido si se autoriza una fase SHADOW.",
+    "Resolver las inconsistencias de estadísticas señaladas en el libro de exclusiones conservando el original y su procedencia.",
+    "Verificar identidad y estado previo de los porteros y las condiciones exactas de mercado antes de incorporar sus ajustes a recomendaciones.",
+    "Completar líneas, precios, reglas y liquidación de props de tiros y atajadas antes de presentarlos como mercados disponibles."
+  ]
+}

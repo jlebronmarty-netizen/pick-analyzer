@@ -1,0 +1,94 @@
+{
+  "dataCutoff": "2026-11-23T15:52:27.459Z",
+  "baseCommit": "ca2d8450dd0f00569614844197b383bb830e6711",
+  "supabase": {
+    "project": "ynuocvexviorgdjrfthw",
+    "status": "ACTIVE_HEALTHY",
+    "mode": "READ_ONLY",
+    "before": [
+      {
+        "source": "predictions",
+        "rows": 137,
+        "digest": "12128796000c8fdfe5b872eacfb12309"
+      },
+      {
+        "source": "outcomes",
+        "rows": 130,
+        "digest": "d40dce0e103a12184570e667e963db41"
+      },
+      {
+        "source": "early",
+        "rows": 56,
+        "digest": "a22dde6000dbfc54794f04d846932cb6"
+      },
+      {
+        "source": "late",
+        "rows": 24,
+        "digest": "6c61565fb77cb80b9219c7d7b3ea2b7c"
+      }
+    ],
+    "after": [
+      {
+        "source": "predictions",
+        "rows": 137,
+        "digest": "12128796000c8fdfe5b872eacfb12309"
+      },
+      {
+        "source": "outcomes",
+        "rows": 130,
+        "digest": "d40dce0e103a12184570e667e963db41"
+      },
+      {
+        "source": "early",
+        "rows": 56,
+        "digest": "a22dde6000dbfc54794f04d846932cb6"
+      },
+      {
+        "source": "late",
+        "rows": 24,
+        "digest": "6c61565fb77cb80b9219c7d7b3ea2b7c"
+      }
+    ],
+    "unchanged": true
+  },
+  "production": {
+    "deployment": "dpl_GYajmAvr5sZtFpVXUftPHZBRhUtB",
+    "state": "READY",
+    "baselineHttp": {
+      "/nhl": 200,
+      "/api/nhl/late-v6-readiness": 200,
+      "/api/nhl/exact-circa-market-research": 200
+    },
+    "modifiedByThisAudit": false,
+    "latestObserved": {
+      "deployment": "dpl_AJCLW29TdCUGWEbM6vQN3dztgbvq",
+      "commit": "ca2d8450dd0f00569614844197b383bb830e6711",
+      "state": "READY",
+      "externalPR": 395,
+      "preservedByRebase": true
+    }
+  },
+  "tests": {
+    "nhl": 162,
+    "dashboard": 26,
+    "failures": 0
+  },
+  "build": {
+    "status": "PASS",
+    "nodeHeapMiB": 4096,
+    "providerCredentialsUsed": false
+  },
+  "visual": {
+    "status": "LOCAL_CHROMIUM_SOCKET_RESTRICTED",
+    "actualReportServerRender": "PASS",
+    "desktopScreenshot": false,
+    "mobileScreenshot": false
+  },
+  "preview": {
+    "status": "PENDING_PR_BUILD"
+  },
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "officialPromotion": false,
+  "initialBaseCommit": "a3d2a1a15ba4afa8594c933efe2a1c3de01458be"
+}

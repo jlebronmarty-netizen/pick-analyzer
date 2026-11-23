@@ -125,3 +125,73 @@ test('new exact research endpoint only reads archived sources; V6 retains team n
  assert.ok(!/\.(?:insert|update|upsert|delete)\(|\bfetch\(/.test(route+svc));
  assert.ok(!/\bthe_odds_api\b|\bODDS_API_KEY\b|\bplaceBet\b/.test(route+svc));
 });
+
+test('full-name accent, case and whitespace variants preserve numerical identity and market sides',()=>{
+ const montreal={...frozen,home_team:'Montréal Canadiens',home_team_id:8};
+ const observation=quote('spread',{home:'Montréal Canadiens',homeId:8,
+  quote:{home:{name:'  mONTREAL   CANADIENS ',line:-1.5,price:175},
+   away:{name:frozen.away_team,line:1.5,price:-205}}});
+ const valid=selectNhlExactCircaAsOf({frozen:montreal,observations:[observation],market:'spread'});
+ assert.equal(valid.status,'VALID_CIRCA_RESEARCH_QUOTE');
+ for(const bad of [
+  {...observation,homeId:5},
+  {...observation,scheduledAt:'2026-11-20T01:01:00Z'},
+  {...observation,quote:{...observation.quote,home:{...observation.quote.home,name:'MTL Canadiens'}}},
+  {...observation,quote:{...observation.quote,home:{...observation.quote.home,name:frozen.away_team}}},
+  {...observation,quote:{...observation.quote,away:{...observation.quote.away,line:-1.5}}},
+ ])assert.equal(selectNhlExactCircaAsOf({frozen:montreal,observations:[bad],market:'spread'}).status,'NOT_READY');
+});
+
+test('all duplicate frozen events are excluded instead of inflating independent-game samples',()=>{
+ const report=gradeNhlExactCircaCohort({frozenRows:[frozen,{...frozen}],
+  observations:[quote('spread'),quote('total')],finalRows:[result(4,3)]});
+ assert.equal(report.frozenRows,2);
+ assert.equal(report.validFrozen,0);
+ assert.equal(report.skippedFrozen,2);
+ assert.equal(report.markets.total.graded,0);
+ assert.equal(report.markets.spread.pricedEvents,0);
+ assert.deepEqual(report.exclusions.map(x=>[x.eventId,x.market,x.reason,x.rows]),
+  [[id,null,'DUPLICATE_FROZEN_EVENT',2]]);
+});
+
+test('a source received after freeze cannot validate an earlier archived market decision',()=>{
+ const leaked={...frozen,source_completed_at:'2026-11-19T22:06:00Z'};
+ const report=gradeNhlExactCircaCohort({frozenRows:[leaked],
+  observations:[quote('spread'),quote('total')],finalRows:[result(4,3)]});
+ assert.equal(report.skippedFrozen,1);
+ assert.equal(report.markets.total.graded,0);
+ assert.equal(report.exclusions[0].reason,'SOURCE_CAPTURE_AFTER_FREEZE');
+ assert.equal(selectNhlExactCircaAsOf({frozen:leaked,observations:[quote('total')],market:'total'}).status,'NOT_READY');
+});
+
+test('a conflicting final body event ID or negative score cannot be graded',()=>{
+ for(const bad of [
+  {...result(4,3),body:{...result(4,3).body,eventId:'nhl:2026020999'}},
+  result(-1,2),
+ ]){
+  const report=gradeNhlExactCircaCohort({frozenRows:[frozen],
+   observations:[quote('spread'),quote('total')],finalRows:[bad]});
+  assert.equal(report.invalidResults,1);
+  assert.equal(report.settledDistinctGames,0);
+  assert.equal(report.markets.total.graded,0);
+  assert.ok(report.exclusions.some(x=>x.reason==='FINAL_IDENTITY_OR_TIME_INVALID'));
+ }
+});
+
+test('same quote instant in different ISO formats still rejects contradictory lines',()=>{
+ const observations=[quote('total'),quote('total',{capturedAt:'2026-11-19T22:03:00.000+00:00',
+  quote:{over:{side:'Over',line:6.5,price:-110},under:{side:'Under',line:6.5,price:-110}}})];
+ assert.equal(selectNhlExactCircaAsOf({frozen,observations,market:'total'}).reason,'CONTRADICTORY_SAME_TIME_QUOTES');
+});
+
+test('per-game market exclusions distinguish unavailable quote, pending final and total push',()=>{
+ const pending=gradeNhlExactCircaCohort({frozenRows:[frozen],observations:[quote('total')],finalRows:[]});
+ assert.ok(pending.exclusions.some(x=>x.eventId===id&&x.market===null&&x.reason==='FINAL_NOT_AVAILABLE'));
+ assert.ok(pending.exclusions.some(x=>x.eventId===id&&x.market==='spread'&&x.reason==='NO_VERIFIED_MATCHED_ASOF_QUOTE'));
+ const push=gradeNhlExactCircaCohort({frozenRows:[frozen],observations:[quote('total')],finalRows:[result(4,2)]});
+ assert.ok(push.exclusions.some(x=>x.eventId===id&&x.market==='total'&&x.reason==='PUSH_EXCLUDED_FROM_WIN_LOSS'));
+ assert.ok(push.exclusions.every(x=>typeof x.reasonLabel==='string'&&x.reasonLabel.length>0));
+ assert.equal(push.markets.total.graded,0);
+ assert.equal(push.markets.total.modelBrier,null);
+ assert.equal(push.markets.total.pushes,1);
+});

@@ -1,0 +1,46 @@
+name: NHL stored archive research audit
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nhl-research-*.mjs'
+      - 'src/lib/nhl-exact-circa-market-research.mjs'
+      - 'src/lib/nhl-goalie-prior-form-asof-v7.mjs'
+      - 'src/services/nhl-research-audit.service.ts'
+      - 'src/app/api/nhl/research-audit/**'
+      - 'src/components/dashboard/NhlResearchAuditPanel.tsx'
+      - 'src/components/dashboard/NhlDashboard.tsx'
+      - 'tests/nhl-*.test.mjs'
+      - 'tests/dashboard-multisport/nhl-research-audit-ui.test.mjs'
+      - 'scripts/nhl-research-audit.mjs'
+      - '.github/workflows/nhl-research-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: NHL chronology, quality and contract regressions
+        run: node --test tests/nhl-*.test.mjs
+      - name: NHL dashboard and empty-state checks
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/dashboard-multisport/nhl*.test.mjs
+      - name: Full application build
+        run: npm run build
