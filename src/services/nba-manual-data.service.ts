@@ -179,7 +179,10 @@ export async function getNbaManualData(date:string){
   const snapshot=await request.order('source_received_at',{ascending:false}).order('snapshot_id').limit(1).abortSignal(signal).maybeSingle();
   const snap=snapshot.data;
   if(snapshot.error||!snap||snap.quote_count>1000||(family==='props'&&Number(snap.batches)!==1))return {gameId,family,status:snapshot.error?'UNAVAILABLE':'PARTIAL',quotes:[]};
-  const link=await supabaseAdmin.from('nba_market_event_links_v1').select('provider_game_id').eq('provider_game_id',gameId).eq('internal_event_id',snap.internal_event_id).eq('home_team_id',Number(f.home.id)).eq('away_team_id',Number(f.away.id)).eq('start_time',String(f.scheduledAt)).lte('created_at',cutoff).abortSignal(signal).maybeSingle();
+  const scheduledGame=arr(data.games).map(obj).find(g=>g.id===f.id);
+  const homeCode=obj(scheduledGame?.home_team).abbreviation,awayCode=obj(scheduledGame?.visitor_team).abbreviation;
+  if(typeof homeCode!=='string'||typeof awayCode!=='string'||!(/^[A-Z]{2,3}$/).test(homeCode)||!(/^[A-Z]{2,3}$/).test(awayCode))return {gameId,family,status:'UNVERIFIED_ID',quotes:[]};
+  const link=await supabaseAdmin.from('nba_market_event_links_v1').select('provider_game_id').eq('provider_game_id',gameId).eq('internal_event_id',snap.internal_event_id).eq('home_team_id','nba_'+homeCode.toLowerCase()).eq('away_team_id','nba_'+awayCode.toLowerCase()).eq('start_time',String(f.scheduledAt)).lte('created_at',cutoff).abortSignal(signal).maybeSingle();
   if(link.error||!link.data)return {gameId,family,status:'UNVERIFIED_ID',quotes:[]};
   const q=await supabaseAdmin.from('nba_market_quotes_v1').select('quote_id,player_id,market,statistic,period,side,line,american_odds,contract,provider_updated_at,source_received_at,book:payload->>sportsbook,ot:payload->>overtime_rule').eq('snapshot_id',snap.snapshot_id).eq('provider_game_id',gameId).eq('internal_event_id',snap.internal_event_id).eq('phase','PREGAME').lte('recorded_at',cutoff).lte('source_received_at',cutoff).order('quote_id').limit(1000).abortSignal(signal);
   if(q.error||!q.data||q.data.length!==snap.quote_count)return {gameId,family,status:'PARTIAL',quotes:[]};
