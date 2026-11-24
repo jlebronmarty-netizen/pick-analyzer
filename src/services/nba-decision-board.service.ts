@@ -1,4 +1,5 @@
 import 'server-only';
+import {projectionHistories} from '@/lib/nba/cheat-game-history.mjs';
 import {buildCheatCandidates} from '@/lib/nba/cheat-sheets.mjs';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
@@ -188,7 +189,7 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  const result=buildNbaDecisionBoard(inputs);
  if(Object.keys(result.summary.qualityCounts).some(k=>k!=='VALIDATED'))
    console.info('NBA_DECISION_DATA_QUALITY',{day,counts:result.summary.qualityCounts,calendarIssues:calendar.issues});
- return {...result,...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
+ return {...result,...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs)} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
    scheduleCapturedAt:schedule?.source_received_at??null,
    historyCaptureAt:archive?.started_at??null,
    historyRunId:archive?.run_id??null,

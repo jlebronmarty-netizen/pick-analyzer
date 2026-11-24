@@ -11,3 +11,19 @@ test('partial terms retain a descriptive projection, missing history and stale l
  assert.deepEqual(topProjections(rows,'points','h2h',-200,0),[]);
  assert.deepEqual(topProjections(rows,'points','ten',-200,Date.parse(r.dataQuality.expiresAt)),[]);
 });
+
+import {projectionHistories} from '../src/lib/nba/cheat-game-history.mjs';
+import {buildNbaDecisionBoard} from '../src/lib/nba/decision-board-core.mjs';
+import {inputs} from './fixtures/nba-shead-inputs.mjs';
+test('bar values reproduce both averages from the same dated games',()=>{
+ const sample=inputs(),board=buildNbaDecisionBoard(sample),row=board.rows.props[0];
+ const history=projectionHistories(board,sample)[row.historyKey];
+ assert.equal(history.trend.length,10);
+ for(const [n,expected] of [[5,row.l5],[10,row.l10]]){
+   const values=history.trend.slice(0,n);
+   assert.equal(values.reduce((total,g)=>total+g.value,0)/n,expected);
+ }
+ const old=sample.playerHistory.find(r=>r.provider_game_id===history.trend[1].id);
+ sample.playerHistory.push(old);
+ assert.equal(projectionHistories(board,sample)[row.historyKey].trend.length,0);
+});

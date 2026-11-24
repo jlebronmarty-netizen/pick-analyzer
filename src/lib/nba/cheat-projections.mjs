@@ -5,12 +5,12 @@ const permittedIssues=new Map([
   ['OVERTIME_RULE_UNVERIFIED','Regla de tiempo extra pendiente'],
   ['PLAYER_AVAILABILITY_UNCONFIRMED','Disponibilidad del jugador pendiente']
 ]);
-export function projectionRows(rows){
+export function projectionRows(rows,histories={}){
   return rows.filter(r=>Number.isFinite(r.projection) && Number.isFinite(r.line) &&
     Number.isFinite(r.odds) && Number.isFinite(r.advantage) && r.advantage>=0 &&
     r.sample===10 && r.quoteFreshness==='RECENT' && r.dataQuality?.book==='FanDuel' &&
     r.dataQuality.issues.every(i=>permittedIssues.has(i.reason))).map(r=>({
-      player:r.playerId,name:r.playerName,matchup:r.matchup,market:r.statistic,start:r.startsAt,
+      ...histories[r.historyKey],player:r.playerId,name:r.playerName,matchup:r.matchup,market:r.statistic,start:r.startsAt,
       projection:r.projection,line:r.line,side:r.selection,odds:r.odds,edge:r.advantage,
       ten:r.hit10,five:r.hit5,l5:r.l5,l10:r.l10,quote:r.quoteId,
       captured:r.capturedAt,expires:r.dataQuality.expiresAt,

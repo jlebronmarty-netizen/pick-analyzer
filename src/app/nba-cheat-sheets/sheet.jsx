@@ -7,6 +7,21 @@ import styles from './sheet.module.css';
 const windows={ten:'Últimos 10',five:'Últimos 5',h2h:'Contra el rival'};
 const time=v=>new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',hour:'numeric',minute:'2-digit'}).format(new Date(v));
 const date=v=>new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',day:'numeric',month:'short'}).format(new Date(v));
+function Trend({row:r,initial}){
+  const [window,setWindow]=useState(initial);
+  const series=(r.trend??[]).slice(0,window==='five'?5:10).reverse();
+  const scale=Math.max(1,r.line,...series.map(g=>g.value));
+  return <div className={styles.trend}><div className={styles.stats}>
+    {['five','ten'].map((k,i)=><button type="button" key={k} aria-pressed={k===window} onClick={()=>setWindow(k)}><small>Promedio L{i?10:5}</small><strong>{i?r.l10:r.l5}</strong></button>)}
+    <div><small>Proyección − línea</small><strong>{(r.projection-r.line>0?'+':'')+(r.projection-r.line).toFixed(1)}</strong></div></div>
+    {series.length ? <figure><figcaption>{windows[window]} · del más antiguo al reciente</figcaption>
+      <div className={styles.bars}>{series.map(g=>{
+        const hit=r.side==='Over'?g.value>r.line:g.value<r.line;
+        return <div key={g.id} className={styles.column} title={date(g.date)+' · '+g.rival+' · '+g.value} aria-label={date(g.date)+' contra '+g.rival+': '+g.value}>
+          <b>{g.value}</b><span data-hit={hit} style={{height:(g.value/scale*44)+'px'}}/></div>;
+      })}</div><small>Verde = cumplió la línea de {r.line}</small></figure>:<small>Desglose por juego pendiente.</small>}
+  </div>;
+}
 function Buttons({label,options,value,onChange}){
   return <fieldset><legend>{label}</legend><div>{Object.entries(options).map(([id,text])=><button type="button" key={id} aria-pressed={value===id} onClick={()=>onChange(id)}>{text}</button>)}</div></fieldset>;
 }
@@ -25,6 +40,7 @@ export default function Sheet({cards=[],projections=[],day,asOf,showReference=fa
   const active=cards.filter(c=>Date.parse(c.expiresAt)>now && c.odds>=Number(floor));
   const ranked=rankSheet(active,market,w,Number(floor));
   const projected=topProjections(projections,market,w,Number(floor),now);
+  const observed=[...new Map(projections.filter(r=>r.market===market && r.odds>=Number(floor) && Date.parse(r.expires)>now && r.meetings?.length).map(r=>[r.player,r])).values()].sort((a,b)=>b.meetings.length-a.meetings.length || a.name.localeCompare(b.name));
   return <main className={styles.sheet}><Link href="/nba-decision-board">← Decision Board</Link>
     <header className={styles.hero}><p>NBA <span> / </span> {date(day+'T12:00:00Z')}</p><h1>Cheat Sheets</h1><p>Las líneas de hoy frente al historial de cada jugador.</p></header>
     {captureFailed && <p role="status">La captura de seguimiento está pendiente.</p>}
@@ -36,11 +52,17 @@ export default function Sheet({cards=[],projections=[],day,asOf,showReference=fa
         <header><span>{r.matchup}</span><span>{time(r.start)} PR</span></header><h2>{r.name}</h2>
         <p className={styles.line}><strong>{r.projection.toFixed(1)}</strong> {markets[market].toLowerCase()} · proyección</p>
         <div className={styles.score}><b>{r[w]}/{w==='ten'?10:5}</b><span>{r.side==='Over'?'Más de':'Menos de'} {r.line}<small>veces que cumplió esa línea</small></span></div>
-        <div className={styles.stats}><div><small>Promedio L5</small><strong>{r.l5}</strong></div><div><small>Promedio L10</small><strong>{r.l10}</strong></div><div><small>Proyección − línea</small><strong>{(r.projection-r.line>0?'+':'')+(r.projection-r.line).toFixed(1)}</strong></div></div>
+        <Trend key={r.quote+w} row={r} initial={w}/>
         <div className={styles.footer}><span>FanDuel <b>{r.odds>0?'+':''}{r.odds}</b></span><span>Captura {time(r.captured)} PR</span></div>
         <details><summary>{r.warnings.length?'Validación parcial':'Ver cálculo'}</summary><p>Proyección descriptiva de Pick. Usa 65% del promedio L5 y 35% del L10 en juegos con al menos 10 minutos.</p>{r.warnings.map(v=><p key={v}>{v}</p>)}</details>
       </article>)}</div>:<p className={styles.empty}>Sin proyecciones de Pick con línea comparable para estos filtros.</p>}
     </section>}
+    {w==='h2h' && <section><h2 className={styles.heading}>Encuentros anteriores · {markets[market]}</h2>
+      {observed.length ? <div className={styles.grid}>{observed.map(r=><article className={styles.card} key={r.quote}><header>Contra {r.rival}</header>
+        <h2>{r.name}</h2><p className={styles.line}>{r.meetings.length} {r.meetings.length===1?'juego observado':'juegos observados'}</p>
+        <div className={styles.footer}>{r.meetings.map(g=><span key={g.id}>{date(g.date)} · <b>{g.value}</b> {markets[market].toLowerCase()}</span>)}</div></article>)}</div>:
+      <p className={styles.empty}>El archivo consultado para estos jugadores y líneas no muestra actuaciones previas ante el rival. La consulta cubre hasta 60 días de esta temporada.</p>}
+      <p>El Top 10 requiere 5 encuentros verificables por jugador y una línea validada. Aquí puedes ver también muestras menores.</p></section>}
     <h2 className={styles.heading}>Top 10 verificado · {markets[market]}</h2><p aria-live="polite">{ranked.length} {ranked.length===1?'jugador':'jugadores'} · {windows[w]} · Cuotas al {time(asOf)} PR</p>
     {ranked.length?<div className={styles.grid}>{ranked.map((c,i)=><Card key={c.quoteId} card={c} window={w} rank={i+1} alternatives={active.filter(a=>a.market===market && a.playerId===c.playerId && a.quoteId!==c.quoteId && a[w].length>=(w==='ten'?10:5))}/>)}</div>:<div className={styles.empty}><strong>Sin tarjetas para estos filtros</strong><p>Se necesita una cuota prepartido vigente y un historial verificable. Prueba otro mercado o revisa después de la próxima captura.</p></div>}
     {showReference && <details className={styles.reference}><summary>Ver ejemplo visual de una tarjeta</summary>
