@@ -20,5 +20,5 @@ export default async function Page(){
     try {await captureNbaCheatSheets(board.day,board.cheatSheets??[]);}
     catch {captureFailed=true;}
   }
-  return <Sheet captureFailed={captureFailed} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
+  return <Sheet showReference={process.env.VERCEL_ENV==='preview'} captureFailed={captureFailed} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
 }

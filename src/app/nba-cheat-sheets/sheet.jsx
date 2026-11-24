@@ -18,7 +18,7 @@ function Card({card:c,window:w,rank,alternatives}){
     <div className={styles.footer}><span>{c.book} <b>{c.odds>0?'+':''}{c.odds}</b></span><span>Actualizada {time(c.updated)} PR</span></div>
     <details><summary>Ver los {c[w].length} juegos</summary><table><caption>Del más reciente al más antiguo</caption><thead><tr>{['Fecha','Rival','Min','Total','Resultado'].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{c[w].map(r=><tr key={r.id}><td>{date(r.date)}</td><td>{r.rival}</td><td>{Math.round(r.minutes)}</td><td>{r.value}</td><td>{{win:'Acierto',push:'Empate',loss:'Fallo'}[outcome(c,r.value)]}</td></tr>)}</tbody></table>{alternatives.length>0 && <section><h3>Otras líneas verificadas</h3><ul>{alternatives.map(a=><li key={a.quoteId}>{a.side==='over'?'Más de':'Menos de'} {a.line} · {hits(a,w)}/{a[w].length} · {a.odds>0?'+':''}{a.odds}</li>)}</ul></section>}</details></article>;
 }
-export default function Sheet({cards=[],day,asOf,captureFailed=false}){
+export default function Sheet({cards=[],day,asOf,showReference=false,captureFailed=false}){
   const [market,setMarket]=useState('points'),[w,setWindow]=useState('ten'),[floor,setFloor]=useState('-300'),[now,setNow]=useState(Date.parse(asOf));
   useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),15000);return ()=>clearInterval(id);},[asOf]);
   const active=cards.filter(c=>Date.parse(c.expiresAt)>now && c.odds>=Number(floor));
@@ -29,5 +29,11 @@ export default function Sheet({cards=[],day,asOf,captureFailed=false}){
     <div className={styles.controls}><Buttons label="Mercado" options={markets} value={market} onChange={setMarket}/><Buttons label="Historial" options={windows} value={w} onChange={setWindow}/><Buttons label="Cuota mínima" options={{'-300':'−300 o mejor','-200':'−200 o mejor'}} value={floor} onChange={setFloor}/></div>
     <h2 className={styles.heading}>Top 10 · {markets[market]}</h2><p aria-live="polite">{ranked.length} {ranked.length===1?'jugador':'jugadores'} · {windows[w]} · Cuotas al {time(asOf)} PR</p>
     {ranked.length?<div className={styles.grid}>{ranked.map((c,i)=><Card key={c.quoteId} card={c} window={w} rank={i+1} alternatives={active.filter(a=>a.market===market && a.playerId===c.playerId && a.quoteId!==c.quoteId && a[w].length>=(w==='ten'?10:5))}/>)}</div>:<div className={styles.empty}><strong>Sin tarjetas para estos filtros</strong><p>Se necesita una cuota prepartido vigente y un historial verificable. Prueba otro mercado o revisa después de la próxima captura.</p></div>}
+    {showReference && <details className={styles.reference}><summary>Ver ejemplo visual de una tarjeta</summary>
+      <p>Ejemplo de tu referencia del 18 de noviembre. El ranking de hoy aparece arriba.</p>
+      <article className={styles.card}><header><span>NBA · Asistencias</span><span>18 nov</span></header>
+        <h2>Klay Thompson</h2><p className={styles.line}><strong>2+</strong> asistencias</p>
+        <div className={styles.score}><b>9/10</b><span>Contra Milwaukee<small>veces que cumplió</small></span></div>
+      </article></details>}
     <p className={styles.note}>Cada acierto se calcula con la línea indicada. Los empates cuentan como juegos disputados. Contra el rival usa hasta 10 encuentros del archivo de temporada y requiere 5 para entrar al ranking. Las frecuencias son históricas.</p></main>;
 }
