@@ -1,4 +1,7 @@
 import 'server-only';
+import {createClient} from '@supabase/supabase-js';
+import {originalContext} from '@/lib/nba/decision-storage-original.mjs';
+import {verifiedArchivedPlayerFinal,reconciledPeriods} from '@/lib/nba/decision-archived-final-core.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
 import {readNcaabManualRows,validateNcaabManualDate,ncaabManualDate} from '@/services/ncaab-manual-data.service';
 
@@ -36,6 +39,32 @@ export async function getNbaManualData(date:string){
  const contexts=await readNcaabManualRows((after,limit)=>{
  let q=supabaseAdmin.from('nba_game_context_v2').select('game_id,provider_game_id,player_stats,player_stats_captured_at',{count:'exact'}).lte('player_stats_captured_at',readAt).order('game_id').limit(limit).abortSignal(signal);if(after)q=q.gt('game_id',after);return q;
  },{key:'game_id',cap:2000,pageSize:25});
+ // Reuse immutable, hash-verified archive originals for missing operational contexts.
+ // This reader is independent of the prediction board's budget and does not
+ // modify its cache, environment flags, or provider activity.
+ const manifests=await supabaseAdmin.from('nba_goat_season_archive_v1').select('season,provider_game_id,source_captured_at,response_sha256,data_count,storage_bucket,storage_object_path,compressed_bytes,json_bytes,game_date',{count:'exact'}).eq('season',season).eq('dataset_key','player_stats').lt('game_date',date).lte('source_captured_at',readAt).order('game_date',{ascending:false}).order('provider_game_id').limit(1500).abortSignal(signal);
+ if(manifests.error||!manifests.data||manifests.count!==manifests.data.length)throw Error('MANIFEST_READ_INCOMPLETE');
+ const have=new Set(contexts.map(c=>Number(c.provider_game_id)));
+ const missing=manifests.data.filter(m=>!have.has(Number(m.provider_game_id)));
+ const storage=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.SUPABASE_SERVICE_ROLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:(input,init)=>fetch(input,{...init,signal:AbortSignal.any([signal,AbortSignal.timeout(7000),...(init?.signal?[init.signal]:[])])})}});
+ let archiveBytes=0,archiveVerified=0,archiveAttempted=0;
+ const archiveBudget=768*1024,archiveCap=180;
+ const queued=missing.filter(m=>{
+ if(m.storage_bucket!=='nba-goat-2026-private'||!Number.isSafeInteger(m.provider_game_id)||!/^[a-f0-9]{64}$/.test(m.response_sha256)||m.storage_object_path!==[season,m.provider_game_id,'player_stats',m.response_sha256+'.json.gz'].join('/')||!Number.isSafeInteger(m.compressed_bytes)||m.compressed_bytes<1||m.compressed_bytes>32768||archiveAttempted>=archiveCap||archiveBytes+m.compressed_bytes>archiveBudget)return false;
+ archiveAttempted++;archiveBytes+=m.compressed_bytes;return true;
+ });
+ for(let i=0;i<queued.length;i+=10){
+ if(signal.aborted)break;
+ const batch=await Promise.all(queued.slice(i,i+10).map(async m=>{
+ try{const res=await storage.storage.from(m.storage_bucket).download(m.storage_object_path);if(res.error||!res.data)return null;
+ const ctx=originalContext(Buffer.from(await res.data.arrayBuffer()),m);
+ const g=ctx?.player_stats?.data?.[0]?.game;
+ if(!ctx||!g||!verifiedArchivedPlayerFinal({context:ctx,final:g,providerGameId:m.provider_game_id,allowPartialComponents:true}))return null;
+ return {...ctx,game_id:'bdl_nba_'+m.provider_game_id};
+ }catch{return null;}
+ }));
+ for(const ctx of batch){if(ctx){contexts.push(ctx);archiveVerified++;}}
+ }
  const names=new Map<string,string>(),nameConflicts=new Set<string>(),teamDirectory=new Map<number,string>(),teamConflicts=new Set<number>();
  const addName=(p:Row)=>{const id=num(p.id),name=[p.first_name,p.last_name].filter(x=>typeof x==='string'&&x.trim()).join(' ').trim();if(id===null||!name)return;const k=String(id);if(names.has(k)&&names.get(k)!==name)nameConflicts.add(k);names.set(k,name);};
  const addTeam=(t:Row)=>{const id=num(t.id),name=t.full_name;if(id===null||typeof name!=='string'||!name)return;if(teamDirectory.has(id)&&teamDirectory.get(id)!==name)teamConflicts.add(id);teamDirectory.set(id,name);};
@@ -51,7 +80,7 @@ export async function getNbaManualData(date:string){
  if(h===null||a===null||h===a||hi===null||ai===null||hi===ai||h<0||a<0)continue;
  const hq=[1,2,3,4].map(i=>num(g['home_q'+i])),aq=[1,2,3,4].map(i=>num(g['visitor_q'+i]));
  const ho=[1,2,3].map(i=>num(g['home_ot'+i])??0),ao=[1,2,3].map(i=>num(g['visitor_ot'+i])??0);
- const valid=hq.every(x=>x!==null&&Number.isInteger(x)&&x>=0)&&aq.every(x=>x!==null&&Number.isInteger(x)&&x>=0)&&ho.every(x=>Number.isInteger(x)&&x>=0)&&ao.every(x=>Number.isInteger(x)&&x>=0)&&[...hq,...ho].reduce<number>((s,x)=>s+(x??0),0)===h&&[...aq,...ao].reduce<number>((s,x)=>s+(x??0),0)===a;
+ const valid=!!reconciledPeriods(g)&&hq.every(x=>x!==null&&Number.isInteger(x)&&x>=0)&&aq.every(x=>x!==null&&Number.isInteger(x)&&x>=0)&&ho.every(x=>Number.isInteger(x)&&x>=0)&&ao.every(x=>Number.isInteger(x)&&x>=0)&&[...hq,...ho].reduce<number>((s,x)=>s+(x??0),0)===h&&[...aq,...ao].reduce<number>((s,x)=>s+(x??0),0)===a;
  const k='bdl_nba_'+id,candidate={id:k,date:dt,homeId:hi,awayId:ai,homeScore:h,awayScore:a,homeQuarters:valid?hq:null,awayQuarters:valid?aq:null,homeOvertime:valid?ho:null,awayOvertime:valid?ao:null};
  const old=periodCandidates.get(k);if(old&&JSON.stringify(old)!==JSON.stringify(candidate))periodConflicts.add(k);periodCandidates.set(k,candidate);
  }
@@ -107,5 +136,5 @@ export async function getNbaManualData(date:string){
  }
  matchups.sort((a,b)=>String(b.game_date).localeCompare(String(a.game_date)));
  const goatGames=new Set(players.map(r=>String(r.provider_game_id)));
- return {schemaVersion:'NBA_MANUAL_DATA_V1',sport:'NBA',date,timezone:'America/Puerto_Rico',readAt,status:'PARTIAL',readOnly:true,providerCalls:0,databaseWrites:0,predictionAdjustment:false,modelPromoted:false,source:{scheduleCapturedAt:snap.source_received_at,scheduleSnapshotId:snap.snapshot_id},coverage:{fixtures:fixtures.length,observedFinals:games.length,goatGames:goatGames.size,playerRows:players.length,players:playerSummaries.length,conflicts:conflicts.size,periodGames:verifiedPeriods.length,namedPlayers:playerSummaries.filter(p=>p.name!==null).length,lineups:lineups.length,injuries:injuries.length,matchupRows:matchups.length,matchedFinals:games.filter(g=>goatGames.has(String(g.game_id).replace('bdl_nba_',''))).length},fixtures,teams,players:playerSummaries,periods:verifiedPeriods,lineups,injuries,matchups,warnings:['Historial observado, no récord oficial ni últimos diez consecutivos certificados.','Los nombres se vinculan por ID GOAT cuando existe evidencia; el último equipo observado no certifica roster actual.','Cuartos y mitades solo donde los parciales suman el marcador final; contexto prepartido observado, no confirmado. Matchups históricos de jugadores con alineación archivada para la jornada, no asignaciones proyectadas.','No se calculan recomendaciones ni probabilidades.']};
+ return {schemaVersion:'NBA_MANUAL_DATA_V1',sport:'NBA',date,timezone:'America/Puerto_Rico',readAt,status:'PARTIAL',readOnly:true,providerCalls:0,databaseWrites:0,predictionAdjustment:false,modelPromoted:false,source:{scheduleCapturedAt:snap.source_received_at,scheduleSnapshotId:snap.snapshot_id},coverage:{fixtures:fixtures.length,observedFinals:games.length,goatGames:goatGames.size,playerRows:players.length,players:playerSummaries.length,conflicts:conflicts.size,periodGames:verifiedPeriods.length,archiveMissing:missing.length,archiveAttempted,archiveVerified,namedPlayers:playerSummaries.filter(p=>p.name!==null).length,lineups:lineups.length,injuries:injuries.length,matchupRows:matchups.length,matchedFinals:games.filter(g=>goatGames.has(String(g.game_id).replace('bdl_nba_',''))).length},fixtures,teams,players:playerSummaries,periods:verifiedPeriods,lineups,injuries,matchups,warnings:['Historial observado, no récord oficial ni últimos diez consecutivos certificados. Los archivos originales se verifican por hash y consistencia del box score; los que no pasan se excluyen.','Los nombres se vinculan por ID GOAT cuando existe evidencia; el último equipo observado no certifica roster actual.','Cuartos y mitades solo donde los parciales suman el marcador final; contexto prepartido observado, no confirmado. Matchups históricos de jugadores con alineación archivada para la jornada, no asignaciones proyectadas.','No se calculan recomendaciones ni probabilidades.']};
 }
