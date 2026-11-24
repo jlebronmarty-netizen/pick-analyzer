@@ -82,13 +82,13 @@ function Row({row,rank,history,version}){
   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
    <div><p className="text-xs text-slate-400">{row.dataQuality?.book??'Operador pendiente'} / Línea</p><p className="font-semibold tabular-nums">{row.line===null?'ML':decimal(row.line)} <span className="text-sky-200">{odds(row.odds)}</span></p></div>
    <div><p className="text-xs text-slate-400">{row.market==='moneyline'?'Margen estimado':'Proyección'}</p><p className="font-semibold tabular-nums">{decimal(row.projection,2)}</p></div>
-   <div><p className="text-xs text-slate-400">Brecha favorable</p><p className="font-semibold tabular-nums">{gap===null?'—':(gap>0?'+':'')+decimal(gap,2)}</p></div>
+   <div><p className="text-xs text-slate-400">{rank==null?'Brecha descriptiva':'Brecha favorable'}</p><p className="font-semibold tabular-nums">{gap===null?'—':(gap>0?'+':'')+decimal(gap,2)}</p></div>
    <div><p className="text-xs text-slate-400">{row.market==='props'?'L5 / L10':'Puntos anotados L5 / L10 (ambos equipos)'}</p><p className="font-semibold tabular-nums">{decimal(row.l5)}/{decimal(row.l10)}</p></div>
    <div><p className="text-xs text-slate-400">Historial / aciertos</p><p className="font-semibold tabular-nums">{row.hit10!=null?row.hit10+'/'+row.sample:row.sample!=null?row.sample+' partidos':'—'}</p></div>
-   <div><p className="text-xs text-slate-400">Condiciones a favor</p><p className="font-semibold text-sky-200">{row.preference?.favorableCount??0}/{row.preference?.conditionCount??0}</p><p className="text-xs text-amber-200">Probabilidad sin calibrar</p></div>
+   <div><p className="text-xs text-slate-400">Condiciones a favor</p><p className="font-semibold text-sky-200">{row.preference?`${row.preference.favorableCount}/${row.preference.conditionCount}`:'—'}</p><p className="text-xs text-amber-200">Probabilidad sin calibrar</p></div>
   </div>
   <div className="mt-3 flex items-center justify-between gap-2">
-   <p className="text-xs text-slate-300">{row.preference?.favorableReasons?.slice(0,2).join(' · ')??humanReason(row)}</p>
+   <p className="text-xs text-slate-300">{issueLabels[row.dataQuality?.issues?.[0]?.reason]??row.preference?.favorableReasons?.slice(0,2).join(' · ')??humanReason(row)}</p>
    <button type="button" onClick={()=>setExpanded(!expanded)} aria-expanded={expanded} className="shrink-0 rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-100">{expanded?'Ocultar':'Ver contexto'}</button>
   </div>
   {expanded&&<div className="mt-3 rounded-lg bg-slate-950 p-3 text-sm leading-6 text-slate-200">
@@ -244,7 +244,7 @@ export default function DecisionBoard(){
     </select>}
     <input aria-label="Buscar jugador, mercado o equipo" value={search} onChange={e=>{setSearch(e.target.value);setLimit(30);}} placeholder="Buscar jugador, equipo o mercado" className="min-w-56 flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"/>
    </div>
-   <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">{NAV.find(t=>t.id===tab)?.title} <span className="text-sm font-normal text-slate-400">({entries.length})</span></h2>
+   <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-semibold">{NAV.find(t=>t.id===tab)?.title} <span className="text-sm font-normal text-slate-400">({entries.length}){data&&tab!=='top'&&` preferencias vigentes · ${captured.length} lados capturados`}</span></h2>
     <div className="flex flex-wrap items-center gap-2">
      <label htmlFor="nba-decision-sort" className="text-sm text-slate-300">Ordenar por</label>
      <select id="nba-decision-sort" aria-label="Ordenar oportunidades NBA" value={sortBy} onChange={e=>{setSortBy(e.target.value);setLimit(30);}} className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100">
@@ -258,7 +258,6 @@ export default function DecisionBoard(){
    </div>
    <p className="text-xs text-sky-300">Vista: solo lados favorables · {data?.preferenceVersion??'sin versión de preferencias'} · Se excluyen PASAR y lados opuestos del mismo contrato.</p>
    <p className="text-xs text-amber-200">La brecha se compara en unidades propias de cada mercado (ML: margen estimado; spread/total/props: puntos o estadística). Orden descriptivo, no probabilidad de ganar.</p>
-   {!error&&!loading&&<p className="text-xs text-slate-400">Únicamente un lado por contrato; las alternativas y los mercados sin señal se excluyen de esta lista y se consideran PASAR. El registro original permanece intacto para backtesting.</p>}
    {error&&<p role="alert" className="rounded-xl border border-rose-700 bg-rose-950 p-4 text-sm">No pude cargar el panel: {error}</p>}
    {!loading&&!error&&entries.length===0&&<EmptyMarket rows={captured} pending={pending} top={tab==='top'} filtered={gameId!=='all'||period!=='all'||Boolean(search)}/>}
    {entries.slice(0,limit).map((r,i)=><Row key={r.id} row={r} rank={i+1} history={data.historyEvidence?.[r.historyKey]} version={data.version}/>)}
@@ -266,7 +265,7 @@ export default function DecisionBoard(){
    {data?.evidence?.marketCaptureIssues?.length>0&&<details className="rounded-xl border border-slate-700 p-3"><summary>Mercados sin captura verificable</summary>
     {data.evidence.marketCaptureIssues.map(i=><p key={i.game+'-'+i.lane} className="text-xs">Partido {i.game} · {i.lane==='props'?'Player props':'Mercados principales'} · SIN DATOS · {i.reason}</p>)}
    </details>}
-   {data&&<details className="rounded-xl border border-slate-700 p-3"><summary>Datos pendientes de validación</summary>
+   {data&&<details key={tab} open={tab!=='top'&&entries.length===0&&pending.length>0} className="rounded-xl border border-slate-700 p-3"><summary className="cursor-pointer">Datos pendientes de validación</summary>
     <p className="my-2 text-xs">Lados pendientes en esta vista: {pending.length}.</p>
     {pending.slice(0,limit).map(r=>
        <Row key={r.id} row={r} history={data.historyEvidence?.[r.historyKey]} version={data.version}/>)}

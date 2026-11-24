@@ -31,7 +31,11 @@ for(const viewport of [{name:'desktop',width:1440,height:1000},{name:'mobile',wi
  test(`NBA board is discoverable from home and navigation on ${viewport.name}`,async({page},testInfo)=>{
   await page.setViewportSize(viewport);
   await page.route('**/api/**',route=>route.fulfill({status:503,json:{error:'TEST_READ_UNAVAILABLE'}}));
-  await page.route('**/api/nba/decision-board',route=>route.fulfill({json:buildNbaDecisionBoard(inputs(before))}));
+  const source=inputs(before);
+  const goatMainQuotes=[{market:'moneyline',side:'home',line:null},{market:'spread',side:'away',line:2.5},{market:'total',side:'over',line:220.5}]
+   .map(q=>({...q,quote_id:'fixture-'+q.market,provider_game_id:source.scheduleGames[0].id,source_received_at:before,american_odds:-110}));
+  const board=buildNbaDecisionBoard({...source,goatMainQuotes});
+  await page.route('**/api/nba/decision-board',route=>route.fulfill({json:board}));
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Deportes',exact:true,level:1})).toBeVisible();
   const cta=page.locator('[data-sport-card="nba"]').getByRole('link',{name:'Abrir NBA: análisis y mercados',exact:true});
@@ -57,6 +61,14 @@ for(const viewport of [{name:'desktop',width:1440,height:1000},{name:'mobile',wi
   const tabs=page.getByRole('navigation',{name:'Mercados NBA'});
   for(const name of ['Top 25','Moneyline','Spread','Total','Player props','Cuartos / Mitades']){
    await expect(tabs.getByRole('button',{name:new RegExp('^'+name)})).toBeVisible();
+  }
+  for(const name of ['Moneyline','Spread','Total','Player props']){
+   await tabs.getByRole('button',{name:new RegExp('^'+name)}).click();
+   const pending=page.locator('details').filter({has:page.getByText('Datos pendientes de validación',{exact:true})});
+   await expect(pending).toHaveJSProperty('open',true);
+   await expect(pending.locator('article').first()).toContainText('Precio capturado');
+   await expect(pending.locator('article').first()).toContainText('Brecha descriptiva');
+   await expect(pending).not.toContainText('PREFERENCIA SHADOW');
   }
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  });

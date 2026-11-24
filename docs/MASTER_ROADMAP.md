@@ -22,6 +22,10 @@ Objetivo autorizado: Deportes y accuracy → tablero del deporte → mercados y 
 
 Rama de revisión desde `c374aa7e`: nueva cohorte NBA `nba_prediction_engine_v1_1_inputs_shadow` con precios pareados reales, entradas reproducibles y persistencia que conserva la primera captura. Se corrigen el efecto direccional de la penalización global y los defaults de mercado; resultados y aprendizaje se separan por versión, mercado y juego. NCAAB reproduce 91/91 congelaciones y añade evidencia completa, lectura paginada, incertidumbre pareada y clasificación secuencial sin afirmar holdout validado. El panel distingue cuotas archivadas de ejecución, operador y temporalidad. Sin backfills, proveedores, crons nuevos ni promoción. Integración y comprobación en producción pendientes. [Alcance, pruebas y límites](research/independent-lab/2026-11-21-corrections.md).
 
+## 2026-11-23 · NBA · Evidencia de los mercados pendientes
+
+Vincular las capturas de partido completo con reglas verificables del operador y conciliar los 137 pares jugador–partido con minutos archivados. Los otros 85 pares requieren evidencia de participación. [Corte y alcance de la propuesta de interfaz](audits/2026-11-23-nba-market-tabs.md).
+
 ## 2026-11-21 · Mercados NBA sin preferencias
 
 Para habilitar preferencias de partido completo hace falta evidencia de la regla de prórroga aplicable a cada contrato. Para props también se requieren el historial cotejado y la disponibilidad del jugador antes del partido.

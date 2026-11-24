@@ -23,8 +23,12 @@ test('six NBA views, Shead evidence across refresh, and read failure clears stal
   await expect(empty).toContainText('Ningún lado capturado coincide');
   await expect(empty).not.toContainText('Falta un juego');
   await page.getByLabel('Buscar jugador, mercado o equipo').fill('');
-  await page.getByText('Datos pendientes de validación',{exact:true}).click();
   const row=page.locator('article').filter({hasText:'Jamal Shead'});
+  const pending=page.getByText('Datos pendientes de validación',{exact:true});
+  await expect(row).toBeVisible();
+  await pending.click();
+  await expect(row).toBeHidden();
+  await pending.click();
   await expect(row).toContainText('INCOMPLETE_HISTORY');
   await row.getByRole('button',{name:'Ver contexto'}).click();
   await expect(row).toContainText('21718136');
