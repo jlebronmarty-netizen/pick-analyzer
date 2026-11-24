@@ -26,7 +26,7 @@ export function validateNcaabManualDate(date:string) {
 export async function readNcaabManualRows(readPage:(after:string|null,limit:number)=>PromiseLike<Page>,options:{key?:string;cap?:number;pageSize?:number}={}) {
   const {key='id',cap=5000,pageSize=250}=options;
   if(!Number.isSafeInteger(cap)||cap<1||!Number.isSafeInteger(pageSize)||pageSize<1||pageSize>500)throw Error('INVALID_READ_BUDGET');
-  const rows:Row[]=[];let after:string|null=null,expected:number|null=null;
+  const rows:Row[]=[],seen=new Set<string>();let after:string|null=null,expected:number|null=null;
   for(;;) {
     const result=await readPage(after,pageSize);
     if(result.error||!Array.isArray(result.data)||!Number.isSafeInteger(result.count)||Number(result.count)<0)throw Error('ARCHIVE_READ_FAILED');
@@ -38,8 +38,10 @@ export async function readNcaabManualRows(readPage:(after:string|null,limit:numb
     for(const raw of result.data) {
       if(raw===null||typeof raw!=='object'||Array.isArray(raw))throw Error('INVALID_ARCHIVE_ROW');
       const row=raw as Row,id=row[key];
-      if(typeof id!=='string'||!id||(after!==null&&id<=after))throw Error('ARCHIVE_PAGE_OVERLAP');
-      after=id;rows.push(row);
+      // Postgres ORDER BY and gt share its collation. JavaScript code-point
+      // order differs for legacy uppercase IDs, so verify global uniqueness.
+      if(typeof id!=='string'||!id||seen.has(id))throw Error('ARCHIVE_PAGE_OVERLAP');
+      seen.add(id);after=id;rows.push(row);
     }
     if(rows.length>expected||(!result.data.length&&rows.length<expected))throw Error('INCOMPLETE_ARCHIVE');
     if(rows.length===expected)return rows;

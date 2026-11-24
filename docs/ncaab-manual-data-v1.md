@@ -67,3 +67,8 @@ Pruebas: normalización de identidades y horarios, separación de estadísticas 
 Validación local del 24 de noviembre de 2026: 54 pruebas aprobadas y `npm run build` completo con salida 0. La prueba de transporte conserva un JSON UTF-8 mayor de 5.4 MB y verifica que `UNAVAILABLE` mantiene HTTP 503. El corte real de las 12:22:15 UTC contiene 87 partidos de la fecha PR, 562 equipos observados y 1,158 finales anteriores; el estado sigue siendo `PARTIAL` por cobertura histórica ausente. La latencia y permisos efectivos de la nueva ruta requieren verificación en el despliegue antes de darla por publicada.
 
 El almacenamiento original y los ciclos existentes permanecen intactos. Si una lectura supera el presupuesto, se muestra no disponible y se investiga la proyección de fuente antes de ampliar el límite; no se sirve un subconjunto como temporada completa.
+
+
+## Orden de cursores en producción
+
+La primera comprobación de Preview detectó que el orden `en_US.UTF-8` de PostgreSQL coloca los identificadores heredados en mayúsculas después de los SHA. Corregido el lector para seguir el cursor del servidor y verificar unicidad global, conteos exactos restantes y límites, sin reinterpretar ese orden en JavaScript. Añadida regresión de paginación con ambos formatos; la nueva comprobación real del endpoint queda pendiente del despliegue de esta corrección.

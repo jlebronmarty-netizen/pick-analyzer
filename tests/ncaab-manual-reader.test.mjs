@@ -28,3 +28,15 @@ test('changed count, incomplete pages, overlap and caps fail without a partial r
 test('empty archive is a verified complete zero-row read',async()=>{
  assert.deepEqual(await readNcaabManualRows(async()=>({data:[],count:0,error:null})),[]);
 });
+test('keyset cursor follows database collation for legacy uppercase receipt IDs',async()=>{
+ const source=['00af','aa12','ffafc92','OPENING_FINALS_RECONCILIATION','ORIGINAL_73'].map(id=>({id}));
+ const cursors=[];
+ const rows=await readNcaabManualRows(async(after,limit)=>{
+  cursors.push(after);
+  const start=after===null?0:source.findIndex(row=>row.id===after)+1;
+  const remaining=source.slice(start);
+  return {data:remaining.slice(0,limit),count:remaining.length,error:null};
+ },{pageSize:2,cap:10});
+ assert.deepEqual(rows,source);
+ assert.deepEqual(cursors,[null,'aa12','OPENING_FINALS_RECONCILIATION']);
+});
