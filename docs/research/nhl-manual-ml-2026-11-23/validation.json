@@ -1,6 +1,6 @@
 {
   "version": "NHL_MANUAL_ML_VALIDATION_V1",
-  "status": "LOCAL_VERIFIED_PREVIEW_PENDING",
+  "status": "VERIFIED_RESEARCH_ONLY",
   "baseCommit": "4d4b4ae2d0a1fd82b31fe090f6b7a0980ec779c2",
   "branch": "research/nhl-manual-predictive-evaluation-20261123",
   "sourceSha256": {
@@ -49,7 +49,8 @@
     "rawInputFiles": 6,
     "complete": true,
     "protocolClass": "ASOF_REPLAY",
-    "prospectiveForecastsIssued": 0
+    "prospectiveForecastsIssued": 0,
+    "byteIdenticalRerun": true
   },
   "dataIntegrity": {
     "evidence": "immutability.json",
@@ -57,8 +58,13 @@
     "allFiveFingerprintsUnchanged": true
   },
   "preview": {
-    "status": "PENDING",
-    "endpoint": "/api/nhl/manual-ml-research"
+    "status": "READY",
+    "evidence": "preview-verification.json",
+    "url": "https://pick-analyzer-gu8iui09c-pick-analyzer.vercel.app/api/nhl/manual-ml-research",
+    "httpStatus": 200,
+    "codeCommit": "f5f05ee3396cee18969dc9a9cad80528056091e1",
+    "deploymentId": "dpl_4RvMtDySZsXiSM68HEEhnfK3F5W9",
+    "productionDeployed": false
   },
   "production": {
     "unchangedByThisWork": true,
@@ -73,5 +79,15 @@
     "productionProbabilityChanges": 0,
     "modelPromotions": 0,
     "productionDeployment": false
-  }
+  },
+  "codeCommit": "f5f05ee3396cee18969dc9a9cad80528056091e1",
+  "ci": {
+    "status": "SUCCESS",
+    "codeCommit": "f5f05ee3396cee18969dc9a9cad80528056091e1",
+    "workflow": "NHL stored archive research audit",
+    "runId": 45297530517,
+    "url": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/45297530517",
+    "allEightInitialWorkflowsSucceeded": true
+  },
+  "pullRequest": "https://github.com/jlebronmarty-netizen/pick-analyzer/pull/402"
 }

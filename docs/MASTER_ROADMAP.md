@@ -1,5 +1,7 @@
 ## 2026-11-23 · NHL · Continuación temporal reproducible del archivo manual
 
+[PR #402](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/402) abierto, CI aprobada y Preview READY; nueva API HTTP 200 con lectura completa y siete eventos pendientes. Evidencia vinculada al commit de código `f5f05ee3`; sin merge ni publicación de producción.
+
 Preparada la evaluación aislada de ganador completo OT/SO sobre inputs compartidos, con dos cortes separados (original DRatings y anclaje V6). El archivo actual tiene siete eventos, cero finales y ninguna mejora estimable. Próximos requisitos: capturas previas verificadas; H1 con fuente primaria de standings; variación en descanso; 40 antecedentes por variante y ambas clases antes de intentar un ajuste. Después, una revisión inicial de 30 juegos posteriores en varias fechas, sin tratar ese mínimo como validación. Control, candidato y baseline usan los mismos partidos; el nuevo holdout y escritor de probabilidades requieren una etapa futura autorizada. No hay cron, consumo nuevo de proveedores, cambio al Site ni promoción. [Protocolo y criterios](nhl-manual-ml-research-v1.md) · [Evidencia reproducible](research/nhl-manual-ml-2026-11-23/README.md).
 
 ## 2026-11-23 · NHL · Compartir inputs antes de evaluar cambios de modelo

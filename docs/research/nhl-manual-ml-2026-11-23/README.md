@@ -8,6 +8,8 @@ Datos hasta `2026-11-24T00:05:15.236207Z`: **23 de noviembre de 2026, 20:05:15 P
 
 La producción inspeccionada corresponde a `4d4b4ae2d0a1fd82b31fe090f6b7a0980ec779c2`, integración del [PR #400](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/400). El trabajo está aislado en `research/nhl-manual-predictive-evaluation-20261123`. La corrección de tiros ofensivos de portero del [PR #399](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/399) está integrada: VGK 27 = 26 de patinadores + 1 de Adin Hill. No se vuelve a tratar ese caso como una discrepancia pendiente.
 
+[PR #402 abierto para revisión](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/402). El commit de código `f5f05ee3` pasó CI y la [API en Preview](https://pick-analyzer-gu8iui09c-pick-analyzer.vercel.app/api/nhl/manual-ml-research) respondió HTTP 200 con lectura completa. El corte vivo de esa comprobación, 20:33:53 PR, conserva 14 capturas, siete eventos y cero finales manuales. El informe reproducible de este directorio mantiene su corte original de 20:05:15 PR. La verificación corresponde a una Preview; no se integró ni publicó producción.
+
 ## 1. Sistema activo y referencias
 
 La fuente activa es **DRatings**, contrato `DRATINGS_PUBLIC_V1` y selección `DRATINGS_PUBLIC_ARGMAX_V1`. El baseline de esta investigación es el **primer original archivado**, utilizado por el historial y la liquidación. El tablero vivo puede mostrar una observación posterior de DRatings; la comparación tardía conserva el primer original y no establece superioridad frente a esa actualización contemporánea.
@@ -84,6 +86,8 @@ La cohorte más amplia del original DRatings contiene 130 finales del 4 al 22 de
 - [Manifest de inputs](input-manifest.json): seis archivos, conteos y SHA-256.
 - [Libro de exclusiones](exclusions.json): motivos por evento y anclaje; no se suman como eventos independientes.
 - [Validación técnica](validation.json): pruebas, build, revisión, consistencia de datos y verificación de la API cuando esté disponible.
+- [Verificación de Preview](preview-verification.json): commit de código, HTTP 200, conteos completos y límites de solo lectura.
+- [Inmutabilidad de los archivos originales](immutability.json): cinco huellas coincidentes al mismo corte antes y después del trabajo.
 
 Los seis archivos de entrada completos se conservan en un paquete privado `nhl-manual-ml-inputs-2026-11-23.zip`. El manifest permite verificar que una reproducción usa los mismos bytes. El hash `source_snapshot_sha256` del manual identifica el dataset completo original del panel; no se recalculó sobre `feature_payload`, porque esos bytes no representan ese dataset entero.
 

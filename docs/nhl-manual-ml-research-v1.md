@@ -36,6 +36,8 @@ Circa se conserva como la cotización archivada identificada en DRatings; no es 
 
 La referencia concreta de este protocolo es **la primera probabilidad DRatings archivada**, usada por el historial y su liquidación. El tablero vivo puede mostrar una observación DRatings posterior de `latestRun.detail.forecasts` o del snapshot de cotización más reciente mediante `mergeNhlQuoteSnapshots`. Por tanto, una futura diferencia favorable en el anclaje tardío se interpretará frente a ese original conservado; no demostraría por sí sola superioridad frente a la última probabilidad DRatings visible exactamente a esa misma hora. El adaptador declara este alcance como `researchBaseline: FIRST_IMMUTABLE_ORIGINAL`.
 
+Las capas de investigación V2 (descanso y antecedentes de porteros), V3 (PP/PK), V5 (probables ESPN) y V7 (forma histórica de porteros) conservan evidencia contextual; no convierten automáticamente esos datos en ajustes de probabilidad. V8, descomposición regulación/OT/SO del [PR #372](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/372), sigue separado de `main` y de este trabajo. No se presenta ese borrador como modelo activo ni como contrato ya certificado.
+
 Las entradas originales y límites de las referencias están documentados en [la auditoría NHL anterior](research/nhl-audit-2026-11-23/README.md). Sus resultados históricos se incluyen como contexto, con sus propios denominadores. No acreditan el efecto incremental de datos manuales, porque esos partidos anteriores carecen de snapshots manuales disponibles en sus decisiones.
 
 ## 2. Archivo disponible y trazabilidad
