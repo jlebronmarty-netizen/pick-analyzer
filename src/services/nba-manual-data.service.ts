@@ -172,17 +172,19 @@ export async function getNbaManualData(date:string){
  }
  matchups.sort((a,b)=>String(b.game_date).localeCompare(String(a.game_date)));
  // Optional archive extensions never invalidate the base V1 report.
- const archivedMarkets=await Promise.all(fixtures.map(async f=>{
+ const archivedMarkets=(await Promise.all(fixtures.flatMap(f=>['game','props'].map(async family=>{
   const gameId=Number(f.id),cutoff=new Date(Math.min(Date.parse(readAt),Date.parse(String(f.scheduledAt))-1)).toISOString();
-  const snapshot=await supabaseAdmin.from('nba_market_snapshots_v1').select('snapshot_id,internal_event_id,quote_count,source_received_at').eq('provider_game_id',gameId).eq('date_local',date).eq('phase','PREGAME').lte('recorded_at',cutoff).lte('source_received_at',cutoff).order('source_received_at',{ascending:false}).order('snapshot_id').limit(1).abortSignal(signal).maybeSingle();
+  let request=supabaseAdmin.from('nba_market_snapshots_v1').select('snapshot_id,internal_event_id,quote_count,source_received_at,batches:payload->meta->>batch_count').eq('provider_game_id',gameId).eq('date_local',date).eq('phase','PREGAME').lte('recorded_at',cutoff).lte('source_received_at',cutoff);
+  request=family==='game'?request.is('payload->meta->>batch_count',null):request.not('payload->meta->>batch_count','is',null);
+  const snapshot=await request.order('source_received_at',{ascending:false}).order('snapshot_id').limit(1).abortSignal(signal).maybeSingle();
   const snap=snapshot.data;
-  if(snapshot.error||!snap||snap.quote_count>1000)return {gameId,status:snapshot.error?'UNAVAILABLE':'PARTIAL',quotes:[]};
+  if(snapshot.error||!snap||snap.quote_count>1000||(family==='props'&&Number(snap.batches)!==1))return {gameId,family,status:snapshot.error?'UNAVAILABLE':'PARTIAL',quotes:[]};
   const link=await supabaseAdmin.from('nba_market_event_links_v1').select('provider_game_id').eq('provider_game_id',gameId).eq('internal_event_id',snap.internal_event_id).eq('home_team_id',Number(f.home.id)).eq('away_team_id',Number(f.away.id)).eq('start_time',String(f.scheduledAt)).lte('created_at',cutoff).abortSignal(signal).maybeSingle();
-  if(link.error||!link.data)return {gameId,status:'UNVERIFIED_ID',quotes:[]};
+  if(link.error||!link.data)return {gameId,family,status:'UNVERIFIED_ID',quotes:[]};
   const q=await supabaseAdmin.from('nba_market_quotes_v1').select('quote_id,player_id,market,statistic,period,side,line,american_odds,contract,provider_updated_at,source_received_at,book:payload->>sportsbook,ot:payload->>overtime_rule').eq('snapshot_id',snap.snapshot_id).eq('provider_game_id',gameId).eq('internal_event_id',snap.internal_event_id).eq('phase','PREGAME').lte('recorded_at',cutoff).lte('source_received_at',cutoff).order('quote_id').limit(1000).abortSignal(signal);
-  if(q.error||!q.data||q.data.length!==snap.quote_count)return {gameId,status:'PARTIAL',quotes:[]};
-  return {gameId,status:'ARCHIVED',snapshotId:snap.snapshot_id,capturedAt:snap.source_received_at,quotes:q.data};
- }));
+  if(q.error||!q.data||q.data.length!==snap.quote_count)return {gameId,family,status:'PARTIAL',quotes:[]};
+  return {gameId,family,status:'ARCHIVED',snapshotId:snap.snapshot_id,capturedAt:snap.source_received_at,quotes:q.data};
+ }))));
  const meetings=verifiedPeriods.filter(p=>fixtures.some(f=>(p.homeId===f.home.id&&p.awayId===f.away.id)||(p.homeId===f.away.id&&p.awayId===f.home.id)));
  const meetingIds=new Set(meetings.map(p=>String(p.id).replace('bdl_nba_','')));
  const meetingPlayers=players.filter(r=>meetingIds.has(String(r.provider_game_id))).map(r=>({gameId:r.provider_game_id,playerId:r.player_id,name:names.get(String(r.player_id))??null,teamId:r.team_id,season,...Object.fromEntries(metrics.map(k=>[k,r[k]]))}));
