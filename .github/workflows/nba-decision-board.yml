@@ -19,6 +19,13 @@ on:
       - 'src/services/nba-decision-board.service.ts'
       - 'src/app/api/nba/decision-board/**'
       - 'src/app/nba-decision-board/**'
+      - 'src/app/nba-manual/**'
+      - 'src/app/api/nba/manual-data/**'
+      - 'src/services/nba-manual-data.service.ts'
+      - 'src/components/dashboard/NbaManualReview.tsx'
+      - 'src/lib/nba/manual-*.mjs'
+      - 'tests/nba-manual-access.test.mjs'
+      - 'tests/dashboard-multisport/nba-manual-review.test.mjs'
       - 'tests/nba-decision-board.test.mjs'
       - 'tests/nba-decision-learning.test.mjs'
       - 'src/lib/nba/decision-learning-core.mjs'
@@ -72,6 +79,8 @@ jobs:
           node-version: '24'
       - name: Test archived-only contracts, missing-data blocking and cross-provider IDs
         run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs
+      - name: Verify manual NBA tracker and private access boundaries
+        run: node --test tests/nba-manual-access.test.mjs tests/dashboard-multisport/nba-manual-review.test.mjs
       - name: Ensure no unapproved provider call or official pick mutation
         run: |
           if grep -R -n -E 'prediction_history.*(insert|upsert|update)|recommendedPick: true' src/lib/nba/decision-board-core.mjs src/lib/nba/decision-learning-core.mjs src/services/nba-decision-board.service.ts src/services/nba-decision-learning.service.ts src/app/api/nba/decision-board; then
