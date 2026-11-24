@@ -86,3 +86,72 @@ test('reads the operational materializer envelope and preserves its declared pro
   assert.equal(result.player_stats.archive_provenance.source_kind,'STORED_OPERATIONAL_JSON');
   assert.equal(result.player_stats.archive_provenance.source_captured_at,context.player_stats_captured_at);
 });
+
+test('display spends the same budget on chronological prop windows, including a verified DNP extension',async()=>{
+  const {readDisplayWindowContexts}=await import('../src/lib/nba/decision-storage-original.mjs');
+  const {indexEvidence,playerWindow}=await import('../src/lib/nba/decision-integrity.mjs');
+  const games=[],manifests=[],playerHistory=[],bytesById=new Map();
+  for(let day=1;day<=15;day++){
+    const date='2026-11-'+String(day).padStart(2,'0'), id=day===15?100:day;
+    const tip=date+'T15:00:00Z', capturedAt=date+'T23:00:00Z', dnp=day===14;
+    const game={id,datetime:tip,date,season:2026,postseason:false,status_state:'final',
+      home_team:{id:1},visitor_team:{id:2},home_team_score:50,visitor_team_score:45};
+    games.push({game,capturedAt});
+    const data=Array.from({length:10},(_,i)=>{
+      const team=i<5?1:2;
+      return {game,player:{id:i+1,team_id:team},team:{id:team},min:dnp&&i===0?'0':'24:00',
+        pts:i>=5?9:dnp&&i===0?0:dnp&&i===1?20:10,ast:dnp&&i===0?0:2,reb:0,fg3m:0};
+    });
+    const json=Buffer.from(JSON.stringify({data})), bytes=gzipSync(json);
+    const hash=createHash('sha256').update(json).digest('hex');
+    bytesById.set(id,bytes);
+    manifests.push({season:2026,provider_game_id:id,source_captured_at:capturedAt,response_sha256:hash,
+      compressed_bytes:bytes.length,json_bytes:json.length,data_count:data.length,storage_bucket:'nba-goat-2026-private',
+      storage_object_path:'2026/'+id+'/player_stats/'+hash+'.json.gz'});
+    playerHistory.push({season:2026,provider_game_id:id,game_datetime:tip,team_id:1,opponent_team_id:2,player_id:1,
+      source_captured_at:capturedAt,materialized_at:capturedAt,source_sha256:hash,minutes_played:dnp?0:24,ast:dnp?0:2});
+  }
+  const target={...games.at(-1).game,id:101,datetime:'2026-11-16T23:30:00Z',status_state:'scheduled'};
+  const quote={provider_game_id:101,player_id:1};
+  const inputs={games:[target],propQuotes:[quote,quote],calendar:{games,issues:[]},asOf:'2026-11-16T21:00:00Z',playerHistory};
+  const needed=new Set(bytesById.keys()), expected=games.slice(-11).map(({game})=>game.id);
+  const budget=expected.reduce((sum,id)=>sum+bytesById.get(id).length,0);
+  const fetched=[], cache=new Map();
+  const fetchBox=async m=>{fetched.push(m.provider_game_id);return bytesById.get(m.provider_game_id);};
+  const verified=await readDisplayWindowContexts(manifests,[],needed,fetchBox,budget,cache,inputs);
+  assert.deepEqual(fetched,[...expected].reverse());
+  const audit=playerWindow(indexEvidence({...inputs,manifests,contexts:verified}),target,1,['ast']);
+  assert.equal(audit.status,'VALIDATED');
+  assert.deepEqual(audit.included.map(r=>r.id),[...expected].reverse().filter(id=>id!==14));
+  assert.deepEqual(audit.excluded,[{id:14,reason:'DNP'}]);
+  fetched.length=0;
+  const warm=await readDisplayWindowContexts(manifests,[],needed,fetchBox,budget,cache,inputs);
+  assert.equal(warm.length,verified.length);assert.deepEqual(fetched,[]);
+
+  const limited=await readDisplayWindowContexts(manifests,[],needed,fetchBox,budget-1,new Map(),inputs);
+  assert.equal(fetched.length,10);
+  assert.notEqual(playerWindow(indexEvidence({...inputs,manifests,contexts:limited}),target,1,['ast']).status,'VALIDATED');
+  fetched.length=0;
+  const corrupt=await readDisplayWindowContexts(manifests,[],needed,async m=>{
+    fetched.push(m.provider_game_id);return m.provider_game_id===14?Buffer.from('invalid'):bytesById.get(m.provider_game_id);
+  },budget,new Map(),inputs);
+  const unresolved=playerWindow(indexEvidence({...inputs,manifests,contexts:corrupt}),target,1,['ast']);
+  assert.equal(unresolved.status,'PARTIAL');
+  assert.ok(unresolved.issues.some(i=>i.id===14&&i.reason==='MINUTE_EXCLUSION_UNVERIFIED'));
+  assert.equal(fetched.filter(id=>id===14).length,1);
+  fetched.length=0;
+  const quarantine={provider_game_id:14,player_stats_captured_at:games[13].capturedAt,player_stats:null};
+  const withQuarantine=await readDisplayWindowContexts(manifests,[quarantine],needed,fetchBox,budget,new Map(),inputs);
+  assert.ok(!fetched.includes(14));
+  const quarantinedWindow=playerWindow(indexEvidence({...inputs,manifests,contexts:[quarantine,...withQuarantine]}),target,1,['ast']);
+  assert.ok(quarantinedWindow.issues.some(i=>i.id===14&&i.reason==='ORIGINAL_BOX_NOT_VERIFIED'));
+
+  fetched.length=0;
+  const shared={objects:127,bytes:0};
+  await readOriginalContexts(manifests.slice(0,1),[],needed,fetchBox,budget,new Map(),shared);
+  await readOriginalContexts(manifests.slice(1,2),[],needed,fetchBox,budget,new Map(),shared);
+  assert.deepEqual(fetched,[1]);
+  assert.equal(shared.objects,128);
+  assert.equal(shared.bytes,bytesById.get(1).length);
+  assert.equal(archiveReadOptions(false,{NBA_DECISION_DISPLAY_ARCHIVE_READ_BYTES:'262144'}).prioritizeWindows,false);
+});
