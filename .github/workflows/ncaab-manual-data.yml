@@ -1,0 +1,43 @@
+name: NCAAB shared manual data
+
+on:
+  pull_request:
+    paths:
+      - 'src/types/ncaab-manual-data.ts'
+      - 'src/lib/ncaab-manual-data.ts'
+      - 'src/lib/ncaab-manual-response.ts'
+      - 'src/services/ncaab-manual-data.service.ts'
+      - 'src/app/api/ncaab/manual-data/**'
+      - 'src/components/dashboard/NcaabManualDataPanel.tsx'
+      - 'src/components/dashboard/NcaabDashboard.tsx'
+      - 'tests/ncaab-manual-*.test.mjs'
+      - 'tests/dashboard-multisport/ncaab-manual-data.test.mjs'
+      - '.github/workflows/ncaab-manual-data.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Canonical data and complete-read regression
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/ncaab-manual-*.test.mjs tests/dashboard-multisport/ncaab*.test.mjs
+      - name: Verify production build
+        run: npm run build
