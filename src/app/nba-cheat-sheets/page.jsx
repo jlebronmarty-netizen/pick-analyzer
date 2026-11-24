@@ -4,6 +4,7 @@ import {nbaManualAccess} from '@/lib/nba/manual-access.mjs';
 import Link from 'next/link';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
 import Sheet from './sheet';
+import {projectionRows} from '@/lib/nba/cheat-projections.mjs';
 import {captureNbaCheatSheets} from '@/services/nba-cheat-capture';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
@@ -20,5 +21,5 @@ export default async function Page(){
     try {await captureNbaCheatSheets(board.day,board.cheatSheets??[]);}
     catch {captureFailed=true;}
   }
-  return <Sheet showReference={process.env.VERCEL_ENV==='preview'} captureFailed={captureFailed} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
+  return <Sheet projections={projectionRows(board.rows.props)} showReference={process.env.VERCEL_ENV==='preview'} captureFailed={captureFailed} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
 }
