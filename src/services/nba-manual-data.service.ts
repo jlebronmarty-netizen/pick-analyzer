@@ -33,7 +33,7 @@ export async function getNbaManualData(date:string){
  }
  if(players.length!==expected)throw Error('PLAYER_INCOMPLETE');
  const unique=new Map<string,Row>(),conflicts=new Set<string>();
- for(const r of finals){const id=String(r.game_id),h=num(r.home_score),a=num(r.away_score);if(!/^bdl_nba_\\d+$/.test(id)||h===null||a===null||h===a||h<0||a<0)continue;const old=unique.get(id);if(old&&['home_team','away_team','home_score','away_score','commence_time'].some(k=>old[k]!==r[k]))conflicts.add(id);unique.set(id,r);}
+ for(const r of finals){const id=String(r.game_id),h=num(r.home_score),a=num(r.away_score);if(!/^bdl_nba_[0-9]+$/.test(id)||h===null||a===null||h===a||h<0||a<0)continue;const old=unique.get(id);if(old&&['home_team','away_team','home_score','away_score','commence_time'].some(k=>old[k]!==r[k]))conflicts.add(id);unique.set(id,r);}
  for(const id of conflicts)unique.delete(id);
  const games=[...unique.values()].sort((a,b)=>String(b.commence_time).localeCompare(String(a.commence_time)));
  const teamNames=new Set<string>();for(const g of games){teamNames.add(String(g.home_team));teamNames.add(String(g.away_team));}for(const f of fixtures){if(typeof f.home.name==='string')teamNames.add(f.home.name);if(typeof f.away.name==='string')teamNames.add(f.away.name);}
