@@ -1078,7 +1078,6 @@
     }
   ],
   "metricDiscrepancies": [],
-  "inputHash": "388eed074d7335276a186eeef5cb7959754c235a9863cb741f4aba9778c0e4d2",
   "verification": {
     "forecastIds": 125,
     "independentHypotheses": 125,

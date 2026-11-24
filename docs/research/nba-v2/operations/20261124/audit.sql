@@ -21,3 +21,20 @@ SELECT jsonb_agg(to_jsonb(x) ORDER BY x.cycle_id,x.forecast_id) judgments FROM (
  WHERE c.id<=11 AND c.model_hash='1ec8aff30c264bec1f87917f326db5affb85f508457dc5031b16f80016101329'
 ) x;
 SELECT report FROM nba_v2_shadow.reports WHERE cycle_id=11;
+
+-- First freezes only, at the immutable report cutoff. Expected 125 / 125 / 125.
+SELECT count(*) forecasts,
+ count(DISTINCT (record->>'modelHash',record->>'gameId',record->>'scope',record->>'playerId',record->>'side')) hypotheses,
+ count(*) FILTER(WHERE
+   (record->>'quoteAt')::timestamptz <= (record->>'capturedAt')::timestamptz
+   AND (record->>'capturedAt')::timestamptz <= (record->>'featuresAsOf')::timestamptz
+   AND (record->>'featuresAsOf')::timestamptz <= (record->>'frozenAt')::timestamptz
+   AND (record->>'frozenAt')::timestamptz = c.captured_at
+   AND record->>'frozenAt' = record->>'decisionAt'
+   AND c.captured_at < tip - interval '10 minute'
+   AND c.captured_at < (record->>'expiresAt')::timestamptz
+   AND record->>'qualityStatus' = 'VALIDATED'
+   AND (record->>'contractVerified')::boolean
+ ) valid
+FROM nba_v2_shadow.forecasts f JOIN nba_v2_shadow.cycles c ON c.id=f.cycle_id
+WHERE c.id<=11 AND c.model_hash='1ec8aff30c264bec1f87917f326db5affb85f508457dc5031b16f80016101329';
