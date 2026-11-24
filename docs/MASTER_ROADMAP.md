@@ -1,3 +1,7 @@
+## 2026-11-24 · NCAAB · Datos diarios compartidos
+
+Nueva consulta de solo lectura `/api/ncaab/manual-data` (`NCAAB_MANUAL_DATA_V1`) para Pick y el panel privado. Reutiliza scoreboards, proyecciones y contextos guardados; distingue récord publicado de cobertura observada, muestra finales recientes concretos, sedes, descanso, mitades y estadísticas con denominadores. Identidad y fechas PR verificadas; cuotas archivadas mediante el lector existente. Sin proveedores adicionales, escrituras de datos, migraciones, cambios de modelo o cron. Interfaz bajo demanda con cinco pestañas, fecha, búsqueda y paginación. [Contrato, cobertura y límites](ncaab-manual-data-v1.md). Validación local: 54 pruebas y build completo aprobados. JSON transmitido por fragmentos para admitir respuestas mayores de 4.5 MB. Publicación y medición del lector en Vercel pendientes; el presupuesto de lectura de 48 MiB produce ausencia explícita si el archivo lo supera.
+
 ## 2026-11-23 · NHL · Compartir inputs antes de evaluar cambios de modelo
 
 Preparados almacenamiento privado append-only de `NHL_MANUAL_FEATURES_V1`, escritor restringido, lectura diaria completa y comparación bajo demanda en Pick. Los snapshots acreditan disponibilidad desde su inserción real; preservan generación, cortes y payload de la fuente. Migración instalada y permisos verificados; sigue la primera escritura con readback, conectar la actualización autorizada y completar QA móvil. La evaluación prospectiva y cualquier promoción de modelos siguen fuera de este módulo. [Detalle](nhl-manual-features-v1.md).
