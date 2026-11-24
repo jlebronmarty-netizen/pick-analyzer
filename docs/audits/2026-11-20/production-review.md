@@ -1,5 +1,7 @@
 # Revisión del PR 391 para integración
 
+**Producción, 20 de noviembre a las 9:25 p. m. PR.** La versión de integridad está desplegada y el tablero se comprobó con datos reales. [Resultados de las seis vistas y ciclos SHADOW pendientes](production-verification.md)
+
 Se revisaron los 35 archivos de la primera versión (`55a86bd1`), las rutas consumidoras, dos RPC de SHADOW, las capturas archivadas, los logs de las tres ejecuciones y la versión de producción. La base comprobada fue `61ed75d8145f41bb8a2e116a91c31491513fce6f`. La revisión añade correcciones a la rama existente. El despliegue de referencia es `dpl_4mjsCRqDjp9ZWqMtgMGGd4saCt7C`. [PR, commit vigente y controles](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/391/checks)
 
 ## Cambios que afectan a los resultados
