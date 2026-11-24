@@ -1,4 +1,5 @@
 import 'server-only';
+import {buildCheatCandidates} from '@/lib/nba/cheat-sheets.mjs';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
@@ -50,7 +51,7 @@ async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:stri
  const result=await query(fields).eq('source_received_at',at).order('snapshot_id').limit(33).abortSignal(AbortSignal.timeout(10000));
  return {id:game.id,lane,...readMarketBatches(check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED'),game,lane,asOf)};
 }
-export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false}={}){
+export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false,withCheatSheets=false}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
  const [slate,archived,hoops,settlementRows,contextResult,pregameResult]=await Promise.all([
   db.from('nba_market_schedules_v1').select('source_received_at,payload,date_local').eq('date_local',day).lte('recorded_at',asOf).lte('source_received_at',asOf)
@@ -179,14 +180,15 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
     names[String(player.id)]??=player.first_name+' '+player.last_name;
   }
  }
- const result=buildNbaDecisionBoard({
+ const inputs={
    scheduleGames:games,calendar,manifests,contexts,pregame:available,goatMainQuotes:recentMain,
    goatPropQuotes:propQuotes,playerHistory:completeHistory,playerNames:names,
    hoopsCapture:hoop,asOf
- });
+ };
+ const result=buildNbaDecisionBoard(inputs);
  if(Object.keys(result.summary.qualityCounts).some(k=>k!=='VALIDATED'))
    console.info('NBA_DECISION_DATA_QUALITY',{day,counts:result.summary.qualityCounts,calendarIssues:calendar.issues});
- return {...result,accuracy:accuracy(settled,asOf),evidence:{
+ return {...result,...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
    scheduleCapturedAt:schedule?.source_received_at??null,
    historyCaptureAt:archive?.started_at??null,
    historyRunId:archive?.run_id??null,
@@ -196,3 +198,4 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
    reportVersion:BOARD_VERSION,noProviderCalls:true,noWrites:true
  }};
 }
+

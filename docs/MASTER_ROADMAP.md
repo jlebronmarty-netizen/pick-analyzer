@@ -1,3 +1,7 @@
+## NBA · Cheat Sheets · 24 noviembre 2026
+
+Ruta privada `/nba-cheat-sheets`. Top 10 descriptivo por mercado, L5/L10/H2H, cuota mínima y captura prepartido idempotente. Aplicar `202611240901_nba_cheat_snapshots.sql` antes de habilitar producción. Verificar resultados prospectivos tras acumular capturas y finales.
+
 ## NBA · Centro de análisis manual por partido (borrador)
 
 PR #407 propone `archivedMarkets`, `meetingPlayers` y `observedSeason` en V1. Lee el último snapshot prepartido por ID, verifica equipos y horario mediante event_links y conserva línea, lado, operador, hora y regla OT originales. Los box scores H2H se limitan a filas disponibles. Pendiente validación del preview. No cambia proveedores, cron, motores ni almacenamiento.
