@@ -15,7 +15,7 @@ export default function ShadowReview({data}){
   const rows=data.contracts.filter(r=>(day==='all'||r.day===day)&&(status==='all'||r.status===status))
     .toSorted((a,b)=>a.day.localeCompare(b.day)||a.matchup.localeCompare(b.matchup)||a.period.localeCompare(b.period));
   const overall=data.report.find(s=>s.scope==='ALL_DESCRIPTIVE');
-  return <main className="mx-auto max-w-5xl space-y-5 px-4 py-6 text-slate-100">
+  return <main className="mx-auto w-full min-w-0 max-w-5xl space-y-5 break-words px-4 py-6 text-slate-100">
     <header><a href="/nba-decision-board" className="text-sky-300">Decision Board NBA</a>
       <h1 className="mt-3 text-3xl font-bold">Evaluación prospectiva V2</h1>
       <p className="mt-2 text-slate-300">{data.source==='ledger'?'Última lectura del registro diario':'Corte del archivo'} {pr(data.asOf)} PR · SHADOW</p>
@@ -36,7 +36,7 @@ export default function ShadowReview({data}){
     <section aria-label="Métricas prospectivas por mercado">
       <h2 className="font-semibold">Resultados frente al precio archivado</h2>
       <p className="mt-2 text-sm text-slate-300">Métricas al {pr(data.metricsAsOf??data.asOf)} PR, agrupadas por partido. Brier y Log Loss menores indican mejor ajuste a los resultados. La diferencia Brier resta el operador sin margen al modelo. Los intervalos del 95% remuestrean partidos completos.</p>
-      <div className="mt-3 overflow-x-auto rounded border border-slate-700">
+      <div className="mt-3 max-w-full overflow-x-auto rounded border border-slate-700">
         <table className="w-full text-left text-sm tabular-nums">
           <caption className="sr-only">Evaluación experimental por versión y mercado</caption>
           <thead className="bg-slate-900"><tr>{['Mercado','Juegos','Ganados / perdidos / devueltos','Brier V2','Brier operador','Diferencia Brier e IC 95%','Log Loss','MAE','Accuracy','EV congelado','ROI simulado'].map(label=><th key={label} scope="col" className="p-3">{label}</th>)}</tr></thead>
