@@ -155,7 +155,18 @@ export async function getNbaManualData(date:string){
  const teamNames=new Set<string>(teamDirectory.values());for(const g of games){teamNames.add(String(g.home_team));teamNames.add(String(g.away_team));}for(const f of fixtures){if(typeof f.home.name==='string')teamNames.add(f.home.name);if(typeof f.away.name==='string')teamNames.add(f.away.name);}
  const teams=[...teamNames].sort().map(name=>{const history=games.filter(g=>g.home_team===name||g.away_team===name).map(g=>{const home=g.home_team===name;return {id:g.game_id,date:g.commence_time,opponent:home?g.away_team:g.home_team,home,pointsFor:home?g.home_score:g.away_score,pointsAgainst:home?g.away_score:g.home_score};});const recent=history.slice(0,10);return {name,observedGames:history.length,wins:history.filter(g=>Number(g.pointsFor)>Number(g.pointsAgainst)).length,losses:history.filter(g=>Number(g.pointsFor)<Number(g.pointsAgainst)).length,pointsFor:avg(history,'pointsFor'),pointsAgainst:avg(history,'pointsAgainst'),recent,sequenceVerified:false};});
  const groups=new Map<string,Row[]>();for(const r of players){const k=String(r.player_id);const rows=groups.get(k)||[];rows.push(r);groups.set(k,rows);}
- const playerSummaries=[...groups.entries()].map(([playerId,rows])=>{rows.sort((a,b)=>Date.parse(String(b.game_datetime))-Date.parse(String(a.game_datetime)));const played=rows.filter(r=>num(r.minutes_played)!==null&&Number(r.minutes_played)>0),recent=played.slice(0,10);return {playerId,name:names.get(playerId)??null,observedTeamId:rows[0].team_id,observedAppearances:played.length,recent:recent.map(r=>({gameId:r.provider_game_id,date:r.game_datetime,teamId:r.team_id,opponentId:r.opponent_team_id,...Object.fromEntries(metrics.map(k=>[k,r[k]]))})),averages:Object.fromEntries(metrics.map(k=>[k,avg(recent,k)])),sequenceVerified:false};});
+ const rosterPlayerIds=new Set([
+  ...lineups.flatMap(l=>arr(l.players).map(p=>String(obj(p).playerId))),
+  ...injuries.map(p=>String(p.playerId)),
+ ]);
+ const appearance=(r:Row)=>({gameId:r.provider_game_id,date:r.game_datetime,teamId:r.team_id,opponentId:r.opponent_team_id,...Object.fromEntries(metrics.map(k=>[k,r[k]]))});
+ const playerSummaries=[...groups.entries()].map(([playerId,rows])=>{
+  rows.sort((a,b)=>Date.parse(String(b.game_datetime))-Date.parse(String(a.game_datetime)));
+  const played=rows.filter(r=>num(r.minutes_played)!==null&&Number(r.minutes_played)>0),recent=played.slice(0,10);
+  return {playerId,name:names.get(playerId)??null,observedTeamId:rows[0].team_id,observedAppearances:played.length,
+   recent:recent.map(appearance),...(rosterPlayerIds.has(playerId)?{earlierAppearances:played.slice(10).map(appearance)}:{}),
+   averages:Object.fromEntries(metrics.map(k=>[k,avg(recent,k)])),sequenceVerified:false};
+ });
  // Read only matchups involving today's observed participants. Historical
  // game date and capture are retained; these are not projected assignments.
  const participantIds=[...new Set(lineups.flatMap(l=>arr(l.players).map(x=>num(obj(x).playerId))).filter((x):x is number=>x!==null))];
