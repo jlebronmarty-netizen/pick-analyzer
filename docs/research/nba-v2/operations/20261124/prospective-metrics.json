@@ -1,0 +1,1093 @@
+{
+  "asOf": "2026-11-24T12:15:24.503+00:00",
+  "modelHash": "1ec8aff30c264bec1f87917f326db5affb85f508457dc5031b16f80016101329",
+  "forecasts": 125,
+  "observations": 175,
+  "reportCycle": 11,
+  "scopes": [
+    {
+      "scope": "moneyline",
+      "scheduledGames": 0,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 0,
+      "metrics": {
+        "games": 0,
+        "contracts": 0,
+        "binaryGames": 0,
+        "pushes": 0,
+        "brier": null,
+        "logLoss": null,
+        "accuracy": null,
+        "mae": null,
+        "ece": null,
+        "brier95": null,
+        "calibrationBins": [],
+        "pricedGames": 0,
+        "simulatedRoi": null,
+        "meanEv": null,
+        "positiveEvGames": 0,
+        "positiveEvRoi": null,
+        "positiveEvRoi95": null,
+        "differenceVsBookBrier": null,
+        "differenceVsBookBrier95": null,
+        "overOrSelectedSideWinRate": null,
+        "calibrationError": null,
+        "archivedDecimalRoi": null,
+        "bookLogLoss": null,
+        "bookBrier": null,
+        "pairedBrierDifference": null,
+        "intervals95": {
+          "brier": null,
+          "logLoss": null,
+          "accuracy": null,
+          "overOrSelectedSideWinRate": null,
+          "calibrationError": null,
+          "meanEv": null,
+          "simulatedRoi": null,
+          "positiveEvRoi": null,
+          "archivedDecimalRoi": null,
+          "bookLogLoss": null,
+          "bookBrier": null,
+          "pairedBrierDifference": null
+        },
+        "bootstrapReplicates": 0,
+        "wins": 0,
+        "losses": 0,
+        "pairedBinaryGames": 0
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "spread",
+      "scheduledGames": 0,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 0,
+      "metrics": {
+        "games": 0,
+        "contracts": 0,
+        "binaryGames": 0,
+        "pushes": 0,
+        "brier": null,
+        "logLoss": null,
+        "accuracy": null,
+        "mae": null,
+        "ece": null,
+        "brier95": null,
+        "calibrationBins": [],
+        "pricedGames": 0,
+        "simulatedRoi": null,
+        "meanEv": null,
+        "positiveEvGames": 0,
+        "positiveEvRoi": null,
+        "positiveEvRoi95": null,
+        "differenceVsBookBrier": null,
+        "differenceVsBookBrier95": null,
+        "overOrSelectedSideWinRate": null,
+        "calibrationError": null,
+        "archivedDecimalRoi": null,
+        "bookLogLoss": null,
+        "bookBrier": null,
+        "pairedBrierDifference": null,
+        "intervals95": {
+          "brier": null,
+          "logLoss": null,
+          "accuracy": null,
+          "overOrSelectedSideWinRate": null,
+          "calibrationError": null,
+          "meanEv": null,
+          "simulatedRoi": null,
+          "positiveEvRoi": null,
+          "archivedDecimalRoi": null,
+          "bookLogLoss": null,
+          "bookBrier": null,
+          "pairedBrierDifference": null
+        },
+        "bootstrapReplicates": 0,
+        "wins": 0,
+        "losses": 0,
+        "pairedBinaryGames": 0
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total",
+      "scheduledGames": 0,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 0,
+      "metrics": {
+        "games": 0,
+        "contracts": 0,
+        "binaryGames": 0,
+        "pushes": 0,
+        "brier": null,
+        "logLoss": null,
+        "accuracy": null,
+        "mae": null,
+        "ece": null,
+        "brier95": null,
+        "calibrationBins": [],
+        "pricedGames": 0,
+        "simulatedRoi": null,
+        "meanEv": null,
+        "positiveEvGames": 0,
+        "positiveEvRoi": null,
+        "positiveEvRoi95": null,
+        "differenceVsBookBrier": null,
+        "differenceVsBookBrier95": null,
+        "overOrSelectedSideWinRate": null,
+        "calibrationError": null,
+        "archivedDecimalRoi": null,
+        "bookLogLoss": null,
+        "bookBrier": null,
+        "pairedBrierDifference": null,
+        "intervals95": {
+          "brier": null,
+          "logLoss": null,
+          "accuracy": null,
+          "overOrSelectedSideWinRate": null,
+          "calibrationError": null,
+          "meanEv": null,
+          "simulatedRoi": null,
+          "positiveEvRoi": null,
+          "archivedDecimalRoi": null,
+          "bookLogLoss": null,
+          "bookBrier": null,
+          "pairedBrierDifference": null
+        },
+        "bootstrapReplicates": 0,
+        "wins": 0,
+        "losses": 0,
+        "pairedBinaryGames": 0
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total_q1",
+      "scheduledGames": 25,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 25,
+      "metrics": {
+        "games": 25,
+        "contracts": 25,
+        "binaryGames": 25,
+        "pushes": 0,
+        "brier": 0.30327051269483385,
+        "logLoss": 0.8052388371279194,
+        "accuracy": 0.4,
+        "mae": 6.2932000000000015,
+        "ece": 0.2751485148514851,
+        "brier95": [
+          0.26064527987452213,
+          0.3474622586020979
+        ],
+        "calibrationBins": [
+          {
+            "bin": 2,
+            "contracts": 1,
+            "mass": 1,
+            "p": 0.2945544554455446,
+            "observed": 1
+          },
+          {
+            "bin": 3,
+            "contracts": 7,
+            "mass": 7,
+            "p": 0.353960396039604,
+            "observed": 0.8571428571428571
+          },
+          {
+            "bin": 4,
+            "contracts": 9,
+            "mass": 9,
+            "p": 0.4496699669966997,
+            "observed": 0.3333333333333333
+          },
+          {
+            "bin": 5,
+            "contracts": 6,
+            "mass": 6,
+            "p": 0.5495049504950495,
+            "observed": 0.3333333333333333
+          },
+          {
+            "bin": 6,
+            "contracts": 2,
+            "mass": 2,
+            "p": 0.6534653465346534,
+            "observed": 0.5
+          }
+        ],
+        "pricedGames": 25,
+        "simulatedRoi": -0.01883613059706714,
+        "meanEv": -0.13536308000000002,
+        "positiveEvGames": 7,
+        "positiveEvRoi": -0.19626946377130605,
+        "positiveEvRoi95": null,
+        "differenceVsBookBrier": 0.05374015731250088,
+        "differenceVsBookBrier95": [
+          0.012051153758307951,
+          0.09872858060646564
+        ],
+        "overOrSelectedSideWinRate": 0.52,
+        "calibrationError": 0.2751485148514851,
+        "archivedDecimalRoi": -0.37666666666666665,
+        "bookLogLoss": 0.6922079176563248,
+        "bookBrier": 0.249530355382333,
+        "pairedBrierDifference": 0.05374015731250088,
+        "intervals95": {
+          "brier": [
+            0.26064527987452213,
+            0.3474622586020979
+          ],
+          "logLoss": [
+            0.7168313316630851,
+            0.8963713864988345
+          ],
+          "accuracy": [
+            0.2,
+            0.6
+          ],
+          "overOrSelectedSideWinRate": [
+            0.32,
+            0.72
+          ],
+          "calibrationError": [
+            0.16326732673267322,
+            0.4678217821782178
+          ],
+          "meanEv": [
+            -0.21296504,
+            -0.05825847999999999
+          ],
+          "simulatedRoi": [
+            -0.4002696942893362,
+            0.3509383864021302
+          ],
+          "positiveEvRoi": null,
+          "archivedDecimalRoi": null,
+          "bookLogLoss": [
+            0.681019817593752,
+            0.7025143877880556
+          ],
+          "bookBrier": [
+            0.24393839574988999,
+            0.2546808759428896
+          ],
+          "pairedBrierDifference": [
+            0.012051153758307951,
+            0.09872858060646564
+          ]
+        },
+        "bootstrapReplicates": 1000,
+        "wins": 13,
+        "losses": 12,
+        "pairedBinaryGames": 25
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total_q2",
+      "scheduledGames": 25,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 25,
+      "metrics": {
+        "games": 25,
+        "contracts": 25,
+        "binaryGames": 25,
+        "pushes": 0,
+        "brier": 0.24539710586614966,
+        "logLoss": 0.6839976929482786,
+        "accuracy": 0.6,
+        "mae": 8.206,
+        "ece": 0.11413867438757862,
+        "brier95": [
+          0.20867592498158932,
+          0.2832128698285689
+        ],
+        "calibrationBins": [
+          {
+            "bin": 4,
+            "contracts": 8,
+            "mass": 8,
+            "p": 0.45238772767770213,
+            "observed": 0.25
+          },
+          {
+            "bin": 5,
+            "contracts": 8,
+            "mass": 8,
+            "p": 0.5623742900174458,
+            "observed": 0.5
+          },
+          {
+            "bin": 6,
+            "contracts": 9,
+            "mass": 9,
+            "p": 0.6372634131253647,
+            "observed": 0.5555555555555556
+          }
+        ],
+        "pricedGames": 25,
+        "simulatedRoi": -0.17541758019865006,
+        "meanEv": 0.04517375999999999,
+        "positiveEvGames": 17,
+        "positiveEvRoi": -0.006236031589099585,
+        "positiveEvRoi95": [
+          -0.44052713124559606,
+          0.40133385073260935
+        ],
+        "differenceVsBookBrier": -0.0018159865380986218,
+        "differenceVsBookBrier95": [
+          -0.03495310256079469,
+          0.0337084796853162
+        ],
+        "overOrSelectedSideWinRate": 0.44,
+        "calibrationError": 0.11413867438757862,
+        "archivedDecimalRoi": 0.9003333333333333,
+        "bookLogLoss": 0.6875720199921516,
+        "bookBrier": 0.2472130924042484,
+        "pairedBrierDifference": -0.0018159865380986218,
+        "intervals95": {
+          "brier": [
+            0.20867592498158932,
+            0.2832128698285689
+          ],
+          "logLoss": [
+            0.6087774880919636,
+            0.7611144182293994
+          ],
+          "accuracy": [
+            0.4,
+            0.8
+          ],
+          "overOrSelectedSideWinRate": [
+            0.24,
+            0.64
+          ],
+          "calibrationError": [
+            0.05680544277730847,
+            0.3223563317140355
+          ],
+          "meanEv": [
+            -0.009241800000000001,
+            0.09638356
+          ],
+          "simulatedRoi": [
+            -0.5448843969666949,
+            0.19184330797665392
+          ],
+          "positiveEvRoi": [
+            -0.44052713124559606,
+            0.40133385073260935
+          ],
+          "archivedDecimalRoi": null,
+          "bookLogLoss": [
+            0.67658818669719,
+            0.6981666584170848
+          ],
+          "bookBrier": [
+            0.24172254650359862,
+            0.25250694798294865
+          ],
+          "pairedBrierDifference": [
+            -0.03495310256079469,
+            0.0337084796853162
+          ]
+        },
+        "bootstrapReplicates": 1000,
+        "wins": 11,
+        "losses": 14,
+        "pairedBinaryGames": 25
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total_q3",
+      "scheduledGames": 25,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 25,
+      "metrics": {
+        "games": 25,
+        "contracts": 25,
+        "binaryGames": 25,
+        "pushes": 0,
+        "brier": 0.2551359965937555,
+        "logLoss": 0.7040877248609597,
+        "accuracy": 0.48,
+        "mae": 7.0124,
+        "ece": 0.2467771713620383,
+        "brier95": [
+          0.20311528724272498,
+          0.30758356551216004
+        ],
+        "calibrationBins": [
+          {
+            "bin": 2,
+            "contracts": 1,
+            "mass": 1,
+            "p": 0.24778036213289142,
+            "observed": 1
+          },
+          {
+            "bin": 3,
+            "contracts": 2,
+            "mass": 2,
+            "p": 0.32193669705712563,
+            "observed": 0
+          },
+          {
+            "bin": 4,
+            "contracts": 4,
+            "mass": 4,
+            "p": 0.4700699099181179,
+            "observed": 0.5
+          },
+          {
+            "bin": 5,
+            "contracts": 9,
+            "mass": 9,
+            "p": 0.5503883695561108,
+            "observed": 0.3333333333333333
+          },
+          {
+            "bin": 6,
+            "contracts": 6,
+            "mass": 6,
+            "p": 0.6413986463256092,
+            "observed": 0.3333333333333333
+          },
+          {
+            "bin": 7,
+            "contracts": 3,
+            "mass": 3,
+            "p": 0.7160904374055276,
+            "observed": 1
+          }
+        ],
+        "pricedGames": 25,
+        "simulatedRoi": -0.1749809939186685,
+        "meanEv": 0.035247600000000025,
+        "positiveEvGames": 17,
+        "positiveEvRoi": -0.2202405920798834,
+        "positiveEvRoi95": [
+          -0.665892497230342,
+          0.2860914464066404
+        ],
+        "differenceVsBookBrier": 0.007306676546199178,
+        "differenceVsBookBrier95": [
+          -0.04285579684647939,
+          0.060573045462124595
+        ],
+        "overOrSelectedSideWinRate": 0.44,
+        "calibrationError": 0.2467771713620383,
+        "archivedDecimalRoi": -0.34600000000000003,
+        "bookLogLoss": 0.6888036523859168,
+        "bookBrier": 0.24782932004755634,
+        "pairedBrierDifference": 0.007306676546199178,
+        "intervals95": {
+          "brier": [
+            0.20311528724272498,
+            0.30758356551216004
+          ],
+          "logLoss": [
+            0.5943584002747966,
+            0.816112508168667
+          ],
+          "accuracy": [
+            0.28,
+            0.68
+          ],
+          "overOrSelectedSideWinRate": [
+            0.24,
+            0.64
+          ],
+          "calibrationError": [
+            0.14343892227871202,
+            0.4231274769194374
+          ],
+          "meanEv": [
+            -0.06172524,
+            0.115964
+          ],
+          "simulatedRoi": [
+            -0.5533533462040642,
+            0.19971242860084104
+          ],
+          "positiveEvRoi": [
+            -0.665892497230342,
+            0.2860914464066404
+          ],
+          "archivedDecimalRoi": null,
+          "bookLogLoss": [
+            0.6768955211987857,
+            0.7008524047741957
+          ],
+          "bookBrier": [
+            0.2418781313451908,
+            0.2538511832183931
+          ],
+          "pairedBrierDifference": [
+            -0.04285579684647939,
+            0.060573045462124595
+          ]
+        },
+        "bootstrapReplicates": 1000,
+        "wins": 11,
+        "losses": 14,
+        "pairedBinaryGames": 25
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total_q4",
+      "scheduledGames": 25,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 25,
+      "metrics": {
+        "games": 25,
+        "contracts": 25,
+        "binaryGames": 25,
+        "pushes": 0,
+        "brier": 0.25904543672188995,
+        "logLoss": 0.7120980889612321,
+        "accuracy": 0.52,
+        "mae": 6.715599999999999,
+        "ece": 0.09633663366336628,
+        "brier95": [
+          0.22893270267620822,
+          0.29158734437800216
+        ],
+        "calibrationBins": [
+          {
+            "bin": 3,
+            "contracts": 2,
+            "mass": 2,
+            "p": 0.34158415841584155,
+            "observed": 0.5
+          },
+          {
+            "bin": 4,
+            "contracts": 10,
+            "mass": 10,
+            "p": 0.4698019801980197,
+            "observed": 0.4
+          },
+          {
+            "bin": 5,
+            "contracts": 8,
+            "mass": 8,
+            "p": 0.5352722772277227,
+            "observed": 0.5
+          },
+          {
+            "bin": 6,
+            "contracts": 5,
+            "mass": 5,
+            "p": 0.6222772277227723,
+            "observed": 0.4
+          }
+        ],
+        "pricedGames": 25,
+        "simulatedRoi": -0.16611118767261807,
+        "meanEv": -0.02649852,
+        "positiveEvGames": 11,
+        "positiveEvRoi": -0.14509076070767185,
+        "positiveEvRoi95": [
+          -0.731829573934837,
+          0.4367492637822664
+        ],
+        "differenceVsBookBrier": 0.012817057876569808,
+        "differenceVsBookBrier95": [
+          -0.01708826598261024,
+          0.04403781683109131
+        ],
+        "overOrSelectedSideWinRate": 0.44,
+        "calibrationError": 0.09633663366336628,
+        "archivedDecimalRoi": -1,
+        "bookLogLoss": 0.6856029902086669,
+        "bookBrier": 0.24622837884532026,
+        "pairedBrierDifference": 0.012817057876569808,
+        "intervals95": {
+          "brier": [
+            0.22893270267620822,
+            0.29158734437800216
+          ],
+          "logLoss": [
+            0.650680381049503,
+            0.7788850302960213
+          ],
+          "accuracy": [
+            0.32,
+            0.72
+          ],
+          "overOrSelectedSideWinRate": [
+            0.24,
+            0.64
+          ],
+          "calibrationError": [
+            0.07079207920792081,
+            0.3185148514851485
+          ],
+          "meanEv": [
+            -0.08029007999999999,
+            0.028386639999999987
+          ],
+          "simulatedRoi": [
+            -0.5411282444587018,
+            0.2088514924194426
+          ],
+          "positiveEvRoi": [
+            -0.731829573934837,
+            0.4367492637822664
+          ],
+          "archivedDecimalRoi": null,
+          "bookLogLoss": [
+            0.6765061374523471,
+            0.6956704199196311
+          ],
+          "bookBrier": [
+            0.24168182562692567,
+            0.25126053105090224
+          ],
+          "pairedBrierDifference": [
+            -0.01708826598261024,
+            0.04403781683109131
+          ]
+        },
+        "bootstrapReplicates": 1000,
+        "wins": 11,
+        "losses": 14,
+        "pairedBinaryGames": 25
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total_h1",
+      "scheduledGames": 25,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 25,
+      "metrics": {
+        "games": 25,
+        "contracts": 25,
+        "binaryGames": 25,
+        "pushes": 0,
+        "brier": 0.23244804430938146,
+        "logLoss": 0.6595978488445594,
+        "accuracy": 0.68,
+        "mae": 10.313599999999997,
+        "ece": 0.16960396039603956,
+        "brier95": [
+          0.19893368297225764,
+          0.2729989706891481
+        ],
+        "calibrationBins": [
+          {
+            "bin": 3,
+            "contracts": 3,
+            "mass": 3,
+            "p": 0.3523102310231023,
+            "observed": 0.3333333333333333
+          },
+          {
+            "bin": 4,
+            "contracts": 12,
+            "mass": 12,
+            "p": 0.4554455445544554,
+            "observed": 0.25
+          },
+          {
+            "bin": 5,
+            "contracts": 7,
+            "mass": 7,
+            "p": 0.5413719943422913,
+            "observed": 0.5714285714285714
+          },
+          {
+            "bin": 6,
+            "contracts": 2,
+            "mass": 2,
+            "p": 0.6188118811881188,
+            "observed": 1
+          },
+          {
+            "bin": 7,
+            "contracts": 1,
+            "mass": 1,
+            "p": 0.745049504950495,
+            "observed": 0
+          }
+        ],
+        "pricedGames": 25,
+        "simulatedRoi": -0.23664082035489545,
+        "meanEv": -0.06265504000000001,
+        "positiveEvGames": 8,
+        "positiveEvRoi": -0.046602761645134494,
+        "positiveEvRoi95": [
+          -0.7360774818401936,
+          0.5981193947295642
+        ],
+        "differenceVsBookBrier": -0.01755593621415435,
+        "differenceVsBookBrier95": [
+          -0.049885750457676126,
+          0.02234292470122748
+        ],
+        "overOrSelectedSideWinRate": 0.4,
+        "calibrationError": 0.16960396039603956,
+        "archivedDecimalRoi": -0.38433333333333336,
+        "bookLogLoss": 0.6931552483296315,
+        "bookBrier": 0.2500039805235358,
+        "pairedBrierDifference": -0.01755593621415435,
+        "intervals95": {
+          "brier": [
+            0.19893368297225764,
+            0.2729989706891481
+          ],
+          "logLoss": [
+            0.5890449354188596,
+            0.7472940536741999
+          ],
+          "accuracy": [
+            0.48,
+            0.84
+          ],
+          "overOrSelectedSideWinRate": [
+            0.2,
+            0.6
+          ],
+          "calibrationError": [
+            0.09613861386138614,
+            0.37693069306930693
+          ],
+          "meanEv": [
+            -0.12940539999999998,
+            0.009283279999999988
+          ],
+          "simulatedRoi": [
+            -0.6176649437519003,
+            0.13827604748754344
+          ],
+          "positiveEvRoi": [
+            -0.7360774818401936,
+            0.5981193947295642
+          ],
+          "archivedDecimalRoi": null,
+          "bookLogLoss": [
+            0.68575400741069,
+            0.7005527524643091
+          ],
+          "bookBrier": [
+            0.24630420009311585,
+            0.25370227610648655
+          ],
+          "pairedBrierDifference": [
+            -0.049885750457676126,
+            0.02234292470122748
+          ]
+        },
+        "bootstrapReplicates": 1000,
+        "wins": 10,
+        "losses": 15,
+        "pairedBinaryGames": 25
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "total_h2",
+      "scheduledGames": 0,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 1079,
+      "settledIndependentGames": 0,
+      "metrics": {
+        "games": 0,
+        "contracts": 0,
+        "binaryGames": 0,
+        "pushes": 0,
+        "brier": null,
+        "logLoss": null,
+        "accuracy": null,
+        "mae": null,
+        "ece": null,
+        "brier95": null,
+        "calibrationBins": [],
+        "pricedGames": 0,
+        "simulatedRoi": null,
+        "meanEv": null,
+        "positiveEvGames": 0,
+        "positiveEvRoi": null,
+        "positiveEvRoi95": null,
+        "differenceVsBookBrier": null,
+        "differenceVsBookBrier95": null,
+        "overOrSelectedSideWinRate": null,
+        "calibrationError": null,
+        "archivedDecimalRoi": null,
+        "bookLogLoss": null,
+        "bookBrier": null,
+        "pairedBrierDifference": null,
+        "intervals95": {
+          "brier": null,
+          "logLoss": null,
+          "accuracy": null,
+          "overOrSelectedSideWinRate": null,
+          "calibrationError": null,
+          "meanEv": null,
+          "simulatedRoi": null,
+          "positiveEvRoi": null,
+          "archivedDecimalRoi": null,
+          "bookLogLoss": null,
+          "bookBrier": null,
+          "pairedBrierDifference": null
+        },
+        "bootstrapReplicates": 0,
+        "wins": 0,
+        "losses": 0,
+        "pairedBinaryGames": 0
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "props_assists",
+      "scheduledGames": 0,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": 333,
+      "settledIndependentGames": 0,
+      "metrics": {
+        "games": 0,
+        "contracts": 0,
+        "binaryGames": 0,
+        "pushes": 0,
+        "brier": null,
+        "logLoss": null,
+        "accuracy": null,
+        "mae": null,
+        "ece": null,
+        "brier95": null,
+        "calibrationBins": [],
+        "pricedGames": 0,
+        "simulatedRoi": null,
+        "meanEv": null,
+        "positiveEvGames": 0,
+        "positiveEvRoi": null,
+        "positiveEvRoi95": null,
+        "differenceVsBookBrier": null,
+        "differenceVsBookBrier95": null,
+        "overOrSelectedSideWinRate": null,
+        "calibrationError": null,
+        "archivedDecimalRoi": null,
+        "bookLogLoss": null,
+        "bookBrier": null,
+        "pairedBrierDifference": null,
+        "intervals95": {
+          "brier": null,
+          "logLoss": null,
+          "accuracy": null,
+          "overOrSelectedSideWinRate": null,
+          "calibrationError": null,
+          "meanEv": null,
+          "simulatedRoi": null,
+          "positiveEvRoi": null,
+          "archivedDecimalRoi": null,
+          "bookLogLoss": null,
+          "bookBrier": null,
+          "pairedBrierDifference": null
+        },
+        "bootstrapReplicates": 0,
+        "wins": 0,
+        "losses": 0,
+        "pairedBinaryGames": 0
+      },
+      "status": "INSUFFICIENT_INDEPENDENT_GAMES",
+      "executableRoi": null,
+      "approvedForBetting": false
+    },
+    {
+      "scope": "ALL_DESCRIPTIVE",
+      "scheduledGames": 25,
+      "pending": 0,
+      "disputed": 0,
+      "historicalTrainingGames": null,
+      "settledIndependentGames": 25,
+      "metrics": {
+        "games": 25,
+        "contracts": 125,
+        "binaryGames": 25,
+        "pushes": 0,
+        "brier": 0.25905941923720216,
+        "logLoss": 0.71300403854859,
+        "accuracy": 0.5360000000000001,
+        "mae": 7.708159999999998,
+        "ece": 0.13978745125707248,
+        "brier95": [
+          0.23844071110154147,
+          0.284105389686656
+        ],
+        "calibrationBins": [
+          {
+            "bin": 2,
+            "contracts": 2,
+            "mass": 0.4,
+            "p": 0.271167408789218,
+            "observed": 1
+          },
+          {
+            "bin": 3,
+            "contracts": 14,
+            "mass": 2.8000000000000003,
+            "p": 0.34726394116374776,
+            "observed": 0.5714285714285713
+          },
+          {
+            "bin": 4,
+            "contracts": 43,
+            "mass": 8.600000000000001,
+            "p": 0.4583669186208844,
+            "observed": 0.3255813953488372
+          },
+          {
+            "bin": 5,
+            "contracts": 38,
+            "mass": 7.600000000000004,
+            "p": 0.5479289875613859,
+            "observed": 0.44736842105263147
+          },
+          {
+            "bin": 6,
+            "contracts": 24,
+            "mass": 4.800000000000002,
+            "p": 0.6349876329225557,
+            "observed": 0.49999999999999983
+          },
+          {
+            "bin": 7,
+            "contracts": 4,
+            "mass": 0.8,
+            "p": 0.7233302042917694,
+            "observed": 0.7500000000000001
+          }
+        ],
+        "pricedGames": 25,
+        "simulatedRoi": -0.15439734254837986,
+        "meanEv": -0.028819055999999992,
+        "positiveEvGames": 24,
+        "positiveEvRoi": -0.1580971146322335,
+        "positiveEvRoi95": [
+          -0.45108163588542466,
+          0.11390354538659184
+        ],
+        "differenceVsBookBrier": 0.010898393796603378,
+        "differenceVsBookBrier95": [
+          -0.00927041011372712,
+          0.036273077272612746
+        ],
+        "overOrSelectedSideWinRate": 0.44800000000000006,
+        "calibrationError": 0.13978745125707248,
+        "archivedDecimalRoi": -0.2413333333333333,
+        "bookLogLoss": 0.6894683657145383,
+        "bookBrier": 0.24816102544059876,
+        "pairedBrierDifference": 0.010898393796603378,
+        "intervals95": {
+          "brier": [
+            0.23844071110154147,
+            0.284105389686656
+          ],
+          "logLoss": [
+            0.6692424884057101,
+            0.767322256646099
+          ],
+          "accuracy": [
+            0.42400000000000015,
+            0.6320000000000001
+          ],
+          "overOrSelectedSideWinRate": [
+            0.352,
+            0.5359999999999999
+          ],
+          "calibrationError": [
+            0.0778059656783402,
+            0.2428834636580617
+          ],
+          "meanEv": [
+            -0.06525070399999999,
+            0.0072713519999999966
+          ],
+          "simulatedRoi": [
+            -0.33965883127102287,
+            0.010982656524665489
+          ],
+          "positiveEvRoi": [
+            -0.45108163588542466,
+            0.11390354538659184
+          ],
+          "archivedDecimalRoi": null,
+          "bookLogLoss": [
+            0.6850115608056601,
+            0.6937742260188782
+          ],
+          "bookBrier": [
+            0.24593363029665277,
+            0.2503130660824672
+          ],
+          "pairedBrierDifference": [
+            -0.00927041011372712,
+            0.036273077272612746
+          ]
+        },
+        "bootstrapReplicates": 1000,
+        "wins": 56,
+        "losses": 69,
+        "pairedBinaryGames": 25
+      },
+      "status": "POOLED_DESCRIPTIVE_ONLY",
+      "executableRoi": null,
+      "approvedForBetting": false
+    }
+  ],
+  "metricDiscrepancies": [],
+  "inputHash": "388eed074d7335276a186eeef5cb7959754c235a9863cb741f4aba9778c0e4d2",
+  "verification": {
+    "forecastIds": 125,
+    "independentHypotheses": 125,
+    "chronologicalContractChecksPassed": 125,
+    "archivedScheduleObservations": 175,
+    "matchingActualAndResult": 175,
+    "seedForecasts": 40,
+    "seedOutcomes": 15,
+    "seedForecastHash": "69475f2392bb5c45bcfc4f89ca22a9ee9c7741bd16e91db84a86efc7d331b076",
+    "seedOutcomeHash": "0f4ad7b618b6b10b81533e8de4f1eb1b423b5a4f38841010af675503d6402210"
+  }
+}

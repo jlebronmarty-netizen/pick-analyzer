@@ -1,8 +1,14 @@
 import {test,expect} from '@playwright/test';
-test('SHADOW daily review filters graded and pending contracts and preserves the challenge balance',async({page})=>{
+for(const viewport of [{width:1440,height:1000},{width:390,height:844}]) test('SHADOW review shows market metrics and contract filters at '+viewport.width+'px',async({page})=>{
+ await page.setViewportSize(viewport);
  await page.goto('/nba-decision-v2');
  await expect(page.getByRole('heading',{name:'Evaluación prospectiva V2'})).toBeVisible();
  await expect(page.getByLabel('Challenge')).toContainText('$187.94');
+ const metrics=page.getByRole('region',{name:'Métricas prospectivas por mercado',exact:true});
+ await expect(metrics.getByRole('table')).toBeVisible();
+ await expect(metrics.getByRole('row',{name:/^Primer cuarto/})).toContainText('0.1899');
+ await expect(metrics.getByRole('row',{name:/^Moneyline/})).toContainText('—');
+ await expect(metrics).toContainText('JUGADA sigue desactivado');
  await expect(page.getByLabel('Challenge')).toContainText('SIN APUESTA');
  await page.getByLabel('Jornada PR').selectOption('2026-11-20');
  await expect(page.locator('details')).toHaveCount(15);
