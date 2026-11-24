@@ -1,0 +1,20 @@
+name: NBA prospective settlement research safety
+on:
+  pull_request:
+    paths:
+      - 'src/lib/nba/nba-props-settlement-shadow.mjs'
+      - 'tests/nba-props-settlement-shadow.test.mjs'
+      - 'docs/NBA_PROPS_PROSPECTIVE_SETTLEMENT_GATE.md'
+      - '.github/workflows/nba-props-settlement-safety.yml'
+permissions:
+  contents: read
+jobs:
+  nba-settlement-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/nba-props-settlement-shadow.test.mjs
