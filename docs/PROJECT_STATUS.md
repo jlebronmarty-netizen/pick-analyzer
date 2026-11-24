@@ -24,6 +24,10 @@ Corte verificado a las 11:52:27 a. m. PR: 142 boxscores/PBP, 32 equipos, 5,112 r
 
 Rama de revisión `research/nhl-data-evaluation-20261123`: panel NHL bajo demanda, lectura paginada completa, calibración/incertidumbre, base normalizada y exclusiones. Corrige Montreal/Montréal en contratos exactos y estadísticas incompatibles al generar nueva evidencia V7; conserva originales. 162 pruebas NHL y 26 de interfaz/integración aprobadas; build local y CI aprobados. [PR #399](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/399) abierto; Preview READY, API HTTP 200 y flujo visual de escritorio verificado. Revisión móvil pendiente. Sin escrituras de datos, proveedores, cron nuevo ni promoción. Referencias y evidencia en [informe reproducible](research/nhl-audit-2026-11-23/README.md). Sin merge ni cambios NHL en producción; se preservó la integración paralela del PR #395 sobre `ca2d8450`.
 
+## 2026-11-24 · NBA · Seguimiento prospectivo V2
+
+Rama de revisión para consultar el ledger experimental desde el mismo deployment privado del Decision Board. El ciclo 11 tiene 125 contratos de 25 partidos, métricas reproducidas y 175 observaciones conciliadas con snapshots. La tabla por mercado expone incertidumbre, ROI simulado y cobertura; Moneyline, Spread y Props siguen sin muestra. Brier combinado 0.2591 frente a 0.2482 del operador y ROI simulado −15.44%. Faltan 75 partidos prospectivos por período antes del umbral de revisión. Producción conserva su versión; integración del seguimiento pendiente. [Informe, pruebas y pendientes](research/nba-v2/operations/20261124/README.md).
+
 ## 2026-11-23 · NBA · Originales de las ventanas de Player Props
 
 El cruce de producción a las 8:11 p. m. PR identificó 24 originales de Props ausentes del plan de lectura con caché vacía. La primera pasada de la rama selecciona los 24 dentro del mismo presupuesto. A las 8:30 p. m. el ciclo natural dejó 119 de 222 pares históricos materializados y cotejados. [Evidencia y reproducción](audits/2026-11-23-nba-archive-window-priority.md).

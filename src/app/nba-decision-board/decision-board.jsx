@@ -178,6 +178,7 @@ export default function DecisionBoard(){
     </div>
     <div className="flex flex-wrap items-start gap-2">
      <a href="/nba-market-data" className="inline-flex h-9 items-center rounded-lg border border-slate-600 px-4 text-sm text-slate-200">Vista técnica GOAT</a>
+     <a href="/nba-decision-v2" className="inline-flex h-9 items-center rounded-lg border border-slate-600 px-4 text-sm text-slate-200">Seguimiento V2 SHADOW</a>
      <button type="button" onClick={refresh} disabled={loading} className="h-9 rounded-lg border border-sky-600 px-4 text-sm text-sky-200 disabled:opacity-50">{loading?'Actualizando…':'Actualizar sin consumir API'}</button>
     </div>
    </div>

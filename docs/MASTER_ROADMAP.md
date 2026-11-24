@@ -24,6 +24,10 @@ Implementada en rama de revisión la auditoría A–E de datos NHL y su panel: c
 
 PR #399 abierto, CI y Preview aprobados; flujo de escritorio y API con datos reales verificados. Pendientes: revisión del PR, comprobación visual móvil e integración; revisión inicial V6 al alcanzar 30 partidos (actual: 24; ningún umbral garantiza mejora); futuro periodo independiente para variantes fijas; confirmación/identidad previa de porteros; reglas exactas de Circa y hora publicada; mercado y liquidación de props de tiros/atajadas. Las cuatro pruebas evaluables de 19 partidos son inconclusas, porteros no tiene muestra cronológica suficiente. No promover modelos, certificar ROI/CLV/FanDuel ni declarar player props completo.
 
+## 2026-11-24 · NBA · Seguimiento prospectivo V2
+
+Rama de revisión para consultar el ledger experimental desde el mismo deployment privado del Decision Board. El ciclo 11 tiene 125 contratos de 25 partidos, métricas reproducidas y 175 observaciones conciliadas con snapshots. La tabla por mercado expone incertidumbre, ROI simulado y cobertura; Moneyline, Spread y Props siguen sin muestra. Brier combinado 0.2591 frente a 0.2482 del operador y ROI simulado −15.44%. Faltan 75 partidos prospectivos por período antes del umbral de revisión. Producción conserva su versión; integración del seguimiento pendiente. [Informe, pruebas y pendientes](research/nba-v2/operations/20261124/README.md).
+
 ## 2026-11-23 · NBA · Originales de las ventanas de Player Props
 
 Revisar la prioridad de los originales de L5/L10 en el tablero y medir con el mismo corte la lectura efectiva y los cambios de calidad tras integrar. Quedan pendientes la evidencia regional de los contratos de jornada completa y la conciliación del box Clippers–Dallas. [Evidencia y reproducción](audits/2026-11-23-nba-archive-window-priority.md).

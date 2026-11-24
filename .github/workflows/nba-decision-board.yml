@@ -33,6 +33,9 @@ on:
       - 'src/services/nba-decision-learning.service.ts'
       - 'src/services/nba-decision-v2-hook.mjs'
       - 'src/lib/nba/decision-observe-v2.mjs'
+      - 'src/lib/nba/decision-v2-review-access.mjs'
+      - 'src/app/nba-decision-v2/**'
+      - 'tests/product-experience/nba-v2-forward.spec.ts'
       - 'src/app/api/operations/nba-v2-observe/**'
       - 'scripts/research/nba-v2/daily/**'
       - 'tests/nba-v2*.test.mjs'
@@ -78,7 +81,7 @@ jobs:
         with:
           node-version: '24'
       - name: Test archived-only contracts, missing-data blocking and cross-provider IDs
-        run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs
+        run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs tests/nba-v2-live-review.test.mjs
       - name: Verify manual NBA tracker and private access boundaries
         run: node --test tests/nba-manual-access.test.mjs tests/dashboard-multisport/nba-manual-review.test.mjs
       - name: Ensure no unapproved provider call or official pick mutation
@@ -148,7 +151,7 @@ jobs:
             fi
             sleep 1
           done
-          npx playwright test tests/product-experience/nba-navigation-history.spec.ts --config=playwright.config.ts --workers=1
+          npx playwright test tests/product-experience/nba-navigation-history.spec.ts tests/product-experience/nba-v2-forward.spec.ts --config=playwright.config.ts --workers=1
       - name: Preserve responsive screenshots, traces and fixture server logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
