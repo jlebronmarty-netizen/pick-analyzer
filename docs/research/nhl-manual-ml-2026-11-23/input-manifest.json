@@ -1,0 +1,35 @@
+{
+  "cutoff": "2026-11-24T00:05:15.236207Z",
+  "complete": true,
+  "files": {
+    "manual": {
+      "rows": 14,
+      "sha256": "24b42f623e53ff9b5cafef0ec6edf2b43d6fa94852288d00c067341b743ef73c"
+    },
+    "predictions": {
+      "rows": 137,
+      "sha256": "2c7d7bfd42301ca9bd0ebdcd20407773314b1a32b30a4370ebfc6462a3ab8b35"
+    },
+    "outcomes": {
+      "rows": 130,
+      "sha256": "7eb658093b08ceede371d07aedf7dfa010f9dce17190593454d95e87bc74166f"
+    },
+    "early": {
+      "rows": 57,
+      "sha256": "5f6c4ccfe9dab911ab1f3bf1302272403d97ed9f7fe308831d503ec37748db62"
+    },
+    "late": {
+      "rows": 31,
+      "sha256": "3318eceed0eca8ae99cca63f17918223424da2d48b630d5713c96d4ba501ec7c"
+    },
+    "directories": {
+      "rows": 18,
+      "sha256": "5393403e2e3436bb132cec5feae2f452664268a67cd755bae92e977ab31ccd8f"
+    }
+  },
+  "readEvidence": {
+    "mode": "READ_ONLY_SQL_EXPORT",
+    "complete": true,
+    "cutoff": "2026-11-24T00:05:15.236207Z"
+  }
+}

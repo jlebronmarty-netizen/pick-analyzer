@@ -1,3 +1,7 @@
+## 2026-11-23 · NHL · Continuación temporal reproducible del archivo manual
+
+Preparada la evaluación aislada de ganador completo OT/SO sobre inputs compartidos, con dos cortes separados (original DRatings y anclaje V6). El archivo actual tiene siete eventos, cero finales y ninguna mejora estimable. Próximos requisitos: capturas previas verificadas; H1 con fuente primaria de standings; variación en descanso; 40 antecedentes por variante y ambas clases antes de intentar un ajuste. Después, una revisión inicial de 30 juegos posteriores en varias fechas, sin tratar ese mínimo como validación. Control, candidato y baseline usan los mismos partidos; el nuevo holdout y escritor de probabilidades requieren una etapa futura autorizada. No hay cron, consumo nuevo de proveedores, cambio al Site ni promoción. [Protocolo y criterios](nhl-manual-ml-research-v1.md) · [Evidencia reproducible](research/nhl-manual-ml-2026-11-23/README.md).
+
 ## 2026-11-23 · NHL · Compartir inputs antes de evaluar cambios de modelo
 
 Preparados almacenamiento privado append-only de `NHL_MANUAL_FEATURES_V1`, escritor restringido, lectura diaria completa y comparación bajo demanda en Pick. Los snapshots acreditan disponibilidad desde su inserción real; preservan generación, cortes y payload de la fuente. Migración instalada y permisos verificados; sigue la primera escritura con readback, conectar la actualización autorizada y completar QA móvil. La evaluación prospectiva y cualquier promoción de modelos siguen fuera de este módulo. [Detalle](nhl-manual-features-v1.md).

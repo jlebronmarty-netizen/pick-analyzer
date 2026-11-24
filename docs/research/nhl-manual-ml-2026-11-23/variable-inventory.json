@@ -1,0 +1,2304 @@
+{
+  "version": "NHL_MANUAL_VARIABLE_INVENTORY_V1",
+  "status": "READ_ONLY_CONTRACT_AND_EXPORT_AUDIT",
+  "auditedAt": "2026-11-24T00:15:26.544891+00:00",
+  "exportCutoff": "2026-11-24T00:05:15.236207Z",
+  "readOnly": true,
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "siteWrites": 0,
+  "repoWrites": 0,
+  "inputFiles": [
+    {
+      "path": "/workspace/scratch/77aca471d40b/nhl-manual-evidence/manual.json",
+      "rows": 14,
+      "sha256": "24b42f623e53ff9b5cafef0ec6edf2b43d6fa94852288d00c067341b743ef73c",
+      "manifestHashMatches": true
+    },
+    {
+      "path": "/workspace/scratch/77aca471d40b/nhl-manual-evidence/predictions.json",
+      "rows": 137,
+      "sha256": "2c7d7bfd42301ca9bd0ebdcd20407773314b1a32b30a4370ebfc6462a3ab8b35",
+      "manifestHashMatches": true
+    },
+    {
+      "path": "/workspace/scratch/77aca471d40b/nhl-manual-evidence/outcomes.json",
+      "rows": 130,
+      "sha256": "7eb658093b08ceede371d07aedf7dfa010f9dce17190593454d95e87bc74166f",
+      "manifestHashMatches": true
+    },
+    {
+      "path": "/workspace/scratch/77aca471d40b/nhl-manual-evidence/early.json",
+      "rows": 57,
+      "sha256": "5f6c4ccfe9dab911ab1f3bf1302272403d97ed9f7fe308831d503ec37748db62",
+      "manifestHashMatches": true
+    },
+    {
+      "path": "/workspace/scratch/77aca471d40b/nhl-manual-evidence/late.json",
+      "rows": 31,
+      "sha256": "3318eceed0eca8ae99cca63f17918223424da2d48b630d5713c96d4ba501ec7c",
+      "manifestHashMatches": true
+    },
+    {
+      "path": "/workspace/scratch/77aca471d40b/nhl-manual-evidence/directories.json",
+      "rows": 18,
+      "sha256": "5393403e2e3436bb132cec5feae2f452664268a67cd755bae92e977ab31ccd8f",
+      "manifestHashMatches": true
+    }
+  ],
+  "sourceCode": {
+    "pickCommit": "4d4b4ae2d0a1fd82b31fe090f6b7a0980ec779c2",
+    "siteCommit": "afc298fa121cdf46c4e10068252568cc38d5b0b5",
+    "files": [
+      {
+        "path": "/workspace/scratch/77aca471d40b/pick-analyzer-nhl-manual/docs/nhl-manual-features-v1.md",
+        "sha256": "90e5f995f051bf6c056959c455031fcda095bdab67e028ee4c25f8e2fa117698"
+      },
+      {
+        "path": "/workspace/scratch/77aca471d40b/pick-analyzer-nhl-manual/src/lib/nhl-manual-features.mjs",
+        "sha256": "cd7ede4122bd662258026e487f6f3281ef1685cf79d2d48ab6663f321b894115"
+      },
+      {
+        "path": "/workspace/scratch/77aca471d40b/pick-analyzer-nhl-manual/scripts/nhl-manual-feature-sql.py",
+        "sha256": "f302fa08aa361e5b28385b8c17f6c5da3c70893ef968338aa306ebba718ab95d"
+      },
+      {
+        "path": "/workspace/sites/nhl-laboratorio-jeffrey-v1/src/manual-dataset.mjs",
+        "sha256": "4f82a8e0e215b192ab7f4fbf666bb70ff782471132ae1cec508f5014292d5caa"
+      },
+      {
+        "path": "/workspace/sites/nhl-laboratorio-jeffrey-v1/src/input-adapter.mjs",
+        "sha256": "64113f0e1c39e2226f71f50b7bb452583c9bcca3805329fa6d882179b05600b3"
+      },
+      {
+        "path": "/workspace/sites/nhl-laboratorio-jeffrey-v1/src/analysis-dashboard.mjs",
+        "sha256": "25deadbc168d3b47f0ac44b4a52cd44027089d64cbfcb75915677a96b3d6d3c1"
+      },
+      {
+        "path": "/workspace/sites/nhl-laboratorio-jeffrey-v1/src/ui.js",
+        "sha256": "0777b0fb4103e654d0db86e256afcb565d35c8fe621982cea3ff01c5e17771b5"
+      }
+    ]
+  },
+  "denominators": {
+    "snapshots": 14,
+    "distinct_games": 7,
+    "source_runs": 2,
+    "source_dataset_hashes": 2,
+    "team_snapshot_instances": 28,
+    "latest_team_instances": 14,
+    "latest_unique_teams": 14,
+    "latest_recent_references": 140,
+    "latest_recent_distinct_games": 108,
+    "latest_period_rows": 42,
+    "latest_goalie_appearance_rows": 64,
+    "latest_goalie_appearance_distinct_games": 55,
+    "matching_final_outcomes": 0,
+    "pregame_at_audit_cutoff": 6,
+    "started_at_audit_cutoff": 1,
+    "games_with_identical_team_payload_across_versions": 7
+  },
+  "availability": {
+    "earliestPickAvailability": "2026-11-23T21:14:57.028375+00:00",
+    "latestPickAvailability": "2026-11-23T21:16:07.202034+00:00",
+    "sourceGenerationTimes": [
+      "2026-11-23T21:07:51.184Z",
+      "2026-11-23T21:15:28.761Z"
+    ],
+    "selectionPolicy": "Latest snapshot with available_as_of and inserted_at <= frozen decision, exact event/teams/schedule match; one game is one observation.",
+    "models": {
+      "predictions": {
+        "matching_games": 7,
+        "manual_available_as_of_decision": 0,
+        "rows": [
+          {
+            "event_id": "nhl:2026020378",
+            "decision_at": "2026-11-23T01:37:18.844+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:00:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020379",
+            "decision_at": "2026-11-23T01:37:19.471+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020380",
+            "decision_at": "2026-11-23T01:37:20.068+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020381",
+            "decision_at": "2026-11-23T01:37:20.692+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020382",
+            "decision_at": "2026-11-23T01:37:21.256+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020383",
+            "decision_at": "2026-11-23T01:37:21.769+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T02:40:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020384",
+            "decision_at": "2026-11-23T01:37:22.38+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T03:00:00+00:00"
+          }
+        ]
+      },
+      "early": {
+        "matching_games": 7,
+        "manual_available_as_of_decision": 0,
+        "rows": [
+          {
+            "event_id": "nhl:2026020378",
+            "decision_at": "2026-11-23T11:07:25.331+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:00:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020379",
+            "decision_at": "2026-11-23T11:07:25.331+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020380",
+            "decision_at": "2026-11-23T11:07:25.331+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020381",
+            "decision_at": "2026-11-23T15:07:26.572+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020382",
+            "decision_at": "2026-11-23T15:07:26.572+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020383",
+            "decision_at": "2026-11-23T15:07:26.572+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T02:40:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020384",
+            "decision_at": "2026-11-23T18:07:30.512+00:00",
+            "selected_available_as_of": null,
+            "eligible_versions": 0,
+            "minutes_before_decision": null,
+            "scheduled_at": "2026-11-24T03:00:00+00:00"
+          }
+        ]
+      },
+      "late": {
+        "matching_games": 7,
+        "manual_available_as_of_decision": 7,
+        "rows": [
+          {
+            "event_id": "nhl:2026020378",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.19551+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338741,
+            "scheduled_at": "2026-11-24T00:00:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020379",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.197547+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338708,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020380",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.198439+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338693,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020381",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.19937+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338677,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020382",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.200344+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338661,
+            "scheduled_at": "2026-11-24T00:30:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020383",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.20119+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338647,
+            "scheduled_at": "2026-11-24T02:40:00+00:00"
+          },
+          {
+            "event_id": "nhl:2026020384",
+            "decision_at": "2026-11-23T22:07:27.52+00:00",
+            "selected_available_as_of": "2026-11-23T21:16:07.202034+00:00",
+            "eligible_versions": 2,
+            "minutes_before_decision": 51.338633,
+            "scheduled_at": "2026-11-24T03:00:00+00:00"
+          }
+        ]
+      }
+    },
+    "predictiveMetrics": null,
+    "predictiveMetricsReason": "ZERO_MATCHING_FINAL_OUTCOMES; no prospective manual model prediction exists in this contract."
+  },
+  "sourceRuns": [
+    {
+      "sourceRunId": "2026-11-23-NHL-997481-20261123205404713007",
+      "sourceDatasetSha256": "baffe5ccd31525aa693065c8d4aa92f728ad9ee466061a45cca41d97f1f8ba99",
+      "snapshots": 7,
+      "availableFrom": "2026-11-23T21:14:57.028375+00:00",
+      "availableTo": "2026-11-23T21:14:57.03838+00:00"
+    },
+    {
+      "sourceRunId": "2026-11-23-fresh-contract-NHL:997482-20261123211311794451",
+      "sourceDatasetSha256": "eb046e06fece2ab4ddba29bd61f220c9ca68f753c95f10504551363d83394082",
+      "snapshots": 7,
+      "availableFrom": "2026-11-23T21:16:07.19551+00:00",
+      "availableTo": "2026-11-23T21:16:07.202034+00:00"
+    }
+  ],
+  "certification": {
+    "scope": "Claims and internal consistency of persisted features; independent raw calendar and seed source receipts were not part of the export.",
+    "last10ClaimedCompleteLatest": 14,
+    "last10IdsMatchExpectedOrderedLatest": 14,
+    "last10IndependentlyRecertifiedFromRawCalendar": null,
+    "rawCalendarNotProvided": true,
+    "standingsMethodLatest": {
+      "PRESERVED_SEED": 7
+    },
+    "standingsCaptureNonNullLatest": 0,
+    "standingsCurrentClaimedLatest": 7,
+    "standingsThrough": "2026-11-22",
+    "specialTeamsThroughDateNonNullLatest": 0,
+    "specialTeamsGpMatchesLatest": 14,
+    "goalieStatusesLatest": {
+      "NO_CONFIRMADO": 9,
+      "CONFIRMADO": 1,
+      "PROBABLE": 4
+    },
+    "bothGoaliesConfirmedGamesLatest": 0,
+    "officialGoalieAnnouncementVerifiedTrueLatest": 0,
+    "goaliePlayerIdNonNullLatest": 0,
+    "goalieSourceTimeNonNullLatest": 4,
+    "goalieSampleGpDistributionLatest": {
+      "5": 10,
+      "3": 2,
+      "4": 2
+    }
+  },
+  "integrityChecks": {
+    "scope": "All 14 snapshots / 28 team instances; rounded-rate tolerance 1.1e-6.",
+    "totalAssertions": 1254,
+    "byCheck": {
+      "server_availability_equals_insertion": 14,
+      "source_before_pick_before_start": 14,
+      "capture_before_audit_cutoff": 14,
+      "research_only_flags": 14,
+      "outer_inner_identity": 14,
+      "provenance_not_after_source": 84,
+      "season_gp": 28,
+      "season_points": 28,
+      "season_ratio": 28,
+      "season_records": 28,
+      "season_gf_pg": 28,
+      "season_ga_pg": 28,
+      "l10_ids_ordered": 28,
+      "l10_certification_claim": 28,
+      "l10_record": 28,
+      "l10_venues": 28,
+      "l10_gf_pg": 28,
+      "l10_ga_pg": 28,
+      "l10_real_goals_for_pg": 28,
+      "l10_real_goals_against_pg": 28,
+      "l10_dates": 28,
+      "period_set": 28,
+      "period_coverage": 84,
+      "period_gf_pg": 84,
+      "period_ga_pg": 84,
+      "physical_vs_final": 28,
+      "rest_consistent": 28,
+      "special_ratios": 28,
+      "special_gp_match": 28,
+      "nested_capture_not_after_generation": 64,
+      "goalie_count": 28,
+      "goalie_ga_sum": 28,
+      "goalie_sa_sum": 28,
+      "goalie_saves_sum": 28,
+      "goalie_arithmetic": 28,
+      "goalie_time": 28,
+      "goalie_rates": 28,
+      "goalie_history": 28
+    },
+    "issues": [],
+    "actualReaderAccepted": 14,
+    "actualPythonExportGroupsAccepted": 2
+  },
+  "validationGapProbes": {
+    "method": "Synthetic mutations of a deep clone of an actual row/export, in memory only; not persisted. These probes describe validator scope, not faults found in actual data.",
+    "results": [
+      {
+        "case": "l10_count_ids_mismatch",
+        "jsReaderAccepted": true,
+        "pythonWriterAccepted": false,
+        "pythonRejection": "RECENT_GAME_COUNT_MISMATCH"
+      },
+      {
+        "case": "pp_ratio_out_of_range",
+        "jsReaderAccepted": true,
+        "pythonWriterAccepted": true,
+        "pythonRejection": null
+      },
+      {
+        "case": "nested_capture_after_generation",
+        "jsReaderAccepted": true,
+        "pythonWriterAccepted": false,
+        "pythonRejection": "TEAM_SOURCE_AFTER_FEATURE"
+      },
+      {
+        "case": "season_impossible_arithmetic",
+        "jsReaderAccepted": true,
+        "pythonWriterAccepted": true,
+        "pythonRejection": null
+      },
+      {
+        "case": "rest_contradiction",
+        "jsReaderAccepted": true,
+        "pythonWriterAccepted": true,
+        "pythonRejection": null
+      },
+      {
+        "case": "goalie_current_event_in_history",
+        "jsReaderAccepted": true,
+        "pythonWriterAccepted": true,
+        "pythonRejection": null
+      }
+    ]
+  },
+  "fieldsLatestTeamInstances": [
+    {
+      "path": "abbrev",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 14
+    },
+    {
+      "path": "last10.away_games",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2,
+      "max": 7
+    },
+    {
+      "path": "last10.away_record",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 13
+    },
+    {
+      "path": "last10.calendar_verified_through",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "2026-11-22": 14
+      }
+    },
+    {
+      "path": "last10.complete",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "True": 14
+      }
+    },
+    {
+      "path": "last10.coverage",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "COMPLETA": 14
+      }
+    },
+    {
+      "path": "last10.expected_event_ids",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "minItems": 10,
+      "maxItems": 10
+    },
+    {
+      "path": "last10.ga",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 21,
+      "max": 39
+    },
+    {
+      "path": "last10.ga_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2.1,
+      "max": 3.9
+    },
+    {
+      "path": "last10.gf",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 22,
+      "max": 45
+    },
+    {
+      "path": "last10.gf_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2.2,
+      "max": 4.5
+    },
+    {
+      "path": "last10.gp",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 10,
+      "max": 10
+    },
+    {
+      "path": "last10.home_games",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 3,
+      "max": 8
+    },
+    {
+      "path": "last10.home_record",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 14
+    },
+    {
+      "path": "last10.l",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0,
+      "max": 8
+    },
+    {
+      "path": "last10.newest_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "2026-11-21": 14
+      }
+    },
+    {
+      "path": "last10.oldest_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 7,
+      "counts": {
+        "2026-10-31": 3,
+        "2026-10-30": 1,
+        "2026-10-29": 2,
+        "2026-11-03": 2,
+        "2026-11-02": 2,
+        "2026-11-01": 3,
+        "2026-10-22": 1
+      }
+    },
+    {
+      "path": "last10.otl",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0,
+      "max": 3
+    },
+    {
+      "path": "last10.periods",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    {
+      "path": "last10.real_goals_against",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 20,
+      "max": 39
+    },
+    {
+      "path": "last10.real_goals_against_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2,
+      "max": 3.9
+    },
+    {
+      "path": "last10.real_goals_for",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 22,
+      "max": 44
+    },
+    {
+      "path": "last10.real_goals_for_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2.2,
+      "max": 4.4
+    },
+    {
+      "path": "last10.record",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 12
+    },
+    {
+      "path": "last10.sequence_verified",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "True": 14
+      }
+    },
+    {
+      "path": "last10.shots_against_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 23.8,
+      "max": 30.8
+    },
+    {
+      "path": "last10.shots_for_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 24.4,
+      "max": 33.8
+    },
+    {
+      "path": "last10.w",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 1,
+      "max": 8
+    },
+    {
+      "path": "recent_event_ids",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "minItems": 10,
+      "maxItems": 10
+    },
+    {
+      "path": "reported_goalie.checked_at",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 2,
+      "counts": {
+        "2026-11-23T16:10:48Z": 13,
+        "2026-11-23T16:05:56Z": 1
+      }
+    },
+    {
+      "path": "reported_goalie.name",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 14
+    },
+    {
+      "path": "reported_goalie.notes",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 6,
+      "counts": {
+        "Nombre listado por Daily Faceoff sin anuncio de titularidad. No tratar como confirmado ni como probable respaldado por reporte.": 9,
+        "DFO afirma que Dobes será titular contra Los Angeles y lo marca Confirmed, atribuido a Renaud Lavoie. Post original no accesible; confirmación verificada a través de DFO.": 1,
+        "DFO atribuye a Bruce Garrioch que Ullmark fue el primer portero en salir del hielo. Señal de titular probable; no confirmación.": 1,
+        "DFO atribuye a Stefen Rosner que ocupó portería habitual del titular en morning skate. Aún no confirmado; post original no accesible.": 1,
+        "DFO atribuye a Mitchell Clinton expectativa de titularidad ante Utah. Aún no confirmado; post original no accesible.": 1,
+        "Previo oficial de Seattle incluye Grubauer en su proyección explícitamente no oficial.": 1
+      }
+    },
+    {
+      "path": "reported_goalie.official_announcement_verified",
+      "denominator": 14,
+      "present": 1,
+      "nonnull": 1,
+      "distinct": 1,
+      "counts": {
+        "False": 1
+      }
+    },
+    {
+      "path": "reported_goalie.original_source_url",
+      "denominator": 14,
+      "present": 4,
+      "nonnull": 4,
+      "distinct": 4,
+      "counts": {
+        "https://x.com/renlavoietva/status/2124895657164968070": 1,
+        "https://x.com/SunGarrioch/status/2124892871002042557": 1,
+        "https://x.com/stefen_rosner/status/2124887128387547410": 1,
+        "https://x.com/MitchellClinton/status/2124886404560019584": 1
+      }
+    },
+    {
+      "path": "reported_goalie.provider_status",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 4,
+      "counts": {
+        "Unconfirmed": 9,
+        "Confirmed": 1,
+        "Likely": 3,
+        "Projected lines (not official)": 1
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.appearances",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "minItems": 3,
+      "maxItems": 5
+    },
+    {
+      "path": "reported_goalie.recent_sample.ga",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 7,
+      "max": 17
+    },
+    {
+      "path": "reported_goalie.recent_sample.gaa_60",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 1.735298,
+      "max": 5.297114
+    },
+    {
+      "path": "reported_goalie.recent_sample.gp",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 3,
+      "max": 5
+    },
+    {
+      "path": "reported_goalie.recent_sample.label",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "Hasta 5 apariciones dentro del historial reciente del equipo; no son estadísticas de temporada": 14
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.newest_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 4,
+      "counts": {
+        "2026-11-21": 9,
+        "2026-11-19": 3,
+        "2026-11-15": 1,
+        "2026-11-17": 1
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.note",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 0
+    },
+    {
+      "path": "reported_goalie.recent_sample.oldest_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 7,
+      "counts": {
+        "2026-11-05": 2,
+        "2026-11-08": 4,
+        "2026-11-04": 1,
+        "2026-11-12": 2,
+        "2026-11-07": 2,
+        "2026-11-03": 1,
+        "2026-11-06": 2
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.sa",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 66,
+      "max": 168
+    },
+    {
+      "path": "reported_goalie.recent_sample.save_pct",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0.80303,
+      "max": 0.928571
+    },
+    {
+      "path": "reported_goalie.recent_sample.saves",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 53,
+      "max": 156
+    },
+    {
+      "path": "reported_goalie.recent_sample.scope",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "TEAM_L10_LAST_UP_TO_5_APPEARANCES": 14
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.toi",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 14
+    },
+    {
+      "path": "reported_goalie.source_date",
+      "denominator": 14,
+      "present": 1,
+      "nonnull": 1,
+      "distinct": 1,
+      "counts": {
+        "2026-11-23": 1
+      }
+    },
+    {
+      "path": "reported_goalie.source_id",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 2,
+      "counts": {
+        "dfo": 13,
+        "sea": 1
+      }
+    },
+    {
+      "path": "reported_goalie.source_time",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 4,
+      "distinct": 4,
+      "counts": {
+        "2026-11-23T16:01:34.835Z": 1,
+        "2026-11-23T15:50:30.867Z": 1,
+        "2026-11-23T15:30:05.568Z": 1,
+        "2026-11-23T15:24:33.606Z": 1
+      }
+    },
+    {
+      "path": "reported_goalie.source_url",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 2,
+      "counts": {
+        "https://www.dailyfaceoff.com/starting-goalies/2026-11-23": 13,
+        "https://www.nhl.com/kraken/news/anaheim-ducks-vs-seattle-kraken-game-preview-projected-lines-112326": 1
+      }
+    },
+    {
+      "path": "reported_goalie.status",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 3,
+      "counts": {
+        "NO_CONFIRMADO": 9,
+        "CONFIRMADO": 1,
+        "PROBABLE": 4
+      }
+    },
+    {
+      "path": "rest.as_of_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "2026-11-23": 14
+      }
+    },
+    {
+      "path": "rest.back_to_back",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "False": 14
+      }
+    },
+    {
+      "path": "rest.days_off",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 1,
+      "max": 1
+    },
+    {
+      "path": "rest.last_game_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "2026-11-21": 14
+      }
+    },
+    {
+      "path": "rest.verified",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "True": 14
+      }
+    },
+    {
+      "path": "season.away_record",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 13
+    },
+    {
+      "path": "season.ga",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 56,
+      "max": 92
+    },
+    {
+      "path": "season.ga_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2.24,
+      "max": 3.833333
+    },
+    {
+      "path": "season.gf",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 54,
+      "max": 90
+    },
+    {
+      "path": "season.gf_pg",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 2.5,
+      "max": 3.826087
+    },
+    {
+      "path": "season.gp",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 20,
+      "max": 25
+    },
+    {
+      "path": "season.home_record",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 13
+    },
+    {
+      "path": "season.l",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 3,
+      "max": 14
+    },
+    {
+      "path": "season.otl",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0,
+      "max": 5
+    },
+    {
+      "path": "season.points",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 16,
+      "max": 39
+    },
+    {
+      "path": "season.points_pct",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0.38,
+      "max": 0.78
+    },
+    {
+      "path": "season.record",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 14
+    },
+    {
+      "path": "season.row",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 6,
+      "max": 17
+    },
+    {
+      "path": "season.rw",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 4,
+      "max": 16
+    },
+    {
+      "path": "season.through_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "2026-11-22": 14
+      }
+    },
+    {
+      "path": "season.w",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 7,
+      "max": 17
+    },
+    {
+      "path": "special_teams.captured_at",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "2026-11-23T18:07:30.392Z": 14
+      }
+    },
+    {
+      "path": "special_teams.games_played",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 20,
+      "max": 25
+    },
+    {
+      "path": "special_teams.is_current_gp_match",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "True": 14
+      }
+    },
+    {
+      "path": "special_teams.note",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "distinct": 1,
+      "counts": {
+        "GP coincide con clasificación.": 14
+      }
+    },
+    {
+      "path": "special_teams.pk_pct",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0.607143,
+      "max": 0.850747
+    },
+    {
+      "path": "special_teams.pp_pct",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 14,
+      "min": 0.134831,
+      "max": 0.341772
+    },
+    {
+      "path": "special_teams.through_date",
+      "denominator": 14,
+      "present": 14,
+      "nonnull": 0
+    }
+  ],
+  "fieldsAllTeamSnapshotInstances": [
+    {
+      "path": "abbrev",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 14
+    },
+    {
+      "path": "last10.away_games",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2,
+      "max": 7
+    },
+    {
+      "path": "last10.away_record",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 13
+    },
+    {
+      "path": "last10.calendar_verified_through",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "2026-11-22": 28
+      }
+    },
+    {
+      "path": "last10.complete",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "True": 28
+      }
+    },
+    {
+      "path": "last10.coverage",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "COMPLETA": 28
+      }
+    },
+    {
+      "path": "last10.expected_event_ids",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "minItems": 10,
+      "maxItems": 10
+    },
+    {
+      "path": "last10.ga",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 21,
+      "max": 39
+    },
+    {
+      "path": "last10.ga_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2.1,
+      "max": 3.9
+    },
+    {
+      "path": "last10.gf",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 22,
+      "max": 45
+    },
+    {
+      "path": "last10.gf_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2.2,
+      "max": 4.5
+    },
+    {
+      "path": "last10.gp",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 10,
+      "max": 10
+    },
+    {
+      "path": "last10.home_games",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 3,
+      "max": 8
+    },
+    {
+      "path": "last10.home_record",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 14
+    },
+    {
+      "path": "last10.l",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0,
+      "max": 8
+    },
+    {
+      "path": "last10.newest_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "2026-11-21": 28
+      }
+    },
+    {
+      "path": "last10.oldest_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 7,
+      "counts": {
+        "2026-10-31": 6,
+        "2026-10-30": 2,
+        "2026-10-29": 4,
+        "2026-11-03": 4,
+        "2026-11-02": 4,
+        "2026-11-01": 6,
+        "2026-10-22": 2
+      }
+    },
+    {
+      "path": "last10.otl",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0,
+      "max": 3
+    },
+    {
+      "path": "last10.periods",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    {
+      "path": "last10.real_goals_against",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 20,
+      "max": 39
+    },
+    {
+      "path": "last10.real_goals_against_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2,
+      "max": 3.9
+    },
+    {
+      "path": "last10.real_goals_for",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 22,
+      "max": 44
+    },
+    {
+      "path": "last10.real_goals_for_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2.2,
+      "max": 4.4
+    },
+    {
+      "path": "last10.record",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 12
+    },
+    {
+      "path": "last10.sequence_verified",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "True": 28
+      }
+    },
+    {
+      "path": "last10.shots_against_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 23.8,
+      "max": 30.8
+    },
+    {
+      "path": "last10.shots_for_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 24.4,
+      "max": 33.8
+    },
+    {
+      "path": "last10.w",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 1,
+      "max": 8
+    },
+    {
+      "path": "recent_event_ids",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "minItems": 10,
+      "maxItems": 10
+    },
+    {
+      "path": "reported_goalie.checked_at",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 2,
+      "counts": {
+        "2026-11-23T16:10:48Z": 26,
+        "2026-11-23T16:05:56Z": 2
+      }
+    },
+    {
+      "path": "reported_goalie.name",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 14
+    },
+    {
+      "path": "reported_goalie.notes",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 6,
+      "counts": {
+        "Nombre listado por Daily Faceoff sin anuncio de titularidad. No tratar como confirmado ni como probable respaldado por reporte.": 18,
+        "DFO afirma que Dobes será titular contra Los Angeles y lo marca Confirmed, atribuido a Renaud Lavoie. Post original no accesible; confirmación verificada a través de DFO.": 2,
+        "DFO atribuye a Bruce Garrioch que Ullmark fue el primer portero en salir del hielo. Señal de titular probable; no confirmación.": 2,
+        "DFO atribuye a Stefen Rosner que ocupó portería habitual del titular en morning skate. Aún no confirmado; post original no accesible.": 2,
+        "DFO atribuye a Mitchell Clinton expectativa de titularidad ante Utah. Aún no confirmado; post original no accesible.": 2,
+        "Previo oficial de Seattle incluye Grubauer en su proyección explícitamente no oficial.": 2
+      }
+    },
+    {
+      "path": "reported_goalie.official_announcement_verified",
+      "denominator": 28,
+      "present": 2,
+      "nonnull": 2,
+      "distinct": 1,
+      "counts": {
+        "False": 2
+      }
+    },
+    {
+      "path": "reported_goalie.original_source_url",
+      "denominator": 28,
+      "present": 8,
+      "nonnull": 8,
+      "distinct": 4,
+      "counts": {
+        "https://x.com/renlavoietva/status/2124895657164968070": 2,
+        "https://x.com/SunGarrioch/status/2124892871002042557": 2,
+        "https://x.com/stefen_rosner/status/2124887128387547410": 2,
+        "https://x.com/MitchellClinton/status/2124886404560019584": 2
+      }
+    },
+    {
+      "path": "reported_goalie.provider_status",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 4,
+      "counts": {
+        "Unconfirmed": 18,
+        "Confirmed": 2,
+        "Likely": 6,
+        "Projected lines (not official)": 2
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.appearances",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "minItems": 3,
+      "maxItems": 5
+    },
+    {
+      "path": "reported_goalie.recent_sample.ga",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 7,
+      "max": 17
+    },
+    {
+      "path": "reported_goalie.recent_sample.gaa_60",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 1.735298,
+      "max": 5.297114
+    },
+    {
+      "path": "reported_goalie.recent_sample.gp",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 3,
+      "max": 5
+    },
+    {
+      "path": "reported_goalie.recent_sample.label",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "Hasta 5 apariciones dentro del historial reciente del equipo; no son estadísticas de temporada": 28
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.newest_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 4,
+      "counts": {
+        "2026-11-21": 18,
+        "2026-11-19": 6,
+        "2026-11-15": 2,
+        "2026-11-17": 2
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.note",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 0
+    },
+    {
+      "path": "reported_goalie.recent_sample.oldest_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 7,
+      "counts": {
+        "2026-11-05": 4,
+        "2026-11-08": 8,
+        "2026-11-04": 2,
+        "2026-11-12": 4,
+        "2026-11-07": 4,
+        "2026-11-03": 2,
+        "2026-11-06": 4
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.sa",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 66,
+      "max": 168
+    },
+    {
+      "path": "reported_goalie.recent_sample.save_pct",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0.80303,
+      "max": 0.928571
+    },
+    {
+      "path": "reported_goalie.recent_sample.saves",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 53,
+      "max": 156
+    },
+    {
+      "path": "reported_goalie.recent_sample.scope",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "TEAM_L10_LAST_UP_TO_5_APPEARANCES": 28
+      }
+    },
+    {
+      "path": "reported_goalie.recent_sample.toi",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 14
+    },
+    {
+      "path": "reported_goalie.source_date",
+      "denominator": 28,
+      "present": 2,
+      "nonnull": 2,
+      "distinct": 1,
+      "counts": {
+        "2026-11-23": 2
+      }
+    },
+    {
+      "path": "reported_goalie.source_id",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 2,
+      "counts": {
+        "dfo": 26,
+        "sea": 2
+      }
+    },
+    {
+      "path": "reported_goalie.source_time",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 8,
+      "distinct": 4,
+      "counts": {
+        "2026-11-23T16:01:34.835Z": 2,
+        "2026-11-23T15:50:30.867Z": 2,
+        "2026-11-23T15:30:05.568Z": 2,
+        "2026-11-23T15:24:33.606Z": 2
+      }
+    },
+    {
+      "path": "reported_goalie.source_url",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 2,
+      "counts": {
+        "https://www.dailyfaceoff.com/starting-goalies/2026-11-23": 26,
+        "https://www.nhl.com/kraken/news/anaheim-ducks-vs-seattle-kraken-game-preview-projected-lines-112326": 2
+      }
+    },
+    {
+      "path": "reported_goalie.status",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 3,
+      "counts": {
+        "NO_CONFIRMADO": 18,
+        "CONFIRMADO": 2,
+        "PROBABLE": 8
+      }
+    },
+    {
+      "path": "rest.as_of_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "2026-11-23": 28
+      }
+    },
+    {
+      "path": "rest.back_to_back",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "False": 28
+      }
+    },
+    {
+      "path": "rest.days_off",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 1,
+      "max": 1
+    },
+    {
+      "path": "rest.last_game_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "2026-11-21": 28
+      }
+    },
+    {
+      "path": "rest.verified",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "True": 28
+      }
+    },
+    {
+      "path": "season.away_record",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 13
+    },
+    {
+      "path": "season.ga",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 56,
+      "max": 92
+    },
+    {
+      "path": "season.ga_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2.24,
+      "max": 3.833333
+    },
+    {
+      "path": "season.gf",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 54,
+      "max": 90
+    },
+    {
+      "path": "season.gf_pg",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 2.5,
+      "max": 3.826087
+    },
+    {
+      "path": "season.gp",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 20,
+      "max": 25
+    },
+    {
+      "path": "season.home_record",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 13
+    },
+    {
+      "path": "season.l",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 3,
+      "max": 14
+    },
+    {
+      "path": "season.otl",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0,
+      "max": 5
+    },
+    {
+      "path": "season.points",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 16,
+      "max": 39
+    },
+    {
+      "path": "season.points_pct",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0.38,
+      "max": 0.78
+    },
+    {
+      "path": "season.record",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 14
+    },
+    {
+      "path": "season.row",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 6,
+      "max": 17
+    },
+    {
+      "path": "season.rw",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 4,
+      "max": 16
+    },
+    {
+      "path": "season.through_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "2026-11-22": 28
+      }
+    },
+    {
+      "path": "season.w",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 7,
+      "max": 17
+    },
+    {
+      "path": "special_teams.captured_at",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "2026-11-23T18:07:30.392Z": 28
+      }
+    },
+    {
+      "path": "special_teams.games_played",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 20,
+      "max": 25
+    },
+    {
+      "path": "special_teams.is_current_gp_match",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "True": 28
+      }
+    },
+    {
+      "path": "special_teams.note",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "distinct": 1,
+      "counts": {
+        "GP coincide con clasificación.": 28
+      }
+    },
+    {
+      "path": "special_teams.pk_pct",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0.607143,
+      "max": 0.850747
+    },
+    {
+      "path": "special_teams.pp_pct",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 28,
+      "min": 0.134831,
+      "max": 0.341772
+    },
+    {
+      "path": "special_teams.through_date",
+      "denominator": 28,
+      "present": 28,
+      "nonnull": 0
+    }
+  ],
+  "fieldsLatestPeriods": [
+    {
+      "path": "ga",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 1,
+      "max": 17
+    },
+    {
+      "path": "ga_pg",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 0.1,
+      "max": 1.7
+    },
+    {
+      "path": "gf",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 4,
+      "max": 17
+    },
+    {
+      "path": "gf_pg",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 0.4,
+      "max": 1.7
+    },
+    {
+      "path": "goals_coverage",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 10,
+      "max": 10
+    },
+    {
+      "path": "gp",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 10,
+      "max": 10
+    },
+    {
+      "path": "period",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "path": "shots_against_pg",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 6.5,
+      "max": 11.2
+    },
+    {
+      "path": "shots_coverage",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 10,
+      "max": 10
+    },
+    {
+      "path": "shots_for_pg",
+      "denominator": 42,
+      "present": 42,
+      "nonnull": 42,
+      "min": 6,
+      "max": 11.3
+    }
+  ],
+  "fieldsLatestGoalieAppearances": [
+    {
+      "path": "date",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 16
+    },
+    {
+      "path": "ga",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "path": "id",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 55
+    },
+    {
+      "path": "name",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 14
+    },
+    {
+      "path": "opponent",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 30
+    },
+    {
+      "path": "sa",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "min": 3,
+      "max": 50
+    },
+    {
+      "path": "save_pct",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "min": 0.333333,
+      "max": 1
+    },
+    {
+      "path": "saves",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "min": 2,
+      "max": 45
+    },
+    {
+      "path": "source_url",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 55
+    },
+    {
+      "path": "toi",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 37
+    },
+    {
+      "path": "venue",
+      "denominator": 64,
+      "present": 64,
+      "nonnull": 64,
+      "distinct": 2,
+      "counts": {
+        "V": 31,
+        "L": 33
+      }
+    }
+  ],
+  "inventory": [
+    {
+      "category": "Temporada: resultados y puntos",
+      "paths": "season.gp,w,l,otl,record,points,points_pct,rw,row",
+      "units": "partidos; puntos; ratio 0–1",
+      "source": "Seed conservado; normalizador admite standings oficial o incremento certificado",
+      "observedCoverage": "14/14 equipos; GP 20–25; puntos % 0.38–0.78",
+      "certificationAndLimitation": "Aritmética consistente 14/14. PRESERVED_SEED y captura de standings nula en 7/7 eventos.",
+      "contractPresence": "Sí, salvo ranking y algunas columnas omitidas por la proyección de Pick."
+    },
+    {
+      "category": "Temporada: goles",
+      "paths": "season.gf,ga,gf_pg,ga_pg",
+      "units": "goles; goles/partido",
+      "source": "Marcador final acumulado del seed/standings",
+      "observedCoverage": "14/14; GF/partido 2.5–3.826087; GA/partido 2.24–3.833333",
+      "certificationAndLimitation": "No incluye bitácora de todos los juegos de temporada ni sus capturas.",
+      "contractPresence": "Sí; incluye marcador final, no una suma de solo 60 min."
+    },
+    {
+      "category": "Temporada: local/visitante",
+      "paths": "season.home_record,away_record",
+      "units": "récord W–L–OTL; n derivable de cada récord",
+      "source": "Condición oficial del juego en standings/seed",
+      "observedCoverage": "14/14",
+      "certificationAndLimitation": "Suma de ambas condiciones concuerda con el récord total; sin medias GF/GA o tiros específicas por condición.",
+      "contractPresence": "Sí en payload; no se muestra en el panel mínimo de Pick."
+    },
+    {
+      "category": "L10: identidad y secuencia",
+      "paths": "recent_event_ids; last10.gp,expected_event_ids,complete,sequence_verified,coverage,calendar_verified_through",
+      "units": "IDs ordenados; conteo; booleanos; fecha",
+      "source": "Historial oficial normalizado + calendario independiente, o secuencia del seed previamente verificada",
+      "observedCoverage": "14/14 con 10 IDs; 140 referencias / 108 partidos distintos; todos hasta 22 nov",
+      "certificationAndLimitation": "Los 10 IDs esperados coinciden en orden con los observados. Certificación declarada y consistente; el calendario raw no está en este export.",
+      "contractPresence": "Sí; raw recent_games no está."
+    },
+    {
+      "category": "L10: récord",
+      "paths": "last10.w,l,otl,record",
+      "units": "conteos y W–L–OTL",
+      "source": "Resultados oficiales del historial reciente",
+      "observedCoverage": "14/14; GP=10",
+      "certificationAndLimitation": "W+L+OTL=10 y récord consistente. El porcentaje de puntos L10 es derivable, no un campo persistido.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "L10: goles finales",
+      "paths": "last10.gf,ga,gf_pg,ga_pg",
+      "units": "goles; goles/partido",
+      "source": "Marcadores finales incluyendo OT/SO",
+      "observedCoverage": "14/14; GF/partido 2.2–4.5; GA/partido 2.1–3.9",
+      "certificationAndLimitation": "Las medias concuerdan con sumas/10. La liquidación de un mercado requiere reglas propias.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "L10: goles físicos",
+      "paths": "last10.real_goals_for,real_goals_against,real_goals_for_pg,real_goals_against_pg",
+      "units": "goles; goles/partido sin bono decisivo SO",
+      "source": "Suma de períodos oficiales, incluyendo OT y excluyendo bonus de shootout",
+      "observedCoverage": "14/14",
+      "certificationAndLimitation": "Suma P1–P3 <= goles físicos <= marcador final en todos. No confundir con GF/GA finales.",
+      "contractPresence": "Sí en payload; no en proyección mínima de Pick."
+    },
+    {
+      "category": "L10: tiros",
+      "paths": "last10.shots_for_pg,shots_against_pg",
+      "units": "SOG/partido",
+      "source": "Tiros a puerta del boxscore oficial",
+      "observedCoverage": "14/14; a favor 24.4–33.8; en contra 23.8–30.8",
+      "certificationAndLimitation": "No son intentos de tiro, Corsi o xG. Se conservan promedios, no conteos por partido en este contrato.",
+      "contractPresence": "Sí; no tiros de temporada completa."
+    },
+    {
+      "category": "L10: período P1/P2/P3",
+      "paths": "last10.periods[].period,gp,gf,ga,gf_pg,ga_pg,shots_for_pg,shots_against_pg,goals_coverage,shots_coverage",
+      "units": "n; goles/partido en ese período; SOG/partido en ese período",
+      "source": "Desglose oficial por período del historial reciente",
+      "observedCoverage": "42/42 filas; n=10; cobertura de goles y tiros 10/10 en todas",
+      "certificationAndLimitation": "Cobertura declarada completa y aritmética de goles consistente. No períodos de temporada, OT o SO.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "L10: local/visitante",
+      "paths": "last10.home_games,away_games,home_record,away_record",
+      "units": "partidos y W–L–OTL",
+      "source": "Condición oficial en la secuencia reciente",
+      "observedCoverage": "14/14; local n=3–8; visita n=2–7",
+      "certificationAndLimitation": "Ambos subconjuntos suman 10; muestras desiguales, sin ajuste por fuerza de rivales.",
+      "contractPresence": "Sí en payload; no en proyección mínima de Pick."
+    },
+    {
+      "category": "L10: fechas de ventana",
+      "paths": "last10.oldest_date,newest_date,calendar_verified_through",
+      "units": "fecha ISO, sin hora",
+      "source": "Fechas de los juegos seleccionados y corte de calendario",
+      "observedCoverage": "14/14; último juego 21 nov; calendario declarado hasta 22 nov",
+      "certificationAndLimitation": "Solo IDs y agregados: no se recertifica cada fecha/horario de los 108 juegos desde este payload.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "Descanso",
+      "paths": "rest.last_game_date,days_off,back_to_back,as_of_date,verified",
+      "units": "días completos sin partido; booleanos; fecha",
+      "source": "Diferencia de fechas de calendario menos 1, condicionada a secuencia verificada",
+      "observedCoverage": "14/14; todos days_off=1, back_to_back=false, último juego 21 nov",
+      "certificationAndLimitation": "Aritmética y estado consistentes; cero variación en esta tanda. No horas transcurridas, viaje ni fatiga.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "Power play",
+      "paths": "special_teams.pp_pct",
+      "units": "ratio 0–1 (display ×100)",
+      "source": "Snapshot oficial de equipos especiales",
+      "observedCoverage": "14/14; 0.134831–0.341772",
+      "certificationAndLimitation": "Captura 23 nov 18:07:30.392Z; GP coincide; through_date=null. Sin oportunidades PP ni sus conteos.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "Penalty kill",
+      "paths": "special_teams.pk_pct",
+      "units": "ratio 0–1 (display ×100)",
+      "source": "Snapshot oficial de equipos especiales",
+      "observedCoverage": "14/14; 0.607143–0.850747",
+      "certificationAndLimitation": "Mismo corte/limitación PP. Coincidir en GP no acredita por sí solo todo el rango de fechas.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "PP/PK: procedencia",
+      "paths": "special_teams.games_played,captured_at,through_date,is_current_gp_match,note",
+      "units": "n; timestamp; fecha nullable; booleano",
+      "source": "Metadata de snapshot oficial y comparación contra season.gp",
+      "observedCoverage": "GP/captura/flag 14/14; through_date 0/14 no nulo",
+      "certificationAndLimitation": "Coinciden GP 20–25. El conteo de oportunidades y la fecha exacta de cierre no se conservan.",
+      "contractPresence": "Sí; parte de metadata omitida en proyección."
+    },
+    {
+      "category": "Portero reportado",
+      "paths": "reported_goalie.name,status,provider_status,source_id,source_url,checked_at,source_time,notes",
+      "units": "nombre; enum; URL; timestamp",
+      "source": "Daily Faceoff 13 equipos; reporte Seattle 1",
+      "observedCoverage": "Nombre/estado/consulta 14/14; hora original 4/14; 1 CONFIRMADO, 4 PROBABLE, 9 NO_CONFIRMADO",
+      "certificationAndLimitation": "Ningún juego con ambos confirmados. El único CONFIRMADO es según DFO; official_announcement_verified=false.",
+      "contractPresence": "Sí."
+    },
+    {
+      "category": "Portero: identidad",
+      "paths": "reported_goalie.player_id; recent_sample.appearances[].name",
+      "units": "ID NHL opcional; nombre",
+      "source": "ID explícito si existe; de lo contrario coincidencia exacta de nombre normalizado",
+      "observedCoverage": "player_id 0/14; nombres presentes en 14/14",
+      "certificationAndLimitation": "Las muestras actuales dependen del nombre; las apariciones no incluyen player_id. No equivalencia ESPN↔NHL implícita.",
+      "contractPresence": "Nombre sí; ID ausente en la muestra real."
+    },
+    {
+      "category": "Portero: muestra y conteos",
+      "paths": "reported_goalie.recent_sample.scope,gp,ga,sa,saves,toi,oldest_date,newest_date,appearances[]",
+      "units": "apariciones; goles; SOG; atajadas; minutos:segundos",
+      "source": "Hasta 5 apariciones válidas dentro del L10 del equipo",
+      "observedCoverage": "14/14; 10 muestras de 5, 2 de 4, 2 de 3; 64 apariciones / 55 juegos",
+      "certificationAndLimitation": "Sumas, TOI, pertenencia a L10 y fechas consistentes. Incluye relevos con TOI>0; no necesariamente últimos 5 inicios ni toda la temporada.",
+      "contractPresence": "Sí en payload; la proyección mínima de Pick lo omite."
+    },
+    {
+      "category": "Portero: SV%",
+      "paths": "reported_goalie.recent_sample.save_pct",
+      "units": "ratio 0–1 = sum(saves)/sum(sa)",
+      "source": "Agregado ponderado por tiros enfrentados",
+      "observedCoverage": "14/14",
+      "certificationAndLimitation": "No promedio simple de porcentajes; titular incierto en 13/14.",
+      "contractPresence": "Sí en payload."
+    },
+    {
+      "category": "Portero: GA/60",
+      "paths": "reported_goalie.recent_sample.gaa_60",
+      "units": "goles/60 minutos = sum(GA)×3600/sum(TOI segundos)",
+      "source": "Apariciones históricas válidas, sin bonus SO ni goles a red vacía imputados al portero",
+      "observedCoverage": "14/14",
+      "certificationAndLimitation": "No GAA de temporada; denominador de tiempo y ventana distintos entre porteros.",
+      "contractPresence": "Sí en payload."
+    },
+    {
+      "category": "H2H / serie actual",
+      "paths": "matchup.season_series",
+      "units": "n, resultados, cobertura de serie",
+      "source": "Visible en Site a partir de calendario/historial y reporte",
+      "observedCoverage": "0/7 eventos: categoría no exportada",
+      "certificationAndLimitation": "No inferir ausencia de enfrentamientos de una lista inexistente. Requiere archivo fuente separado con fecha/cobertura.",
+      "contractPresence": "NO en feature_payload."
+    },
+    {
+      "category": "Lesiones / bajas",
+      "paths": "matchup.injuries,injuries_coverage",
+      "units": "estados, fecha, cobertura",
+      "source": "Reportes visibles en Site",
+      "observedCoverage": "0/7 eventos: categoría no exportada",
+      "certificationAndLimitation": "Lista ausente no significa equipo sano.",
+      "contractPresence": "NO en feature_payload."
+    },
+    {
+      "category": "Ranking",
+      "paths": "team.rank,conference_rank,division_rank",
+      "units": "posición",
+      "source": "Clasificación del Site",
+      "observedCoverage": "0/14 equipos: fuera de season",
+      "certificationAndLimitation": "Puntos/GP/rw/row sí están; ranking exacto, liga completa y desempates H2H no.",
+      "contractPresence": "NO en feature_payload."
+    },
+    {
+      "category": "Mercados y reglas",
+      "paths": "matchup.markets,prices,lines,book,contract flags",
+      "units": "cuotas; goles; lado; reglas; timestamp",
+      "source": "Capturas de referencia mostradas en Site",
+      "observedCoverage": "0/7 eventos: no hay cuotas/lineas",
+      "certificationAndLimitation": "provenance.markets_captured_at existe pero no contiene cotización; no permite calcular EV/ROI o liquidar.",
+      "contractPresence": "NO; requiere unión temporal a snapshots de mercado."
+    },
+    {
+      "category": "Historial detallado",
+      "paths": "recent_games; games; raw PBP/boxscore; skaters",
+      "units": "filas de partido/jugador",
+      "source": "Archivos oficiales normalizados visibles en historial Site",
+      "observedCoverage": "0 filas de equipo por juego en contrato; sí IDs L10 y submuestra de portero",
+      "certificationAndLimitation": "No se recalculan tiros/períodos ni se recertifica calendario completo solo con los agregados.",
+      "contractPresence": "NO; excepción: apariciones de portero incluidas."
+    },
+    {
+      "category": "Lecturas de análisis del Site",
+      "paths": "analysis-dashboard selection/factors/reasons",
+      "units": "regla descriptiva y texto",
+      "source": "Coincidencia de líderes en puntos temporada, puntos L10 y balance de goles L10",
+      "observedCoverage": "0 selecciones/probabilidades persistidas; forecast_probability=null en 14/14 snapshots",
+      "certificationAndLimitation": "Puede derivarse la regla central; no reproducir elegibilidad íntegra sin recent_games/contexto. No es modelo probabilístico validado.",
+      "contractPresence": "NO se exportan las lecturas; inputs centrales sí."
+    }
+  ],
+  "limitations": [
+    "PRESERVED_SEED with no standings capture time applies to every one of 14 snapshots, not only event 0378. Current-through date is a claim, not a fresh receipt.",
+    "The two source runs repeat identical team inputs for each of the seven games. Do not double denominators.",
+    "Only late V6 had the manual snapshots available as of its frozen decision. Original and early snapshots precede the manual input.",
+    "No matching final outcomes exist at export cutoff. Do not report accuracy, Brier, log-loss, EV or ROI as zero or as evidence.",
+    "All latest teams have one rest day and no back-to-back; this tranche cannot identify a rest effect.",
+    "L10 completeness and period coverage are internally consistent claims. The raw independent calendar is absent from this export.",
+    "Goalie reports retain distinct status and clocks. All reported player_id are absent; matching by normalized name and uncertain starters limit interpretation.",
+    "Full published dataset bytes are not part of the table exports; source_snapshot_sha256 is preserved but not independently recomputed against source dataset bytes.",
+    "H2H, injuries, market contracts, ranks and full team game history do not cross this contract.",
+    "The raw contract includes venue records and goalie recent statistics even though the current Pick panel projection omits them."
+  ]
+}
