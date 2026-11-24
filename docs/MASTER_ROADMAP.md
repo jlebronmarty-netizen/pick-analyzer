@@ -14,6 +14,10 @@ Implementada en rama de revisión la auditoría A–E de datos NHL y su panel: c
 
 PR #399 abierto, CI y Preview aprobados; flujo de escritorio y API con datos reales verificados. Pendientes: revisión del PR, comprobación visual móvil e integración; revisión inicial V6 al alcanzar 30 partidos (actual: 24; ningún umbral garantiza mejora); futuro periodo independiente para variantes fijas; confirmación/identidad previa de porteros; reglas exactas de Circa y hora publicada; mercado y liquidación de props de tiros/atajadas. Las cuatro pruebas evaluables de 19 partidos son inconclusas, porteros no tiene muestra cronológica suficiente. No promover modelos, certificar ROI/CLV/FanDuel ni declarar player props completo.
 
+## 2026-11-23 · NBA · Originales de las ventanas de Player Props
+
+Revisar la prioridad de los originales de L5/L10 en el tablero y medir con el mismo corte la lectura efectiva y los cambios de calidad tras integrar. Quedan pendientes la evidencia regional de los contratos de jornada completa y la conciliación del box Clippers–Dallas. [Evidencia y reproducción](audits/2026-11-23-nba-archive-window-priority.md).
+
 ## 2026-11-22 · Flujo por deporte y reparación operativa NBA
 
 Objetivo autorizado: Deportes y accuracy → tablero del deporte → mercados y detalle. La rama corrige acceso NBA, separación de versiones, lectura fallida y límite diario en America/Puerto_Rico. Mantener JUGADA bloqueada y conservar los pronósticos originales durante publicación y verificación. La rama añade un materializador de originales archivados íntegros al cron NBA existente, con límite por ejecución, transacción idempotente y procedencia explícita. Su activación y primer ciclo real quedan pendientes; un box score incompleto permanece excluido. [Alcance y evidencia](audits/2026-11-22-nba-flow/README.md).

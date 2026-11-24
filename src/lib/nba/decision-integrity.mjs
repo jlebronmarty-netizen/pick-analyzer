@@ -64,7 +64,7 @@ export function teamWindow(e,target,team,observedIds) {
   return calendarCheck(e,team,audit);
 }
 
-export function playerWindow(e,target,playerId,parts) {
+export function playerWindow(e,target,playerId,parts,onGame=undefined) {
   const records = (e.compact.get(playerId) ?? []).filter(r => r.season === target.season &&
       stamp(r.game_datetime) < Math.min(stamp(target.datetime),stamp(e.asOf)) &&
       stamp(r.materialized_at) <= stamp(e.asOf) && stamp(r.source_captured_at) <= stamp(e.asOf));
@@ -74,6 +74,7 @@ export function playerWindow(e,target,playerId,parts) {
   const team = Number(latest.team_id);
   if (!teams(target).includes(team)) return unavailable(e,'IDENTITY_MISMATCH','TEAM_OUTSIDE_TARGET_GAME');
   const audit = auditWindow(expected(e,target,team), game => {
+    onGame?.(game.id);
     const final = inspectFinal(game);
     if (final) return final;
     const matches = byGame.get(game.id) ?? [];

@@ -2,7 +2,7 @@ import 'server-only';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
-import {archiveReadOptions,readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
+import {archiveReadOptions,readDisplayWindowContexts,readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
 import {readMarketBatches} from '@/lib/nba/decision-market-snapshot.mjs';
 import {archivedCalendar,tailDays} from '@/lib/nba/decision-calendar.mjs';
 const stamp=(v:unknown)=>Date.parse(String(v??''));
@@ -162,10 +162,14 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  }
  if(incompleteIndex)contexts.push(...[...needed].map(id=>({provider_game_id:id,player_stats_captured_at:asOf,player_stats:null})));
  const archiveRead=archiveReadOptions(forDisplay);
- const storageOriginals=await readOriginalContexts(manifests,contexts,needed,async (m:any)=>{
+ const fetchOriginal=async (m:any)=>{
    const r=await db.storage.from(m.storage_bucket).download(m.storage_object_path);
    return r.error||!r.data?null:Buffer.from(await r.data.arrayBuffer());
- },archiveRead.limit,archiveRead.cache);
+ };
+ const storageOriginals=archiveRead.prioritizeWindows && !incompleteIndex
+   ? await readDisplayWindowContexts(manifests,contexts,needed,fetchOriginal,archiveRead.limit,archiveRead.cache,
+       {games,propQuotes,calendar,playerHistory:completeHistory,asOf})
+   : await readOriginalContexts(manifests,contexts,needed,fetchOriginal,archiveRead.limit,archiveRead.cache);
  contexts.push(...storageOriginals);
  const available=optional(pregameResult,'NBA_DECISION_AVAILABILITY_FAILED');
  for(const p of available)for(const lineup of p.projected_lineups?.data??[]){
