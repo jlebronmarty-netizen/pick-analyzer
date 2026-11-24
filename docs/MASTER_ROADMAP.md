@@ -1,3 +1,7 @@
+## NBA · Centro de análisis manual por partido (borrador)
+
+PR #407 propone `archivedMarkets`, `meetingPlayers` y `observedSeason` en V1. Lee el último snapshot prepartido por ID, verifica equipos y horario mediante event_links y conserva línea, lado, operador, hora y regla OT originales. Los box scores H2H se limitan a filas disponibles. Pendiente validación del preview. No cambia proveedores, cron, motores ni almacenamiento.
+
 ## 2026-11-24 · NBA · Datos compartidos (PR #406)
 
 Rama de revisión `feat/nba-shared-manual-data-v1`: lector y API de solo lectura, panel manual, Dashboard descriptivo, prototipo local de tracker, acceso privado equivalente al Decision Board. Preview del commit 44aa3f1c: 242 finales/períodos conciliados, 253 juegos GOAT compactos, 534/535 nombres, 30 equipos, seis alineaciones, 26 reportes de disponibilidad y 1,159 matchups. 29/30 equipos con diez finales observados (Sacramento ocho); secuencia no certificada. Sin cambios de modelo, proveedor, cron o escritura de base de datos. Sigue pendiente validar el último commit con la nueva protección y CI, integración al Site privado, persistencia compartida del tracker y refresh. [Contrato y límites](nba-manual-data-v1.md). No fusionado ni publicado al corte de esta nota.
