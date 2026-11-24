@@ -58,7 +58,7 @@ export default function ShadowReview({data}){
       <p className="mt-2 text-sm text-slate-300">Accuracy evalúa el clasificador al umbral de 50%. Ganados y perdidos corresponden al lado congelado. ROI simula una unidad a cada precio archivado y pondera por partido. La ejecución regional sigue pendiente. Las probabilidades continúan experimentales y JUGADA sigue desactivado.</p>
       <p className="mt-2 text-sm text-slate-300">Capital del Challenge informado el {data.bankroll.dayPR}. La evaluación del modelo usa el ledger de pronósticos y resultados.</p>
     </section>
-    <section><div className="flex flex-wrap items-end gap-4"><h2 className="text-xl font-semibold">Contratos congelados</h2>
+    <section aria-label="Contratos congelados"><div className="flex flex-wrap items-end gap-4"><h2 className="text-xl font-semibold">Contratos congelados</h2>
       <label>Jornada PR <select aria-label="Jornada PR" value={day} onChange={e=>setDay(e.target.value)} className="bg-slate-900 p-1"><option value="all">Todas</option>{[...new Set(data.contracts.map(r=>r.day))].map(d=><option key={d}>{d}</option>)}</select></label>
       <label>Resultado <select aria-label="Resultado" value={status} onChange={e=>setStatus(e.target.value)} className="bg-slate-900 p-1"><option value="all">Todos</option>{Object.entries(labels).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label></div>
       {data.source==='ledger'&&<p className="mt-2 text-sm text-slate-300">Detalle de las dos últimas jornadas disponibles. Las métricas anteriores abarcan toda la cohorte del informe.</p>}
