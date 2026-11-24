@@ -1,6 +1,7 @@
 'use client';
 import {useState,useRef} from 'react';
 import Link from 'next/link';
+import {NbaManualDailyDashboard,NbaManualTracker} from '@/components/dashboard/NbaManualReview';
 type Metric={value:number|null;n:number};
 type Game={id:string;date:string;opponent:string;home:boolean;pointsFor:number;pointsAgainst:number};
 type Team={name:string;observedGames:number;wins:number;losses:number;pointsFor:Metric;pointsAgainst:Metric;recent:Game[];sequenceVerified:boolean};
@@ -10,8 +11,9 @@ type Period={id:string;date:string;home:string;away:string;homeQuarters:number[]
 type Lineup={gameId:number;teamId:number;status:string;capturedAt:string;players:{playerId:number;name:string;position:string}[]};
 type Injury={gameId:number;teamId:number;playerId:number;name:string;status:string;capturedAt:string};
 type Matchup={game_id:string;game_date:string;offensive_player_id:number;defender_player_id:number;offensive_player_name:string|null;defender_player_name:string|null;matchup_seconds:number|null;player_points:number|null;fgm:number|null;fga:number|null;assists:number|null;turnovers:number|null;captured_at:string};
-type Report={schemaVersion:string;date:string;status:string;readAt:string;source:{scheduleCapturedAt:string};coverage:Record<string,number>;fixtures:Fixture[];teams:Team[];players:Player[];periods:Period[];lineups:Lineup[];injuries:Injury[];matchups:Matchup[];warnings:string[]};
-const tabs=['Resumen','Partidos','Equipos','Últimos 10','Jugadores','Cuartos y mitades','Lesiones y alineaciones','Matchups'] as const;
+type Final={gameId:string;scheduledAt:string;home:string;away:string;homeScore:number;awayScore:number};
+type Report={schemaVersion:string;date:string;status:string;readAt:string;source:{scheduleCapturedAt:string};coverage:Record<string,number>;fixtures:Fixture[];teams:Team[];players:Player[];periods:Period[];lineups:Lineup[];injuries:Injury[];matchups:Matchup[];finals:Final[];warnings:string[]};
+const tabs=['Resumen','Dashboard','Tracker','Partidos','Equipos','Últimos 10','Jugadores','Cuartos y mitades','Lesiones y alineaciones','Matchups'] as const;
 const fmt=(n:number|null|undefined)=>n==null?'—':n.toLocaleString('es-PR',{maximumFractionDigits:1});
 const stamp=(s:string)=>new Date(s).toLocaleString('es-PR',{timeZone:'America/Puerto_Rico'});
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Puerto_Rico',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -30,7 +32,9 @@ export default function Page(){
  {error&&<p role="alert" className="text-amber-300">{error}</p>}
  {report&&<><p className="text-sm">Calendario: {stamp(report.source.scheduleCapturedAt)} PR · Lectura: {stamp(report.readAt)} PR</p><div className="flex flex-wrap gap-2" role="tablist">{tabs.map(t=><button key={t} role="tab" aria-selected={tab===t} className={control+(tab===t?' border-teal-300 text-teal-300':'')} onClick={()=>{setTab(t);setQuery('');setPage(0);}}>{t}</button>)}</div>
  <section role="tabpanel" className="space-y-3">
- {tab==='Resumen'&&<><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{Object.entries(report.coverage).map(([k,v])=><div key={k} className="rounded-lg border border-slate-700 p-3"><div className="text-xs">{({fixtures:'Partidos del día',observedFinals:'Finales observados',goatGames:'Partidos GOAT',playerRows:'Registros individuales',players:'Jugadores',conflicts:'Conflictos excluidos',matchedFinals:'Finales vinculados a GOAT',periodGames:'Partidos con parciales conciliados',namedPlayers:'Jugadores identificados',lineups:'Alineaciones archivadas',injuries:'Reportes de disponibilidad',matchupRows:'Observaciones de matchups'} as Record<string,string>)[k]??k}</div><strong className="text-xl">{v}</strong></div>)}</div>{report.warnings.map(w=><p key={w} className="text-sm text-amber-200">{w}</p>)}</>}
+ {tab==='Dashboard'&&<NbaManualDailyDashboard report={report}/>}
+ {tab==='Tracker'&&<NbaManualTracker report={report}/>}
+ {tab==='Resumen'&&<><div className="grid grid-cols-2 gap-3 md:grid-cols-4">{Object.entries(report.coverage).map(([k,v])=><div key={k} className="rounded-lg border border-slate-700 p-3"><div className="text-xs">{({fixtures:'Partidos del día',observedFinals:'Finales observados',goatGames:'Partidos GOAT',playerRows:'Registros individuales',players:'Jugadores',conflicts:'Conflictos excluidos',matchedFinals:'Finales vinculados a GOAT',periodGames:'Partidos con parciales conciliados',namedPlayers:'Jugadores identificados',lineups:'Alineaciones archivadas',injuries:'Reportes de disponibilidad',matchupRows:'Observaciones de matchups',archiveMissing:'Originales sin contexto operativo',archiveAttempted:'Originales consultados',archiveVerified:'Originales verificados',archiveCacheHits:'Originales reutilizados desde caché'} as Record<string,string>)[k]??k}</div><strong className="text-xl">{v}</strong></div>)}</div>{report.warnings.map(w=><p key={w} className="text-sm text-amber-200">{w}</p>)}</>}
  {tab==='Partidos'&&report.fixtures.map(f=><article key={f.id} className="rounded-lg border border-slate-700 p-4"><strong>{f.away.name} @ {f.home.name}</strong><p>{stamp(f.scheduledAt)} PR · {f.state}</p></article>)}
  {(tab==='Equipos'||tab==='Últimos 10'||tab==='Jugadores')&&<input className={control} aria-label="Buscar" placeholder={tab==='Jugadores'?'Nombre, ID de jugador o equipo':'Buscar equipo'} value={query} onChange={e=>{setQuery(e.target.value);setPage(0);}}/>}
  {(tab==='Equipos'||tab==='Últimos 10')&&teams.slice(page*12,page*12+12).map(t=><article key={t.name} className="rounded-lg border border-slate-700 p-4"><strong>{t.name}</strong><p>{t.wins}–{t.losses} · {t.observedGames} finales observados · {fmt(t.pointsFor.value)} / {fmt(t.pointsAgainst.value)} puntos</p><p className="text-xs text-amber-200">Cobertura no certificada como temporada completa.</p>{tab==='Últimos 10'&&t.recent.map(g=><div key={g.id} className="border-t border-slate-700 py-2 text-sm">{stamp(g.date)} · {g.home?'Local':'Visitante'} · {g.opponent} · {g.pointsFor}–{g.pointsAgainst}</div>)}</article>)}
