@@ -1,7 +1,9 @@
 import {unstable_cache} from 'next/cache';
 import {ledgerReview} from '../../../scripts/research/nba-v2/daily/review.mjs';
 import {supabasePort} from '../../../scripts/research/nba-v2/daily/supabase-port.mjs';
-import {notFound} from 'next/navigation';
+import {notFound,redirect} from 'next/navigation';
+import {headers} from 'next/headers';
+import {v2ReviewAccess} from '@/lib/nba/decision-v2-review-access.mjs';
 import data from '../../../docs/research/nba-v2/operations/prospective-report.json';
 import ShadowReview from './shadow-review';
 export const dynamic='force-dynamic';
@@ -11,8 +13,10 @@ const latest=unstable_cache(async()=>{
   return supabasePort(supabaseAdmin).review(data.modelHash);
 },['nba-v2-private-preview-review',data.modelHash],{revalidate:300});
 export default async function Page(){
-  if(process.env.VERCEL_ENV!=='preview')notFound();
-  if(process.env.NBA_DECISION_V2_PREVIEW_LEDGER==='read'){
+  const access=v2ReviewAccess(process.env,await headers());
+  if(!access)notFound();
+  if(access.redirect)redirect(access.redirect);
+  if(access.source==='ledger'){
     try {
       const live=ledgerReview(await latest(),data);
       if(live)return <ShadowReview data={live}/>;
