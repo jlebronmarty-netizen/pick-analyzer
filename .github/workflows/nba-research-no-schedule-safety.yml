@@ -1,0 +1,21 @@
+name: NBA research zero-call no-op safety
+on:
+  pull_request:
+    paths:
+      - 'src/services/nba-goat-research-capture.service.ts'
+      - 'tests/nba-research-no-schedule-noop.test.mjs'
+      - '.github/workflows/nba-research-no-schedule-safety.yml'
+permissions:
+  contents: read
+jobs:
+  no-provider-call-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/nba-research-no-schedule-noop.test.mjs
