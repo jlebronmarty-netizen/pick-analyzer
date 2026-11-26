@@ -1,4 +1,6 @@
 import 'server-only';
+import {projectionHistories} from '@/lib/nba/cheat-game-history.mjs';
+import {buildCheatCandidates} from '@/lib/nba/cheat-sheets.mjs';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
@@ -50,7 +52,7 @@ async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:stri
  const result=await query(fields).eq('source_received_at',at).order('snapshot_id').limit(33).abortSignal(AbortSignal.timeout(10000));
  return {id:game.id,lane,...readMarketBatches(check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED'),game,lane,asOf)};
 }
-export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false}={}){
+export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false,withCheatSheets=false,withSheetLab=false}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
  const [slate,archived,hoops,settlementRows,contextResult,pregameResult]=await Promise.all([
   db.from('nba_market_schedules_v1').select('source_received_at,payload,date_local').eq('date_local',day).lte('recorded_at',asOf).lte('source_received_at',asOf)
@@ -113,7 +115,7 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
   const group=playerIds.slice(i,i+24),groupRows:any[]=[];
   for(let start=0;;start+=1000){
    const r=await db.from('nba_goat_player_game_research_v1')
-     .select('season,provider_game_id,player_id,team_id,opponent_team_id,game_datetime,source_captured_at,source_sha256,materialized_at,minutes_played,pts,reb,ast,fg3m')
+     .select('season,provider_game_id,player_id,team_id,opponent_team_id,game_datetime,source_captured_at,source_sha256,materialized_at,minutes_played,pts,reb,ast,fg3m'+(withSheetLab?',stl,blk,turnover':''))
      .in('player_id',group).in('season',seasons).lte('materialized_at',asOf).lte('source_captured_at',asOf)
      .gte('game_datetime',new Date(now.getTime()-60*86400000).toISOString()).lt('game_datetime',asOf)
      .order('game_datetime',{ascending:false}).order('provider_game_id',{ascending:false}).order('player_id')
@@ -179,14 +181,16 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
     names[String(player.id)]??=player.first_name+' '+player.last_name;
   }
  }
- const result=buildNbaDecisionBoard({
+ const inputs={
    scheduleGames:games,calendar,manifests,contexts,pregame:available,goatMainQuotes:recentMain,
    goatPropQuotes:propQuotes,playerHistory:completeHistory,playerNames:names,
    hoopsCapture:hoop,asOf
- });
+ };
+ const result=buildNbaDecisionBoard(inputs);
  if(Object.keys(result.summary.qualityCounts).some(k=>k!=='VALIDATED'))
    console.info('NBA_DECISION_DATA_QUALITY',{day,counts:result.summary.qualityCounts,calendarIssues:calendar.issues});
- return {...result,accuracy:accuracy(settled,asOf),evidence:{
+ const lab=withSheetLab?await (await import('@/lib/nba/sheet-lab/build.mjs')).buildSheetLab(inputs,db):null;
+ return {...result,...(withSheetLab?{lab}:{}),...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs)} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
    scheduleCapturedAt:schedule?.source_received_at??null,
    historyCaptureAt:archive?.started_at??null,
    historyRunId:archive?.run_id??null,

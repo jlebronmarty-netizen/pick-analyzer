@@ -1,3 +1,37 @@
+
+## Reanudación controlada · cuarta migración
+
+La migración 202611260903_nba_sheet_view_acl limita los permisos a las cuatro vistas identificadas. El control exige SELECT sin delegación para service_role, ausencia de permisos efectivos por tabla y columna para anon y authenticated, y security_invoker. La prueba reproduce los privilegios predeterminados de producción y comprueba un permiso heredado mediante membresía; ejecutar este control en cada futuro tracker deportivo. Continuar con la lectura de catálogo antes de fusionar y activar. Los estados siguientes describen el corte anterior a esta corrección.
+
+
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
+## Integridad de liquidación · revisión del PR #408
+
+PR #408: se corrigió la lectura de estadísticas rechazadas en la liquidación FT. Cobertura de ocho mercados, ambas direcciones, reintentos y exclusión de pendientes del ROI en PostgreSQL aislado. Pendiente de revisión antes de producción.
+
+
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+PR #408 incorpora el tracker prospectivo por posición y unidades. La activación depende de autorización y de tres migraciones. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+PR #408: análisis por contrato, períodos conciliados y tracker ensayado en PostgreSQL local. Revisar la evidencia de integridad y el control MLB antes de publicación. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
+
+PR #408, rama `feat/nba-cheat-sheets`. Inventario del Site V13, código de referencia NBA recuperado y separación de tarjeta, filtros y barras. Validación local de escritorio/móvil, ranking y parciales. La revisión de la rama precede a una decisión de producción.
+
+[Inventario NBA y guía de continuidad](CHEAT_SHEETS_MASTER.md) · [Hoja de ruta y revisión](CHEAT_SHEETS_ROADMAP.md) · [Contrato de datos](CHEAT_SHEETS_DATA_CONTRACT.md) · [Componentes compartidos](CHEAT_SHEETS_MULTISPORT.md).
+
+## NBA · Cheat Sheets · 24 noviembre 2026
+
+Ruta privada `/nba-cheat-sheets`. Top 10 descriptivo por mercado, L5/L10/H2H, cuota mínima y captura prepartido idempotente. Aplicar `202611240901_nba_cheat_snapshots.sql` antes de habilitar producción. Verificar resultados prospectivos tras acumular capturas y finales.
+
 ## NBA · Centro de análisis manual por partido (borrador)
 
 PR #407 propone `archivedMarkets`, `meetingPlayers` y `observedSeason` en V1. Lee el último snapshot prepartido por ID, verifica equipos y horario mediante event_links y conserva línea, lado, operador, hora y regla OT originales. Los box scores H2H se limitan a filas disponibles. Pendiente validación del preview. No cambia proveedores, cron, motores ni almacenamiento.

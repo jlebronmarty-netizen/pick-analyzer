@@ -58,7 +58,7 @@ export function projectedPeriod(game,history,period){
 function oddsLabel(q){return num(q.american_odds??q.american_odds_approx);}
 function eventKey(g){return String(g.id);}
 function sideName(g,side){return side==='home'?g.home_team.full_name:side==='away'?g.visitor_team.full_name:side;}
-function latestUniqueQuotes(list,keyFn){
+export function latestUniqueQuotes(list,keyFn){
  const sorted=list.slice().sort((a,b)=>Date.parse(b.source_received_at??'')-Date.parse(a.source_received_at??''));
  const seen=new Map(),res=[];
  for(const q of sorted){
@@ -283,3 +283,4 @@ export function buildNbaDecisionBoard({
   'Player props Q1 y mercados especiales sin historial equivalente quedan sin predicción.',
  ]};
 }
+

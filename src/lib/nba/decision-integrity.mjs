@@ -64,7 +64,7 @@ export function teamWindow(e,target,team,observedIds) {
   return calendarCheck(e,team,audit);
 }
 
-export function playerWindow(e,target,playerId,parts,onGame=undefined) {
+export function playerWindow(e,target,playerId,parts,onGame=undefined,{allMinutes=false,required=10,opponentId=null}={}) {
   const records = (e.compact.get(playerId) ?? []).filter(r => r.season === target.season &&
       stamp(r.game_datetime) < Math.min(stamp(target.datetime),stamp(e.asOf)) &&
       stamp(r.materialized_at) <= stamp(e.asOf) && stamp(r.source_captured_at) <= stamp(e.asOf));
@@ -73,7 +73,8 @@ export function playerWindow(e,target,playerId,parts,onGame=undefined) {
   if (!latest) return calendarCheck(e,null,unavailable(e,'INCOMPLETE_HISTORY','NO_MATERIALIZED_PLAYER_HISTORY'));
   const team = Number(latest.team_id);
   if (!teams(target).includes(team)) return unavailable(e,'IDENTITY_MISMATCH','TEAM_OUTSIDE_TARGET_GAME');
-  const audit = auditWindow(expected(e,target,team), game => {
+  const events = expected(e,target,team).filter(g=>opponentId===null || teams(g).includes(opponentId));
+  const audit = auditWindow(events, game => {
     onGame?.(game.id);
     const final = inspectFinal(game);
     if (final) return final;
@@ -104,18 +105,18 @@ export function playerWindow(e,target,playerId,parts,onGame=undefined) {
     if (raw) {
       const [whole,seconds = 0] = String(raw.min).split(':').map(Number);
       if (Math.abs(whole + seconds/60 - min) > .001 ||
-          (min >= 10 && parts.some(k=>raw[k] !== r[k]))) return issue('PARTIAL','ORIGINAL_BOX_DISAGREES');
+          ((allMinutes ? min>0 : min>=10) && parts.some(k=>raw[k] !== r[k]))) return issue('PARTIAL','ORIGINAL_BOX_DISAGREES');
     }
-    if (min < 10) {
+    if (min === 0 || (!allMinutes && min < 10)) {
       if (!raw) return issue('PARTIAL','MINUTE_EXCLUSION_UNVERIFIED');
       return {exclude:min === 0 ? 'DNP' : 'UNDER_TEN_MINUTES'};
     }
     if (parts.some(k => !Number.isSafeInteger(r[k]) || r[k] < 0)) return issue('PARTIAL','MISSING_OR_INVALID_STAT');
     const include = {sourceHash:r.source_sha256, teamId:team};
     return raw ? {include} : {include, ...issue('PARTIAL','ORIGINAL_BOX_NOT_CROSS_CHECKED')};
-  }, e.asOf);
+  }, e.asOf,required);
   const oldest = audit.included.at(-1)?.date;
-  if (oldest && records.some(r => stamp(r.game_datetime) >= stamp(oldest) &&
+  if (oldest && records.some(r => (opponentId===null || r.opponent_team_id===opponentId) && stamp(r.game_datetime) >= stamp(oldest) &&
       !audit.included.some(v=>v.id===r.provider_game_id) && !audit.excluded.some(v=>v.id===r.provider_game_id) &&
       !audit.issues.some(v=>v.id===r.provider_game_id))) {
     audit.issues.unshift({status:'IDENTITY_MISMATCH',reason:'TRANSFER_OR_GAME_OUTSIDE_SCHEDULE'});
@@ -197,3 +198,4 @@ export function marketQuality(q, game, evidence, histories) {
     q.market==='props'?stamp(p?.captured_at)+3*3600000:Infinity);
   return {status:issues[0]?.status ?? 'VALIDATED',issues,warnings,overtimeRule:rule??'NOT_VERIFIED',regionalExecutionVerified:false,expiresAt:Number.isFinite(validUntil)?new Date(validUntil).toISOString():null,book:book ?? null,providerUpdatedAt:q.provider_updated_at ?? null};
 }
+

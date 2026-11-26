@@ -2,6 +2,11 @@ name: NBA Decision Board Private Preview
 on:
   pull_request:
     paths:
+      - 'src/lib/nba/sheet-lab/**'
+      - 'tests/nba-sheet*'
+      - 'tests/fixtures/nba-sheet-*'
+      - 'supabase/migrations/*nba_sheet*.sql'
+      - 'supabase/migrations/*nba_cheat*.sql'
       - 'src/lib/nba/decision-board-core.mjs'
       - 'src/lib/nba/decision-integrity.mjs'
       - 'src/lib/nba/decision-storage-original.mjs'
@@ -80,6 +85,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Test pregame NBA Cheat Sheets, periods and scheduled rankings
+        run: node --test tests/nba-cheat-ranking.test.mjs tests/nba-cheat-projections.test.mjs tests/nba-sheet-lab.test.mjs tests/nba-sheet-periods.test.mjs tests/nba-sheet-scheduler.test.mjs
       - name: Test archived-only contracts, missing-data blocking and cross-provider IDs
         run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs tests/nba-v2-live-review.test.mjs
       - name: Verify manual NBA tracker and private access boundaries
@@ -162,3 +169,34 @@ jobs:
             test-results/nba-navigation-server/
           if-no-files-found: warn
           retention-days: 7
+
+  sheet-settlement-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:55438:5432'
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run NBA regression tests
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/nba*.test.mjs
+      - name: Install isolated PostgreSQL test client
+        run: npm install --prefix "$RUNNER_TEMP/sheet-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
+      - name: Verify migrations, reports and pending-to-final settlement
+        run: |
+          export NBA_SHEET_TEST_PG_MODULE="$RUNNER_TEMP/sheet-pg/node_modules/pg/lib/index.js"
+          node tests/nba-sheet-tracker.postgres.mjs
+          node tests/nba-sheet-performance.postgres.mjs
+          node tests/nba-sheet-retry.postgres.mjs
+          node tests/nba-sheet-view-acl.postgres.mjs

@@ -1,3 +1,37 @@
+
+## Reanudación controlada · cuarta migración
+
+La migración 202611260903_nba_sheet_view_acl limita los permisos a las cuatro vistas identificadas. El control exige SELECT sin delegación para service_role, ausencia de permisos efectivos por tabla y columna para anon y authenticated, y security_invoker. La prueba reproduce los privilegios predeterminados de producción y comprueba un permiso heredado mediante membresía; ejecutar este control en cada futuro tracker deportivo. Continuar con la lectura de catálogo antes de fusionar y activar. Los estados siguientes describen el corte anterior a esta corrección.
+
+
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
+## Integridad de liquidación · revisión del PR #408
+
+NBA Cheat Sheets espera revisión de la liquidación corregida antes de fusionar o aplicar las tres migraciones. Mantener el escritor apagado hasta la autorización.
+
+
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+NBA: validar el lanzamiento del tracker antes de trasladar historia privada o iniciar NHL. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+Próxima decisión NBA: revisión de la rama y de las migraciones privadas ensayadas. Quedan pendientes el control MLB documentado, la aprobación de producción y la evaluación prospectiva real. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
+
+Próxima entrega NBA: auditar participaciones y reproducir parciales PBP al mismo corte. Después, comparar contratos y condiciones; ensayar tracker privado y captura idempotente. El 25-nov la tabla de snapshots de Cheat Sheets estaba pendiente en Supabase.
+
+[Inventario NBA y guía de continuidad](CHEAT_SHEETS_MASTER.md) · [Hoja de ruta y revisión](CHEAT_SHEETS_ROADMAP.md) · [Contrato de datos](CHEAT_SHEETS_DATA_CONTRACT.md) · [Componentes compartidos](CHEAT_SHEETS_MULTISPORT.md).
+
+## NBA · Cheat Sheets · 24 noviembre 2026
+
+Ruta privada `/nba-cheat-sheets`. Top 10 descriptivo por mercado, L5/L10/H2H, cuota mínima y captura prepartido idempotente. Aplicar `202611240901_nba_cheat_snapshots.sql` antes de habilitar producción. Verificar resultados prospectivos tras acumular capturas y finales.
+
 ## NBA · Centro de análisis manual por partido (borrador)
 
 PR #407 propone `archivedMarkets`, `meetingPlayers` y `observedSeason` en V1. Lee el último snapshot prepartido por ID, verifica equipos y horario mediante event_links y conserva línea, lado, operador, hora y regla OT originales. Los box scores H2H se limitan a filas disponibles. Pendiente validación del preview. No cambia proveedores, cron, motores ni almacenamiento.

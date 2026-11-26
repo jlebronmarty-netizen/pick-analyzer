@@ -1,5 +1,6 @@
 'use client'
 
+import {usePathname} from 'next/navigation'
 import {
   createContext,
   useCallback,
@@ -24,7 +25,13 @@ const DashboardContext = createContext<DashboardContextType>({
   refresh: async () => {},
 })
 
-export function DashboardProvider({
+export function DashboardProvider({children}: {children: React.ReactNode}) {
+  const path = usePathname()
+  if (path === '/nba-cheat-sheets' || path?.startsWith('/nba-cheat-sheets/')) return <>{children}</>
+  return <ActiveDashboardProvider>{children}</ActiveDashboardProvider>
+}
+
+function ActiveDashboardProvider({
   children,
 }: {
   children: React.ReactNode
