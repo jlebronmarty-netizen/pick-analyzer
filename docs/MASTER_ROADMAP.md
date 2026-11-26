@@ -1,4 +1,9 @@
 
+## Transición NBA → NHL · planificación del 25 de noviembre
+
+Acta de producción NBA #410 fusionada. Primer tick natural verificado; seguimiento activo de la primera captura elegible y liquidación real. NHL en auditoría de sólo lectura. [Inventario, fronteras con investigación y condiciones de inicio](NHL_CHEAT_SHEETS_ROADMAP.md).
+
+
 ## Estado de producción · activación del 25 de noviembre
 
 NBA publicado. Hito siguiente: evidencia operativa de dos ejecuciones y primera liquidación real. NHL se mantiene en preparación documental. [Informe de producción](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
