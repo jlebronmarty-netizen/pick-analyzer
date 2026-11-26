@@ -1,5 +1,10 @@
 # NBA Cheat Sheets en Pick Analyzer
 
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+La portada, el análisis avanzado y el tracker comparten el archivo prepartido. Las visitas son de lectura. El cron captura y liquida con activación explícita. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+
 ## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
 
 Entrega NBA de revisión. La portada mantiene sus rankings y da acceso al análisis por contrato, perfiles y combinados. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).

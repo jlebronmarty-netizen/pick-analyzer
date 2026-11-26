@@ -1,5 +1,10 @@
 # Contrato de lectura NBA
 
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+Contrato prospectivo: primera posición, línea, precio y metodología por estrategia. La vista nba_sheet_performance_v1 publica muestras, unidades, ROI y pares equivalentes por puesto y Top acumulado. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+
 ## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
 
 Extensión NBA_SHEET_LAB_V1: cuotas prepartido, muestras por período, ocho criterios y liquidación privada. El informe detalla identidad de contrato, unidades, reloj, denominadores y muestras excluidas. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
@@ -16,7 +21,7 @@ Revisión documental 1, 25-nov-2026. La ruta de página es `/nba-cheat-sheets`. 
 | Tarjeta verificada | `cheat-sheets.mjs` → `cheat-ranking.mjs` | `quoteId,gameId,playerId,name,market,side,line,odds,book,start,updated,expiresAt,matchup` y listas `five,ten,h2h`. Cada juego lleva `id,date,team,rival,minutes,value`. Lado `over/under`. Mercado en `points,rebounds,assists,threes`. |
 | Tarjeta descriptiva | `cheat-projections.mjs` + `projectionHistories` | `quote,gameId,player,name,market,side,line,odds,start,captured,expires,projection,l5,l10,five,ten,edge,warnings`. Aquí `five/ten` son conteos y `side` es `Over/Under`. `trend` y `meetings` llevan valor, fecha, rival e ID. Una serie sin conciliación de los diez IDs queda vacía. |
 | Rival bajo demanda | `src/app/api/nba/cheat-rival/route.js`, `cheat-rival.mjs`, `nba-manual-data.service.ts` | Archivo manual `NBA_MANUAL_DATA_V1`; finales `game_results` y marcadores conciliados; alineaciones/lesiones en `nba_pregame_context_v1`; `nba_matchup_observations_v3` para el par ataque → defensa. |
-| Ranking congelado | `src/services/nba-cheat-capture.ts` | En producción, si hay elegibles, guarda en `nba_cheat_snapshots_v1` el SHA-256 de la serialización de [día,payload], fecha, primera expiración y payload de rankings/quotes y tarjetas verificadas. Upsert idempotente con duplicados ignorados. Preview sólo lee. |
+| Ranking congelado | `src/lib/nba/sheet-lab/scheduler.mjs` | Captura programada prepartido de cada ranking y primera inscripción por estrategia. Ver el contrato de lanzamiento. |
 
 ## Fórmulas, muestras y filtros
 

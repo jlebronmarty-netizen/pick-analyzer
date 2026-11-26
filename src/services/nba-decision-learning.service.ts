@@ -1,6 +1,5 @@
 import {runOptionalNbaV2} from './nba-decision-v2-hook.mjs';
 import 'server-only';
-import {captureNbaCheatSheets} from './nba-cheat-capture';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin as db} from '@/lib/supabase-admin';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
@@ -20,14 +19,10 @@ async function writeIgnoreDuplicates(table:string,values:any[],id:string){
  return written;
 }
 export async function freezeNbaDecisionShadow(now=new Date()){
- const board=await readNbaDecisionBoard({now,withCheatSheets:true});
+ const board=await readNbaDecisionBoard({now});
  const original=await persistV1Freeze(board,now);
  await runOptionalNbaV2('freeze',db,board);
- const cheatCapture=await captureNbaCheatSheets(board.day,board.cheatSheets??[]).catch(()=>{
-   console.error('NBA_CHEAT_CAPTURE_FAILED');
-   return 'FAILED';
- });
- return {...original,cheatCapture};
+ return original;
 }
 async function persistV1Freeze(board:Awaited<ReturnType<typeof readNbaDecisionBoard>>,now:Date){
  const plan=planNbaShadowFreeze(board,now.toISOString());
@@ -179,4 +174,3 @@ export async function readNbaDecisionLearningStatus(){
   fullHistoryExhaustive:complete,periodSince:since,
   uncertaintyMethod:m.method,provider_calls:0,model_promotions:0};
 }
-

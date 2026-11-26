@@ -1,3 +1,8 @@
+
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+PR #408 incorpora el tracker prospectivo por posición y unidades. La activación depende de autorización y de tres migraciones. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
 ## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
 
 PR #408: análisis por contrato, períodos conciliados y tracker ensayado en PostgreSQL local. Revisar la evidencia de integridad y el control MLB antes de publicación. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).

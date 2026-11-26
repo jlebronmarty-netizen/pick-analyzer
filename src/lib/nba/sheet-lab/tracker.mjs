@@ -1,3 +1,5 @@
+import {rankSheet,hits,markets} from '../cheat-ranking.mjs';
+import {projectionRows,topProjections} from '../cheat-projections.mjs';
 import {createHash} from 'node:crypto';
 import {verifiedArchivedPlayerFinal} from '../decision-archived-final-core.mjs';
 import {reconcilePeriods} from './periods.mjs';
@@ -22,11 +24,31 @@ export function prepareSnapshots(lab, originals=[]){
   const cards=rows.map(r=>({quoteId:r.id,gameId:r.gameId,playerId:r.playerId,statistic:r.market,metric:r.metric,period:r.period,side:r.side,
    line:r.line,odds:r.odds,book:'FanDuel',ot:r.ot,start:r.start,captured:r.captured,expires:r.expires,
    score:r[method],n:r.n,original:comparableOriginal(r,originals,lab.at)}));
-  const payload={version:'NBA_SHEET_LAB_V1',method,band,scope:market||'general',cards};
-  const snapshot_id=createHash('sha256').update(JSON.stringify([lab.date,payload])).digest('hex');
-  snapshots.push({snapshot_id,day_local:lab.date,expires_at:new Date(Math.min(...cards.map(c=>stamp(c.expires)))).toISOString(),payload});
+  snapshots.push(snapshot(lab.date,method,band,market||'general',cards));
+
  }
  return snapshots;
+}
+function snapshot(date,method,band,scope,cards){
+ const payload={version:'NBA_SHEET_LAB_V1',method,band,scope,cards};
+ const snapshot_id=createHash('sha256').update(JSON.stringify([date,payload])).digest('hex');
+ return {snapshot_id,day_local:date,expires_at:new Date(Math.min(...cards.map(c=>stamp(c.expires)))).toISOString(),payload};
+}
+export function frontSnapshots(board,originals=[]){
+ const results=[],now=stamp(board.asOf),qualities=new Map(board.rows.props.map(q=>[q.quoteId,q.dataQuality]));
+ const projections=projectionRows(board.rows.props),verified=(board.cheatSheets??[]).filter(c=>stamp(c.expiresAt)>now&&stamp(c.start)>now);
+ for(const band of ['-250','-650'])for(const market of Object.keys(markets))for(const window of ['five','ten','h2h']){
+  const groups=[['verified_'+window,rankSheet(verified,market,window,Number(band)).map(r=>({
+   quoteId:r.quoteId,gameId:r.gameId,playerId:r.playerId,statistic:market,period:'FT',side:r.side,line:r.line,odds:r.odds,book:r.book,ot:'INCLUDES_OT',start:r.start,captured:r.updated,expires:r.expiresAt,n:r[window].length,score:hits(r,window)/r[window].length
+  }))]];
+  if(window!=='h2h')groups.push(['projection_'+window,topProjections(projections,market,window,Number(band),now).map(r=>({
+   quoteId:r.quote,gameId:r.gameId,playerId:r.player,statistic:market,period:'FT',side:r.side.toLowerCase(),line:r.line,odds:r.odds,book:'FanDuel',
+   ot:qualities.get(r.quote)?.overtimeRule==='INCLUDES_OVERTIME'&&!r.warnings.includes('Regla de tiempo extra pendiente')?'INCLUDES_OT':'NOT_VERIFIED',
+   start:r.start,captured:r.captured,expires:r.expires,n:window==='ten'?10:5,score:r[window]/(window==='ten'?10:5),projection:r.projection
+  }))]);
+  for(const [method,cards] of groups)if(cards.length)results.push(snapshot(board.day,method,band,market,cards.map(c=>({...c,original:comparableOriginal({...c,market:c.statistic},originals,board.asOf)}))));
+ }
+ return results;
 }
 const metricFor={points:'pts',rebounds:'reb',assists:'ast',threes:'fg3m',points_rebounds_assists:'pra',points_rebounds:'pr',points_assists:'pa',rebounds_assists:'ra'};
 export function settleContract(c,{context,final,pbp,voidReceipt},registeredAt){

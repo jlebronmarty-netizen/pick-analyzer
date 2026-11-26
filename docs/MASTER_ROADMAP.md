@@ -1,3 +1,8 @@
+
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+NBA: validar el lanzamiento del tracker antes de trasladar historia privada o iniciar NHL. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
 ## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
 
 Próxima decisión NBA: revisión de la rama y de las migraciones privadas ensayadas. Quedan pendientes el control MLB documentado, la aprobación de producción y la evaluación prospectiva real. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).

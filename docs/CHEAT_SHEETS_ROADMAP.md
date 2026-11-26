@@ -1,5 +1,10 @@
 # Consolidación NBA · revisión de entrega
 
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+Pendiente de autorización: tres migraciones aditivas, activar el cron y observar capturas y liquidaciones reales. Comparar metodologías sólo en sus propias muestras. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+
 ## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
 
 Las fases de auditoría, períodos, combinados, filtros y condiciones ya tienen implementación candidata en #408. El tracker tiene ensayo aislado; restan la revisión de certificación MLB y la decisión de producción. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).

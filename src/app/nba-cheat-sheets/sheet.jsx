@@ -49,7 +49,7 @@ export default function Sheet({cards=[],projections=[],day,asOf,showReference=fa
   return <main className={styles.sheet}><Link href="/nba-decision-board">← Decision Board</Link>
     <header className={styles.hero}><p>NBA <span> / </span> {date(day+'T12:00:00Z')}</p><h1>Cheat Sheets</h1><p>Las líneas de hoy frente al historial de cada jugador.</p></header>
     <details className={styles.method}><summary>Metodología y validación</summary><p>Pick calcula la proyección con 65% del promedio de los últimos 5 juegos y 35% del promedio de los últimos 10, en partidos con al menos 10 minutos. La gráfica muestra cuántas veces el jugador cumplió la línea. Las limitaciones de cada contrato aparecen en su tarjeta.</p></details>
-    <p><Link href="/nba-cheat-sheets/analisis">Top 10 general, combinados y análisis por contrato →</Link></p>
+    <p><Link href="/nba-cheat-sheets/analisis">Top 10 general, combinados y análisis por contrato →</Link> · <Link href="/nba-cheat-sheets/tracker">Tracker de resultados</Link></p>
     {captureFailed && <p role="status">La captura de seguimiento está pendiente.</p>}
     <div className={styles.controls}><FilterGroup label="Mercado" options={markets} value={market} onChange={setMarket}/><FilterGroup label="Historial" options={windows} value={w} onChange={setWindow}/><FilterGroup label="Rango de cuotas" options={oddsBands} value={floor} onChange={setFloor}/></div>
     {w!=='h2h' && <section aria-label="Proyecciones de Pick">

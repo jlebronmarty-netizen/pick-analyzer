@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
 import Sheet from './sheet';
 import {projectionRows} from '@/lib/nba/cheat-projections.mjs';
-import {captureNbaCheatSheets} from '@/services/nba-cheat-capture';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
 export default async function Page(){
@@ -16,10 +15,5 @@ export default async function Page(){
   let board;
   try {board=await readNbaDecisionBoard({forDisplay:true,withCheatSheets:true});}
   catch {return <main className="p-6"><h1>Cheat Sheets NBA</h1><p>No se pudo leer el archivo de hoy. Vuelve a cargar la página.</p><Link href="/nba-decision-board">Volver al Decision Board</Link></main>;}
-  let captureFailed=false;
-  if(process.env.VERCEL_ENV==='production'){
-    try {await captureNbaCheatSheets(board.day,board.cheatSheets??[]);}
-    catch {captureFailed=true;}
-  }
-  return <Sheet projections={projectionRows(board.rows.props,board.projectionHistories)} showReference={process.env.VERCEL_ENV==='preview'} captureFailed={captureFailed} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
+  return <Sheet projections={projectionRows(board.rows.props,board.projectionHistories)} showReference={process.env.VERCEL_ENV==='preview'} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
 }

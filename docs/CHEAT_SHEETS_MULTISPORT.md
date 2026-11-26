@@ -1,5 +1,10 @@
 # Componentes reutilizables de Cheat Sheets
 
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+El contrato de reporting separa inscripción, liquidación y agregación. Cada deporte debe validar participación, período, cuota y liquidación antes de reutilizar la presentación. NHL queda en preparación. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+
 ## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
 
 El nuevo consumidor NBA usa SheetCard, TrendBars y los estilos compartidos. Los cálculos por período, reglas regionales y cruces SHADOW siguen en el dominio NBA. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
