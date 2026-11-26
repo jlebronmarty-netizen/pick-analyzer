@@ -199,3 +199,4 @@ jobs:
           node tests/nba-sheet-tracker.postgres.mjs
           node tests/nba-sheet-performance.postgres.mjs
           node tests/nba-sheet-retry.postgres.mjs
+          node tests/nba-sheet-view-acl.postgres.mjs
