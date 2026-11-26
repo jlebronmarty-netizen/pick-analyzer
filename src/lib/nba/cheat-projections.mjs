@@ -11,7 +11,7 @@ export function projectionRows(rows,histories={}){
     Number.isFinite(r.odds) && Number.isFinite(r.advantage) && r.advantage>=0 &&
     r.sample===10 && r.quoteFreshness==='RECENT' && r.dataQuality?.book==='FanDuel' &&
     r.dataQuality.issues.every(i=>permittedIssues.has(i.reason))).map(r=>({
-      ...histories[r.historyKey],player:r.playerId,name:r.playerName,matchup:r.matchup,market:r.statistic,start:r.startsAt,
+      ...histories[r.historyKey],player:r.playerId,gameId:r.gameId,name:r.playerName,matchup:r.matchup,market:r.statistic,start:r.startsAt,
       projection:r.projection,line:r.line,side:r.selection,odds:r.odds,edge:r.advantage,
       ten:r.hit10,five:r.hit5,l5:r.l5,l10:r.l10,quote:r.quoteId,
       captured:r.capturedAt,expires:r.dataQuality.expiresAt,

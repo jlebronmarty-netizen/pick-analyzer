@@ -14,9 +14,9 @@ const num=(x:unknown):number|null=>typeof x==='number'&&Number.isFinite(x)?x:nul
 const dateOf=(x:unknown)=>typeof x==='string'&&Number.isFinite(Date.parse(x))?ncaabManualDate(x):null;
 const metrics=['pts','reb','ast','fg3m','stl','blk','turnover','minutes_played'] as const;
 const avg=(rows:Row[],key:string)=>{const v=rows.map(r=>num(r[key])).filter((x):x is number=>x!==null);return {value:v.length?v.reduce((a,b)=>a+b,0)/v.length:null,n:v.length};};
-export async function getNbaManualData(date:string){
+export async function getNbaManualData(date:string,rivalCutoff?:string){
  validateNcaabManualDate(date);
- const readAt=new Date().toISOString(),year=Number(date.slice(0,4)),season=Number(date.slice(5,7))>=7?year:year-1;
+ const readAt=rivalCutoff??new Date().toISOString(),year=Number(date.slice(0,4)),season=Number(date.slice(5,7))>=7?year:year-1;
  const start=date+'T00:00:00-04:00', seasonStart=season+'-10-01T00:00:00-04:00';
  const signal=AbortSignal.timeout(45000);
  const schedule=await supabaseAdmin.from('nba_market_schedules_v1').select('snapshot_id,source_received_at,payload').eq('date_local',date).lte('source_received_at',readAt).order('source_received_at',{ascending:false}).order('snapshot_id').limit(1).abortSignal(signal);
@@ -78,6 +78,7 @@ export async function getNbaManualData(date:string){
  const addName=(p:Row)=>{const id=num(p.id),name=[p.first_name,p.last_name].filter(x=>typeof x==='string'&&x.trim()).join(' ').trim();if(id===null||!name)return;const k=String(id);if(names.has(k)&&names.get(k)!==name)nameConflicts.add(k);names.set(k,name);};
  const addTeam=(t:Row)=>{const id=num(t.id),name=t.full_name;if(id===null||typeof name!=='string'||!name)return;if(teamDirectory.has(id)&&teamDirectory.get(id)!==name)teamConflicts.add(id);teamDirectory.set(id,name);};
  for(const f of fixtures){addTeam({id:f.home.id,full_name:f.home.name});addTeam({id:f.away.id,full_name:f.away.name});}
+ const foulRows=new Map<string,number|null>();
  const periodCandidates=new Map<string,Row>(),periodConflicts=new Set<string>();
  for(const c of contexts){
  const rows=arr(obj(c.player_stats).data).map(obj);
@@ -85,6 +86,10 @@ export async function getNbaManualData(date:string){
  const g=obj(row.game),id=num(g.id),dt=g.datetime;
  if(id===null||id!==num(c.provider_game_id)||typeof dt!=='string'||!Number.isFinite(Date.parse(dt))||Date.parse(dt)>=Date.parse(start)||Date.parse(dt)<Date.parse(seasonStart)||g.season!==season||g.status_state!=='final')continue;
  addName(obj(row.player));addTeam(obj(row.team));
+ if(rivalCutoff && Number.isSafeInteger(row.pf) && Number(row.pf)>=0 && Date.parse(String(c.player_stats_captured_at))>Date.parse(dt)){
+   const key=[id,obj(row.player).id,obj(row.team).id].join('|');
+   foulRows.set(key,foulRows.has(key)&&foulRows.get(key)!==row.pf?null:Number(row.pf));
+ }
  const h=num(g.home_team_score),a=num(g.visitor_team_score),hi=num(g.home_team_id),ai=num(g.visitor_team_id);
  if(h===null||a===null||h===a||hi===null||ai===null||hi===ai||h<0||a<0)continue;
  const hq=[1,2,3,4].map(i=>num(g['home_q'+i])),aq=[1,2,3,4].map(i=>num(g['visitor_q'+i]));
@@ -160,7 +165,7 @@ export async function getNbaManualData(date:string){
  // game date and capture are retained; these are not projected assignments.
  const participantIds=[...new Set(lineups.flatMap(l=>arr(l.players).map(x=>num(obj(x).playerId))).filter((x):x is number=>x!==null))];
  const matchups:Row[]=[],matchupKeys=new Set<string>();let matchupExpected:number|null=null;
- if(participantIds.length){
+ if(!rivalCutoff && participantIds.length){
  for(let offset=0;offset<15000;offset+=500){
  const ids=participantIds.join(',');
  const q=await supabaseAdmin.from('nba_matchup_observations_v3').select('game_id,provider_game_id,game_date,offensive_player_id,defender_player_id,offensive_player_name,defender_player_name,matchup_seconds,player_points,fgm,fga,assists,turnovers,captured_at',{count:'exact'}).gte('game_date',seasonStart.slice(0,10)).lt('game_date',date).lte('captured_at',readAt).or('offensive_player_id.in.('+ids+'),defender_player_id.in.('+ids+')').order('game_id').order('offensive_player_id').order('defender_player_id').range(offset,offset+499).abortSignal(signal);
@@ -172,7 +177,7 @@ export async function getNbaManualData(date:string){
  }
  matchups.sort((a,b)=>String(b.game_date).localeCompare(String(a.game_date)));
  // Optional archive extensions never invalidate the base V1 report.
- const archivedMarkets=(await Promise.all(fixtures.flatMap(f=>['game','props'].map(async family=>{
+ const archivedMarkets=(await Promise.all((rivalCutoff?[]:fixtures).flatMap(f=>['game','props'].map(async family=>{
   const gameId=Number(f.id),cutoff=new Date(Math.min(Date.parse(readAt),Date.parse(String(f.scheduledAt))-1)).toISOString();
   let request=supabaseAdmin.from('nba_market_snapshots_v1').select('snapshot_id,internal_event_id,quote_count,source_received_at,batches:payload->meta->>batch_count').eq('provider_game_id',gameId).eq('date_local',date).eq('phase','PREGAME').lte('recorded_at',cutoff).lte('source_received_at',cutoff);
   request=family==='game'?request.is('payload->meta->>batch_count',null):request.not('payload->meta->>batch_count','is',null);
@@ -192,5 +197,10 @@ export async function getNbaManualData(date:string){
  const meetingIds=new Set(meetings.map(p=>String(p.id).replace('bdl_nba_','')));
  const meetingPlayers=players.filter(r=>meetingIds.has(String(r.provider_game_id))).map(r=>({gameId:r.provider_game_id,playerId:r.player_id,name:names.get(String(r.player_id))??null,teamId:r.team_id,season,...Object.fromEntries(metrics.map(k=>[k,r[k]]))}));
  const goatGames=new Set(players.map(r=>String(r.provider_game_id)));
- return {schemaVersion:'NBA_MANUAL_DATA_V1',sport:'NBA',date,timezone:'America/Puerto_Rico',readAt,status:'PARTIAL',readOnly:true,providerCalls:0,databaseWrites:0,predictionAdjustment:false,modelPromoted:false,source:{scheduleCapturedAt:snap.source_received_at,scheduleSnapshotId:snap.snapshot_id},coverage:{fixtures:fixtures.length,observedFinals:games.length,goatGames:goatGames.size,playerRows:players.length,players:playerSummaries.length,conflicts:conflicts.size,periodGames:verifiedPeriods.length,archiveMissing:missing.length,archiveAttempted,archiveVerified,archiveCacheHits,scoreboardChecked,scoreboardUnavailable,scoreboardRecovered,namedPlayers:playerSummaries.filter(p=>p.name!==null).length,lineups:lineups.length,injuries:injuries.length,matchupRows:matchups.length,matchedFinals:games.filter(g=>goatGames.has(String(g.game_id).replace('bdl_nba_',''))).length},archivedMarkets,meetingPlayers,observedSeason:season,fixtures,teams,players:playerSummaries,finals:games.map(g=>({gameId:String(g.game_id).replace('bdl_nba_',''),scheduledAt:g.commence_time,home:g.home_team,away:g.away_team,homeScore:g.home_score,awayScore:g.away_score})),periods:verifiedPeriods,lineups,injuries,matchups,warnings:['Historial observado, no récord oficial ni últimos diez consecutivos certificados. Los archivos originales se verifican por hash y consistencia del box score; los que no pasan se excluyen del historial individual certificado. Los marcadores de carteleras finales conciliadas pueden aportar resultados independientes, sin certificar las participaciones.','Los nombres se vinculan por ID GOAT cuando existe evidencia; el último equipo observado no certifica roster actual.','Cuartos y mitades solo donde los parciales suman el marcador final; contexto prepartido observado, no confirmado. Matchups históricos de jugadores con alineación archivada para la jornada, no asignaciones proyectadas.','No se calculan recomendaciones ni probabilidades.']};
+ const rivalHistory=rivalCutoff?players.map(r=>({
+   playerId:r.player_id,gameId:r.provider_game_id,teamId:r.team_id,opp:r.opponent_team_id,date:r.game_datetime,
+   pts:r.pts,reb:r.reb,ast:r.ast,fg3m:r.fg3m,min:r.minutes_played,
+   pf:foulRows.get([r.provider_game_id,r.player_id,r.team_id].join('|'))??null
+ })):undefined;
+ return {...(rivalHistory?{rivalHistory}:{}),schemaVersion:'NBA_MANUAL_DATA_V1',sport:'NBA',date,timezone:'America/Puerto_Rico',readAt,status:'PARTIAL',readOnly:true,providerCalls:0,databaseWrites:0,predictionAdjustment:false,modelPromoted:false,source:{scheduleCapturedAt:snap.source_received_at,scheduleSnapshotId:snap.snapshot_id},coverage:{fixtures:fixtures.length,observedFinals:games.length,goatGames:goatGames.size,playerRows:players.length,players:playerSummaries.length,conflicts:conflicts.size,periodGames:verifiedPeriods.length,archiveMissing:missing.length,archiveAttempted,archiveVerified,archiveCacheHits,scoreboardChecked,scoreboardUnavailable,scoreboardRecovered,namedPlayers:playerSummaries.filter(p=>p.name!==null).length,lineups:lineups.length,injuries:injuries.length,matchupRows:matchups.length,matchedFinals:games.filter(g=>goatGames.has(String(g.game_id).replace('bdl_nba_',''))).length},archivedMarkets,meetingPlayers,observedSeason:season,fixtures,teams,players:playerSummaries,finals:games.map(g=>({gameId:String(g.game_id).replace('bdl_nba_',''),scheduledAt:g.commence_time,home:g.home_team,away:g.away_team,homeScore:g.home_score,awayScore:g.away_score})),periods:verifiedPeriods,lineups,injuries,matchups,warnings:['Historial observado, no récord oficial ni últimos diez consecutivos certificados. Los archivos originales se verifican por hash y consistencia del box score; los que no pasan se excluyen del historial individual certificado. Los marcadores de carteleras finales conciliadas pueden aportar resultados independientes, sin certificar las participaciones.','Los nombres se vinculan por ID GOAT cuando existe evidencia; el último equipo observado no certifica roster actual.','Cuartos y mitades solo donde los parciales suman el marcador final; contexto prepartido observado, no confirmado. Matchups históricos de jugadores con alineación archivada para la jornada, no asignaciones proyectadas.','No se calculan recomendaciones ni probabilidades.']};
 }
