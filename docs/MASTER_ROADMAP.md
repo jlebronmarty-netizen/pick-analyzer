@@ -1,3 +1,7 @@
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+Próxima decisión NBA: revisión de la rama y de las migraciones privadas ensayadas. Quedan pendientes el control MLB documentado, la aprobación de producción y la evaluación prospectiva real. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
 ## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
 
 Próxima entrega NBA: auditar participaciones y reproducir parciales PBP al mismo corte. Después, comparar contratos y condiciones; ensayar tracker privado y captura idempotente. El 25-nov la tabla de snapshots de Cheat Sheets estaba pendiente en Supabase.

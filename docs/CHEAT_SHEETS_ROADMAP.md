@@ -1,5 +1,10 @@
 # Consolidación NBA · revisión de entrega
 
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+Las fases de auditoría, períodos, combinados, filtros y condiciones ya tienen implementación candidata en #408. El tracker tiene ensayo aislado; restan la revisión de certificación MLB y la decisión de producción. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+
 **Destino actual:** vista previa de `feat/nba-cheat-sheets` en el PR #408. Base visual y funcional `2bd1709e`. La revisión entrega el inventario, la recuperación del trabajo técnico y una separación de presentación en uso por NBA. La activación de capacidades históricas adicionales tiene hitos propios.
 
 | Fase | Cierre de esta revisión | Evidencia |

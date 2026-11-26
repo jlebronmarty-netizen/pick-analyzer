@@ -27,6 +27,9 @@ function Trend({row:r,initial}){
 function Limits({row:r}){
   return r.warnings.length>0&&<p className={styles.limits}><b>Pendiente de validar</b> · {r.warnings.map(v=>({'Box score original pendiente de cotejo':'box score original','Regla de tiempo extra pendiente':'regla de tiempo extra','Disponibilidad del jugador pendiente':'disponibilidad del jugador'}[v]??v)).join(' · ')}</p>;
 }
+function ProfileLink({row}){
+ return <p className={styles.limits}><Link href={"/nba-cheat-sheets/analisis?game="+row.gameId+"&player="+(row.playerId??row.player)}>Perfil detallado del jugador →</Link></p>;
+}
 function Card({card:c,window:w,rank,alternatives,asOf}){
   const title=c.side==='over'&&c.line%1===0.5?Math.ceil(c.line)+'+':(c.side==='over'?'Más de ':'Menos de ')+c.line;
   return <SheetCard><header><span>{c.matchup}</span><span>{time(c.start)} PR</span></header>
@@ -34,7 +37,7 @@ function Card({card:c,window:w,rank,alternatives,asOf}){
     <div className={styles.score}><b>{hits(c,w)}/{c[w].length}</b><span>{windows[w]}<small>veces que cumplió</small></span><i>#{rank}</i></div>
     <div className={styles.stats}>{Object.entries(windows).map(([k,v])=><div key={k}><small>{v}</small><strong>{c[k].length?hits(c,k)+'/'+c[k].length:'—'}</strong></div>)}</div>
     <div className={styles.footer}><span>{c.book} <b>{c.odds>0?'+':''}{c.odds}</b></span><span>Actualizada {time(c.updated)} PR</span></div>
-    <details><summary>Ver los {c[w].length} juegos</summary><table><caption>Del más reciente al más antiguo</caption><thead><tr>{['Fecha','Rival','Min','Total','Resultado'].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{c[w].map(r=><tr key={r.id}><td>{date(r.date)}</td><td>{r.rival}</td><td>{Math.round(r.minutes)}</td><td>{r.value}</td><td>{{win:'Acierto',push:'Empate',loss:'Fallo'}[outcome(c,r.value)]}</td></tr>)}</tbody></table>{alternatives.length>0 && <section><h3>Otras líneas verificadas</h3><ul>{alternatives.map(a=><li key={a.quoteId}>{a.side==='over'?'Más de':'Menos de'} {a.line} · {hits(a,w)}/{a[w].length} · {a.odds>0?'+':''}{a.odds}</li>)}</ul></section>}</details><Rival row={c} asOf={asOf}/></SheetCard>;
+    <details><summary>Ver los {c[w].length} juegos</summary><table><caption>Del más reciente al más antiguo</caption><thead><tr>{['Fecha','Rival','Min','Total','Resultado'].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{c[w].map(r=><tr key={r.id}><td>{date(r.date)}</td><td>{r.rival}</td><td>{Math.round(r.minutes)}</td><td>{r.value}</td><td>{{win:'Acierto',push:'Empate',loss:'Fallo'}[outcome(c,r.value)]}</td></tr>)}</tbody></table>{alternatives.length>0 && <section><h3>Otras líneas verificadas</h3><ul>{alternatives.map(a=><li key={a.quoteId}>{a.side==='over'?'Más de':'Menos de'} {a.line} · {hits(a,w)}/{a[w].length} · {a.odds>0?'+':''}{a.odds}</li>)}</ul></section>}</details><ProfileLink row={c}/><Rival row={c} asOf={asOf}/></SheetCard>;
 }
 export default function Sheet({cards=[],projections=[],day,asOf,showReference=false,captureFailed=false}){
   const [market,setMarket]=useState('points'),[w,setWindow]=useState('ten'),[floor,setFloor]=useState('-250'),[now,setNow]=useState(Date.parse(asOf));
@@ -46,6 +49,7 @@ export default function Sheet({cards=[],projections=[],day,asOf,showReference=fa
   return <main className={styles.sheet}><Link href="/nba-decision-board">← Decision Board</Link>
     <header className={styles.hero}><p>NBA <span> / </span> {date(day+'T12:00:00Z')}</p><h1>Cheat Sheets</h1><p>Las líneas de hoy frente al historial de cada jugador.</p></header>
     <details className={styles.method}><summary>Metodología y validación</summary><p>Pick calcula la proyección con 65% del promedio de los últimos 5 juegos y 35% del promedio de los últimos 10, en partidos con al menos 10 minutos. La gráfica muestra cuántas veces el jugador cumplió la línea. Las limitaciones de cada contrato aparecen en su tarjeta.</p></details>
+    <p><Link href="/nba-cheat-sheets/analisis">Top 10 general, combinados y análisis por contrato →</Link></p>
     {captureFailed && <p role="status">La captura de seguimiento está pendiente.</p>}
     <div className={styles.controls}><FilterGroup label="Mercado" options={markets} value={market} onChange={setMarket}/><FilterGroup label="Historial" options={windows} value={w} onChange={setWindow}/><FilterGroup label="Rango de cuotas" options={oddsBands} value={floor} onChange={setFloor}/></div>
     {w!=='h2h' && <section aria-label="Proyecciones de Pick">
@@ -58,13 +62,13 @@ export default function Sheet({cards=[],projections=[],day,asOf,showReference=fa
         <Trend key={r.quote+w} row={r} initial={w}/>
         <div className={styles.footer}><span>FanDuel <b>{r.odds>0?'+':''}{r.odds}</b></span><span>Captura {time(r.captured)} PR</span></div>
         <Limits row={r}/>
-        <Rival row={r} asOf={asOf}/>
+        <ProfileLink row={r}/><Rival row={r} asOf={asOf}/>
       </SheetCard>)}</div>:<p className={styles.empty}>Sin proyecciones de Pick con línea comparable para estos filtros.</p>}
     </section>}
     {w==='h2h' && <section><h2 className={styles.heading}>Encuentros anteriores · {markets[market]}</h2>
       {observed.length ? <div className={styles.grid}>{observed.map(r=><SheetCard key={r.quote}><header>Contra {r.rival}</header>
         <h2>{r.name}</h2><p className={styles.line}>{r.meetings.length} {r.meetings.length===1?'juego observado':'juegos observados'}</p>
-        <div className={styles.footer}>{r.meetings.map(g=><span key={g.id}>{date(g.date)} · <b>{g.value}</b> {markets[market].toLowerCase()}</span>)}</div><Limits row={r}/><Rival row={r} asOf={asOf}/></SheetCard>)}</div>:
+        <div className={styles.footer}>{r.meetings.map(g=><span key={g.id}>{date(g.date)} · <b>{g.value}</b> {markets[market].toLowerCase()}</span>)}</div><Limits row={r}/><ProfileLink row={r}/><Rival row={r} asOf={asOf}/></SheetCard>)}</div>:
       <p className={styles.empty}>El archivo consultado para estos jugadores y líneas no muestra actuaciones previas ante el rival. La consulta cubre hasta 60 días de esta temporada.</p>}
       <p>El Top 10 requiere 5 encuentros verificables por jugador y una línea validada. Aquí puedes ver también muestras menores.</p></section>}
     <h2 className={styles.heading}>Top 10 verificado · {markets[market]}</h2><p aria-live="polite">{ranked.length} {ranked.length===1?'jugador':'jugadores'} · {windows[w]} · Cuotas al {time(asOf)} PR</p>

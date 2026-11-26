@@ -1,5 +1,10 @@
 # Componentes reutilizables de Cheat Sheets
 
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+El nuevo consumidor NBA usa SheetCard, TrendBars y los estilos compartidos. Los cálculos por período, reglas regionales y cruces SHADOW siguen en el dominio NBA. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+
 NBA es el único consumidor implementado. El punto de extensión es la presentación de un contrato deportivo ya resuelto por Pick.
 
 | Capa | Responsabilidad actual | Contrato para otro consumidor |

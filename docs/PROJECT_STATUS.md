@@ -1,3 +1,7 @@
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+PR #408: análisis por contrato, períodos conciliados y tracker ensayado en PostgreSQL local. Revisar la evidencia de integridad y el control MLB antes de publicación. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
 ## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
 
 PR #408, rama `feat/nba-cheat-sheets`. Inventario del Site V13, código de referencia NBA recuperado y separación de tarjeta, filtros y barras. Validación local de escritorio/móvil, ranking y parciales. La revisión de la rama precede a una decisión de producción.

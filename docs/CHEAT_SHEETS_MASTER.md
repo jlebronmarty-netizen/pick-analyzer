@@ -1,5 +1,10 @@
 # NBA Cheat Sheets en Pick Analyzer
 
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+Entrega NBA de revisión. La portada mantiene sus rankings y da acceso al análisis por contrato, perfiles y combinados. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+
 Guía de continuidad · revisión del 25 de noviembre de 2026 (Puerto Rico). Revisar la rama `feat/nba-cheat-sheets`, PR #408, antes de consultar producción. El estándar de diseño es la vista NBA del commit `2bd1709ea1c96f11bf97a5ee87929074a4db03d8`. Esta revisión extrae componentes de presentación y recupera las funciones exclusivas del Site como referencia ejecutable.
 
 ## Dónde empezar

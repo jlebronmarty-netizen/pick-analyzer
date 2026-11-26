@@ -1,5 +1,10 @@
 # Contrato de lectura NBA
 
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+Extensión NBA_SHEET_LAB_V1: cuotas prepartido, muestras por período, ocho criterios y liquidación privada. El informe detalla identidad de contrato, unidades, reloj, denominadores y muestras excluidas. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+
 Revisión documental 1, 25-nov-2026. La ruta de página es `/nba-cheat-sheets`. El control de acceso lo aplica `nbaManualAccess`; la lectura del rival usa la misma política, con respuesta privada sin caché HTTP. Consultar las rutas protegidas de Vercel con la sesión autorizada. Las claves de Supabase son exclusivamente del servidor.
 
 ## Fuentes y flujo vigentes
