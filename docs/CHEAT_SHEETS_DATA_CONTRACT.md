@@ -1,5 +1,10 @@
 # Contrato de lectura NBA
 
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 ## Integridad de liquidación · revisión del PR #408
 
 FT utiliza exclusivamente pts, reb, ast y fg3m normalizados. PRA, PR, PA y RA requieren todos sus componentes. Datos parciales conservan mercados independientes si el box supera la conciliación de puntos y marcador. Un punto inválido impide certificar el box completo. Ceros válidos se conservan. Un contrato pendiente cuenta en la muestra inscrita y queda fuera de aciertos, fallos, accuracy, unidades liquidadas, ganancias, pérdidas y pares. La liquidación usa evidencia recibida a más tardar en el corte de la ejecución.

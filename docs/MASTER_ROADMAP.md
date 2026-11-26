@@ -1,4 +1,9 @@
 
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 ## Integridad de liquidación · revisión del PR #408
 
 NBA Cheat Sheets espera revisión de la liquidación corregida antes de fusionar o aplicar las tres migraciones. Mantener el escritor apagado hasta la autorización.

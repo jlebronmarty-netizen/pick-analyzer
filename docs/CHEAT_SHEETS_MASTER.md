@@ -1,5 +1,10 @@
 # NBA Cheat Sheets en Pick Analyzer
 
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 ## Integridad de liquidación · revisión del PR #408
 
 La liquidación de partido completo usa la fila individual normalizada que devuelve el verificador. Las estadísticas de períodos conservan su conciliación independiente con Play-by-Play.

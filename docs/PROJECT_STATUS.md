@@ -1,4 +1,9 @@
 
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 ## Integridad de liquidación · revisión del PR #408
 
 PR #408: se corrigió la lectura de estadísticas rechazadas en la liquidación FT. Cobertura de ocho mercados, ambas direcciones, reintentos y exclusión de pendientes del ROI en PostgreSQL aislado. Pendiente de revisión antes de producción.

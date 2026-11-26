@@ -1,5 +1,10 @@
 # Consolidación NBA · revisión de entrega
 
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 ## Integridad de liquidación · revisión del PR #408
 
 Siguiente hito: revisión de la corrección y autorización de lanzamiento del nuevo SHA. Las tres migraciones continúan pendientes y el escritor apagado.
