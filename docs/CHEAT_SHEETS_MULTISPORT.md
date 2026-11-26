@@ -1,5 +1,10 @@
 # Componentes reutilizables de Cheat Sheets
 
+## Transición NBA → NHL · planificación del 25 de noviembre
+
+Acta de producción NBA #410 fusionada. Primer tick natural verificado; seguimiento activo de la primera captura elegible y liquidación real. NHL en auditoría de sólo lectura. [Inventario, fronteras con investigación y condiciones de inicio](NHL_CHEAT_SHEETS_ROADMAP.md).
+
+
 ## Estado de producción · activación del 25 de noviembre
 
 Cada tracker nuevo debe probar ACL efectivas y heredadas, ausencia de delegación y de acceso público, inmutabilidad, liquidación por componentes verificados y exclusión contable de pendientes. Aplicar primero estas pruebas al futuro adaptador NHL. [Informe de producción](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
