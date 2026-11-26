@@ -1,4 +1,9 @@
 
+## Integridad de liquidación · revisión del PR #408
+
+NBA Cheat Sheets espera revisión de la liquidación corregida antes de fusionar o aplicar las tres migraciones. Mantener el escritor apagado hasta la autorización.
+
+
 ## Tracker prospectivo · revisión de lanzamiento de NBA
 
 NBA: validar el lanzamiento del tracker antes de trasladar historia privada o iniciar NHL. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).

@@ -1,5 +1,10 @@
 # Contrato de lectura NBA
 
+## Integridad de liquidación · revisión del PR #408
+
+FT utiliza exclusivamente pts, reb, ast y fg3m normalizados. PRA, PR, PA y RA requieren todos sus componentes. Datos parciales conservan mercados independientes si el box supera la conciliación de puntos y marcador. Un punto inválido impide certificar el box completo. Ceros válidos se conservan. Un contrato pendiente cuenta en la muestra inscrita y queda fuera de aciertos, fallos, accuracy, unidades liquidadas, ganancias, pérdidas y pares. La liquidación usa evidencia recibida a más tardar en el corte de la ejecución.
+
+
 ## Tracker prospectivo · revisión de lanzamiento de NBA
 
 Contrato prospectivo: primera posición, línea, precio y metodología por estrategia. La vista nba_sheet_performance_v1 publica muestras, unidades, ROI y pares equivalentes por puesto y Top acumulado. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).

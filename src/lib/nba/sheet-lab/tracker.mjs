@@ -51,32 +51,39 @@ export function frontSnapshots(board,originals=[]){
  return results;
 }
 const metricFor={points:'pts',rebounds:'reb',assists:'ast',threes:'fg3m',points_rebounds_assists:'pra',points_rebounds:'pr',points_assists:'pa',rebounds_assists:'ra'};
-export function settleContract(c,{context,final,pbp,voidReceipt},registeredAt){
+export function settleContract(c,{context,final,pbp,voidReceipt},registeredAt,asOf=Date.now()){
  const pending={result:'pending',value:null};
  if(!Number.isFinite(stamp(registeredAt))||!(stamp(c.captured)<=stamp(registeredAt)&&stamp(registeredAt)<stamp(c.start)&&stamp(registeredAt)<stamp(c.expires)))return pending;
- if(voidReceipt?.quoteId&&voidReceipt.quoteId===c.quoteId&&voidReceipt.book===c.book&&voidReceipt.status==='VOID'&&stamp(voidReceipt.at)>=stamp(registeredAt))return {result:'void',value:null};
+ if(voidReceipt?.quoteId&&voidReceipt.quoteId===c.quoteId&&voidReceipt.book===c.book&&voidReceipt.status==='VOID'&&stamp(voidReceipt.at)>=stamp(registeredAt)&&stamp(voidReceipt.at)<=asOf)return {result:'void',value:null};
+ if(!(stamp(context?.player_stats_captured_at)<=asOf))return pending;
  const verified=verifiedArchivedPlayerFinal({context,final,providerGameId:c.gameId,allowPartialComponents:true});
  if(!verified||stamp(final.datetime)!==stamp(c.start)||!['over','under'].includes(c.side)||!Number.isFinite(c.line))return pending;
- const rows=context.player_stats.data,raw=rows.find(r=>r.player.id===c.playerId);
- if(!raw)return pending;
- if(minutesValue(String(raw.min))===0)return ['pts','reb','ast','fg3m','stl','blk','turnover'].every(k=>raw[k]==null||Number(raw[k])===0)?{result:'dnp',value:null}:pending;
+ const player=verified.rows.get(c.playerId);
+ if(!player){
+  // The verifier omits zero-minute participants from its normalized statistics.
+  const dnp=context.player_stats.data.find(r=>Number(r.player.id)===c.playerId);
+  const noProduction=dnp && ['pts','reb','ast','fg3m','stl','blk','turnover'].every(k=>
+   dnp[k]==null || dnp[k]===0 || dnp[k]==='0');
+  return noProduction && minutesValue(String(dnp.min))===0 ? {result:'dnp',value:null} : pending;
+ }
  if(c.book!=='FanDuel'||!metricFor[c.statistic]||c.ot==='NOT_VERIFIED'||!['FT','Q1','Q2','Q3','Q4','1H','2H','OT'].includes(c.period))return pending;
  const expected=['FT','2H'].includes(c.period)?'INCLUDES_OT':'EXCLUDES_OT';
  if(c.period!=='OT'&&c.ot!==expected)return pending;
- let values=raw;
+ let values=player;
  if(c.period!=='FT'){
-  if(!pbp||pbp.provider_game_id!==c.gameId||!(stamp(pbp.captured_at)>stamp(c.start))||!Array.isArray(pbp.payload?.data)||!pbp.payload.data.every(e=>e.game_id===c.gameId))return pending;
-  const s=reconcilePeriods(raw.game,rows,pbp.payload.data)[c.playerId]?.[c.period];
+  if(!pbp||!(stamp(pbp.captured_at)<=asOf)||pbp.provider_game_id!==c.gameId||!(stamp(pbp.captured_at)>stamp(c.start))||!Array.isArray(pbp.payload?.data)||!pbp.payload.data.every(e=>e.game_id===c.gameId))return pending;
+  const rows=context.player_stats.data;
+  const s=reconcilePeriods(rows[0].game,rows,pbp.payload.data)[c.playerId]?.[c.period];
   if(!s)return pending;values=segmentValues(s);
  }
  const value=playerValues(values)[metricFor[c.statistic]];
  if(!Number.isFinite(value))return pending;
  return {value,result:value===c.line?'push':(c.side==='over'?value>c.line:value<c.line)?'win':'loss'};
 }
-export function gradeSnapshot(snapshot,evidence){
+export function gradeSnapshot(snapshot,evidence,asOf=Date.now()){
  return snapshot.payload.cards.map(c=>{
-  const data=evidence.get(c.gameId)??{},grade=settleContract(c,data,snapshot.captured_at);
-  const original=c.original?settleContract({...c,side:c.original.side,quoteId:c.original.quoteId},data,snapshot.captured_at):null;
+  const data=evidence.get(c.gameId)??{},grade=settleContract(c,data,snapshot.captured_at,asOf);
+  const original=c.original?settleContract({...c,side:c.original.side,quoteId:c.original.quoteId},data,snapshot.captured_at,asOf):null;
   return {snapshot_id:snapshot.snapshot_id,quote_id:c.quoteId,...grade,pick_result:original?.result??null};
  });
 }

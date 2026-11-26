@@ -1,5 +1,10 @@
 # NBA Cheat Sheets en Pick Analyzer
 
+## Integridad de liquidación · revisión del PR #408
+
+La liquidación de partido completo usa la fila individual normalizada que devuelve el verificador. Las estadísticas de períodos conservan su conciliación independiente con Play-by-Play.
+
+
 ## Tracker prospectivo · revisión de lanzamiento de NBA
 
 La portada, el análisis avanzado y el tracker comparten el archivo prepartido. Las visitas son de lectura. El cron captura y liquida con activación explícita. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).

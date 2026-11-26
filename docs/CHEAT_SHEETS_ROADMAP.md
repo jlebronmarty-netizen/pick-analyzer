@@ -1,5 +1,10 @@
 # Consolidación NBA · revisión de entrega
 
+## Integridad de liquidación · revisión del PR #408
+
+Siguiente hito: revisión de la corrección y autorización de lanzamiento del nuevo SHA. Las tres migraciones continúan pendientes y el escritor apagado.
+
+
 ## Tracker prospectivo · revisión de lanzamiento de NBA
 
 Pendiente de autorización: tres migraciones aditivas, activar el cron y observar capturas y liquidaciones reales. Comparar metodologías sólo en sus propias muestras. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).

@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {comparableOriginal,prepareSnapshots,gradeSnapshot,settleContract} from '../src/lib/nba/sheet-lab/tracker.mjs';
+import {comparableOriginal,prepareSnapshots,gradeSnapshot as gradeAt,settleContract as settleAt} from '../src/lib/nba/sheet-lab/tracker.mjs';
 import {rankContracts} from '../src/lib/nba/sheet-lab/rank.mjs';
 import {playerValues} from '../src/lib/nba/sheet-lab/nba-props.mjs';
+const settlementCutoff=Date.parse('2026-11-26T03:00:00Z');
+const gradeSnapshot=(snapshot,evidence)=>gradeAt(snapshot,evidence,settlementCutoff);
+const settleContract=(card,evidence,at)=>settleAt(card,evidence,at,settlementCutoff);
 const start='2026-11-25T23:00:00Z',at='2026-11-25T22:10:00Z',captured='2026-11-25T22:00:00Z';
 const r={id:'a',gameId:1,playerId:12,start,captured,expires:start,ot:'INCLUDES_OT',metric:'pra',market:'points_rebounds_assists',period:'FT',side:'over',line:11,odds:-300,n:8,rate:.75,gap:2,pct:18,conditions:3};
 const o={id:'o',gameId:1,playerId:12,market:'props',statistic:r.market,start,captured,decisionAt:at,recordedAt:at,ot:r.ot,period:'ft',book:'FanDuel',side:'under',line:r.line};

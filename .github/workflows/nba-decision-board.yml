@@ -4,6 +4,9 @@ on:
     paths:
       - 'src/lib/nba/sheet-lab/**'
       - 'tests/nba-sheet*'
+      - 'tests/fixtures/nba-sheet-*'
+      - 'supabase/migrations/*nba_sheet*.sql'
+      - 'supabase/migrations/*nba_cheat*.sql'
       - 'src/lib/nba/decision-board-core.mjs'
       - 'src/lib/nba/decision-integrity.mjs'
       - 'src/lib/nba/decision-storage-original.mjs'
@@ -166,3 +169,31 @@ jobs:
             test-results/nba-navigation-server/
           if-no-files-found: warn
           retention-days: 7
+
+  sheet-settlement-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:55438:5432'
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run NBA regression tests
+        run: node --test tests/nba*.test.mjs
+      - name: Install isolated PostgreSQL test client
+        run: npm install --prefix "$RUNNER_TEMP/sheet-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
+      - name: Verify migrations, reports and pending-to-final settlement
+        run: |
+          export NBA_SHEET_TEST_PG_MODULE="$RUNNER_TEMP/sheet-pg/node_modules/pg/lib/index.js"
+          node tests/nba-sheet-tracker.postgres.mjs
+          node tests/nba-sheet-performance.postgres.mjs
+          node tests/nba-sheet-retry.postgres.mjs

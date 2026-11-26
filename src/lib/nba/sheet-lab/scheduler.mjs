@@ -48,7 +48,7 @@ export async function settlePending(db,now=new Date(),loadEvidence=gameEvidence)
    // Multiple strategy memberships often reference exactly the same frozen card.
    const key=JSON.stringify([e.card,e.recorded_at]);let grade=memo.get(key);
    if(!grade){
-    [grade]=gradeSnapshot({snapshot_id:e.snapshot_id,captured_at:e.recorded_at,payload:{cards:[e.card]}},new Map([[e.card.gameId,evidence]]));
+    [grade]=gradeSnapshot({snapshot_id:e.snapshot_id,captured_at:e.recorded_at,payload:{cards:[e.card]}},new Map([[e.card.gameId,evidence]]),now.getTime());
     memo.set(key,grade);
    }
    if(grade.result!=='pending'&&grade.pick_result!=='pending')grades.push({...grade,snapshot_id:e.snapshot_id,quote_id:e.quote_id});

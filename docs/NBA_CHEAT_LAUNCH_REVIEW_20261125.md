@@ -1,5 +1,10 @@
 # NBA Cheat Sheets · revisión de publicación del 25 de noviembre de 2026
 
+## Integridad de liquidación · revisión del PR #408
+
+El lanzamiento de 74133c6b se detuvo antes de producción. Un rebote −1 producía un acierto Under aun cuando el verificador lo descartaba. La corrección usa valores verificados para FT y conserva el cotejo individual de Play-by-Play para períodos. En PostgreSQL aislado se observó un pendiente con cero filas de liquidación, cero decisiones, cero unidades liquidadas y cero pares. Una segunda lectura válida produjo una única liquidación. Las pruebas usan datos sintéticos. El job sheet-settlement-regression ejecuta las pruebas NBA y tres suites PostgreSQL en una base efímera.
+
+
 ## Navegación y acceso
 
 El enlace del Decision Board de NBA abre /nba-cheat-sheets. La portada enlaza /nba-cheat-sheets/analisis y /nba-cheat-sheets/tracker. El tracker reutiliza el control privado de NBA. Las páginas son lectoras. El proveedor de dashboard omite toda la familia de rutas Cheat Sheets. El archivo de navegación compartida NbaBoardAccess y la política compartida read-only-sport-route se restauran desde main. Los manifiestos y hashes de MLB conservan su versión certificada.

@@ -1,4 +1,9 @@
 
+## Integridad de liquidación · revisión del PR #408
+
+PR #408: se corrigió la lectura de estadísticas rechazadas en la liquidación FT. Cobertura de ocho mercados, ambas direcciones, reintentos y exclusión de pendientes del ROI en PostgreSQL aislado. Pendiente de revisión antes de producción.
+
+
 ## Tracker prospectivo · revisión de lanzamiento de NBA
 
 PR #408 incorpora el tracker prospectivo por posición y unidades. La activación depende de autorización y de tres migraciones. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).

@@ -1,5 +1,10 @@
 # Componentes reutilizables de Cheat Sheets
 
+## Integridad de liquidación · revisión del PR #408
+
+Para reutilizar el tracker, cada adaptador deportivo debe devolver estadísticas normalizadas y exponer sus criterios de conciliación. Un componente rechazado invalida todos los mercados que lo requieren.
+
+
 ## Tracker prospectivo · revisión de lanzamiento de NBA
 
 El contrato de reporting separa inscripción, liquidación y agregación. Cada deporte debe validar participación, período, cuota y liquidación antes de reutilizar la presentación. NHL queda en preparación. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
