@@ -1,4 +1,9 @@
 
+## Estado de producción · activación del 25 de noviembre
+
+NBA Cheat Sheets se fusionó en 5410211f. Vercel producción READY, escritor habilitado y cuatro migraciones aplicadas. Aún sin contratos prospectivos en el corte de activación. [Informe de producción](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 ## Reanudación controlada · cuarta migración
 
 La migración 202611260903_nba_sheet_view_acl limita los permisos a las cuatro vistas identificadas. El control exige SELECT sin delegación para service_role, ausencia de permisos efectivos por tabla y columna para anon y authenticated, y security_invoker. La prueba reproduce los privilegios predeterminados de producción y comprueba un permiso heredado mediante membresía; ejecutar este control en cada futuro tracker deportivo. Continuar con la lectura de catálogo antes de fusionar y activar. Los estados siguientes describen el corte anterior a esta corrección.
