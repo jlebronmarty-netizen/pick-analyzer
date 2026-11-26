@@ -9,7 +9,7 @@ export function buildCheatCandidates(input){
   const quotes=latestUniqueQuotes(goatPropQuotes,q=>[q.provider_game_id,q.player_id,q.statistic,q.side,q.line,q.period].join('|'));
   for(const q of quotes){
     const game=games.get(q.provider_game_id), field=fields[q.statistic], id=q.player_id;
-    if(!game || !field || !playerNames[id] || q.american_odds < -300 || q.line==null || Number(q.line)<0)continue;
+    if(!game || !field || !playerNames[id] || q.american_odds < -650 || q.line==null || Number(q.line)<0)continue;
     const key=[game.id,id,field].join('|');
     if(!cache.has(key)){
       const records=evidence.compact.get(id)??[];

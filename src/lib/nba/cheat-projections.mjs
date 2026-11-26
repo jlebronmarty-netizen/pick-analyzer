@@ -1,3 +1,4 @@
+import {inOddsBand} from './cheat-ranking.mjs';
 // These rows describe the existing Decision Board model and archived price.
 // They never enter the verified trend ranking or its pregame snapshot.
 const permittedIssues=new Map([
@@ -20,7 +21,7 @@ export function projectionRows(rows,histories={}){
 export function topProjections(rows,market,window,floor,now){
   if(!['ten','five'].includes(window))return [];
   const other=window==='ten'?'five':'ten';
-  const sorted=rows.filter(r=>r.market===market && r.odds>=floor && Date.parse(r.expires)>now &&
+  const sorted=rows.filter(r=>r.market===market && inOddsBand(r.odds,floor) && Date.parse(r.expires)>now &&
     Date.parse(r.start)>now && Number.isInteger(r[window])).sort((a,b)=>
     b[window]-a[window] || b[other]-a[other] || b.odds-a.odds || a.quote.localeCompare(b.quote));
   const seen=new Set();

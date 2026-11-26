@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
-import {rankSheet,hits,markets,outcome} from '@/lib/nba/cheat-ranking.mjs';
+import {oddsBands,inOddsBand,rankSheet,hits,markets,outcome} from '@/lib/nba/cheat-ranking.mjs';
 import {topProjections} from '@/lib/nba/cheat-projections.mjs';
 import styles from './sheet.module.css';
 const windows={ten:'Últimos 10',five:'Últimos 5',h2h:'Contra el rival'};
@@ -35,16 +35,16 @@ function Card({card:c,window:w,rank,alternatives}){
     <details><summary>Ver los {c[w].length} juegos</summary><table><caption>Del más reciente al más antiguo</caption><thead><tr>{['Fecha','Rival','Min','Total','Resultado'].map(x=><th key={x}>{x}</th>)}</tr></thead><tbody>{c[w].map(r=><tr key={r.id}><td>{date(r.date)}</td><td>{r.rival}</td><td>{Math.round(r.minutes)}</td><td>{r.value}</td><td>{{win:'Acierto',push:'Empate',loss:'Fallo'}[outcome(c,r.value)]}</td></tr>)}</tbody></table>{alternatives.length>0 && <section><h3>Otras líneas verificadas</h3><ul>{alternatives.map(a=><li key={a.quoteId}>{a.side==='over'?'Más de':'Menos de'} {a.line} · {hits(a,w)}/{a[w].length} · {a.odds>0?'+':''}{a.odds}</li>)}</ul></section>}</details></article>;
 }
 export default function Sheet({cards=[],projections=[],day,asOf,showReference=false,captureFailed=false}){
-  const [market,setMarket]=useState('points'),[w,setWindow]=useState('ten'),[floor,setFloor]=useState('-300'),[now,setNow]=useState(Date.parse(asOf));
+  const [market,setMarket]=useState('points'),[w,setWindow]=useState('ten'),[floor,setFloor]=useState('-250'),[now,setNow]=useState(Date.parse(asOf));
   useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),15000);return ()=>clearInterval(id);},[asOf]);
-  const active=cards.filter(c=>Date.parse(c.expiresAt)>now && c.odds>=Number(floor));
+  const active=cards.filter(c=>Date.parse(c.expiresAt)>now && inOddsBand(c.odds,Number(floor)));
   const ranked=rankSheet(active,market,w,Number(floor));
   const projected=topProjections(projections,market,w,Number(floor),now);
-  const observed=[...new Map(projections.filter(r=>r.market===market && r.odds>=Number(floor) && Date.parse(r.expires)>now && r.meetings?.length).map(r=>[r.player,r])).values()].sort((a,b)=>b.meetings.length-a.meetings.length || a.name.localeCompare(b.name));
+  const observed=[...new Map(projections.filter(r=>r.market===market && inOddsBand(r.odds,Number(floor)) && Date.parse(r.expires)>now && r.meetings?.length).map(r=>[r.player,r])).values()].sort((a,b)=>b.meetings.length-a.meetings.length || a.name.localeCompare(b.name));
   return <main className={styles.sheet}><Link href="/nba-decision-board">← Decision Board</Link>
     <header className={styles.hero}><p>NBA <span> / </span> {date(day+'T12:00:00Z')}</p><h1>Cheat Sheets</h1><p>Las líneas de hoy frente al historial de cada jugador.</p></header>
     {captureFailed && <p role="status">La captura de seguimiento está pendiente.</p>}
-    <div className={styles.controls}><Buttons label="Mercado" options={markets} value={market} onChange={setMarket}/><Buttons label="Historial" options={windows} value={w} onChange={setWindow}/><Buttons label="Cuota mínima" options={{'-300':'−300 o mejor','-200':'−200 o mejor'}} value={floor} onChange={setFloor}/></div>
+    <div className={styles.controls}><Buttons label="Mercado" options={markets} value={market} onChange={setMarket}/><Buttons label="Historial" options={windows} value={w} onChange={setWindow}/><Buttons label="Rango de cuotas" options={oddsBands} value={floor} onChange={setFloor}/></div>
     {w!=='h2h' && <section aria-label="Proyecciones de Pick">
       <h2 className={styles.heading}>Proyecciones de Pick · {markets[market]}</h2>
       <p aria-live="polite">{projected.length} de hasta 10 jugadores · Ordenados por aciertos en {windows[w].toLowerCase()}.</p>
