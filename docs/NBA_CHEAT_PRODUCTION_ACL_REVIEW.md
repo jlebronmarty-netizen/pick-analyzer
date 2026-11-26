@@ -1,5 +1,24 @@
 # NBA Cheat Sheets · control de publicación en producción
 
+## Publicación y activación · 25 de noviembre, después de las 11 p. m. de Puerto Rico
+
+PR #408 fusionado en `5410211f38edb007ce5cf7a5ce4e1738fcc6217c`. Ocho controles pasaron en el candidato `c1b603375ba8a84ebd05ff0f53819f2f23d1983b`. La única migración ejecutada durante la reanudación fue 202611260903_nba_sheet_view_acl.sql, registrada en producción como nba_sheet_view_acl, versión 20261126030845. El catálogo confirmó exclusivamente SELECT sin grant option para service_role en las cuatro vistas, security_invoker=true y ausencia de acceso para PUBLIC, anon y authenticated. La migración también comprueba privilegios por columna. En PostgreSQL aislado se reprodujeron los defaults de producción y una membresía con TRIGGER que la migración rechazó. Pasaron las suites de inscripción, liquidación, reintento, unidades, pares y ACL.
+
+Vercel producción READY, primero con escritor apagado y luego con NBA_CHEAT_TRACKER_ENABLED=true sólo en producción. Despliegue activo al validar: `dpl_FeqbN2kyZa5Kw2EwxaMfzy1KhNSX`. Se verificó el enlace del Decision Board, la portada, el análisis y el tracker. Las tres páginas privadas activadas devolvieron HTTP 200; el tracker consultó su vista y mostró ausencia de observaciones. Reversión del escritor: retirar la bandera y redesplegar el mismo código, preservando registros, migraciones y protecciones de acceso.
+
+Al activarse el escritor habían pasado las horas de inicio de los nueve partidos de la jornada, incluidos los dos últimos a las 11 p. m. PR. Cero snapshots, entradas y liquidaciones al corte. El contador de muestra vacía no es accuracy de cero. Seguimiento horario temporal de las dos primeras ejecuciones naturales y la primera liquidación disponible, con logs NBA_SHEET_TICK y relectura del archivo. Hasta observarlas, no certificar éxito del cron ni resultados prospectivos.
+
+### Investigación con archivos existentes
+
+En el corte de las 10:09 p. m. PR, los 94 recibos del rango −251 a −650 de los ocho mercados en los dos juegos finales tenían contrato de hito sin verificar y OT desconocida. Mantenerlos excluidos. Para reconsiderar, exigir equivalencia de umbral, período, OT, participación, precio y liquidación por contrato. No inferir reglas de una línea Over parecida.
+
+Una consulta descriptiva de los 25 jugadores con precio estricto estándar de esos dos juegos identificó a los 25 por la última afiliación de equipo archivada y compatible con el partido; el campo de equipo en los propios recibos no permitió ese enlace. Con corte anterior al juego y temporada 2026 observada, 13 tenían al menos una aparición contra ese equipo y ninguno alcanzaba dos. La muestra cuenta jugadores y no es el denominador de los 330 contratos del informe anterior.
+
+La captura previa incluía cinco titulares esperados por equipo y, entre los cuatro equipos, 15 registros Out y 4 Questionable. Para los 25 jugadores, 20 figuraban como titulares esperados. Ninguno de esos titulares tenía una observación defensiva archivada contra los titulares esperados del contrario bajo los filtros de temporada y corte; se comparó únicamente esa intersección. El archivo global sí contenía 6,330 observaciones con tiempo positivo en 67 juegos. Un reporte de lesiones no certifica automáticamente a los jugadores disponibles. Permanecen pendientes la cobertura de suplentes y la conciliación de períodos donde falten componentes individuales. Conservar el mínimo de muestra y la distinción entre rival posicional y defensor observado.
+
+Para NHL: inventariar las fuentes internas equivalentes y las exclusivas del Site, validar reglas de OT/participación de porteros y probar por contrato las protecciones de liquidación y permisos antes de reutilizar la presentación. La validación operativa NBA precede al desarrollo NHL.
+
+
 ## Reanudación controlada · cuarta migración
 
 La migración 202611260903_nba_sheet_view_acl limita los permisos a las cuatro vistas identificadas. El control exige SELECT sin delegación para service_role, ausencia de permisos efectivos por tabla y columna para anon y authenticated, y security_invoker. La prueba reproduce los privilegios predeterminados de producción y comprueba un permiso heredado mediante membresía; ejecutar este control en cada futuro tracker deportivo. Continuar con la lectura de catálogo antes de fusionar y activar. Los estados siguientes describen el corte anterior a esta corrección.
