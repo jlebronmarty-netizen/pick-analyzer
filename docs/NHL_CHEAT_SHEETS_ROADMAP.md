@@ -1,5 +1,10 @@
 # NHL Cheat Sheets · inventario y roadmap condicionado
 
+## Control operativo del 26 de noviembre de 2026
+
+El roadmap se incorporó a main en el PR #411. Las dos ejecuciones naturales NBA ya están acreditadas. Quedan pendientes la primera inscripción prepartido elegible, su liquidación real y la conciliación contable por estrategia y posición. Presentar la propuesta definitiva tras verificar esos tres puntos. [Acta de validación operativa](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
 Auditoría de solo lectura del 25 de noviembre de 2026, Puerto Rico. Los conteos son del archivo de Pick al consultar. Una captura es una observación de una fuente; varios precios del mismo evento no aumentan la muestra de partidos. Este documento propone trabajo futuro. No introduce colectores, migraciones, rutas, cambios de modelo ni operaciones sobre Sites.
 
 ## Cierre operativo de NBA
