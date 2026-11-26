@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import styles from './sheet.module.css';
+import styles from '@/components/cheat-sheets/sheet.module.css';
 
 const metrics={pts:'Puntos',reb:'Rebotes',ast:'Asistencias',fg3m:'Triples',min:'Minutos',pf:'Faltas personales'};
 const marketStat={points:'pts',rebounds:'reb',assists:'ast',threes:'fg3m'};

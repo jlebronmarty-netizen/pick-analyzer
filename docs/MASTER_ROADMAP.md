@@ -1,3 +1,9 @@
+## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
+
+Próxima entrega NBA: auditar participaciones y reproducir parciales PBP al mismo corte. Después, comparar contratos y condiciones; ensayar tracker privado y captura idempotente. El 25-nov la tabla de snapshots de Cheat Sheets estaba pendiente en Supabase.
+
+[Inventario NBA y guía de continuidad](CHEAT_SHEETS_MASTER.md) · [Hoja de ruta y revisión](CHEAT_SHEETS_ROADMAP.md) · [Contrato de datos](CHEAT_SHEETS_DATA_CONTRACT.md) · [Componentes compartidos](CHEAT_SHEETS_MULTISPORT.md).
+
 ## NBA · Cheat Sheets · 24 noviembre 2026
 
 Ruta privada `/nba-cheat-sheets`. Top 10 descriptivo por mercado, L5/L10/H2H, cuota mínima y captura prepartido idempotente. Aplicar `202611240901_nba_cheat_snapshots.sql` antes de habilitar producción. Verificar resultados prospectivos tras acumular capturas y finales.

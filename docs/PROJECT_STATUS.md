@@ -1,3 +1,9 @@
+## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
+
+PR #408, rama `feat/nba-cheat-sheets`. Inventario del Site V13, código de referencia NBA recuperado y separación de tarjeta, filtros y barras. Validación local de escritorio/móvil, ranking y parciales. La revisión de la rama precede a una decisión de producción.
+
+[Inventario NBA y guía de continuidad](CHEAT_SHEETS_MASTER.md) · [Hoja de ruta y revisión](CHEAT_SHEETS_ROADMAP.md) · [Contrato de datos](CHEAT_SHEETS_DATA_CONTRACT.md) · [Componentes compartidos](CHEAT_SHEETS_MULTISPORT.md).
+
 ## NBA · Cheat Sheets · 24 noviembre 2026
 
 Ruta privada `/nba-cheat-sheets`. Top 10 descriptivo por mercado, L5/L10/H2H, cuota mínima y captura prepartido idempotente. Aplicar `202611240901_nba_cheat_snapshots.sql` antes de habilitar producción. Verificar resultados prospectivos tras acumular capturas y finales.
