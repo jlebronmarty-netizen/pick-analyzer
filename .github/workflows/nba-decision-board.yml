@@ -183,12 +183,14 @@ jobs:
         options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run NBA regression tests
-        run: node --test tests/nba*.test.mjs
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/nba*.test.mjs
       - name: Install isolated PostgreSQL test client
         run: npm install --prefix "$RUNNER_TEMP/sheet-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
       - name: Verify migrations, reports and pending-to-final settlement
