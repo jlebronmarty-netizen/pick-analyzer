@@ -42,3 +42,8 @@ test('real archived fixture crosses signed receipt, historical rows and profile;
  assert.ok(lab.profiles[ft.key].history.length);assert.equal(Object.keys(ft.checks).length,8);
  assert.ok(!rankContracts(lab.rows,{band:'-250',period:'Q1',sort:'rate'},Date.parse(i.asOf)).length);
 });
+test('a void receipt from one archived quote does not void the opposite Pick quote',()=>{
+ const payload=prepareSnapshots({date:'2026-11-25',at,rows:[r]},[{...o,quoteId:'under'}])[0];
+ const [row]=gradeSnapshot({...payload,captured_at:at},new Map([[1,{context,final:g,voidReceipt:{quoteId:r.id,book:'FanDuel',status:'VOID',at:start}}]]));
+ assert.equal(row.result,'void');assert.equal(row.pick_result,'loss');
+});

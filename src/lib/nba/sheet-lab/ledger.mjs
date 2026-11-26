@@ -11,8 +11,7 @@ export async function freezeLabRankings(db,lab){
  return snapshots.map(s=>s.snapshot_id);
 }
 export async function settleLabRankings(db,snapshot,evidence){
- const grades=gradeSnapshot(snapshot,evidence).filter(g=>g.result!=='pending')
-  .map(g=>({...g,pick_result:g.pick_result==='pending'?null:g.pick_result}));
+ const grades=gradeSnapshot(snapshot,evidence).filter(g=>g.result!=='pending'&&g.pick_result!=='pending');
  if(!grades.length)return [];
  const saved=await db.from('nba_sheet_grades_v1').upsert(grades,{onConflict:'snapshot_id,quote_id',ignoreDuplicates:true});
  if(saved.error)throw Error('SHEET_GRADING_FAILED');

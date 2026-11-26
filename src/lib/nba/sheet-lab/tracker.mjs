@@ -32,12 +32,12 @@ const metricFor={points:'pts',rebounds:'reb',assists:'ast',threes:'fg3m',points_
 export function settleContract(c,{context,final,pbp,voidReceipt},registeredAt){
  const pending={result:'pending',value:null};
  if(!Number.isFinite(stamp(registeredAt))||!(stamp(c.captured)<=stamp(registeredAt)&&stamp(registeredAt)<stamp(c.start)&&stamp(registeredAt)<stamp(c.expires)))return pending;
- if(voidReceipt?.quoteId===c.quoteId&&voidReceipt.book===c.book&&voidReceipt.status==='VOID'&&stamp(voidReceipt.at)>=stamp(registeredAt))return {result:'void',value:null};
+ if(voidReceipt?.quoteId&&voidReceipt.quoteId===c.quoteId&&voidReceipt.book===c.book&&voidReceipt.status==='VOID'&&stamp(voidReceipt.at)>=stamp(registeredAt))return {result:'void',value:null};
  const verified=verifiedArchivedPlayerFinal({context,final,providerGameId:c.gameId,allowPartialComponents:true});
  if(!verified||stamp(final.datetime)!==stamp(c.start)||!['over','under'].includes(c.side)||!Number.isFinite(c.line))return pending;
  const rows=context.player_stats.data,raw=rows.find(r=>r.player.id===c.playerId);
  if(!raw)return pending;
- if(minutesValue(String(raw.min))===0)return {result:'dnp',value:null};
+ if(minutesValue(String(raw.min))===0)return ['pts','reb','ast','fg3m','stl','blk','turnover'].every(k=>raw[k]==null||Number(raw[k])===0)?{result:'dnp',value:null}:pending;
  if(c.book!=='FanDuel'||!metricFor[c.statistic]||c.ot==='NOT_VERIFIED'||!['FT','Q1','Q2','Q3','Q4','1H','2H','OT'].includes(c.period))return pending;
  const expected=['FT','2H'].includes(c.period)?'INCLUDES_OT':'EXCLUDES_OT';
  if(c.period!=='OT'&&c.ot!==expected)return pending;
@@ -54,7 +54,7 @@ export function settleContract(c,{context,final,pbp,voidReceipt},registeredAt){
 export function gradeSnapshot(snapshot,evidence){
  return snapshot.payload.cards.map(c=>{
   const data=evidence.get(c.gameId)??{},grade=settleContract(c,data,snapshot.captured_at);
-  const original=c.original?settleContract({...c,side:c.original.side},data,snapshot.captured_at):null;
+  const original=c.original?settleContract({...c,side:c.original.side,quoteId:c.original.quoteId},data,snapshot.captured_at):null;
   return {snapshot_id:snapshot.snapshot_id,quote_id:c.quoteId,...grade,pick_result:original?.result??null};
  });
 }

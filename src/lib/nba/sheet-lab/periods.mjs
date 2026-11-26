@@ -7,6 +7,7 @@ export function reconcilePeriods(game,players,events){
  const ordered=[...events].sort((a,b)=>a.order-b.order);
  if(ordered.some((e,i)=>!integer(e.order)||!integer(e.period)||e.period<1||e.period>count||i&&ordered[i-1].order===e.order))return {};
  const last=ordered.at(-1),ends=ordered.filter(e=>e.type==='End Period');
+ if(ordered.filter(e=>e.type==='End Game').length!==Number(last.type==='End Game'))return {};
  if(ends.length!==count||last.period!==count||!['End Game','End Period'].includes(last.type)||
    last.type==='End Period'&&!['0.0','0:00','00:00'].includes(last.clock)||
    last.home_score!==game.home_team_score||last.away_score!==game.visitor_team_score)return {};
@@ -22,6 +23,7 @@ export function reconcilePeriods(game,players,events){
  for(const e of ordered){
   const t=(e.text??'').toLowerCase(),points=e.scoring_play===true?e.score_value:0;
   if(!integer(points))return {};
+  if(e.participants!=null&&!Array.isArray(e.participants))return {};
   for(const [idx,id] of (e.participants??[]).entries()){
    if(!byPlayer.has(id))byPlayer.set(id,new Map());
    const periods=byPlayer.get(id),r=periods.get(e.period)??{v:Array(7).fill(0),active:false};
