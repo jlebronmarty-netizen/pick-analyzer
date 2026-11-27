@@ -2,6 +2,8 @@ import { readNhlResearchSchedules } from "@/lib/nhl-research-features.mjs";
 import { selectEspnNhlProbablesAsOf } from "@/lib/nhl-espn-free-goalie-probables-v5.mjs";
 import { selectNhlSpecialTeamsAsOf } from "@/lib/nhl-special-teams-asof-core.mjs";
 
+import { gunzipSync } from "node:zlib";
+import { regulationPeriods } from "./periods.mjs";
 const day = 86400000;
 
 // One archived daily receipt per date at a common time before the earliest game.
@@ -10,9 +12,12 @@ async function calendarDay(db, date, cut) {
   const source = "https://api-web.nhle.com/v1/score/" + date;
   const { data, error } = await db
     .from("nhl_free_source_v1")
-    .select("id,captured_at,source_url,body")
+    .select(
+      "id,captured_at,source_url,body,run:nhl_free_runs_v1!inner(completed_at)",
+    )
     .eq("source_url", source)
     .lte("captured_at", cut)
+    .lte("run.completed_at", cut)
     .order("captured_at", { ascending: false })
     .order("id")
     .limit(2)
@@ -22,10 +27,26 @@ async function calendarDay(db, date, cut) {
   if (!data?.length || snapshots.length !== data.length) return null;
   const current = snapshots.at(-1),
     other = snapshots.at(-2);
-  return other?.capturedAt === current.capturedAt &&
+  if (
+    other?.capturedAt === current.capturedAt &&
     other.sha256 !== current.sha256
-    ? null
-    : current;
+  )
+    return null;
+  const saved = data.find((r) => r.id === current.sourceId);
+  if (Date.parse(saved.run?.completed_at) < Date.parse(current.capturedAt))
+    return null;
+  const raw = JSON.parse(
+    gunzipSync(Buffer.from(saved.body.raw, "base64"), {
+      maxOutputLength: 2000000,
+    }).toString("utf8"),
+  );
+  const scores = new Map(
+    raw.games.map((g) => ["nhl:" + g.id, regulationPeriods(g)]),
+  );
+  return {
+    ...current,
+    games: current.games.map((g) => ({ ...g, scoring: scores.get(g.eventId) })),
+  };
 }
 
 export async function nativeFixtures(db, games, date, cutoff, rows) {

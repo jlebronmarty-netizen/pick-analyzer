@@ -42,12 +42,29 @@ function percentage(n) {
     ? (100 * n).toFixed(1) + "%"
     : na;
 }
+function Analysis({ label, children, className }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <details
+      className={className}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+    >
+      <summary>{label}</summary>
+      {open ? children : null}
+    </details>
+  );
+}
 function Team({ team: t, window, opponent }) {
   const games = teamWindow(t, window, opponent).reverse();
   const mean = (key) =>
     games.length && games.every((g) => Number.isFinite(g[key]))
       ? (games.reduce((sum, g) => sum + g[key], 0) / games.length).toFixed(1)
       : na;
+  const periodGames = games.filter((g) => g.periods?.length === 3);
+  const wins = games.filter((g) => g.score > g.against).length;
+  const overtimeLosses = games.filter(
+    (g) => g.score < g.against && g.finish !== "REG",
+  ).length;
   const starts = games.flatMap((g) =>
     g.goalies.filter((p) => p.id === t.goalieId),
   );
@@ -62,8 +79,9 @@ function Team({ team: t, window, opponent }) {
       {games.length ? (
         <>
           <p>
-            Marcador final a favor · {games.length} juegos · incluye desempate
-            SO
+            Récord {wins}–{games.length - wins - overtimeLosses}–
+            {overtimeLosses} · Marcador final a favor · {games.length} juegos ·
+            incluye desempate SO
           </p>
           <TrendBars
             bars={games.map((g) => ({
@@ -96,8 +114,7 @@ function Team({ team: t, window, opponent }) {
           : na}
       </p>
       {games.length > 0 && (
-        <details>
-          <summary>Jugadores y cruces observados</summary>
+        <Analysis label="Jugadores y cruces observados">
           {games.map((g) => (
             <details key={g.id}>
               <summary>
@@ -135,7 +152,7 @@ function Team({ team: t, window, opponent }) {
               ))}
             </details>
           ))}
-        </details>
+        </Analysis>
       )}
       <p>
         PP{" "}
@@ -157,9 +174,32 @@ function Team({ team: t, window, opponent }) {
             : "No"
           : na}
       </p>
-      {t.last10.periods.length > 0 &&
-      t.last10.complete &&
-      t.last10.sequenceVerified ? (
+      {periodGames.length ? (
+        <p>
+          Goles por período a favor/en contra · {periodGames.length}/
+          {games.length} juegos con acta conciliada ·{" "}
+          {[0, 1, 2]
+            .map(
+              (i) =>
+                "P" +
+                (i + 1) +
+                " " +
+                [0, 1]
+                  .map((side) =>
+                    (
+                      periodGames.reduce(
+                        (acc, g) => acc + g.periods[i][side],
+                        0,
+                      ) / periodGames.length
+                    ).toFixed(1),
+                  )
+                  .join("/"),
+            )
+            .join(" · ")}
+        </p>
+      ) : t.last10.periods.length > 0 &&
+        t.last10.complete &&
+        t.last10.sequenceVerified ? (
         <p>
           Goles a favor/en contra por período (L10) ·{" "}
           {t.last10.periods
@@ -245,23 +285,63 @@ export default function Sheet({ date, data }) {
               Top 10 histórico · {markets[market]} · {bands[r.band]}
             </h2>
             {r.entries.length ? (
-              <ol>
+              <div className={s.grid}>
                 {r.entries.map(({ game: g, quote: q, hits, n, ties }, i) => (
-                  <li key={g.id + q.side}>
-                    {i + 1}. {g.away} @ {g.home} ·{" "}
-                    {
+                  <SheetCard key={g.id + q.side}>
+                    <header>
+                      <span>
+                        {g.away} @ {g.home}
+                      </span>
+                      <span>{prTime(g.time)} PR</span>
+                    </header>
+                    <h2>
                       {
-                        home: g.home,
-                        away: g.away,
-                        over: "Más de",
-                        under: "Menos de",
-                      }[q.side]
-                    }{" "}
-                    {q.line ?? ""} · {q.price > 0 ? "+" : ""}
-                    {q.price} · {hits}/{n} sobre el umbral · {ties} empates
-                  </li>
+                        {
+                          home: g.home,
+                          away: g.away,
+                          over: "Más de",
+                          under: "Menos de",
+                        }[q.side]
+                      }{" "}
+                      {q.line ?? ""}
+                    </h2>
+                    <div className={s.score}>
+                      <b>
+                        {hits}/{n}
+                      </b>
+                      <span>veces sobre el umbral</span>
+                      <i>#{i + 1}</i>
+                    </div>
+                    <div className={s.footer}>
+                      <span>
+                        Circa {q.price > 0 ? "+" : ""}
+                        {q.price}
+                      </span>
+                      <span>
+                        {ties} empates · {prTime(q.captured)} PR
+                      </span>
+                    </div>
+                    <Analysis
+                      className={s.analysis}
+                      label="Historial del mercado"
+                    >
+                      {(market === "total" ? ["away", "home"] : [q.side]).map(
+                        (side) => (
+                          <Team
+                            key={side}
+                            team={g.fixture.teams[side]}
+                            window={window}
+                            opponent={
+                              g.fixture.teams[side === "home" ? "away" : "home"]
+                                .abbrev
+                            }
+                          />
+                        ),
+                      )}
+                    </Analysis>
+                  </SheetCard>
                 ))}
-              </ol>
+              </div>
             ) : (
               <p>
                 Sin cuotas y muestras comparables de al menos cinco partidos.
@@ -316,8 +396,7 @@ export default function Sheet({ date, data }) {
                     ) : (
                       <p>Sin cuota comparable en este rango.</p>
                     )}
-                    <details>
-                      <summary>Análisis del partido</summary>
+                    <Analysis label="Análisis del partido">
                       {g.fixture && (
                         <p>
                           {g.fixture.native
@@ -348,7 +427,7 @@ export default function Sheet({ date, data }) {
                         Lesiones y alineación completa · Sin confirmar en este
                         corte.
                       </p>
-                    </details>
+                    </Analysis>
                   </div>
                 </SheetCard>
               );

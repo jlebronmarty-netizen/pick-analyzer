@@ -15,8 +15,15 @@ Ruta privada de Preview `/nhl-cheat-sheets`. El selector de jornada usa Puerto R
 
 Semilla V13 del 23 de noviembre y CSV por equipo del informe Pick #399. Se cruzaron ID del juego, equipo, sede y hora de captura del box; el último juego fue el 22. Los 284 registros equipo–partido coinciden en marcador final. En tiros coinciden 282/284. Para nhl:2026020349 V13 muestra TBL 20 y EDM 23 frente a 19 y 24 en Pick. La vista excluye esos tiros de sus medias hasta conciliar el recibo. Sobre secuencias con todos los boxes comunes, coinciden las sumas de goles L5 en 32/32 equipos y L10 en 8/8. En tiros coinciden 30/32 y 6/8. Las fechas de generación de los dos informes difieren: este cotejo valida los boxes comunes, no la hora de disponibilidad del productor.
 
-El Site todavía produce la secuencia reciente, cobertura de calendario, récord por sede, integración de PP/PK y estados de disponibilidad. El detalle por jugador ya usa Pick. Siguen pendientes la sustitución independiente del productor, la paridad de períodos y porteros por corte y la disponibilidad de lesiones, clasificación y reglas por contrato. #372 y #402 conservan su alcance predictivo independiente.
+El Site todavía produce la secuencia reciente, cobertura de calendario, récord por sede, integración de PP/PK y estados de disponibilidad. El detalle por jugador ya usa Pick. Siguen pendientes la sustitución independiente del productor, la extensión de la paridad de períodos y porteros a más jornadas y la disponibilidad de lesiones, clasificación y reglas por contrato. #372 y #402 conservan su alcance predictivo independiente.
 
 ## Revisión
 
 Pruebas locales de ventanas, deduplicación H2H, bandas y empates junto con regresión NBA y lector NHL. El tracker NHL queda fuera de esta fase. Para retirar la vista previa basta cerrar la rama de revisión. No se modificó infraestructura.
+
+
+En los siete partidos del 23 de noviembre, los 14 equipos coinciden con el Site en secuencia L10, fecha de clasificación y récord general, local y visitante. Para esas ventanas coinciden las 42 comparaciones equipo–período (partidos, goles y tiros a favor/en contra por partido). También coinciden los 14 nombres, estados y horas de revisión de portero y las 14 ternas de partidos, PP% y PK%. La igualdad numérica de equipos especiales no iguala las horas de los dos cortes. La posición ordinal y el listado parcial de lesiones del Site aún requieren una fuente con procedencia equivalente en Pick.
+
+En el archivo nativo, los goles P1–P3 se aceptan cuando la secuencia oficial de goles coincide con el box final, las identidades y el tipo de final. El cálculo separa el gol de prórroga y el desempate de shootout. Las medias de períodos indican cuántos partidos de la ventana se conciliaron.
+
+Validación del PR #414: build completo de Next, 198 pruebas de NHL y regresión NBA aprobadas. Chromium a 390 y 1440 px con la ruta real y una reproducción local del archivo MIN–SJS del 23 de noviembre. Se comprobaron los filtros de partido, período histórico, mercado y bandas, los diez valores de barras L5 entre los dos equipos, la apertura de ambas clases de tarjeta y la ausencia de desbordamiento horizontal o errores de hidratación. Petición sin identidad a la ruta privada: HTTP 404. Protección de Vercel habilitada para Preview.

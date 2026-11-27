@@ -55,3 +55,38 @@ test("totals count each unique final and keep exact thresholds in denominator", 
     5,
   );
 });
+
+import { regulationPeriods } from "../src/app/nhl-cheat-sheets/periods.mjs";
+test("period accounting separates shootout bonus and rejects incomplete scoring", () => {
+  const game = {
+    gameState: "FINAL",
+    gameOutcome: { lastPeriodType: "SO" },
+    homeTeam: { abbrev: "H", score: 2 },
+    awayTeam: { abbrev: "A", score: 1 },
+    goals: [
+      {
+        period: 1,
+        periodDescriptor: { number: 1, periodType: "REG" },
+        teamAbbrev: "H",
+        homeScore: 1,
+        awayScore: 0,
+      },
+      {
+        period: 3,
+        periodDescriptor: { number: 3, periodType: "REG" },
+        teamAbbrev: "A",
+        homeScore: 1,
+        awayScore: 1,
+      },
+    ],
+  };
+  assert.deepEqual(regulationPeriods(game).periods, [
+    { home: 1, away: 0 },
+    { home: 0, away: 0 },
+    { home: 0, away: 1 },
+  ]);
+  assert.equal(
+    regulationPeriods({ ...game, goals: game.goals.slice(0, 1) }),
+    null,
+  );
+});

@@ -14,7 +14,7 @@ async function rows(query) {
   let expected;
   do {
     const result = await query
-      .range(output.length, output.length + 199)
+      .range(output.length, output.length + 499)
       .abortSignal(AbortSignal.timeout(18000));
     if (
       result.error ||
@@ -243,11 +243,17 @@ export async function readSheet(date) {
     const source = manual.rows.find(
       (r) => r.event_id === f.eventId && r.available_as_of === f.availableAsOf,
     )?.feature_payload;
+    const gameIds = new Set(
+      Object.values(f.teams).flatMap((t) => t.last10.recentEventIds),
+    );
+    const fixtureBoxes = boxes.filter((b) => gameIds.has(b.event_id));
     const observed = matchups.filter(
-      (m) => Date.parse(m.captured_at) <= Date.parse(f.availableAsOf),
+      (m) =>
+        gameIds.has(m.event_id) &&
+        Date.parse(m.captured_at) <= Date.parse(f.availableAsOf),
     );
     const history = normalizeNhlResearchContexts(
-      boxes,
+      fixtureBoxes,
       f.availableAsOf,
       observed,
     );
@@ -289,6 +295,7 @@ export async function readSheet(date) {
           (r) => r.eventId === id && r.teamId === g?.opponentId,
         );
         if (!g || !rival || g.opponentId !== rival.teamId) return null;
+        let periods = null;
         if (f.native) {
           const scheduled = t.expectedMatches.find((x) => x.eventId === id);
           const home = g.side === "home" ? g.teamId : g.opponentId;
@@ -300,10 +307,24 @@ export async function readSheet(date) {
             Date.parse(scheduled.scheduledAt) !== Date.parse(g.scheduledAt)
           )
             return null;
+          const scored = scheduled.scoring;
+          if (
+            scored &&
+            scored.finish === g.endType &&
+            scored[g.side + "Score"] === g.finalGoalsFor &&
+            scored[g.side === "home" ? "awayScore" : "homeScore"] ===
+              g.finalGoalsAgainst
+          ) {
+            periods = scored.periods.map((p) => [
+              p[g.side],
+              p[g.side === "home" ? "away" : "home"],
+            ]);
+          }
           t.abbrev = g.team;
         }
         return {
           id,
+          periods,
           opp: rival.team,
           score: g.finalGoalsFor,
           against: g.finalGoalsAgainst,
@@ -392,7 +413,7 @@ export async function readSheet(date) {
             fullName: t.goalie.name,
             decisionAt: f.availableAsOf,
             gameEventId: f.eventId,
-            boxscoreRows: boxes,
+            boxscoreRows: fixtureBoxes,
           }).goalieNhlIdCandidate ?? null;
     }
   }
