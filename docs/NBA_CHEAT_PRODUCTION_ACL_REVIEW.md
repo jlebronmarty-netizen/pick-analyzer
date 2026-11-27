@@ -1,5 +1,27 @@
 # NBA Cheat Sheets · control de publicación en producción
 
+## Primera inscripción prepartido · 27 de noviembre de 2026
+
+Horas de Puerto Rico. El primer lote se registró a las 02:30:34.558323 con diez posiciones simultáneas del ranking general por frecuencia (`rate`, banda −250 o mejor). La primera tarjeta del lote fue el jugador ID 15 de MIA–NYK, partido 21718193, más de 11.5 rebotes a −132 en FanDuel. El calendario archivado a las 02:30:26 fijaba el inicio para las 20:00 del mismo día. La cuota prepartido se recibió a las 02:00:34 y seguía vigente durante la inscripción. El archivo confirma el identificador, el lado y la línea. La cotización carece de nombre, verificación regional de precio y regla confirmada de prórroga.
+
+- Captura `36357af502691236f6793c86825752695df18a6fd80b0794fd0d5558cf96c995`. Cotización `99175d991ee42938f04b279ea931b0bb7f3293d8494324583308bbef7e054403`. Calendario `ceeff56975b5e5abf3d8c7a96245f96b76835355c069295e1cb7e0c39ab6c794`.
+- Vercel registró `OK` a las 02:30:34 (`q8q67-1795761025231-258200da8476`) y 03:00:31 (`6s2jl-1795762825620-5824dde2f6c0`). Cada ejecución informó 52 intentos de captura, cero vencimientos y cero llamadas del tracker a proveedores.
+- Al corte de las 03:04, Supabase contenía 104 capturas, 725 inscripciones de cuatro partidos y 232 identificadores de cuota distintos. Las 725 coincidieron con la cuota archivada en jugador, partido, mercado, lado, línea y precio, y con la tarjeta en su posición y metodología originales. Todas entraron antes del inicio y dentro de la vigencia de la cuota. Hubo cero contratos repetidos dentro de la misma jornada, metodología, alcance y banda.
+- Inscripciones por metodología: `rate` 158, `gap` 151, `pct` 154, `conditions` 159, `projection_five` 52 y `projection_ten` 51. Los alcances y métodos pueden compartir contratos. La posición pertenece al primer ingreso de cada contrato dentro de su estrategia y puede repetirse durante la jornada.
+- Las 725 inscripciones seguían pendientes. La vista de la cola de liquidación, que exige que haya pasado la hora de inicio, tenía cero filas. En las 29 540 filas de rendimiento, todos los contratos estaban pendientes, con cero decisiones, pares liquidados y unidades ganadas, perdidas, netas o liquidadas. Accuracy y ROI eran nulos en todas las posiciones y Tops. Sigue pendiente la conciliación de la primera liquidación real, así como el recálculo con resultados y la comparación con Pick cuando existan pares equivalentes.
+
+## Control operativo del 26 de noviembre de 2026
+
+| Hora de Puerto Rico | Solicitud de Vercel | Resultado |
+|---|---|---|
+| 25-nov 23:30:32 | fg4dg-1795663825792-b607478655a9 | NBA_SHEET_TICK OK |
+| 26-nov 00:00:26 | pnwcg-1795665625360-b2d90f9181ec | NBA_SHEET_TICK OK |
+
+En ambas ejecuciones naturales del GET de producción hubo cero contratos intentados o vencidos, cero partidos pendientes, cero liquidaciones intentadas y cero llamadas del tracker a proveedores. El segundo recibo procede del despliegue dpl_2PNU6pnFaUWde87WWJcP2RavxYcA. Supabase a las 00:04:12 PR tenía cero capturas, inscripciones, liquidaciones y filas de rendimiento.
+
+El seguimiento permanece abierto. Para cerrarlo, cotejar la primera captura elegible con su inicio, primera posición, metodología y precio; la primera liquidación con la estadística individual verificada; y las vistas de posiciones y Top acumulados con una recomputación de unidades, ROI, accuracy y denominadores por estrategia. Una muestra vacía no permite validar esa contabilidad prospectiva. El [roadmap NHL](NHL_CHEAT_SHEETS_ROADMAP.md) ya está en main; la propuesta definitiva aguarda ese cierre.
+
+
 ## Publicación y activación · 25 de noviembre, después de las 11 p. m. de Puerto Rico
 
 PR #408 fusionado en `5410211f38edb007ce5cf7a5ce4e1738fcc6217c`. Ocho controles pasaron en el candidato `c1b603375ba8a84ebd05ff0f53819f2f23d1983b`. La única migración ejecutada durante la reanudación fue 202611260903_nba_sheet_view_acl.sql, registrada en producción como nba_sheet_view_acl, versión 20261126030845. El catálogo confirmó exclusivamente SELECT sin grant option para service_role en las cuatro vistas, security_invoker=true y ausencia de acceso para PUBLIC, anon y authenticated. La migración también comprueba privilegios por columna. En PostgreSQL aislado se reprodujeron los defaults de producción y una membresía con TRIGGER que la migración rechazó. Pasaron las suites de inscripción, liquidación, reintento, unidades, pares y ACL.
