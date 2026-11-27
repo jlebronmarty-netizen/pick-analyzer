@@ -56,3 +56,6 @@ NBA es el único consumidor implementado. El punto de extensión es la presentac
 5. Comparar las frecuencias, el orden y los IDs de contrato antes y después. Verificar teclado, foco visible, apertura/cierre en móvil y escritorio y estado sin evidencia.
 
 El próximo deporte se decide después de la aceptación de NBA. Las diferencias de períodos, estadísticas, posiciones y reglas de liquidación se resuelven en cada dominio. La UI compartida carece de tablas, credenciales y dependencias de proveedores.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).

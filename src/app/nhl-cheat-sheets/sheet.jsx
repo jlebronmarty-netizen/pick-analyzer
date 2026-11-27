@@ -77,6 +77,12 @@ function Team({ team: t, window, opponent, opponentGoalie }) {
         Temporada {t.season.record ?? na} · Posición {t.rank ?? na} · Local{" "}
         {t.homeRecord ?? na} · Visitante {t.awayRecord ?? na}
       </p>
+      <p>
+        {t.alignment?.division ?? na} · {t.alignment?.conference ?? na} ·
+        Temporada: {t.season.games ?? na} PJ · {t.season.points ?? na} pts ·
+        GF/GC por juego {t.season.goalsForPerGame ?? na}/
+        {t.season.goalsAgainstPerGame ?? na}
+      </p>
       {games.length ? (
         <>
           <p>
@@ -100,7 +106,11 @@ function Team({ team: t, window, opponent, opponentGoalie }) {
           </p>
         </>
       ) : (
-        <p>Sin serie comparable para esta ventana.</p>
+        <p>
+          Sin serie comparable. Partidos con box verificable en la ventana
+          general: {t.history.filter(Boolean).length}/
+          {t.last10.recentEventIds.length}.
+        </p>
       )}
       <p>
         Portero {t.goalie.name ?? na} · {t.goalie.status}
@@ -228,12 +238,20 @@ export default function Sheet({ date, data }) {
   const [market, M] = useState("ml"),
     [band, B] = useState("all"),
     [window, W] = useState("10"),
-    [game, G] = useState("all");
+    [game, G] = useState("all"),
+    [order, O] = useState("frequency");
   const visible =
     data?.games.filter((g) => game === "all" || game === g.id) ?? [];
   const ranks = (band === "all" ? ["standard", "heavy"] : [band]).map((b) => ({
     band: b,
-    entries: rankThresholds(visible, data?.prices ?? [], market, b, window),
+    entries: rankThresholds(
+      visible,
+      data?.prices ?? [],
+      market,
+      b,
+      window,
+      order,
+    ),
   }));
   return (
     <main className={s.sheet}>
@@ -261,10 +279,20 @@ export default function Sheet({ date, data }) {
           options={{
             5: "Últimos 5",
             10: "Últimos 10",
-            h2h: "Contra el rival en L10",
+            direct5: "H2H · últimos 5",
+            direct10: "H2H · últimos 10",
           }}
           value={window}
           onChange={W}
+        />
+        <FilterGroup
+          label="Orden"
+          options={{
+            frequency: "Frecuencia histórica",
+            conditions: "Condiciones favorables",
+          }}
+          value={order}
+          onChange={O}
         />
         <FilterGroup label="Cuotas" options={bands} value={band} onChange={B} />
       </div>
@@ -287,69 +315,92 @@ export default function Sheet({ date, data }) {
             </h2>
             {r.entries.length ? (
               <div className={s.grid}>
-                {r.entries.map(({ game: g, quote: q, hits, n, ties }, i) => (
-                  <SheetCard key={g.id + q.side}>
-                    <header>
-                      <span>
-                        {g.away} @ {g.home}
-                      </span>
-                      <span>{prTime(g.time)} PR</span>
-                    </header>
-                    <h2>
-                      {
+                {r.entries.map(
+                  ({ game: g, quote: q, hits, n, ties, conditions }, i) => (
+                    <SheetCard key={g.id + q.side}>
+                      <header>
+                        <span>
+                          {g.away} @ {g.home}
+                        </span>
+                        <span>{prTime(g.time)} PR</span>
+                      </header>
+                      <h2>
                         {
-                          home: g.home,
-                          away: g.away,
-                          over: "Más de",
-                          under: "Menos de",
-                        }[q.side]
-                      }{" "}
-                      {q.line ?? ""}
-                    </h2>
-                    <div className={s.score}>
-                      <b>
-                        {hits}/{n}
-                      </b>
-                      <span>veces sobre el umbral</span>
-                      <i>#{i + 1}</i>
-                    </div>
-                    <div className={s.footer}>
-                      <span>
-                        Circa {q.price > 0 ? "+" : ""}
-                        {q.price}
-                      </span>
-                      <span>
-                        {ties} empates · {prTime(q.captured)} PR
-                      </span>
-                    </div>
-                    <Analysis
-                      className={s.analysis}
-                      label="Historial del mercado"
-                    >
-                      {(market === "total" ? ["away", "home"] : [q.side]).map(
-                        (side) => (
-                          <Team
-                            key={side}
-                            team={g.fixture.teams[side]}
-                            opponentGoalie={{
-                              id: g.fixture.teams[
-                                side === "home" ? "away" : "home"
-                              ].goalieId,
-                              name: g.fixture.teams[
-                                side === "home" ? "away" : "home"
-                              ].goalie.name,
-                            }}
-                            window={window}
-                            opponent={
-                              g.fixture.teams[side === "home" ? "away" : "home"]
-                                .abbrev
-                            }
-                          />
-                        ),
-                      )}
-                    </Analysis>
-                  </SheetCard>
-                ))}
+                          {
+                            home: g.home,
+                            away: g.away,
+                            over: "Más de",
+                            under: "Menos de",
+                          }[q.side]
+                        }{" "}
+                        {q.line ?? ""}
+                      </h2>
+                      <div className={s.score}>
+                        <b>
+                          {hits}/{n}
+                        </b>
+                        <span>veces sobre el umbral</span>
+                        <i>#{i + 1}</i>
+                      </div>
+                      <div className={s.footer}>
+                        <span>
+                          Circa {q.price > 0 ? "+" : ""}
+                          {q.price}
+                        </span>
+                        <span>
+                          {ties} empates · {prTime(q.captured)} PR
+                        </span>
+                      </div>
+                      <Analysis
+                        label={
+                          "Condiciones favorables · " +
+                          conditions.filter((c) => c.pass === true).length +
+                          "/" +
+                          conditions.filter((c) => c.pass !== null).length +
+                          " evaluables"
+                        }
+                      >
+                        {conditions.map((c) => (
+                          <p key={c.name}>
+                            {c.name} ·{" "}
+                            {c.pass === null
+                              ? "Sin evidencia"
+                              : c.pass
+                                ? "Cumple"
+                                : "No cumple"}
+                          </p>
+                        ))}
+                      </Analysis>
+                      <Analysis
+                        className={s.analysis}
+                        label="Historial del mercado"
+                      >
+                        {(market === "total" ? ["away", "home"] : [q.side]).map(
+                          (side) => (
+                            <Team
+                              key={side}
+                              team={g.fixture.teams[side]}
+                              opponentGoalie={{
+                                id: g.fixture.teams[
+                                  side === "home" ? "away" : "home"
+                                ].goalieId,
+                                name: g.fixture.teams[
+                                  side === "home" ? "away" : "home"
+                                ].goalie.name,
+                              }}
+                              window={window}
+                              opponent={
+                                g.fixture.teams[
+                                  side === "home" ? "away" : "home"
+                                ].abbrev
+                              }
+                            />
+                          ),
+                        )}
+                      </Analysis>
+                    </SheetCard>
+                  ),
+                )}
               </div>
             ) : (
               <p>

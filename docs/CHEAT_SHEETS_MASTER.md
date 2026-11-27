@@ -89,3 +89,6 @@ La versión 13 del Site corresponde a `9835e3ab79ec423cab1333198e10f7565e845eb0`
 ## Versiones y evidencias
 
 La rama incorporó Top 10 y captura el 24-nov, consolidó las bandas de cuotas en `7a3ff822` e incorporó rival y metodología en `2bd1709e`. El commit V13 del Site identifica la fuente recuperada y es independiente de la numeración de Pick. Los documentos distinguen entrega en la rama, capacidad en producción, referencia recuperada y trabajo futuro.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).

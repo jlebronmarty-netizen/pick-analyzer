@@ -4583,3 +4583,6 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 Medir en una prueba privada y acotada cuántos historiales de props se pueden cotejar con los box scores archivados. Verificar por separado la disponibilidad previa del jugador y la regla de prórroga de cada contrato.
 
 Prueba de vista previa completada el 21 de noviembre a las 8:34 p. m. de Puerto Rico. Se validó el historial de 334 de 842 lados de props. Antes de activar lecturas periódicas en producción, revisar el límite de lectura y los 140 lados con discrepancias de original o identidad. Siguen pendientes los historiales incompletos, la disponibilidad de los jugadores y la regla regional de prórroga.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).

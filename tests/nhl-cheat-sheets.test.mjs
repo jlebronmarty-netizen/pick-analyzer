@@ -90,3 +90,30 @@ test("period accounting separates shootout bonus and rejects incomplete scoring"
     null,
   );
 });
+
+test("direct series is independent of general history and never fills missing boxes", () => {
+  const team = { history: [], direct: history };
+  assert.equal(teamWindow(team, "direct5").length, 5);
+  assert.equal(teamWindow(team, "direct10").length, 10);
+  assert.deepEqual(
+    teamWindow({ ...team, direct: [null, ...history] }, "direct5"),
+    [],
+  );
+});
+test("market criteria keep unsupported factors unknown and pushes outside hits", () => {
+  const [r] = rankThresholds(
+    fixtures,
+    [quote],
+    "total",
+    "heavy",
+    "10",
+    "conditions",
+  );
+  assert.equal(r.conditions.length, 9);
+  assert.equal(r.conditions.find((c) => c.name === "Forma L10").pass, false);
+  assert.equal(
+    r.conditions.find((c) => c.name === "Porteros confirmados").pass,
+    null,
+  );
+  assert.equal(r.conditions.find((c) => c.name === "H2H").pass, null);
+});

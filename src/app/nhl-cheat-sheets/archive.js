@@ -1,4 +1,5 @@
 import "server-only";
+import alignment from "./alignment-2026.json";
 import { nativeFixtures } from "./native";
 import { normalizeNhlResearchContexts } from "@/lib/nhl-research-features.mjs";
 import { nhlGoalieAsOfSide } from "@/lib/nhl-goalie-prior-form-asof-v7.mjs";
@@ -209,11 +210,43 @@ export async function readSheet(date) {
   );
   fixtures.push(...native);
   for (const f of native) games.get(f.eventId).fixture = f;
+  const catalog = fixtures.length
+    ? await rows(
+        db
+          .from("nhl_game_context_v2")
+          .select(
+            "event_id,boxscore_captured_at,tip:boxscore->>startTimeUTC,hid:boxscore->homeTeam->id,aid:boxscore->awayTeam->id,home:boxscore->homeTeam->>abbrev,away:boxscore->awayTeam->>abbrev",
+            { count: "exact" },
+          )
+          .eq("boxscore->>season", "20262027")
+          .eq("boxscore->>gameType", "2")
+          .in("boxscore->>gameState", ["FINAL", "OFF"])
+          .order("event_id"),
+      )
+    : [];
+  for (const f of fixtures) {
+    const matches = (t, id, abbrev) =>
+      t.teamId ? t.teamId === id : t.abbrev === abbrev;
+    f.directIds = catalog
+      .filter(
+        (r) =>
+          Date.parse(r.tip) < Date.parse(r.boxscore_captured_at) &&
+          Date.parse(r.boxscore_captured_at) <= Date.parse(f.availableAsOf) &&
+          ((matches(f.teams.home, r.hid, r.home) &&
+            matches(f.teams.away, r.aid, r.away)) ||
+            (matches(f.teams.home, r.aid, r.away) &&
+              matches(f.teams.away, r.hid, r.home))),
+      )
+      .sort((a, b) => Date.parse(b.tip) - Date.parse(a.tip))
+      .slice(0, 10)
+      .map((r) => r.event_id);
+  }
   const ids = [
     ...new Set(
-      fixtures.flatMap((f) =>
-        Object.values(f.teams).flatMap((t) => t.last10.recentEventIds),
-      ),
+      fixtures.flatMap((f) => [
+        ...Object.values(f.teams).flatMap((t) => t.last10.recentEventIds),
+        ...f.directIds,
+      ]),
     ),
   ];
   const boxes = ids.length
@@ -243,9 +276,10 @@ export async function readSheet(date) {
     const source = manual.rows.find(
       (r) => r.event_id === f.eventId && r.available_as_of === f.availableAsOf,
     )?.feature_payload;
-    const gameIds = new Set(
-      Object.values(f.teams).flatMap((t) => t.last10.recentEventIds),
-    );
+    const gameIds = new Set([
+      ...Object.values(f.teams).flatMap((t) => t.last10.recentEventIds),
+      ...f.directIds,
+    ]);
     const fixtureBoxes = boxes.filter((b) => gameIds.has(b.event_id));
     const observed = matchups.filter(
       (m) =>
@@ -277,15 +311,15 @@ export async function readSheet(date) {
       t.awayRecord = raw?.season.away_record;
       const expected = raw?.last10.expected_event_ids;
       const seq = t.last10.recentEventIds;
-      t.history = (
+      const recent =
         t.last10.sequenceVerified &&
         (f.native ||
           (t.last10.complete &&
             seq.length === 10 &&
             JSON.stringify(expected) === JSON.stringify(seq)))
           ? seq
-          : []
-      ).map((id) => {
+          : [];
+      const describe = (id, direct = false) => {
         const g = history.teamGames.find(
           (g) =>
             g.eventId === id &&
@@ -296,7 +330,7 @@ export async function readSheet(date) {
         );
         if (!g || !rival || g.opponentId !== rival.teamId) return null;
         let periods = null;
-        if (f.native) {
+        if (f.native && !direct) {
           const scheduled = t.expectedMatches.find((x) => x.eventId === id);
           const home = g.side === "home" ? g.teamId : g.opponentId;
           const away = g.side === "away" ? g.teamId : g.opponentId;
@@ -325,14 +359,29 @@ export async function readSheet(date) {
         return {
           id,
           periods,
+          venue: g.side,
+          date: g.gameDate,
           opp: rival.team,
           score: g.finalGoalsFor,
           against: g.finalGoalsAgainst,
           goals: g.performanceGoalsVerified ? g.goalsFor : null,
           allowed: rival.performanceGoalsVerified ? g.goalsAgainst : null,
-          shots: g.shotsVerified && id !== "nhl:2026020349" ? g.shotsFor : null,
+          shots:
+            g.shotsVerified &&
+            (id !== "nhl:2026020349" ||
+              (g.team === "EDM" &&
+                g.shotsFor === 24 &&
+                g.capturedAt === "2026-11-20T05:37:24.155Z"))
+              ? g.shotsFor
+              : null,
           shotsAgainst:
-            g.shotsVerified && id !== "nhl:2026020349" ? g.shotsAgainst : null,
+            g.shotsVerified &&
+            (id !== "nhl:2026020349" ||
+              (rival.team === "EDM" &&
+                g.shotsAgainst === 24 &&
+                g.capturedAt === "2026-11-20T05:37:24.155Z"))
+              ? g.shotsAgainst
+              : null,
           finish: g.endType,
           skaters: history.skaterGames
             .filter(
@@ -393,7 +442,15 @@ export async function readSheet(date) {
               g: m.goals,
             })),
         };
-      });
+      };
+      t.history = recent.map((id) => describe(id));
+      t.direct = f.directIds.map((id) => describe(id, true));
+      if (
+        date >= "2026-11-23" &&
+        date < "2027-07-01" &&
+        Date.parse(f.availableAsOf) >= Date.parse("2026-11-23T16:15:18Z")
+      )
+        t.alignment = alignment[t.abbrev] ?? null;
       delete t.expectedMatches;
       if (
         f.native &&

@@ -3767,3 +3767,6 @@ NHL V6 now reads finals by the event IDs of its latest 250 freezes in batches of
 El lector de box scores acepta las listas que guarda el archivo estacional y el formato anterior con el campo `data`. Se reprodujeron los juegos 21718144, 21718145 y 21718146 con 104 filas en total. En cada caso coincidieron el tamaño original, el tamaño comprimido y el SHA-256 del manifiesto.
 
 El 21 de noviembre a las 8:34 p. m. de Puerto Rico se compararon dos vistas previas del mismo commit con 842 lados de props. Coincidieron los identificadores de cuota, los precios, las líneas, las capturas y las claves de historial. Con un límite de 256 KiB por lectura, 334 lados correspondientes a 24 jugadores pasaron de historial parcial a validado y 140 mostraron discrepancias con el original o su identidad. Otros 360 siguieron con historial incompleto y ocho conservaron diferencias estadísticas. De los 334 con historial validado, 188 seguían antes del inicio y requerían verificar tanto la disponibilidad como la prórroga. El tablero devolvió cero props preferidas, cero llamadas al proveedor y cero escrituras en ambas lecturas. El límite de la rama de prueba volvió a cero después de la comparación.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).

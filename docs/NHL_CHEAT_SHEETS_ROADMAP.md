@@ -46,3 +46,6 @@ Sustituir esa dependencia por etapas: cotejar hashes y contratos del productor d
 5. **Salida controlada.** Condiciones de inicio: dos ticks naturales NBA acreditados, primera captura prepartido elegible y primera liquidación real verificada; revisar este plan con el propietario. Condiciones de despliegue NHL: paridad descriptiva, reglas por mercado demostradas, pruebas de seguridad y autorización separada. Antes de retirar cualquier dependencia, acreditar captura y liquidación NHL autónomas.
 
 Referencias: [auditoría NHL y datos normalizados](research/nhl-audit-2026-11-23/README.md), [contrato de inputs manuales](nhl-manual-features-v1.md), [fuente Circa](NHL_FREE_CIRCA_MAIN_MARKETS_20261115.md), [requisitos multideporte](CHEAT_SHEETS_MULTISPORT.md), [acta NBA](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
