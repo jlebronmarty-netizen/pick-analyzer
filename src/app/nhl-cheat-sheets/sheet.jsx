@@ -1,5 +1,6 @@
 "use client";
 import { teamWindow, inBand, rankThresholds } from "./windows.mjs";
+import { GoalieComparison, PlayerCard } from "./players";
 import { useState } from "react";
 import {
   FilterGroup,
@@ -54,7 +55,7 @@ function Analysis({ label, children, className }) {
     </details>
   );
 }
-function Team({ team: t, window, opponent }) {
+function Team({ team: t, window, opponent, opponentGoalie }) {
   const games = teamWindow(t, window, opponent).reverse();
   const mean = (key) =>
     games.length && games.every((g) => Number.isFinite(g[key]))
@@ -115,6 +116,7 @@ function Team({ team: t, window, opponent }) {
       </p>
       {games.length > 0 && (
         <Analysis label="Jugadores y cruces observados">
+          <PlayerCard games={games} opponentGoalie={opponentGoalie} />
           {games.map((g) => (
             <details key={g.id}>
               <summary>
@@ -145,9 +147,8 @@ function Team({ team: t, window, opponent }) {
                 </tbody>
               </table>
               {g.meetings.map((m) => (
-                <p key={m.shooter + "-" + m.goalie}>
-                  #{m.shooter} vs portero #{m.goalie} · {m.s} tiros · {m.g}{" "}
-                  goles
+                <p key={m.shooterId + "-" + m.goalieId}>
+                  {m.shooter} vs portero {m.goalie} · {m.s} tiros · {m.g} goles
                 </p>
               ))}
             </details>
@@ -330,6 +331,14 @@ export default function Sheet({ date, data }) {
                           <Team
                             key={side}
                             team={g.fixture.teams[side]}
+                            opponentGoalie={{
+                              id: g.fixture.teams[
+                                side === "home" ? "away" : "home"
+                              ].goalieId,
+                              name: g.fixture.teams[
+                                side === "home" ? "away" : "home"
+                              ].goalie.name,
+                            }}
                             window={window}
                             opponent={
                               g.fixture.teams[side === "home" ? "away" : "home"]
@@ -398,6 +407,12 @@ export default function Sheet({ date, data }) {
                     )}
                     <Analysis label="Análisis del partido">
                       {g.fixture && (
+                        <GoalieComparison
+                          teams={g.fixture.teams}
+                          window={window}
+                        />
+                      )}
+                      {g.fixture && (
                         <p>
                           {g.fixture.native
                             ? "Archivo de Pick disponible hasta"
@@ -410,6 +425,14 @@ export default function Sheet({ date, data }) {
                           <Team
                             key={side}
                             team={t}
+                            opponentGoalie={{
+                              id: g.fixture.teams[
+                                side === "home" ? "away" : "home"
+                              ].goalieId,
+                              name: g.fixture.teams[
+                                side === "home" ? "away" : "home"
+                              ].goalie.name,
+                            }}
                             window={window}
                             opponent={
                               g.fixture.teams[side === "home" ? "away" : "home"]

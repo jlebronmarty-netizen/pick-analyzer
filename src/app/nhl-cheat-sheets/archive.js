@@ -385,6 +385,8 @@ export async function readSheet(date) {
                 ),
             )
             .map((m) => ({
+              shooterId: m.shooting_player_id,
+              goalieId: m.goalie_id,
               shooter: m.shooting_player_name ?? m.shooting_player_id,
               goalie: m.goalie_name ?? m.goalie_id,
               s: m.shots,
