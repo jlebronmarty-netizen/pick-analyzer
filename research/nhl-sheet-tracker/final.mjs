@@ -9,7 +9,7 @@ function seconds(toi) {
   const [minutes, sec] = toi.split(":").map(Number);
   return minutes * 60 + sec;
 }
-function verifyPlayerRows(box, plays, side, finish, shotsAgree) {
+function verifyPlayerRows(box, plays, side, finish, shotsAgree, gameSeconds) {
   const roster = box.playerByGameStats?.[side + "Team"];
   const opponent = box[side === "home" ? "awayTeam" : "homeTeam"].id;
   const own = box[side + "Team"].id;
@@ -32,7 +32,7 @@ function verifyPlayerRows(box, plays, side, finish, shotsAgree) {
         return null;
       const toi = seconds(p.toi),
         goalie = roster.goalies.includes(p);
-      if (toi === null || toi > (finish === "REG" ? 3600 : 3900) || toi === 0)
+      if (toi === null || toi > gameSeconds || toi === 0)
         return { id: p.playerId, participation: "unknown" };
       const periods = [1, 2, 3, ...(finish === "REG" ? [] : [4])].map(
         (period) => {
@@ -224,6 +224,17 @@ export function verifyArchivedFinal(rows, contract, asOf) {
       Math.sign(soGoals[h.id] - soGoals[a.id]) !== Math.sign(h.score - a.score))
   )
     return null;
+  const otEnd =
+    finish === "REG"
+      ? 0
+      : seconds(
+          p.plays.find(
+            (x) =>
+              x.typeDescKey === "period-end" && x.periodDescriptor.number === 4,
+          )?.timeInPeriod,
+        );
+  if (otEnd === null || otEnd > 300 || (finish === "SO" && otEnd !== 300))
+    return null;
   const s = regulationPeriods({ ...b, goals });
   if (!s) return null;
   const reg = { home: 0, away: 0 };
@@ -262,7 +273,7 @@ export function verifyArchivedFinal(rows, contract, asOf) {
     scores,
     shotsAgree,
     players: ["home", "away"].flatMap((side) =>
-      verifyPlayerRows(b, fieldPlays, side, finish, shotsAgree),
+      verifyPlayerRows(b, fieldPlays, side, finish, shotsAgree, 3600 + otEnd),
     ),
   };
 }

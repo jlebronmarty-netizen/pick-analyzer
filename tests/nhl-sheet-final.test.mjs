@@ -150,6 +150,7 @@ test("OT counts its winning goal; shootout credits one only to the official scor
         periodDescriptor: { number: n, periodType: n === 4 ? "OT" : "SO" },
         typeDescKey,
         eventId: next++,
+        timeInPeriod: n === 4 ? "05:00" : "00:00",
         details,
       });
     if (finish === "OT") add(4, "goal", goal);

@@ -63,3 +63,9 @@ El flujo aislado congela recibos y usa el archivo final para producir liquidacio
 5. Solamente tras autorización habilitar NHL_CHEAT_TRACKER_ENABLED, observar dos ciclos naturales, cotejar primera captura y primera liquidación real y recalcular contabilidad desde los recibos. Ante discrepancia, apagar el escritor y conservar el esquema, recibos y evidencia. Investigar antes de reintentar. No reconstruir posiciones ni borrar tablas como reversión.
 
 El seguimiento horario NBA continúa en su automatización independiente. Las pruebas del tracker NHL descritas aquí no representan rendimiento prospectivo real.
+
+### Recuperación del historial anterior al 3 de noviembre
+
+El archivo de transición V13 sí contiene resúmenes anteriores. Encontré tres para Boston, cuatro para Seattle, dos para Colorado, Detroit, Washington y NY Rangers, y tres para Los Ángeles. Para la secuencia corta del 27, los candidatos más recientes que cubrirían el déficit son BOS 2026020232 y 2026020217, SEA 2026020216 y 2026020202, COL 2026020234, DET 2026020233, WSH 2026020228, NYR 2026020230 y LAK 2026020221. La consulta directa de esos nueve IDs devolvió cero filas en nhl_game_context_v2. Las nueve referencias V13 indican un resumen oficial consultado el 23 y tienen captured_at nulo. Sirven para localizar las actas; falta una copia archivada conciliable y la secuencia del calendario para incorporarlas al L10 nativo. Ninguna se usó para reconstruir una inscripción.
+
+Validación local: build Next completo, 206 pruebas de NHL y regresión NBA, pruebas PostgreSQL del nuevo ledger y de regresión de contabilidad y ACL NBA. Chromium a 390 y 1440 px sobre el archivo reproducido de MIN–SJS permitió comprobar barras, filtros, expansión, hidratación y acceso privado.
