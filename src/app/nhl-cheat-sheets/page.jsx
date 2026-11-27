@@ -4,6 +4,7 @@ import { nbaManualAccess } from "@/lib/nba/manual-access.mjs";
 import { nhlManualFeatureDate } from "@/lib/nhl-manual-features.mjs";
 import { readSheet } from "./archive";
 import Sheet from "./sheet";
+import layout from "./layout.module.css";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 export default async function Page({ searchParams }) {
@@ -19,5 +20,5 @@ export default async function Page({ searchParams }) {
   try {
     data = await readSheet(date);
   } catch {}
-  return <Sheet date={typeof date === "string" ? date : ""} data={data} />;
+  return <div className={layout.surface}><Sheet date={typeof date === "string" ? date : ""} data={data} /></div>;
 }
