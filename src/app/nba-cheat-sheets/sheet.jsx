@@ -53,12 +53,19 @@ function BandResults({cards,projections,milestones,coverage,market,w,floor,now,a
     return {strict:sum.strict+(counts?.strict??0),milestones:sum.milestones+(counts?.milestones??0)};
   },{strict:0,milestones:0});
   return <section aria-label={oddsBands[floor]}>
-    <h2 className={styles.heading}>{oddsBands[floor]} · {markets[market]}</h2>
+    {references.length>0 && <section><h2 className={styles.heading}>Top histórico · {markets[market]} · {oddsBands[floor]}</h2>
+      <p>{references.length} {references.length===1?'jugador':'jugadores'} · {windows[w]} con al menos 10 minutos. Reglas pendientes · fuera del tracker.</p>
+      <div className={styles.grid}>{references.map((r,i)=><SheetCard key={r.quote}><header><span>{r.matchup}</span><span>#{i+1}</span></header><h2>{r.name}</h2>
+        <p className={styles.line}><strong>{r.threshold}+</strong> {markets[market].toLowerCase()}</p>
+        <div className={styles.score}><b>{r[w]}/{w==='five'?5:10}</b><span>juegos en que alcanzó el umbral</span></div>
+        <div className={styles.footer}><span>FanDuel {r.odds>0?'+':''}{r.odds}</span><span>Actualizada {time(r.updated)} PR</span></div>
+      </SheetCard>)}</div></section>}
+    {references.length===0 && <h2 className={styles.heading}>{oddsBands[floor]} · {markets[market]}</h2>}
     {coverage && <p className={styles.note}>
       {coverage.menus.length>0 && <>Al corte de las {time(asOf)} PR · {totals.strict} líneas Over/Under archivadas · {totals.milestones} hitos excluidos por reglas pendientes. </>}
       {coverage.expected===0 ? 'Sin partidos prepartido en la cartelera consultada.' : <>Cobertura de cuotas de {coverage.menus.length} de {coverage.expected} partidos prepartido.</>}
     </p>}
-    {w!=='h2h' && <section aria-label={'Proyecciones de Pick · '+oddsBands[floor]}>
+    {w!=='h2h' && (projected.length>0 || references.length===0) && <section aria-label={'Proyecciones de Pick · '+oddsBands[floor]}>
       <h2 className={styles.heading}>Proyecciones de Pick · {markets[market]}</h2>
       <p aria-live="polite">{projected.length} de hasta 10 jugadores · Ordenados por aciertos en {windows[w].toLowerCase()}.</p>
       {projected.length ? <div className={styles.grid}>{projected.map(r=><SheetCard key={r.quote}>
@@ -77,15 +84,11 @@ function BandResults({cards,projections,milestones,coverage,market,w,floor,now,a
         <div className={styles.footer}>{r.meetings.map(g=><span key={g.id}>{date(g.date)} · <b>{g.value}</b> {markets[market].toLowerCase()}</span>)}</div><Limits row={r}/><ProfileLink row={r}/><Rival row={r} asOf={asOf}/></SheetCard>)}</div>:
       <p className={styles.empty}>El archivo consultado para estos jugadores y líneas no muestra actuaciones previas ante el rival. La consulta cubre hasta 60 días de esta temporada.</p>}
       <p>El Top 10 requiere 5 encuentros verificables por jugador y una línea validada. Aquí puedes ver también muestras menores.</p></section>}
-    <h2 className={styles.heading}>Top 10 verificado · {markets[market]}</h2><p aria-live="polite">{ranked.length} {ranked.length===1?'jugador':'jugadores'} · {windows[w]} · Cuotas al {time(asOf)} PR</p>
+    {ranked.length===0 && references.length>0
+      ? <p className={styles.note}>Contratos verificados en este rango: 0.</p>
+      : <>    <h2 className={styles.heading}>Top 10 verificado · {markets[market]}</h2><p aria-live="polite">{ranked.length} {ranked.length===1?'jugador':'jugadores'} · {windows[w]} · Cuotas al {time(asOf)} PR</p>
     {ranked.length?<div className={styles.grid}>{ranked.map((c,i)=><Card key={c.quoteId} card={c} window={w} rank={i+1} asOf={asOf} alternatives={active.filter(a=>a.market===market && a.playerId===c.playerId && a.quoteId!==c.quoteId && a[w].length>=(w==='ten'?10:5))}/>)}</div>:<div className={styles.empty}><strong>Sin tarjetas para estos filtros</strong><p>Se necesita una cuota prepartido vigente y un historial verificable.</p></div>}
-    {references.length>0 && <section><h2 className={styles.heading}>Hitos archivados · historial descriptivo</h2>
-      <p>Veces que el jugador alcanzó el umbral en partidos con al menos 10 minutos. Las reglas de liquidación están pendientes. Estos hitos quedan fuera del ranking verificado y del tracker.</p>
-      <div className={styles.grid}>{references.map(r=><SheetCard key={r.quote}><header>{r.matchup}</header><h2>{r.name}</h2>
-        <p className={styles.line}><strong>{r.threshold}+</strong> {markets[market].toLowerCase()}</p>
-        <div className={styles.score}><b>{r[w]}/{w==='five'?5:10}</b><span>juegos en que alcanzó el umbral</span></div>
-        <div className={styles.footer}><span>FanDuel {r.odds>0?'+':''}{r.odds}</span><span>Actualizada {time(r.updated)} PR</span></div>
-      </SheetCard>)}</div></section>}
+      </>}
   </section>;
 }
 export default function Sheet({cards=[],projections=[],milestones=[],coverage,day,asOf,showReference=false,captureFailed=false}){

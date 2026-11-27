@@ -12,8 +12,11 @@ for(const width of [390,1440]){
     await expect(card).toHaveCount(0);
     await page.getByRole('button',{name:'−251 a −650',exact:true}).click();
     await expect(card).toBeVisible();
+    await expect(card).toContainText('#1');
+    await expect(page.getByText('Sin tarjetas para estos filtros')).toHaveCount(0);
+    await expect(page.getByRole('heading',{name:'Top histórico · Puntos · −251 a −650'})).toBeVisible();
     await page.getByRole('button',{name:'Ambos rangos',exact:true}).click();
-    await expect(page.getByRole('heading',{name:'Top 10 verificado · Puntos',exact:true})).toHaveCount(2);
+    await expect(page.getByRole('heading',{name:'Top 10 verificado · Puntos',exact:true})).toHaveCount(1);
     await page.getByRole('button',{name:'Rebotes',exact:true}).click();
     await expect(card).toHaveCount(0);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
