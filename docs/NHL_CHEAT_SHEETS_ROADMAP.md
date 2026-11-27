@@ -1,5 +1,7 @@
 # NHL Cheat Sheets · inventario y roadmap condicionado
 
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
+
 Auditoría de solo lectura del 25 de noviembre de 2026, Puerto Rico. Los conteos son del archivo de Pick al consultar. Una captura es una observación de una fuente; varios precios del mismo evento no aumentan la muestra de partidos. Este documento propone trabajo futuro. No introduce colectores, migraciones, rutas, cambios de modelo ni operaciones sobre Sites.
 
 ## Cierre operativo de NBA

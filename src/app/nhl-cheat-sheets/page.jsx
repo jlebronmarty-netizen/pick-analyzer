@@ -1,0 +1,15 @@
+import {headers} from 'next/headers';
+import {notFound} from 'next/navigation';
+import {nbaManualAccess} from '@/lib/nba/manual-access.mjs';
+import {nhlManualFeatureDate} from '@/lib/nhl-manual-features.mjs';
+import {readSheet} from './archive';
+import Sheet from './sheet';
+export const dynamic='force-dynamic';
+export const maxDuration=60;
+export default async function Page({searchParams}){
+  if(process.env.VERCEL_ENV!=='preview'||nbaManualAccess(new Request('https://preview.vercel.app',{headers:await headers()})))notFound();
+  const date=(await searchParams).date??nhlManualFeatureDate();
+  let data;
+  try{data=await readSheet(date);}catch{}
+  return <Sheet date={typeof date==='string'?date:''} data={data}/>;
+}

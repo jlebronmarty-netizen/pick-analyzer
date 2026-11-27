@@ -1,4 +1,6 @@
 # NBA Cheat Sheets en Pick Analyzer
+
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
 
 Cada rango muestra una lista a la vez. Proyecciones e hitos comparten la tarjeta detallada, las barras L5/L10 y el análisis del rival. Para hitos, la igualdad alcanza el umbral y la cuota corresponde al hito archivado.
