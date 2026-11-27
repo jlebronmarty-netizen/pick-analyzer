@@ -2,6 +2,9 @@ name: NBA Decision Board Private Preview
 on:
   pull_request:
     paths:
+      - 'src/app/nba-cheat-sheets/**'
+      - 'src/lib/nba/cheat-*.mjs'
+      - 'tests/nba-cheat-*.test.mjs'
       - 'src/lib/nba/sheet-lab/**'
       - 'tests/nba-sheet*'
       - 'tests/fixtures/nba-sheet-*'
