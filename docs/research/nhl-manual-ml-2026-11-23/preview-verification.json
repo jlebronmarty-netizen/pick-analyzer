@@ -1,0 +1,162 @@
+{
+  "version": "NHL_MANUAL_ML_PREVIEW_VERIFICATION_V1",
+  "deploymentId": "dpl_4RvMtDySZsXiSM68HEEhnfK3F5W9",
+  "url": "https://pick-analyzer-gu8iui09c-pick-analyzer.vercel.app/api/nhl/manual-ml-research",
+  "environment": "PREVIEW",
+  "vercelTarget": "staging",
+  "deploymentStatus": "READY",
+  "codeCommit": "f5f05ee3396cee18969dc9a9cad80528056091e1",
+  "httpStatus": 200,
+  "cacheControl": "private, no-store",
+  "cutoff": "2026-11-24T00:33:53.839Z",
+  "status": "INSUFFICIENT_SETTLED_HISTORY",
+  "readEvidence": {
+    "complete": true,
+    "cutoff": "2026-11-24T00:33:53.839Z",
+    "tables": [
+      {
+        "table": "nhl_challenger_shadow_v1",
+        "rows": 57,
+        "pages": 1,
+        "expected": 57,
+        "complete": true
+      },
+      {
+        "table": "nhl_free_outcomes_v1",
+        "rows": 130,
+        "pages": 1,
+        "expected": 130,
+        "complete": true
+      },
+      {
+        "table": "nhl_free_predictions_v1",
+        "rows": 137,
+        "pages": 1,
+        "expected": 137,
+        "complete": true
+      },
+      {
+        "table": "nhl_free_source_v1",
+        "rows": 18,
+        "pages": 1,
+        "expected": 18,
+        "complete": true,
+        "requestedDirectoryIds": 18
+      },
+      {
+        "table": "nhl_late_shadow_v6",
+        "rows": 31,
+        "pages": 1,
+        "expected": 31,
+        "complete": true
+      },
+      {
+        "table": "nhl_manual_feature_snapshots_v1",
+        "rows": 14,
+        "pages": 1,
+        "expected": 14,
+        "complete": true
+      }
+    ],
+    "consistency": "Fixed capture cutoff and stable exact counts per page; separate read transactions.",
+    "readOnly": true,
+    "providerCalls": 0,
+    "databaseWrites": 0
+  },
+  "coverage": {
+    "snapshots": 14,
+    "uniqueGames": 7,
+    "updates": 2,
+    "originalMatched": 0,
+    "earlyMatched": 0,
+    "lateMatched": 7,
+    "settledManual": 0
+  },
+  "variants": [
+    {
+      "id": "goals_season_l10",
+      "eligibleGames": 0,
+      "eligibleSettledGames": 0,
+      "scoredGames": 0,
+      "replayForecasts": 0,
+      "candidateMetrics": {
+        "label": "H1 · Goles de temporada y cambio L10",
+        "games": 0,
+        "hits": 0,
+        "accuracy": null,
+        "accuracyInterval95": null,
+        "brier": null,
+        "logLoss": null,
+        "meanProbability": null,
+        "observedHomeWinRate": null,
+        "thresholdTies": 0
+      }
+    },
+    {
+      "id": "shots_l10",
+      "eligibleGames": 7,
+      "eligibleSettledGames": 0,
+      "scoredGames": 0,
+      "replayForecasts": 0,
+      "candidateMetrics": {
+        "label": "H2 · Diferencial de tiros L10",
+        "games": 0,
+        "hits": 0,
+        "accuracy": null,
+        "accuracyInterval95": null,
+        "brier": null,
+        "logLoss": null,
+        "meanProbability": null,
+        "observedHomeWinRate": null,
+        "thresholdTies": 0
+      }
+    },
+    {
+      "id": "special_teams",
+      "eligibleGames": 7,
+      "eligibleSettledGames": 0,
+      "scoredGames": 0,
+      "replayForecasts": 0,
+      "candidateMetrics": {
+        "label": "H3 · Emparejamiento PP/PK",
+        "games": 0,
+        "hits": 0,
+        "accuracy": null,
+        "accuracyInterval95": null,
+        "brier": null,
+        "logLoss": null,
+        "meanProbability": null,
+        "observedHomeWinRate": null,
+        "thresholdTies": 0
+      }
+    },
+    {
+      "id": "rest",
+      "eligibleGames": 7,
+      "eligibleSettledGames": 0,
+      "scoredGames": 0,
+      "replayForecasts": 0,
+      "candidateMetrics": {
+        "label": "H4 · Diferencia de descanso",
+        "games": 0,
+        "hits": 0,
+        "accuracy": null,
+        "accuracyInterval95": null,
+        "brier": null,
+        "logLoss": null,
+        "meanProbability": null,
+        "observedHomeWinRate": null,
+        "thresholdTies": 0
+      }
+    }
+  ],
+  "adapterExclusions": 0,
+  "readOnly": true,
+  "providerCalls": 0,
+  "databaseWrites": 0,
+  "predictionAdjustment": false,
+  "modelPromoted": false,
+  "prospectiveCandidateForecastsIssued": 0,
+  "uiChanges": false,
+  "productionDeployment": false
+}

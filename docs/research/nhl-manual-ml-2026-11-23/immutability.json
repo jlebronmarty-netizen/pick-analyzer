@@ -1,0 +1,71 @@
+{
+  "cutoff": "2026-11-24T00:05:15.236207Z",
+  "before": [
+    {
+      "source": "manual",
+      "rows": 14,
+      "digest": "ff5e178d144a352ca405a1a8148f9e2f"
+    },
+    {
+      "source": "predictions",
+      "rows": 137,
+      "digest": "345f4c4b164398e725bfe2c34d76041c"
+    },
+    {
+      "source": "outcomes",
+      "rows": 130,
+      "digest": "b3826c4d7894e3be65e877cfd5872308"
+    },
+    {
+      "source": "early",
+      "rows": 57,
+      "digest": "75472fde3c71593ce97a89c08c7d49e7"
+    },
+    {
+      "source": "late",
+      "rows": 31,
+      "digest": "7c708876edc55978eed5e86614c0eb91"
+    }
+  ],
+  "after": [
+    {
+      "source": "manual",
+      "rows": 14,
+      "digest": "ff5e178d144a352ca405a1a8148f9e2f"
+    },
+    {
+      "source": "predictions",
+      "rows": 137,
+      "digest": "345f4c4b164398e725bfe2c34d76041c"
+    },
+    {
+      "source": "outcomes",
+      "rows": 130,
+      "digest": "b3826c4d7894e3be65e877cfd5872308"
+    },
+    {
+      "source": "early",
+      "rows": 57,
+      "digest": "75472fde3c71593ce97a89c08c7d49e7"
+    },
+    {
+      "source": "late",
+      "rows": 31,
+      "digest": "7c708876edc55978eed5e86614c0eb91"
+    }
+  ],
+  "unchanged": true,
+  "currentCounts": [
+    {
+      "checked_at": "2026-11-24 00:26:29.570067+00",
+      "snapshots": 14,
+      "unique_games": 7,
+      "runs": 2,
+      "first_available": "2026-11-23 21:14:57.028375+00",
+      "last_available": "2026-11-23 21:16:07.202034+00",
+      "games_with_final": 0
+    }
+  ],
+  "method": "MD5 of ordered row digests at the identical fixed cutoff; integrity comparison, not a cryptographic source authenticity claim.",
+  "sql": "select 'manual' as source,count(*) as rows,md5(string_agg(md5(row_to_json(t)::text),'' order by event_id,available_as_of)) as digest from public.nhl_manual_feature_snapshots_v1 t where inserted_at<='2026-11-24T00:05:15.236207Z'::timestamptz union all select 'predictions' as source,count(*) as rows,md5(string_agg(md5(row_to_json(t)::text),'' order by id)) as digest from public.nhl_free_predictions_v1 t where created_at<='2026-11-24T00:05:15.236207Z'::timestamptz union all select 'outcomes' as source,count(*) as rows,md5(string_agg(md5(row_to_json(t)::text),'' order by id)) as digest from public.nhl_free_outcomes_v1 t where observed_at<='2026-11-24T00:05:15.236207Z'::timestamptz union all select 'early' as source,count(*) as rows,md5(string_agg(md5(row_to_json(t)::text),'' order by id)) as digest from public.nhl_challenger_shadow_v1 t where created_at<='2026-11-24T00:05:15.236207Z'::timestamptz union all select 'late' as source,count(*) as rows,md5(string_agg(md5(row_to_json(t)::text),'' order by id)) as digest from public.nhl_late_shadow_v6 t where created_at<='2026-11-24T00:05:15.236207Z'::timestamptz"
+}

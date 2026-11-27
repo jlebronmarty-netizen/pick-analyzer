@@ -1,3 +1,7 @@
+## NHL · Seguimiento del 27 de noviembre de 2026
+
+18 capturas, 11 eventos con final, 8 disponibles al corte tardío y 0 al original. Tiros y PP/PK tienen 8 antecedentes elegibles de los 40 requeridos. Los originales aparecieron entre 8 h 22 min y 23 h 30 min antes de la primera captura. La fuente externa debe publicar antes de la primera probabilidad para estudiar el corte original.
+
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
 
 La portada permite comparar ambos rangos o elegir uno. Cada clasificación conserva hasta diez jugadores por mercado, rango y ventana. Los menús prepartido conciliados aportan los conteos de líneas Over/Under y de hitos con reglas pendientes.
@@ -62,6 +66,14 @@ Rama de revisión `feat/nba-shared-manual-data-v1`: lector y API de solo lectura
 Nueva consulta de solo lectura `/api/ncaab/manual-data` (`NCAAB_MANUAL_DATA_V1`) para Pick y el panel privado. Reutiliza scoreboards, proyecciones y contextos guardados; distingue récord publicado de cobertura observada, muestra finales recientes concretos, sedes, descanso, mitades y estadísticas con denominadores. Identidad y fechas PR verificadas; cuotas archivadas mediante el lector existente. Sin proveedores adicionales, escrituras de datos, migraciones, cambios de modelo o cron. Interfaz bajo demanda con cinco pestañas, fecha, búsqueda y paginación. [Contrato, cobertura y límites](ncaab-manual-data-v1.md). Validación local: 54 pruebas y build completo aprobados. JSON transmitido por fragmentos para admitir respuestas mayores de 4.5 MB. Publicación y medición del lector en Vercel pendientes; el presupuesto de lectura de 48 MiB produce ausencia explícita si el archivo lo supera.
 
 La primera comprobación de Preview detectó que el orden `en_US.UTF-8` de PostgreSQL coloca los identificadores heredados en mayúsculas después de los SHA. Corregido el lector para seguir el cursor del servidor y verificar unicidad global, conteos exactos restantes y límites, sin reinterpretar ese orden en JavaScript. Añadida regresión de paginación con ambos formatos; la nueva comprobación real del endpoint queda pendiente del despliegue de esta corrección.
+
+## 2026-11-23 · NHL · Evaluación predictiva de inputs manuales
+
+[PR #402](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/402) abierto, CI aprobada y Preview READY; nueva API HTTP 200 con lectura completa y siete eventos pendientes. Evidencia vinculada al commit de código `f5f05ee3`; sin merge ni publicación de producción.
+
+Producción verificada en `4d4b4ae2` (PR #400 integrado). Corte 20:05:15 PR: **14 capturas de siete partidos**, dos versiones con valores iguales, cero finales. Manual no existía al corte original DRatings ni early (0/7), pero sí al V6 tardío (7/7). Referencia de investigación: primer DRatings archivado del historial; el tablero puede mostrar una observación posterior. H1 temporada/L10 queda bloqueada por `PRESERVED_SEED` sin captura primaria; tiros y PP/PK tienen variación, descanso vale cero en todos.
+
+Rama aislada `research/nhl-manual-predictive-evaluation-20261123`: evaluador de cuatro hipótesis fijas, control de intercepto emparejado, ridge 10, mínimo 40 antecedentes, estandarización/calibración solo con fechas anteriores y revisiones de resultados resueltas por corte. API nueva de solo lectura `/api/nhl/manual-ml-research`, CLI offline verificable por seis hashes y datos de identidad archivados. 208 pruebas NHL, 31 del tablero, 10 del contrato SQL y build completo aprobados. No hay candidatos ajustados, métricas manuales estimables, nuevos pronósticos emitidos ni promoción. Se preservan originales y congelaciones; verificación de cinco archivos de base sin cambios. No se modifica el Site ni la programación diaria. [Protocolo](nhl-manual-ml-research-v1.md) · [Resultados y continuación](research/nhl-manual-ml-2026-11-23/README.md).
 
 ## 2026-11-23 · NHL · Inputs diarios compartidos
 
