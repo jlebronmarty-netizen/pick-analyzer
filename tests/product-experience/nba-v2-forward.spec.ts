@@ -1,19 +1,26 @@
 import {test,expect} from '@playwright/test';
-test('SHADOW daily review filters graded and pending contracts and preserves the challenge balance',async({page})=>{
+for(const viewport of [{width:1440,height:1000},{width:390,height:844}]) test('SHADOW review shows market metrics and contract filters at '+viewport.width+'px',async({page})=>{
+ await page.setViewportSize(viewport);
  await page.goto('/nba-decision-v2');
  await expect(page.getByRole('heading',{name:'Evaluación prospectiva V2'})).toBeVisible();
  await expect(page.getByLabel('Challenge')).toContainText('$187.94');
+ const metrics=page.getByRole('region',{name:'Métricas prospectivas por mercado',exact:true});
+ await expect(metrics.getByRole('table')).toBeVisible();
+ await expect(metrics.getByRole('row',{name:/^Primer cuarto/})).toContainText('0.1899');
+ await expect(metrics.getByRole('row',{name:/^Moneyline/})).toContainText('—');
+ await expect(metrics).toContainText('JUGADA sigue desactivado');
  await expect(page.getByLabel('Challenge')).toContainText('SIN APUESTA');
+ const contracts=page.getByRole('region',{name:'Contratos congelados',exact:true});
  await page.getByLabel('Jornada PR').selectOption('2026-11-20');
- await expect(page.locator('details')).toHaveCount(15);
- await page.getByLabel('Resultado',{exact:true}).selectOption('win');await expect(page.locator('details')).toHaveCount(6);
- await page.locator('summary').first().click();
- await expect(page.locator('details').first()).toContainText('Probabilidad V2');
- await expect(page.locator('details').first()).toContainText('Historial VALIDATED');
- await expect(page.locator('details').first()).toContainText('Precio del operador');
+ await expect(contracts.locator('details')).toHaveCount(15);
+ await page.getByLabel('Resultado',{exact:true}).selectOption('win');await expect(contracts.locator('details')).toHaveCount(6);
+ await contracts.locator('summary').first().click();
+ await expect(contracts.locator('details').first()).toContainText('Probabilidad V2');
+ await expect(contracts.locator('details').first()).toContainText('Historial VALIDATED');
+ await expect(contracts.locator('details').first()).toContainText('Precio del operador');
  await page.getByLabel('Jornada PR').selectOption('2026-11-21');
  await expect(page.getByText('No hay contratos con estos filtros.')).toBeVisible();
- await page.getByLabel('Resultado',{exact:true}).selectOption('pending');await expect(page.locator('details')).toHaveCount(25);
+ await page.getByLabel('Resultado',{exact:true}).selectOption('pending');await expect(contracts.locator('details')).toHaveCount(25);
  await expect(page.getByLabel('Validación por mercado')).toContainText('SIN DATOS');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

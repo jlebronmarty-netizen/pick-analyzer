@@ -1,8 +1,11 @@
 import 'server-only';
+import {describeMenu} from '@/lib/nba/cheat-menu-coverage.mjs';
+import {projectionHistories} from '@/lib/nba/cheat-game-history.mjs';
+import {buildCheatCandidates} from '@/lib/nba/cheat-sheets.mjs';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
 import {supabaseAdmin} from '@/lib/supabase-admin';
 import {buildNbaDecisionBoard,BOARD_VERSION} from '@/lib/nba/decision-board-core.mjs';
-import {archiveReadOptions,readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
+import {archiveReadOptions,readDisplayWindowContexts,readOriginalContexts} from '@/lib/nba/decision-storage-original.mjs';
 import {readMarketBatches} from '@/lib/nba/decision-market-snapshot.mjs';
 import {archivedCalendar,tailDays} from '@/lib/nba/decision-calendar.mjs';
 const stamp=(v:unknown)=>Date.parse(String(v??''));
@@ -29,7 +32,7 @@ function accuracy(rows:any[],asOf:string){
  result.periods={...result.props};
  return result;
 }
-async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:string,db:typeof supabaseAdmin){
+async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:string,db:typeof supabaseAdmin,withCoverage:boolean){
  const query=(fields:string)=>{
    const q=db.from('nba_market_snapshots_v1').select(fields).eq('provider_game_id',game.id)
      .gte('source_received_at',since).lte('source_received_at',asOf).lte('recorded_at',asOf);
@@ -48,9 +51,14 @@ async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:stri
    'complete:payload->meta->coverage->complete_response,normalized_count:payload->meta->coverage->normalized_quotes'].join(',');
  const at=(head.data as any).source_received_at;
  const result=await query(fields).eq('source_received_at',at).order('snapshot_id').limit(33).abortSignal(AbortSignal.timeout(10000));
- return {id:game.id,lane,...readMarketBatches(check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED'),game,lane,asOf)};
+ const batches=check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED');
+ const receipt=readMarketBatches(batches,game,lane,asOf);
+ if(withCoverage && lane==='props' && !receipt.reason){
+   return {id:game.id,lane,...receipt,...describeMenu(batches)};
+ }
+ return {id:game.id,lane,...receipt};
 }
-export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false}={}){
+export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false,withCheatSheets=false,withSheetLab=false}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
  const [slate,archived,hoops,settlementRows,contextResult,pregameResult]=await Promise.all([
   db.from('nba_market_schedules_v1').select('source_received_at,payload,date_local').eq('date_local',day).lte('recorded_at',asOf).lte('source_received_at',asOf)
@@ -90,11 +98,14 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  }));
  const calendar=archivedCalendar(historicalCapture,snapshots,asOf);
  const captures=await Promise.all(games.flatMap((game:any)=>(['main','props'] as const).map(async lane=>{
-   try{return await marketReceipt(game,lane,asOf,threeHours,db);}
+   try{return await marketReceipt(game,lane,asOf,threeHours,db,withCheatSheets && forDisplay);}
    catch{return {id:game.id,lane,quotes:[],reason:'SOURCE_UNAVAILABLE'};}
  })));
  const recentMain=captures.filter(c=>c.lane==='main').flatMap(c=>c.quotes);
  const propSnapshots=captures.filter(c=>c.lane==='props');
+ const pregameIds=new Set(games.filter((g:any)=>g.status_state==='scheduled' && !g.postponed && stamp(g.datetime)>now.getTime()).map((g:any)=>g.id));
+ const pregameMenus=propSnapshots.filter(c=>pregameIds.has(c.id));
+ const reviewedMenus=pregameMenus.flatMap(c=>'menuCounts' in c && c.menuCounts ? [c.menuCounts] : []);
  const propQuotes=propSnapshots.flatMap(c=>c.quotes);
  const ambiguousSnapshots=propSnapshots.filter(c=>c.reason).map(c=>c.id);
  const playerIds=[...new Set(propQuotes.map((x:any)=>Number(x.player_id)).filter(Number.isSafeInteger))];
@@ -113,7 +124,7 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
   const group=playerIds.slice(i,i+24),groupRows:any[]=[];
   for(let start=0;;start+=1000){
    const r=await db.from('nba_goat_player_game_research_v1')
-     .select('season,provider_game_id,player_id,team_id,opponent_team_id,game_datetime,source_captured_at,source_sha256,materialized_at,minutes_played,pts,reb,ast,fg3m')
+     .select('season,provider_game_id,player_id,team_id,opponent_team_id,game_datetime,source_captured_at,source_sha256,materialized_at,minutes_played,pts,reb,ast,fg3m'+(withSheetLab?',stl,blk,turnover':''))
      .in('player_id',group).in('season',seasons).lte('materialized_at',asOf).lte('source_captured_at',asOf)
      .gte('game_datetime',new Date(now.getTime()-60*86400000).toISOString()).lt('game_datetime',asOf)
      .order('game_datetime',{ascending:false}).order('provider_game_id',{ascending:false}).order('player_id')
@@ -162,10 +173,14 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  }
  if(incompleteIndex)contexts.push(...[...needed].map(id=>({provider_game_id:id,player_stats_captured_at:asOf,player_stats:null})));
  const archiveRead=archiveReadOptions(forDisplay);
- const storageOriginals=await readOriginalContexts(manifests,contexts,needed,async (m:any)=>{
+ const fetchOriginal=async (m:any)=>{
    const r=await db.storage.from(m.storage_bucket).download(m.storage_object_path);
    return r.error||!r.data?null:Buffer.from(await r.data.arrayBuffer());
- },archiveRead.limit,archiveRead.cache);
+ };
+ const storageOriginals=archiveRead.prioritizeWindows && !incompleteIndex
+   ? await readDisplayWindowContexts(manifests,contexts,needed,fetchOriginal,archiveRead.limit,archiveRead.cache,
+       {games,propQuotes,calendar,playerHistory:completeHistory,asOf})
+   : await readOriginalContexts(manifests,contexts,needed,fetchOriginal,archiveRead.limit,archiveRead.cache);
  contexts.push(...storageOriginals);
  const available=optional(pregameResult,'NBA_DECISION_AVAILABILITY_FAILED');
  for(const p of available)for(const lineup of p.projected_lineups?.data??[]){
@@ -175,14 +190,16 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
     names[String(player.id)]??=player.first_name+' '+player.last_name;
   }
  }
- const result=buildNbaDecisionBoard({
+ const inputs={
    scheduleGames:games,calendar,manifests,contexts,pregame:available,goatMainQuotes:recentMain,
    goatPropQuotes:propQuotes,playerHistory:completeHistory,playerNames:names,
    hoopsCapture:hoop,asOf
- });
+ };
+ const result=buildNbaDecisionBoard(inputs);
  if(Object.keys(result.summary.qualityCounts).some(k=>k!=='VALIDATED'))
    console.info('NBA_DECISION_DATA_QUALITY',{day,counts:result.summary.qualityCounts,calendarIssues:calendar.issues});
- return {...result,accuracy:accuracy(settled,asOf),evidence:{
+ const lab=withSheetLab?await (await import('@/lib/nba/sheet-lab/build.mjs')).buildSheetLab(inputs,db):null;
+ return {...result,...(withSheetLab?{lab}:{}),...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs),sheetMilestones:pregameMenus.flatMap(c=>'milestones' in c ? c.milestones??[] : []),menuCoverage:{menus:reviewedMenus,expected:pregameMenus.length}} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
    scheduleCapturedAt:schedule?.source_received_at??null,
    historyCaptureAt:archive?.started_at??null,
    historyRunId:archive?.run_id??null,

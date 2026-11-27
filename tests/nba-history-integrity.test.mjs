@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {buildCheatCandidates} from '../src/lib/nba/cheat-sheets.mjs';
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {buildNbaDecisionBoard,buildPlayerProjection} from '../src/lib/nba/decision-board-core.mjs';
@@ -106,6 +107,11 @@ test('a fully evidenced synthetic contract recovers automatically, then expires 
       }));
     x.contexts.push({provider_game_id:game.id,player_stats_captured_at:capturedAt,player_stats:{data}});
   }
+  const cards=buildCheatCandidates(x);
+  assert.equal(cards.length,1);
+  assert.equal(cards[0].ten.length,10);
+  assert.equal(cards[0].five.length,5);
+  assert.equal(buildCheatCandidates({...x,playerHistory:x.playerHistory.slice(1)}).length,0);
   const missing=buildNbaDecisionBoard({...x,playerHistory:x.playerHistory.slice(1)});
   assert.equal(missing.rows.props[0].dataQuality.status,'INCOMPLETE_HISTORY');
   assert.equal(planNbaShadowFreeze(missing,after).rows.length,0);

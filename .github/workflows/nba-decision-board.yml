@@ -2,6 +2,14 @@ name: NBA Decision Board Private Preview
 on:
   pull_request:
     paths:
+      - 'src/app/nba-cheat-sheets/**'
+      - 'src/lib/nba/cheat-*.mjs'
+      - 'tests/nba-cheat-*.test.mjs'
+      - 'src/lib/nba/sheet-lab/**'
+      - 'tests/nba-sheet*'
+      - 'tests/fixtures/nba-sheet-*'
+      - 'supabase/migrations/*nba_sheet*.sql'
+      - 'supabase/migrations/*nba_cheat*.sql'
       - 'src/lib/nba/decision-board-core.mjs'
       - 'src/lib/nba/decision-integrity.mjs'
       - 'src/lib/nba/decision-storage-original.mjs'
@@ -19,6 +27,13 @@ on:
       - 'src/services/nba-decision-board.service.ts'
       - 'src/app/api/nba/decision-board/**'
       - 'src/app/nba-decision-board/**'
+      - 'src/app/nba-manual/**'
+      - 'src/app/api/nba/manual-data/**'
+      - 'src/services/nba-manual-data.service.ts'
+      - 'src/components/dashboard/NbaManualReview.tsx'
+      - 'src/lib/nba/manual-*.mjs'
+      - 'tests/nba-manual-access.test.mjs'
+      - 'tests/dashboard-multisport/nba-manual-review.test.mjs'
       - 'tests/nba-decision-board.test.mjs'
       - 'tests/nba-decision-learning.test.mjs'
       - 'src/lib/nba/decision-learning-core.mjs'
@@ -26,6 +41,10 @@ on:
       - 'src/services/nba-decision-learning.service.ts'
       - 'src/services/nba-decision-v2-hook.mjs'
       - 'src/lib/nba/decision-observe-v2.mjs'
+      - 'src/lib/nba/decision-v2-review-access.mjs'
+      - 'src/app/nba-decision-v2/**'
+      - 'tests/product-experience/nba-v2-forward.spec.ts'
+      - 'tests/product-experience/nba-sheet-bands.spec.ts'
       - 'src/app/api/operations/nba-v2-observe/**'
       - 'scripts/research/nba-v2/daily/**'
       - 'tests/nba-v2*.test.mjs'
@@ -70,8 +89,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Test pregame NBA Cheat Sheets, periods and scheduled rankings
+        run: node --test tests/nba-cheat-ranking.test.mjs tests/nba-cheat-projections.test.mjs tests/nba-sheet-lab.test.mjs tests/nba-sheet-periods.test.mjs tests/nba-sheet-scheduler.test.mjs
       - name: Test archived-only contracts, missing-data blocking and cross-provider IDs
-        run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs
+        run: node --test tests/nba-storage-integrity.test.mjs tests/nba-decision-board.test.mjs tests/nba-decision-learning.test.mjs tests/nba-decision-preference.test.mjs tests/nba-decision-visible.test.mjs tests/nba-v2-daily.test.mjs tests/nba-v2-observe.test.mjs tests/nba-v2-live-review.test.mjs
+      - name: Verify manual NBA tracker and private access boundaries
+        run: node --test tests/nba-manual-access.test.mjs tests/dashboard-multisport/nba-manual-review.test.mjs
       - name: Ensure no unapproved provider call or official pick mutation
         run: |
           if grep -R -n -E 'prediction_history.*(insert|upsert|update)|recommendedPick: true' src/lib/nba/decision-board-core.mjs src/lib/nba/decision-learning-core.mjs src/services/nba-decision-board.service.ts src/services/nba-decision-learning.service.ts src/app/api/nba/decision-board; then
@@ -111,7 +134,10 @@ jobs:
       - name: Verify archived-only materialization and incomplete-original exclusion
         run: node --test tests/nba-archived-player-materializer.test.mjs tests/nba-archived-player-materializer.service.test.mjs tests/nba-invalid-original-classification.test.mjs tests/nba-storage-integrity.test.mjs
       - name: Build application with isolated loopback data configuration
-        run: npm run build
+        run: |
+          mkdir -p src/app/nba-sheet-band-fixture
+          cp tests/fixtures/nba-sheet-band-page.jsx src/app/nba-sheet-band-fixture/page.jsx
+          npm run build
       - name: Install Chromium for local fixtures
         run: npx playwright install --with-deps chromium
       - name: Verify desktop and mobile journeys against the real application
@@ -139,7 +165,7 @@ jobs:
             fi
             sleep 1
           done
-          npx playwright test tests/product-experience/nba-navigation-history.spec.ts --config=playwright.config.ts --workers=1
+          npx playwright test tests/product-experience/nba-navigation-history.spec.ts tests/product-experience/nba-v2-forward.spec.ts tests/product-experience/nba-sheet-bands.spec.ts --config=playwright.config.ts --workers=1
       - name: Preserve responsive screenshots, traces and fixture server logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -150,3 +176,34 @@ jobs:
             test-results/nba-navigation-server/
           if-no-files-found: warn
           retention-days: 7
+
+  sheet-settlement-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:55438:5432'
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run NBA regression tests
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/nba*.test.mjs
+      - name: Install isolated PostgreSQL test client
+        run: npm install --prefix "$RUNNER_TEMP/sheet-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
+      - name: Verify migrations, reports and pending-to-final settlement
+        run: |
+          export NBA_SHEET_TEST_PG_MODULE="$RUNNER_TEMP/sheet-pg/node_modules/pg/lib/index.js"
+          node tests/nba-sheet-tracker.postgres.mjs
+          node tests/nba-sheet-performance.postgres.mjs
+          node tests/nba-sheet-retry.postgres.mjs
+          node tests/nba-sheet-view-acl.postgres.mjs

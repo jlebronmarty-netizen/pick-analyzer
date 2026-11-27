@@ -41,4 +41,17 @@ async function handle(r:NextRequest){
   return apiOk({marketDataArchive,pregameContext,teamStats,results,pbp,v2Context,v3Matchups,causal,shadow,expandedProps,propsHistory,playerMaterialization,legacyOddsApiCalls:0},id);
  }catch{return apiError({id,code:'INTERNAL_ERROR',message:'NBA GOAT market archive failed; downstream model stages were not assumed complete',status:500});}
 }
-export async function GET(r:NextRequest){return handle(r);}export async function POST(r:NextRequest){return handle(r);}
+export async function GET(r:NextRequest){
+ // Only the scheduled production GET participates; status probes and manual POST retain their semantics.
+ if(process.env.NBA_CHEAT_TRACKER_ENABLED!=='true'||process.env.VERCEL_ENV!=='production'||r.nextUrl.search||
+    !process.env.CRON_SECRET||r.headers.get('authorization')!=='Bearer '+process.env.CRON_SECRET)return handle(r);
+ const tracker=async()=>{
+  const [{runSheetTick},{supabaseAdmin:db},{readNbaDecisionBoard:readBoard}]=await Promise.all([
+   import('@/lib/nba/sheet-lab/scheduler.mjs'),import('@/lib/supabase-admin'),import('@/services/nba-decision-board.service')
+  ]);
+  return runSheetTick({db,readBoard});
+ };
+ const [result,receipt]=await Promise.all([handle(r),safe(tracker,'NBA_SHEET_TICK_FAILED')]);
+ result.headers.set('X-NBA-Sheet-Tracker',receipt.status);
+ return result;
+}export async function POST(r:NextRequest){return handle(r);}

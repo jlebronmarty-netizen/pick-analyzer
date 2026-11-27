@@ -20,6 +20,11 @@ export function twoRecentDays(contracts) {
 // Ledger reports are computed once by settlement. A preview read also includes newer first freezes.
 export function ledgerReview(snapshot,archive) {
   if(!snapshot?.report)return null;
+  if(snapshot.report.modelHash!==archive.modelHash || !Array.isArray(snapshot.report.scopes) ||
+      !snapshot.report.scopes.some(scope=>scope.scope==='ALL_DESCRIPTIVE') ||
+      !Array.isArray(snapshot.report.recentContracts) || !Array.isArray(snapshot.newForecasts)) {
+    throw Error('NBA_V2_REVIEW_REPORT_UNVERIFIED');
+  }
   const refs=new Map(archive.contracts.map(c=>[c.id,c]));
   const contracts=new Map(snapshot.report.recentContracts.map(c=>[c.id,{...c,
     ...(refs.has(c.id)?{matchup:refs.get(c.id).matchup,l5:refs.get(c.id).l5,l10:refs.get(c.id).l10}:{})}]));

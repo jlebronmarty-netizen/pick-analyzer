@@ -1,3 +1,72 @@
+## NHL · Seguimiento del 27 de noviembre de 2026
+
+18 capturas, 11 eventos con final, 8 disponibles al corte tardío y 0 al original. Tiros y PP/PK tienen 8 antecedentes elegibles de los 40 requeridos. Los originales aparecieron entre 8 h 22 min y 23 h 30 min antes de la primera captura. La fuente externa debe publicar antes de la primera probabilidad para estudiar el corte original.
+
+## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
+
+La portada permite comparar ambos rangos o elegir uno. Cada clasificación conserva hasta diez jugadores por mercado, rango y ventana. Los menús prepartido conciliados aportan los conteos de líneas Over/Under y de hitos con reglas pendientes.
+
+Detalles en [la guía maestra](CHEAT_SHEETS_MASTER.md).
+
+
+
+## Transición NBA → NHL · planificación del 25 de noviembre
+
+Acta de producción NBA #410 fusionada. Primer tick natural verificado; seguimiento activo de la primera captura elegible y liquidación real. NHL en auditoría de sólo lectura. [Inventario, fronteras con investigación y condiciones de inicio](NHL_CHEAT_SHEETS_ROADMAP.md).
+
+
+## Estado de producción · activación del 25 de noviembre
+
+NBA publicado. Hito siguiente: evidencia operativa de dos ejecuciones y primera liquidación real. NHL se mantiene en preparación documental. [Informe de producción](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
+## Reanudación controlada · cuarta migración
+
+La migración 202611260903_nba_sheet_view_acl limita los permisos a las cuatro vistas identificadas. El control exige SELECT sin delegación para service_role, ausencia de permisos efectivos por tabla y columna para anon y authenticated, y security_invoker. La prueba reproduce los privilegios predeterminados de producción y comprueba un permiso heredado mediante membresía; ejecutar este control en cada futuro tracker deportivo. Continuar con la lectura de catálogo antes de fusionar y activar. Los estados siguientes describen el corte anterior a esta corrección.
+
+
+## Publicación controlada · estado de producción
+
+Las tres migraciones están aplicadas. El escritor continúa apagado y la fusión está detenida por permisos adicionales sobre cuatro vistas. [Evidencia, procedimiento de reanudación y requisitos para NHL](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
+## Integridad de liquidación · revisión del PR #408
+
+NBA Cheat Sheets espera revisión de la liquidación corregida antes de fusionar o aplicar las tres migraciones. Mantener el escritor apagado hasta la autorización.
+
+
+## Tracker prospectivo · revisión de lanzamiento de NBA
+
+NBA: validar el lanzamiento del tracker antes de trasladar historia privada o iniciar NHL. [Auditoría, fórmulas, pruebas y procedimiento de activación](NBA_CHEAT_LAUNCH_REVIEW_20261125.md).
+
+## NBA · Revisión posterior a 747b1b66 · 25-nov-2026
+
+Próxima decisión NBA: revisión de la rama y de las migraciones privadas ensayadas. Quedan pendientes el control MLB documentado, la aprobación de producción y la evaluación prospectiva real. [Informe de implementación, pruebas y pendientes](NBA_CHEAT_REVIEW_20261125.md).
+
+## NBA · Consolidación de Cheat Sheets · 25 noviembre 2026
+
+Próxima entrega NBA: auditar participaciones y reproducir parciales PBP al mismo corte. Después, comparar contratos y condiciones; ensayar tracker privado y captura idempotente. El 25-nov la tabla de snapshots de Cheat Sheets estaba pendiente en Supabase.
+
+[Inventario NBA y guía de continuidad](CHEAT_SHEETS_MASTER.md) · [Hoja de ruta y revisión](CHEAT_SHEETS_ROADMAP.md) · [Contrato de datos](CHEAT_SHEETS_DATA_CONTRACT.md) · [Componentes compartidos](CHEAT_SHEETS_MULTISPORT.md).
+
+## NBA · Cheat Sheets · 24 noviembre 2026
+
+Ruta privada `/nba-cheat-sheets`. Top 10 descriptivo por mercado, L5/L10/H2H, cuota mínima y captura prepartido idempotente. Aplicar `202611240901_nba_cheat_snapshots.sql` antes de habilitar producción. Verificar resultados prospectivos tras acumular capturas y finales.
+
+## NBA · Centro de análisis manual por partido (borrador)
+
+PR #407 propone `archivedMarkets`, `meetingPlayers` y `observedSeason` en V1. Lee el último snapshot prepartido por ID, verifica equipos y horario mediante event_links y conserva línea, lado, operador, hora y regla OT originales. Los box scores H2H se limitan a filas disponibles. Pendiente validación del preview. No cambia proveedores, cron, motores ni almacenamiento.
+
+## 2026-11-24 · NBA · Datos compartidos (PR #406)
+
+Rama de revisión `feat/nba-shared-manual-data-v1`: lector y API de solo lectura, panel manual, Dashboard descriptivo, prototipo local de tracker, acceso privado equivalente al Decision Board. Preview del commit 44aa3f1c: 242 finales/períodos conciliados, 253 juegos GOAT compactos, 534/535 nombres, 30 equipos, seis alineaciones, 26 reportes de disponibilidad y 1,159 matchups. 29/30 equipos con diez finales observados (Sacramento ocho); secuencia no certificada. Sin cambios de modelo, proveedor, cron o escritura de base de datos. Sigue pendiente validar el último commit con la nueva protección y CI, integración al Site privado, persistencia compartida del tracker y refresh. [Contrato y límites](nba-manual-data-v1.md). No fusionado ni publicado al corte de esta nota.
+
+## 2026-11-24 · NCAAB · Datos diarios compartidos
+
+Nueva consulta de solo lectura `/api/ncaab/manual-data` (`NCAAB_MANUAL_DATA_V1`) para Pick y el panel privado. Reutiliza scoreboards, proyecciones y contextos guardados; distingue récord publicado de cobertura observada, muestra finales recientes concretos, sedes, descanso, mitades y estadísticas con denominadores. Identidad y fechas PR verificadas; cuotas archivadas mediante el lector existente. Sin proveedores adicionales, escrituras de datos, migraciones, cambios de modelo o cron. Interfaz bajo demanda con cinco pestañas, fecha, búsqueda y paginación. [Contrato, cobertura y límites](ncaab-manual-data-v1.md). Validación local: 54 pruebas y build completo aprobados. JSON transmitido por fragmentos para admitir respuestas mayores de 4.5 MB. Publicación y medición del lector en Vercel pendientes; el presupuesto de lectura de 48 MiB produce ausencia explícita si el archivo lo supera.
+
+La primera comprobación de Preview detectó que el orden `en_US.UTF-8` de PostgreSQL coloca los identificadores heredados en mayúsculas después de los SHA. Corregido el lector para seguir el cursor del servidor y verificar unicidad global, conteos exactos restantes y límites, sin reinterpretar ese orden en JavaScript. Añadida regresión de paginación con ambos formatos; la nueva comprobación real del endpoint queda pendiente del despliegue de esta corrección.
+
 ## 2026-11-23 · NHL · Continuación temporal reproducible del archivo manual
 
 [PR #402](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/402) abierto, CI aprobada y Preview READY; nueva API HTTP 200 con lectura completa y siete eventos pendientes. Evidencia vinculada al commit de código `f5f05ee3`; sin merge ni publicación de producción.
@@ -20,6 +89,14 @@ Implementada en rama de revisión la auditoría A–E de datos NHL y su panel: c
 
 PR #399 abierto, CI y Preview aprobados; flujo de escritorio y API con datos reales verificados. Pendientes: revisión del PR, comprobación visual móvil e integración; revisión inicial V6 al alcanzar 30 partidos (actual: 24; ningún umbral garantiza mejora); futuro periodo independiente para variantes fijas; confirmación/identidad previa de porteros; reglas exactas de Circa y hora publicada; mercado y liquidación de props de tiros/atajadas. Las cuatro pruebas evaluables de 19 partidos son inconclusas, porteros no tiene muestra cronológica suficiente. No promover modelos, certificar ROI/CLV/FanDuel ni declarar player props completo.
 
+## 2026-11-24 · NBA · Seguimiento prospectivo V2
+
+Rama de revisión para consultar el ledger experimental desde el mismo deployment privado del Decision Board. El ciclo 11 tiene 125 contratos de 25 partidos, métricas reproducidas y 175 observaciones conciliadas con snapshots. La tabla por mercado expone incertidumbre, ROI simulado y cobertura; Moneyline, Spread y Props siguen sin muestra. Brier combinado 0.2591 frente a 0.2482 del operador y ROI simulado −15.44%. Faltan 75 partidos prospectivos por período antes del umbral de revisión. Producción conserva su versión; integración del seguimiento pendiente. [Informe, pruebas y pendientes](research/nba-v2/operations/20261124/README.md).
+
+## 2026-11-23 · NBA · Originales de las ventanas de Player Props
+
+Revisar la prioridad de los originales de L5/L10 en el tablero y medir con el mismo corte la lectura efectiva y los cambios de calidad tras integrar. Quedan pendientes la evidencia regional de los contratos de jornada completa y la conciliación del box Clippers–Dallas. [Evidencia y reproducción](audits/2026-11-23-nba-archive-window-priority.md).
+
 ## 2026-11-22 · Flujo por deporte y reparación operativa NBA
 
 Objetivo autorizado: Deportes y accuracy → tablero del deporte → mercados y detalle. La rama corrige acceso NBA, separación de versiones, lectura fallida y límite diario en America/Puerto_Rico. Mantener JUGADA bloqueada y conservar los pronósticos originales durante publicación y verificación. La rama añade un materializador de originales archivados íntegros al cron NBA existente, con límite por ejecución, transacción idempotente y procedencia explícita. Su activación y primer ciclo real quedan pendientes; un box score incompleto permanece excluido. [Alcance y evidencia](audits/2026-11-22-nba-flow/README.md).
@@ -27,6 +104,10 @@ Objetivo autorizado: Deportes y accuracy → tablero del deporte → mercados y 
 ## 2026-11-21 · Laboratorio independiente · Correcciones de entradas y evidencia
 
 Rama de revisión desde `c374aa7e`: nueva cohorte NBA `nba_prediction_engine_v1_1_inputs_shadow` con precios pareados reales, entradas reproducibles y persistencia que conserva la primera captura. Se corrigen el efecto direccional de la penalización global y los defaults de mercado; resultados y aprendizaje se separan por versión, mercado y juego. NCAAB reproduce 91/91 congelaciones y añade evidencia completa, lectura paginada, incertidumbre pareada y clasificación secuencial sin afirmar holdout validado. El panel distingue cuotas archivadas de ejecución, operador y temporalidad. Sin backfills, proveedores, crons nuevos ni promoción. Integración y comprobación en producción pendientes. [Alcance, pruebas y límites](research/independent-lab/2026-11-21-corrections.md).
+
+## 2026-11-23 · NBA · Evidencia de los mercados pendientes
+
+Vincular las capturas de partido completo con reglas verificables del operador y conciliar los 137 pares jugador–partido con minutos archivados. Los otros 85 pares requieren evidencia de participación. [Corte y alcance de la propuesta de interfaz](audits/2026-11-23-nba-market-tabs.md).
 
 ## 2026-11-21 · Mercados NBA sin preferencias
 
