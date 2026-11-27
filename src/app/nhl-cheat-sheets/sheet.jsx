@@ -83,6 +83,30 @@ function Team({ team: t, window, opponent, opponentGoalie }) {
         GF/GC por juego {t.season.goalsForPerGame ?? na}/
         {t.season.goalsAgainstPerGame ?? na}
       </p>
+      {t.divisionRank && (
+        <p>
+          Posición en división {t.divisionRank} · Conferencia {t.conferenceRank}
+        </p>
+      )}
+      {t.injuries && (
+        <p>
+          Parte parcial V13 ·{" "}
+          {t.injuries.length
+            ? t.injuries
+                .map(
+                  (r) =>
+                    r.player +
+                    " (" +
+                    r.status +
+                    (r.availability_status
+                      ? " · " + r.availability_status
+                      : "") +
+                    ")",
+                )
+                .join(", ")
+            : "Sin bajas documentadas en este parte"}
+        </p>
+      )}
       {games.length ? (
         <>
           <p>
@@ -497,10 +521,7 @@ export default function Sheet({ date, data }) {
                           partido.
                         </p>
                       )}
-                      <p>
-                        Lesiones y alineación completa · Sin confirmar en este
-                        corte.
-                      </p>
+                      <p>Alineación completa · Sin confirmar en este corte.</p>
                     </Analysis>
                   </div>
                 </SheetCard>

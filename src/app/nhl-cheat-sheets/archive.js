@@ -1,4 +1,5 @@
 import "server-only";
+import v13 from "./v13-20261123.json";
 import alignment from "./alignment-2026.json";
 import { nativeFixtures } from "./native";
 import { normalizeNhlResearchContexts } from "@/lib/nhl-research-features.mjs";
@@ -309,6 +310,38 @@ export async function readSheet(date) {
           : null;
       t.homeRecord = raw?.season.home_record;
       t.awayRecord = raw?.season.away_record;
+      const seed = v13.events[f.eventId];
+      if (
+        seed &&
+        Date.parse(seed.start_utc) === Date.parse(f.scheduledAt) &&
+        seed.away === f.teams.away.abbrev &&
+        seed.home === f.teams.home.abbrev &&
+        Date.parse(v13.archivedAt) <= Date.parse(f.availableAsOf)
+      ) {
+        const standings = v13.teams[t.abbrev];
+        t.rank ??= standings.rank;
+        t.divisionRank = standings.division_rank;
+        t.conferenceRank = standings.conference_rank;
+        t.homeRecord ??= standings.season.home_record;
+        t.awayRecord ??= standings.season.away_record;
+        t.injuries = seed.injuries.filter(
+          (r) =>
+            r.team === t.abbrev &&
+            Date.parse(r.checked_at) <= Date.parse(f.availableAsOf),
+        );
+        const report = seed[side + "_goalie"];
+        if (
+          !t.goalie.name &&
+          report?.name &&
+          Date.parse(report.checked_at) <= Date.parse(f.availableAsOf)
+        ) {
+          t.goalie = {
+            name: report.name,
+            status: report.status,
+            checkedAt: report.checked_at,
+          };
+        }
+      }
       const expected = raw?.last10.expected_event_ids;
       const seq = t.last10.recentEventIds;
       const recent =
