@@ -45,6 +45,6 @@ export function milestoneHistory(milestones, projections) {
     const expires = Math.min(Date.parse(row.expires), Date.parse(row.start)-600000, Date.parse(m.updated)+10800000);
     if (!Number.isFinite(expires)) return [];
     const reached = n => row.trend.slice(0,n).filter(g => g.value >= m.threshold).length;
-    return [{...m,name:row.name,matchup:row.matchup,expires,five:reached(5),ten:reached(10)}];
+    return [{...m,projectionQuote:row.quote,name:row.name,matchup:row.matchup,expires,five:reached(5),ten:reached(10)}];
   });
 }

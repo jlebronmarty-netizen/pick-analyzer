@@ -1,6 +1,8 @@
 # NBA Cheat Sheets en Pick Analyzer
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
 
+Cada rango muestra una lista a la vez. Proyecciones e hitos comparten la tarjeta detallada, las barras L5/L10 y el análisis del rival. Para hitos, la igualdad alcanza el umbral y la cuota corresponde al hito archivado.
+
 La portada permite comparar ambos rangos o elegir uno. Cada clasificación conserva hasta diez jugadores por mercado, rango y ventana. Los menús prepartido conciliados aportan los conteos de líneas Over/Under y de hitos con reglas pendientes.
 
 La sección descriptiva de hitos compara el umbral entero observado con la serie de diez juegos de una proyección admisible del mismo jugador, partido y mercado. Cuenta valores mayores o iguales, usando cinco o diez apariciones con al menos diez minutos. Vence con la evidencia, la cuota o diez minutos antes del partido, lo que ocurra primero. No calcula aciertos contractuales ni alimenta inscripciones. H2H continúa sujeto a su propia muestra. El archivo del Site V13 en maintenance/NBA.md documenta que las excepciones de hitos necesitan reglas específicas.
