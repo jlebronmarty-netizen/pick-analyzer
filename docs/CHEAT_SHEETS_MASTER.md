@@ -92,3 +92,5 @@ La rama incorporó Top 10 y captura el 24-nov, consolidó las bandas de cuotas e
 
 
 **NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
