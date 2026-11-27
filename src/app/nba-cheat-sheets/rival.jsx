@@ -9,6 +9,7 @@ const number=v=>Number.isFinite(v)?v.toLocaleString('es-PR',{maximumFractionDigi
 function result(row,g){
  const v=g[marketStat[row.market]];
  if(!Number.isFinite(v))return 'Sin dato';
+ if(row.threshold!=null)return v>=row.threshold?'Alcanzó':'Por debajo';
  if(v===row.line)return 'Empate';
  return (row.side.toLowerCase()==='over'?v>row.line:v<row.line)?'Cumplió':'Falló';
 }
@@ -30,7 +31,7 @@ export function RivalBody({data:d,row}){
  {(d.own.min[period].n<(period===1?10:5)||d.comparison.min[period].n<(period===1?10:5))&&<p><b>Muestra pequeña o incompleta para este período.</b></p>}
  <small>Entre paréntesis, juegos con dato. Las ventanas usan participaciones observadas. Las muestras pueden cubrir fechas distintas o faltar juegos.</small>
  <h3>Historial contra {d.rival.name}</h3>
- <p>Línea de referencia · {row.side.toLowerCase()==='over'?'Más de':'Menos de'} {row.line} {metrics[marketStat[row.market]]?.toLowerCase()}</p>
+ <p>Línea de referencia · {row.threshold!=null?row.threshold+'+':(row.side.toLowerCase()==='over'?'Más de ':'Menos de ')+row.line} {metrics[marketStat[row.market]]?.toLowerCase()}</p>
  {d.meetings.length<5&&<small>{d.meetings.length? 'Muestra pequeña · '+d.meetings.length+' encuentro(s).':'Sin encuentros individuales en el archivo consultado.'}</small>}
  {d.meetings.map(g=><div className={styles.record} key={g.gameId}><b>{day(g.date)} · {result(row,g)}</b><p>{g.score??'Marcador sin verificar'}</p><p>{Object.entries(metrics).map(([k,v])=>number(g[k])+' '+v.toLowerCase()).join(' · ')}</p></div>)}
  <h3>Defensa directa observada</h3>

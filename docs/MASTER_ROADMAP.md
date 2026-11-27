@@ -1,3 +1,10 @@
+## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
+
+La portada permite comparar ambos rangos o elegir uno. Cada clasificación conserva hasta diez jugadores por mercado, rango y ventana. Los menús prepartido conciliados aportan los conteos de líneas Over/Under y de hitos con reglas pendientes.
+
+Detalles en [la guía maestra](CHEAT_SHEETS_MASTER.md).
+
+
 
 ## Transición NBA → NHL · planificación del 25 de noviembre
 

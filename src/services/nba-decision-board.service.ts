@@ -1,4 +1,5 @@
 import 'server-only';
+import {describeMenu} from '@/lib/nba/cheat-menu-coverage.mjs';
 import {projectionHistories} from '@/lib/nba/cheat-game-history.mjs';
 import {buildCheatCandidates} from '@/lib/nba/cheat-sheets.mjs';
 import {gameMetrics} from '@/lib/data-quality/game-metrics.mjs';
@@ -31,7 +32,7 @@ function accuracy(rows:any[],asOf:string){
  result.periods={...result.props};
  return result;
 }
-async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:string,db:typeof supabaseAdmin){
+async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:string,db:typeof supabaseAdmin,withCoverage:boolean){
  const query=(fields:string)=>{
    const q=db.from('nba_market_snapshots_v1').select(fields).eq('provider_game_id',game.id)
      .gte('source_received_at',since).lte('source_received_at',asOf).lte('recorded_at',asOf);
@@ -50,7 +51,12 @@ async function marketReceipt(game:any,lane:'main'|'props',asOf:string,since:stri
    'complete:payload->meta->coverage->complete_response,normalized_count:payload->meta->coverage->normalized_quotes'].join(',');
  const at=(head.data as any).source_received_at;
  const result=await query(fields).eq('source_received_at',at).order('snapshot_id').limit(33).abortSignal(AbortSignal.timeout(10000));
- return {id:game.id,lane,...readMarketBatches(check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED'),game,lane,asOf)};
+ const batches=check(result,'NBA_DECISION_MARKET_CAPTURE_FAILED');
+ const receipt=readMarketBatches(batches,game,lane,asOf);
+ if(withCoverage && lane==='props' && !receipt.reason){
+   return {id:game.id,lane,...receipt,...describeMenu(batches)};
+ }
+ return {id:game.id,lane,...receipt};
 }
 export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forDisplay=false,withCheatSheets=false,withSheetLab=false}={}){
  const asOf=now.toISOString(),day=prDate(now),threeHours=new Date(now.getTime()-3*3600000).toISOString();
@@ -92,11 +98,14 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  }));
  const calendar=archivedCalendar(historicalCapture,snapshots,asOf);
  const captures=await Promise.all(games.flatMap((game:any)=>(['main','props'] as const).map(async lane=>{
-   try{return await marketReceipt(game,lane,asOf,threeHours,db);}
+   try{return await marketReceipt(game,lane,asOf,threeHours,db,withCheatSheets && forDisplay);}
    catch{return {id:game.id,lane,quotes:[],reason:'SOURCE_UNAVAILABLE'};}
  })));
  const recentMain=captures.filter(c=>c.lane==='main').flatMap(c=>c.quotes);
  const propSnapshots=captures.filter(c=>c.lane==='props');
+ const pregameIds=new Set(games.filter((g:any)=>g.status_state==='scheduled' && !g.postponed && stamp(g.datetime)>now.getTime()).map((g:any)=>g.id));
+ const pregameMenus=propSnapshots.filter(c=>pregameIds.has(c.id));
+ const reviewedMenus=pregameMenus.flatMap(c=>'menuCounts' in c && c.menuCounts ? [c.menuCounts] : []);
  const propQuotes=propSnapshots.flatMap(c=>c.quotes);
  const ambiguousSnapshots=propSnapshots.filter(c=>c.reason).map(c=>c.id);
  const playerIds=[...new Set(propQuotes.map((x:any)=>Number(x.player_id)).filter(Number.isSafeInteger))];
@@ -190,7 +199,7 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  if(Object.keys(result.summary.qualityCounts).some(k=>k!=='VALIDATED'))
    console.info('NBA_DECISION_DATA_QUALITY',{day,counts:result.summary.qualityCounts,calendarIssues:calendar.issues});
  const lab=withSheetLab?await (await import('@/lib/nba/sheet-lab/build.mjs')).buildSheetLab(inputs,db):null;
- return {...result,...(withSheetLab?{lab}:{}),...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs)} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
+ return {...result,...(withSheetLab?{lab}:{}),...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs),sheetMilestones:pregameMenus.flatMap(c=>'milestones' in c ? c.milestones??[] : []),menuCoverage:{menus:reviewedMenus,expected:pregameMenus.length}} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
    scheduleCapturedAt:schedule?.source_received_at??null,
    historyCaptureAt:archive?.started_at??null,
    historyRunId:archive?.run_id??null,

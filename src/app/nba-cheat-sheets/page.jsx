@@ -3,6 +3,7 @@ import {redirect,notFound} from 'next/navigation';
 import {nbaManualAccess} from '@/lib/nba/manual-access.mjs';
 import Link from 'next/link';
 import {readNbaDecisionBoard} from '@/services/nba-decision-board.service';
+import {milestoneHistory} from '@/lib/nba/cheat-menu-coverage.mjs';
 import Sheet from './sheet';
 import {projectionRows} from '@/lib/nba/cheat-projections.mjs';
 export const dynamic='force-dynamic';
@@ -15,5 +16,6 @@ export default async function Page(){
   let board;
   try {board=await readNbaDecisionBoard({forDisplay:true,withCheatSheets:true});}
   catch {return <main className="p-6"><h1>Cheat Sheets NBA</h1><p>No se pudo leer el archivo de hoy. Vuelve a cargar la página.</p><Link href="/nba-decision-board">Volver al Decision Board</Link></main>;}
-  return <Sheet projections={projectionRows(board.rows.props,board.projectionHistories)} showReference={process.env.VERCEL_ENV==='preview'} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
+  const projections=projectionRows(board.rows.props,board.projectionHistories);
+  return <Sheet milestones={milestoneHistory(board.sheetMilestones??[],projections)} coverage={board.menuCoverage} projections={projections} showReference={process.env.VERCEL_ENV==='preview'} cards={board.cheatSheets} day={board.day} asOf={board.asOf}/>;
 }
