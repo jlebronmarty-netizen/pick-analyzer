@@ -289,7 +289,7 @@ export default function Sheet({ date, cutoff, frozen, data }) {
         <h1>Cheat Sheets</h1>
         <p>Comparativas y cuotas archivadas.</p>
       </header>
-      
+
       <div className={s.controls}>
         <FilterGroup
           label="Mercado"

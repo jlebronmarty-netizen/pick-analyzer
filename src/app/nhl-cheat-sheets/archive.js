@@ -252,12 +252,14 @@ export async function readSheet(date,cutoff=new Date().toISOString()) {
       ]),
     ),
   ];
-  const boxes = ids.length
+  const slateIds=new Set([...games.keys(),...calendars.flatMap(c=>(c?.games??[]).filter(g=>g.scheduledAt>=from && g.scheduledAt<to).map(g=>g.eventId))]);
+  const boxIds=[...new Set([...ids,...slateIds])];
+  const boxes = boxIds.length
     ? await rows(
         db
           .from("nhl_game_context_v2")
-          .select("event_id,boxscore_captured_at,boxscore", { count: "exact" })
-          .in("event_id", ids)
+          .select("event_id,updated_at,boxscore_captured_at,boxscore", { count: "exact" })
+          .in("event_id", boxIds)
           .order("event_id"),
       )
     : [];
@@ -520,7 +522,7 @@ export async function readSheet(date,cutoff=new Date().toISOString()) {
     )
       prices.delete(key);
   }
-  for(const row of calendars.filter(Boolean).sort((a,b)=>a.capturedAt.localeCompare(b.capturedAt)).flatMap(c=>c.games)){
+  for(const row of calendars.filter(Boolean).sort((a,b)=>a.capturedAt.localeCompare(b.capturedAt)).flatMap(c=>c.games.map(g=>({...g,observed:c.capturedAt})))){
     if(row.scheduledAt<from || row.scheduledAt>=to)continue;
     const g=games.get(row.eventId)??{id:row.eventId,time:row.scheduledAt,home:row.home,away:row.away};
     const conflict=g.home!==row.home || g.away!==row.away;
@@ -531,7 +533,23 @@ export async function readSheet(date,cutoff=new Date().toISOString()) {
     g.time=row.scheduledAt;
     g.state=conflict?'UNKNOWN':row.status;
     g.scheduleState=row.scheduleState;
+    g.stateAt=row.observed;
     games.set(row.eventId,g);
+  }
+  // The finalized box can arrive after the latest archived calendar receipt.
+  const currentBoxes=boxes.filter(r=>slateIds.has(r.event_id) && Date.parse(r.updated_at)<=Date.parse(cutoff));
+  const finals=new Set(normalizeNhlResearchContexts(currentBoxes,cutoff).games.map(r=>r.eventId));
+  for(const r of currentBoxes){
+    const g=games.get(r.event_id),b=r.boxscore,at=Date.parse(r.boxscore_captured_at);
+    if(!g || !b || !(at>=Date.parse(g.time) && at<=Date.parse(cutoff)) ||
+      (g.stateAt && at<Date.parse(g.stateAt)) || "nhl:"+b.id!==g.id ||
+      Date.parse(b.startTimeUTC)!==Date.parse(g.time) || b.homeTeam?.abbrev!==g.home || b.awayTeam?.abbrev!==g.away)continue;
+    if(finals.has(g.id) || ["LIVE","CRIT"].includes(b.gameState)){
+      if(g.stateAt && at===Date.parse(g.stateAt) && g.state!==b.gameState &&
+        !(["OFF","FINAL"].includes(g.state) && finals.has(g.id)))g.state="UNKNOWN";
+      else g.state=b.gameState;
+      g.stateAt=r.boxscore_captured_at;
+    }
   }
   return {
     games: [...games.values()].sort(

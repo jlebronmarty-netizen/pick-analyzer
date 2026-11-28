@@ -66,7 +66,7 @@ async function buildBoard(date, cut) {
           teams,
          l10Audit:counts, causes, divisionEvidence:Object.fromEntries(data.divisionEvidenceCounts) }, initial, profile };
 }
-const cachedBoard = unstable_cache(buildBoard, ["ncaab-sheet-compact-v4"], {revalidate:180});
+const cachedBoard = unstable_cache(buildBoard, ["ncaab-sheet-compact-v5-eligibility"], {revalidate:180});
 
 export default async function Page({ searchParams }) {
   const start=performance.now();

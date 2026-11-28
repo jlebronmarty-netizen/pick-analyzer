@@ -27,3 +27,9 @@ El [PR #13 de Sports Edge Hub](https://github.com/jlebronmarty-netizen/sports-ed
 Para incorporar el paquete se necesita la copia original de la ruta registrada o una entrega verificable. Comprobar tamaño, SHA-256, manifiesto y SQLite en aislamiento. Reconciliar para cada evento los IDs ESPN, equipos, temporada, localía, marcador, fuente, duplicados y timestamps. Registrar las discrepancias y conservar las cuarentenas. Separar H2H por temporada y limitarlo a evidencia disponible al corte. El acumulado no acredita por sí mismo las secuencias recientes L10.
 
 Los tres cortes previos del 23, 24 y 25 de noviembre acreditaron cero ventanas L10 completas. El subconjunto histórico incorporado sigue siendo de 1.024 finales verificados. Véase [la auditoría por jornada](NCAAB_CHEAT_SHEETS_PHASE_2.md). Las líneas universitarias requieren certificar operador, jurisdicción, período, prórroga, pushes y anulaciones antes de cualquier liquidación. La revisión de interfaz no autoriza contratos ni trackers.
+
+## Verificación de revisión
+
+Se ejecutaron 716 pruebas de NBA, NHL, NCAAB y sus paneles. En el corte del 24 de noviembre, la comparación del HTML renderizado con las filas almacenadas detectó una respuesta compacta antigua sin inicio ni estado. La caché del tablero usa una nueva versión para filas que transportan vigencia. NHL contrasta además el calendario con los contextos de `nhl_game_context_v2` recibidos al corte y coteja identidad y hora antes de reconocer una confirmación más reciente.
+
+Para repetir la revisión, abrir las tres rutas protegidas a 390 y 1440 px, cambiar estado y rango, y navegar entre deportes con filtros. Comparar en NCAAB la fecha de hoy explícita con la omitida y, en otra fecha, la 1 p. m. con Cierre del día. El histórico NBA anterior a las 9:03 a. m. PR del 27 de noviembre conservaba 1.225 inscripciones, todas anteriores al inicio. La comprobación de producción fue de solo lectura.

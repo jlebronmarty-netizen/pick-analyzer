@@ -389,7 +389,7 @@ export default function Board({ report, initial, frozen }) {
           </p>
         </header>
         <JornadaControls state={state} games={report.fixtures}/>
-        
+
         <div className={s.controls}>
           <FilterGroup
             label="Mercado"
