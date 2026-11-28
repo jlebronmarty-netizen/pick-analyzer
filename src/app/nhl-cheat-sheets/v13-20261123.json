@@ -1,0 +1,1035 @@
+{
+  "archivedAt": "2026-11-23T16:15:18Z",
+  "events": {
+    "nhl:2026020378": {
+      "away": "CBJ",
+      "home": "NJD",
+      "start_utc": "2026-11-24T00:00:00Z",
+      "injuries": [
+        {
+          "team": "CBJ",
+          "player": "Conor Garland",
+          "status": "IR",
+          "detail": "Parte superior",
+          "source_url": "https://www.nhl.com/devils/news/topic/game-day/njd-vs-cbj/11-23-2026/2026020378/preview-2026020378",
+          "source_id": "njd",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "CBJ",
+          "player": "Sean Monahan",
+          "status": "LESIONADO",
+          "detail": "Parte superior",
+          "source_url": "https://www.nhl.com/devils/news/topic/game-day/njd-vs-cbj/11-23-2026/2026020378/preview-2026020378",
+          "source_id": "njd",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "NJD",
+          "player": "Anthony Mantha",
+          "status": "BAJA",
+          "detail": "Fractura garganta",
+          "source_url": "https://www.nhl.com/devils/news/topic/game-day/njd-vs-cbj/11-23-2026/2026020378/preview-2026020378",
+          "source_id": "njd",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "NJD",
+          "player": "Johnathan Kovacevic",
+          "status": "BAJA",
+          "detail": "Tobillo",
+          "source_url": "https://www.nhl.com/devils/news/topic/game-day/njd-vs-cbj/11-23-2026/2026020378/preview-2026020378",
+          "source_id": "njd",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "NJD",
+          "player": "Seamus Casey",
+          "status": "BAJA",
+          "detail": "Rodilla",
+          "source_url": "https://www.nhl.com/devils/news/topic/game-day/njd-vs-cbj/11-23-2026/2026020378/preview-2026020378",
+          "source_id": "njd",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        }
+      ],
+      "away_goalie": {
+        "name": "Cam Talbot",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Connor Hellebuyck",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      }
+    },
+    "nhl:2026020379": {
+      "away": "LAK",
+      "home": "MTL",
+      "start_utc": "2026-11-24T00:30:00Z",
+      "injuries": [
+        {
+          "team": "MTL",
+          "player": "Josh Anderson",
+          "status": "BAJA_PREVISTA",
+          "detail": "Parte inferior; 3–4 semanas desde anuncio",
+          "source_url": "https://www.nhl.com/canadiens/news/anderson-matheson-out-multiple-weeks",
+          "source_id": "mtl_injury",
+          "source_date": "2026-11-15",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "MTL",
+          "player": "Mike Matheson",
+          "status": "BAJA_PREVISTA",
+          "detail": "Parte inferior; 2–3 semanas desde anuncio",
+          "source_url": "https://www.nhl.com/canadiens/news/anderson-matheson-out-multiple-weeks",
+          "source_id": "mtl_injury",
+          "source_date": "2026-11-15",
+          "checked_at": "2026-11-23T16:05:56Z"
+        }
+      ],
+      "away_goalie": {
+        "name": "Darcy Kuemper",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Jakub Dobes",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "CONFIRMADO"
+      }
+    },
+    "nhl:2026020380": {
+      "away": "CGY",
+      "home": "OTT",
+      "start_utc": "2026-11-24T00:30:00Z",
+      "injuries": [
+        {
+          "team": "CGY",
+          "player": "Martin Pospisil",
+          "status": "DISPONIBILIDAD_PENDIENTE",
+          "detail": "Salió lesionado el 21nov; disponibilidad pendiente",
+          "source_url": "https://www.nhl.com/flames/news/5-things-flames-senators-23-11-26",
+          "source_id": "cgy",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        }
+      ],
+      "away_goalie": {
+        "name": "Devin Cooley",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Linus Ullmark",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "PROBABLE"
+      }
+    },
+    "nhl:2026020381": {
+      "away": "TOR",
+      "home": "NYI",
+      "start_utc": "2026-11-24T00:30:00Z",
+      "injuries": [
+        {
+          "team": "TOR",
+          "player": "Kirill Marchenko",
+          "status": "IR",
+          "detail": "Parte inferior",
+          "source_url": "https://www.nhl.com/islanders/news/game-preview-islanders-vs-maple-leafs-nov-23-2026",
+          "source_id": "nyi",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z",
+          "availability_status": "DIA_A_DIA",
+          "availability_source_id": "nhl_status_nov23",
+          "availability_source_url": "https://www.nhl.com/news/nhl-status-report-news-and-notes-november-22-2026",
+          "availability_note": "Día a día reportado por NHL; no implica alta de IR."
+        },
+        {
+          "team": "TOR",
+          "player": "Colton Sissons",
+          "status": "IR",
+          "detail": "Entrenamiento sin contacto",
+          "source_url": "https://www.nhl.com/islanders/news/game-preview-islanders-vs-maple-leafs-nov-23-2026",
+          "source_id": "nyi",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "TOR",
+          "player": "Miles Wood",
+          "status": "IR",
+          "detail": "Reporte de reserva",
+          "source_url": "https://www.nhl.com/islanders/news/game-preview-islanders-vs-maple-leafs-nov-23-2026",
+          "source_id": "nyi",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "TOR",
+          "player": "Max Domi",
+          "status": "IR",
+          "detail": "Reporte de reserva",
+          "source_url": "https://www.nhl.com/islanders/news/game-preview-islanders-vs-maple-leafs-nov-23-2026",
+          "source_id": "nyi",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "TOR",
+          "player": "Cole McWard",
+          "status": "IR",
+          "detail": "Reporte de reserva",
+          "source_url": "https://www.nhl.com/islanders/news/game-preview-islanders-vs-maple-leafs-nov-23-2026",
+          "source_id": "nyi",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        },
+        {
+          "team": "TOR",
+          "player": "Jack Roslovic",
+          "status": "DIA_A_DIA",
+          "detail": "Parte superior",
+          "source_url": "https://www.nhl.com/islanders/news/game-preview-islanders-vs-maple-leafs-nov-23-2026",
+          "source_id": "nyi",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:05:56Z"
+        }
+      ],
+      "away_goalie": {
+        "name": "Anthony Stolarz",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Ilya Sorokin",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "PROBABLE"
+      }
+    },
+    "nhl:2026020382": {
+      "away": "UTA",
+      "home": "WPG",
+      "start_utc": "2026-11-24T00:30:00Z",
+      "injuries": [],
+      "away_goalie": {
+        "name": "Sebastian Cossa",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Stuart Skinner",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "PROBABLE"
+      }
+    },
+    "nhl:2026020383": {
+      "away": "ANA",
+      "home": "SEA",
+      "start_utc": "2026-11-24T02:40:00Z",
+      "injuries": [
+        {
+          "team": "ANA",
+          "player": "Leo Carlsson",
+          "status": "DIA_A_DIA",
+          "detail": "Parte superior",
+          "source_id": "nhl_status_nov23",
+          "source_url": "https://www.nhl.com/news/nhl-status-report-news-and-notes-november-22-2026",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:10:48Z"
+        },
+        {
+          "team": "ANA",
+          "player": "Beckett Sennecke",
+          "status": "IR",
+          "detail": "Parte superior",
+          "source_id": "nhl_status_nov23",
+          "source_url": "https://www.nhl.com/news/nhl-status-report-news-and-notes-november-22-2026",
+          "source_date": "2026-11-23",
+          "checked_at": "2026-11-23T16:10:48Z"
+        }
+      ],
+      "away_goalie": {
+        "name": "Lukas Dostal",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Philipp Grubauer",
+        "checked_at": "2026-11-23T16:05:56Z",
+        "status": "PROBABLE"
+      }
+    },
+    "nhl:2026020384": {
+      "away": "MIN",
+      "home": "SJS",
+      "start_utc": "2026-11-24T03:00:00Z",
+      "injuries": [
+        {
+          "team": "MIN",
+          "player": "Quinn Hughes",
+          "status": "BAJA_CONFIRMADA_PARA_ESTE_PARTIDO",
+          "detail": "Lesión no especificada; ausencia ante Sharks anunciada",
+          "source_url": "https://www.nhl.com/news/quinn-hughes-injury-status-report-november-21-2026",
+          "source_id": "min_injury",
+          "source_date": "2026-11-22",
+          "checked_at": "2026-11-23T16:05:56Z"
+        }
+      ],
+      "away_goalie": {
+        "name": "Jesper Wallstedt",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      },
+      "home_goalie": {
+        "name": "Yaroslav Askarov",
+        "checked_at": "2026-11-23T16:10:48Z",
+        "status": "NO_CONFIRMADO"
+      }
+    }
+  },
+  "teams": {
+    "CAR": {
+      "rank": 1,
+      "conference_rank": 1,
+      "division_rank": 1,
+      "season": {
+        "gp": 24,
+        "record": "18-3-3",
+        "w": 18,
+        "l": 3,
+        "otl": 3,
+        "points": 39,
+        "points_pct": 0.8125,
+        "gf": 100,
+        "ga": 55,
+        "gf_pg": 4.166667,
+        "ga_pg": 2.291667,
+        "home_record": "8-1-2",
+        "away_record": "10-2-1",
+        "rw": 17,
+        "row": 18,
+        "through_date": "2026-11-22"
+      }
+    },
+    "MIN": {
+      "rank": 2,
+      "conference_rank": 1,
+      "division_rank": 1,
+      "season": {
+        "gp": 25,
+        "record": "17-3-5",
+        "w": 17,
+        "l": 3,
+        "otl": 5,
+        "points": 39,
+        "points_pct": 0.78,
+        "gf": 90,
+        "ga": 56,
+        "gf_pg": 3.6,
+        "ga_pg": 2.24,
+        "home_record": "6-0-2",
+        "away_record": "11-3-3",
+        "rw": 16,
+        "row": 17,
+        "through_date": "2026-11-22"
+      }
+    },
+    "EDM": {
+      "rank": 3,
+      "conference_rank": 2,
+      "division_rank": 1,
+      "season": {
+        "gp": 26,
+        "record": "17-5-4",
+        "w": 17,
+        "l": 5,
+        "otl": 4,
+        "points": 38,
+        "points_pct": 0.7307692307692307,
+        "gf": 101,
+        "ga": 77,
+        "gf_pg": 3.884615,
+        "ga_pg": 2.961538,
+        "home_record": "7-3-2",
+        "away_record": "10-2-2",
+        "rw": 14,
+        "row": 16,
+        "through_date": "2026-11-22"
+      }
+    },
+    "OTT": {
+      "rank": 4,
+      "conference_rank": 2,
+      "division_rank": 1,
+      "season": {
+        "gp": 24,
+        "record": "15-6-3",
+        "w": 15,
+        "l": 6,
+        "otl": 3,
+        "points": 33,
+        "points_pct": 0.6875,
+        "gf": 79,
+        "ga": 70,
+        "gf_pg": 3.291667,
+        "ga_pg": 2.916667,
+        "home_record": "8-2-2",
+        "away_record": "7-4-1",
+        "rw": 12,
+        "row": 13,
+        "through_date": "2026-11-22"
+      }
+    },
+    "VGK": {
+      "rank": 5,
+      "conference_rank": 3,
+      "division_rank": 2,
+      "season": {
+        "gp": 25,
+        "record": "14-6-5",
+        "w": 14,
+        "l": 6,
+        "otl": 5,
+        "points": 33,
+        "points_pct": 0.66,
+        "gf": 85,
+        "ga": 75,
+        "gf_pg": 3.4,
+        "ga_pg": 3.0,
+        "home_record": "7-4-3",
+        "away_record": "7-2-2",
+        "rw": 11,
+        "row": 12,
+        "through_date": "2026-11-22"
+      }
+    },
+    "TBL": {
+      "rank": 6,
+      "conference_rank": 3,
+      "division_rank": 2,
+      "season": {
+        "gp": 23,
+        "record": "15-6-2",
+        "w": 15,
+        "l": 6,
+        "otl": 2,
+        "points": 32,
+        "points_pct": 0.6956521739130435,
+        "gf": 84,
+        "ga": 68,
+        "gf_pg": 3.652174,
+        "ga_pg": 2.956522,
+        "home_record": "10-2-0",
+        "away_record": "5-4-2",
+        "rw": 13,
+        "row": 15,
+        "through_date": "2026-11-22"
+      }
+    },
+    "DAL": {
+      "rank": 7,
+      "conference_rank": 4,
+      "division_rank": 2,
+      "season": {
+        "gp": 23,
+        "record": "15-6-2",
+        "w": 15,
+        "l": 6,
+        "otl": 2,
+        "points": 32,
+        "points_pct": 0.6956521739130435,
+        "gf": 65,
+        "ga": 56,
+        "gf_pg": 2.826087,
+        "ga_pg": 2.434783,
+        "home_record": "9-5-0",
+        "away_record": "6-1-2",
+        "rw": 9,
+        "row": 13,
+        "through_date": "2026-11-22"
+      }
+    },
+    "MTL": {
+      "rank": 8,
+      "conference_rank": 4,
+      "division_rank": 3,
+      "season": {
+        "gp": 24,
+        "record": "14-6-4",
+        "w": 14,
+        "l": 6,
+        "otl": 4,
+        "points": 32,
+        "points_pct": 0.6666666666666666,
+        "gf": 77,
+        "ga": 71,
+        "gf_pg": 3.208333,
+        "ga_pg": 2.958333,
+        "home_record": "5-4-3",
+        "away_record": "9-2-1",
+        "rw": 9,
+        "row": 12,
+        "through_date": "2026-11-22"
+      }
+    },
+    "BOS": {
+      "rank": 9,
+      "conference_rank": 5,
+      "division_rank": 4,
+      "season": {
+        "gp": 23,
+        "record": "15-7-1",
+        "w": 15,
+        "l": 7,
+        "otl": 1,
+        "points": 31,
+        "points_pct": 0.6739130434782609,
+        "gf": 83,
+        "ga": 61,
+        "gf_pg": 3.608696,
+        "ga_pg": 2.652174,
+        "home_record": "9-4-0",
+        "away_record": "6-3-1",
+        "rw": 12,
+        "row": 14,
+        "through_date": "2026-11-22"
+      }
+    },
+    "NJD": {
+      "rank": 10,
+      "conference_rank": 6,
+      "division_rank": 2,
+      "season": {
+        "gp": 23,
+        "record": "15-8-0",
+        "w": 15,
+        "l": 8,
+        "otl": 0,
+        "points": 30,
+        "points_pct": 0.6521739130434783,
+        "gf": 88,
+        "ga": 73,
+        "gf_pg": 3.826087,
+        "ga_pg": 3.173913,
+        "home_record": "9-3-0",
+        "away_record": "6-5-0",
+        "rw": 10,
+        "row": 14,
+        "through_date": "2026-11-22"
+      }
+    },
+    "COL": {
+      "rank": 11,
+      "conference_rank": 5,
+      "division_rank": 3,
+      "season": {
+        "gp": 23,
+        "record": "13-7-3",
+        "w": 13,
+        "l": 7,
+        "otl": 3,
+        "points": 29,
+        "points_pct": 0.6304347826086957,
+        "gf": 90,
+        "ga": 68,
+        "gf_pg": 3.913043,
+        "ga_pg": 2.956522,
+        "home_record": "8-1-2",
+        "away_record": "5-6-1",
+        "rw": 13,
+        "row": 13,
+        "through_date": "2026-11-22"
+      }
+    },
+    "NSH": {
+      "rank": 12,
+      "conference_rank": 6,
+      "division_rank": 4,
+      "season": {
+        "gp": 23,
+        "record": "12-6-5",
+        "w": 12,
+        "l": 6,
+        "otl": 5,
+        "points": 29,
+        "points_pct": 0.6304347826086957,
+        "gf": 71,
+        "ga": 69,
+        "gf_pg": 3.086957,
+        "ga_pg": 3.0,
+        "home_record": "7-3-2",
+        "away_record": "5-3-3",
+        "rw": 9,
+        "row": 10,
+        "through_date": "2026-11-22"
+      }
+    },
+    "FLA": {
+      "rank": 13,
+      "conference_rank": 7,
+      "division_rank": 5,
+      "season": {
+        "gp": 24,
+        "record": "13-8-3",
+        "w": 13,
+        "l": 8,
+        "otl": 3,
+        "points": 29,
+        "points_pct": 0.6041666666666666,
+        "gf": 76,
+        "ga": 71,
+        "gf_pg": 3.166667,
+        "ga_pg": 2.958333,
+        "home_record": "6-3-0",
+        "away_record": "7-5-3",
+        "rw": 11,
+        "row": 13,
+        "through_date": "2026-11-22"
+      }
+    },
+    "STL": {
+      "rank": 14,
+      "conference_rank": 7,
+      "division_rank": 5,
+      "season": {
+        "gp": 24,
+        "record": "13-9-2",
+        "w": 13,
+        "l": 9,
+        "otl": 2,
+        "points": 28,
+        "points_pct": 0.5833333333333334,
+        "gf": 82,
+        "ga": 77,
+        "gf_pg": 3.416667,
+        "ga_pg": 3.208333,
+        "home_record": "8-3-1",
+        "away_record": "5-6-1",
+        "rw": 11,
+        "row": 11,
+        "through_date": "2026-11-22"
+      }
+    },
+    "NYI": {
+      "rank": 15,
+      "conference_rank": 8,
+      "division_rank": 3,
+      "season": {
+        "gp": 22,
+        "record": "11-6-5",
+        "w": 11,
+        "l": 6,
+        "otl": 5,
+        "points": 27,
+        "points_pct": 0.6136363636363636,
+        "gf": 71,
+        "ga": 63,
+        "gf_pg": 3.227273,
+        "ga_pg": 2.863636,
+        "home_record": "5-3-2",
+        "away_record": "6-3-3",
+        "rw": 9,
+        "row": 10,
+        "through_date": "2026-11-22"
+      }
+    },
+    "NYR": {
+      "rank": 16,
+      "conference_rank": 9,
+      "division_rank": 4,
+      "season": {
+        "gp": 23,
+        "record": "13-9-1",
+        "w": 13,
+        "l": 9,
+        "otl": 1,
+        "points": 27,
+        "points_pct": 0.5869565217391305,
+        "gf": 69,
+        "ga": 63,
+        "gf_pg": 3.0,
+        "ga_pg": 2.73913,
+        "home_record": "9-3-0",
+        "away_record": "4-6-1",
+        "rw": 13,
+        "row": 13,
+        "through_date": "2026-11-22"
+      }
+    },
+    "UTA": {
+      "rank": 17,
+      "conference_rank": 8,
+      "division_rank": 6,
+      "season": {
+        "gp": 24,
+        "record": "12-9-3",
+        "w": 12,
+        "l": 9,
+        "otl": 3,
+        "points": 27,
+        "points_pct": 0.5625,
+        "gf": 80,
+        "ga": 81,
+        "gf_pg": 3.333333,
+        "ga_pg": 3.375,
+        "home_record": "6-3-2",
+        "away_record": "6-6-1",
+        "rw": 10,
+        "row": 12,
+        "through_date": "2026-11-22"
+      }
+    },
+    "WPG": {
+      "rank": 18,
+      "conference_rank": 9,
+      "division_rank": 7,
+      "season": {
+        "gp": 24,
+        "record": "11-9-4",
+        "w": 11,
+        "l": 9,
+        "otl": 4,
+        "points": 26,
+        "points_pct": 0.5416666666666666,
+        "gf": 75,
+        "ga": 82,
+        "gf_pg": 3.125,
+        "ga_pg": 3.416667,
+        "home_record": "6-5-2",
+        "away_record": "5-4-2",
+        "rw": 8,
+        "row": 10,
+        "through_date": "2026-11-22"
+      }
+    },
+    "BUF": {
+      "rank": 19,
+      "conference_rank": 10,
+      "division_rank": 6,
+      "season": {
+        "gp": 24,
+        "record": "10-10-4",
+        "w": 10,
+        "l": 10,
+        "otl": 4,
+        "points": 24,
+        "points_pct": 0.5,
+        "gf": 73,
+        "ga": 83,
+        "gf_pg": 3.041667,
+        "ga_pg": 3.458333,
+        "home_record": "4-6-0",
+        "away_record": "6-4-4",
+        "rw": 8,
+        "row": 10,
+        "through_date": "2026-11-22"
+      }
+    },
+    "SJS": {
+      "rank": 20,
+      "conference_rank": 10,
+      "division_rank": 3,
+      "season": {
+        "gp": 25,
+        "record": "11-12-2",
+        "w": 11,
+        "l": 12,
+        "otl": 2,
+        "points": 24,
+        "points_pct": 0.48,
+        "gf": 69,
+        "ga": 89,
+        "gf_pg": 2.76,
+        "ga_pg": 3.56,
+        "home_record": "6-6-1",
+        "away_record": "5-6-1",
+        "rw": 4,
+        "row": 8,
+        "through_date": "2026-11-22"
+      }
+    },
+    "PHI": {
+      "rank": 21,
+      "conference_rank": 11,
+      "division_rank": 5,
+      "season": {
+        "gp": 26,
+        "record": "9-11-6",
+        "w": 9,
+        "l": 11,
+        "otl": 6,
+        "points": 24,
+        "points_pct": 0.46153846153846156,
+        "gf": 67,
+        "ga": 88,
+        "gf_pg": 2.576923,
+        "ga_pg": 3.384615,
+        "home_record": "4-5-3",
+        "away_record": "5-6-3",
+        "rw": 8,
+        "row": 9,
+        "through_date": "2026-11-22"
+      }
+    },
+    "ANA": {
+      "rank": 22,
+      "conference_rank": 11,
+      "division_rank": 4,
+      "season": {
+        "gp": 24,
+        "record": "11-12-1",
+        "w": 11,
+        "l": 12,
+        "otl": 1,
+        "points": 23,
+        "points_pct": 0.4791666666666667,
+        "gf": 87,
+        "ga": 92,
+        "gf_pg": 3.625,
+        "ga_pg": 3.833333,
+        "home_record": "4-6-1",
+        "away_record": "7-6-0",
+        "rw": 10,
+        "row": 11,
+        "through_date": "2026-11-22"
+      }
+    },
+    "CGY": {
+      "rank": 23,
+      "conference_rank": 12,
+      "division_rank": 5,
+      "season": {
+        "gp": 24,
+        "record": "10-12-2",
+        "w": 10,
+        "l": 12,
+        "otl": 2,
+        "points": 22,
+        "points_pct": 0.4583333333333333,
+        "gf": 60,
+        "ga": 84,
+        "gf_pg": 2.5,
+        "ga_pg": 3.5,
+        "home_record": "6-6-1",
+        "away_record": "4-6-1",
+        "rw": 9,
+        "row": 10,
+        "through_date": "2026-11-22"
+      }
+    },
+    "SEA": {
+      "rank": 24,
+      "conference_rank": 13,
+      "division_rank": 6,
+      "season": {
+        "gp": 20,
+        "record": "10-9-1",
+        "w": 10,
+        "l": 9,
+        "otl": 1,
+        "points": 21,
+        "points_pct": 0.525,
+        "gf": 67,
+        "ga": 71,
+        "gf_pg": 3.35,
+        "ga_pg": 3.55,
+        "home_record": "6-4-0",
+        "away_record": "4-5-1",
+        "rw": 7,
+        "row": 8,
+        "through_date": "2026-11-22"
+      }
+    },
+    "WSH": {
+      "rank": 25,
+      "conference_rank": 12,
+      "division_rank": 6,
+      "season": {
+        "gp": 21,
+        "record": "10-11-0",
+        "w": 10,
+        "l": 11,
+        "otl": 0,
+        "points": 20,
+        "points_pct": 0.47619047619047616,
+        "gf": 72,
+        "ga": 83,
+        "gf_pg": 3.428571,
+        "ga_pg": 3.952381,
+        "home_record": "7-6-0",
+        "away_record": "3-5-0",
+        "rw": 8,
+        "row": 10,
+        "through_date": "2026-11-22"
+      }
+    },
+    "DET": {
+      "rank": 26,
+      "conference_rank": 13,
+      "division_rank": 7,
+      "season": {
+        "gp": 23,
+        "record": "8-12-3",
+        "w": 8,
+        "l": 12,
+        "otl": 3,
+        "points": 19,
+        "points_pct": 0.41304347826086957,
+        "gf": 60,
+        "ga": 71,
+        "gf_pg": 2.608696,
+        "ga_pg": 3.086957,
+        "home_record": "4-7-1",
+        "away_record": "4-5-2",
+        "rw": 6,
+        "row": 6,
+        "through_date": "2026-11-22"
+      }
+    },
+    "TOR": {
+      "rank": 27,
+      "conference_rank": 14,
+      "division_rank": 8,
+      "season": {
+        "gp": 25,
+        "record": "8-14-3",
+        "w": 8,
+        "l": 14,
+        "otl": 3,
+        "points": 19,
+        "points_pct": 0.38,
+        "gf": 78,
+        "ga": 90,
+        "gf_pg": 3.12,
+        "ga_pg": 3.6,
+        "home_record": "4-10-2",
+        "away_record": "4-4-1",
+        "rw": 7,
+        "row": 8,
+        "through_date": "2026-11-22"
+      }
+    },
+    "CBJ": {
+      "rank": 28,
+      "conference_rank": 15,
+      "division_rank": 7,
+      "season": {
+        "gp": 21,
+        "record": "9-12-0",
+        "w": 9,
+        "l": 12,
+        "otl": 0,
+        "points": 18,
+        "points_pct": 0.42857142857142855,
+        "gf": 54,
+        "ga": 68,
+        "gf_pg": 2.571429,
+        "ga_pg": 3.238095,
+        "home_record": "6-6-0",
+        "away_record": "3-6-0",
+        "rw": 4,
+        "row": 7,
+        "through_date": "2026-11-22"
+      }
+    },
+    "CHI": {
+      "rank": 29,
+      "conference_rank": 14,
+      "division_rank": 8,
+      "season": {
+        "gp": 24,
+        "record": "8-14-2",
+        "w": 8,
+        "l": 14,
+        "otl": 2,
+        "points": 18,
+        "points_pct": 0.375,
+        "gf": 64,
+        "ga": 96,
+        "gf_pg": 2.666667,
+        "ga_pg": 4.0,
+        "home_record": "6-6-1",
+        "away_record": "2-8-1",
+        "rw": 5,
+        "row": 8,
+        "through_date": "2026-11-22"
+      }
+    },
+    "LAK": {
+      "rank": 30,
+      "conference_rank": 15,
+      "division_rank": 7,
+      "season": {
+        "gp": 21,
+        "record": "7-12-2",
+        "w": 7,
+        "l": 12,
+        "otl": 2,
+        "points": 16,
+        "points_pct": 0.38095238095238093,
+        "gf": 58,
+        "ga": 70,
+        "gf_pg": 2.761905,
+        "ga_pg": 3.333333,
+        "home_record": "2-8-0",
+        "away_record": "5-4-2",
+        "rw": 4,
+        "row": 6,
+        "through_date": "2026-11-22"
+      }
+    },
+    "PIT": {
+      "rank": 31,
+      "conference_rank": 16,
+      "division_rank": 8,
+      "season": {
+        "gp": 23,
+        "record": "7-14-2",
+        "w": 7,
+        "l": 14,
+        "otl": 2,
+        "points": 16,
+        "points_pct": 0.34782608695652173,
+        "gf": 67,
+        "ga": 81,
+        "gf_pg": 2.913043,
+        "ga_pg": 3.521739,
+        "home_record": "4-5-1",
+        "away_record": "3-9-1",
+        "rw": 3,
+        "row": 5,
+        "through_date": "2026-11-22"
+      }
+    },
+    "VAN": {
+      "rank": 32,
+      "conference_rank": 16,
+      "division_rank": 8,
+      "season": {
+        "gp": 26,
+        "record": "6-19-1",
+        "w": 6,
+        "l": 19,
+        "otl": 1,
+        "points": 13,
+        "points_pct": 0.25,
+        "gf": 74,
+        "ga": 114,
+        "gf_pg": 2.846154,
+        "ga_pg": 4.384615,
+        "home_record": "2-10-0",
+        "away_record": "4-9-1",
+        "rw": 3,
+        "row": 5,
+        "through_date": "2026-11-22"
+      }
+    }
+  }
+}

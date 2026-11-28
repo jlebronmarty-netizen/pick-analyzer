@@ -19,6 +19,9 @@ on:
       - 'src/types/nhl-manual-features.ts'
       - 'src/components/dashboard/NhlDashboard.tsx'
       - 'tests/nhl-*.test.mjs'
+      - 'research/nhl-sheet-tracker/**'
+      - 'supabase/migrations/*_nhl_sheet_tracker_review.sql'
+      - 'tests/nhl-sheet-v1.postgres.mjs'
       - 'tests/fixtures/nhl-*.json'
       - 'tests/fixtures/nhl-manual-features.mjs'
       - 'tests/dashboard-multisport/nhl-research-audit-ui.test.mjs'
@@ -43,6 +46,14 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
       SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
       NODE_OPTIONS: --max-old-space-size=4096
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:55438:5432'
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -59,5 +70,9 @@ jobs:
         run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/dashboard-multisport/nhl*.test.mjs
       - name: Shared feature SQL renderer contract and injection checks
         run: python3 -m unittest discover -s tests -p 'test_nhl_manual_feature_sql.py' -v
+      - name: Isolated NHL ledger under Supabase-style privileges
+        run: |
+          npm install --prefix "$RUNNER_TEMP/sheet-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
+          NBA_SHEET_TEST_PG_MODULE="$RUNNER_TEMP/sheet-pg/node_modules/pg/lib/index.js" node tests/nhl-sheet-v1.postgres.mjs
       - name: Full application build
         run: npm run build

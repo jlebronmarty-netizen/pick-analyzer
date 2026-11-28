@@ -1,5 +1,7 @@
 # NHL Cheat Sheets · inventario y roadmap condicionado
 
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
+
 Auditoría de solo lectura del 25 de noviembre de 2026, Puerto Rico. Los conteos son del archivo de Pick al consultar. Una captura es una observación de una fuente; varios precios del mismo evento no aumentan la muestra de partidos. Este documento propone trabajo futuro. No introduce colectores, migraciones, rutas, cambios de modelo ni operaciones sobre Sites.
 
 ## Cierre operativo de NBA
@@ -44,3 +46,8 @@ Sustituir esa dependencia por etapas: cotejar hashes y contratos del productor d
 5. **Salida controlada.** Condiciones de inicio: dos ticks naturales NBA acreditados, primera captura prepartido elegible y primera liquidación real verificada; revisar este plan con el propietario. Condiciones de despliegue NHL: paridad descriptiva, reglas por mercado demostradas, pruebas de seguridad y autorización separada. Antes de retirar cualquier dependencia, acreditar captura y liquidación NHL autónomas.
 
 Referencias: [auditoría NHL y datos normalizados](research/nhl-audit-2026-11-23/README.md), [contrato de inputs manuales](nhl-manual-features-v1.md), [fuente Circa](NHL_FREE_CIRCA_MAIN_MARKETS_20261115.md), [requisitos multideporte](CHEAT_SHEETS_MULTISPORT.md), [acta NBA](NBA_CHEAT_PRODUCTION_ACL_REVIEW.md).
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.

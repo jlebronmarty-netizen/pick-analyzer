@@ -4,6 +4,8 @@
 
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
 
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
+
 La portada permite comparar ambos rangos o elegir uno. Cada clasificación conserva hasta diez jugadores por mercado, rango y ventana. Los menús prepartido conciliados aportan los conteos de líneas Over/Under y de hitos con reglas pendientes.
 
 Detalles en [la guía maestra](CHEAT_SHEETS_MASTER.md).
@@ -4591,3 +4593,8 @@ NBA prediction reads now explicitly skip weight initialization, preserving store
 Medir en una prueba privada y acotada cuántos historiales de props se pueden cotejar con los box scores archivados. Verificar por separado la disponibilidad previa del jugador y la regla de prórroga de cada contrato.
 
 Prueba de vista previa completada el 21 de noviembre a las 8:34 p. m. de Puerto Rico. Se validó el historial de 334 de 842 lados de props. Antes de activar lecturas periódicas en producción, revisar el límite de lectura y los 140 lados con discrepancias de original o identidad. Siguen pendientes los historiales incompletos, la disponibilidad de los jugadores y la regla regional de prórroga.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.

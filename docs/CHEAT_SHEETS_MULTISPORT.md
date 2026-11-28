@@ -1,5 +1,7 @@
 # Componentes reutilizables de Cheat Sheets
 
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
+
 ## Transición NBA → NHL · planificación del 25 de noviembre
 
 Acta de producción NBA #410 fusionada. Primer tick natural verificado; seguimiento activo de la primera captura elegible y liquidación real. NHL en auditoría de sólo lectura. [Inventario, fronteras con investigación y condiciones de inicio](NHL_CHEAT_SHEETS_ROADMAP.md).
@@ -54,3 +56,8 @@ NBA es el único consumidor implementado. El punto de extensión es la presentac
 5. Comparar las frecuencias, el orden y los IDs de contrato antes y después. Verificar teclado, foco visible, apertura/cierre en móvil y escritorio y estado sin evidencia.
 
 El próximo deporte se decide después de la aceptación de NBA. Las diferencias de períodos, estadísticas, posiciones y reglas de liquidación se resuelven en cada dominio. La UI compartida carece de tablas, credenciales y dependencias de proveedores.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.

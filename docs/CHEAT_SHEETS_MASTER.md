@@ -1,4 +1,6 @@
 # NBA Cheat Sheets en Pick Analyzer
+
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
 
 Cada rango muestra una lista a la vez. Proyecciones e hitos comparten la tarjeta detallada, las barras L5/L10 y el análisis del rival. Para hitos, la igualdad alcanza el umbral y la cuota corresponde al hito archivado.
@@ -87,3 +89,8 @@ La versión 13 del Site corresponde a `9835e3ab79ec423cab1333198e10f7565e845eb0`
 ## Versiones y evidencias
 
 La rama incorporó Top 10 y captura el 24-nov, consolidó las bandas de cuotas en `7a3ff822` e incorporó rival y metodología en `2bd1709e`. El commit V13 del Site identifica la fuente recuperada y es independiente de la numeración de Pick. Los documentos distinguen entrega en la rama, capacidad en producción, referencia recuperada y trabajo futuro.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.

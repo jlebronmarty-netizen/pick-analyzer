@@ -1,0 +1,32 @@
+.surface {
+  min-height: 100vh;
+  background: #020617;
+}
+.surface main > form,
+.surface main > label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 1rem 0;
+}
+.surface main > form button,
+.surface main > form input,
+.surface main > label select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: .4rem .7rem;
+  border: 1px solid #55746a;
+  border-radius: 9px;
+  color: #e5efeb;
+  color-scheme: dark;
+  background: #102720;
+}
+.surface article select {
+  max-width: 100%;
+  color: #142921;
+  background: #fbf9ed;
+}
+.surface article th small {
+  display: block;
+}

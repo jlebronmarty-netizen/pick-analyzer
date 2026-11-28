@@ -1,0 +1,130 @@
+{
+  "CAR": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "MIN": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "EDM": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "OTT": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "VGK": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "TBL": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "DAL": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "MTL": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "BOS": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "NJD": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "COL": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "NSH": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "FLA": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "STL": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "NYI": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "NYR": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "UTA": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "WPG": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "BUF": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "SJS": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "PHI": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "ANA": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "CGY": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "SEA": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "WSH": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "DET": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "TOR": {
+    "division": "Atlantic",
+    "conference": "Eastern"
+  },
+  "CBJ": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "CHI": {
+    "division": "Central",
+    "conference": "Western"
+  },
+  "LAK": {
+    "division": "Pacific",
+    "conference": "Western"
+  },
+  "PIT": {
+    "division": "Metropolitan",
+    "conference": "Eastern"
+  },
+  "VAN": {
+    "division": "Pacific",
+    "conference": "Western"
+  }
+}

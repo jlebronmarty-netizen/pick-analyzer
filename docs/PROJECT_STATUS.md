@@ -4,6 +4,8 @@
 
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
 
+**27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
+
 La portada permite comparar ambos rangos o elegir uno. Cada clasificación conserva hasta diez jugadores por mercado, rango y ventana. Los menús prepartido conciliados aportan los conteos de líneas Over/Under y de hitos con reglas pendientes.
 
 Detalles en [la guía maestra](CHEAT_SHEETS_MASTER.md).
@@ -3777,3 +3779,8 @@ NHL V6 now reads finals by the event IDs of its latest 250 freezes in batches of
 El lector de box scores acepta las listas que guarda el archivo estacional y el formato anterior con el campo `data`. Se reprodujeron los juegos 21718144, 21718145 y 21718146 con 104 filas en total. En cada caso coincidieron el tamaño original, el tamaño comprimido y el SHA-256 del manifiesto.
 
 El 21 de noviembre a las 8:34 p. m. de Puerto Rico se compararon dos vistas previas del mismo commit con 842 lados de props. Coincidieron los identificadores de cuota, los precios, las líneas, las capturas y las claves de historial. Con un límite de 256 KiB por lectura, 334 lados correspondientes a 24 jugadores pasaron de historial parcial a validado y 140 mostraron discrepancias con el original o su identidad. Otros 360 siguieron con historial incompleto y ocho conservaron diferencias estadísticas. De los 334 con historial validado, 188 seguían antes del inicio y requerían verificar tanto la disponibilidad como la prórroga. El tablero devolvió cero props preferidas, cero llamadas al proveedor y cero escrituras en ambas lecturas. El límite de la rama de prueba volvió a cero después de la comparación.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.

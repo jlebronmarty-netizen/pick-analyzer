@@ -67,3 +67,8 @@ Revisión documental 1, 25-nov-2026. La ruta de página es `/nba-cheat-sheets`. 
 - FanDuel PR, reglamento archivado con vigencia 30-jul-2026: FT generalmente incluye OT; 1H y cuartos excluyen OT; 2H incluye OT; puntos Q1 requieren participación en Q1. Primer anotador, hitos y SGP pueden tener reglas específicas. Conservar la etiqueta de OT pendiente y distinguir un cálculo descriptivo condicional de un contrato apto para liquidación. Ver versión, excepciones y enlace oficial en maintenance/NBA.md del Site V13. Revalidar el texto aplicable antes de habilitar nuevos mercados.
 - Parciales individuales: orden de eventos único, cierre y acumulados por período conciliados contra box final, incluidos OT. Verificar cada métrica del jugador contra su total del juego y exigir evidencia de participación en el segmento. 2H suma Q3, Q4 y OT. Una métrica en conflicto queda ausente. No sustituir eventos pendientes por ceros ni rellenar un segmento con FT.
 - Para un par prospectivo exigir mismo partido, mercado, jugador, estadística, línea equivalente, período y contrato temporal prepartido. Cada lado se liquida por su propia selección; ambos porcentajes usan exclusivamente pares decididos. No reconstruir un registro manual pasado desde una selección que el usuario pudo haber visto.
+
+
+**NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
+
+**NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
