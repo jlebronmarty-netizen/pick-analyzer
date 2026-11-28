@@ -270,7 +270,7 @@ function Game({ f, window, period, base, cache }) {
     <section>
       <SheetCard>
         <header>
-          {clock(f.scheduledAt)} PR · {divisions[f.division]} ·{" "}
+          {clock(f.scheduledAt)} PR · {f.phaseLabel} · {divisions[f.division]} ·{" "}
           {f.neutralSite === true
             ? "Sede neutral"
             : f.neutralSite === false
@@ -301,17 +301,23 @@ function Game({ f, window, period, base, cache }) {
     </section>
   );
 }
+import {useJornada,JornadaControls,useSheetFilter} from "@/components/cheat-sheets/jornada";
+import {eligible,labels,phase} from "@/lib/cheat-sheets/jornada.mjs";
+
 export default function Board({ report, initial }) {
-  const [window, setWindow] = useState("L5"),
+  const [window, setWindow] = useSheetFilter("ncaab","window","L5"),
     [market, setMarket] = useState("ALL"),
     [period, setPeriod] = useState("FT"),
-    [band, setBand] = useState("both"),
+    [band, setBand] = useSheetFilter("ncaab","band","both"),
     [game, setGame] = useState(""),
     [conference, setConference] = useState("");
   const [sort, setSort] = useState("frequency");
   const [limit, setLimit] = useState(8);
   const [team, setTeam] = useState(""),
     [division, setDivision] = useState("");
+  const deadlines=[...report.fixtures.map(g=>g.scheduledAt),...(report.expiries??[])].map(v=>Date.parse(v));
+  const state=useJornada(report.date,report.readAt,deadlines);
+  const boundary=deadlines.reduce((latest,t)=>t<=state.now && t>Date.parse(report.readAt)?Math.max(latest,t):latest,0);
   const cache = useRef(new Map());
   const base =
     "/ncaab-cheat-sheets/data?" +
@@ -325,10 +331,10 @@ export default function Board({ report, initial }) {
       window,
       conference,
       game,
-      market, sort,
+      market, sort, boundary:String(boundary),
       period,
     });
-  const isInitial =
+  const isInitial = !boundary &&
     !team &&
     !division &&
     !conference &&
@@ -360,7 +366,7 @@ export default function Board({ report, initial }) {
       : null;
   const teams = new Map(report.teams.map((t) => [t.id, t]));
   const fixtures = report.fixtures.filter(
-    (f) =>
+    (f) => state.visible(f) &&
       (!team || [f.awayId, f.homeId].includes(team)) &&
       (!division || f.division === division) &&
       (!game || game === f.eventId) &&
@@ -382,6 +388,7 @@ export default function Board({ report, initial }) {
             PR
           </p>
         </header>
+        <JornadaControls state={state} games={report.fixtures}/>
         <form method="get">
           <label>
             Jornada{" "}
@@ -501,7 +508,7 @@ export default function Board({ report, initial }) {
                 )}
               </p>
             );
-          const rank = rankings[b];
+          const rank = rankings[b].filter(r=>state.visible(r.f) && eligible(r.f,state.now) && [r.f.markets?.expiresAt,r.q.expiresAt,r.side.expiresAt].every(v=>v==null || Date.parse(v)>state.now));
           return (
             <section key={b}>
               <h2 className={s.heading}>
@@ -580,8 +587,8 @@ export default function Board({ report, initial }) {
         <div className={s.grid}>
           {fixtures.slice(0, limit).map((f) => (
             <Game
-              key={f.eventId}
-              f={f}
+              key={base+f.eventId}
+              f={{...f,phaseLabel:labels[phase(f,state.now)]}}
               window={window}
               period={period}
               base={base}

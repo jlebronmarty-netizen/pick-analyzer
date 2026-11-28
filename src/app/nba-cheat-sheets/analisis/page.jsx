@@ -1,3 +1,4 @@
+import {edition} from "@/lib/cheat-sheets/jornada.mjs";
 import {headers} from 'next/headers';
 import {notFound} from 'next/navigation';
 import Link from 'next/link';
@@ -9,9 +10,9 @@ export const maxDuration=120;
 export default async function Page({searchParams}){
  const h=await headers(),host=h.get('host');
  if(nbaManualAccess(new Request('https://'+host+'/nba-cheat-sheets/analisis',{headers:h})))notFound();
- const query=await searchParams;
+ const query=await searchParams,day=edition(query.date,Date.now(),query.snapshot);if(!day)notFound();
  try{
-  const board=await readNbaDecisionBoard({forDisplay:true,withSheetLab:true});
-  return <Lab data={board.lab} initialGame={String(query.game??'')} initialPlayer={String(query.player??'')}/>;
+  const board=await readNbaDecisionBoard({now:new Date(day.cutoff),forDisplay:true,withSheetLab:true});
+  return <Lab fixtures={board.displayFixtures} data={board.lab} initialGame={String(query.game??'')} initialPlayer={String(query.player??'')}/>;
  }catch{return <main><Link href="/nba-cheat-sheets">← Cheat Sheets</Link><p>No se pudo leer la evidencia archivada de esta jornada.</p></main>;}
 }

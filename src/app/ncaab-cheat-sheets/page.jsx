@@ -1,3 +1,4 @@
+import {edition} from "@/lib/cheat-sheets/jornada.mjs";
 import { unstable_cache } from "next/cache";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -23,7 +24,7 @@ async function buildBoard(date, cut) {
         awayId,
         homeName,
         awayName,
-        neutralSite,
+        state, neutralSite,
         scheduledAt,
       }) => ({
         eventId,
@@ -31,7 +32,7 @@ async function buildBoard(date, cut) {
         awayId,
         homeName,
         awayName,
-        neutralSite,
+        state, neutralSite,
         scheduledAt,
         division: data.divisions.get(eventId),
       }),
@@ -61,11 +62,11 @@ async function buildBoard(date, cut) {
           coverage: report.coverage,
           source: report.source,
           warnings: report.warnings,
-          fixtures,
+          fixtures, expiries:report.fixtures.flatMap(f=>[f.markets?.expiresAt,...(f.markets?.quotes??[]).flatMap(q=>[q.expiresAt,q.first?.expiresAt,q.second?.expiresAt])]).filter(Boolean),
           teams,
          l10Audit:counts, causes, divisionEvidence:Object.fromEntries(data.divisionEvidenceCounts) }, initial, profile };
 }
-const cachedBoard = unstable_cache(buildBoard, ["ncaab-sheet-compact-v3"], {revalidate:180});
+const cachedBoard = unstable_cache(buildBoard, ["ncaab-sheet-compact-v4"], {revalidate:180});
 
 export default async function Page({ searchParams }) {
   const start=performance.now();
@@ -82,11 +83,11 @@ export default async function Page({ searchParams }) {
   }
   if (date > today) notFound();
   const now = new Date(Math.floor(Date.now() / 180000) * 180000).toISOString();
-  const archivedCut = date + "T17:00:00.000Z";
-  const cut = requested && archivedCut < now ? archivedCut : now;
+  const archivedCut = edition(date,Date.now(),(await searchParams).snapshot).cutoff;
+  const cut = date < today ? archivedCut : new Date(Math.max(Date.parse(date+"T04:00:00Z"), Date.parse(now))).toISOString();
   try {
     const {report,initial,profile} = await cachedBoard(date, cut);
-    return <div data-ncaab-timing={JSON.stringify({...profile, accessMs})}><Board key={cut} report={report} initial={initial}/></div>;
+    return <div data-ncaab-timing={JSON.stringify({...profile, accessMs})}><Board key={date} report={report} initial={initial}/></div>;
   } catch {
     return (
       <main>

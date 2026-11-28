@@ -16,10 +16,11 @@ export async function GET(req) {
   } catch {
     return new Response(null, { status: 400 });
   }
-  const fixed = p.cut === p.date + "T17:00:00.000Z";
+  const historical=p.date<ncaabManualDate(new Date(now).toISOString());
+  const fixed = historical && (p.cut === p.date + "T17:00:00.000Z" || ms===Date.parse(p.date+"T04:00:00Z")+86400000-1);
   if (
     !Number.isFinite(ms) ||
-    ms > now ||
+    ms > now || (historical && !fixed) ||
     ncaabManualDate(p.cut) !== p.date ||
     (!fixed && (ms % 180000 !== 0 || now - ms > 3600000))
   )
@@ -38,7 +39,7 @@ export async function GET(req) {
       : Object.fromEntries(
           ["standard", "heavy"].map((band) => [
             band,
-            ranking(data, { ...p, band }),
+            ranking(data, { ...p, band, activeAt:fixed?ms:now }),
           ]),
         );
     return Response.json(body, {

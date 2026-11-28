@@ -1,7 +1,7 @@
 import "server-only";
 import v13 from "./v13-20261123.json";
 import alignment from "./alignment-2026.json";
-import { nativeFixtures } from "./native";
+import { nativeFixtures,calendarDay } from "./native";
 import { normalizeNhlResearchContexts } from "@/lib/nhl-research-features.mjs";
 import { nhlGoalieAsOfSide } from "@/lib/nhl-goalie-prior-form-asof-v7.mjs";
 import { supabaseAdmin as db } from "@/lib/supabase-admin";
@@ -36,13 +36,14 @@ async function rows(query) {
   return output;
 }
 
-export async function readSheet(date) {
+export async function readSheet(date,cutoff=new Date().toISOString()) {
   const { from, to } = nhlManualFeatureDayBounds(date);
-  const cutoff = new Date().toISOString();
+
   const end = new Date(
     Math.min(Date.parse(to), Date.parse(cutoff)),
   ).toISOString();
-  const [manual, ml, runs] = await Promise.all([
+  const [calendars,manual, ml, runs] = await Promise.all([
+    Promise.all([date,new Date(Date.parse(date+"T12:00Z")-86400000).toISOString().slice(0,10)].map(d=>calendarDay(db,d,cutoff))),
     readNhlManualFeaturePages(db, {
       date,
       cutoff,
@@ -98,6 +99,7 @@ export async function readSheet(date) {
     homeId,
     market,
     legs,
+    expiresAt,
   ) {
     const start = Date.parse(time),
       captured = Date.parse(stamp),
@@ -149,11 +151,11 @@ export async function readSheet(date) {
           side,
           line: leg.line,
           price: leg.price,
-          captured,
+          captured, expiresAt:leg.expiresAt??expiresAt??null,
         });
       else if (
         old.captured === captured &&
-        (old.line !== leg.line || old.price !== leg.price)
+        (old.line !== leg.line || old.price !== leg.price || old.expiresAt!==(leg.expiresAt??expiresAt??null))
       )
         old.conflict = true;
     }
@@ -175,7 +177,7 @@ export async function readSheet(date) {
         b.awayId,
         b.homeId,
         "ml",
-        { away: { price: b.awayOdds }, home: { price: b.homeOdds } },
+        { away: { price: b.awayOdds }, home: { price: b.homeOdds } }, b.expiresAt,
       );
   }
   for (const run of runs)
@@ -199,7 +201,7 @@ export async function readSheet(date) {
           r.market,
           r.market === "spread"
             ? { away: q.away, home: q.home }
-            : { over: q.over, under: q.under },
+            : { over: q.over, under: q.under }, q.expiresAt??r.expiresAt,
         );
     }
   const native = await nativeFixtures(
@@ -517,6 +519,14 @@ export async function readSheet(date) {
         g.fixture.teams.away.teamId !== g.quoteIds.awayId)
     )
       prices.delete(key);
+  }
+  for(const row of calendars.filter(Boolean).sort((a,b)=>a.capturedAt.localeCompare(b.capturedAt)).flatMap(c=>c.games)){
+    if(row.scheduledAt<from || row.scheduledAt>=to)continue;
+    const g=games.get(row.eventId)??{id:row.eventId,time:row.scheduledAt,home:row.home,away:row.away};
+    const conflict=Date.parse(g.time)!==Date.parse(row.scheduledAt) || g.home!==row.home || g.away!==row.away;
+    g.state=conflict?'UNKNOWN':row.status;
+    g.scheduleState=row.scheduleState;
+    games.set(row.eventId,g);
   }
   return {
     games: [...games.values()].sort(

@@ -71,7 +71,7 @@ export const sorts = { frequency: "Frecuencia histórica", conditions: "Condicio
 export function candidates(
   report,
   pairs,
-  { window, market, band, period, game, conference, sort = "frequency" },
+  { window, market, band, period, game, conference, sort = "frequency", activeAt = Date.parse(report.readAt) },
   possessions = {},
 ) {
   if (period !== "FT" || market === "TEAM" || !report.coverage.readComplete)
@@ -91,7 +91,7 @@ export function candidates(
       continue;
     if (
       f.state !== "PREGAME" ||
-      Date.parse(f.scheduledAt) <= Date.parse(report.readAt) ||
+      !(Date.parse(f.scheduledAt) > activeAt) ||
       f.markets.status !== "REFERENCE_ONLY" ||
       !(Date.parse(f.markets.capturedAt) <= Date.parse(report.readAt))
     )
@@ -101,6 +101,7 @@ export function candidates(
         continue;
       for (const side of [q.first, q.second]) {
         if (
+          ([f.markets.expiresAt,q.expiresAt,side.expiresAt].some(v=>v!=null && !(Date.parse(v)>activeAt))) ||
           side.americanOdds < -650 ||
           (band === "heavy" && side.americanOdds >= -250) ||
           (band === "standard" && side.americanOdds < -250)

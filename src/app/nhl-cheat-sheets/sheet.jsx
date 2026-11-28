@@ -1,4 +1,6 @@
 "use client";
+import {useJornada,JornadaControls,useSheetFilter} from "@/components/cheat-sheets/jornada";
+import {eligible,labels,phase} from "@/lib/cheat-sheets/jornada.mjs";
 import { teamWindow, inBand, rankThresholds } from "./windows.mjs";
 import { GoalieComparison, PlayerCard } from "./players";
 import { useState } from "react";
@@ -258,19 +260,20 @@ function Team({ team: t, window, opponent, opponentGoalie }) {
     </section>
   );
 }
-export default function Sheet({ date, data }) {
+export default function Sheet({ date, cutoff, data }) {
   const [market, M] = useState("ml"),
-    [band, B] = useState("all"),
-    [window, W] = useState("10"),
+    [band, B] = useSheetFilter("nhl","band","all"),
+    [window, W] = useSheetFilter("nhl","window","10"),
     [game, G] = useState("all"),
     [order, O] = useState("frequency");
+  const state=useJornada(date,cutoff,[...(data?.games??[]).map(g=>g.time),...(data?.prices??[]).map(p=>p.expiresAt)]);
   const visible =
-    data?.games.filter((g) => game === "all" || game === g.id) ?? [];
+    data?.games.filter((g) => state.visible(g) && (game === "all" || game === g.id)) ?? [];
   const ranks = (band === "all" ? ["standard", "heavy"] : [band]).map((b) => ({
     band: b,
     entries: rankThresholds(
-      visible,
-      data?.prices ?? [],
+      visible.filter(g=>eligible(g,state.now)),
+      (data?.prices??[]).filter(p=>p.expiresAt==null || Date.parse(p.expiresAt)>state.now),
       market,
       b,
       window,
@@ -280,6 +283,7 @@ export default function Sheet({ date, data }) {
   return (
     <main className={s.sheet}>
       <a href="/nhl">← Panel NHL</a>
+      <JornadaControls state={state} games={data?.games??[]}/>
       <header className={s.hero}>
         <b>NHL · {date}</b>
         <h1>Cheat Sheets</h1>
@@ -445,8 +449,7 @@ export default function Sheet({ date, data }) {
         <p>Sin partidos archivados para esta jornada.</p>
       ) : (
         <div className={s.grid}>
-          {data.games
-            .filter((g) => game === "all" || game === g.id)
+          {visible
             .map((g) => {
               const prices = data.prices.filter(
                 (p) =>
@@ -455,7 +458,7 @@ export default function Sheet({ date, data }) {
               return (
                 <SheetCard key={g.id}>
                   <header>
-                    <small>{prTime(g.time)} PR</small>
+                    <small>{prTime(g.time)} PR · {labels[phase(g,state.now)]} · Cuotas prepartido archivadas</small>
                     <h2>
                       {g.away} @ {g.home}
                     </h2>

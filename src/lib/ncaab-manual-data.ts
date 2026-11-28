@@ -260,7 +260,7 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
   const events:Observation[]=[];
   for(const versions of grouped.values()) {
     if(new Set(versions.map(identity)).size!==1){excludedEvents++;for(const e of versions){blockedTeams.add(e.home.id);blockedTeams.add(e.away.id);mark(e.home.id,"identity_conflict");mark(e.away.id,"identity_conflict");}continue;}
-    const primary=versions.filter(e=>!e.context),candidates=primary.length?primary:versions;
+    const primary=versions.filter(e=>!e.context),candidates=sheet?versions.slice():primary.length?primary:versions;
     candidates.sort((a,b)=>b.capturedAt.localeCompare(a.capturedAt)||a.sourceId.localeCompare(b.sourceId));
     const latest=candidates[0],tied=candidates.filter(e=>e.capturedAt===latest.capturedAt);
     const finals=versions.filter(e=>e.state==='FINAL');

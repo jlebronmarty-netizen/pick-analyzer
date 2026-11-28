@@ -1,13 +1,10 @@
 import "server-only";
 import {priorSeasons} from "../../../research/ncaab-sheet-history/read.mjs";
-import { nbaManualAccess } from "@/lib/nba/manual-access.mjs";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { loadNcaabManualData } from "@/services/ncaab-manual-data.service";
 import { candidates } from "./evidence.mjs";
 
-export const allowed = (headers) =>
-  process.env.VERCEL_ENV === "preview" &&
-  !nbaManualAccess(new Request("https://preview.vercel.app", { headers }));
+export {allowed} from "./access.mjs";
 const cache = new Map();
 async function read(date, cut) {
   const extra = {

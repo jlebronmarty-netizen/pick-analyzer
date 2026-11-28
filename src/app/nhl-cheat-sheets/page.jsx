@@ -1,3 +1,4 @@
+import {edition} from "@/lib/cheat-sheets/jornada.mjs";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import {nhlSheetAccess} from "./access.mjs";
@@ -9,10 +10,11 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 export default async function Page({ searchParams }) {
   if (!nhlSheetAccess(await headers())) notFound();
-  const date = (await searchParams).date ?? nhlManualFeatureDate();
+  const day=edition((await searchParams).date,Date.now(),(await searchParams).snapshot);if(!day)notFound();
+  const {date,cutoff}=day;
   let data;
   try {
-    data = await readSheet(date);
+    data = await readSheet(date,cutoff);
   } catch {}
-  return <div className={layout.surface}><Sheet date={typeof date === "string" ? date : ""} data={data} /></div>;
+  return <div className={layout.surface}><Sheet cutoff={cutoff} date={typeof date === "string" ? date : ""} data={data} /></div>;
 }
