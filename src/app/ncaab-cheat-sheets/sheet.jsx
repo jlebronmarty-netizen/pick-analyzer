@@ -21,12 +21,13 @@ const bands = {
   heavy: "−251 a −650",
 };
 const fmt = (v) => (Number.isFinite(v) ? Number(v.toFixed(1)) : "—");
-const clock = (v) =>
-  new Date(v).toLocaleTimeString("es-PR", {
-    timeZone: "America/Puerto_Rico",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+// Puerto Rico observes UTC−4 throughout the season. Keep SSR and browsers identical.
+function clock(value) {
+  const time = new Date(Date.parse(value) - 4 * 60 * 60 * 1000);
+  const hour = time.getUTCHours();
+  const minute = String(time.getUTCMinutes()).padStart(2, "0");
+  return (hour % 12 || 12) + ":" + minute + (hour < 12 ? " a. m." : " p. m.");
+}
 const record = (a) =>
   a.games ? a.wins + "–" + a.losses + " (" + a.games + ")" : "Sin muestra";
 function Comparison({
