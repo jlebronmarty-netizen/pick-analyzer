@@ -199,7 +199,7 @@ export async function readNbaDecisionBoard({now=new Date(),db=supabaseAdmin,forD
  if(Object.keys(result.summary.qualityCounts).some(k=>k!=='VALIDATED'))
    console.info('NBA_DECISION_DATA_QUALITY',{day,counts:result.summary.qualityCounts,calendarIssues:calendar.issues});
  const lab=withSheetLab?await (await import('@/lib/nba/sheet-lab/build.mjs')).buildSheetLab(inputs,db):null;
- return {...result,...(withSheetLab?{lab}:{}),...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs),sheetMilestones:pregameMenus.flatMap(c=>'milestones' in c ? c.milestones??[] : []),menuCoverage:{menus:reviewedMenus,expected:pregameMenus.length}} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
+ return {...result,...(forDisplay && (withSheetLab || withCheatSheets) ? {displayFixtures:games.map((g:any)=>({id:String(g.id), start:g.datetime,state:g.postponed?'POSTPONED':g.status_state,name:[g.visitor_team?.abbreviation,g.home_team?.abbreviation].join(' @ ')}))}:{}),...(withSheetLab?{lab}:{}),...(withCheatSheets && forDisplay ? {projectionHistories:projectionHistories(result,inputs),sheetMilestones:pregameMenus.flatMap(c=>'milestones' in c ? c.milestones??[] : []),menuCoverage:{menus:reviewedMenus,expected:pregameMenus.length}} : {}),...(withCheatSheets ? {cheatSheets:buildCheatCandidates(inputs)} : {}),accuracy:accuracy(settled,asOf),evidence:{
    scheduleCapturedAt:schedule?.source_received_at??null,
    historyCaptureAt:archive?.started_at??null,
    historyRunId:archive?.run_id??null,

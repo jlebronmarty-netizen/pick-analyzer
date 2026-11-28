@@ -10,7 +10,10 @@ import type {NcaabManualAggregate, NcaabManualDataReport, NcaabManualFixture,
 type Obj = Record<string, unknown>;
 type Stats = NcaabManualRecentGame['stats'];
 type Side = {id:string;name:string;abbreviation:string|null;conference:string|null;raw:Obj};
+type PossessionSample = {possessions:number;minutes:number;pointsFor:number;pointsAgainst:number};
+export type SheetArchive = { timings?:Record<string,number>; audit?:Map<string,string[]>; divisionEvidenceCounts?:Map<string,number>; divisions:Map<string,string>; ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
 type Observation = {
+  offensiveBoards?:[number|null,number|null];
   eventId:string;scheduledAt:string;date:string;season:number;state:NcaabManualFixture['state'];
   home:Side;away:Side;neutralSite:boolean|null;homeScore:number|null;awayScore:number|null;
   capturedAt:string;sourceId:string;sourceDate:string|null;context:boolean;
@@ -33,7 +36,8 @@ const instant = (v:unknown):string|null => {
   if(typeof v!=='string'||!/(?:Z|[+-]\d{2}(?::?\d{2})?)$/i.test(v)||!Number.isFinite(Date.parse(v)))return null;
   return new Date(v).toISOString();
 };
-const day = (v:string):string => new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(v));
+const dayFormat = new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'});
+const day = (v:string):string => dayFormat.format(new Date(v));
 const addDay = (v:string,n:number):string => new Date(Date.parse(v+'T12:00:00Z')+n*86400000).toISOString().slice(0,10);
 const validDate = (v:string):boolean => /^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
 const round = (v:number):number => Math.round(v*1e6)/1e6;
@@ -59,7 +63,7 @@ function selectedReceipts(input:NcaabManualDataInput,readAt:string,rejectedDates
   for(const rows of groups.values()) {
     rows.sort((a,b)=>b.captured_at.localeCompare(a.captured_at)||a.id.localeCompare(b.id));
     const tied=rows.filter(r=>r.captured_at===rows[0].captured_at);
-    if(new Set(tied.map(r=>r.id)).size!==1||new Set(tied.map(r=>canonical(r.body))).size!==1)throw Error('NCAAB_MANUAL_CONFLICTING_RECEIPTS');
+    if(tied.length>1 && (new Set(tied.map(r=>r.id)).size!==1||new Set(tied.map(r=>canonical(r.body))).size!==1))throw Error('NCAAB_MANUAL_CONFLICTING_RECEIPTS');
     if(!Array.isArray(object(rows[0].body).events)||array(object(rows[0].body).events).length>NCAAB_ARCHIVE_MAX_EVENTS) {
       const date=sourceDate(rows[0].source_url)!;
       // Historical seed/reconciliation bodies are not raw daily scoreboards.
@@ -70,6 +74,22 @@ function selectedReceipts(input:NcaabManualDataInput,readAt:string,rejectedDates
     result.push(rows[0]);
   }
   return result.sort((a,b)=>a.source_url.localeCompare(b.source_url));
+}
+function offensiveBoards(values:unknown) {
+  const found=array(values).map(object).filter(r=>r.name==='offensiveRebounds');
+  return found.length===1?integer(found[0].displayValue??found[0].value):null;
+}
+function possessionSample(event:Observation,home:boolean):PossessionSample|null {
+  if(!event.periods.length||!event.offensiveBoards)return null;
+  const counts=[event.homeStats,event.awayStats].map((s,i)=>{
+    const orb=event.offensiveBoards![i];
+    if(orb===null||s.fieldGoalsAttempted===null||s.freeThrowsAttempted===null||s.turnovers===null||
+       (s.rebounds!==null&&orb>s.rebounds))return null;
+    return s.fieldGoalsAttempted-orb+s.turnovers+0.475*s.freeThrowsAttempted;
+  });
+  if(counts[0]===null||counts[1]===null||counts[0]<=0||counts[1]<=0)return null;
+  return {possessions:(counts[0]+counts[1])/2,minutes:40+5*(event.periods.length-2),
+    pointsFor:(home?event.homeScore:event.awayScore)!,pointsAgainst:(home?event.awayScore:event.homeScore)!};
 }
 function stats(values:unknown):Stats {
   const result=emptyStats(),map=new Map<string,unknown>();
@@ -148,6 +168,13 @@ function mergeStats(primary:Stats,supplement:Stats,issues:string[]):Stats {
     if(output[m]===null||output[a]===null||output[m]!>output[a]!){output[m]=null;output[a]=null;}
   return output;
 }
+function divisionEvidence(side:Side):string[] {
+  const team=object(side.raw.team),group=object(team.groups);
+  const labels=[object(team.division).name,team.division,object(group.parent).name,group.isConference===false?group.name:null];
+  return labels.flatMap(label=>typeof label!=='string'?[]:
+    /^(?:NCAA )?Division (?:I|1)$/i.test(label)?['DI']:
+    /^(?:NCAA )?Division (?:II|III|2|3)$/i.test(label)?['OTHER']:[]);
+}
 function recent(event:Observation,teamId:string):NcaabManualRecentGame {
   const home=event.home.id===teamId,opponent=home?event.away:event.home,pf=home?event.homeScore!:event.awayScore!,pa=home?event.awayScore!:event.homeScore!;
   return{eventId:event.eventId,scheduledAt:event.scheduledAt,date:event.date,opponentId:opponent.id,opponentName:opponent.name,
@@ -195,19 +222,24 @@ function savedForecast(rows:Obj[],event:Observation,readAt:string):{forecast:Nca
     archive:{event_id:event.eventId,scheduled_at:event.scheduledAt,created_at:created,home_id:event.home.id,away_id:event.away.id,state:'FORECAST',review_required:false}};
 }
 
-export function buildNcaabManualDataReport(input:NcaabManualDataInput):NcaabManualDataReport {
+export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:SheetArchive):NcaabManualDataReport {
   const readAt=instant(input.readAt);
   if(!readAt||!validDate(input.date))throw Error('NCAAB_MANUAL_INVALID_DATE');
   if(input.readComplete!==true)throw Error('NCAAB_MANUAL_INCOMPLETE_SCAN');
   const year=Number(input.date.slice(0,4)),season=Number(input.date.slice(5,7))>=7?year+1:year;
   const rejectedDates=new Set<string>(),receipts=selectedReceipts(input,readAt,rejectedDates),sourceDates=receipts.map(r=>sourceDate(r.source_url)!).sort(),warnings=new Set<string>();
   const observations:Observation[]=[],blockedTeams=new Set<string>(),unverifiedDates=new Set<string>();let excludedEvents=0;
+  const reasons = new Map<string, Set<string>>();
+  function mark(teamId:string, reason:string) {
+    const labels = reasons.get(teamId) ?? new Set<string>();
+    labels.add(reason); reasons.set(teamId,labels);
+  }
   for(const receipt of receipts)for(const raw of array(object(receipt.body).events)) {
     const e=observation(raw,{sourceId:receipt.id,capturedAt:receipt.captured_at,sourceDate:sourceDate(receipt.source_url),context:false},season);
     if(!e){
       excludedEvents++;unverifiedDates.add(sourceDate(receipt.source_url)!);
       for(const c of array(object(raw).competitions))for(const s of array(object(c).competitors)) {
-        for(const candidate of [object(s).id,nested(s,'team','id')]){const teamId=id(candidate);if(teamId)blockedTeams.add(teamId);}
+        for(const candidate of [object(s).id,nested(s,'team','id')]){const teamId=id(candidate);if(teamId){blockedTeams.add(teamId);mark(teamId,integer(nested(raw,"season","year"))!==season?"season_or_unknown":"invalid_observation");}}
       }
       continue;
     }observations.push(e);
@@ -220,24 +252,32 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput):NcaabManu
     if(!e||e.state!=='FINAL'){excludedEvents++;continue;}
     const hs=detailStats(raw,e,'home'),as=detailStats(raw,e,'away');
     if(!hs||!as){excludedEvents++;continue;}
+    e.offensiveBoards=[e.home,e.away].map(side=>offensiveBoards(array(raw.teams).map(object).find(t=>nested(t,'team','id')===side.id)?.statistics)) as [number|null,number|null];
     e.homeStats=hs;e.awayStats=as;e.detailCapturedAt=at;observations.push(e);
   }
   const grouped=new Map<string,Observation[]>();
   for(const e of observations)grouped.set(e.eventId,[...(grouped.get(e.eventId)??[]),e]);
   const events:Observation[]=[];
   for(const versions of grouped.values()) {
-    if(new Set(versions.map(identity)).size!==1){excludedEvents++;for(const e of versions){blockedTeams.add(e.home.id);blockedTeams.add(e.away.id);}continue;}
-    const primary=versions.filter(e=>!e.context),candidates=primary.length?primary:versions;
+    if(new Set(versions.map(identity)).size!==1){excludedEvents++;for(const e of versions){blockedTeams.add(e.home.id);blockedTeams.add(e.away.id);mark(e.home.id,"identity_conflict");mark(e.away.id,"identity_conflict");}continue;}
+    const primary=versions.filter(e=>!e.context),candidates=sheet && versions[0].date===input.date?versions.slice():primary.length?primary:versions;
     candidates.sort((a,b)=>b.capturedAt.localeCompare(a.capturedAt)||a.sourceId.localeCompare(b.sourceId));
     const latest=candidates[0],tied=candidates.filter(e=>e.capturedAt===latest.capturedAt);
     const finals=versions.filter(e=>e.state==='FINAL');
     if(new Set(tied.map(eventSignature)).size!==1||new Set(finals.map(e=>[e.homeScore,e.awayScore].join(':'))).size>1) {
-      excludedEvents++;blockedTeams.add(latest.home.id);blockedTeams.add(latest.away.id);continue;
+      excludedEvents++;blockedTeams.add(latest.home.id);blockedTeams.add(latest.away.id);for(const id of [latest.home.id,latest.away.id])mark(id,"result_or_version_conflict");continue;
     }
+    latest.offensiveBoards??=[offensiveBoards(latest.home.raw.statistics),offensiveBoards(latest.away.raw.statistics)];
     const details=versions.filter(e=>e.context&&e.scheduledAt===latest.scheduledAt&&e.homeScore===latest.homeScore&&e.awayScore===latest.awayScore)
       .sort((a,b)=>b.capturedAt.localeCompare(a.capturedAt));
     if(!latest.context&&latest.state==='FINAL'&&details[0]) {
-      const detail=details[0];latest.homeStats=mergeStats(latest.homeStats,detail.homeStats,latest.warnings);latest.awayStats=mergeStats(latest.awayStats,detail.awayStats,latest.warnings);
+      const detail=details[0];
+      latest.offensiveBoards=latest.offensiveBoards.map((primary,i)=>{
+        const supplement=detail.offensiveBoards?.[i]??null;
+        if(primary!==null&&supplement!==null&&primary!==supplement){if(sheet)latest.warnings.push('Rebotes ofensivos discrepantes.');return null;}
+        return primary??supplement;
+      }) as [number|null,number|null];
+      latest.homeStats=mergeStats(latest.homeStats,detail.homeStats,latest.warnings);latest.awayStats=mergeStats(latest.awayStats,detail.awayStats,latest.warnings);
       if(!latest.periods.length)latest.periods=detail.periods;
       else if(detail.periods.length&&canonical(latest.periods)!==canonical(detail.periods)){latest.periods=[];latest.warnings.push('Mitades discrepantes entre capturas.');}
       latest.detailCapturedAt=detail.capturedAt;
@@ -248,6 +288,35 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput):NcaabManu
   const finals=events.filter(e=>e.state==='FINAL'&&e.date<input.date),today=events.filter(e=>e.date===input.date);
   const earliest=[...sourceDates.filter(d=>d<=input.date),...rejectedDates,...finals.map(e=>e.date)].sort()[0]??null,missingDates:string[]=[];
   if(earliest)for(let d=earliest;d<=input.date;d=addDay(d,1))if(!sourceDates.includes(d))missingDates.push(d);
+  if(sheet){
+    const affiliations=new Map<string,Set<string>>();
+    const accepted=new Map([...today,...finals].map(e=>[e.eventId,e]));
+    for(const e of observations){
+      const primary=accepted.get(e.eventId);
+      if(!primary||primary.scheduledAt!==e.scheduledAt||identity(primary)!==identity(e))continue;
+      for(const side of [e.home,e.away]){
+        const evidence=affiliations.get(side.id)??new Set<string>();
+        for(const d of divisionEvidence(side))evidence.add(d);
+        affiliations.set(side.id,evidence);
+      }
+    }
+    for(const e of accepted.values()){
+      const groups=[affiliations.get(e.home.id),affiliations.get(e.away.id)];
+      const d=groups.some(g=>g&&g.size>1)?'CONFLICT':groups.some(g=>g?.has('OTHER'))?'OTHER':groups.every(g=>g?.has('DI'))?'DI':'UNKNOWN';
+      sheet.divisions.set(e.eventId,d);
+      if(d==="UNKNOWN" && e.date===input.date && sheet.divisionEvidenceCounts){
+        const label=groups.filter(g=>g?.size).length===1?"one_identified":"neither_identified";
+        sheet.divisionEvidenceCounts.set(label,(sheet.divisionEvidenceCounts.get(label)??0)+1);
+      }
+    }
+  }
+  if(sheet)for(const event of today){
+    const rankOf=(side:Side)=>{
+      const rank=integer(nested(side.raw,'curatedRank','current'));
+      return rank!==null&&rank>=1&&rank<=25?rank:null;
+    };
+    sheet.ranks.set(event.eventId,{[event.home.id]:rankOf(event.home),[event.away.id]:rankOf(event.away)});
+  }
   const recordsByTeam=new Map<string,{event:Observation;side:Side;record:NcaabManualTeam['reportedRecord']}[]>(),definitions=new Map<string,Side>();
   // Sort by the represented fixture date first. Re-reading an old scoreboard
   // today must not replace a newer season record with an old postgame record.
@@ -256,15 +325,40 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput):NcaabManu
     definitions.set(s.id,{...s,conference:s.conference?.startsWith('Conferencia ESPN ')?richerConference??s.conference:s.conference??old?.conference??null});
     if(!e.context){const r=record(s,e);if(r)recordsByTeam.set(s.id,[...(recordsByTeam.get(s.id)??[]),{event:e,side:s,record:r}]);}
   }
+  const historiesById=new Map<string,Observation[]>(), unresolvedIds=new Set<string>();
+  for(const e of [...finals].reverse()) {
+    for(const teamId of [e.home.id,e.away.id]){
+      const rows=historiesById.get(teamId);
+      if(rows)rows.push(e);else historiesById.set(teamId,[e]);
+    }
+  }
+  for(const e of events)if(e.date<input.date&&!['FINAL','POSTPONED','CANCELLED'].includes(e.state)){
+    unresolvedIds.add(e.home.id);unresolvedIds.add(e.away.id);
+  }
   const teams:NcaabManualTeam[]=[];
   for(const def of definitions.values()) {
-    const history=finals.filter(e=>e.home.id===def.id||e.away.id===def.id).sort((a,b)=>b.scheduledAt.localeCompare(a.scheduledAt)||b.eventId.localeCompare(a.eventId));
+    const history=historiesById.get(def.id)??[];
     const all=history.map(e=>recent(e,def.id)),last=all.slice(0,10),archive=aggregate(all),recentAggregate=aggregate(last);
+    if(sheet) {
+      sheet.histories.set(def.id,all);
+      const samples:Record<string,PossessionSample>={};
+      for(const e of history){const value=possessionSample(e,e.home.id===def.id);if(value)samples[e.eventId]=value;}
+      sheet.possessions.set(def.id,samples);
+    }
     const reportedRecord=recordsByTeam.get(def.id)?.at(-1)?.record??null,wl=reportedRecord?.overall?.split('-').map(Number),gp=wl?.length===2?wl[0]+wl[1]:null;
-    const unresolved=events.some(e=>(e.home.id===def.id||e.away.id===def.id)&&e.date<input.date&&!['FINAL','POSTPONED','CANCELLED'].includes(e.state));
+    const unresolved=unresolvedIds.has(def.id);
     const completeSeason=gp!==null&&gp===all.length&&wl![0]===archive.wins&&wl![1]===archive.losses&&!unresolved&&!blockedTeams.has(def.id);
     const intervalMissing=last.length>0&&[...missingDates,...unverifiedDates].some(d=>d>=last.at(-1)!.date&&d<input.date);
     const sequenceVerified=!blockedTeams.has(def.id)&&!unresolved&&(completeSeason||last.length===10&&!intervalMissing);
+    if(sheet?.audit) {
+      if(completeSeason && all.length<10)mark(def.id,"verified_under_ten");
+      if(gp!==null && gp>all.length)mark(def.id,"fewer_archived_than_reported");
+      if(intervalMissing)mark(def.id,"calendar_gap");
+      if(unresolved)mark(def.id,"prior_game_unresolved");
+      if(!sequenceVerified)mark(def.id,"sequence_unverified");
+      if(!all.length)mark(def.id,"no_prior_final");
+      sheet.audit.set(def.id,[...(reasons.get(def.id)??[])]);
+    }
     const complete=sequenceVerified&&last.length===10;
     const coverage=!last.length?'NO_HISTORY':complete?'COMPLETE_TEN':completeSeason&&gp!==null&&gp<10?'SEASON_UNDER_TEN':'PARTIAL';
     const teamWarnings=new Set<string>();

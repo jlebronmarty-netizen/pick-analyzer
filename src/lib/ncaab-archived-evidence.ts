@@ -15,7 +15,7 @@ export type NcaabArchivedQuote = {
   market: 'MONEYLINE' | 'SPREAD' | 'TOTAL'; sportsbook: string;
   first: { side: 'HOME' | 'OVER'; line: number | null; americanOdds: number };
   second: { side: 'AWAY' | 'UNDER'; line: number | null; americanOdds: number };
-  providerField: string; period: 'FULL_GAME'; overtime: 'UNVERIFIED';
+  expiresAt?: string; providerField: string; period: 'FULL_GAME'; overtime: 'UNVERIFIED';
 };
 export type NcaabEventArchiveEvidence = {
   eventId: string; status: 'REFERENCE_ONLY' | 'BLOCKED' | 'MISSING';
@@ -90,7 +90,10 @@ function quotePairs(menu: unknown, forecast: ArchiveForecast): { quotes: NcaabAr
           (firstLine === null || secondLine === null || (market === 'SPREAD' ? firstLine + secondLine !== 0 : firstLine !== secondLine || firstLine <= 0)))) {
         reasons.add('INVALID_OR_INCOMPLETE_' + market + '_PAIR'); invalid.add(key); continue;
       }
+      const deadlines=[q.expiresAt,object(q[field]).expiresAt,a.expiresAt,b.expiresAt].filter(v=>v!=null).map(timestamp);
+      if(deadlines.some(t=>!Number.isFinite(t))) { invalid.add(key); reasons.add('UNVERIFIED_EXPIRY'); continue; }
       const value: NcaabArchivedQuote = {
+        ...(deadlines.length?{expiresAt:new Date(Math.min(...deadlines)).toISOString()}:{}),
         market, sportsbook, first: { side: market === 'TOTAL' ? 'OVER' : 'HOME', line: firstLine, americanOdds: firstOdds },
         second: { side: market === 'TOTAL' ? 'UNDER' : 'AWAY', line: secondLine, americanOdds: secondOdds },
         providerField: field + '.' + firstSide + '/' + secondSide + '.close', period: 'FULL_GAME', overtime: 'UNVERIFIED',

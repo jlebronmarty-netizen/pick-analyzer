@@ -8,7 +8,7 @@ const day = 86400000;
 
 // One archived daily receipt per date at a common time before the earliest game.
 // Stop at the first missing/conflicting day. Never fill a calendar gap with observed boxes.
-async function calendarDay(db, date, cut) {
+export async function calendarDay(db, date, cut) {
   const source = "https://api-web.nhle.com/v1/score/" + date;
   const { data, error } = await db
     .from("nhl_free_source_v1")
@@ -40,12 +40,13 @@ async function calendarDay(db, date, cut) {
       maxOutputLength: 2000000,
     }).toString("utf8"),
   );
+  const teams=new Map(raw.games.map(g=>["nhl:"+g.id,{home:g.homeTeam?.abbrev,away:g.awayTeam?.abbrev}]));
   const scores = new Map(
     raw.games.map((g) => ["nhl:" + g.id, regulationPeriods(g)]),
   );
   return {
     ...current,
-    games: current.games.map((g) => ({ ...g, scoring: scores.get(g.eventId) })),
+    games: current.games.map((g) => ({ ...g,...teams.get(g.eventId), scoring: scores.get(g.eventId) })),
   };
 }
 

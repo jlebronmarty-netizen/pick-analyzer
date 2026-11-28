@@ -63,3 +63,8 @@ python3 docs/reference/nba-site-v13/tests/test_pbp.py
 En la vista privada, abrir cada mercado, cambiar L5/L10/H2H y ambas bandas; revisar que un juego no vigente sale al vencer. Probar un contrato con historia, otro con menos de cinco y otro sin rival único. Inspeccionar el API con el `asOf` de la misma respuesta y registrar por separado página, acceso y cobertura. Para regresión visual comparar los mismos datos, período, viewport y estado expandido en el commit de referencia y en el candidato. Las pruebas con fixtures cubren interacción; el caso real valida la lectura de archivos.
 
 Reversión en revisión: retirar el commit de extracción en la rama por una reversión normal. La entrega no requiere revertir tablas, modelos ni recopilaciones.
+
+
+## Jornadas y navegación · PR #417
+
+El PR #417 reúne NBA, NHL y NCAAB bajo la navegación y la vigencia compartidas. Véanse [Jornadas multideporte](CHEAT_SHEETS_JORNADAS.md) y las limitaciones de publicación.

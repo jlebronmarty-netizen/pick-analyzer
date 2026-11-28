@@ -28,8 +28,9 @@ export async function GET(req){
   const params=new URL(req.url).searchParams,at=params.get('at'),game=Number(params.get('game')),player=Number(params.get('player'));
   const ms=Date.parse(at);
   if(!Number.isSafeInteger(game)||game<1||!Number.isSafeInteger(player)||player<1||!Number.isFinite(ms)||
-    new Date(ms).toISOString()!==at||ms>Date.now()||Date.now()-ms>86400000)return respond({status:'INVALID_REQUEST'},400);
+    new Date(ms).toISOString()!==at||ms>Date.now())return respond({status:'INVALID_REQUEST'},400);
   const day=new Date(ms-4*3600000).toISOString().slice(0,10);
+  if(Date.now()-ms>86400000 && at!==day+"T17:00:00.000Z" && ms!==Date.parse(day+"T04:00:00Z")+86400000-1)return respond({status:"INVALID_REQUEST"},400);
   try{
     const report=await snapshot(day,at);
     let data=rivalAnalysis(report,game,player,null);

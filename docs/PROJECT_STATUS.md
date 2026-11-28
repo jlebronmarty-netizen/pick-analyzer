@@ -3791,6 +3791,18 @@ El 21 de noviembre a las 8:34 p. m. de Puerto Rico se compararon dos vistas prev
 
 **NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
 
+## NCAAB Cheat Sheets · Preview descriptivo
+
+El PR #417 implementa la primera fase sobre NCAAB_MANUAL_DATA_V1. La auditoría por corte, los denominadores por división y sede, la carga bajo demanda, las reglas de clasificación y los pendientes de cobertura se documentan en la [revisión técnica de NCAAB](NCAAB_CHEAT_SHEETS_PHASE_1.md). El tracker queda pendiente de certificación por contrato.
+
+La [segunda revisión NCAAB](NCAAB_CHEAT_SHEETS_PHASE_2.md) documenta las causas del L10 incompleto, simetría de totales, ordenación y rendimiento por corte, certificación pendiente y el tracker aislado probado en PostgreSQL. Sigue en Preview, PR #417.
+
+
 ## NCAAF calendar integrity · 2026-11-27
 
 Georgia's future ESPN event 401869545 has a confirmed time and an explicit TBD opponent. Inventory this placeholder separately and preserve the other 12 fixtures. Production acceptance requires a natural cycle with verified coverage and an inspection of conflicts and skipped games. The current-week Ridge profile remains an independent research dependency.
+
+
+## Jornadas y navegación · PR #417
+
+PR #417 · revisión privada de las tres interfaces, calendario PR y vigencia antes de ordenar y limitar. [Guía de jornadas](CHEAT_SHEETS_JORNADAS.md). La activación en producción está pendiente de revisión.

@@ -154,3 +154,13 @@ test('previous seasons, invalid dates and contradictory team IDs do not contamin
   const r=build(receipts);assert.equal(r.coverage.archivedFinals,2);assert.equal(r.coverage.excludedEvents,2);
   assert.throws(()=>build(receipts,{date:'2026-02-30'}),/INVALID_DATE/);
 });
+
+test('sheet divisions require explicit evidence for both Division I teams',()=>{
+  for(const [a,b,want] of [['Division I','Division 1','DI'],['Division I','Division III','OTHER'],['Division I',null,'UNKNOWN']]){
+    const e=rawGame(),[h,v]=e.competitions[0].competitors;
+    h.team.division=a;v.team.division=b;
+    const extra={histories:new Map(),possessions:new Map(),ranks:new Map(),divisions:new Map()};
+    buildNcaabManualDataReport({date,readAt,receipts:[receipt(date,[e],{capturedAt:readAt})],contexts:[],predictions:[],readComplete:true},extra);
+    assert.equal(extra.divisions.get('espn:100'),want);
+  }
+});

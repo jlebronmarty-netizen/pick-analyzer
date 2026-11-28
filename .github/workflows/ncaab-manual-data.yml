@@ -8,6 +8,15 @@ on:
       - 'src/lib/ncaab-manual-response.ts'
       - 'src/services/ncaab-manual-data.service.ts'
       - 'src/app/api/ncaab/manual-data/**'
+      - 'src/app/ncaab-cheat-sheets/**'
+      - 'src/app/ncaab/page.tsx'
+      - 'src/components/cheat-sheets/**'
+      - 'src/lib/cheat-sheets/**'
+      - 'tests/cheat-sheet-jornada.test.mjs'
+      - 'tests/ncaab-cheat-sheets.test.mjs'
+      - 'research/ncaab-sheet-tracker/**'
+      - 'research/ncaab-sheet-history/**'
+      - 'tests/ncaab-sheet-*'
       - 'src/components/dashboard/NcaabManualDataPanel.tsx'
       - 'src/components/dashboard/NcaabDashboard.tsx'
       - 'tests/ncaab-manual-*.test.mjs'
@@ -27,6 +36,14 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
       SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - '127.0.0.1:55438:5432'
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -38,6 +55,11 @@ jobs:
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
       - name: Canonical data and complete-read regression
-        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/ncaab-manual-*.test.mjs tests/dashboard-multisport/ncaab*.test.mjs
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/ncaab-manual-*.test.mjs tests/ncaab-cheat-sheets.test.mjs tests/cheat-sheet-jornada.test.mjs tests/dashboard-multisport/ncaab*.test.mjs
+      - name: Isolated NCAAB ledger and final evidence
+        run: |
+          node --test tests/ncaab-sheet-final.test.mjs
+          npm install --prefix "$RUNNER_TEMP/sheet-pg" --ignore-scripts --no-audit --no-fund pg@8.16.3
+          NBA_SHEET_TEST_PG_MODULE="$RUNNER_TEMP/sheet-pg/node_modules/pg/lib/index.js" node tests/ncaab-sheet-lab.postgres.mjs
       - name: Verify production build
         run: npm run build

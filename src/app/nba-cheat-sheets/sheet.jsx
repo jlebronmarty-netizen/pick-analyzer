@@ -1,5 +1,7 @@
 'use client';
-import {useEffect,useState} from 'react';
+import {useJornada,JornadaControls,ContextLink,useSheetFilter} from "@/components/cheat-sheets/jornada";
+import {eligible} from "@/lib/cheat-sheets/jornada.mjs";
+import {useState} from 'react';
 import Link from 'next/link';
 import {oddsBands,inOddsBand,rankSheet,hits,markets,outcome} from '@/lib/nba/cheat-ranking.mjs';
 import {topProjections} from '@/lib/nba/cheat-projections.mjs';
@@ -7,8 +9,10 @@ import Rival from './rival';
 import {FilterGroup, SheetCard, TrendBars} from '@/components/cheat-sheets/presentation';
 import styles from '@/components/cheat-sheets/sheet.module.css';
 const windows={ten:'Últimos 10',five:'Últimos 5',h2h:'Contra el rival'};
-const time=v=>new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',hour:'numeric',minute:'2-digit'}).format(new Date(v));
-const date=v=>new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',day:'numeric',month:'short'}).format(new Date(v));
+const local=v=>new Date(new Date(v).getTime()-4*3600000);
+const time=v=>{const d=local(v),h=d.getUTCHours();return (h%12||12)+":"+String(d.getUTCMinutes()).padStart(2,"0")+(h<12?" a. m.":" p. m.");};
+const months=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const date=v=>{const d=local(v);return d.getUTCDate()+" "+months[d.getUTCMonth()];};
 function Trend({row:r,initial}){
   const [window,setWindow]=useState(initial);
   const series=(r.trend??[]).slice(0,window==='five'?5:10).reverse();
@@ -28,7 +32,7 @@ function Limits({row:r}){
   return r.warnings.length>0&&<p className={styles.limits}><b>Pendiente de validar</b> · {r.warnings.map(v=>({'Box score original pendiente de cotejo':'box score original','Regla de tiempo extra pendiente':'regla de tiempo extra','Disponibilidad del jugador pendiente':'disponibilidad del jugador'}[v]??v)).join(' · ')}</p>;
 }
 function ProfileLink({row}){
- return <p className={styles.limits}><Link href={"/nba-cheat-sheets/analisis?game="+row.gameId+"&player="+(row.playerId??row.player)}>Perfil detallado del jugador →</Link></p>;
+ return <p className={styles.limits}><ContextLink href={"/nba-cheat-sheets/analisis?game="+row.gameId+"&player="+(row.playerId??row.player)}>Perfil detallado del jugador →</ContextLink></p>;
 }
 function Card({card:c,window:w,rank,alternatives,asOf}){
   const title=c.side==='over'&&c.line%1===0.5?Math.ceil(c.line)+'+':(c.side==='over'?'Más de ':'Menos de ')+c.line;
@@ -96,17 +100,20 @@ function BandResults({cards,projections,milestones,coverage,market,w,floor,now,a
       </>}
   </section>;
 }
-export default function Sheet({cards=[],projections=[],milestones=[],coverage,day,asOf,showReference=false,captureFailed=false}){
-  const [market,setMarket]=useState('points'),[w,setWindow]=useState('ten'),[floor,setFloor]=useState('both'),[now,setNow]=useState(Date.parse(asOf));
-  useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),15000);return ()=>clearInterval(id);},[asOf]);
+export default function Sheet({fixtures=[],frozen,cards=[],projections=[],milestones=[],coverage,day,asOf,showReference=false,captureFailed=false}){
+  const [market,setMarket]=useSheetFilter('nba','market','points'),[w,setWindow]=useSheetFilter('nba','window','ten'),[floor,setFloor]=useSheetFilter('nba','band','both');
+  const state=useJornada(day,asOf,[...fixtures.map(g=>g.start),...cards.map(r=>r.expiresAt),...projections.map(r=>r.expires),...milestones.map(r=>r.expires)],frozen);
+  const {now}=state, games=new Map(fixtures.map(g=>[g.id,g]));
+  const active=r=>eligible(games.get(String(r.gameId)),now) && ['all','upcoming'].includes(state.view);
   return <main className={styles.sheet}><Link href="/nba-decision-board">← Decision Board</Link>
     <header className={styles.hero}><p>NBA <span> / </span> {date(day+'T12:00:00Z')}</p><h1>Cheat Sheets</h1><p>Las líneas de hoy frente al historial de cada jugador.</p></header>
+    <JornadaControls state={state} games={fixtures} list/>
     <details className={styles.method}><summary>Metodología y validación</summary><p>Pick calcula la proyección con 65% del promedio de los últimos 5 juegos y 35% del promedio de los últimos 10, en partidos con al menos 10 minutos. La gráfica muestra cuántas veces el jugador cumplió la línea. Las limitaciones de cada contrato aparecen en su tarjeta.</p></details>
-    <p><Link href="/nba-cheat-sheets/analisis">Top 10 general, combinados y análisis por contrato →</Link> · <Link href="/nba-cheat-sheets/tracker">Tracker de resultados</Link></p>
+    <p><ContextLink href="/nba-cheat-sheets/analisis">Top 10 general, combinados y análisis por contrato →</ContextLink> · <ContextLink href="/nba-cheat-sheets/tracker">Tracker de resultados</ContextLink></p>
     {captureFailed && <p role="status">La captura de seguimiento está pendiente.</p>}
     <div className={styles.controls}><FilterGroup label="Mercado" options={markets} value={market} onChange={setMarket}/><FilterGroup label="Historial" options={windows} value={w} onChange={setWindow}/><FilterGroup label="Rango de cuotas" options={{both:'Ambos rangos',...oddsBands}} value={floor} onChange={setFloor}/></div>
     {(floor==='both'?Object.keys(oddsBands):[floor]).map(band=><BandResults key={band} floor={band}
-      cards={cards} projections={projections} milestones={milestones} coverage={coverage} market={market} w={w} now={now} asOf={asOf}/>)}
+      cards={cards.filter(active)} projections={projections.filter(active)} milestones={milestones.filter(active)} coverage={coverage} market={market} w={w} now={now} asOf={asOf}/>)}
     {showReference && <details className={styles.reference}><summary>Ver ejemplo visual de una tarjeta</summary>
       <p>Ejemplo de tu referencia del 18 de noviembre. El ranking de hoy aparece arriba.</p>
       <SheetCard><header><span>NBA · Asistencias</span><span>18 nov</span></header>

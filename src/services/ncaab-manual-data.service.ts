@@ -56,11 +56,12 @@ function sourceDay(url:string) {
   try{return validateNcaabManualDate(date);}catch{return null;}
 }
 
-export async function loadNcaabManualData(client:SupabaseClient,date:string,readAt:string,signal:AbortSignal):Promise<NcaabManualDataReport> {
+export async function loadNcaabManualData(client:SupabaseClient,date:string,readAt:string,signal:AbortSignal,histories?:Parameters<typeof buildNcaabManualDataReport>[1]):Promise<NcaabManualDataReport> {
   validateNcaabManualDate(date);
   const year=Number(date.slice(0,4)),seasonStart=`${Number(date.slice(5,7))>=7?year:year-1}-07-01`;
   const from=date+'T00:00:00-04:00',to=new Date(Date.parse(from)+86400000).toISOString();
   const nextDay=ncaabManualDate(to);
+  const started=performance.now();
   const metaPromise=readNcaabManualRows((after,limit)=> {
     let q=client.from('ncaab_daily_source_v1').select('id,captured_at,source_url',{count:'exact'})
       .gte('captured_at',seasonStart+'T00:00:00Z').lte('captured_at',readAt).order('id').limit(limit).abortSignal(signal);
@@ -80,6 +81,7 @@ export async function loadNcaabManualData(client:SupabaseClient,date:string,read
   const [metadataResult,predictionsResult,contextsResult]=await Promise.allSettled([metaPromise,predictionsPromise,contextPromise]);
   if(metadataResult.status!=='fulfilled')throw Error('SOURCE_METADATA_UNAVAILABLE');
   if(predictionsResult.status!=='fulfilled')throw Error('FORECAST_READ_UNAVAILABLE');
+  const indexMs=performance.now()-started;
   const sourceErrors:string[]=[];
   const contexts=contextsResult.status==='fulfilled'?contextsResult.value:[];
   if(contextsResult.status!=='fulfilled')sourceErrors.push('DETAIL_ARCHIVE_UNAVAILABLE');
@@ -95,8 +97,8 @@ export async function loadNcaabManualData(client:SupabaseClient,date:string,read
   if(latest.size>MAX_SOURCE_DATES)throw Error('SOURCE_DATE_LIMIT');
   const wanted=[...latest.values()].sort((a,b)=>String(a.source_url).localeCompare(String(b.source_url)));
   const receipts:NcaabArchiveReceipt[]=[];let totalBytes=0;
-  // Three receipt bodies per request; sequential batches bound peak memory.
-  for(let offset=0;offset<wanted.length;offset+=3) {
+  // Three receipt bodies per request; two concurrent batches bound peak memory.
+  async function loadBatch(offset:number) {
     const batch=wanted.slice(offset,offset+3),ids=batch.map(r=>String(r.id));
     const result=await client.from('ncaab_daily_source_v1').select('id,captured_at,source_url,events:body->events',{count:'exact'})
       .in('id',ids).lte('captured_at',readAt).order('id').limit(3).abortSignal(signal);
@@ -113,7 +115,15 @@ export async function loadNcaabManualData(client:SupabaseClient,date:string,read
       receipts.push(row);
     }
   }
-  return buildNcaabManualDataReport({date,readAt,receipts,contexts,predictions:predictionsResult.value,readComplete:true,sourceErrors});
+  for(let offset=0;offset<wanted.length;offset+=6) {
+    await Promise.all([loadBatch(offset), ...(offset+3<wanted.length?[loadBatch(offset+3)]:[])]);
+  }
+  const normalizedAt=performance.now();
+  const report=buildNcaabManualDataReport({date,readAt,receipts,contexts,predictions:predictionsResult.value,readComplete:true,sourceErrors},histories);
+  if(histories?.timings) Object.assign(histories.timings,{
+    indexMs:Math.round(indexMs),receiptMs:Math.round(normalizedAt-started-indexMs),
+    normalizeMs:Math.round(performance.now()-normalizedAt)});
+  return report;
 }
 
 const cache=new Map<string,{expires:number;value:NcaabManualDataReport}>();

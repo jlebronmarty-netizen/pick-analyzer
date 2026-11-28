@@ -72,3 +72,14 @@ Revisión documental 1, 25-nov-2026. La ruta de página es `/nba-cheat-sheets`. 
 **NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
 
 **NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
+
+## NCAAB Cheat Sheets · Preview descriptivo
+
+El PR #417 implementa la primera fase sobre NCAAB_MANUAL_DATA_V1. La auditoría por corte, los denominadores por división y sede, la carga bajo demanda, las reglas de clasificación y los pendientes de cobertura se documentan en la [revisión técnica de NCAAB](NCAAB_CHEAT_SHEETS_PHASE_1.md). El tracker queda pendiente de certificación por contrato.
+
+La [segunda revisión NCAAB](NCAAB_CHEAT_SHEETS_PHASE_2.md) documenta las causas del L10 incompleto, simetría de totales, ordenación y rendimiento por corte, certificación pendiente y el tracker aislado probado en PostgreSQL. Sigue en Preview, PR #417.
+
+
+## Jornadas y navegación · PR #417
+
+El contrato compartido de estado, inicio, vencimiento, corte PR y selección antes del límite se define en [Jornadas multideporte](CHEAT_SHEETS_JORNADAS.md). Cada deporte conserva su validador de precios y sus denominadores históricos.
