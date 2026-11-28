@@ -67,3 +67,5 @@ El próximo deporte se decide después de la aceptación de NBA. Las diferencias
 ## NCAAB Cheat Sheets · Preview descriptivo
 
 El PR #417 implementa la primera fase sobre NCAAB_MANUAL_DATA_V1. La auditoría por corte, los denominadores por división y sede, la carga bajo demanda, las reglas de clasificación y los pendientes de cobertura se documentan en la [revisión técnica de NCAAB](NCAAB_CHEAT_SHEETS_PHASE_1.md). El tracker queda pendiente de certificación por contrato.
+
+La [segunda revisión NCAAB](NCAAB_CHEAT_SHEETS_PHASE_2.md) documenta las causas del L10 incompleto, simetría de totales, ordenación y rendimiento por corte, certificación pendiente y el tracker aislado probado en PostgreSQL. Sigue en Preview, PR #417.

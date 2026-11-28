@@ -10,7 +10,7 @@ export const allowed = (headers) =>
 const cache = new Map();
 async function read(date, cut) {
   const extra = {
-    timings: {}, audit:new Map(),
+    timings: {}, audit:new Map(), divisionEvidenceCounts:new Map(),
     histories: new Map(),
     possessions: new Map(),
     ranks: new Map(),
@@ -45,7 +45,7 @@ async function read(date, cut) {
     }
   }
   return {
-    report, audit:extra.audit, timings: extra.timings,
+    report, audit:extra.audit, divisionEvidenceCounts:extra.divisionEvidenceCounts, timings: extra.timings,
     pairs,
     attempts,
     histories: extra.histories,

@@ -220,17 +220,26 @@ export function candidates(
           );
         const n = Math.min(e.n, o.n);
         if (total) {
-          const expected =
-            (((e.pace + o.pace) / 2) *
-              (e.offense + o.defense + o.offense + e.defense)) /
-            200;
-          add(
-            "Ritmo y eficiencia frente al total",
-            n >= 5
-              ? (expected - side.line) * (side.side === "OVER" ? 1 : -1) >= 2
-              : null,
-            n,
-          );
+          // Pool unique game totals and minutes. Each team's floor is checked
+          // separately; a prior meeting contributes one game to the estimate.
+          const pooled = new Map();
+          let conflict = false;
+          for (const [id, games] of [[team.id,recent],[other.id,opponentRecent]]) {
+            for (const g of games) {
+              const stats = possessions[id]?.[g.eventId];
+              if (!stats) continue;
+              const entry = { points:stats.pointsFor+stats.pointsAgainst, minutes:stats.minutes, possessions:stats.possessions };
+              const old = pooled.get(g.eventId);
+              if (old && (old.points !== entry.points || old.minutes !== entry.minutes || old.possessions !== entry.possessions)) conflict=true;
+              pooled.set(g.eventId,entry);
+            }
+          }
+          const stats = [...pooled.values()];
+          const sum = k => stats.reduce((s,r)=>s+r[k],0);
+          const pos = sum("possessions"), mins=sum("minutes");
+          const expected = pos>0 && mins>0 ? (40*pos/mins)*(sum("points")/pos) : null;
+          add("Ritmo y eficiencia frente al total", n>=5 && !conflict && expected!==null
+            ? (expected-side.line)*(side.side==="OVER"?1:-1)>=2 : null, stats.length);
         } else
           add(
             "Ventaja de eficiencia neta",

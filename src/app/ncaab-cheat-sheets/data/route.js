@@ -1,5 +1,5 @@
 import { allowed, archive, detail, ranking } from "../archive";
-import { markets, windows } from "../evidence.mjs";
+import { markets, windows, sorts } from "../evidence.mjs";
 import {
   validateNcaabManualDate,
   ncaabManualDate,
@@ -26,7 +26,7 @@ export async function GET(req) {
     return new Response(null, { status: 400 });
   if (
     !p.id &&
-    (!Object.hasOwn(windows, p.window) ||
+    ((p.sort && !Object.hasOwn(sorts,p.sort)) || !Object.hasOwn(windows, p.window) ||
       !Object.hasOwn(markets, p.market) ||
       !["FT", "1", "2", "OT"].includes(p.period))
   )

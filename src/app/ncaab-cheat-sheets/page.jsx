@@ -63,9 +63,9 @@ async function buildBoard(date, cut) {
           warnings: report.warnings,
           fixtures,
           teams,
-         l10Audit:counts, causes }, initial, profile };
+         l10Audit:counts, causes, divisionEvidence:Object.fromEntries(data.divisionEvidenceCounts) }, initial, profile };
 }
-const cachedBoard = unstable_cache(buildBoard, ["ncaab-sheet-compact-v2"], {revalidate:180});
+const cachedBoard = unstable_cache(buildBoard, ["ncaab-sheet-compact-v3"], {revalidate:180});
 
 export default async function Page({ searchParams }) {
   const start=performance.now();

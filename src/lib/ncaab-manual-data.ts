@@ -11,7 +11,7 @@ type Obj = Record<string, unknown>;
 type Stats = NcaabManualRecentGame['stats'];
 type Side = {id:string;name:string;abbreviation:string|null;conference:string|null;raw:Obj};
 type PossessionSample = {possessions:number;minutes:number;pointsFor:number;pointsAgainst:number};
-export type SheetArchive = { timings?:Record<string,number>; audit?:Map<string,string[]>; divisions:Map<string,string>; ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
+export type SheetArchive = { timings?:Record<string,number>; audit?:Map<string,string[]>; divisionEvidenceCounts?:Map<string,number>; divisions:Map<string,string>; ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
 type Observation = {
   offensiveBoards?:[number|null,number|null];
   eventId:string;scheduledAt:string;date:string;season:number;state:NcaabManualFixture['state'];
@@ -304,6 +304,10 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
       const groups=[affiliations.get(e.home.id),affiliations.get(e.away.id)];
       const d=groups.some(g=>g&&g.size>1)?'CONFLICT':groups.some(g=>g?.has('OTHER'))?'OTHER':groups.every(g=>g?.has('DI'))?'DI':'UNKNOWN';
       sheet.divisions.set(e.eventId,d);
+      if(d==="UNKNOWN" && e.date===input.date && sheet.divisionEvidenceCounts){
+        const label=groups.filter(g=>g?.size).length===1?"one_identified":"neither_identified";
+        sheet.divisionEvidenceCounts.set(label,(sheet.divisionEvidenceCounts.get(label)??0)+1);
+      }
     }
   }
   if(sheet)for(const event of today){
@@ -321,9 +325,19 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
     definitions.set(s.id,{...s,conference:s.conference?.startsWith('Conferencia ESPN ')?richerConference??s.conference:s.conference??old?.conference??null});
     if(!e.context){const r=record(s,e);if(r)recordsByTeam.set(s.id,[...(recordsByTeam.get(s.id)??[]),{event:e,side:s,record:r}]);}
   }
+  const historiesById=new Map<string,Observation[]>(), unresolvedIds=new Set<string>();
+  for(const e of [...finals].reverse()) {
+    for(const teamId of [e.home.id,e.away.id]){
+      const rows=historiesById.get(teamId);
+      if(rows)rows.push(e);else historiesById.set(teamId,[e]);
+    }
+  }
+  for(const e of events)if(e.date<input.date&&!['FINAL','POSTPONED','CANCELLED'].includes(e.state)){
+    unresolvedIds.add(e.home.id);unresolvedIds.add(e.away.id);
+  }
   const teams:NcaabManualTeam[]=[];
   for(const def of definitions.values()) {
-    const history=finals.filter(e=>e.home.id===def.id||e.away.id===def.id).sort((a,b)=>b.scheduledAt.localeCompare(a.scheduledAt)||b.eventId.localeCompare(a.eventId));
+    const history=historiesById.get(def.id)??[];
     const all=history.map(e=>recent(e,def.id)),last=all.slice(0,10),archive=aggregate(all),recentAggregate=aggregate(last);
     if(sheet) {
       sheet.histories.set(def.id,all);
@@ -332,7 +346,7 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
       sheet.possessions.set(def.id,samples);
     }
     const reportedRecord=recordsByTeam.get(def.id)?.at(-1)?.record??null,wl=reportedRecord?.overall?.split('-').map(Number),gp=wl?.length===2?wl[0]+wl[1]:null;
-    const unresolved=events.some(e=>(e.home.id===def.id||e.away.id===def.id)&&e.date<input.date&&!['FINAL','POSTPONED','CANCELLED'].includes(e.state));
+    const unresolved=unresolvedIds.has(def.id);
     const completeSeason=gp!==null&&gp===all.length&&wl![0]===archive.wins&&wl![1]===archive.losses&&!unresolved&&!blockedTeams.has(def.id);
     const intervalMissing=last.length>0&&[...missingDates,...unverifiedDates].some(d=>d>=last.at(-1)!.date&&d<input.date);
     const sequenceVerified=!blockedTeams.has(def.id)&&!unresolved&&(completeSeason||last.length===10&&!intervalMissing);
