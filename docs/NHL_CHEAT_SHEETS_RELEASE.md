@@ -1,0 +1,15 @@
+# Publicación descriptiva NHL · 27 de noviembre de 2026 (Puerto Rico)
+
+GitHub fusionó [PR #414](https://github.com/jlebronmarty-netizen/pick-analyzer/pull/414), revisión a0e1dc06dd46fe490cf5fe2d15f95568f1a8a985, en c9e2218008c87fdc477537a3ca6986e1a6db3957. El PR era compatible con main y las 11 ejecuciones de Actions terminaron en success. El build de la app compila Next y el workflow del ledger usa PostgreSQL aislado. Antes de fusionar se verificó en el panel de integraciones de Supabase que el proyecto carecía de repositorio GitHub vinculado. Tras la fusión, la migración 202611270901 seguía ausente del historial aplicado.
+
+Vercel READY inicial dpl_Qaq8SapVMSQfSrH6xwVB1n2nV5TZ. Después, en producción exclusivamente, NHL_CHEAT_SHEETS_ENABLED=true y NHL_CHEAT_TRACKER_ENABLED=false. Despliegue READY del mismo commit con ambas variables: dpl_FDVQBQka1dztP8rYjAYvb6VgJn3J. [Abrir interfaz privada](https://pick-analyzer-d736w7nw9-pick-analyzer.vercel.app/nhl-cheat-sheets). El panel /nhl devolvió 200 con enlace a la hoja. La jornada NHL del 27 devolvió 200 con mercados; una petición anónima al hostname del despliegue devolvió 302 al SSO de Vercel. Las tres páginas NBA (portada, análisis y tracker) devolvieron 200. La automatización horaria de seguimiento NBA está activa.
+
+Primera ejecución natural observada de la revisión fusionada: 27-nov 20:37:23 PR en el primer despliegue, request nqnfz-1795826236092-4cbccddacda1. Núcleo PASS, contexto y diagnóstico COMPLETED. sheetTracker DISABLED, captured=0, written=0. Las dos llamadas registradas pertenecen al proceso programado preexistente. Las comprobaciones de publicación usaron lecturas de archivos, páginas y logs. Para revertir la interfaz, apagar sólo su flag de producción y redesplegar la versión aprobada. Conservar el tracker apagado.
+
+## Datos abiertos
+
+La [auditoría por contrato y cobertura](NHL_CHEAT_SHEETS_PHASE_3.md) identifica el recibo y reglamento oficial vigentes que faltan por casa y jurisdicción. Exigir etiqueta de mercado, lados, línea, cuota y corte, período, tratamiento de prórroga y shootout, empate/push, suspensión, aplazamiento y anulación. Para props se añade participación mínima y estadística oficial. En Circa falta demostrar la jurisdicción de la oferta; en FanDuel PR falta parear el recibo NHL con sus reglas locales aplicables.
+
+Los nueve juegos pendientes para L10 son BOS 2026020232 y 2026020217, SEA 2026020216 y 2026020202, COL 2026020234, DET 2026020233, WSH 2026020228, NYR 2026020230 y LAK 2026020221. V13 permite ubicarlos; falta acta conciliable con tiempo de captura y secuencia de calendario. Permanecen pendientes confirmación prepartido de porteros, lesiones completas, alineaciones y clasificación por sede/división/conferencia. En 2026020349 persisten 19 tiros de Tampa Bay en box y 20 en PBP; sus tiros y las atajadas derivadas quedan excluidos.
+
+La siguiente etapa documental está en el [inventario NCAAB](NCAAB_CHEAT_SHEETS_ROADMAP.md).
