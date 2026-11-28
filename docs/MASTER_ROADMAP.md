@@ -1,5 +1,7 @@
 ## NHL · Seguimiento del 27 de noviembre de 2026
 
+**27 nov 2026 · Publicación.** [NHL descriptivo en producción y comprobaciones](NHL_CHEAT_SHEETS_RELEASE.md) · [Inventario y plan NCAAB](NCAAB_CHEAT_SHEETS_ROADMAP.md).
+
 18 capturas, 11 eventos con final, 8 disponibles al corte tardío y 0 al original. Tiros y PP/PK tienen 8 antecedentes elegibles de los 40 requeridos. Los originales aparecieron entre 8 h 22 min y 23 h 30 min antes de la primera captura. La fuente externa debe publicar antes de la primera probabilidad para estudiar el corte original.
 
 ## NBA · Top 10 por mercado y rango de cuotas (27 de noviembre)
