@@ -1,5 +1,7 @@
 # Componentes reutilizables de Cheat Sheets
 
+**27 nov 2026 · Publicación.** [NHL descriptivo en producción y comprobaciones](NHL_CHEAT_SHEETS_RELEASE.md) · [Inventario y plan NCAAB](NCAAB_CHEAT_SHEETS_ROADMAP.md).
+
 **27 nov 2026 · NHL.** [Fase descriptiva en revisión, fuentes archivadas y cotejo con V13](NHL_CHEAT_SHEETS_PHASE_1.md). La autorización de Preview permite avanzar mientras continúa el seguimiento prospectivo de NBA.
 
 ## Transición NBA → NHL · planificación del 25 de noviembre
