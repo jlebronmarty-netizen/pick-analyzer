@@ -3790,3 +3790,7 @@ El 21 de noviembre a las 8:34 p. m. de Puerto Rico se compararon dos vistas prev
 **NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
 
 **NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
+
+## NCAAF calendar integrity · 2026-11-27
+
+Georgia's future ESPN event 401869545 has a confirmed time and an explicit TBD opponent. Inventory this placeholder separately and preserve the other 12 fixtures. Production acceptance requires a natural cycle with verified coverage and an inspection of conflicts and skipped games. The current-week Ridge profile remains an independent research dependency.
