@@ -29,3 +29,9 @@ export const matches = (game, view, at) => view === "all" || phase(game, at) ===
 
 export const bands = { nba: {both:"both",standard:"-250",heavy:"-650"}, nhl:{both:"all",standard:"standard",heavy:"heavy"}, ncaab:{both:"both",standard:"standard",heavy:"heavy"} };
 export const windows = { nba:{L5:"five",L10:"ten",H10:"h2h"}, nhl:{L5:"5",L10:"10",H5:"direct5",H10:"direct10"}, ncaab:{L5:"L5",L10:"L10",H5:"H5",H10:"H10"} };
+
+export const marketKeys = {
+  nba:{points:"points",rebounds:"rebounds",assists:"assists",threes:"threes"},
+  nhl:{ml:"ml",spread:"spread",total:"total",team:"team",periodML:"periodML",periodSpread:"periodSpread",periodTotal:"periodTotal",skater:"skater",goalie:"goalie"},
+  ncaab:{general:"ALL",ml:"MONEYLINE",spread:"SPREAD",total:"TOTAL",team:"TEAM"}
+};

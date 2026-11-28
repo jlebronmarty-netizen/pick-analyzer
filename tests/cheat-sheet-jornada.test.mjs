@@ -31,3 +31,9 @@ test('Interfaz NCAAB requiere entorno, host e identidad; el tracker es independi
  assert(allowed(headers,env));assert(!allowed(headers,{...env,NCAAB_CHEAT_SHEETS_ENABLED:'false'}));
  for(const key of ['host','x-vercel-oidc-token']){const h=new Headers(headers);h.delete(key);assert(!allowed(h,env));}
 });
+test('El ranking compacto conserva inicio, estado y vencimiento hasta el navegador',async()=>{
+ const {compactRank}=await import('../src/app/ncaab-cheat-sheets/evidence.mjs');
+ const r=JSON.parse(JSON.stringify(compactRank({f:{eventId:"espn:1",state:"PREGAME",scheduledAt:new Date(future).toISOString(),markets:{}},q:{expiresAt:new Date(future-100).toISOString()},team:{name:"Equipo"}})));
+ assert(eligible(r.f,at,r.q.expiresAt));assert(!eligible(r.f,future-100,r.q.expiresAt));
+ assert.equal(edition('2026-11-26',at,'close').cutoff,'2026-11-27T03:59:59.999Z');
+});

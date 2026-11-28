@@ -304,9 +304,9 @@ function Game({ f, window, period, base, cache }) {
 import {useJornada,JornadaControls,useSheetFilter} from "@/components/cheat-sheets/jornada";
 import {eligible,labels,phase} from "@/lib/cheat-sheets/jornada.mjs";
 
-export default function Board({ report, initial }) {
+export default function Board({ report, initial, frozen }) {
   const [window, setWindow] = useSheetFilter("ncaab","window","L5"),
-    [market, setMarket] = useState("ALL"),
+    [market, setMarket] = useSheetFilter("ncaab","market","ALL"),
     [period, setPeriod] = useState("FT"),
     [band, setBand] = useSheetFilter("ncaab","band","both"),
     [game, setGame] = useState(""),
@@ -316,7 +316,7 @@ export default function Board({ report, initial }) {
   const [team, setTeam] = useState(""),
     [division, setDivision] = useState("");
   const deadlines=[...report.fixtures.map(g=>g.scheduledAt),...(report.expiries??[])].map(v=>Date.parse(v));
-  const state=useJornada(report.date,report.readAt,deadlines);
+  const state=useJornada(report.date,report.readAt,deadlines,frozen);
   const boundary=deadlines.reduce((latest,t)=>t<=state.now && t>Date.parse(report.readAt)?Math.max(latest,t):latest,0);
   const cache = useRef(new Map());
   const base =
@@ -389,18 +389,7 @@ export default function Board({ report, initial }) {
           </p>
         </header>
         <JornadaControls state={state} games={report.fixtures}/>
-        <form method="get">
-          <label>
-            Jornada{" "}
-            <input
-              aria-label="Jornada"
-              name="date"
-              type="date"
-              defaultValue={report.date}
-            />
-          </label>
-          <button>Ver corte de la 1 p. m. PR</button>
-        </form>
+        
         <div className={s.controls}>
           <FilterGroup
             label="Mercado"

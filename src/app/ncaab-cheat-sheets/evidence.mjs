@@ -271,3 +271,19 @@ export function candidates(
     )
     .slice(0, 10);
 }
+
+export function compactRank({ f, q, side, team, conditions, frequency, gap, percent }) {
+  return {
+    f: {
+      eventId: f.eventId, state:f.state, scheduledAt:f.scheduledAt,
+      homeName: f.homeName,
+      awayName: f.awayName,
+      markets: { capturedAt: f.markets.capturedAt, expiresAt:f.markets.expiresAt??null },
+    },
+    q: { market: q.market, sportsbook: q.sportsbook, expiresAt:q.expiresAt??null },
+    side,
+    team: { name: team.name },
+    conditions,
+    frequency, gap, percent,
+  };
+}

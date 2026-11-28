@@ -13,6 +13,6 @@ export default async function Page({searchParams}){
  const query=await searchParams,day=edition(query.date,Date.now(),query.snapshot);if(!day)notFound();
  try{
   const board=await readNbaDecisionBoard({now:new Date(day.cutoff),forDisplay:true,withSheetLab:true});
-  return <Lab fixtures={board.displayFixtures} data={board.lab} initialGame={String(query.game??'')} initialPlayer={String(query.player??'')}/>;
+  return <Lab frozen={day.frozen} fixtures={board.displayFixtures} data={board.lab} initialGame={String(query.game??'')} initialPlayer={String(query.player??'')}/>;
  }catch{return <main><Link href="/nba-cheat-sheets">← Cheat Sheets</Link><p>No se pudo leer la evidencia archivada de esta jornada.</p></main>;}
 }

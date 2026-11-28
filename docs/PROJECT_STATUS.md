@@ -3801,3 +3801,8 @@ La [segunda revisión NCAAB](NCAAB_CHEAT_SHEETS_PHASE_2.md) documenta las causas
 ## NCAAF calendar integrity · 2026-11-27
 
 Georgia's future ESPN event 401869545 has a confirmed time and an explicit TBD opponent. Inventory this placeholder separately and preserve the other 12 fixtures. Production acceptance requires a natural cycle with verified coverage and an inspection of conflicts and skipped games. The current-week Ridge profile remains an independent research dependency.
+
+
+## Jornadas y navegación · PR #417
+
+PR #417 · revisión privada de las tres interfaces, calendario PR y vigencia antes de ordenar y limitar. [Guía de jornadas](CHEAT_SHEETS_JORNADAS.md). La activación en producción está pendiente de revisión.

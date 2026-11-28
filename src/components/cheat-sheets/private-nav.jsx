@@ -6,5 +6,5 @@ import {Navigation} from "./jornada";
 export default async function PrivateNav({sport,children}) {
   const h=await headers(),url="https://"+(process.env.VERCEL_URL||"preview.vercel.app");
   const enabled=[...(!nbaManualAccess(new Request(url,{headers:h}))?["nba"]:[]),...(nhlSheetAccess(h)?["nhl"]:[]),...(allowed(h)?["ncaab"]:[])];
-  return <>{enabled.includes(sport)&&<Navigation sport={sport} enabled={enabled}/ >}{children}</>;
+  return <>{enabled.includes(sport)&&<Navigation sport={sport} enabled={enabled}/>}{children}</>;
 }

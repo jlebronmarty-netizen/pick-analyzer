@@ -1,7 +1,7 @@
 'use client';
 import {useJornada,JornadaControls,ContextLink,useSheetFilter} from "@/components/cheat-sheets/jornada";
-import {eligible,labels,phase} from "@/lib/cheat-sheets/jornada.mjs";
-import {useEffect,useState} from 'react';
+import {eligible} from "@/lib/cheat-sheets/jornada.mjs";
+import {useState} from 'react';
 import Link from 'next/link';
 import {SheetCard,TrendBars} from '@/components/cheat-sheets/presentation';
 import styles from '@/components/cheat-sheets/sheet.module.css';
@@ -28,13 +28,15 @@ function Profile({profile,row}){
  <table><thead><tr><th>Partido</th><th>{marketLabels[row.market]} · {period}</th></tr></thead><tbody>{series.map(g=><tr key={g.id}><td>{date(g.date)}</td><td>{num(g.value)}</td></tr>)}</tbody></table>
  <h3>Participaciones del calendario</h3>{!profile.audit.length&&<p>Equipo o calendario sin verificar.</p>}{profile.audit.map(g=><p key={g.id}>{date(g.start)} · {g.state}{g.missing?' · faltan '+g.missing:''}</p>)}</div></details>;
 }
-export default function Lab({fixtures=[],data,initialGame='',initialPlayer=''}){
+export default function Lab({fixtures=[],frozen,data,initialGame='',initialPlayer=''}){
  const [filters,set]=useState({market:'',period:'',side:'',game:initialGame,player:initialPlayer,band:'-250',sort:'rate'});
- const state=useJornada(data.date,data.at,[...fixtures.map(g=>g.start),...data.rows.map(r=>r.expires)]),{now}=state;
+ const state=useJornada(data.date,data.at,[...fixtures.map(g=>g.start),...data.rows.map(r=>r.expires)],frozen),{now}=state;
  const fixtureMap=new Map(fixtures.map(g=>[g.id,g]));
- const update=k=>v=>set(f=>({...f,[k]:v,...(k==='game'?{player:''}:{})}));
+ const [linkedBand,setLinkedBand]=useSheetFilter("nba","band","-250");
+ const band=linkedBand==="both"?filters.band:linkedBand;
+ const update=k=>v=>k==="band"?setLinkedBand(v):set(f=>({...f,[k]:v,...(k==='game'?{player:''}:{})}));
  const live=data.rows.filter(r=>state.visible(fixtureMap.get(String(r.gameId))??{}) && eligible(fixtureMap.get(String(r.gameId)),now,r.expires)&&Date.parse(r.start)>now);
- const ranked=rankContracts(live,filters,now);
+ const ranked=rankContracts(live,{...filters,band},now);
  const games=Object.fromEntries(live.map(r=>[r.gameId,r.game])),players=Object.fromEntries(live.filter(r=>!filters.game||String(r.gameId)===filters.game).map(r=>[r.playerId,r.name]));
  const profileRow=filters.player&&live.find(r=>String(r.playerId)===filters.player&&(!filters.game||String(r.gameId)===filters.game)&&(!filters.market||filters.market===r.market)&&(!filters.period||filters.period===r.period));
  return <main className={styles.sheet}><ContextLink href="/nba-cheat-sheets">← Cheat Sheets</ContextLink>
@@ -42,7 +44,7 @@ export default function Lab({fixtures=[],data,initialGame='',initialPlayer=''}){
  <JornadaControls state={state} games={fixtures} list/>
  <div className={styles.controls+" "+labStyles.filters}>{Object.entries({
  market:['Mercado',{'':'Top 10 general',...marketLabels}],game:['Partido',{'':'Todos',...games}],player:['Jugador',{'':'Todos',...players}],side:['Lado',{'':'Ambos',over:'Over',under:'Under'}],period:['Período',{'':'Todos',...periods}],band:['Rango de cuotas',oddsBands],sort:['Orden',sorts]
- }).map(([k,[label,options]])=><Select key={k} label={label+' '} options={options} value={filters[k]} onChange={update(k)}/>)}</div>
+ }).map(([k,[label,options]])=><Select key={k} label={label+' '} options={options} value={k==="band"?band:filters[k]} onChange={update(k)}/>)}</div>
  <h2 className={styles.heading}>Top 10 · {marketLabels[filters.market]??'General'}</h2>
  <p>Al menos cinco valores comparables en diez apariciones observadas. La brecha se orienta al lado del contrato. Las condiciones cuentan criterios descriptivos.</p>
  {data.coverage&&<p className={styles.note}>Archivo del corte · {data.coverage.periodGames}/{data.coverage.selectedBoxes} boxes con parciales individuales conciliados. {data.coverage.calendarIssues>0?'Hay incidencias en el calendario histórico.':''}</p>}

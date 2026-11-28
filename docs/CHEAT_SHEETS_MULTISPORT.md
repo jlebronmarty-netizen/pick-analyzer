@@ -69,3 +69,8 @@ El próximo deporte se decide después de la aceptación de NBA. Las diferencias
 El PR #417 implementa la primera fase sobre NCAAB_MANUAL_DATA_V1. La auditoría por corte, los denominadores por división y sede, la carga bajo demanda, las reglas de clasificación y los pendientes de cobertura se documentan en la [revisión técnica de NCAAB](NCAAB_CHEAT_SHEETS_PHASE_1.md). El tracker queda pendiente de certificación por contrato.
 
 La [segunda revisión NCAAB](NCAAB_CHEAT_SHEETS_PHASE_2.md) documenta las causas del L10 incompleto, simetría de totales, ordenación y rendimiento por corte, certificación pendiente y el tracker aislado probado en PostgreSQL. Sigue en Preview, PR #417.
+
+
+## Jornadas y navegación · PR #417
+
+[Jornadas multideporte](CHEAT_SHEETS_JORNADAS.md) describe el selector privado, los filtros transportables, la integración del calendario de cada deporte y la separación entre interfaz y tracker.

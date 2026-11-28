@@ -16,5 +16,5 @@ export default async function Page({ searchParams }) {
   try {
     data = await readSheet(date,cutoff);
   } catch {}
-  return <div className={layout.surface}><Sheet cutoff={cutoff} date={typeof date === "string" ? date : ""} data={data} /></div>;
+  return <div className={layout.surface}><Sheet frozen={day.frozen} cutoff={cutoff} date={typeof date === "string" ? date : ""} data={data} /></div>;
 }

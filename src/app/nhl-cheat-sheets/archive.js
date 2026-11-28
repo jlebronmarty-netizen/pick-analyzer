@@ -523,7 +523,12 @@ export async function readSheet(date,cutoff=new Date().toISOString()) {
   for(const row of calendars.filter(Boolean).sort((a,b)=>a.capturedAt.localeCompare(b.capturedAt)).flatMap(c=>c.games)){
     if(row.scheduledAt<from || row.scheduledAt>=to)continue;
     const g=games.get(row.eventId)??{id:row.eventId,time:row.scheduledAt,home:row.home,away:row.away};
-    const conflict=Date.parse(g.time)!==Date.parse(row.scheduledAt) || g.home!==row.home || g.away!==row.away;
+    const conflict=g.home!==row.home || g.away!==row.away;
+    if(Date.parse(g.time)!==Date.parse(row.scheduledAt) || conflict){
+      for(const [key,quote] of prices)if(quote.id===row.eventId)prices.delete(key);
+      g.fixture=null;
+    }
+    g.time=row.scheduledAt;
     g.state=conflict?'UNKNOWN':row.status;
     g.scheduleState=row.scheduleState;
     games.set(row.eventId,g);

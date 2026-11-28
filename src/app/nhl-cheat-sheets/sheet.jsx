@@ -260,13 +260,13 @@ function Team({ team: t, window, opponent, opponentGoalie }) {
     </section>
   );
 }
-export default function Sheet({ date, cutoff, data }) {
-  const [market, M] = useState("ml"),
+export default function Sheet({ date, cutoff, frozen, data }) {
+  const [market, M] = useSheetFilter("nhl","market","ml"),
     [band, B] = useSheetFilter("nhl","band","all"),
     [window, W] = useSheetFilter("nhl","window","10"),
     [game, G] = useState("all"),
     [order, O] = useState("frequency");
-  const state=useJornada(date,cutoff,[...(data?.games??[]).map(g=>g.time),...(data?.prices??[]).map(p=>p.expiresAt)]);
+  const state=useJornada(date,cutoff,[...(data?.games??[]).map(g=>g.time),...(data?.prices??[]).map(p=>p.expiresAt)],frozen);
   const visible =
     data?.games.filter((g) => state.visible(g) && (game === "all" || game === g.id)) ?? [];
   const ranks = (band === "all" ? ["standard", "heavy"] : [band]).map((b) => ({
@@ -289,12 +289,7 @@ export default function Sheet({ date, cutoff, data }) {
         <h1>Cheat Sheets</h1>
         <p>Comparativas y cuotas archivadas.</p>
       </header>
-      <form>
-        <label>
-          Jornada <input type="date" name="date" defaultValue={date} />
-        </label>{" "}
-        <button>Consultar</button>
-      </form>
+      
       <div className={s.controls}>
         <FilterGroup
           label="Mercado"

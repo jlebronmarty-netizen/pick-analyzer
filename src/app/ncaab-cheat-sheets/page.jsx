@@ -87,7 +87,7 @@ export default async function Page({ searchParams }) {
   const cut = date < today ? archivedCut : new Date(Math.max(Date.parse(date+"T04:00:00Z"), Date.parse(now))).toISOString();
   try {
     const {report,initial,profile} = await cachedBoard(date, cut);
-    return <div data-ncaab-timing={JSON.stringify({...profile, accessMs})}><Board key={date} report={report} initial={initial}/></div>;
+    return <div data-ncaab-timing={JSON.stringify({...profile, accessMs})}><Board frozen={date<today} key={date} report={report} initial={initial}/></div>;
   } catch {
     return (
       <main>

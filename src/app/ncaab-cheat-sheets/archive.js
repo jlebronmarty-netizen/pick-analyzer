@@ -2,7 +2,7 @@ import "server-only";
 import {priorSeasons} from "../../../research/ncaab-sheet-history/read.mjs";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { loadNcaabManualData } from "@/services/ncaab-manual-data.service";
-import { candidates } from "./evidence.mjs";
+import { candidates,compactRank } from "./evidence.mjs";
 
 export {allowed} from "./access.mjs";
 const cache = new Map();
@@ -85,19 +85,7 @@ export function ranking(data, filters) {
     data.pairs,
     filters,
     data.possessions,
-  ).map(({ f, q, side, team, conditions, frequency, gap, percent }) => ({
-    f: {
-      eventId: f.eventId,
-      homeName: f.homeName,
-      awayName: f.awayName,
-      markets: { capturedAt: f.markets.capturedAt },
-    },
-    q: { market: q.market, sportsbook: q.sportsbook },
-    side,
-    team: { name: team.name },
-    conditions,
-    frequency, gap, percent,
-  }));
+  ).map(compactRank);
 }
 export function detail(data, id) {
   const f = data.report.fixtures.find((f) => f.eventId === id);

@@ -53,3 +53,8 @@ Referencias: [auditoría NHL y datos normalizados](research/nhl-audit-2026-11-23
 **NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
 
 **NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
+
+
+## Jornadas y navegación · PR #417
+
+El PR #417 incorpora la lectura del calendario NHL al corte de la jornada para la presentación de partidos. Ver [Jornadas multideporte](CHEAT_SHEETS_JORNADAS.md). NHL continúa en modo descriptivo.

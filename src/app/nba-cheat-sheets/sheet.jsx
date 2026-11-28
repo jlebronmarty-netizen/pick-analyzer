@@ -1,7 +1,7 @@
 'use client';
 import {useJornada,JornadaControls,ContextLink,useSheetFilter} from "@/components/cheat-sheets/jornada";
-import {eligible,labels,phase} from "@/lib/cheat-sheets/jornada.mjs";
-import {useEffect,useState} from 'react';
+import {eligible} from "@/lib/cheat-sheets/jornada.mjs";
+import {useState} from 'react';
 import Link from 'next/link';
 import {oddsBands,inOddsBand,rankSheet,hits,markets,outcome} from '@/lib/nba/cheat-ranking.mjs';
 import {topProjections} from '@/lib/nba/cheat-projections.mjs';
@@ -9,8 +9,10 @@ import Rival from './rival';
 import {FilterGroup, SheetCard, TrendBars} from '@/components/cheat-sheets/presentation';
 import styles from '@/components/cheat-sheets/sheet.module.css';
 const windows={ten:'Últimos 10',five:'Últimos 5',h2h:'Contra el rival'};
-const time=v=>new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',hour:'numeric',minute:'2-digit'}).format(new Date(v));
-const date=v=>new Intl.DateTimeFormat('es-PR',{timeZone:'America/Puerto_Rico',day:'numeric',month:'short'}).format(new Date(v));
+const local=v=>new Date(new Date(v).getTime()-4*3600000);
+const time=v=>{const d=local(v),h=d.getUTCHours();return (h%12||12)+":"+String(d.getUTCMinutes()).padStart(2,"0")+(h<12?" a. m.":" p. m.");};
+const months=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const date=v=>{const d=local(v);return d.getUTCDate()+" "+months[d.getUTCMonth()];};
 function Trend({row:r,initial}){
   const [window,setWindow]=useState(initial);
   const series=(r.trend??[]).slice(0,window==='five'?5:10).reverse();
@@ -98,9 +100,9 @@ function BandResults({cards,projections,milestones,coverage,market,w,floor,now,a
       </>}
   </section>;
 }
-export default function Sheet({fixtures=[],cards=[],projections=[],milestones=[],coverage,day,asOf,showReference=false,captureFailed=false}){
-  const [market,setMarket]=useState('points'),[w,setWindow]=useSheetFilter('nba','window','ten'),[floor,setFloor]=useSheetFilter('nba','band','both');
-  const state=useJornada(day,asOf,[...fixtures.map(g=>g.start),...cards.map(r=>r.expiresAt),...projections.map(r=>r.expires),...milestones.map(r=>r.expires)]);
+export default function Sheet({fixtures=[],frozen,cards=[],projections=[],milestones=[],coverage,day,asOf,showReference=false,captureFailed=false}){
+  const [market,setMarket]=useSheetFilter('nba','market','points'),[w,setWindow]=useSheetFilter('nba','window','ten'),[floor,setFloor]=useSheetFilter('nba','band','both');
+  const state=useJornada(day,asOf,[...fixtures.map(g=>g.start),...cards.map(r=>r.expiresAt),...projections.map(r=>r.expires),...milestones.map(r=>r.expires)],frozen);
   const {now}=state, games=new Map(fixtures.map(g=>[g.id,g]));
   const active=r=>eligible(games.get(String(r.gameId)),now) && ['all','upcoming'].includes(state.view);
   return <main className={styles.sheet}><Link href="/nba-decision-board">← Decision Board</Link>
