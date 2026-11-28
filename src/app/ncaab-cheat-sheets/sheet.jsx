@@ -39,6 +39,7 @@ function Comparison({
   period,
   possessions,
   ranks,
+  prior = [],
   attempts,
   splits,
 }) {
@@ -191,6 +192,11 @@ function Comparison({
             ))}
           </tbody>
         </table>
+        <h3>H2H de temporadas anteriores · archivo parcial</h3>
+        {prior.length ? prior.map(({year,n,games})=><div key={year}>
+          <b>{year-1}–{year} · {n} encuentros archivados</b>
+          <ul>{games.slice(0,window.endsWith("5")?5:10).map(g=><li key={g.id}>{g.date} UTC · {home.abbreviation ?? home.name} {g.homePoints}–{g.awayPoints} {away.abbreviation ?? away.name}</li>)}</ul>
+        </div>) : <p>Sin cruces conciliados en el archivo anterior.</p>}
         <h3>Recibo del partido · cuotas archivadas</h3>
         {f.markets.quotes.length === 0 ? (
           <p>Sin precio pareado al corte.</p>

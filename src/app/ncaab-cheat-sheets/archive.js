@@ -1,4 +1,5 @@
 import "server-only";
+import {priorSeasons} from "../../../research/ncaab-sheet-history/read.mjs";
 import { nbaManualAccess } from "@/lib/nba/manual-access.mjs";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { loadNcaabManualData } from "@/services/ncaab-manual-data.service";
@@ -123,6 +124,7 @@ export function detail(data, id) {
     home: teams[0],
     away: teams[1],
     pair: data.pairs[id],
+    prior:priorSeasons(f,data.report.seasonEndingYear,data.report.readAt),
     ranks: data.ranks.get(id),
     attempts: Object.fromEntries(teams.map((t) => [t.id, data.attempts[t.id]])),
     possessions: Object.fromEntries(

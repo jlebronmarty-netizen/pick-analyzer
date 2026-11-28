@@ -12,6 +12,7 @@ on:
       - 'src/app/ncaab/page.tsx'
       - 'tests/ncaab-cheat-sheets.test.mjs'
       - 'research/ncaab-sheet-tracker/**'
+      - 'research/ncaab-sheet-history/**'
       - 'tests/ncaab-sheet-*'
       - 'src/components/dashboard/NcaabManualDataPanel.tsx'
       - 'src/components/dashboard/NcaabDashboard.tsx'

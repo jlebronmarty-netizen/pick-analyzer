@@ -125,3 +125,12 @@ test("total conditions and favorable gaps survive swapping the teams", () => {
   const f=r.fixtures[0];[f.homeId,f.awayId]=[f.awayId,f.homeId];assert.deepEqual(select(),before);
   assert.equal(candidates(setup(),{},{...opts,sort:"percent"}).length,0);
 });
+
+test("prior-season matchups respect capture time, team orientation and season boundaries",async()=>{
+  const {priorSeasons}=await import("../research/ncaab-sheet-history/read.mjs");
+  const f={homeId:"245",awayId:"145"},cut="2026-11-24T17:00:00Z";
+  assert.deepEqual(priorSeasons(f,2027,"2026-10-01T12:00:00Z"),[]);
+  const a=priorSeasons(f,2027,cut), b=priorSeasons({homeId:"145",awayId:"245"},2027,cut);
+  assert.ok(a.length && a.every(g=>g.year<2027 && g.n>=g.games.length && g.games.length<=10));
+  assert.equal(a[0].games[0].homePoints,b[0].games[0].awayPoints);
+});
