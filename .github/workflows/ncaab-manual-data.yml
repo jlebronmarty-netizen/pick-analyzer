@@ -8,6 +8,9 @@ on:
       - 'src/lib/ncaab-manual-response.ts'
       - 'src/services/ncaab-manual-data.service.ts'
       - 'src/app/api/ncaab/manual-data/**'
+      - 'src/app/ncaab-cheat-sheets/**'
+      - 'src/app/ncaab/page.tsx'
+      - 'tests/ncaab-cheat-sheets.test.mjs'
       - 'src/components/dashboard/NcaabManualDataPanel.tsx'
       - 'src/components/dashboard/NcaabDashboard.tsx'
       - 'tests/ncaab-manual-*.test.mjs'
@@ -38,6 +41,6 @@ jobs:
       - name: Install pinned dependencies
         run: npm ci --no-audit --no-fund
       - name: Canonical data and complete-read regression
-        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/ncaab-manual-*.test.mjs tests/dashboard-multisport/ncaab*.test.mjs
+        run: node --loader ./tests/dashboard-multisport/tsx-loader.mjs --test tests/ncaab-manual-*.test.mjs tests/ncaab-cheat-sheets.test.mjs tests/dashboard-multisport/ncaab*.test.mjs
       - name: Verify production build
         run: npm run build

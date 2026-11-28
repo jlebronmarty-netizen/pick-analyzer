@@ -11,7 +11,7 @@ type Obj = Record<string, unknown>;
 type Stats = NcaabManualRecentGame['stats'];
 type Side = {id:string;name:string;abbreviation:string|null;conference:string|null;raw:Obj};
 type PossessionSample = {possessions:number;minutes:number;pointsFor:number;pointsAgainst:number};
-export type SheetArchive = { histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
+export type SheetArchive = { ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
 type Observation = {
   offensiveBoards?:[number|null,number|null];
   eventId:string;scheduledAt:string;date:string;season:number;state:NcaabManualFixture['state'];
@@ -275,6 +275,13 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
   const finals=events.filter(e=>e.state==='FINAL'&&e.date<input.date),today=events.filter(e=>e.date===input.date);
   const earliest=[...sourceDates.filter(d=>d<=input.date),...rejectedDates,...finals.map(e=>e.date)].sort()[0]??null,missingDates:string[]=[];
   if(earliest)for(let d=earliest;d<=input.date;d=addDay(d,1))if(!sourceDates.includes(d))missingDates.push(d);
+  if(sheet)for(const event of today){
+    const rankOf=(side:Side)=>{
+      const rank=integer(nested(side.raw,'curatedRank','current'));
+      return rank!==null&&rank>=1&&rank<=25?rank:null;
+    };
+    sheet.ranks.set(event.eventId,{[event.home.id]:rankOf(event.home),[event.away.id]:rankOf(event.away)});
+  }
   const recordsByTeam=new Map<string,{event:Observation;side:Side;record:NcaabManualTeam['reportedRecord']}[]>(),definitions=new Map<string,Side>();
   // Sort by the represented fixture date first. Re-reading an old scoreboard
   // today must not replace a newer season record with an old postgame record.
