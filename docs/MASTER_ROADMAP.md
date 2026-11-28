@@ -1,3 +1,7 @@
+## NHL: captura temprana de equipos
+
+Pick ya conserva PP/PK y los últimos marcadores con tiros disponibles al cerrar el ciclo de NHL. El hito pendiente es verificar el primer cruce prospectivo con el original de DRatings. [Contrato y evidencia](../research/nhl-early/README.md).
+
 ## NHL · Seguimiento del 27 de noviembre de 2026
 
 18 capturas, 11 eventos con final, 8 disponibles al corte tardío y 0 al original. Tiros y PP/PK tienen 8 antecedentes elegibles de los 40 requeridos. Los originales aparecieron entre 8 h 22 min y 23 h 30 min antes de la primera captura. La fuente externa debe publicar antes de la primera probabilidad para estudiar el corte original.
