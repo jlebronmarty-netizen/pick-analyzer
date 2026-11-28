@@ -4604,3 +4604,7 @@ Prueba de vista previa completada el 21 de noviembre a las 8:34 p. m. de Puerto 
 **NHL · revisión privada del 27 de noviembre de 2026.** [Cobertura, condiciones por mercado, paridad V13 y laboratorio PostgreSQL de la segunda fase](NHL_CHEAT_SHEETS_PHASE_2.md).
 
 **NHL · revisión de fase 3.** [Verificador final, auditoría contractual, comparación de lados opuestos, PostgreSQL aislado y lanzamiento escalonado](NHL_CHEAT_SHEETS_PHASE_3.md). Tracker pendiente de certificación.
+
+## NCAAB Cheat Sheets · Preview descriptivo
+
+El PR #417 implementa la primera fase sobre NCAAB_MANUAL_DATA_V1. La auditoría por corte, los denominadores por división y sede, la carga bajo demanda, las reglas de clasificación y los pendientes de cobertura se documentan en la [revisión técnica de NCAAB](NCAAB_CHEAT_SHEETS_PHASE_1.md). El tracker queda pendiente de certificación por contrato.

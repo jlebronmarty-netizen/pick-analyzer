@@ -413,7 +413,7 @@ export default function Board({ report, initial }) {
           />
           <label>
             Equipo{" "}
-            <select value={team} onChange={(e) => setTeam(e.target.value)}>
+            <select aria-label="Equipo" value={team} onChange={(e) => setTeam(e.target.value)}>
               <option value="">Todos</option>
               {report.teams.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -425,6 +425,7 @@ export default function Board({ report, initial }) {
           <label>
             División{" "}
             <select
+              aria-label="División"
               value={division}
               onChange={(e) => setDivision(e.target.value)}
             >
@@ -440,6 +441,7 @@ export default function Board({ report, initial }) {
             Partido{" "}
             <select
               style={{ maxWidth: "100%", colorScheme: "dark" }}
+              aria-label="Partido"
               value={game}
               onChange={(e) => setGame(e.target.value)}
             >
@@ -455,6 +457,7 @@ export default function Board({ report, initial }) {
             Conferencia{" "}
             <select
               style={{ maxWidth: "100%", colorScheme: "dark" }}
+              aria-label="Conferencia"
               value={conference}
               onChange={(e) => setConference(e.target.value)}
             >
