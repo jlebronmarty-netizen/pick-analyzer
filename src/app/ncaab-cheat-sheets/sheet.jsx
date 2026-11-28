@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FilterGroup,
   SheetCard,
@@ -7,14 +7,7 @@ import {
 } from "@/components/cheat-sheets/presentation";
 import layout from "../nhl-cheat-sheets/layout.module.css";
 import s from "@/components/cheat-sheets/sheet.module.css";
-import {
-  windows,
-  markets,
-  sample,
-  measure,
-  candidates,
-  efficiency,
-} from "./evidence.mjs";
+import { windows, markets, sample, measure, efficiency } from "./evidence.mjs";
 
 const periods = {
   FT: "Partido",
@@ -46,6 +39,7 @@ function Comparison({
   possessions,
   ranks,
   attempts,
+  splits,
 }) {
   const columns = [home, away].map((t, i) => {
     const history = sample(t, pair, window, i === 1);
@@ -73,6 +67,13 @@ function Comparison({
     ["Conferencia", (t) => t.conference ?? "Sin dato"],
     ["Ranking publicado en ESPN", (t) => ranks?.[t.id] ?? "Sin dato"],
     ["Récord reportado", (t) => t.reportedRecord?.overall ?? "Sin dato"],
+    ...Object.entries(divisions).map(([k, label]) => [
+      label,
+      (t) => {
+        const [w, l] = splits[t.id][k];
+        return w + "–" + l + " (n=" + (w + l) + ")";
+      },
+    ]),
     ["Temporada observada", (t) => record(t.archive)],
     ...[
       ["Local", "home"],
@@ -222,7 +223,78 @@ function Comparison({
     </SheetCard>
   );
 }
-export default function Board({ report, pairs, possessions, ranks, attempts }) {
+const divisions = {
+  DI: "División I vs. División I",
+  OTHER: "Participa otra división",
+  UNKNOWN: "División sin verificar",CONFLICT:"División contradictoria",
+};
+function get(cache, url) {
+  if (!cache.has(url)) {
+    const request = fetch(url)
+      .then((r) => {
+        if (!r.ok) throw Error("READ_FAILED");
+        return r.json();
+      })
+      .catch((e) => {
+        cache.delete(url);
+        throw e;
+      });
+    cache.set(url, request);
+  }
+  return cache.get(url);
+}
+function Game({ f, window, period, base, cache }) {
+  const [data, setData] = useState(null),
+    [state, setState] = useState("closed");
+  async function open() {
+    if (data) {
+      setState(state === "open" ? "closed" : "open");
+      return;
+    }
+    setState("loading");
+    try {
+      setData(await get(cache, base + "&id=" + encodeURIComponent(f.eventId)));
+      setState("open");
+    } catch {
+      setState("error");
+    }
+  }
+  return (
+    <section>
+      <SheetCard>
+        <header>
+          {clock(f.scheduledAt)} PR · {divisions[f.division]} ·{" "}
+          {f.neutralSite === true
+            ? "Sede neutral"
+            : f.neutralSite === false
+              ? "Localía registrada"
+              : "Sede sin verificar"}
+        </header>
+        <h2>
+          {f.awayName} @ {f.homeName}
+        </h2>
+        <button
+          className={s.line}
+          disabled={state === "loading"}
+          aria-expanded={state === "open"}
+          onClick={open}
+        >
+          {state === "loading"
+            ? "Cargando análisis…"
+            : state === "open"
+              ? "Cerrar análisis"
+              : state === "error"
+                ? "Lectura fallida · reintentar"
+                : "Ver análisis del partido"}
+        </button>
+      </SheetCard>
+      {state === "open" && data && (
+        <Comparison {...data} window={window} period={period} />
+      )}
+    </section>
+  );
+}
+export default function Board({ report, initial }) {
   const [window, setWindow] = useState("L5"),
     [market, setMarket] = useState("ALL"),
     [period, setPeriod] = useState("FT"),
@@ -230,9 +302,59 @@ export default function Board({ report, pairs, possessions, ranks, attempts }) {
     [game, setGame] = useState(""),
     [conference, setConference] = useState("");
   const [limit, setLimit] = useState(8);
+  const [team, setTeam] = useState(""),
+    [division, setDivision] = useState("");
+  const cache = useRef(new Map());
+  const base =
+    "/ncaab-cheat-sheets/data?" +
+    new URLSearchParams({ date: report.date, cut: report.readAt });
+  const key =
+    base +
+    "&" +
+    new URLSearchParams({
+      team,
+      division,
+      window,
+      conference,
+      game,
+      market,
+      period,
+    });
+  const isInitial =
+    !team &&
+    !division &&
+    !conference &&
+    !game &&
+    market === "ALL" &&
+    period === "FT" &&
+    window === "L5";
+  const [response, setResponse] = useState(null);
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    if (isInitial) return;
+    let current = true;
+    get(cache.current, key).then(
+      (data) => {
+        if (current) setResponse({ key, data });
+      },
+      () => {
+        if (current) setResponse({ key, error: true });
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [key, isInitial, retry]);
+  const rankings = isInitial
+    ? initial
+    : response?.key === key
+      ? response.data
+      : null;
   const teams = new Map(report.teams.map((t) => [t.id, t]));
   const fixtures = report.fixtures.filter(
     (f) =>
+      (!team || [f.awayId, f.homeId].includes(team)) &&
+      (!division || f.division === division) &&
       (!game || game === f.eventId) &&
       (!conference ||
         [
@@ -289,6 +411,31 @@ export default function Board({ report, pairs, possessions, ranks, attempts }) {
             value={band}
             onChange={setBand}
           />
+          <label>
+            Equipo{" "}
+            <select value={team} onChange={(e) => setTeam(e.target.value)}>
+              <option value="">Todos</option>
+              {report.teams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            División{" "}
+            <select
+              value={division}
+              onChange={(e) => setDivision(e.target.value)}
+            >
+              <option value="">Todas</option>
+              {Object.entries(divisions).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </label>
           <label style={{ minWidth: 0, maxWidth: "100%" }}>
             Partido{" "}
             <select
@@ -325,12 +472,24 @@ export default function Board({ report, pairs, possessions, ranks, attempts }) {
           </label>
         </div>
         {(band === "both" ? ["standard", "heavy"] : [band]).map((b) => {
-          const rank = candidates(
-            report,
-            pairs,
-            { window, market, period, band: b, game, conference },
-            possessions,
-          );
+          if (!rankings)
+            return (
+              <p key={b} role="status">
+                {response?.key === key && response.error ? (
+                  <button
+                    onClick={() => {
+                      setResponse(null);
+                      setRetry(retry + 1);
+                    }}
+                  >
+                    Lectura fallida · reintentar
+                  </button>
+                ) : (
+                  "Cargando ranking…"
+                )}
+              </p>
+            );
+          const rank = rankings[b];
           return (
             <section key={b}>
               <h2 className={s.heading}>
@@ -408,17 +567,13 @@ export default function Board({ report, pairs, possessions, ranks, attempts }) {
         <h2 className={s.heading}>Comparativas · {fixtures.length} partidos</h2>
         <div className={s.grid}>
           {fixtures.slice(0, limit).map((f) => (
-            <Comparison
+            <Game
               key={f.eventId}
               f={f}
-              home={teams.get(f.homeId)}
-              away={teams.get(f.awayId)}
-              pair={pairs[f.eventId] ?? []}
               window={window}
               period={period}
-              possessions={possessions}
-              ranks={ranks[f.eventId]}
-              attempts={attempts}
+              base={base}
+              cache={cache.current}
             />
           ))}
         </div>

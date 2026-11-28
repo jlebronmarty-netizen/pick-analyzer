@@ -11,7 +11,7 @@ type Obj = Record<string, unknown>;
 type Stats = NcaabManualRecentGame['stats'];
 type Side = {id:string;name:string;abbreviation:string|null;conference:string|null;raw:Obj};
 type PossessionSample = {possessions:number;minutes:number;pointsFor:number;pointsAgainst:number};
-export type SheetArchive = { ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
+export type SheetArchive = { divisions:Map<string,string>; ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
 type Observation = {
   offensiveBoards?:[number|null,number|null];
   eventId:string;scheduledAt:string;date:string;season:number;state:NcaabManualFixture['state'];
@@ -167,6 +167,13 @@ function mergeStats(primary:Stats,supplement:Stats,issues:string[]):Stats {
     if(output[m]===null||output[a]===null||output[m]!>output[a]!){output[m]=null;output[a]=null;}
   return output;
 }
+function divisionEvidence(side:Side):string[] {
+  const team=object(side.raw.team),group=object(team.groups);
+  const labels=[object(team.division).name,team.division,object(group.parent).name,group.isConference===false?group.name:null];
+  return labels.flatMap(label=>typeof label!=='string'?[]:
+    /^(?:NCAA )?Division (?:I|1)$/i.test(label)?['DI']:
+    /^(?:NCAA )?Division (?:II|III|2|3)$/i.test(label)?['OTHER']:[]);
+}
 function recent(event:Observation,teamId:string):NcaabManualRecentGame {
   const home=event.home.id===teamId,opponent=home?event.away:event.home,pf=home?event.homeScore!:event.awayScore!,pa=home?event.awayScore!:event.homeScore!;
   return{eventId:event.eventId,scheduledAt:event.scheduledAt,date:event.date,opponentId:opponent.id,opponentName:opponent.name,
@@ -275,6 +282,24 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
   const finals=events.filter(e=>e.state==='FINAL'&&e.date<input.date),today=events.filter(e=>e.date===input.date);
   const earliest=[...sourceDates.filter(d=>d<=input.date),...rejectedDates,...finals.map(e=>e.date)].sort()[0]??null,missingDates:string[]=[];
   if(earliest)for(let d=earliest;d<=input.date;d=addDay(d,1))if(!sourceDates.includes(d))missingDates.push(d);
+  if(sheet){
+    const affiliations=new Map<string,Set<string>>();
+    const accepted=new Map([...today,...finals].map(e=>[e.eventId,e]));
+    for(const e of observations){
+      const primary=accepted.get(e.eventId);
+      if(!primary||primary.scheduledAt!==e.scheduledAt||identity(primary)!==identity(e))continue;
+      for(const side of [e.home,e.away]){
+        const evidence=affiliations.get(side.id)??new Set<string>();
+        for(const d of divisionEvidence(side))evidence.add(d);
+        affiliations.set(side.id,evidence);
+      }
+    }
+    for(const e of accepted.values()){
+      const groups=[affiliations.get(e.home.id),affiliations.get(e.away.id)];
+      const d=groups.some(g=>g&&g.size>1)?'CONFLICT':groups.some(g=>g?.has('OTHER'))?'OTHER':groups.every(g=>g?.has('DI'))?'DI':'UNKNOWN';
+      sheet.divisions.set(e.eventId,d);
+    }
+  }
   if(sheet)for(const event of today){
     const rankOf=(side:Side)=>{
       const rank=integer(nested(side.raw,'curatedRank','current'));

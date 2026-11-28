@@ -1,9 +1,8 @@
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { supabaseAdmin } from "@/lib/supabase-admin";
-import { nbaManualAccess } from "@/lib/nba/manual-access.mjs";
+import { archive, allowed, ranking } from "./archive";
+
 import {
-  loadNcaabManualData,
   validateNcaabManualDate,
   ncaabManualDate,
 } from "@/services/ncaab-manual-data.service";
@@ -14,11 +13,7 @@ export const maxDuration = 60;
 
 export default async function Page({ searchParams }) {
   const h = await headers();
-  if (
-    process.env.VERCEL_ENV !== "preview" ||
-    nbaManualAccess(new Request("https://preview.vercel.app", { headers: h }))
-  )
-    notFound();
+  if (!allowed(h)) notFound();
   const today = ncaabManualDate(new Date().toISOString());
   const requested = (await searchParams).date;
   const date = requested ?? today;
@@ -28,57 +23,55 @@ export default async function Page({ searchParams }) {
     notFound();
   }
   if (date > today) notFound();
-  const now = new Date().toISOString();
+  const now = new Date(Math.floor(Date.now() / 180000) * 180000).toISOString();
   const archivedCut = date + "T17:00:00.000Z";
   const cut = requested && archivedCut < now ? archivedCut : now;
   try {
-    const histories = new Map(),
-      possessions = new Map(),
-      ranks = new Map();
-    const report = await loadNcaabManualData(
-      supabaseAdmin,
-      date,
-      cut,
-      AbortSignal.timeout(45000),
-      { histories, possessions, ranks },
-    );
-    const pairs = {};
-    for (const f of report.fixtures)
-      pairs[f.eventId] = (histories.get(f.homeId) ?? [])
-        .filter((g) => g.opponentId === f.awayId)
-        .slice(0, 10);
+    const data = await archive(date, cut),
+      { report } = data;
     const ids = new Set(report.fixtures.flatMap((f) => [f.homeId, f.awayId]));
-    const attempts = {};
-    for (const id of ids) {
-      const rows = histories.get(id) ?? [];
-      attempts[id] = Object.fromEntries(
-        Object.entries({
-          fieldGoalPct: "fieldGoalsAttempted",
-          threePointPct: "threePointersAttempted",
-          freeThrowPct: "freeThrowsAttempted",
-        }).map(([key, field]) => [
-          key,
-          rows.reduce((sum, g) => sum + (g.stats[field] ?? 0), 0),
-        ]),
-      );
-    }
+    const fixtures = report.fixtures.map(
+      ({
+        eventId,
+        homeId,
+        awayId,
+        homeName,
+        awayName,
+        neutralSite,
+        scheduledAt,
+      }) => ({
+        eventId,
+        homeId,
+        awayId,
+        homeName,
+        awayName,
+        neutralSite,
+        scheduledAt,
+        division: data.divisions.get(eventId),
+      }),
+    );
+    const teams = report.teams
+      .filter((t) => ids.has(t.id))
+      .map(({ id, name, conference }) => ({ id, name, conference }));
+    const initial = Object.fromEntries(
+      ["standard", "heavy"].map((band) => [
+        band,
+        ranking(data, { window: "L5", market: "ALL", period: "FT", band }),
+      ]),
+    );
     return (
       <Board
-        attempts={attempts}
+        key={cut}
         report={{
           date,
-          readAt: report.readAt,
+          readAt: cut,
           coverage: report.coverage,
           source: report.source,
           warnings: report.warnings,
-          fixtures: report.fixtures,
-          teams: report.teams.filter((t) => ids.has(t.id)),
+          fixtures,
+          teams,
         }}
-        pairs={pairs}
-        ranks={Object.fromEntries(ranks)}
-        possessions={Object.fromEntries(
-          [...possessions].filter(([id]) => ids.has(id)),
-        )}
+        initial={initial}
       />
     );
   } catch {
