@@ -113,3 +113,15 @@ test("shared games count once for totals and possession rates use real playing t
     { n: 1, pace: (40 * 70) / 45, offense: 110, defense: 100 },
   );
 });
+
+test("total conditions and favorable gaps survive swapping the teams", () => {
+  const r=setup();
+  r.fixtures[0].neutralSite=false;
+  r.teams[0].recentGames=games.map((g,i)=>({...g,venue:"HOME",eventId:"h"+i,pointsFor:110}));
+  r.teams[1].recentGames=games.map((g,i)=>({...g,venue:"AWAY",eventId:"a"+i,pointsFor:39}));
+  r.fixtures[0].markets.quotes=[{...quote,market:"TOTAL",first:{side:"OVER",line:140,americanOdds:-105},second:{side:"UNDER",line:140,americanOdds:-105}}];
+  const select=()=>candidates(r,{}, {...opts,sort:"percent"}).map(({conditions,frequency,side,gap,percent})=>({conditions,frequency,side,gap,percent}));
+  const before=select(); assert.equal(before.length,2); assert.equal(before[0].frequency.n,10);
+  const f=r.fixtures[0];[f.homeId,f.awayId]=[f.awayId,f.homeId];assert.deepEqual(select(),before);
+  assert.equal(candidates(setup(),{},{...opts,sort:"percent"}).length,0);
+});

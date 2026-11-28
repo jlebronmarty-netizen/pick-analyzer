@@ -11,7 +11,7 @@ type Obj = Record<string, unknown>;
 type Stats = NcaabManualRecentGame['stats'];
 type Side = {id:string;name:string;abbreviation:string|null;conference:string|null;raw:Obj};
 type PossessionSample = {possessions:number;minutes:number;pointsFor:number;pointsAgainst:number};
-export type SheetArchive = { divisions:Map<string,string>; ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
+export type SheetArchive = { timings?:Record<string,number>; audit?:Map<string,string[]>; divisions:Map<string,string>; ranks:Map<string,Record<string,number|null>>; histories:Map<string,NcaabManualRecentGame[]>; possessions:Map<string,Record<string,PossessionSample>> };
 type Observation = {
   offensiveBoards?:[number|null,number|null];
   eventId:string;scheduledAt:string;date:string;season:number;state:NcaabManualFixture['state'];
@@ -36,7 +36,8 @@ const instant = (v:unknown):string|null => {
   if(typeof v!=='string'||!/(?:Z|[+-]\d{2}(?::?\d{2})?)$/i.test(v)||!Number.isFinite(Date.parse(v)))return null;
   return new Date(v).toISOString();
 };
-const day = (v:string):string => new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(v));
+const dayFormat = new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'});
+const day = (v:string):string => dayFormat.format(new Date(v));
 const addDay = (v:string,n:number):string => new Date(Date.parse(v+'T12:00:00Z')+n*86400000).toISOString().slice(0,10);
 const validDate = (v:string):boolean => /^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
 const round = (v:number):number => Math.round(v*1e6)/1e6;
@@ -62,7 +63,7 @@ function selectedReceipts(input:NcaabManualDataInput,readAt:string,rejectedDates
   for(const rows of groups.values()) {
     rows.sort((a,b)=>b.captured_at.localeCompare(a.captured_at)||a.id.localeCompare(b.id));
     const tied=rows.filter(r=>r.captured_at===rows[0].captured_at);
-    if(new Set(tied.map(r=>r.id)).size!==1||new Set(tied.map(r=>canonical(r.body))).size!==1)throw Error('NCAAB_MANUAL_CONFLICTING_RECEIPTS');
+    if(tied.length>1 && (new Set(tied.map(r=>r.id)).size!==1||new Set(tied.map(r=>canonical(r.body))).size!==1))throw Error('NCAAB_MANUAL_CONFLICTING_RECEIPTS');
     if(!Array.isArray(object(rows[0].body).events)||array(object(rows[0].body).events).length>NCAAB_ARCHIVE_MAX_EVENTS) {
       const date=sourceDate(rows[0].source_url)!;
       // Historical seed/reconciliation bodies are not raw daily scoreboards.
@@ -228,12 +229,17 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
   const year=Number(input.date.slice(0,4)),season=Number(input.date.slice(5,7))>=7?year+1:year;
   const rejectedDates=new Set<string>(),receipts=selectedReceipts(input,readAt,rejectedDates),sourceDates=receipts.map(r=>sourceDate(r.source_url)!).sort(),warnings=new Set<string>();
   const observations:Observation[]=[],blockedTeams=new Set<string>(),unverifiedDates=new Set<string>();let excludedEvents=0;
+  const reasons = new Map<string, Set<string>>();
+  function mark(teamId:string, reason:string) {
+    const labels = reasons.get(teamId) ?? new Set<string>();
+    labels.add(reason); reasons.set(teamId,labels);
+  }
   for(const receipt of receipts)for(const raw of array(object(receipt.body).events)) {
     const e=observation(raw,{sourceId:receipt.id,capturedAt:receipt.captured_at,sourceDate:sourceDate(receipt.source_url),context:false},season);
     if(!e){
       excludedEvents++;unverifiedDates.add(sourceDate(receipt.source_url)!);
       for(const c of array(object(raw).competitions))for(const s of array(object(c).competitors)) {
-        for(const candidate of [object(s).id,nested(s,'team','id')]){const teamId=id(candidate);if(teamId)blockedTeams.add(teamId);}
+        for(const candidate of [object(s).id,nested(s,'team','id')]){const teamId=id(candidate);if(teamId){blockedTeams.add(teamId);mark(teamId,integer(nested(raw,"season","year"))!==season?"season_or_unknown":"invalid_observation");}}
       }
       continue;
     }observations.push(e);
@@ -253,13 +259,13 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
   for(const e of observations)grouped.set(e.eventId,[...(grouped.get(e.eventId)??[]),e]);
   const events:Observation[]=[];
   for(const versions of grouped.values()) {
-    if(new Set(versions.map(identity)).size!==1){excludedEvents++;for(const e of versions){blockedTeams.add(e.home.id);blockedTeams.add(e.away.id);}continue;}
+    if(new Set(versions.map(identity)).size!==1){excludedEvents++;for(const e of versions){blockedTeams.add(e.home.id);blockedTeams.add(e.away.id);mark(e.home.id,"identity_conflict");mark(e.away.id,"identity_conflict");}continue;}
     const primary=versions.filter(e=>!e.context),candidates=primary.length?primary:versions;
     candidates.sort((a,b)=>b.capturedAt.localeCompare(a.capturedAt)||a.sourceId.localeCompare(b.sourceId));
     const latest=candidates[0],tied=candidates.filter(e=>e.capturedAt===latest.capturedAt);
     const finals=versions.filter(e=>e.state==='FINAL');
     if(new Set(tied.map(eventSignature)).size!==1||new Set(finals.map(e=>[e.homeScore,e.awayScore].join(':'))).size>1) {
-      excludedEvents++;blockedTeams.add(latest.home.id);blockedTeams.add(latest.away.id);continue;
+      excludedEvents++;blockedTeams.add(latest.home.id);blockedTeams.add(latest.away.id);for(const id of [latest.home.id,latest.away.id])mark(id,"result_or_version_conflict");continue;
     }
     latest.offensiveBoards??=[offensiveBoards(latest.home.raw.statistics),offensiveBoards(latest.away.raw.statistics)];
     const details=versions.filter(e=>e.context&&e.scheduledAt===latest.scheduledAt&&e.homeScore===latest.homeScore&&e.awayScore===latest.awayScore)
@@ -330,6 +336,15 @@ export function buildNcaabManualDataReport(input:NcaabManualDataInput, sheet?:Sh
     const completeSeason=gp!==null&&gp===all.length&&wl![0]===archive.wins&&wl![1]===archive.losses&&!unresolved&&!blockedTeams.has(def.id);
     const intervalMissing=last.length>0&&[...missingDates,...unverifiedDates].some(d=>d>=last.at(-1)!.date&&d<input.date);
     const sequenceVerified=!blockedTeams.has(def.id)&&!unresolved&&(completeSeason||last.length===10&&!intervalMissing);
+    if(sheet?.audit) {
+      if(completeSeason && all.length<10)mark(def.id,"verified_under_ten");
+      if(gp!==null && gp>all.length)mark(def.id,"fewer_archived_than_reported");
+      if(intervalMissing)mark(def.id,"calendar_gap");
+      if(unresolved)mark(def.id,"prior_game_unresolved");
+      if(!sequenceVerified)mark(def.id,"sequence_unverified");
+      if(!all.length)mark(def.id,"no_prior_final");
+      sheet.audit.set(def.id,[...(reasons.get(def.id)??[])]);
+    }
     const complete=sequenceVerified&&last.length===10;
     const coverage=!last.length?'NO_HISTORY':complete?'COMPLETE_TEN':completeSeason&&gp!==null&&gp<10?'SEASON_UNDER_TEN':'PARTIAL';
     const teamWarnings=new Set<string>();

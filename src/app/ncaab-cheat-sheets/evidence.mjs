@@ -67,10 +67,11 @@ export function efficiency(games, samples) {
     defense: pos ? (100 * sum("pointsAgainst")) / pos : null,
   };
 }
+export const sorts = { frequency: "Frecuencia histórica", conditions: "Condiciones favorables", gap: "Brecha en puntos", percent: "Brecha porcentual" };
 export function candidates(
   report,
   pairs,
-  { window, market, band, period, game, conference },
+  { window, market, band, period, game, conference, sort = "frequency" },
   possessions = {},
 ) {
   if (period !== "FT" || market === "TEAM" || !report.coverage.readComplete)
@@ -142,23 +143,22 @@ export function candidates(
           add(label, r.n >= 5 ? r.rate >= 0.6 : null, r.n);
         }
         const recent = team.last10.sequenceVerified ? team.recentGames : [];
-        threshold("Forma L5 a la línea de referencia", recent.slice(0, 5));
-        threshold(
-          "Forma L10 a la línea de referencia",
-          recent.length === 10 ? recent : [],
-        );
-        const venue =
-          f.neutralSite === true
-            ? "NEUTRAL"
-            : f.neutralSite === false
-              ? isAway
-                ? "AWAY"
-                : "HOME"
-              : null;
-        threshold(
-          "Rendimiento en la sede",
-          recent.filter((g) => g.venue === venue),
-        );
+        const opponentRecent = other.last10.sequenceVerified ? other.recentGames : [];
+        function compareSamples(label, first, second, minimum = 5) {
+          if (!total) return threshold(label, first.length >= minimum ? first : []);
+          const merged = unique([...first, ...second]);
+          const enough = first.length >= minimum && second.length >= minimum;
+          add(label, enough ? rate(merged, q.market, side).rate >= 0.6 : null, merged.length);
+        }
+        compareSamples("Forma L5 a la línea de referencia", recent.slice(0, 5), opponentRecent.slice(0, 5));
+        compareSamples("Forma L10 a la línea de referencia", recent, opponentRecent, 10);
+        const venue = f.neutralSite === true ? "NEUTRAL" : f.neutralSite === false ? (isAway ? "AWAY" : "HOME") : null;
+        const opposite = venue === "HOME" ? "AWAY" : venue === "AWAY" ? "HOME" : venue;
+        const venueSample = (games, expected) => games.filter(g =>
+          expected !== null && (total && expected !== "NEUTRAL"
+            ? ["HOME", "AWAY"].includes(g.venue) : g.venue === expected));
+        compareSamples(total ? "Totales en sede neutral o con localía" : "Rendimiento en la sede",
+          venueSample(recent, venue), venueSample(opponentRecent, opposite));
         threshold("Ante el rival", sample(team, pair, "H10", isAway));
         const gap =
           rows.reduce((s, g) => s + margin(g, q.market, side), 0) / rows.length;
@@ -239,13 +239,20 @@ export function candidates(
               : null,
             n,
           );
-        result.push({ f, q, side, team, frequency, conditions, rows });
+        // A reference total has a positive points denominator. ML has no points
+        // line and percent change at a signed handicap is not comparable.
+        const percent = total && side.line > 0 ? 100 * gap / side.line : null;
+        if (sort === "percent" && percent === null) continue;
+        const fulfilled = conditions.filter(c => c.ok === true).length;
+        result.push({ f, q, side, team, frequency, conditions, rows, gap, percent, fulfilled });
       }
     }
   }
   return result
     .sort(
       (a, b) =>
+        (sort === "conditions" ? b.fulfilled - a.fulfilled :
+         sort === "gap" ? b.gap - a.gap : sort === "percent" ? b.percent - a.percent : 0) ||
         b.frequency.rate - a.frequency.rate ||
         b.frequency.n - a.frequency.n ||
         a.f.eventId.localeCompare(b.f.eventId) ||

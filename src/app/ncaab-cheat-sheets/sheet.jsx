@@ -7,7 +7,7 @@ import {
 } from "@/components/cheat-sheets/presentation";
 import layout from "../nhl-cheat-sheets/layout.module.css";
 import s from "@/components/cheat-sheets/sheet.module.css";
-import { windows, markets, sample, measure, efficiency } from "./evidence.mjs";
+import { windows, markets, sorts, sample, measure, efficiency } from "./evidence.mjs";
 
 const periods = {
   FT: "Partido",
@@ -302,6 +302,7 @@ export default function Board({ report, initial }) {
     [band, setBand] = useState("both"),
     [game, setGame] = useState(""),
     [conference, setConference] = useState("");
+  const [sort, setSort] = useState("frequency");
   const [limit, setLimit] = useState(8);
   const [team, setTeam] = useState(""),
     [division, setDivision] = useState("");
@@ -318,7 +319,7 @@ export default function Board({ report, initial }) {
       window,
       conference,
       game,
-      market,
+      market, sort,
       period,
     });
   const isInitial =
@@ -326,7 +327,7 @@ export default function Board({ report, initial }) {
     !division &&
     !conference &&
     !game &&
-    market === "ALL" &&
+    sort === "frequency" && market === "ALL" &&
     period === "FT" &&
     window === "L5";
   const [response, setResponse] = useState(null);
@@ -412,6 +413,7 @@ export default function Board({ report, initial }) {
             value={band}
             onChange={setBand}
           />
+          <FilterGroup label="Ordenar por" options={sorts} value={sort} onChange={setSort} />
           <label>
             Equipo{" "}
             <select aria-label="Equipo" value={team} onChange={(e) => setTeam(e.target.value)}>
@@ -500,11 +502,11 @@ export default function Board({ report, initial }) {
                 Top 10 · {markets[market]} · {bands[b]}
               </h2>
               <p>
-                Frecuencia histórica a la línea archivada · {rank.length}{" "}
+                {sorts[sort]} · {rank.length}{" "}
                 referencias
               </p>
               <div className={s.grid}>
-                {rank.map(({ f, q, side, team, frequency, conditions }, i) => {
+                {rank.map(({ f, q, side, team, frequency, conditions, gap, percent }, i) => {
                   const evaluated = conditions.filter((c) => c.ok !== null);
                   return (
                     <SheetCard
@@ -523,7 +525,7 @@ export default function Board({ report, initial }) {
                           : team.name}{" "}
                         {side.line ?? ""}
                       </h2>
-                      <p className={s.line}>{markets[q.market]}</p>
+                      <p className={s.line}>{markets[q.market]} · Brecha {fmt(gap)} puntos{percent != null ? " (" + fmt(percent) + "%)" : ""}</p>
                       <div className={s.score}>
                         <b>
                           {frequency.wins}/{frequency.n}
@@ -594,6 +596,7 @@ export default function Board({ report, initial }) {
             {report.source.missingDates.length} fechas sin captura. H2H usa
             enfrentamientos observados de esta temporada.
           </p>
+          <p>L10 de los equipos de la jornada · {report.l10Audit.COMPLETE_TEN ?? 0} completas · {report.l10Audit.SEASON_UNDER_TEN ?? 0} con temporada verificada de menos de diez · {report.l10Audit.PARTIAL ?? 0} parciales · {report.l10Audit.NO_HISTORY ?? 0} sin historial.</p>
           {report.warnings.map((w) => (
             <p key={w}>{w}</p>
           ))}

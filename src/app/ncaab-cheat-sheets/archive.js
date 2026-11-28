@@ -10,6 +10,7 @@ export const allowed = (headers) =>
 const cache = new Map();
 async function read(date, cut) {
   const extra = {
+    timings: {}, audit:new Map(),
     histories: new Map(),
     possessions: new Map(),
     ranks: new Map(),
@@ -44,7 +45,7 @@ async function read(date, cut) {
     }
   }
   return {
-    report,
+    report, audit:extra.audit, timings: extra.timings,
     pairs,
     attempts,
     histories: extra.histories,
@@ -86,7 +87,7 @@ export function ranking(data, filters) {
     data.pairs,
     filters,
     data.possessions,
-  ).map(({ f, q, side, team, conditions, frequency }) => ({
+  ).map(({ f, q, side, team, conditions, frequency, gap, percent }) => ({
     f: {
       eventId: f.eventId,
       homeName: f.homeName,
@@ -97,7 +98,7 @@ export function ranking(data, filters) {
     side,
     team: { name: team.name },
     conditions,
-    frequency,
+    frequency, gap, percent,
   }));
 }
 export function detail(data, id) {
