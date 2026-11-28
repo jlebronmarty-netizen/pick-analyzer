@@ -1,5 +1,24 @@
 # NBA Cheat Sheets · control de publicación en producción
 
+## Primeras liquidaciones por falta de participación · 28 de noviembre de 2026
+
+Horas de Puerto Rico. El ciclo natural de las 00:30, solicitud Vercel `p49dw-1795840225169-007fc79d9474`, registró 14 liquidaciones por DNP. Corresponden a tres contratos de Dean Wade (jugador 666940) en Philadelphia–Indiana (21718195). El calendario archivado a las 00:30:26 del día 28 confirmó el final 111–87. El box final capturado el 27 a las 23:00:38 contiene una única fila del jugador (49658871), con minutos explícitos «0» y contadores individuales en cero. No consta un motivo clínico o técnico. El PBP archivado contiene 485 jugadas, 115 del primer cuarto, sin mención de Wade. La evidencia de participación procede del box final.
+
+La primera liquidación se registró a las 00:30:27.508452 del día 28. El contrato era menos de 1.5 triples de partido completo a −275, posición original 3 del ranking general por brecha porcentual (`pct`), inscrito el día 27 a las 05:00:32.163422 antes del inicio de las 20:30. Su recibo de cuota es `aa460df96b5a12625288f52a8aaf16d3ba8b9caf78a64f452e67debbeeb23779`. Se verificaron los 14 recibos en la posición de su captura original. Diez inscripciones corresponden a ese contrato de triples, dos a más de 4.5 rebotes de partido completo a −106 y dos a más de 0.5 puntos del primer cuarto a +100. En los 14 casos el valor liquidado es nulo. El DNP abarca la participación en el partido completo, incluido el contrato del primer cuarto.
+
+| Metodología | Inscripciones | DNP | Posiciones originales con DNP |
+|---|---:|---:|---|
+| Frecuencia (`rate`) | 516 | 2 | 3 |
+| Brecha (`gap`) | 521 | 2 | 3 |
+| Brecha porcentual (`pct`) | 478 | 4 | 1, 3 |
+| Condiciones (`conditions`) | 574 | 2 | 3 |
+| Proyección L5 | 172 | 2 | 1, 9 |
+| Proyección L10 | 174 | 2 | 1, 10 |
+
+Al revisar el ciclo de la 01:00, las 2,435 inscripciones incluían 2,421 pendientes. El recálculo desde inscripciones y liquidaciones coincidió con las 736 agrupaciones acumuladas por metodología, alcance, banda y posición individual o Top 1/3/5/7/10. Las 42,833 filas de rendimiento presentaron cero decisiones, cero unidades ganadas, perdidas, netas y liquidadas, y cero pares con Pick. Accuracy y ROI carecen de denominador en cada metodología. Las inscripciones repetidas entre estrategias corresponden a muestras separadas.
+
+Sigue pendiente la primera decisión con estadística individual verificable para comprobar un acierto o fallo, su exposición y el ROI. La comparación monetaria con Pick requiere además un original prepartido equivalente y con cuota. El seguimiento automático sigue abierto.
+
 ## Primera inscripción prepartido · 27 de noviembre de 2026
 
 Horas de Puerto Rico. El primer lote se registró a las 02:30:34.558323 con diez posiciones simultáneas del ranking general por frecuencia (`rate`, banda −250 o mejor). La primera tarjeta del lote fue el jugador ID 15 de MIA–NYK, partido 21718193, más de 11.5 rebotes a −132 en FanDuel. El calendario archivado a las 02:30:26 fijaba el inicio para las 20:00 del mismo día. La cuota prepartido se recibió a las 02:00:34 y seguía vigente durante la inscripción. El archivo confirma el identificador, el lado y la línea. La cotización carece de nombre, verificación regional de precio y regla confirmada de prórroga.
