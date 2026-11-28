@@ -26,6 +26,13 @@ export function parseTeamSchedule(body,team,season,capture,conference=null){
   const c=e.competitions[0],h=c.competitors?.find(x=>x.homeAway==='home'),a=c.competitors?.find(x=>x.homeAway==='away'),st=c.status?.type;
   const hi=id(h?.id),ai=id(a?.id),tip=Date.parse(e.date);
   if(st?.state==='pre'&&st?.name==='STATUS_SCHEDULED'&&c.timeValid===false&&(!hi||!ai)){excluded.push({event_id:'espn:'+eid,scheduled_at:e.date,reason:'UNASSIGNED_FUTURE_OPPONENT'});continue;}
+  const opponent=hi===team?a:ai===team?h:null;
+  if(c.timeValid===true && st?.state==='pre' && st.name==='STATUS_SCHEDULED' && st.completed===false
+    && tip>Date.parse(capture.captured_at) && id(c.id)===eid && c.competitors?.length===2
+    && String(opponent?.id)==='-2' && String(opponent.team?.id)==='-2' && opponent.team.displayName==='TBD'){
+   excluded.push({event_id:'espn:'+eid,scheduled_at:e.date,reason:'UNASSIGNED_FUTURE_OPPONENT'});
+   continue;
+  }
   if(!hi||!ai||hi===ai)mismatch('INVALID_PARTICIPANTS');
   if(![hi,ai].includes(team))mismatch('REQUESTED_TEAM_NOT_IN_EVENT');
   if(id(c.id)!==eid)mismatch('COMPETITION_ID_CONFLICT');
