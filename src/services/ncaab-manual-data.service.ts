@@ -56,7 +56,7 @@ function sourceDay(url:string) {
   try{return validateNcaabManualDate(date);}catch{return null;}
 }
 
-export async function loadNcaabManualData(client:SupabaseClient,date:string,readAt:string,signal:AbortSignal):Promise<NcaabManualDataReport> {
+export async function loadNcaabManualData(client:SupabaseClient,date:string,readAt:string,signal:AbortSignal,histories?:Parameters<typeof buildNcaabManualDataReport>[1]):Promise<NcaabManualDataReport> {
   validateNcaabManualDate(date);
   const year=Number(date.slice(0,4)),seasonStart=`${Number(date.slice(5,7))>=7?year:year-1}-07-01`;
   const from=date+'T00:00:00-04:00',to=new Date(Date.parse(from)+86400000).toISOString();
@@ -113,7 +113,7 @@ export async function loadNcaabManualData(client:SupabaseClient,date:string,read
       receipts.push(row);
     }
   }
-  return buildNcaabManualDataReport({date,readAt,receipts,contexts,predictions:predictionsResult.value,readComplete:true,sourceErrors});
+  return buildNcaabManualDataReport({date,readAt,receipts,contexts,predictions:predictionsResult.value,readComplete:true,sourceErrors},histories);
 }
 
 const cache=new Map<string,{expires:number;value:NcaabManualDataReport}>();
